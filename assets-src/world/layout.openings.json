@@ -123,6 +123,7 @@
       "hinge": "right", "swing": "L0_HALL", "maxAngleDeg": 95.0,
       "frame": { "asset": null, "casing": 0.070 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
+      "joineryStyle": "four_panel", "hardwareMaterial": "MAT_KITCHEN_HARDWARE_STEEL",
       "solid": false, "lockable": false
     },
     {
@@ -141,6 +142,7 @@
       "hinge": "left", "swing": "L0_LAUNDRY", "maxAngleDeg": 95.0,
       "frame": { "asset": null, "casing": 0.070 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
+      "joineryStyle": "four_panel", "hardwareMaterial": "MAT_KITCHEN_HARDWARE_STEEL",
       "solid": false, "lockable": false
     },
     {
@@ -150,6 +152,7 @@
       "hinge": "left", "swing": "L0_STOR", "maxAngleDeg": 95.0,
       "frame": { "asset": null, "casing": 0.070 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
+      "joineryStyle": "four_panel", "hardwareMaterial": "MAT_KITCHEN_HARDWARE_STEEL",
       "solid": false, "lockable": false
     },
     {
@@ -159,6 +162,7 @@
       "hinge": "left", "swing": "L0_PANTRY", "maxAngleDeg": 95.0,
       "frame": { "asset": null, "casing": 0.070 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
+      "joineryStyle": "four_panel", "hardwareMaterial": "MAT_KITCHEN_HARDWARE_STEEL",
       "solid": false, "lockable": false
     },
     {
@@ -288,6 +292,7 @@
       "hinge": "left", "swing": "L0_WC1", "maxAngleDeg": 95.0,
       "frame": { "asset": null, "casing": 0.070 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
+      "joineryStyle": "four_panel", "hardwareMaterial": "MAT_KITCHEN_HARDWARE_STEEL",
       "solid": false, "lockable": true
     },
     {

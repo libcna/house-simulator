@@ -263,6 +263,10 @@ def build() -> dict[str, dict]:
          # id opts the same opening into the generated paired shutter assembly.
          "muntinPattern": {"enum": ["six_over_six"]},
          "shutterMaterial": ID,
+         # Selected close-route single leaves opt into spatial painted joinery explicitly.  The
+         # paired hardware material keeps the generator from inferring a finish from a room name.
+         "joineryStyle": {"enum": ["four_panel"]},
+         "hardwareMaterial": ID,
          "asset": ID_OR_NULL, "material": ID_OR_NULL, "panelMaterial": ID,
          "solid": BOOL, "lockable": BOOL})))
 

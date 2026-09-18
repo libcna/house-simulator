@@ -49,6 +49,8 @@ remaining bare foyer/hall main-light points with physical ceiling fixtures. `HOU
 both remaining hall side-wall bays a measured nine-frame family gallery. `HOUSE-01066` is the
 selected correction for the coarse, dark formal-living piano composition. `HOUSE-00941` replaces
 the facade's generic bare-wood map with measured painted clapboard at real-world course spacing.
+`HOUSE-00942` replaces five close-route single-leaf slabs with explicitly selected painted
+four-panel joinery and physical lever hardware without changing their portal/collision contract.
 Round 9 proves the exterior
 material omission is fixed; `HOUSE-00924`
 removes the
@@ -13989,6 +13991,44 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
                 were advanced; all eighteen culling pairs pass at 0.0558% worst (`l0-sunroom`).
                 Full repository/content/provenance and strict-XNA gates pass with compilation and
                 heavy work restricted to CPU 0-5 / at most six workers.
+- [x] HOUSE-00942 — Finish selected L0 route single doors as painted four-panel joinery
+      dep: HOUSE-00377, HOUSE-00456, HOUSE-00486, HOUSE-00907, HOUSE-00940, HOUSE-01050 · sys: content/world · plat: TOOL · pri: MUST
+      accept: (1) five close-route single leaves in hall/family/dining/kitchen use one explicit
+              data selector for four-panel painted joinery and an approved hardware material;
+              unselected interior doors retain their existing representation; (2) both faces have
+              spatial panel moulding, a backplate and lever on the lock stile opposite the authored
+              hinge, with no room-id branch; (3) portal rectangles, collision, hinge/swing data,
+              future animation and lightmap receiver geometry remain unchanged; (4) matched fixed
+              day/night captures prove the improvement in the normal production-material path
+      verify: opening schema/semantic selftests; deterministic shell/material/UV2/chunk checks;
+              fixed visual review; unit, integration, render, culling and strict-XNA gates
+      note: (2026-09-18) `DOOR_L0_HALL__L0_FAMILY`,
+            `DOOR_L0_FAMILY__L0_LAUNDRY`, `DOOR_L0_DINING__L0_STOR`,
+            `DOOR_L0_KITCHEN__L0_PANTRY` and `DOOR_L0_HALL__L0_WC1` now explicitly opt into
+            `four_panel` joinery and the existing brushed-steel kitchen hardware finish. The
+            general shell grammar emits four two-column/two-row painted outlines and two-sided
+            physical backplate/lever hardware, mirrored from the authored hinge. The leaf slab,
+            aperture, portal, collision and receiver meshes do not move. Family/kitchen reuse an
+            existing material; only dining, hall and pantry need one measured chunk each.
+      review: Round 73's matched twenty-one-camera clear-day and normal-night sets were inspected
+              as contact sheets and direct before/after pairs. The selected hall door changes
+              8,308 day / 7,996 night pixels above two channel levels; the front-on family-media
+              pair changes 3,117 / 4,150 and the kitchen pair 3,325 / 3,744. The new relief and
+              lock-side levers are readable without recolouring the painted leaves. Exterior and
+              unrelated-room differences remain sub-0.0002 normalized RGB MAE capture noise.
+              `VISUAL-GATE-1` still FAILS: the route is substantially improved, but night roof/
+              dormer depth, sparse exterior context and repetitive facade massing remain larger.
+      verified: (2026-09-18) All thirteen world semantic rules and their mutation selftests pass;
+                the opening schema is current. Shell generation is deterministic across all 99
+                cells, all 96 material maps resolve, the committed manifest matches, and 5,252
+                receiver / 54,974 detail faces unwrap without changing a receiver product. The
+                packed world is 688 chunks / 57.024370 MB; measured exceptions add only one chunk
+                to dining, hall and pantry. All 1,409 unit tests and 135 integration tests pass
+                with one established integration skip. Both changed strict first-person pairs
+                were inspected and deliberately advanced; all 48 active software-render tests
+                pass, explicit blockout goldens remain unchanged, and all eighteen culling pairs
+                stay below 0.2% at 0.0558% worst (`l0-sunroom`). `tools/ci/run_checks.sh` is green,
+                including 323 strict-XNA units, with heavy work pinned to CPU 0-5 / six workers.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -19680,6 +19720,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-18 | `HOUSE-00942` | **New task, next free phase-12 id.** Add an explicit data-selected four-panel treatment and physical lever hardware to five close-route generated single leaves while leaving the full door population and later animated-door tasks open. | Round 72's family-media and hall views expose large plain painted slabs after the connected rooms, fixtures and furniture around them have converged. The existing deterministic shell/joinery and approved steel material can correct those high-frequency route defects without a room-id branch, download, renderer change, portal/collision change or a false claim that all interior doors are final. |
 | 2026-09-18 | `HOUSE-00941` | **New task, next free phase-12 id.** Replace only the three canonical siding finishes and their generated state/layout derivatives with a deterministic painted-clapboard material at six courses per world metre. | Round 71's fixed clear-day road/path images make the source mismatch visible across the largest surface in the frame: `MAT_SIDING_*` uses ambientCG `Wood095`, a generic orange bare board with broad grain bands rather than the Colonial Revival horizontal siding specified by §12.1. A project-authored tileable albedo/normal pair corrects material identity and scale through the existing stock-XNA path without geometry, exposure, renderer or lightmap changes. The same source remains independently available for doors, furniture and other legitimate bare wood. |
 | 2026-09-18 | `HOUSE-01066` | **New task, next free phase-13 id.** Refine the already approved formal upright as a bounded hero-asset checkpoint while leaving the full room furnishing task open. | Round 70 ranks the dark/coarse piano as the largest remaining interior defect. Its placement, lighting, bench and wall composition are already measured, so improving the deterministic model and material separation has higher visible value and lower risk than downloading a replacement, changing room exposure or widening `HOUSE-00988`. |
 | 2026-09-18 | `HOUSE-01065` | **New task, next free phase-13 id.** Resolve the hall's nine-frame gallery as a bounded deterministic surface-dressing checkpoint while leaving the full furnishing/stair-wall task open. | Round 69 makes the two long bare side-wall bays the largest remaining arrival defect. The already approved static-prop and canonical-material path can implement §20.4's non-identifiable route 2 without a download, likeness/AI issue, renderer work, collision or false completion of `HOUSE-00987`. |

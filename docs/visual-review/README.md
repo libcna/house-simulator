@@ -3194,3 +3194,50 @@ render tests pass, and all eighteen culling pairs remain at 0.0558% worst (`l0-s
 debug blockout remains available. The next highest-value checkpoint is honest night-exterior
 readability for the roof/dormers or garage/side yard, followed by the daytime facade massing—not
 an unrelated subsystem or a global exposure lift.
+
+## Round 73 — selected-route four-panel joinery
+
+Commit: `HOUSE-00942` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 72's [central hall](captures/house-00941-clapboard-day-r1/central-hall.png),
+[family media wall](captures/house-00941-clapboard-day-r1/family-media.png) and
+[kitchen](captures/house-00941-clapboard-day-r1/kitchen.png) show the close single-leaf doors as
+featureless painted slabs without hardware. After: the complete twenty-one-camera
+[clear-day](captures/house-00942-single-door-joinery-day-r1) and
+[normal-night](captures/house-00942-single-door-joinery-night-r1) sets show restrained four-panel
+relief and physical lock-side steel levers. All 42 frames were inspected as complete contact
+sheets; the three changed views and both strict first-person pairs were also opened directly.
+
+Ranked visible defects remaining:
+
+1. The roof, dormers and far-side elevations still collapse outside bounded night sources; the
+   canonical 22:00 review has the Moon below the horizon, so a fake moon key is not an honest fix.
+2. Garage/side-yard terrain and distant-neighbour context remain sparse and lose depth at night.
+3. The simple facade massing and repetitive window rhythm remain conspicuous by day.
+4. Formal living remains deliberately dark with weak furniture/floor contact away from the
+   piano's bounded practical pool.
+5. Several secondary rooms and exterior surfaces remain sparse beyond the connected slice.
+
+Fixed: five explicitly selected painted single doors now carry one data-driven `four_panel`
+joinery selector and the already approved brushed-steel kitchen-hardware material. Both leaf faces
+receive two columns by two rows of raised moulding; a physical backplate and lever are mirrored
+from the authored hinge onto the lock stile. Unselected leaves stay plain. The slab, aperture,
+portal, collision, swing/hinge contract and lightmap receiver geometry do not move, and the shell
+generator contains no room-id branch. Only dining, hall and pantry require one measured material
+chunk each; family and kitchen reuse an already resident steel role.
+
+Against Round 72, `central-hall` changes 8,308 day / 7,996 night pixels above two channel levels
+(0.5769% / 0.5553%; normalized RGB MAE 0.000278 / 0.000213), `family-media` changes 3,117 / 4,150
+(0.2165% / 0.2882%; 0.000108 / 0.000190), and `kitchen` changes 3,325 / 3,744
+(0.2309% / 0.2600%; 0.000178 / 0.000196). Exterior and unrelated-room controls remain below
+0.0002 MAE. The world is 688 chunks / 96 cells / 89 props / 266 exterior instances / 57.024370
+MB; its 202 materials retain 638 opaque, 44 cutout and 107 unculled state changes. The two strict
+references that directly face the changed hall leaf (`fp-l0-hall` and `fp-l0-hall-corner`) were
+inspected old/new and deliberately advanced; the explicit blockout reference suite did not move.
+All eighteen culling pairs remain below 0.2%, at 0.0558% worst (`l0-sunroom`). Full test and gate
+results are in `docs/handoff.md`.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next highest-value checkpoint is honest night-exterior
+readability for the roof/dormers or garage/side yard, followed by daytime facade depth—not an
+unrelated subsystem or global exposure lift.

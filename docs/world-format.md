@@ -291,6 +291,10 @@ together: `six_over_six` means two columns by three rows in each sash, while `sh
 selects the finish for its paired louvered shutters. Windows without both fields remain plain.
 A generated raised-panel exterior door may similarly name `panelMaterial`; it selects the finish
 of spatial panel geometry independently from the leaf body without changing the portal or leaf.
+Selected generated painted interior leaves may name `"joineryStyle": "four_panel"` together with
+an approved `hardwareMaterial`. The style adds spatial painted moulding and two-sided lever
+hardware to the static closed leaf without changing its portal, hinge, swing or collision; both
+fields are required together so geometry never guesses a finish from a room id.
 
 ```jsonc
 {

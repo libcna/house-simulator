@@ -1031,6 +1031,8 @@ def rule_6_references(world: World) -> list[Problem]:
               "material", have_materials)
         check("openings", index, "shutterMaterial", opening.get("shutterMaterial"), materials,
               "material", have_materials)
+        check("openings", index, "hardwareMaterial", opening.get("hardwareMaterial"), materials,
+              "material", have_materials)
         check("openings", index, "asset", opening.get("asset"), assets, "asset", have_assets)
 
     for index, flight in enumerate(world.flights):
@@ -1417,6 +1419,24 @@ def rule_7_openings(world: World) -> list[Problem]:
                 7, FILE_OF["openings"], f"openings/{index}/panelMaterial",
                 f"opening {opening.get('id')} assigns generated exterior panel material "
                 f"{panel_material!r} without an exterior D_ENTRY/D_GARAGE leaf"))
+
+        joinery = opening.get("joineryStyle")
+        hardware = opening.get("hardwareMaterial")
+        if (joinery is None) != (hardware is None):
+            problems.append(Problem(
+                7, FILE_OF["openings"], f"openings/{index}",
+                f"opening {opening.get('id')} must author joineryStyle and hardwareMaterial "
+                "together"))
+        if joinery is not None and (
+                opening.get("kind") != "door"
+                or opening.get("type") not in
+                ("D_INT_PASSAGE", "D_INT_PRIVACY", "D_INT_SOLID")
+                or opening.get("material") != "MAT_DOOR_PAINTED"):
+            problems.append(Problem(
+                7, FILE_OF["openings"], f"openings/{index}/joineryStyle",
+                f"opening {opening.get('id')} assigns generated painted single-leaf joinery to "
+                f"unsupported type/material {opening.get('type')!r}/"
+                f"{opening.get('material')!r}"))
 
     for index, portal in enumerate(world.portals):
         kind = portal.get("kind")
@@ -4112,6 +4132,44 @@ def selftest() -> int:
         _, problems = validate(twinned, wanted=[7])
         require(len(problems) == 1 and "already claimed" in problems[0].message,
                 f"two leaves in one hole is caught as well as none "
+                f"({[str(p) for p in problems]})")
+
+        # `HOUSE-00942`: spatial single-leaf joinery is an explicit data opt-in and the finish is
+        # part of the same declaration.  A half-authored pair would create either floating metal
+        # or painted panels with no handle; a special/exterior type must use its own grammar.
+        joined = copy.deepcopy(base)
+        joined_door = row(joined, "openings", "DOOR_WC1")
+        joined_door["material"] = "MAT_DOOR_PAINTED"
+        joined_door["joineryStyle"] = "four_panel"
+        joined_door["hardwareMaterial"] = "MAT_PAINT"
+        joined["materials"]["materials"].append({
+            **copy.deepcopy(joined["materials"]["materials"][0]),
+            "id": "MAT_DOOR_PAINTED",
+        })
+        joined_dir = workspace / "selected-single-joinery"
+        write_fixture(joined_dir, joined)
+        _, problems = validate(joined_dir, wanted=[7])
+        require(not problems,
+                f"a painted supported single leaf may explicitly select complete joinery "
+                f"({[str(p) for p in problems]})")
+
+        unhandled = copy.deepcopy(joined)
+        row(unhandled, "openings", "DOOR_WC1").pop("hardwareMaterial")
+        unhandled_dir = workspace / "joinery-without-hardware"
+        write_fixture(unhandled_dir, unhandled)
+        _, problems = validate(unhandled_dir, wanted=[7])
+        require(any("must author joineryStyle and hardwareMaterial together" in p.message
+                    for p in problems),
+                f"a joinery style without its physical finish is caught "
+                f"({[str(p) for p in problems]})")
+
+        special = copy.deepcopy(joined)
+        row(special, "openings", "DOOR_WC1")["type"] = "D_ENTRY"
+        special_dir = workspace / "joinery-on-special-door"
+        write_fixture(special_dir, special)
+        _, problems = validate(special_dir, wanted=[7])
+        require(any("unsupported type/material" in p.message for p in problems),
+                f"special leaves cannot silently borrow the selected interior grammar "
                 f"({[str(p) for p in problems]})")
 
         # 14. Rule 11 is a proof about STANDING, and about the hole rather than the wall.

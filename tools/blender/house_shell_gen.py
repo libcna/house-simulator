@@ -674,6 +674,19 @@ DOUBLE_DOOR_LEVER_LENGTH = 0.125
 DOUBLE_DOOR_LEVER_HEIGHT = 0.020
 DOUBLE_DOOR_HARDWARE_PROJECTION = 0.045
 
+#: `HOUSE-00942`: selected close-route single leaves may opt into a painted four-panel treatment
+#: through `layout.openings.json`.  The 35 mm moulding is shallow enough to remain ordinary door
+#: joinery, while the 45 x 210 mm backplate and 125 mm lever match the already measured paired-door
+#: hardware.  Keeping the selector in data lets later rooms converge deliberately without naming a
+#: room here or silently decorating all 53 interior doors at once.
+SINGLE_DOOR_PANEL_MOULDING = 0.035
+SINGLE_DOOR_PANEL_RELIEF = 0.012
+SINGLE_DOOR_BACKPLATE_WIDTH = 0.045
+SINGLE_DOOR_BACKPLATE_HEIGHT = 0.210
+SINGLE_DOOR_LEVER_LENGTH = 0.125
+SINGLE_DOOR_LEVER_HEIGHT = 0.018
+SINGLE_DOOR_HARDWARE_PROJECTION = 0.040
+
 #: `HOUSE-00935`: the 4.86 m garage leaf is five real sectional bands rather than one blank slab.
 #: Each band carries four broad raised steel panels. Their 140 mm side margin, 90 mm inter-panel
 #: gap, 55 mm vertical reveal and 14 mm relief are ordinary carriage-door dimensions and remain
@@ -854,6 +867,70 @@ def double_door_boxes(hu0: float, hu1: float, lv0: float, lv1: float,
     both_faces(centre - DOUBLE_DOOR_ASTRAGAL / 2.0,
                centre + DOUBLE_DOOR_ASTRAGAL / 2.0,
                lv0, lv1, "trim", "astragal", DOUBLE_DOOR_PANEL_RELIEF * 0.5)
+    return boxes
+
+
+def single_door_detail_boxes(lu0: float, lu1: float, lv0: float, lv1: float,
+                             depth_lo: float, depth_hi: float, hinge: str,
+                             style: str | None):
+    """Painted panel relief and two-sided hardware for one selected interior leaf.
+
+    A row without a style remains the established plain generated leaf.  `four_panel` creates two
+    balanced columns over two height bands; its moulding shares the leaf's `trim` finish, so the
+    detail is real geometry without inventing a second paint.  Hardware is a distinct physical
+    material and mirrors to the lock stile opposite the authored hinge.
+    """
+    if style is None:
+        return []
+    if style != "four_panel":
+        raise ValueError(f"unsupported single-door joinery style {style!r}")
+    width = lu1 - lu0
+    height = lv1 - lv0
+    if width <= 0.0 or height <= 0.0 or depth_hi <= depth_lo:
+        return []
+
+    boxes = []
+
+    def both_faces(u0, u1, v0, v1, klass, part, projection):
+        boxes.append((u0, u1, v0, v1, depth_lo - projection, depth_lo, klass, part))
+        boxes.append((u0, u1, v0, v1, depth_hi, depth_hi + projection, klass, part))
+
+    moulding = min(SINGLE_DOOR_PANEL_MOULDING, width * 0.045, height * 0.020)
+    for column_lo, column_hi in ((0.105, 0.455), (0.545, 0.895)):
+        for row_lo, row_hi in ((0.075, 0.385), (0.445, 0.915)):
+            panel_u0, panel_u1 = lu0 + column_lo * width, lu0 + column_hi * width
+            panel_v0, panel_v1 = lv0 + row_lo * height, lv0 + row_hi * height
+            both_faces(panel_u0, panel_u1, panel_v0, panel_v0 + moulding,
+                       "trim", "single_panel_moulding", SINGLE_DOOR_PANEL_RELIEF)
+            both_faces(panel_u0, panel_u1, panel_v1 - moulding, panel_v1,
+                       "trim", "single_panel_moulding", SINGLE_DOOR_PANEL_RELIEF)
+            both_faces(panel_u0, panel_u0 + moulding, panel_v0 + moulding,
+                       panel_v1 - moulding, "trim", "single_panel_moulding",
+                       SINGLE_DOOR_PANEL_RELIEF)
+            both_faces(panel_u1 - moulding, panel_u1, panel_v0 + moulding,
+                       panel_v1 - moulding, "trim", "single_panel_moulding",
+                       SINGLE_DOOR_PANEL_RELIEF)
+
+    lock_right = str(hinge or "left").lower() != "right"
+    handle_u = lu0 + (0.875 if lock_right else 0.125) * width
+    handle_v = lv0 + min(0.98, height * 0.48)
+    both_faces(handle_u - SINGLE_DOOR_BACKPLATE_WIDTH / 2.0,
+               handle_u + SINGLE_DOOR_BACKPLATE_WIDTH / 2.0,
+               handle_v - SINGLE_DOOR_BACKPLATE_HEIGHT / 2.0,
+               handle_v + SINGLE_DOOR_BACKPLATE_HEIGHT / 2.0,
+               "interior_door_hardware", "single_backplate",
+               SINGLE_DOOR_PANEL_RELIEF + 0.007)
+    if lock_right:
+        lever_u0, lever_u1 = (handle_u - SINGLE_DOOR_LEVER_LENGTH + 0.015,
+                              handle_u + 0.015)
+    else:
+        lever_u0, lever_u1 = (handle_u - 0.015,
+                              handle_u + SINGLE_DOOR_LEVER_LENGTH - 0.015)
+    both_faces(lever_u0, lever_u1,
+               handle_v - SINGLE_DOOR_LEVER_HEIGHT / 2.0,
+               handle_v + SINGLE_DOOR_LEVER_HEIGHT / 2.0,
+               "interior_door_hardware", "single_lever",
+               SINGLE_DOOR_HARDWARE_PROJECTION)
     return boxes
 
 
@@ -1062,6 +1139,7 @@ SURFACE_COLOURS = {
     "exterior_door_panel": (0.44, 0.28, 0.17, 1.0),
     "exterior_door_hardware": (0.55, 0.34, 0.14, 1.0),
     "interior_door_panel": (0.44, 0.28, 0.17, 1.0),
+    "interior_door_hardware": (0.80, 0.82, 0.84, 1.0),
     "trim":      (0.96, 0.96, 0.94, 1.0),
     "glass":     (0.55, 0.72, 0.80, 0.35),
     "window_frame": (0.96, 0.94, 0.90, 1.0),
@@ -1086,6 +1164,7 @@ SHELL_MATERIALS = {
     "exterior_door_panel": "MAT_EXTERIOR_DOOR_PANEL_HARDWOOD",
     "exterior_door_hardware": "MAT_EXTERIOR_DOOR_HARDWARE_BRONZE",
     "interior_door_panel": "MAT_DOOR_PANEL_HARDWOOD",
+    "interior_door_hardware": "MAT_KITCHEN_HARDWARE_STEEL",
     "trim": "MAT_DOOR_PAINTED",
     "glass": "MAT_GLASS_CLEAR",
     "window_frame": "MAT_WINDOW_FRAME_WHITE",
@@ -1244,6 +1323,21 @@ def cell_surface_materials(cell: dict, openings=(), portals=(), flights=(),
             f"{', '.join(sorted(exterior_door_panels))}")
     if exterior_door_panels:
         result["exterior_door_panel"] = next(iter(exterior_door_panels))
+
+    interior_door_hardware = {
+        row.get("hardwareMaterial")
+        for row in openings
+        if row.get("kind") == "door"
+        and cell.get("id") in portal_cells.get(row.get("portal"), ())
+        and row.get("joineryStyle")
+        and row.get("hardwareMaterial")
+    }
+    if len(interior_door_hardware) > 1:
+        raise ValueError(
+            f"{cell.get('id')}: generated interior door hardware names multiple materials: "
+            f"{', '.join(sorted(interior_door_hardware))}")
+    if interior_door_hardware:
+        result["interior_door_hardware"] = next(iter(interior_door_hardware))
 
     stair_surfaces = {
         row.get("surface") for row in flights if row.get("fromCell") == cell.get("id")
@@ -2066,6 +2160,12 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                                       else "trim")
                         leaf_box(lu0, lu1, lv0, lv1,
                                  middle - thickness / 2.0, middle + thickness / 2.0, leaf_class)
+                        if leaf_class == "trim" and opening.get("joineryStyle"):
+                            for detail in single_door_detail_boxes(
+                                    lu0, lu1, lv0, lv1, middle - thickness / 2.0,
+                                    middle + thickness / 2.0, opening.get("hinge"),
+                                    opening.get("joineryStyle")):
+                                leaf_box(*detail[:6], detail[6])
                         if leaf_class == "exterior_door" and opening.get("type") == "D_ENTRY":
                             for detail in entry_door_detail_boxes(
                                     lu0, lu1, lv0, lv1, middle - thickness / 2.0,
@@ -2819,10 +2919,17 @@ def selftest(output: Path) -> int:
             # opening" means, and the room on the other side carries the other half.
             want_min = [box[0], inner[2], outer_z]
             want_max = [box[1], float(levels["L1"]["ffl"]), box[5]]
-            close = all(abs(a - b) < 1e-4 for a, b in zip(bounds[0], want_min)) and \
-                all(abs(a - b) < 1e-4 for a, b in zip(bounds[1], want_max))
+            # The selected pantry leaf now has a real lever projecting a few centimetres past the
+            # partition centre line.  Architectural surfaces must still reach the exact faces;
+            # the only permitted extra extent is bounded by that measured hardware projection.
+            close = (want_min[0] - SINGLE_DOOR_HARDWARE_PROJECTION - 1e-4
+                     <= bounds[0][0] <= want_min[0] + 1e-4
+                     and abs(bounds[0][1] - want_min[1]) < 1e-4
+                     and abs(bounds[0][2] - want_min[2]) < 1e-4
+                     and all(abs(a - b) < 1e-4 for a, b in zip(bounds[1], want_max)))
             require(close,
-                    f"and the exported cell spans its inner faces and its outer skin: "
+                    f"and the exported cell spans its inner faces and outer skin, with only "
+                    f"bounded selected-door hardware allowed past them: "
                     f"{[round(v, 3) for v in bounds[0]]}..{[round(v, 3) for v in bounds[1]]} "
                     f"against {[round(v, 3) for v in want_min]}.."
                     f"{[round(v, 3) for v in want_max]}")
@@ -3212,6 +3319,9 @@ def selftest(output: Path) -> int:
         boxes_expected += 1
         boxes_expected += 2 if (hole[1] - hole[0]) - width > 2e-9 else 0
         boxes_expected += 1 if (hole[3] - hole[2]) - height > 1e-9 else 0
+        boxes_expected += len(single_door_detail_boxes(
+            0.0, width, 0.0, height, -0.02, 0.02, row.get("hinge"),
+            row.get("joineryStyle")))
     for hole in window_holes:
         row = openings_by_portal[hole[4]]
         boxes_expected += 1                                   # the sill board, in every room
@@ -3304,6 +3414,32 @@ def selftest(output: Path) -> int:
     require(glazed_classes.count("trim") == 12 and glazed_classes.count("metal") == 8,
             f"and its stiles, rails, astragal and matched two-sided levers remain physical joinery "
             f"({glazed_classes.count('trim')} timber, {glazed_classes.count('metal')} metal boxes)")
+
+    # `HOUSE-00942`: the single-leaf grammar is independent of today's five selected rows.  This
+    # catches a nominal `four_panel` style that emits a flat slab, one-sided detail or a handle on
+    # the hinge stile even if the canonical house and a weakened expectation later drift together.
+    single_left = single_door_detail_boxes(
+        0.0, 0.86, 0.60, 2.65, -0.02, 0.02, "left", "four_panel")
+    single_right = single_door_detail_boxes(
+        0.0, 0.86, 0.60, 2.65, -0.02, 0.02, "right", "four_panel")
+    single_parts = [row[7] for row in single_left]
+    single_classes = [row[6] for row in single_left]
+    require(single_parts.count("single_panel_moulding") == 32
+            and single_parts.count("single_backplate") == 2
+            and single_parts.count("single_lever") == 2
+            and single_classes.count("trim") == 32
+            and single_classes.count("interior_door_hardware") == 4,
+            f"a selected single leaf carries four two-sided raised panels and two-sided lever "
+            f"hardware ({single_parts.count('single_panel_moulding')} mouldings, "
+            f"{single_classes.count('interior_door_hardware')} hardware boxes)")
+    left_plate = next(row for row in single_left if row[7] == "single_backplate")
+    right_plate = next(row for row in single_right if row[7] == "single_backplate")
+    require((left_plate[0] + left_plate[1]) / 2.0 > 0.70
+            and (right_plate[0] + right_plate[1]) / 2.0 < 0.16,
+            "and the lock stile mirrors opposite the authored hinge")
+    require(not single_door_detail_boxes(
+        0.0, 0.86, 0.60, 2.65, -0.02, 0.02, "left", None),
+            "while an unselected leaf retains the established plain generated representation")
 
     # ...and the builder READS it. The claim above is about the boards; this one is about the path
     # from the opening row to them, which a hard-coded 0.06 satisfies just as well until a door
@@ -3548,6 +3684,23 @@ def selftest(output: Path) -> int:
     require(entry_materials["exterior_door_hardware"]
             == "MAT_EXTERIOR_DOOR_HARDWARE_BRONZE",
             "and entry hardware has a stable exterior-visible metal role")
+
+    family = cells["L0_FAMILY"]
+    family_extent = extent_of(family, levels[family["level"]])[0]
+    family_mesh = build_cell(
+        family, family_extent, neighbours=neighbours, construction=construction,
+        level=levels[family["level"]], levels=levels, portals=all_portals,
+        openings=openings_by_portal, cells_by_id=cells)
+    family_classes = [
+        SURFACE_ORDER[polygon.material_index] for polygon in family_mesh.data.polygons]
+    require(family_classes.count("interior_door_hardware") == 48,
+            f"the builder reads both selected family-room leaves and emits four closed hardware "
+            f"boxes per leaf ({family_classes.count('interior_door_hardware')} faces)")
+    family_materials = cell_surface_materials(
+        family, openings_by_portal.values(), all_portals, cells_by_id=cells)
+    require(family_materials["interior_door_hardware"]
+            == "MAT_KITCHEN_HARDWARE_STEEL",
+            "and their authored approved hardware finish reaches the shell material slot")
     document, _error = gltf_validate.read_gltf_json(output / "L0_KITCHEN.glb")
     require(len(document.get("materials", [])) >= 6,
             f"the exported file carries them ({len(document.get('materials', []))})")

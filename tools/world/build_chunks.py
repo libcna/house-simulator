@@ -283,6 +283,15 @@ for double_door_cell, added, explanation in (
         previous_limit + added,
         previous_reason + f"; HOUSE-00940 adds {explanation}")
 
+# `HOUSE-00942`: five selected L0 route leaves use the kitchen's existing steel hardware role.
+# Family and kitchen already draw that role, while laundry, store and WC1 rise only to the global
+# target.  These are therefore the three measured exceptions that actually grow by one chunk.
+for single_door_cell in ("L0_DINING", "L0_HALL", "L0_PANTRY"):
+    previous_limit, previous_reason = CHUNK_BUDGET_EXCEPTIONS[single_door_cell]
+    CHUNK_BUDGET_EXCEPTIONS[single_door_cell] = (
+        previous_limit + 1,
+        previous_reason + "; HOUSE-00942 adds one shared steel single-door hardware role")
+
 #: The vertex layouts, one per stock effect, with the attributes that effect actually reads.
 #: `MaterialBinder`'s `MaterialKind` is the same closed list of four; `Skinned` never appears here
 #: because a skinned prop is an animated one and animated props are not batched (§17.4).
@@ -2359,9 +2368,12 @@ def selftest() -> int:
         # `HOUSE-00487`, owner decision: §17.4's six-chunk TARGET, and the exception model that
         # replaced "over it is an error". Claimed on the RULE rather than on the house, so the
         # three ways to be wrong are each exercised whatever the house currently measures.
-        require(not chunk_budget_problems({"L0_HALL": MAX_CHUNKS_PER_CELL}),
+        # Use a deliberately non-canonical id: fixture claims about the no-exception path must
+        # not silently become claims about whichever real room later acquires an exception.
+        budget_fixture_cell = "FIXTURE_UNDECLARED"
+        require(not chunk_budget_problems({budget_fixture_cell: MAX_CHUNKS_PER_CELL}),
                 f"a cell at exactly {MAX_CHUNKS_PER_CELL} chunks is fine and needs no exception")
-        undeclared = chunk_budget_problems({"L0_HALL": MAX_CHUNKS_PER_CELL + 1})
+        undeclared = chunk_budget_problems({budget_fixture_cell: MAX_CHUNKS_PER_CELL + 1})
         require(len(undeclared) == 1 and "declares no exception" in undeclared[0],
                 f"a cell over it with no exception is an ERROR, and the message says what to do "
                 f"({undeclared})")

@@ -2040,6 +2040,13 @@ move them, not an assertion in either direction.
   stain keeps the real 55 mm relief readable at room scale. This is the static closed-shell
   representation only: portal ownership, collision and the later two-leaf animation contract
   stay data-driven and unchanged.
+  `HOUSE-00942` extends that static-shell grammar only where an opening row explicitly pairs
+  `joineryStyle: four_panel` with a `hardwareMaterial`. Five close L0 route leaves currently opt
+  in. Each keeps its unchanged painted slab and receives four two-column/two-row shallow moulding
+  outlines on both faces plus a physical backplate and lever on the lock stile opposite its
+  authored hinge. The moulding reuses the cell's painted door role; the hardware uses the authored
+  approved steel role. Unselected leaves remain plain, no room id selects geometry, and portal,
+  aperture, collision, lightmap-receiver and later animation semantics remain unchanged.
 
 ### 17.5 Directory layout
 

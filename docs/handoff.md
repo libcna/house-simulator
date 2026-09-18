@@ -1,3 +1,53 @@
+# Visual-sprint handoff — 2026-09-18 (`HOUSE-00942` checkpoint)
+
+Branch `develop`. Task-start HEAD `5eadaee9d931` (`HOUSE-00941`). This file belongs to the single
+`HOUSE-00942` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit debug blockout remains available.
+
+Five close-route painted single doors are no longer blank slabs. The openings
+`DOOR_L0_HALL__L0_FAMILY`, `DOOR_L0_FAMILY__L0_LAUNDRY`,
+`DOOR_L0_DINING__L0_STOR`, `DOOR_L0_KITCHEN__L0_PANTRY` and
+`DOOR_L0_HALL__L0_WC1` explicitly select data-driven `four_panel` joinery plus the already
+approved brushed-steel kitchen-hardware material. The general shell grammar emits raised
+two-column/two-row moulding on both faces and mirrors a physical backplate/lever from the authored
+hinge onto the lock stile. Unselected leaves remain plain; no room id is hard-coded. Leaf slabs,
+apertures, portals, collision, hinge/swing data, future animation and lightmap receivers are
+unchanged.
+
+The canonical before is Round 72's
+[central hall](visual-review/captures/house-00941-clapboard-day-r1/central-hall.png). The complete
+twenty-one-camera after sets are
+[clear day](visual-review/captures/house-00942-single-door-joinery-day-r1) and
+[normal night](visual-review/captures/house-00942-single-door-joinery-night-r1). All 42 frames were
+inspected as contact sheets; `central-hall`, `family-media` and `kitchen` were also inspected as
+direct before/after pairs. Those views change 8,308 / 3,117 / 3,325 day pixels and 7,996 / 4,150 /
+3,744 night pixels above two channel levels, with only 0.000108–0.000278 normalized RGB MAE.
+Exterior and unrelated controls remain below 0.0002 MAE. The two strict first-person references
+that directly face the changed hall leaf (`fp-l0-hall`, `fp-l0-hall-corner`) were opened old/new
+and intentionally advanced; explicit blockout references remain unchanged.
+
+The world is 688 chunks / 96 cells / 89 static props / 266 exterior hierarchy instances /
+57.024370 MB. Its 202 materials retain 638 opaque submissions, 44 cutouts and 107 unculled state
+changes. All 1,409 unit and 135 integration tests pass (one established integration skip). The
+opening schema/semantic selftests, deterministic shell/material/UV2/chunk checks, content graph
+and the focused first-person suite pass. All eighteen culled-vs-unculled pairs stay below 0.2%, at
+0.0558% worst (`l0-sunroom`). All 48 active software-render tests pass; eight capture-only
+generators remain disabled. `tools/ci/run_checks.sh` passes every repository/content/provenance
+gate and all 323 strict-XNA translation units. Compilation and heavy tools stayed on CPU 0-5 / at
+most six workers. The existing CMake tree cannot automatically reconfigure inside the sandbox
+because an unrelated new sharp-runtime test glob would make CMake write shared `~/deps/FNA3D`;
+the already configured unit/integration/render binaries and exact stored content-copy command
+were used without editing CNA, sharp-runtime or shared dependencies.
+
+Largest remaining visible defects: the roof/dormers and far-side elevations remain black outside
+bounded night sources; garage/side-yard and neighbour depth remain sparse at night; facade
+massing/window rhythm remains repetitive by day; formal living still has weak local contact away
+from the bounded piano pool. The next highest-value checkpoint is honest local night-exterior
+readability for the roof/dormers or garage/side yard, then daytime facade depth. Do not raise
+global exposure or leave the slice for unrelated systems.
+
+---
+
 # Visual-sprint handoff — 2026-09-18 (`HOUSE-00941` checkpoint)
 
 Branch `develop`. Task-start HEAD `ab37c13` (`HOUSE-01066`). This file belongs to the single
