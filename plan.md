@@ -45,8 +45,9 @@ breaks up the remaining foreground sofa mass with a physically draped textile ac
 `HOUSE-01063` dresses one blank wall bay and the bare coffee table with a coherent formal-room
 set. `HOUSE-01064` carries that restrained surface-dressing discipline into the empty foyer/hall
 arrival with a runner, console objects and portal-flanking art. `HOUSE-01290` replaces the three
-remaining bare foyer/hall main-light points with physical ceiling fixtures. The next screenshot-
-ranked route defect is the broad under-dressed foyer/hall side wall. Round 9 proves the exterior
+remaining bare foyer/hall main-light points with physical ceiling fixtures. `HOUSE-01065` gives
+both remaining hall side-wall bays a measured nine-frame family gallery. The next screenshot-
+ranked route defect is the coarse, dark formal-living piano composition. Round 9 proves the exterior
 material omission is fixed; `HOUSE-00924`
 removes the
 exposure-scaled glass tint, and `HOUSE-00925` keeps outdoor receivers from clipping when viewed
@@ -159,7 +160,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 10 | Exterior and property | 00761–00840 | 25 | Terrain, fences, gates, drive, garden |
 | 11 | Neighbourhood background | 00841–00890 | 17 | The house is not floating in nothing |
 | 12 | Materials and textures | 00891–00970 | 36 | The blockout reads as a building |
-| 13 | Static furniture and dressing | 00971–01120 | 70 | Every room furnished to density |
+| 13 | Static furniture and dressing | 00971–01120 | 71 | Every room furnished to density |
 | 14 | Interactable framework | 01121–01180 | 26 | The 12 behaviours and the data model |
 | 15 | Doors and windows | 01181–01250 | 22 | Portals are dynamic |
 | 16 | Lights and switches | 01251–01310 | 30 | The house can be lit — **first playable** |
@@ -15081,6 +15082,48 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             pairs pass at 0.0558% worst (`l0-sunroom`) against 0.2%. All project static gates and
             323 strict-XNA translation units pass with compilation and heavy work restricted to
             CPU 0-5.
+- [x] HOUSE-01065 — Give the central hall its bounded nine-frame family gallery composition
+      dep: HOUSE-00215, HOUSE-00220, HOUSE-00296, HOUSE-01064, HOUSE-01290 · sys: content/world · plat: TOOL · pri: MUST
+      note: (2026-09-18) Round 69 resolves the unsupported ceiling pools and leaves the long bare
+            side-wall bays as the largest connected-route defect. Implement the architecture's
+            permitted §20.4 route-2 imagery as two complementary collision-free clusters without
+            claiming the dependency-blocked full `HOUSE-00987` stair-and-hall furnishing scope.
+      accept: deterministically author nine individually composed, physically layered frames split
+            across the two available side-wall bays; imagery is deliberately abstracted original
+            family silhouette relief with no identifiable person and no AI-generated likeness;
+            register within 20 mm of the real walls, stay clear of dining/WC/family portals and
+            the 1.2 m circulation route, reuse approved stock-XNA materials, add no collision or
+            renderer branch, capture and inspect the matched day/night route, and pass content,
+            budget, render, culling, provenance and strict-XNA gates with heavy work capped at six
+            CPUs
+      result: Two deterministic project-authored GLBs now form the complete bounded nine-frame
+            hall composition: a five-frame 1.880 x 1.510 x 0.084396 m / 9,160-triangle west salon
+            cluster and a non-mirrored four-frame 1.686492 x 1.500 x 0.083812 m /
+            6,848-triangle east cluster. Every frame has a physical back, mat, image plane and
+            original low-relief geometric silhouettes. The exact collision-free placements sit
+            20 mm from the real side walls, remain inside the two measured portal-free intervals
+            and preserve the full hall circulation lane. Approved walnut, paper, canvas and brass
+            roles are reused; no material, light, collision, renderer branch, download or real/AI
+            likeness was added. A permanent preparation gate pins byte regeneration, hashes,
+            bounds, triangles, components, UV0, source roles and both world placements.
+      review: All 40 frames in the expanded Round 70 day/night sets were opened, including two new
+            cross-hall cameras which directly expose every frame and both adjacent doorway edges.
+            The paired clusters add domestic scale and identity without blocking a door, floating
+            or becoming a repeated mirror layout. Against Round 69, `entrance-foyer` changes
+            10,088 day / 13,164 night pixels above two channel levels (0.7006% / 0.9142%; RGB MAE
+            0.001221 / 0.001192), `central-hall` changes 30,967 / 30,605 (2.1505% / 2.1253%;
+            0.000628 / 0.000612), and `foyer-living-doors` changes 19,226 / 19,250 (1.3351% /
+            1.3368%; 0.002479 / 0.002544). Eighteen strict references were advanced intentionally
+            after inspecting their amplified diffs: the material hall views show the gallery and
+            physical fixtures; the small exterior/season differences are restricted to the same
+            changed interior seen through the front entrance.
+      verified: The world has 201 materials, 2,955 stable ids and 904 manifest rows; its 681 chunks,
+            89 props, 266 exterior instances and 56.263094 MB upload remain inside budget. The
+            unculled diagnostic is 637 opaque / 44 cutout / 106 state changes. All 1,409 unit, 135
+            integration and 48 active software-render cases pass (eight capture-only generators
+            remain disabled); all eighteen culling pairs pass at 0.0558% worst (`l0-sunroom`)
+            against 0.2%. All project static gates and 323 strict-XNA translation units pass with
+            compilation and heavy work restricted to CPU 0-5.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -19511,19 +19554,19 @@ Recorded so nobody has to re-derive the decision.
 
 ## Task count
 
-**1 333 numbered tasks across 53 phases.**
+**1 344 numbered tasks across 53 phases.**
 
 | Phase group | Phases | Tasks |
 |---|---|---|
 | Foundations, capability proof, build, pipeline, assets | 0–4 | 238 |
 | World data, blockout, collision, camera, visibility | 5–9 | 218 |
-| Exterior, neighbourhood, materials, furnishing | 10–13 | 141 |
+| Exterior, neighbourhood, materials, furnishing | 10–13 | 142 |
 | Interaction framework and the systems built on it | 14–21 | 160 |
 | Time, sun, moon, stars, sky, weather | 22–30 | 155 |
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 162 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 343** |
+| **Total** | **0–52** | **1 344** |
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
 disturbs an existing one.
@@ -19559,6 +19602,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-18 | `HOUSE-01065` | **New task, next free phase-13 id.** Resolve the hall's nine-frame gallery as a bounded deterministic surface-dressing checkpoint while leaving the full furnishing/stair-wall task open. | Round 69 makes the two long bare side-wall bays the largest remaining arrival defect. The already approved static-prop and canonical-material path can implement §20.4's non-identifiable route 2 without a download, likeness/AI issue, renderer work, collision or false completion of `HOUSE-00987`. |
 | 2026-09-18 | `HOUSE-01290` | **New task, next free phase-16 id.** Reuse the approved semi-flush fixture for the one foyer and two hall main sources, relocate their optics to the real diffuser plane and rebake only the two affected receiver cells. | Round 68 resolves the hall floor, terminal wall and console but exposes three warm ceiling pools with no physical source. The existing deterministic fixture and established main groups can correct that visible cause without a new asset, global exposure, renderer work, switch change or unrelated subsystem. |
 | 2026-09-18 | `HOUSE-01064` | **New task, next free phase-13 id.** Finish the currently bare foyer console, hall floor and two end-wall flanks as one bounded arrival composition while keeping full room-density tasks open. | Round 67's fixed foyer/hall cameras show these three connected surfaces as the largest remaining domestic-identity defect. Deterministic project-authored dressing can finish them through the approved prop/material path without a download, collision, light change, runtime branch or false completion of `HOUSE-00986`/`HOUSE-00987`. |
 | 2026-09-18 | `HOUSE-01063` | **New task, next free phase-13 id.** Treat one empty wall bay and the existing bare coffee table as a single restrained formal-room dressing checkpoint while leaving the full furnishing task open. | Round 66 confirms that more broad colour correction is lower value than human-scale evidence of use. A deterministic paired relief and measured books/tray/bowl vignette can reuse approved room roles and finish two prominent surfaces without unbounded clutter, a download, lighting change or runtime branch. |

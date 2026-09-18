@@ -5666,6 +5666,14 @@ photographs of *the characters the game itself uses* (§20.4 route 3), posed in 
 rooms and rendered in Blender. We own them, they are consistent with the avatar the player
 chooses at the level of "this is the family who live here", and no real person is depicted.
 
+`HOUSE-01065` establishes the nine-frame `L0_HALL` composition before the avatar-dependent route-3
+image set exists. Five physically layered frames occupy the west doorway bay and four occupy the
+east stair-side bay; their original geometric silhouette reliefs are the explicitly permitted
+§20.4 route 2 and depict no identifiable person. The frame dimensions, wall registration and
+clusters are production geometry. The later route-3 pass may replace only the image-plane content
+without moving the accepted composition. The six stair-wall frames remain part of the broader
+`HOUSE-00987` scope and are not claimed by this bounded checkpoint.
+
 Mirrors: 4 of them. Implementation is a **static cube map** per mirror baked offline
 (`EnvironmentMapEffect`), which is correct for a fixed mirror in a fixed room and costs nothing.
 The player's reflection is **not** rendered — a deliberate, documented limitation (D-19, §77),

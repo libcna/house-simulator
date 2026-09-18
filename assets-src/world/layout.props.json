@@ -67,6 +67,32 @@
       "interactable": null
     },
     {
+      "id": "PROP_HALL_GALLERY_WEST",
+      "asset": "MODEL_HALL_GALLERY_WEST",
+      "cell": "L0_HALL",
+      "position": [-2.18, 1.95, -19.47],
+      "yawDeg": 270,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_HALL_GALLERY_EAST",
+      "asset": "MODEL_HALL_GALLERY_EAST",
+      "cell": "L0_HALL",
+      "position": [2.18, 1.95, -19.47],
+      "yawDeg": 90,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
       "id": "PROP_L0_KITCHEN_NORTH_BASE_RUN",
       "asset": "MODEL_KITCHEN_NORTH_BASE_RUN",
       "cell": "L0_KITCHEN",

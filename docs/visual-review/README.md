@@ -3053,3 +3053,52 @@ All eighteen culling pairs pass at 0.0558% worst (`l0-sunroom`); full test/gate 
 debug blockout remains available. The next highest visible value is a restrained foyer/hall
 side-wall gallery layer, followed by the coarse formal piano or another screenshot-ranked route
 defect—not an unrelated subsystem.
+
+## Round 70 — bounded central-hall family gallery
+
+Commit: `HOUSE-01065` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 69's [entrance](captures/house-01290-arrival-fixtures-day-final/entrance-foyer.png)
+and [central hall](captures/house-01290-arrival-fixtures-day-final/central-hall.png) leave both long
+side-wall bays blank even though the end wall, floor and physical lighting are composed. After:
+the expanded twenty-camera [clear-day](captures/house-01065-hall-gallery-day-final) and
+[normal-night](captures/house-01065-hall-gallery-night-final) sets include direct
+[west](captures/house-01065-hall-gallery-day-final/hall-gallery-west.png) and
+[east](captures/house-01065-hall-gallery-day-final/hall-gallery-east.png) cross-hall views. All 40
+frames were opened at full resolution; every one of the nine frames and both doorway boundaries
+were inspected in both lighting states.
+
+Ranked visible defects remaining:
+
+1. Formal living remains dark and brown-heavy; its older upright piano is the coarsest close hero
+   object along the furnished route.
+2. The roof, dormers and far-side elevations still collapse outside bounded night sources.
+3. Garage/side-yard terrain and distant-neighbour context lose depth at night.
+4. The simple facade massing and repetitive window rhythm remain conspicuous by day.
+5. The gallery imagery is deliberately abstract route-2 relief; character-consistent route-3
+   imagery and the six stair-wall frames remain later, explicitly separate work.
+
+Fixed: a deterministic 9,160-triangle west cluster composes five differently proportioned frames
+over 1.880 x 1.510 m; a 6,848-triangle east cluster composes four non-mirrored frames over
+1.686492 x 1.500 m. Every frame has a physical back, mat, image layer and original anonymous
+geometric family relief. Both collision-free placements sit 20 mm from the actual walls, remain
+inside the measured portal-free z interval and preserve the 1.2 m circulation route. Existing
+approved walnut, paper, canvas and brass roles are reused. No new material, light, exposure,
+renderer path, collision, download or identifiable/AI likeness was introduced.
+
+Against Round 69, `entrance-foyer` changes 10,088 day / 13,164 night pixels above two channel
+levels (0.7006% / 0.9142%; normalized RGB MAE 0.001221 / 0.001192), `central-hall` changes 30,967 /
+30,605 (2.1505% / 2.1253%; 0.000628 / 0.000612), and `foyer-living-doors` changes 19,226 / 19,250
+(1.3351% / 1.3368%; 0.002479 / 0.002544). The software-render run exposed references not advanced
+with Round 69's physical fixtures; all changed current-output references were regenerated with the
+official disabled cases and their amplified diffs inspected. Material hall changes show the new
+gallery/fixtures, while tiny exterior and seasonal differences remain confined to the front-door
+view into that same changed interior. The world is 681 chunks / 96 cells / 89 props / 266 exterior
+instances / 56.263094 MB; 201 materials produce 637 opaque, 44 cutout and 106 unculled state
+changes. All 48 active software-render tests pass and all eighteen culling pairs remain at 0.0558%
+worst (`l0-sunroom`); complete test and gate results are in `docs/handoff.md`.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next highest visible value is replacing or substantially
+refining the coarse formal-living piano composition, followed by the next screenshot-ranked route
+or exterior defect—not an unrelated subsystem.

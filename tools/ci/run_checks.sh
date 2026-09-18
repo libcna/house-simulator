@@ -172,6 +172,7 @@ run_gate "living-surface-dressing" python3 tools/assets/living_surface_dressing_
 # HOUSE-01064: the foyer/hall runner, console vignette and portal-flanking relief remain
 # byte-deterministic, collision-free and registered to their real support/wall surfaces.
 run_gate "foyer-hall-dressing" python3 tools/assets/foyer_hall_dressing_prepare.py --check
+run_gate "hall-gallery" python3 tools/assets/hall_gallery_prepare.py --check
 # HOUSE-01053: the family focal wall retains the pinned CC0 low cabinet, exact canonical roles,
 # measured television gap and family-only placement without unsupported source metadata.
 run_gate "family-media-console" python3 tools/assets/family_media_console_prepare.py --check

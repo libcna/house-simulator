@@ -38,6 +38,11 @@ POSES = (
     ("foyer-living-doors", "0.40,0.60,-16.30,270.0,0.0"),
     ("foyer-facing-front", "0.00,0.60,-16.70,180.0,0.0"),
     ("central-hall", "0.00,0.60,-20.65,0.0,0.0"),
+    # HOUSE-01065: the route view looks north through the hall and therefore only catches these
+    # side-wall gallery clusters obliquely. Paired cross-hall views keep all nine frame positions,
+    # their measured hanging band and the adjacent clear doorways directly reviewable.
+    ("hall-gallery-west", "0.60,0.60,-19.47,270.0,0.0"),
+    ("hall-gallery-east", "-0.60,0.60,-19.47,90.0,0.0"),
     ("kitchen-from-hall", "0.00,0.60,-23.55,285.0,0.0"),
     ("living-room", "-5.20,0.60,-17.25,90.0,0.0"),
     ("living-composition", "-3.10,0.60,-18.50,270.0,0.0"),

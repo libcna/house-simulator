@@ -1,3 +1,51 @@
+# Visual-sprint handoff — 2026-09-18 (`HOUSE-01065` checkpoint)
+
+Branch `develop`. Task-start HEAD `54a7002` (`HOUSE-01290`). This file belongs to the single
+`HOUSE-01065` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit debug blockout remains available.
+
+The central hall's two long side-wall bays now carry the architecture's bounded nine-frame family
+gallery. A deterministic five-frame west cluster is 1.880 x 1.510 x 0.084396 m, 9,160 triangles
+and 652,924 bytes; the complementary four-frame east cluster is 1.686492 x 1.500 x 0.083812 m,
+6,848 triangles and 492,852 bytes. Each frame has a physical back, mat, image and original
+anonymous silhouette relief implementing §20.4 route 2 without a real or AI-generated likeness.
+Both collision-free props sit 20 mm from their actual wall, inside the measured door-free bays and
+outside the 1.2 m circulation route. Four existing approved material roles are reused. The full
+avatar-dependent route-3 imagery and six stair-wall frames remain later `HOUSE-00987` work.
+
+The canonical before views are Round 69's
+[entrance](visual-review/captures/house-01290-arrival-fixtures-day-final/entrance-foyer.png) and
+[central hall](visual-review/captures/house-01290-arrival-fixtures-day-final/central-hall.png). The
+complete after sets expand to twenty cameras with direct gallery coverage:
+[clear day](visual-review/captures/house-01065-hall-gallery-day-final) and
+[normal night](visual-review/captures/house-01065-hall-gallery-night-final). All 40 frames were
+opened. Against Round 69, `entrance-foyer` changes 10,088 day / 13,164 night pixels above two
+channel levels (0.7006% / 0.9142%; normalized RGB MAE 0.001221 / 0.001192), `central-hall` changes
+30,967 / 30,605 (2.1505% / 2.1253%; 0.000628 / 0.000612), and `foyer-living-doors` changes 19,226 /
+19,250 (1.3351% / 1.3368%; 0.002479 / 0.002544). The two direct views prove all nine frames remain
+supported and doorway-clear. Eighteen current-output strict references were regenerated through
+their official disabled cases and their amplified diffs inspected; large hall differences show
+the gallery/physical fixtures and small exterior/season differences are restricted to their view
+through the front entrance.
+
+The world is 681 chunks / 96 cells / 89 static props / 266 exterior hierarchy instances /
+56.263094 MB. Its 201 materials, 904 manifest rows and 2,955 stable ids produce 637 opaque
+submissions, 44 cutouts and 106 unculled state changes, inside §71.2. All 1,409 unit, 135
+integration and 48 active software-render tests pass; eight capture-only generators remain
+disabled. All eighteen culled-vs-unculled pairs stay below 0.2%, at 0.0558% worst (`l0-sunroom`).
+Compilation and heavy tools stayed on CPU 0-5 / at most six workers. Content, deterministic
+gallery regeneration, provenance/licence and all project static gates plus all 323 strict-XNA
+translation units pass.
+
+Largest remaining visible defects: formal living is dark/brown-heavy and its upright piano is the
+coarsest close hero object; the roof/dormers and far-side elevations remain black outside bounded
+night sources; garage/yard and neighbour depth remain sparse; facade massing/window rhythm is
+still repetitive. The next highest-value checkpoint is replacing or substantially refining the
+formal piano composition, then the next screenshot-ranked route or exterior defect. Do not raise
+global exposure or leave the slice for unrelated systems.
+
+---
+
 # Visual-sprint handoff — 2026-09-18 (`HOUSE-01290` checkpoint)
 
 Branch `develop`. Task-start HEAD `2fbe3f1` (`HOUSE-01064`). This file belongs to the single

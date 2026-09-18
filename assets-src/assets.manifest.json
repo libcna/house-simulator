@@ -1801,6 +1801,90 @@
       ]
     },
     {
+      "id": "MODEL_HALL_GALLERY_EAST",
+      "category": "picture",
+      "sourceFile": "assets-src/Models/Furniture/Hall/gallery_east.glb",
+      "sourceSha256": "31b210a28fe97fa44e4ded649386b9e383a0d6fea363bf4445684f90c4ed5b4d",
+      "contentName": "Models/Furniture/Hall/gallery_east",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Central-hall east family gallery cluster",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored four-frame gallery cluster generated deterministically by tools/blender/hall_gallery.py for HOUSE-01065. Original geometric silhouettes implement cna-house.md section 20.4 route 2 without depicting an identifiable person or using an AI-generated likeness. Approved canonical frame, mat, canvas and relief materials are reused; no third-party image, mesh or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.686492,
+          1.5,
+          0.083812
+        ],
+        "triangles": {
+          "LOD0": 6848
+        }
+      },
+      "materialMap": {
+        "GALLERY_FRAME": "MAT_FURNITURE_PIANO_WOOD",
+        "GALLERY_MAT": "MAT_LIVING_ART_PAPER",
+        "GALLERY_IMAGE": "MAT_FAMILY_ART_CANVAS",
+        "GALLERY_RELIEF": "MAT_FURNITURE_PIANO_BRASS"
+      },
+      "usedIn": [
+        "L0_HALL"
+      ]
+    },
+    {
+      "id": "MODEL_HALL_GALLERY_WEST",
+      "category": "picture",
+      "sourceFile": "assets-src/Models/Furniture/Hall/gallery_west.glb",
+      "sourceSha256": "ecbde6018493e03e2df2b2260fd07ee58ac2b1fa0bdbc3d3df3e6d098b6ba7a7",
+      "contentName": "Models/Furniture/Hall/gallery_west",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Central-hall west family gallery cluster",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored five-frame salon gallery cluster generated deterministically by tools/blender/hall_gallery.py for HOUSE-01065. Original geometric silhouettes implement cna-house.md section 20.4 route 2 without depicting an identifiable person or using an AI-generated likeness. Approved canonical frame, mat, canvas and relief materials are reused; no third-party image, mesh or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.88,
+          1.51,
+          0.084396
+        ],
+        "triangles": {
+          "LOD0": 9160
+        }
+      },
+      "materialMap": {
+        "GALLERY_FRAME": "MAT_FURNITURE_PIANO_WOOD",
+        "GALLERY_MAT": "MAT_LIVING_ART_PAPER",
+        "GALLERY_IMAGE": "MAT_FAMILY_ART_CANVAS",
+        "GALLERY_RELIEF": "MAT_FURNITURE_PIANO_BRASS"
+      },
+      "usedIn": [
+        "L0_HALL"
+      ]
+    },
+    {
       "id": "MODEL_HALL_PORTAL_ART_PAIR",
       "category": "picture",
       "sourceFile": "assets-src/Models/Furniture/Hall/portal_art_pair.glb",
