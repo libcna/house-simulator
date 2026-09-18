@@ -117,11 +117,17 @@ CHUNK_BUDGET_EXCEPTIONS = {
                  "which have to load with the exterior rather than with the neighbourhood. "
                  "HOUSE-00772 adds AlphaTest foliage, BasicEffect bark and measured Reach-cap "
                  "splits for the street trees and the far road-edge hedge"),
-    "EXT_FRONTYARD_E": (13,
+    "EXT_FRONTYARD_E": (15,
                          "HOUSE-00772's planted east lawn: its existing ground/building finishes "
                          "plus measured source-exact bark, branch, leaf, flower and grass atlases. "
                          "HOUSE-00937 adds the authored foundation-mulch terrain role. This "
-                         "exterior cell is a landscape region rather than a room"),
+                         "exterior cell is a landscape region rather than a room. HOUSE-01289 "
+                         "adds one shared bronze body and one switched lens role for its two "
+                         "facade uplights"),
+    "EXT_FRONTYARD_W": (8,
+                         "the planted west lawn keeps ground, facade, bark and cutout foliage "
+                         "separate. HOUSE-01289 adds one shared bronze body and one switched lens "
+                         "role for its two facade uplights; both instances reuse those roles"),
     "EXT_SIDEYARD_W": (12,
                         "HOUSE-00772's densely planted west border: existing exterior finishes "
                         "plus measured source-exact bark and cutout foliage, including Reach-cap "

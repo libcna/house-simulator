@@ -1,6 +1,6 @@
 {
   "schema": "cna-house/manifest/1",
-  "worldHash": "sha256:e50c034e23e9fe0a8bfa6d522708a82fe622ec4c8b7a3a4d0150729bcfbcbd83",
+  "worldHash": "sha256:1035ea0b7914ae97b6d2226c64efe3031550bc44e3127e6062aec3dbd69c32f7",
   "members": [
     {
       "file": "layout.levels.json",
@@ -8,7 +8,7 @@
     },
     {
       "file": "layout.cells.json",
-      "sha256": "sha256:3c3013464a6595d77fcfc3cfc0c931dab99a3c49c65bdf98b71421c53880bf5e"
+      "sha256": "sha256:77cf8c7f7cf66b9e9f92d188b486e6b5a54fb1abfd03b0f202d6c3b2d1632d40"
     },
     {
       "file": "layout.portals.json",
@@ -24,19 +24,19 @@
     },
     {
       "file": "layout.lights.json",
-      "sha256": "sha256:0275720acfa347a7396a330ce560fa5ca6940ef8b0f46e74c45f2c579ffc8c69"
+      "sha256": "sha256:3ed3050a360b835bbe7e70ede6d4929319480e78fa6a02eaf6a028d24180322c"
     },
     {
       "file": "layout.props.json",
-      "sha256": "sha256:176918b02d1bef87f732dc033dd96e9e6d8440dd272310631a12fd4d00fb708c"
+      "sha256": "sha256:ad75a94fed7b0c829e79b6dd0d30160e537925b595867cc411609fc9cd6d49d8"
     },
     {
       "file": "layout.materials.json",
-      "sha256": "sha256:cc1f1a5899ea48cd1ec139bb2da5d39e9db2e64e0dbee5df210d9042cf728796"
+      "sha256": "sha256:092c1fa40621b96bbf2f78ab7abb340ceaad04197cc3d0cb5ce510d99934d1ef"
     },
     {
       "file": "layout.nav.json",
-      "sha256": "sha256:0eedccbfad6ebe304fdc90890d1244f937c64a8589dd655946095ad14a4a3ffc"
+      "sha256": "sha256:9934b3dbdc4dd46bff32c42185e5bd8166e68a297b25a9e5e5b70ad528c40c31"
     },
     {
       "file": "layout.audio.json",
@@ -44,7 +44,7 @@
     },
     {
       "file": "layout.exterior.json",
-      "sha256": "sha256:45deacbde5e22e1c9f6c354dd7f4c87d344f9bc672e78f5cc26954a014463f22"
+      "sha256": "sha256:21201badfc1ebe017c422a0074447074a1433ddc88bbaac38498a03e91584238"
     },
     {
       "file": "layout.weather.json",
@@ -68,7 +68,7 @@
     },
     {
       "file": "terrain_materials.png",
-      "sha256": "sha256:0dc56307add4fbe4183171f22e890251c066325e7e2ee6a39015c7922b05a445"
+      "sha256": "sha256:ec89c872921a62397bfd787869bd3cfcf5f989f81eae0d88bc7d41f4c391588f"
     }
   ]
 }

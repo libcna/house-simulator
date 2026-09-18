@@ -418,7 +418,8 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:37000d9f220deb4a6f7b2294a817d4e3a7e319280da3b82cd04b0abab1073d9e"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:73e496302418fa58a0d6545e852d08df1defed9c3dc6f6c3e316fa33b30f665f"
     },
     {
       "cell": "L1_BED4",
@@ -428,7 +429,8 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:5682f795de9de4e5396d42ccd2fa60bbd209453809f86a0ff3f5a752f03cb882"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:9ea5282752583957154685394f8c43667737867c04dc86bcba89b2849df7da6b"
     },
     {
       "cell": "L1_BED5",
@@ -438,7 +440,8 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:53545afcd659a0f36eba3566b3f44e3718b25613a41177537ff7883848c5ec43"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:c6c76c41ee169b09ef225debe0b09268c631ec0d17b711db78550b097fae9c28"
     },
     {
       "cell": "L1_CLOSET_2",
@@ -539,7 +542,8 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:9308bea5a34bfe2f985a7954dab596809e184ccf6ba0ce3c80aed28dc3c6405a"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:f4f8c3ecc76f97d2e30609cf853028514e43a601cb5223c55f3eff96fd2cec14"
     },
     {
       "cell": "L1_STOR",
@@ -599,7 +603,8 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:b07c083bce2643f13fe5760272963f156dd64616d04bedefafddd5423f0a8997"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:c7569d360ad3597247a4d16146850379f54ab78cb49baae4d9bd3e60954841dd"
     },
     {
       "cell": "L2_BED7",
@@ -669,7 +674,8 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:277f93654c6751e60016604718ba97b6123330e9569295c70d7b463dd1fb2be2"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:6388875d7a39169af294fc18e94eb04849d2e679fdb749f492b1c511ca3b363a"
     },
     {
       "cell": "L2_LINEN2",
@@ -699,7 +705,8 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:3172ab6ae31ea7f6de71daad52c38694899c70cb853674e796b3ffe46fe86b17"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:7dc78787a5f91c583e559429279443ac46e0d7d2f0f026bd36cd29dd1baeb090"
     },
     {
       "cell": "L2_STAIR_MAIN",
@@ -709,7 +716,8 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:e27ee9a460863818b3d81f6377512474f4ee4242ad5afedbca66ac5aa5e4437d"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:019e97d3137072976d000a291a7db1ee2f8184c5369ed4e6a170cfb17bcf8e14"
     },
     {
       "cell": "L2_STOR2",
@@ -803,12 +811,19 @@
     }
   ],
   "promotedSubsetCells": [
-    "L1_LANDING"
+    "L1_BED3",
+    "L1_BED4",
+    "L1_BED5",
+    "L1_STAIR_MAIN",
+    "L2_BED6",
+    "L2_LIBRARY",
+    "L2_STAIR_ATTIC",
+    "L2_STAIR_MAIN"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 5111808,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 509603,
+  "sourceBytes": 517277,
   "tool": "bake_house_lightmaps.py"
 }

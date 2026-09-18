@@ -2128,6 +2128,50 @@
       "duskSensor": true
     },
 
+    // ---- LG_EXT_FACADE_UPLIGHT x4 -- four compact landscape spots hidden between the existing
+    // ---- foundation shrubs. They wash selected upper-storey bays rather than lifting global
+    // ---- night exposure or duplicating the porch and garage arrival circuits.
+    {
+      "id": "LIGHT_EXT_FACADE_UPLIGHT_W1", "cell": "EXT_FRONTYARD_W", "group": "LG_EXT_FACADE_UPLIGHT",
+      "type": "spot", "position": [-11.35, 0.243, -12.672],
+      "direction": [0.0, 0.9734, -0.2290], "coneInnerDeg": 24.0, "coneOuterDeg": 44.0,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 2400.0, "range": 9.0,
+      "bakeLumensPerRadiantWatt": 5.0, "bakeCells": ["L1_BED3", "L2_BED6"],
+      "fixtureProp": "PROP_EXT_FACADE_UPLIGHT_W1", "emissiveMaterialSlot": "UplightLens",
+      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false,
+      "duskSensor": true
+    },
+    {
+      "id": "LIGHT_EXT_FACADE_UPLIGHT_W2", "cell": "EXT_FRONTYARD_W", "group": "LG_EXT_FACADE_UPLIGHT",
+      "type": "spot", "position": [-6.15, 0.243, -12.682],
+      "direction": [0.0, 0.9734, -0.2290], "coneInnerDeg": 24.0, "coneOuterDeg": 44.0,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 2400.0, "range": 9.0,
+      "bakeLumensPerRadiantWatt": 5.0, "bakeCells": ["L1_BED4", "L2_LIBRARY"],
+      "fixtureProp": "PROP_EXT_FACADE_UPLIGHT_W2", "emissiveMaterialSlot": "UplightLens",
+      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false,
+      "duskSensor": true
+    },
+    {
+      "id": "LIGHT_EXT_FACADE_UPLIGHT_E1", "cell": "EXT_FRONTYARD_E", "group": "LG_EXT_FACADE_UPLIGHT",
+      "type": "spot", "position": [4.65, 0.243, -12.682],
+      "direction": [0.0, 0.9734, -0.2290], "coneInnerDeg": 24.0, "coneOuterDeg": 44.0,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 2400.0, "range": 9.0,
+      "bakeLumensPerRadiantWatt": 5.0, "bakeCells": ["L1_STAIR_MAIN", "L2_STAIR_MAIN"],
+      "fixtureProp": "PROP_EXT_FACADE_UPLIGHT_E1", "emissiveMaterialSlot": "UplightLens",
+      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false,
+      "duskSensor": true
+    },
+    {
+      "id": "LIGHT_EXT_FACADE_UPLIGHT_E2", "cell": "EXT_FRONTYARD_E", "group": "LG_EXT_FACADE_UPLIGHT",
+      "type": "spot", "position": [7.95, 0.243, -12.672],
+      "direction": [0.0, 0.9734, -0.2290], "coneInnerDeg": 24.0, "coneOuterDeg": 44.0,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 2400.0, "range": 9.0,
+      "bakeLumensPerRadiantWatt": 5.0, "bakeCells": ["L1_BED5", "L2_STAIR_ATTIC"],
+      "fixtureProp": "PROP_EXT_FACADE_UPLIGHT_E2", "emissiveMaterialSlot": "UplightLens",
+      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false,
+      "duskSensor": true
+    },
+
     // ---- LG_EXT_DRIVEWAY_FLOOD x1 -- over the garage door, aimed 25 degrees out from vertical:
     // ---- enough wall wash for the sectional door and apron, but not enough reach for the street
     {

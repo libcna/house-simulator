@@ -402,7 +402,7 @@ TEST(LightingSystemTests, InitialGroupsMatchAuthoredDefaultsAndEntryLightsCanBeS
     EXPECT_FLOAT_EQ(hall->artificial, 0.0F);
 }
 
-TEST(LightingSystemTests, AllNineteenAuthoredDuskFixturesFollowDayNightWithAVisibleStagger)
+TEST(LightingSystemTests, AllTwentyThreeAuthoredDuskFixturesFollowDayNightWithAVisibleStagger)
 {
     if (!ContentIsBuilt())
     {
@@ -411,17 +411,19 @@ TEST(LightingSystemTests, AllNineteenAuthoredDuskFixturesFollowDayNightWithAVisi
     HouseLighting house;
     house.clock.calendarDaysPerSimDay = 1.0;
     const Id porch = Id::Of("LG_L0_PORCH_LANTERN");
+    const Id facadeUplights = Id::Of("LG_EXT_FACADE_UPLIGHT");
     const Id garageLanterns = Id::Of("LG_EXT_GARAGE_LANTERN");
     const Id street = Id::Of("LG_EXT_STREET");
     const Id neighbours = Id::Of("LG_EXT_NEIGHBOUR_PORCH");
     ASSERT_TRUE(house.lighting.IsGroupDuskControlled(porch));
+    ASSERT_TRUE(house.lighting.IsGroupDuskControlled(facadeUplights));
     ASSERT_TRUE(house.lighting.IsGroupDuskControlled(garageLanterns));
     ASSERT_TRUE(house.lighting.IsGroupDuskControlled(street));
     ASSERT_TRUE(house.lighting.IsGroupDuskControlled(neighbours));
     EXPECT_EQ(std::count_if(house.world.Lights().begin(),
                             house.world.Lights().end(),
                             [](const world::Light& light) { return light.duskSensor; }),
-              19);
+              23);
 
     cnahouse::environment::CivilTime time;
     time.year = 2031;
@@ -432,6 +434,7 @@ TEST(LightingSystemTests, AllNineteenAuthoredDuskFixturesFollowDayNightWithAVisi
     house.lighting.Update(Frame(200));
     EXPECT_FALSE(house.lighting.FindGroup(porch)->on);
     EXPECT_FLOAT_EQ(house.lighting.FindGroup(porch)->Level(), 0.0F);
+    EXPECT_FALSE(house.lighting.FindGroup(facadeUplights)->on);
     EXPECT_FALSE(house.lighting.FindGroup(garageLanterns)->on);
     EXPECT_FALSE(house.lighting.FindGroup(street)->on);
     EXPECT_FALSE(house.lighting.FindGroup(neighbours)->on);
@@ -441,6 +444,8 @@ TEST(LightingSystemTests, AllNineteenAuthoredDuskFixturesFollowDayNightWithAVisi
     house.lighting.Update(Frame(201));
     EXPECT_TRUE(house.lighting.FindGroup(porch)->on);
     EXPECT_FLOAT_EQ(house.lighting.FindGroup(porch)->Level(), 1.0F);
+    EXPECT_TRUE(house.lighting.FindGroup(facadeUplights)->on);
+    EXPECT_FLOAT_EQ(house.lighting.FindGroup(facadeUplights)->Level(), 1.0F);
     EXPECT_TRUE(house.lighting.FindGroup(garageLanterns)->on);
     EXPECT_FLOAT_EQ(house.lighting.FindGroup(garageLanterns)->Level(), 1.0F);
     EXPECT_TRUE(house.lighting.FindGroup(street)->on);

@@ -855,6 +855,58 @@
       "interactable": null
     },
     {
+      "id": "PROP_EXT_FACADE_UPLIGHT_W1",
+      "asset": "MODEL_FIXTURE_FACADE_UPLIGHT",
+      "cell": "EXT_FRONTYARD_W",
+      "position": [-11.35, 0.0, -12.65],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_EXT_FACADE_UPLIGHT_W2",
+      "asset": "MODEL_FIXTURE_FACADE_UPLIGHT",
+      "cell": "EXT_FRONTYARD_W",
+      "position": [-6.15, 0.0, -12.66],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_EXT_FACADE_UPLIGHT_E1",
+      "asset": "MODEL_FIXTURE_FACADE_UPLIGHT",
+      "cell": "EXT_FRONTYARD_E",
+      "position": [4.65, 0.0, -12.66],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_EXT_FACADE_UPLIGHT_E2",
+      "asset": "MODEL_FIXTURE_FACADE_UPLIGHT",
+      "cell": "EXT_FRONTYARD_E",
+      "position": [7.95, 0.0, -12.65],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
       "id": "PROP_EXT_WALK_BOLLARD_1",
       "asset": "MODEL_FIXTURE_PATH_BOLLARD",
       "cell": "EXT_WALK",

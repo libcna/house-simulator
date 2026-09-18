@@ -36,7 +36,9 @@ images. `HOUSE-01283` replaces the kitchen island's bare, wrongly oriented point
 three physical downlighting pendants on the real long island axis. `HOUSE-01287` turns the nominal
 front-balcony point into a real over-door lantern with one bounded L1 receiver bake, and
 `HOUSE-01288` makes the four existing front-walk sources physical low bollards without taking
-their manual circuit away. Round 9 proves the exterior material omission is fixed; `HOUSE-00924`
+their manual circuit away. `HOUSE-01289` adds four physical foundation-bed uplights and selected
+L1/L2 facade bakes, replacing the remaining broad black night elevation with restrained warm
+vertical pools without raising global exposure. Round 9 proves the exterior material omission is fixed; `HOUSE-00924`
 removes the
 exposure-scaled glass tint, and `HOUSE-00925` keeps outdoor receivers from clipping when viewed
 from a dark room. Round 11 leaves the front façade and empty/dark entrance route as the largest
@@ -15568,6 +15570,48 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             1,409 unit, 135 integration and 48 active software-render tests pass; all eighteen
             culling pairs remain below 0.2% at 0.1338% worst (`l0-sunroom`). Content, budget,
             licence/provenance and all 323 strict-XNA translation-unit gates pass.
+- [x] HOUSE-01289 — Add physical foundation-bed uplights to the broad black front facade
+      dep: HOUSE-00929, HOUSE-00937, HOUSE-00938, HOUSE-00939, HOUSE-01256, HOUSE-01259, HOUSE-01260, HOUSE-01281, HOUSE-01287, HOUSE-01288 · sys: world, content, lighting, rendering · plat: ALL · pri: MUST
+      note: (2026-09-18) Round 62 leaves most of L1/L2 as one dead black elevation even though the
+            door, porch, garage and walk now have correctly bounded practicals. Four small upward
+            fixtures can sit in the two existing foundation beds, use the existing dusk owner and
+            name only the front-facing upper receiver cells. Do not enlarge one porch source,
+            raise global exposure, illuminate L0 twice or convert the manual arrival circuits.
+      accept: four correctly scaled project-authored bronze/lens uplights are visible in the two
+              existing foundation beds by day and drive a separate dusk group. Restrained warm
+              upward spots produce readable, non-uniform L1/L2 facade depth at night through
+              explicit selected bakes, without global exposure, renderer, collision, portal or
+              nav changes. Complete matched eighteen-camera day/night sets are inspected; only
+              intended strict references advance, and deterministic asset, world, content, unit,
+              integration, render, culling, provenance and strict-XNA gates pass with compilation
+              and heavy work restricted to CPU 0-5 / at most six workers.
+      done: (2026-09-18) A deterministic 232-triangle, 200 x 259 x 200 mm fixture provides an
+            anchored dark-bronze foot/yoke and separately emissive warm lens. Four collision-free
+            static instances sit inside `EXT_FRONTYARD_W/E` at measured foundation-bed positions.
+            Their linked optical centres drive 2,400 lm / 3,000 K upward 24/44-degree spots with
+            9 m range on the new dusk-owned `LG_EXT_FACADE_UPLIGHT`. Each source names exactly one
+            front L1 and one front L2 receiver; no L0 or unrelated interior is baked. The selected
+            offline calibration is 5 lm per radiant watt and does not change the global 683 value.
+      review: (2026-09-18) Round 63 opens complete matched eighteen-camera clear-day and 22:00
+            sets. Against Round 62, night exterior-front/front-path/garage/close-route frames
+            change 73,623 / 210,482 / 132,547 / 810,668 pixels above two channel levels, with
+            normalized MAE 0.001965 / 0.005070 / 0.003492 / 0.020155. Day changes remain small
+            (0.001189 / 0.000168 / 0.000827 / 0.001032 MAE) and show credible ground hardware.
+            A first 700 lm / 100 lm-per-watt bake was rejected as invisible; the final facade has
+            warm vertical rhythm while retaining darkness above the bounded L2 reach. Exact off
+            capture is unavailable because the shared dusk controller intentionally reasserts its
+            group every frame; the matched Round 62 scene is the honest before control.
+      verified: (2026-09-18) The permanent generator gate recreates the GLB byte-for-byte and pins
+            its two slots, all four transforms, optical links, dusk semantics, cones, ranges and
+            exact eight-cell receiver set. The selected 256-sample atlases peak at 0.3271–0.3465
+            on L1 and 0.0640–0.1562 on L2. Stable-id validation records 2,928 live ids; all thirteen
+            world rules pass. The world is 659 chunks / 77 props / 266 exterior instances /
+            53.915377 MB; the unculled diagnostic is 615 opaque, 44 cutout and 99 state changes.
+            All 1,409 unit and 135 integration tests plus the content-current gate pass. All 48
+            active software-render cases pass after five intended exterior references and one
+            daylight-occlusion guard were inspected and selectively advanced; all eighteen
+            culling pairs remain below 0.2%. Content, budget, licence/provenance and strict-XNA
+            gates pass with compilation/heavy work restricted to CPU 0-5 / at most six workers.
 - [x] HOUSE-01261 — Implement the per-object three-directional-light assignment (key/fill/bounce) for dynamic objects
       dep: HOUSE-01251, HOUSE-00892 · sys: lighting · plat: ALL · pri: MUST
       accept: `BasicEffect` and `SkinnedEffect` receive the same stable key/fill/bounce slot
@@ -19294,6 +19338,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-18 | `HOUSE-01289` | **New task, next free phase-16 id.** Add four measured upward fixtures inside the two completed foundation beds, own them through a distinct dusk group and bake only eight explicitly named front L1/L2 receivers. | Round 62 leaves the multi-storey facade as the largest normal-night defect after the bounded door, porch, garage and walk layers are physical. An attempted existing garage-flood control only blew out the apron and did not reach the elevation. Foundation uplights provide a real source, visible daytime hardware and selected receiver boundary without global exposure, an oversized porch lamp, manual-circuit changes or renderer work. |
 | 2026-09-17 | `HOUSE-01288` | **New task, next free phase-16 id.** Replace the four existing unlinked front-walk points with measured physical bollards at their stable positions, preserve the independent manual circuit and start that circuit on only for the selected normal-play arrival. | Round 61 leaves the close gate-to-step route as an empty underlit strip. A forced-on fixed-camera control proves the four existing sources improve wayfinding but have no visible fixture, while their manual switch remains a useful player boundary. Physicalizing that authored layer improves both day composition and night arrival without dusk automation, broad fake terrain pools, global exposure or renderer work. |
 | 2026-09-17 | `HOUSE-01287` | **New task, next free phase-16 id.** Replace the existing displaced front-balcony point with the approved physical wall lantern, give only its adjacent L1 landing shell an explicit selected bake and retain its existing manual group. | Round 60 names the broad black upper facade as the largest exterior defect. Source tracing finds a nominal balcony light 2.15 m above its door head, 1.35 m in front of the wall, unlinked to any prop and unbound to any useful receiver. A measured over-door practical improves both day composition and bounded night readability without global exposure, a new asset, an L2 light or renderer work. |
 | 2026-09-17 | `HOUSE-01286` | **New task, next free phase-16 id.** Reuse the approved physical semi-flush fixture for the four already-authored formal-living main sources, replace their near-ceiling point singularities with measured broad downward optics and promote only the selected-cell bake. | Round 59's largest remaining defect is the nearly black formal living room. A fixed-camera `--light-on=LG_L0_LIVING_MAIN` control proves this is not merely an off switch: the current atlas adds four tiny ceiling spots but leaves the room black. Bake evidence explains it quantitatively (10.5507 peak / 0.0110 mean) and the completed family fixture provides a dependency-valid 0.2292 peak / 0.0454 mean reference without a new asset, renderer or global-exposure change. |

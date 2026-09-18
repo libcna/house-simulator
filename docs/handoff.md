@@ -1,3 +1,64 @@
+# Visual-sprint handoff — 2026-09-18 (`HOUSE-01289` checkpoint)
+
+Branch `develop`. Task-start HEAD `32543ec73cbd02408d79435fac58cc849524725b`
+(`HOUSE-01288`). This file belongs to the single `HOUSE-01289` commit; use that commit as the
+ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal gameplay remains production-material only and
+explicit debug blockout remains available.
+
+Four real landscape uplights now break up the broad black front elevation at night. The
+deterministic project-authored fixture is 200 x 259 x 200 mm and 232 triangles, with an anchored
+dark-bronze foot/yoke and separate warm emissive lens. Four collision-free static instances sit
+inside the two existing front foundation beds. Their linked optical centres drive the new
+dusk-owned `LG_EXT_FACADE_UPLIGHT`: 2,400 lm / 3,000 K upward 24/44-degree spots with 9 m range.
+Each source names exactly one L1 and one L2 front shell, for eight explicit selected receivers and
+no L0 or unrelated-room bake. The 5 lm-per-radiant-watt conversion is a per-source offline
+calibration, not claimed fixture efficacy; the global 683 value, exposure, renderer, collision,
+navigation and portal architecture are unchanged.
+
+The canonical before view is Round 62's
+[night front](visual-review/captures/house-01288-path-bollards-night-final/exterior-front.png).
+The complete matched eighteen-camera after sets are
+[clear day](visual-review/captures/house-01289-facade-uplights-day-final) and
+[normal night](visual-review/captures/house-01289-facade-uplights-night-final). The
+[night front](visual-review/captures/house-01289-facade-uplights-night-final/exterior-front.png),
+[front path](visual-review/captures/house-01289-facade-uplights-night-final/front-path.png) and
+[close route](visual-review/captures/house-01289-facade-uplights-night-final/front-walk-bollards.png)
+show the new layer most clearly. All 36 final frames were opened. Night exterior-front/path/garage/
+close-route normalized MAE against Round 62 is 0.001965 / 0.005070 / 0.003492 / 0.020155; day is
+0.001189 / 0.000168 / 0.000827 / 0.001032. Exact `--light-off` control is not claimed because the
+shared dusk owner intentionally reasserts the group every frame at 22:00; Round 62 is the honest
+matched before. A 700 lm / 100 lm-per-watt first bake was rejected as visually absent.
+
+The final eight 256-sample artificial atlases peak at 0.3271–0.3465 on L1 and 0.0640–0.1562 on
+L2. The selected daylight refresh also replaces stale broad-white receivers with real
+window/shutter/cornice occlusion. The resulting facade was inspected at full resolution before
+narrowing one old direct-sun pixel guard from R > 100 to R > 40: the shaded wood texel is R=52,
+well above the display-sky R=18. One HUD and four season references were opened pairwise and
+intentionally advanced; no blockout, first-person-pose or property golden moved.
+
+The world is 659 chunks / 96 cells / 77 static props / 266 exterior hierarchy instances /
+53.915377 MB. The unculled diagnostic is 615 opaque submissions, 44 cutouts and 99 state changes.
+The draw-list guard records the exact 659-call world, still far below the 1,400-call envelope.
+Stable-id validation records 2,928 ids; the asset manifest has 895 rows. The permanent generator
+gate recreates the GLB byte-for-byte and pins both slots, all transforms, optical links, dusk
+semantics, cones, ranges and the exact receiver set.
+
+All thirteen world validators and all 1,409 unit tests pass. The 135 integration cases pass as
+125 offscreen graphics/content cases plus ten serial SaveStore cases in their writable test data
+location; the separate content-current gate also passes. All 48 active software-render cases pass,
+with eight explicit reference-generators disabled. All eighteen culled-vs-unculled poses remain
+below 0.2%. Content, budget, provenance/licensing and strict-XNA gates pass. Compilation and heavy
+tools stayed on CPU 0-5 / at most six workers.
+
+Largest remaining visible defects: the roof/dormer plane and far side elevations remain dark
+above/outside the bounded L2 pools; garage/side-yard terrain and neighbour context lose depth;
+formal living is brown-heavy with weak furniture contact and broad bare walls; foyer/hall wall bays
+need restrained domestic detail. The next highest-value checkpoint is formal-living grounding and
+wall dressing or a separate physical upper/side-facade layer. Do not raise global night exposure
+or leave the visual slice for unrelated systems.
+
+---
+
 # Visual-sprint handoff — 2026-09-18 (`HOUSE-01288` checkpoint)
 
 Branch `develop`. Task-start HEAD `25e2bd386a86f0c52de22ab15df177a1387498bd`

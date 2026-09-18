@@ -2739,3 +2739,62 @@ test and gate results are recorded in `docs/handoff.md`.
 debug blockout remains available. The next highest visible value is a measured physical layer for
 the remaining black facade/garage approach or formal-living grounding and wall dressing—not a
 global night-exposure increase.
+
+## Round 63 — physical front-facade uplights
+
+Commit: `HOUSE-01289` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 62's [night front](captures/house-01288-path-bollards-night-final/exterior-front.png)
+has useful door, porch, garage and path layers, but most of the two upper storeys collapse into one
+black plane. After: the complete matched eighteen-camera
+[clear-day](captures/house-01289-facade-uplights-day-final) and
+[normal-night](captures/house-01289-facade-uplights-night-final) sets add four physical landscape
+fixtures and selected warm L1/L2 pools. The [night front](captures/house-01289-facade-uplights-night-final/exterior-front.png),
+[front path](captures/house-01289-facade-uplights-night-final/front-path.png) and
+[close route](captures/house-01289-facade-uplights-night-final/front-walk-bollards.png) show the
+effect most clearly. All 36 final frames and five affected strict-reference pairs were opened.
+
+Ranked visible defects remaining:
+
+1. L2 above the bounded pools, the roof/dormer plane and both far side elevations remain dark at
+   night; they need their own real source/receiver logic, not more uplight flux.
+2. The garage/side-yard terrain and distant neighbour context still lose depth outside the
+   physically bounded arrival layers.
+3. The formal living room remains brown-heavy, with weak furniture contact and broad bare walls.
+4. Foyer/hall wall bays still need restrained art and domestic secondary detail.
+5. The simple facade massing and repetitive window rhythm remain more obvious than the fixtures by
+   day, despite coherent production materials.
+
+Fixed: a deterministic project-authored 232-triangle fixture supplies a 200 mm anchored bronze
+foot/yoke and a separately emissive lens within 200 x 259 x 200 mm bounds. Four collision-free
+static instances sit inside the two existing foundation beds. Their linked optical centres drive
+the new dusk-owned `LG_EXT_FACADE_UPLIGHT`: 2,400 lm / 3,000 K upward 24/44-degree spots with 9 m
+range. Each source names exactly one front L1 and one front L2 shell; eight selected 256-sample
+atlases peak at 0.3271–0.3465 on L1 and 0.0640–0.1562 on L2. The 5 lm-per-radiant-watt value is a
+per-source offline-render calibration, not claimed fixture efficacy, and global exposure and the
+683 default remain unchanged.
+
+Against Round 62, the night exterior-front/front-path/garage-approach/close-route frames change
+73,623 / 210,482 / 132,547 / 810,668 pixels above two channel levels, with normalized MAE
+0.001965 / 0.005070 / 0.003492 / 0.020155. Day deltas are 10,914 / 1,198 / 8,656 / 10,534 pixels
+(0.001189 / 0.000168 / 0.000827 / 0.001032 MAE), preserving the clear-day composition while making
+the small ground hardware reviewable. A 700 lm / 100 lm-per-watt first bake was rejected because
+its roughly 0.005 L1 peak was visually absent. The final normal-night facade gains a restrained
+warm vertical rhythm; the close view also exposes some broad cell-local lawn warmth, accepted for
+now as bounded to the two foundation-yard cells rather than a global exposure change.
+
+An exact `--light-off` frame is not represented as a control: the shared dusk controller
+intentionally reasserts this automatic group's state every frame at 22:00. Round 62 is therefore
+the honest matched before scene. The current 256-sample daylight rebake also replaces stale broad
+white receiver atlases with window/shutter/cornice occlusion. Its full facade was inspected before
+one old direct-sun pixel guard was narrowed from R > 100 to R > 40; the shaded texel is R=52 and
+the dark display-sky range is R=18. Five seasonal/HUD references were then advanced selectively.
+
+The world is 659 chunks / 96 cells / 77 props / 266 exterior instances / 53.915377 MB. The
+unculled diagnostic is 615 opaque, 44 cutout and 99 state changes. All eighteen culling pairs stay
+below 0.2%; full test and gate results are recorded in `docs/handoff.md`.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next highest visible value is restrained formal-living
+grounding/wall dressing or a separate physical upper/side-facade layer—not global night exposure
+and not unrelated subsystem work.

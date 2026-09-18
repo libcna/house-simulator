@@ -3441,6 +3441,15 @@ it. This is the technique lightmapped games used for twenty years and it is a pe
 > control and persistence owner; the group is not converted to dusk automation. The fixtures are
 > deterministic project-authored content, preserve the clear circulation lane and add no fake
 > terrain illumination, exposure change, cross-cell receiver or renderer path.
+>
+> `HOUSE-01289` adds four deterministic 200 x 259 x 200 mm bronze/lens landscape uplights inside
+> the two existing front foundation beds. Their linked optical centres drive a separate
+> dusk-owned group of 2,400 lm / 3,000 K upward 24/44-degree spots with 9 m range. Each source
+> names exactly one front L1 and one front L2 shell as a fixed foreign receiver, for eight selected
+> 256-sample products total; L1 peaks at 0.3271–0.3465 and L2 at 0.0640–0.1562 under the explicit
+> per-source 5 lm-per-radiant-watt offline calibration. This calibration is an artistic conversion
+> inside the bake tool, not fixture efficacy, and leaves the global 683 value untouched. No L0
+> receiver, global exposure change, renderer path or manual-circuit ownership is added.
 
 ### 28.4 Daylight through windows
 

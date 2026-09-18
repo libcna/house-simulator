@@ -124,6 +124,9 @@ run_gate "porch-lantern" python3 tools/assets/porch_lantern.py --check
 # HOUSE-01288: the independently switched path circuit is four real low fixtures rather than
 # bare light points; preserve their deterministic model, exact positions and bounded optics.
 run_gate "path-bollard" python3 tools/assets/path_bollard.py --check
+# HOUSE-01289: the upper facade's dusk layer is four measured ground fixtures with selected
+# cross-cell bakes; preserve both the physical model and its deliberately bounded receiver set.
+run_gate "facade-uplight" python3 tools/assets/facade_uplight.py --check
 # HOUSE-01047: the manually switched garage wall pack is another physical linked fixture, not a
 # bare light point or a one-off binary checked in without its deterministic source.
 run_gate "garage-floodlight" python3 tools/assets/garage_floodlight.py --check

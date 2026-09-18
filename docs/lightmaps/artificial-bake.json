@@ -986,14 +986,24 @@
       "daylight": null,
       "groups": [
         {
+          "group": "LG_EXT_FACADE_UPLIGHT",
+          "image": "L1_BED3_LM_LG_EXT_FACADE_UPLIGHT.png",
+          "lights": [
+            "LIGHT_EXT_FACADE_UPLIGHT_W1"
+          ],
+          "mean": 0.005832720237212436,
+          "peak": 0.346486896276474,
+          "scale": 0.346486896276474
+        },
+        {
           "group": "LG_L1_BED3_BEDSIDE",
           "image": "L1_BED3_LM_LG_L1_BED3_BEDSIDE.png",
           "lights": [
             "LIGHT_L1_BED3_BEDSIDE_1"
           ],
-          "mean": 0.003980688624777247,
-          "peak": 0.029647625982761383,
-          "scale": 0.029647625982761383
+          "mean": 0.003977202921751823,
+          "peak": 0.02966705523431301,
+          "scale": 0.02966705523431301
         },
         {
           "group": "LG_L1_BED3_MAIN",
@@ -1002,24 +1012,35 @@
             "LIGHT_L1_BED3_MAIN_1",
             "LIGHT_L1_BED3_MAIN_2"
           ],
-          "mean": 0.013055532322144011,
-          "peak": 22.392009735107422,
-          "scale": 22.392009735107422
+          "mean": 0.01304786467810257,
+          "peak": 22.392070770263672,
+          "scale": 22.392070770263672
         }
       ],
-      "shellHash": "sha256:37000d9f220deb4a6f7b2294a817d4e3a7e319280da3b82cd04b0abab1073d9e"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:73e496302418fa58a0d6545e852d08df1defed9c3dc6f6c3e316fa33b30f665f"
     },
     {
       "cell": "L1_BED4",
       "daylight": null,
       "groups": [
         {
+          "group": "LG_EXT_FACADE_UPLIGHT",
+          "image": "L1_BED4_LM_LG_EXT_FACADE_UPLIGHT.png",
+          "lights": [
+            "LIGHT_EXT_FACADE_UPLIGHT_W2"
+          ],
+          "mean": 0.0052312721194897795,
+          "peak": 0.3270590007305145,
+          "scale": 0.3270590007305145
+        },
+        {
           "group": "LG_L1_BED4_DESK",
           "image": "L1_BED4_LM_LG_L1_BED4_DESK.png",
           "lights": [
             "LIGHT_L1_BED4_DESK_1"
           ],
-          "mean": 0.000198767465090079,
+          "mean": 0.00019856094599965705,
           "peak": 0.004080836661159992,
           "scale": 0.004080836661159992
         },
@@ -1031,26 +1052,37 @@
             "LIGHT_L1_BED4_MAIN_2",
             "LIGHT_L1_BED4_MAIN_3"
           ],
-          "mean": 0.018585964398211825,
-          "peak": 24.246158599853516,
-          "scale": 24.246158599853516
+          "mean": 0.01855745409330565,
+          "peak": 24.246097564697266,
+          "scale": 24.246097564697266
         }
       ],
-      "shellHash": "sha256:5682f795de9de4e5396d42ccd2fa60bbd209453809f86a0ff3f5a752f03cb882"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:9ea5282752583957154685394f8c43667737867c04dc86bcba89b2849df7da6b"
     },
     {
       "cell": "L1_BED5",
       "daylight": null,
       "groups": [
         {
+          "group": "LG_EXT_FACADE_UPLIGHT",
+          "image": "L1_BED5_LM_LG_EXT_FACADE_UPLIGHT.png",
+          "lights": [
+            "LIGHT_EXT_FACADE_UPLIGHT_E2"
+          ],
+          "mean": 0.005253727166719991,
+          "peak": 0.3447071313858032,
+          "scale": 0.3447071313858032
+        },
+        {
           "group": "LG_L1_BED5_BEDSIDE",
           "image": "L1_BED5_LM_LG_L1_BED5_BEDSIDE.png",
           "lights": [
             "LIGHT_L1_BED5_BEDSIDE_1"
           ],
-          "mean": 0.0044215683872335645,
-          "peak": 0.030712604522705078,
-          "scale": 0.030712604522705078
+          "mean": 0.004417410075869862,
+          "peak": 0.030726978555321693,
+          "scale": 0.030726978555321693
         },
         {
           "group": "LG_L1_BED5_MAIN",
@@ -1059,12 +1091,13 @@
             "LIGHT_L1_BED5_MAIN_1",
             "LIGHT_L1_BED5_MAIN_2"
           ],
-          "mean": 0.012062365318273264,
-          "peak": 3.086684226989746,
-          "scale": 3.086684226989746
+          "mean": 0.012053865314253688,
+          "peak": 3.086650848388672,
+          "scale": 3.086650848388672
         }
       ],
-      "shellHash": "sha256:53545afcd659a0f36eba3566b3f44e3718b25613a41177537ff7883848c5ec43"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:c6c76c41ee169b09ef225debe0b09268c631ec0d17b711db78550b097fae9c28"
     },
     {
       "cell": "L1_CLOSET_2",
@@ -1339,17 +1372,28 @@
       "daylight": null,
       "groups": [
         {
+          "group": "LG_EXT_FACADE_UPLIGHT",
+          "image": "L1_STAIR_MAIN_LM_LG_EXT_FACADE_UPLIGHT.png",
+          "lights": [
+            "LIGHT_EXT_FACADE_UPLIGHT_E1"
+          ],
+          "mean": 0.0024157014783593436,
+          "peak": 0.34381288290023804,
+          "scale": 0.34381288290023804
+        },
+        {
           "group": "LG_L1_STAIR_MAIN_MAIN",
           "image": "L1_STAIR_MAIN_LM_LG_L1_STAIR_MAIN_MAIN.png",
           "lights": [
             "LIGHT_L1_STAIR_MAIN_MAIN_1"
           ],
-          "mean": 0.0016341123555623548,
-          "peak": 0.06499706953763962,
-          "scale": 0.06499706953763962
+          "mean": 0.0016319784570254466,
+          "peak": 0.06498487293720245,
+          "scale": 0.06498487293720245
         }
       ],
-      "shellHash": "sha256:9308bea5a34bfe2f985a7954dab596809e184ccf6ba0ce3c80aed28dc3c6405a"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:f4f8c3ecc76f97d2e30609cf853028514e43a601cb5223c55f3eff96fd2cec14"
     },
     {
       "cell": "L1_STOR",
@@ -1463,15 +1507,25 @@
       "daylight": null,
       "groups": [
         {
+          "group": "LG_EXT_FACADE_UPLIGHT",
+          "image": "L2_BED6_LM_LG_EXT_FACADE_UPLIGHT.png",
+          "lights": [
+            "LIGHT_EXT_FACADE_UPLIGHT_W1"
+          ],
+          "mean": 0.0018532359116080865,
+          "peak": 0.06399711221456528,
+          "scale": 0.06399711221456528
+        },
+        {
           "group": "LG_L2_BED6_MAIN",
           "image": "L2_BED6_LM_LG_L2_BED6_MAIN.png",
           "lights": [
             "LIGHT_L2_BED6_MAIN_1",
             "LIGHT_L2_BED6_MAIN_2"
           ],
-          "mean": 0.012397025915083987,
-          "peak": 21.97340965270996,
-          "scale": 21.97340965270996
+          "mean": 0.012391058855942019,
+          "peak": 21.973398208618164,
+          "scale": 21.973398208618164
         },
         {
           "group": "LG_L2_BED6_SEWING",
@@ -1479,12 +1533,13 @@
           "lights": [
             "LIGHT_L2_BED6_SEWING_1"
           ],
-          "mean": 0.00019296009737931584,
-          "peak": 0.004498985596001148,
-          "scale": 0.004498985596001148
+          "mean": 0.00019275907297658135,
+          "peak": 0.004499032627791166,
+          "scale": 0.004499032627791166
         }
       ],
-      "shellHash": "sha256:b07c083bce2643f13fe5760272963f156dd64616d04bedefafddd5423f0a8997"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:c7569d360ad3597247a4d16146850379f54ab78cb49baae4d9bd3e60954841dd"
     },
     {
       "cell": "L2_BED7",
@@ -1665,6 +1720,16 @@
       "daylight": null,
       "groups": [
         {
+          "group": "LG_EXT_FACADE_UPLIGHT",
+          "image": "L2_LIBRARY_LM_LG_EXT_FACADE_UPLIGHT.png",
+          "lights": [
+            "LIGHT_EXT_FACADE_UPLIGHT_W2"
+          ],
+          "mean": 0.0022745878914245377,
+          "peak": 0.06536047905683517,
+          "scale": 0.06536047905683517
+        },
+        {
           "group": "LG_L2_LIBRARY_MAIN",
           "image": "L2_LIBRARY_LM_LG_L2_LIBRARY_MAIN.png",
           "lights": [
@@ -1672,9 +1737,9 @@
             "LIGHT_L2_LIBRARY_MAIN_2",
             "LIGHT_L2_LIBRARY_MAIN_3"
           ],
-          "mean": 0.016037396557846348,
-          "peak": 3.6484274864196777,
-          "scale": 3.6484274864196777
+          "mean": 0.016012380577112288,
+          "peak": 3.6484761238098145,
+          "scale": 3.6484761238098145
         },
         {
           "group": "LG_L2_LIBRARY_READING",
@@ -1683,9 +1748,9 @@
             "LIGHT_L2_LIBRARY_READING_1",
             "LIGHT_L2_LIBRARY_READING_2"
           ],
-          "mean": 0.007564507734524409,
-          "peak": 0.040985528379678726,
-          "scale": 0.040985528379678726
+          "mean": 0.007554602756277464,
+          "peak": 0.04099579527974129,
+          "scale": 0.04099579527974129
         },
         {
           "group": "LG_L2_LIBRARY_SHELVES",
@@ -1696,12 +1761,13 @@
             "LIGHT_L2_LIBRARY_SHELVES_3",
             "LIGHT_L2_LIBRARY_SHELVES_4"
           ],
-          "mean": 0.014158657675326968,
-          "peak": 1.4082435369491577,
-          "scale": 1.4082435369491577
+          "mean": 0.014140648669639315,
+          "peak": 1.408302664756775,
+          "scale": 1.408302664756775
         }
       ],
-      "shellHash": "sha256:277f93654c6751e60016604718ba97b6123330e9569295c70d7b463dd1fb2be2"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:6388875d7a39169af294fc18e94eb04849d2e679fdb749f492b1c511ca3b363a"
     },
     {
       "cell": "L2_LINEN2",
@@ -1754,6 +1820,16 @@
       "daylight": null,
       "groups": [
         {
+          "group": "LG_EXT_FACADE_UPLIGHT",
+          "image": "L2_STAIR_ATTIC_LM_LG_EXT_FACADE_UPLIGHT.png",
+          "lights": [
+            "LIGHT_EXT_FACADE_UPLIGHT_E2"
+          ],
+          "mean": 0.00215993855551209,
+          "peak": 0.06539493799209595,
+          "scale": 0.06539493799209595
+        },
+        {
           "group": "LG_L2_STAIR_ATTIC_MAIN",
           "image": "L2_STAIR_ATTIC_LM_LG_L2_STAIR_ATTIC_MAIN.png",
           "lights": [
@@ -1764,24 +1840,36 @@
           "scale": 0.015156349167227745
         }
       ],
-      "shellHash": "sha256:3172ab6ae31ea7f6de71daad52c38694899c70cb853674e796b3ffe46fe86b17"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:7dc78787a5f91c583e559429279443ac46e0d7d2f0f026bd36cd29dd1baeb090"
     },
     {
       "cell": "L2_STAIR_MAIN",
       "daylight": null,
       "groups": [
         {
+          "group": "LG_EXT_FACADE_UPLIGHT",
+          "image": "L2_STAIR_MAIN_LM_LG_EXT_FACADE_UPLIGHT.png",
+          "lights": [
+            "LIGHT_EXT_FACADE_UPLIGHT_E1"
+          ],
+          "mean": 0.008283885704870346,
+          "peak": 0.15619806945323944,
+          "scale": 0.15619806945323944
+        },
+        {
           "group": "LG_L2_STAIR_MAIN_MAIN",
           "image": "L2_STAIR_MAIN_LM_LG_L2_STAIR_MAIN_MAIN.png",
           "lights": [
             "LIGHT_L2_STAIR_MAIN_MAIN_1"
           ],
-          "mean": 0.00489542769521569,
-          "peak": 0.06818307936191559,
-          "scale": 0.06818307936191559
+          "mean": 0.004892718549526064,
+          "peak": 0.0681879073381424,
+          "scale": 0.0681879073381424
         }
       ],
-      "shellHash": "sha256:e27ee9a460863818b3d81f6377512474f4ee4242ad5afedbca66ac5aa5e4437d"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:019e97d3137072976d000a291a7db1ee2f8184c5369ed4e6a170cfb17bcf8e14"
     },
     {
       "cell": "L2_STOR2",
@@ -1949,12 +2037,19 @@
     }
   ],
   "promotedSubsetCells": [
-    "L1_LANDING"
+    "L1_BED3",
+    "L1_BED4",
+    "L1_BED5",
+    "L1_STAIR_MAIN",
+    "L2_BED6",
+    "L2_LIBRARY",
+    "L2_STAIR_ATTIC",
+    "L2_STAIR_MAIN"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 8126464,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 1044819,
+  "sourceBytes": 1068234,
   "tool": "bake_house_lightmaps.py"
 }
