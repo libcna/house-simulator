@@ -3553,3 +3553,47 @@ culled/unculled pairs pass, with the latter still 0.0558% worst at `l0-sunroom`.
 debug blockout remains available. The next checkpoint should address the screenshot-ranked simple
 family exterior view or another large truthful route defect—not interactive-curtain architecture,
 global exposure or an unrelated subsystem.
+
+## Round 81 — inhabited rear terrace and lawn
+
+Commit: `HOUSE-00771` checkpoint (`2026-09-19`; exact HEAD in `docs/handoff.md`).
+
+Before: the four retained [selected baseline views](captures/house-00771-garden-furniture-before-selected)
+show the rear terrace and lawn as empty grass/paving between shrubs. After: the complete
+twenty-four-camera [clear-day](captures/house-00771-garden-furniture-day-final) and
+[normal-night](captures/house-00771-garden-furniture-night-final) sets add one coherent garden
+suite and three fixed reciprocal review cameras. Both contact sheets and the direct rear-terrace,
+backyard-to-house and family-garden pairs were opened at full size.
+
+Ranked visible defects remaining:
+
+1. At 22:00 the terrace surface and new furniture are almost black; the two nominal terrace
+   sources do not create a readable physical pool in the retained rear views.
+2. The broad rear elevation, especially the open dark slider bay and long balcony rail, remains
+   architecturally simple around the now-inhabited foreground.
+3. The dining group and loungers are coherent and correctly scaled, but their source geometry and
+   material response remain simpler than the strongest finished interior hero assets.
+4. Formal living retains weak furniture/floor contact outside its bounded piano practical.
+5. Secondary rooms, side elevations and distant-neighbour context remain sparse.
+
+Fixed: six deterministic project-authored GLBs supply a four-seat dining group, two separately
+angled loungers, one swing bench, one stone fire pit, one birdbath and four planted pots. Ten exact
+canonical placements preserve the slider/step circulation route and reuse six approved outdoor
+finish families. Solid components have generated named collision proxies; foliage remains a
+separate cutout batch. No asset download, runtime renderer branch or new material was needed.
+
+The day family-window view now has an obvious inhabited focal layer instead of lawn and fence, and
+the reciprocal lawn view reads as a usable terrace composition. The night review deliberately
+does not hide the next defect: foliage catches the existing exterior contribution while the
+furniture and paving remain nearly black. The world measures 705 chunks / 104 props / 282 exterior
+instances / 59.068129 MB; exact `EXT_BACKYARD` and `EXT_TERRACE` chunk exceptions preserve the
+collidable and cutout subranges. Six strict references with a real line of sight were inspected
+old/new and intentionally advanced: blockout east/northeast/north/west change 0.4301% / 0.6706% /
+0.2174% / 0.2235%, while the near property terrace and orchard views change 3.4171% / 2.9787%.
+Their differences are confined to the approved furniture silhouettes; unrelated references were
+not regenerated.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next checkpoint should make the already-authored rear
+lighting physical and useful, or fix the precise source/receiver defect if those sources are not
+reaching the terrace—not lift global exposure or leave the vertical slice for unrelated work.

@@ -80,13 +80,13 @@ namespace
         const auto& list = game.RenderListForTesting();
         ASSERT_GT(list.Size(), 0U) << "the frame drew from an empty list";
         EXPECT_TRUE(list.IsSorted()) << "the pass read its slice, which is what sorts the list";
-        // HOUSE-01067's shared curtain finish brought the measured unculled house to 696
+        // HOUSE-00771's coherent garden suite brought the measured unculled house to 705
         // calls, over FOUR frames: a list that was not emptied between them would be four houses
         // long and would still draw a correct-looking picture. This diagnostic remains far below
-        // §71.2's 1,400-call worst-case envelope; named visible poses protect its 644-call typical
-        // opaque row. Both picture-window placements share one fabric and one existing steel
-        // role, so the bounded increase is exactly one draw and one opaque state change.
-        EXPECT_LE(list.DrawCalls(), 696) << "the list was not cleared between frames";
+        // §71.2's 1,400-call worst-case envelope. Ten placements reuse six assets and six already
+        // canonical finishes; the measured increase is nine chunks, including one independently
+        // bounded foliage cutout, rather than one draw per chair, slat or planter.
+        EXPECT_LE(list.DrawCalls(), 705) << "the list was not cleared between frames";
 
         const cnahouse::debug::Counter* chunks = game.CountersForTesting().Find("static.chunks");
         const cnahouse::debug::Counter* states = game.CountersForTesting().Find("static.stateChanges");
@@ -124,20 +124,20 @@ namespace
             previousOpaque = &item;
             ++opaque;
         }
-        // HOUSE-00945 adds one cell-scoped batch for five driveway-border shrubs: 45 is the
-        // measured world-wide alpha-test slice, including the formal sofa fringe and two indoor
-        // plants. Five repeated shrubs remain sub-ranges of that one draw.
-        EXPECT_EQ(cutouts, 45U)
+        // HOUSE-00771 adds one cell-scoped planter-foliage batch: 46 is the measured world-wide
+        // alpha-test slice, including the formal sofa fringe, two indoor plants and the existing
+        // exterior vegetation. Four repeated planters remain sub-ranges of that one draw.
+        EXPECT_EQ(cutouts, 46U)
             << "the formal sofa fringe, two indoor plant leaves and exterior foliage batches";
         EXPECT_EQ(opaque + cutouts, list.Size()) << "unexpected pass items entered the blockout list";
         // Every opaque item was drawn: nothing in that slice named a chunk the runtime could
         // not find. Alpha-tested leaves belong to AlphaTestPass, not this debug opaque pass.
         EXPECT_EQ(static_cast<std::size_t>(chunks->Max()), opaque);
         // And the material was bound once per run, not once per chunk. The unculled diagnostic
-        // reaches 108 after HOUSE-01067 adds one truthful woven curtain finish.
+        // reaches 109 after HOUSE-00771 adds the independently bounded garden-suite finishes.
         // That remains below §71.2's 210 worst case; visible poses protect smaller rows.
         EXPECT_GT(states->Max(), 0);
-        EXPECT_LE(states->Max(), 108);
+        EXPECT_LE(states->Max(), 109);
         EXPECT_LT(states->Max(), chunks->Max() / 4)
             << "the sort bought nothing: the pass is rebinding almost per chunk";
         // The pass's own count and the list's agree, which is what says the two are counting the

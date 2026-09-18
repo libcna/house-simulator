@@ -63,6 +63,16 @@ POSES = (
     # barely exercise the television/media focal wall. This measured head-height view makes the
     # source screen, surround finish and their alignment a permanent visual-review boundary.
     ("family-media", "5.10,0.60,-26.25,180.0,0.0"),
+    # HOUSE-00771: the interior route views see the rear landscape only through picture-window
+    # glass.  This oblique terrace-level camera keeps furniture scale, circulation and the
+    # terrace-to-lawn transition directly reviewable without replacing those interior views.
+    ("rear-terrace", "0.00,0.45,-32.80,0.0,-8.0"),
+    # The reciprocal lawn view proves that the terrace composition and the freestanding rear-lawn
+    # pieces belong to the house rather than reading as isolated catalogue props against a fence.
+    ("backyard-to-house", "-8.00,-0.28,-42.00,135.0,0.0"),
+    # A room-side reciprocal view keeps the exact defect that selected HOUSE-00771 in the fixed
+    # set: the rear composition must contribute domestic depth through the family picture window.
+    ("family-garden-view", "5.70,0.60,-23.05,0.0,0.0"),
 )
 SCENARIOS = {
     "clear-day": (10.5, "W_CLEAR"),

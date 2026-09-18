@@ -1,3 +1,66 @@
+# Visual-sprint handoff — 2026-09-19 (`HOUSE-00771` checkpoint)
+
+Branch `develop`. Task-start HEAD `d82de7c075865cac08e46eaf615b87a8db0d8e26`
+(`HOUSE-01067`). This file belongs to the single `HOUSE-00771` commit; use that commit as the
+ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal gameplay remains production-material only and
+explicit debug blockout remains available.
+
+The empty family-window landscape is now an inhabited rear composition. Six deterministic
+project-authored GLBs supply one four-seat dining group, one reusable lounger, one A-frame swing
+bench, one cold stone fire pit, one turned birdbath and one planted pot. Ten canonical prop rows
+place the dining group, two loungers and four pots on `EXT_TERRACE`, and the swing, fire pit and
+birdbath on `EXT_BACKYARD`. The central slider-to-steps circulation route stays clear. The suite
+reuses existing outdoor wood, bronze/steel, oatmeal textile, bluestone, soil and foliage finishes;
+solid components carry named generated collision proxies and the plant foliage remains a separate
+alpha-tested sub-range. No third-party asset, runtime branch, material or architecture exception
+was introduced.
+
+Four retained [selected baseline images](visual-review/captures/house-00771-garden-furniture-before-selected)
+show the empty rear paving/lawn. The complete retained after sets contain 24 fixed
+[clear-day](visual-review/captures/house-00771-garden-furniture-day-final) and 24 fixed
+[normal-night](visual-review/captures/house-00771-garden-furniture-night-final) images, including
+new reciprocal `rear-terrace`, `backyard-to-house` and `family-garden-view` boundaries. Both
+contact sheets and all three direct day/night views were opened at full size. Day now has a clear
+domestic focal layer through the family picture window and a usable composition from the lawn.
+Night honestly exposes the next largest defect: foliage catches existing exterior contribution,
+but the terrace paving and furniture are almost black despite two nominal terrace sources.
+
+The world is 203 materials / 2,991 stable ids / 915 manifest rows / 705 chunks / 96 cells /
+104 static props / 282 exterior hierarchy instances / 59.068129 MB uploaded. `EXT_BACKYARD` is
+exactly 8 chunks / 7 roles and `EXT_TERRACE` 7 / 7; their measured exceptions preserve collision
+and the independent foliage cutout. Collision is 1,652 shapes (1,575 OBB / 77 triangle meshes),
+and navigation is 893 nodes / 4,000 edges. The six GLBs regenerate byte-for-byte and permanent
+checks pin UV0, dimensions, triangle counts, material slots/maps, component names, origins,
+collision proxy names and all ten placements. Manifest/provenance/licence, world validation,
+stable ids and collision/navigation/chunk selftests pass.
+
+Six strict references with a genuine line of sight were inspected old/new and intentionally
+advanced: blockout east/northeast/north/west change 0.4301% / 0.6706% / 0.2174% / 0.2235%; the
+near property terrace/orchard views change 3.4171% / 2.9787%. Differences are confined to the
+approved furniture silhouettes. The complete result is 1,409 unit, 135 integration and 48 active
+software-render tests green; SaveStore's ten tests were run separately with access to their real
+test directory while the other 125 stayed in the stable software-render sandbox. All eighteen
+culled/unculled pairs remain below 0.2%, at 0.0558% worst (`l0-sunroom`). All 323 strict-XNA
+translation units are clean. Compilation and heavy work stayed on CPU 0-5 / at most six workers.
+
+The normal Ninja target still attempts the known unrelated configure-time write to shared
+`~/deps/FNA3D`, which the sandbox rejects. Only the stored direct compile/link action for the
+changed integration object was run, with ccache disabled for that single compile; no CNA,
+sharp-runtime or shared dependency was modified. Collision, navigation and chunks were rebuilt
+directly. Navigation completed in seconds at 893 / 4,000 and no `build_nav.py` process remains;
+the previously reported day-long process was not an expected bake duration and is no longer
+present.
+
+Largest visible defects: the rear terrace/backyard is nearly unreadable at 22:00; the broad rear
+elevation and dark slider bay remain simple around the now-inhabited foreground; the garden
+models' material/geometry response is simpler than the strongest finished interior hero assets;
+formal living still has weak furniture/floor contact outside its bounded piano practical; and
+secondary rooms/elevations remain sparse. The next checkpoint should inspect the two existing
+terrace lights end-to-end and make a bounded physical practical/receiver pool useful in these
+fixed night views—not raise global exposure or leave the vertical slice for unrelated work.
+
+---
+
 # Visual-sprint handoff — 2026-09-19 (`HOUSE-01067` checkpoint)
 
 Branch `develop`. Task-start HEAD `d5bd6117bb6a0d90e64d99b439651b28803cb405`

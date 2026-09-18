@@ -129,6 +129,15 @@ CHUNK_BUDGET_EXCEPTIONS = {
                          "the planted west lawn keeps ground, facade, bark and cutout foliage "
                          "separate. HOUSE-01289 adds one shared bronze body and one switched lens "
                          "role for its two facade uplights; both instances reuse those roles"),
+    "EXT_BACKYARD": (8,
+                      "HOUSE-00771's inhabited rear lawn keeps its existing grass/fence finish "
+                      "and the garden suite's reusable wood, metal, stone, soil and textile roles "
+                      "separate; one exact Reach-cap split preserves the collidable swing/fire-pit "
+                      "sub-ranges instead of flattening their materials"),
+    "EXT_TERRACE": (7,
+                     "HOUSE-00771's terrace composition reuses five coherent garden-suite roles "
+                     "across the dining group, two loungers and four planters while preserving "
+                     "the paving and foliage as independently bounded static batches"),
     "EXT_SIDEYARD_W": (12,
                         "HOUSE-00772's densely planted west border: existing exterior finishes "
                         "plus measured source-exact bark and cutout foliage, including Reach-cap "

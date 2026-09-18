@@ -1842,6 +1842,209 @@
       ]
     },
     {
+      "id": "MODEL_GARDEN_BIRDBATH",
+      "category": "birdbath",
+      "sourceFile": "assets-src/Models/Furniture/Garden/birdbath.glb",
+      "sourceSha256": "a7c96d617219baefe6732ea66fc301facd7074b5e9d6c898977bfbc88e60412f",
+      "contentName": "Models/Furniture/Garden/birdbath",
+      "kind": "model",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "authored",
+        "name": "Turned-stone garden birdbath",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored support-grounded pedestal, capital and shallow basin from tools/blender/garden_furniture_suite.py for HOUSE-00771; no third-party mesh or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [0.75, 0.905, 0.75],
+        "triangles": { "LOD0": 816 },
+        "collision": "garden_birdbath_004_basin_rim_COL"
+      },
+      "materialMap": {
+        "GARDEN_STONE": "MAT_OUTDOOR_BLUESTONE"
+      },
+      "usedIn": ["EXT_BACKYARD"]
+    },
+    {
+      "id": "MODEL_GARDEN_DINING_SET",
+      "category": "garden-dining-set",
+      "sourceFile": "assets-src/Models/Furniture/Garden/dining_set.glb",
+      "sourceSha256": "d0d8ced3d0c3608abbe5075aeda6953397459a9d7bf5b60b64762e731dd118af",
+      "contentName": "Models/Furniture/Garden/dining_set",
+      "kind": "model",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "authored",
+        "name": "Four-place round garden dining group",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored measured round table and four individually framed chairs from tools/blender/garden_furniture_suite.py for HOUSE-00771; no third-party mesh or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [2.58, 0.940505, 2.58],
+        "triangles": { "LOD0": 5112 },
+        "collision": "garden_dining_001_table_top_COL"
+      },
+      "materialMap": {
+        "GARDEN_METAL": "MAT_METAL_BALCONY",
+        "GARDEN_TEXTILE": "MAT_FAMILY_CURTAIN_WOOL",
+        "GARDEN_WOOD": "MAT_OUTDOOR_GARDEN_WOOD"
+      },
+      "usedIn": ["EXT_TERRACE"]
+    },
+    {
+      "id": "MODEL_GARDEN_FIRE_PIT",
+      "category": "garden-firepit",
+      "sourceFile": "assets-src/Models/Furniture/Garden/fire_pit.glb",
+      "sourceSha256": "3f3ad7e0513f998e6dfb0e0bf3cdd2bec7b182ef9bc73831fd059bc4199b38a2",
+      "contentName": "Models/Furniture/Garden/fire_pit",
+      "kind": "model",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "authored",
+        "name": "Unlit stone-ring garden fire pit",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored stone plinth/ring, steel bowl, cold ash and crossed logs from tools/blender/garden_furniture_suite.py for HOUSE-00771. It is deliberately unlit; HOUSE-02691 retains flame, embers and audio."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [1.2, 0.45, 1.2],
+        "triangles": { "LOD0": 972 },
+        "collision": "garden_firepit_002_stone_ring_COL"
+      },
+      "materialMap": {
+        "GARDEN_METAL": "MAT_METAL_BALCONY",
+        "GARDEN_SOIL": "MAT_OUTDOOR_SOIL",
+        "GARDEN_STONE": "MAT_OUTDOOR_BLUESTONE",
+        "GARDEN_WOOD": "MAT_OUTDOOR_GARDEN_WOOD"
+      },
+      "usedIn": ["EXT_BACKYARD"]
+    },
+    {
+      "id": "MODEL_GARDEN_LOUNGER",
+      "category": "garden-lounger",
+      "sourceFile": "assets-src/Models/Furniture/Garden/lounger.glb",
+      "sourceSha256": "196b7bf3fba10077efe2bd6e402effe11ba80172f1549df2215870fa266a809a",
+      "contentName": "Models/Furniture/Garden/lounger",
+      "kind": "model",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "authored",
+        "name": "Adjustable timber garden lounger",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored slatted frame, real legs/back stays and separate canvas pads from tools/blender/garden_furniture_suite.py for HOUSE-00771; reused twice with distinct placement angles."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [0.695, 0.887765, 1.924598],
+        "triangles": { "LOD0": 2032 },
+        "collision": "garden_lounger_001_side_rail_-1_COL"
+      },
+      "materialMap": {
+        "GARDEN_METAL": "MAT_METAL_BALCONY",
+        "GARDEN_TEXTILE": "MAT_FAMILY_CURTAIN_WOOL",
+        "GARDEN_WOOD": "MAT_OUTDOOR_GARDEN_WOOD"
+      },
+      "usedIn": ["EXT_TERRACE"]
+    },
+    {
+      "id": "MODEL_GARDEN_PLANTER",
+      "category": "planter",
+      "sourceFile": "assets-src/Models/Furniture/Garden/planter.glb",
+      "sourceSha256": "38063571d06a49fb67471a5b1da554e00b92b9f1fd48ee2f74d1726a6e462785",
+      "contentName": "Models/Furniture/Garden/planter",
+      "kind": "model",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "authored",
+        "name": "Planted tapered terrace pot",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored tapered pot, rim, soil and seven-piece evergreen crown from tools/blender/garden_furniture_suite.py for HOUSE-00771; four rotations avoid obvious stamp repetition."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [0.674339, 1.034, 0.58],
+        "triangles": { "LOD0": 756 },
+        "collision": "garden_planter_002_pot_rim_COL"
+      },
+      "materialMap": {
+        "GARDEN_FOLIAGE": "MAT_FURNITURE_PLANT_LEAF",
+        "GARDEN_SOIL": "MAT_OUTDOOR_SOIL",
+        "GARDEN_STONE": "MAT_OUTDOOR_BLUESTONE"
+      },
+      "usedIn": ["EXT_TERRACE"]
+    },
+    {
+      "id": "MODEL_GARDEN_SWING_BENCH",
+      "category": "garden-swing",
+      "sourceFile": "assets-src/Models/Furniture/Garden/swing_bench.glb",
+      "sourceSha256": "e1bc6073dd85ed5b370c52ead0aa98e3159da20d37f608015ae448a01b803c01",
+      "contentName": "Models/Furniture/Garden/swing_bench",
+      "kind": "model",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "authored",
+        "name": "Two-place A-frame garden swing bench",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored timber A-frame, physical suspension rods, slatted bench, pad and shallow canopy from tools/blender/garden_furniture_suite.py for HOUSE-00771. It remains static; HOUSE-01887 retains ambient motion."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [2.42, 2.130818, 1.2],
+        "triangles": { "LOD0": 1856 },
+        "collision": "garden_swing_003_foot_-1_front_COL"
+      },
+      "materialMap": {
+        "GARDEN_METAL": "MAT_METAL_BALCONY",
+        "GARDEN_TEXTILE": "MAT_FAMILY_CURTAIN_WOOL",
+        "GARDEN_WOOD": "MAT_OUTDOOR_GARDEN_WOOD"
+      },
+      "usedIn": ["EXT_BACKYARD"]
+    },
+    {
       "id": "MODEL_HALL_GALLERY_EAST",
       "category": "picture",
       "sourceFile": "assets-src/Models/Furniture/Hall/gallery_east.glb",

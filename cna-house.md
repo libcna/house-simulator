@@ -864,6 +864,15 @@ but ordinary for an American suburban lot carrying a house of this size.
 | Orchard corner | +12.0 … +21.0 | −46.0 … −38.0 | 4 fruit trees, a stack of firewood under a lean-to |
 | Rear fence line | −22.5 … +22.5 | −48.0 | 1.85 m board fence, a 0.9 m gate at `x = +19.0` to the alley (locked, decorative) |
 
+`HOUSE-00771` realizes the two rear leisure zones as canonical static props rather than generator
+decoration. `EXT_TERRACE` carries one four-seat dining group, two separately angled loungers and
+four planted pots while preserving the central slider-to-lawn route. `EXT_BACKYARD` carries the
+swing bench, stone fire pit and birdbath with clear circulation around the three terrace steps.
+Six deterministic project-authored GLBs reuse the approved outdoor wood, metal, textile,
+bluestone, soil and foliage finishes and carry named collision proxies where their solid mass
+requires one. Their exact positions remain authoritative in `layout.props.json`; furniture scale
+or composition is never hard-coded in runtime code.
+
 **No swimming pool.** Analysis: a pool would add a large animated water surface, a fence-within-a-
 fence, a pump house, seasonal covers, drowning-avoidance collision and winter behaviour, for a
 feature the brief marks as optional and "spectacle". The same effort spent on the vegetable

@@ -64,7 +64,10 @@ hardware. `HOUSE-00948` frames that leaf with layered painted pilasters, plinths
 and crown, breaking the garage wing's largest remaining flat facade edge without changing the
 opening or adding a draw role. `HOUSE-01067` returns the scheduler indoors and gives both dominant
 family-room picture windows measured open woven curtains, physical support hardware and domestic
-scale without claiming phase 45's later interactive blind state.
+scale without claiming phase 45's later interactive blind state. `HOUSE-00771` then addresses the
+empty view through those windows with a coherent project-authored terrace dining group, two
+loungers, swing bench, fire pit, birdbath and four planters, and makes the rear composition a fixed
+visual-review boundary.
 Round 9 proves the exterior
 material omission is fixed; `HOUSE-00924`
 removes the
@@ -11969,8 +11972,41 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             with the beds.
 - [ ] HOUSE-00770 — Place the exterior props: mailbox, bins ×3, hose reel, AC condenser, gas meter, water tap, downspout splash blocks
       dep: HOUSE-00764 · sys: world · plat: TOOL · pri: MUST
-- [ ] HOUSE-00771 — Place the garden furniture: terrace table and chairs, two loungers, swing bench, fire pit, birdbath, planters
+- [x] HOUSE-00771 — Place the garden furniture: terrace table and chairs, two loungers, swing bench, fire pit, birdbath, planters
       dep: HOUSE-00765 · sys: world · plat: TOOL · pri: MUST
+      verify: `tools/assets/garden_furniture_prepare.py --check`; `tools/assets/check_manifest.py`;
+              `tools/assets/scale_check.py` and `tools/assets/origin_check.py` for all six models;
+              `tools/world/validate_world.py`; `tools/world/build_collision.py --selftest`;
+              `tools/world/build_nav.py --selftest`; `tools/world/build_chunks.py --selftest`;
+              stable-id golden; unit, integration and software-render suites; all eighteen
+              culled/unculled pairs; strict-XNA and full staged CI gates
+      note: (2026-09-19) Six deterministic project-authored GLBs provide one four-seat terrace
+            dining group, one reusable lounger, one swing bench, one stone fire pit, one birdbath
+            and one planted pot. Ten canonical prop rows place the dining group, two loungers and
+            four planters on `EXT_TERRACE`, with the swing, fire pit and birdbath on
+            `EXT_BACKYARD`. The suite reuses approved outdoor wood, bronze/steel, woven textile,
+            bluestone, soil and foliage materials; solid pieces carry generated named collision
+            proxies while the planters keep their foliage cutout independently bounded. No
+            third-party model or new runtime path was introduced.
+      measured: 705 chunks / 96 cells / 104 props / 282 exterior-hierarchy instances /
+            59.068129 MB uploaded. `EXT_BACKYARD` is exactly 8 chunks / 7 material roles and
+            `EXT_TERRACE` exactly 7 / 7; these two measured exceptions preserve collision and the
+            independent foliage cutout rather than flattening the garden suite. Collision is
+            1,652 shapes (1,575 OBB / 77 triangle meshes) and navigation remains 893 nodes /
+            4,000 edges. The six GLBs regenerate byte-for-byte and their permanent check pins
+            dimensions, UV0, material slots, component names, collision names and all placements.
+      visual: Round 81 retains 24 fixed clear-day and 24 fixed 22:00 views plus four selected
+            baseline images. Day now reads as an inhabited terrace/rear lawn from both the family
+            picture window and the reciprocal lawn view. The largest visible remaining defect is
+            honest: at 22:00 the furniture and terrace surface are almost black despite the two
+            existing nominal terrace sources, so physical rear practicals/receiver contribution
+            should lead the next dependency-valid review rather than raising global exposure.
+            Six strict references with a real line of sight were inspected and advanced: four
+            distant blockout directions change 0.2174--0.6706% and the near terrace/orchard
+            property views 3.4171% / 2.9787%; no unrelated golden was regenerated.
+      ordering: selected after `HOUSE-01067` because the newly dressed family windows made the
+            empty rear landscape the largest fixed-camera defect; its dependency `HOUSE-00765`
+            was already complete
 - [x] HOUSE-00772 — Place the vegetation: 34 street trees, 3 property trees, 4 fruit trees, 60 shrubs, hedges, flower beds, grass patches
       dep: HOUSE-00297, HOUSE-00392 · sys: world · plat: TOOL · pri: MUST
       verify: `tools/assets/polyhaven_vegetation.py --check`; `tools/world/build_chunks.py
