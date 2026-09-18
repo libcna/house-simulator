@@ -145,6 +145,8 @@ EXPECTED_COUNTS = {
 # exact-set gate, while claiming another generator's output would make the two ownership checks
 # contradict each other.  Their dedicated material generators own these bytes and entries.
 FOREIGN_TEXTURES = {
+    "roof_asphalt_shingle_albedo.png",
+    "roof_asphalt_shingle_normal.png",
     "siding_clapboard_albedo.png",
     "siding_clapboard_normal.png",
     "snow_shell_albedo.png",

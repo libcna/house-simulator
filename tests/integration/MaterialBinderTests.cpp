@@ -330,8 +330,10 @@ namespace
                 const MaterialDesc* roof = binder.Find(Id::Of("MAT_ROOF_SHINGLE"));
                 ASSERT_NE(roof, nullptr);
                 EXPECT_EQ(roof->kind, MaterialKind::DualTexture);
-                EXPECT_EQ(roof->diffuseTexture, "Textures/Materials/tile_light_square_albedo");
-                EXPECT_FLOAT_EQ(roof->diffuse[2], 0.74F);
+                EXPECT_EQ(roof->diffuseTexture, "Textures/Materials/roof_asphalt_shingle_albedo");
+                EXPECT_FLOAT_EQ(roof->diffuse[0], 0.68F);
+                EXPECT_FLOAT_EQ(roof->diffuse[1], 0.66F);
+                EXPECT_FLOAT_EQ(roof->diffuse[2], 0.64F);
 
                 const MaterialDesc* siding = binder.Find(Id::Of("MAT_SIDING_SAGE"));
                 ASSERT_NE(siding, nullptr);

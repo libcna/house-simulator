@@ -3241,3 +3241,49 @@ results are in `docs/handoff.md`.
 debug blockout remains available. The next highest-value checkpoint is honest night-exterior
 readability for the roof/dormers or garage/side yard, followed by daytime facade depth—not an
 unrelated subsystem or global exposure lift.
+
+## Round 74 — physically scaled asphalt shingles
+
+Commit: `HOUSE-00943` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 73's [garage approach](captures/house-00942-single-door-joinery-day-r1/garage-approach.png)
+and [front exterior](captures/house-00942-single-door-joinery-day-r1/exterior-front.png) show the
+acknowledged ambientCG `Tiles140` square ceramic floor map stretched across every roof. After: the
+complete twenty-one-camera [clear-day](captures/house-00943-asphalt-shingle-day-r1) and
+[normal-night](captures/house-00943-asphalt-shingle-night-r1) sets use a project-authored charcoal
+asphalt pair at seven exposed courses per true sloping metre. All 42 frames were inspected as
+complete contact sheets; both exterior views and enlarged garage-roof crops were opened directly.
+
+Ranked visible defects remaining:
+
+1. The roof/dormer silhouette still collapses at 22:00 outside bounded practical sources; the Moon
+   is below the horizon in this canonical review, so a fake moon key remains the wrong fix.
+2. Main-roof and dormer edges still lack convincing ridge/hip caps, flashing and gutter depth even
+   though the surface material and scale are now coherent.
+3. Garage/side-yard terrain and distant-neighbour context remain sparse and lose depth at night.
+4. The simple facade massing and repetitive window rhythm remain conspicuous by day.
+5. Formal living remains deliberately dark with weak furniture/floor contact away from the
+   piano's bounded practical pool.
+
+Fixed: one deterministic 512 px albedo/linear-normal pair supplies seven approximately 143 mm
+courses, four staggered tabs, short exposed slots and restrained aggregate variation. Stable dry,
+wet and unbaked roof ids retain asphalt/weather/audio/effect semantics. Roof UV0 now uses a
+horizontal contour axis and a true surface-slope axis rather than plan projection. The five
+pre-existing twisted dormer-transition quads are explicitly split along the same rendered export
+diagonal before UV assignment; positions, silhouette, collision and lightmaps do not move. A
+first in-game pass was rejected because its cool 0.82/0.85/0.90 tint looked flat and blue. The
+retained warm-neutral 0.68/0.66/0.64 tint reads as restrained charcoal under the clear-day sky.
+
+Against Round 73, `exterior-front` changes 17,722 day / 17,635 night pixels above two channel
+levels (1.2307% / 1.2247%; normalized RGB MAE 0.001026 / 0.000396), and `garage-approach` changes
+21,278 / 20,678 (1.4776% / 1.4360%; 0.001266 / 0.000400). The path and balcony controls change
+only 0.09–0.14% at night. The strict `fp-l3-room`, HUD and four seasonal exterior pairs were opened
+old/new and intentionally advanced; explicit debug-blockout references remain unchanged. The
+world stays at 688 chunks / 96 cells / 89 props / 266 exterior instances / 57.024981 MB. All 48
+active software-render tests pass and all eighteen culling pairs remain below 0.2%, at 0.0558%
+worst (`l0-sunroom`).
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next highest-value checkpoint is physical roof-edge detail
+(ridge/hip caps, flashing and gutters) followed by honest bounded night-exterior depth around the
+garage/side yard—not a global exposure lift or an unrelated subsystem.

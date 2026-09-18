@@ -23,12 +23,18 @@ CONTENT_CONFIG = REPO / "assets-src" / "Textures" / ".cna-content.json"
 TEXTURES = REPO / "assets-src" / "Textures" / "Materials"
 SIDING_ALBEDO = TEXTURES / "siding_clapboard_albedo.png"
 SIDING_NORMAL = TEXTURES / "siding_clapboard_normal.png"
+ROOF_ALBEDO = TEXTURES / "roof_asphalt_shingle_albedo.png"
+ROOF_NORMAL = TEXTURES / "roof_asphalt_shingle_normal.png"
 PREVIEW = REPO / "docs" / "asset-review" / "materials" / "exterior" / "contact-sheet.png"
 BEGIN = "    // BEGIN GENERATED EXTERIOR MATERIALS (exterior_materials.py)"
 END = "    // END GENERATED EXTERIOR MATERIALS"
 SIDING_SIZE = 512
 SIDING_COURSES_PER_METRE = 6
 SIDING_ROUGHNESS = 0.72
+ROOF_SIZE = 512
+ROOF_COURSES_PER_METRE = 7
+ROOF_TABS_PER_METRE = 4
+ROOF_ROUGHNESS = 0.86
 
 
 @dataclass(frozen=True)
@@ -51,11 +57,10 @@ EXTERIORS = (
     Exterior("MAT_SIDING_DUSTY_BLUE", "wood_board", (0.64, 0.74, 0.90), "siding"),
     Exterior("MAT_BRICK_WATER_TABLE", "brick_red", (1.00, 0.92, 0.86), "brick",
              (0.75, 0.75)),
-    # The acquired set has no roofing map. The reviewed charcoal square-tile source is the only
-    # retained pattern with discrete weather-shedding units, so it supplies the visible shingle
-    # courses while explicit overrides give the roof asphalt's wet/audio semantics.
-    Exterior("MAT_ROOF_SHINGLE", "tile_light_square", (0.66, 0.69, 0.74), "roof shingle",
-             (1.5, 1.5), (True, 55.0), "asphalt", "asphalt", 0.12,
+    # `tile_light_square` remains the deterministic semantic seed, but HOUSE-00943 replaces its
+    # visibly ceramic square grid with a project-authored seven-course asphalt-shingle pair.
+    Exterior("MAT_ROOF_SHINGLE", "tile_light_square", (0.68, 0.66, 0.64), "roof shingle",
+             (1.0, 1.0), (True, 55.0), "asphalt", "asphalt", 0.12,
              (0.35, 2.4, 2.6)),
     Exterior("MAT_SOFFIT_WHITE", "paint_white_fine", (1.00, 0.98, 0.93), "soffit",
              snow=(False, 0.0), class_override="paint",
@@ -89,6 +94,16 @@ def material_row(exterior: Exterior) -> dict:
         mapped = pbr_to_stock.convert((1.0, 1.0, 1.0), 0.0, SIDING_ROUGHNESS)
         row["albedo"] = "Textures/Materials/siding_clapboard_albedo"
         row["normal"] = "Textures/Materials/siding_clapboard_normal"
+        row["specularColor"] = mapped["specularColour"]
+        row["specularPower"] = mapped["specularPower"]
+    if exterior.role == "roof shingle":
+        # A square ceramic floor tile was always only the least-wrong source in the first fixed
+        # library. The stable material id now resolves to a real one-metre asphalt layout: seven
+        # 143 mm exposures with four staggered tabs, while the established wet/snow/audio contract
+        # remains on this row and its generated derivatives.
+        mapped = pbr_to_stock.convert((1.0, 1.0, 1.0), 0.0, ROOF_ROUGHNESS)
+        row["albedo"] = "Textures/Materials/roof_asphalt_shingle_albedo"
+        row["normal"] = "Textures/Materials/roof_asphalt_shingle_normal"
         row["specularColor"] = mapped["specularColour"]
         row["specularPower"] = mapped["specularPower"]
     if exterior.class_override is not None:
@@ -155,6 +170,80 @@ def siding_texture_images():
     return albedo, normal
 
 
+def roof_noise(x: int, y: int, seed: int = 0) -> float:
+    """Stable periodic -1..1 aggregate noise without a PRNG or platform state."""
+    x %= ROOF_SIZE
+    y %= ROOF_SIZE
+    value = ((x * 73856093) ^ (y * 19349663) ^ (seed * 83492791)) & 0xffffffff
+    value ^= value >> 13
+    value = (value * 1274126177) & 0xffffffff
+    return ((value & 0xffff) / 32767.5) - 1.0
+
+
+def roof_height(x: int, y: int) -> float:
+    """Periodic laminated-shingle relief with an overlap and short exposed tab slots."""
+    u = ((x % ROOF_SIZE) + 0.5) / ROOF_SIZE
+    v = ((y % ROOF_SIZE) + 0.5) / ROOF_SIZE
+    course_value = v * ROOF_COURSES_PER_METRE
+    course = math.floor(course_value)
+    phase = course_value - course
+    tab_value = u * ROOF_TABS_PER_METRE + (0.5 if course % 2 else 0.0)
+    tab_phase = tab_value - math.floor(tab_value)
+    tab_distance = min(tab_phase, 1.0 - tab_phase)
+    overlap = 0.022 * phase
+    # Slots stop below the covered head of each shingle instead of scoring the whole roof grid.
+    slot = -0.010 * math.exp(-0.5 * (tab_distance / 0.025) ** 2) \
+        * max(0.0, min(1.0, (phase - 0.08) / 0.10)) \
+        * max(0.0, min(1.0, (0.78 - phase) / 0.10))
+    granule = 0.0018 * roof_noise(x, y, course)
+    return overlap + slot + granule
+
+
+def roof_texture_images():
+    """Return tileable charcoal asphalt-shingle albedo and matching +Y tangent normal."""
+    from PIL import Image
+
+    albedo = Image.new("RGBA", (ROOF_SIZE, ROOF_SIZE))
+    normal = Image.new("RGB", (ROOF_SIZE, ROOF_SIZE))
+    albedo_pixels = albedo.load()
+    normal_pixels = normal.load()
+    heights = [[roof_height(x, y) for x in range(ROOF_SIZE)] for y in range(ROOF_SIZE)]
+    for y in range(ROOF_SIZE):
+        v = (y + 0.5) / ROOF_SIZE
+        course_value = v * ROOF_COURSES_PER_METRE
+        course = math.floor(course_value)
+        phase = course_value - course
+        lap_shadow = 24.0 * math.exp(-0.5 * (phase / 0.035) ** 2)
+        edge_highlight = 5.0 * math.exp(-0.5 * ((phase - 0.075) / 0.035) ** 2)
+        for x in range(ROOF_SIZE):
+            u = (x + 0.5) / ROOF_SIZE
+            tab_value = u * ROOF_TABS_PER_METRE + (0.5 if course % 2 else 0.0)
+            tab_phase = tab_value - math.floor(tab_value)
+            tab_distance = min(tab_phase, 1.0 - tab_phase)
+            slot = 20.0 * math.exp(-0.5 * (tab_distance / 0.018) ** 2) \
+                * max(0.0, min(1.0, (phase - 0.10) / 0.08)) \
+                * max(0.0, min(1.0, (0.76 - phase) / 0.08))
+            aggregate = 8.0 * roof_noise(x, y, 17) + 3.0 * roof_noise(x // 4, y // 4, 29)
+            course_tone = 3.0 * math.sin(2.0 * math.pi * (course / ROOF_COURSES_PER_METRE))
+            base = max(0, min(255, round(
+                112.0 + course_tone + aggregate - lap_shadow - slot + edge_highlight)))
+            albedo_pixels[x, y] = (
+                max(0, base - 5), max(0, base - 3), base, 255)
+
+            dx = heights[y][(x + 1) % ROOF_SIZE] - heights[y][(x - 1) % ROOF_SIZE]
+            dy = heights[(y + 1) % ROOF_SIZE][x] - heights[(y - 1) % ROOF_SIZE][x]
+            nx = -20.0 * dx
+            ny = -20.0 * dy
+            nz = 1.0
+            length = math.sqrt(nx * nx + ny * ny + nz * nz)
+            normal_pixels[x, y] = (
+                round((nx / length * 0.5 + 0.5) * 255.0),
+                round((ny / length * 0.5 + 0.5) * 255.0),
+                round((nz / length * 0.5 + 0.5) * 255.0),
+            )
+    return albedo, normal
+
+
 def png_bytes(image) -> bytes:
     output = io.BytesIO()
     image.save(output, format="PNG", optimize=True)
@@ -200,7 +289,8 @@ def validate_definitions() -> list[str]:
         if exterior.snow[0] and not 0.0 < exterior.snow[1] <= 90.0:
             problems.append(f"{exterior.material_id} has an invalid snow slope")
     roof = next(exterior for exterior in EXTERIORS if exterior.role == "roof shingle")
-    if roof.class_override != "asphalt" or roof.snow[1] < 40.0 or roof.wet_override is None:
+    if (roof.class_override != "asphalt" or roof.snow[1] < 40.0 or
+            roof.wet_override is None or roof.uv_scale != (1.0, 1.0)):
         problems.append("roof must retain asphalt response and accept snow on the house pitch")
     soffit = next(exterior for exterior in EXTERIORS if exterior.role == "soffit")
     if soffit.snow[0]:
@@ -228,9 +318,13 @@ def preview_image():
                       (31, 34, 40))
     draw = ImageDraw.Draw(sheet)
     siding_albedo, _ = siding_texture_images()
+    roof_albedo, _ = roof_texture_images()
     for index, exterior in enumerate(EXTERIORS):
         if exterior.role == "siding":
             albedo = siding_albedo.convert("RGB").resize(
+                (tile_width, image_height), Image.Resampling.LANCZOS)
+        elif exterior.role == "roof shingle":
+            albedo = roof_albedo.convert("RGB").resize(
                 (tile_width, image_height), Image.Resampling.LANCZOS)
         else:
             with Image.open(pbr_to_stock.TEXTURES / f"{exterior.source}_albedo.png") as source:
@@ -272,12 +366,17 @@ def check() -> int:
     expected_albedo, expected_normal = siding_texture_images()
     compare_image(SIDING_ALBEDO, expected_albedo, problems)
     compare_image(SIDING_NORMAL, expected_normal, problems)
+    expected_roof_albedo, expected_roof_normal = roof_texture_images()
+    compare_image(ROOF_ALBEDO, expected_roof_albedo, problems)
+    compare_image(ROOF_NORMAL, expected_roof_normal, problems)
     try:
         manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
         manifest_rows = {row.get("id"): row for row in manifest.get("assets", [])}
         expected_manifest = {
             "TEXTURE_MATERIAL_SIDING_CLAPBOARD_ALBEDO": SIDING_ALBEDO,
             "TEXTURE_MATERIAL_SIDING_CLAPBOARD_NORMAL": SIDING_NORMAL,
+            "TEXTURE_MATERIAL_ROOF_ASPHALT_SHINGLE_ALBEDO": ROOF_ALBEDO,
+            "TEXTURE_MATERIAL_ROOF_ASPHALT_SHINGLE_NORMAL": ROOF_NORMAL,
         }
         for asset_id, path in expected_manifest.items():
             row = manifest_rows.get(asset_id)
@@ -288,7 +387,7 @@ def check() -> int:
             if row.get("sourceSha256") != digest:
                 problems.append(f"{asset_id}: manifest hash is stale")
             if row.get("origin", {}).get("kind") != "generated":
-                problems.append(f"{asset_id}: siding source must be project-generated")
+                problems.append(f"{asset_id}: architectural source must be project-generated")
         config = json.loads(CONTENT_CONFIG.read_text(encoding="utf-8"))
         configured = config.get("assets", {})
         expected_parameters = {
@@ -296,11 +395,13 @@ def check() -> int:
             "premultiplyAlpha": {"type": "bool", "value": False},
         }
         for name in ("Materials/siding_clapboard_albedo.png",
-                     "Materials/siding_clapboard_normal.png"):
+                     "Materials/siding_clapboard_normal.png",
+                     "Materials/roof_asphalt_shingle_albedo.png",
+                     "Materials/roof_asphalt_shingle_normal.png"):
             if configured.get(name, {}).get("parameters") != expected_parameters:
                 problems.append(f"{CONTENT_CONFIG}: {name} must pin mips=true, premultiply=false")
     except (OSError, json.JSONDecodeError) as error:
-        problems.append(f"could not verify siding registration: {error}")
+        problems.append(f"could not verify generated architectural registration: {error}")
     try:
         with Image.open(PREVIEW) as source:
             actual_preview = source.convert("RGB")
@@ -360,11 +461,15 @@ def write() -> int:
     _, after = remainder.split(END, 1)
     MATERIALS_FILE.write_text(before + BEGIN + "\n" + rendered + "\n" + END + after,
                               encoding="utf-8")
-    albedo, normal = siding_texture_images()
-    SIDING_ALBEDO.write_bytes(png_bytes(albedo))
-    SIDING_NORMAL.write_bytes(png_bytes(normal))
-    print(f"exterior_materials: wrote {len(EXTERIORS)} materials and two "
-          f"{SIDING_SIZE}x{SIDING_SIZE} painted-clapboard maps")
+    siding_albedo, siding_normal = siding_texture_images()
+    roof_albedo, roof_normal = roof_texture_images()
+    SIDING_ALBEDO.write_bytes(png_bytes(siding_albedo))
+    SIDING_NORMAL.write_bytes(png_bytes(siding_normal))
+    ROOF_ALBEDO.write_bytes(png_bytes(roof_albedo))
+    ROOF_NORMAL.write_bytes(png_bytes(roof_normal))
+    print(f"exterior_materials: wrote {len(EXTERIORS)} materials, two "
+          f"{SIDING_SIZE}x{SIDING_SIZE} painted-clapboard maps and two "
+          f"{ROOF_SIZE}x{ROOF_SIZE} asphalt-shingle maps")
     return 0
 
 
@@ -421,6 +526,40 @@ def selftest() -> int:
     if minima != SIDING_COURSES_PER_METRE:
         print(f"exterior_materials: detected {minima} lap shadows, expected "
               f"{SIDING_COURSES_PER_METRE}", file=sys.stderr)
+        return 1
+    roof_row = next(row for row in rows if row["id"] == "MAT_ROOF_SHINGLE")
+    if (roof_row["albedo"] != "Textures/Materials/roof_asphalt_shingle_albedo" or
+            roof_row["normal"] != "Textures/Materials/roof_asphalt_shingle_normal" or
+            roof_row["uvScale"] != [1.0, 1.0]):
+        print("exterior_materials: roof does not use the one-metre asphalt-shingle pair",
+              file=sys.stderr)
+        return 1
+    roof_albedo, roof_normal = roof_texture_images()
+    if (png_bytes(roof_albedo) != png_bytes(roof_texture_images()[0]) or
+            png_bytes(roof_normal) != png_bytes(roof_texture_images()[1])):
+        print("exterior_materials: asphalt-shingle generation is not byte-deterministic",
+              file=sys.stderr)
+        return 1
+    roof_values = [roof_albedo.getpixel((ROOF_SIZE // 3, y))[0]
+                   for y in range(ROOF_SIZE)]
+    roof_minima = sum(roof_values[y] < roof_values[(y - 1) % ROOF_SIZE]
+                      and roof_values[y] <= roof_values[(y + 1) % ROOF_SIZE]
+                      and roof_values[y] < 95 for y in range(ROOF_SIZE))
+    if roof_minima < ROOF_COURSES_PER_METRE:
+        print(f"exterior_materials: detected only {roof_minima} shingle laps, expected at least "
+              f"{ROOF_COURSES_PER_METRE}", file=sys.stderr)
+        return 1
+    # The exposed slot is a short shingle-tab joint, not a ceramic grout line running through the
+    # covered head. Sample one staggered boundary in the exposed and covered parts of course zero.
+    boundary_x = 0
+    exposed_y = round((0.45 / ROOF_COURSES_PER_METRE) * ROOF_SIZE)
+    covered_y = round((0.90 / ROOF_COURSES_PER_METRE) * ROOF_SIZE)
+    if not (roof_albedo.getpixel((boundary_x, exposed_y))[0] + 8 <
+            roof_albedo.getpixel((ROOF_SIZE // 8, exposed_y))[0] and
+            abs(roof_albedo.getpixel((boundary_x, covered_y))[0] -
+                roof_albedo.getpixel((ROOF_SIZE // 8, covered_y))[0]) < 18):
+        print("exterior_materials: shingle tabs do not stop below the covered head",
+              file=sys.stderr)
         return 1
     print("exterior_materials: selftest passed")
     return 0

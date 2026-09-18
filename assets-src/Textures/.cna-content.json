@@ -842,6 +842,30 @@
         }
       }
     },
+    "Materials/roof_asphalt_shingle_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/roof_asphalt_shingle_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
     "Materials/siding_clapboard_albedo.png": {
       "parameters": {
         "generateMipmaps": {

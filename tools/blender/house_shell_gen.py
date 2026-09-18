@@ -1209,7 +1209,7 @@ def is_exterior_door_material(material_id) -> bool:
     return isinstance(material_id, str) and material_id.startswith("MAT_EXTERIOR_DOOR_")
 
 
-def planar_uvs(mesh) -> None:
+def planar_uvs(mesh, roof_pitch: float | None = None) -> None:
     """A world-space planar UV0, one unit per metre, projected on each face's dominant axis.
 
     The shell had **no UV layer at all** until `HOUSE-00471` went to add the second one and found
@@ -1220,11 +1220,47 @@ def planar_uvs(mesh) -> None:
     wants: a 1 m tile is 1 m everywhere, so the boards on a floor are the same size in the kitchen
     as in the attic, and no seam moves when a room is resized. The second channel -- the packed,
     density-uniform one the lightmaps bake into -- is `lightmap_unwrap.py`'s and is a different
-    thing for a different reason.
+    thing for a different reason. Sloping roof faces are the one directional case: their U axis
+    follows the horizontal contour and V measures true surface distance upslope from the authored
+    pitch. That keeps
+    shingle exposures level, one metre on every hip plane, rather than projecting a ceramic-looking
+    grid from world plan coordinates.
     """
     layer = mesh.uv_layers.new(name="UVMap")
     for polygon in mesh.polygons:
         normal = polygon.normal
+        surface_class = SURFACE_ORDER[polygon.material_index]
+        roof_horizontal = math.hypot(normal.x, normal.y)
+        if (surface_class == "roof" and roof_pitch is not None and roof_pitch > 1.0e-6 and
+                roof_horizontal > 1.0e-6):
+            horizontal = (-normal.y, normal.x)
+            horizontal_length = math.hypot(*horizontal)
+            contour_x = horizontal[0] / horizontal_length
+            contour_y = horizontal[1] / horizontal_length
+            # Cut hip/dormer polygons can be non-planar quads before glTF triangulation. Their
+            # geometric horizontal edge is the authoritative course direction; using the averaged
+            # polygon normal can rotate a dormer course into its slope. Prefer the longest level
+            # edge when one exists, with the normal-derived contour as the triangle fallback.
+            longest_level = 0.0
+            loops = list(polygon.loop_indices)
+            for offset, loop_index in enumerate(loops):
+                next_loop = loops[(offset + 1) % len(loops)]
+                point = mesh.vertices[mesh.loops[loop_index].vertex_index].co
+                following = mesh.vertices[mesh.loops[next_loop].vertex_index].co
+                dx = following.x - point.x
+                dy = following.y - point.y
+                length = math.hypot(dx, dy)
+                if abs(following.z - point.z) < 1.0e-6 and length > longest_level:
+                    longest_level = length
+                    contour_x = dx / length
+                    contour_y = dy / length
+            for loop_index in polygon.loop_indices:
+                point = mesh.vertices[mesh.loops[loop_index].vertex_index].co
+                layer.data[loop_index].uv = (
+                    point.x * contour_x + point.y * contour_y,
+                    point.z / roof_horizontal,
+                )
+            continue
         axis = max(range(3), key=lambda index: abs(normal[index]))
         for loop_index in polygon.loop_indices:
             point = mesh.vertices[mesh.loops[loop_index].vertex_index].co
@@ -2672,6 +2708,24 @@ def dormer_finish_faces(rect_u: tuple, rect_v: tuple, plane_z: float, outer: tup
     ]
 
 
+def nonplanar_quad(points, tolerance: float = 1.0e-6) -> bool:
+    """Whether four world points need explicit triangles rather than one twisted polygon."""
+    if len(points) != 4:
+        return False
+    p0, p1, p2, p3 = points
+    a = tuple(p1[index] - p0[index] for index in range(3))
+    b = tuple(p2[index] - p0[index] for index in range(3))
+    c = tuple(p3[index] - p0[index] for index in range(3))
+    normal = (a[1] * b[2] - a[2] * b[1],
+              a[2] * b[0] - a[0] * b[2],
+              a[0] * b[1] - a[1] * b[0])
+    length = math.sqrt(sum(value * value for value in normal))
+    if length <= tolerance:
+        return False
+    distance = abs(sum(normal[index] * c[index] for index in range(3))) / length
+    return distance > tolerance
+
+
 def build_roof(name: str, box: tuple, construction: dict, dormers=(), eaves=None,
                spouts=(), structure_by_cells: bool = False, material_definitions=None):
     """One roof object over @p box, with its fascia. @p box is the WALL CENTRE-LINE rectangle.
@@ -2691,10 +2745,18 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=(), eaves=None
     classes: list[str] = []
 
     def add(points, outward, klass="roof") -> None:
+        ordered = facing(points, outward)
         base = len(vertices)
-        vertices.extend(to_blender(*point) for point in facing(points, outward))
-        faces.append(tuple(range(base, base + len(points))))
-        classes.append(klass)
+        vertices.extend(to_blender(*point) for point in ordered)
+        if klass == "roof" and nonplanar_quad(ordered):
+            # Blender/glTF would triangulate this twisted dormer transition implicitly, after UV
+            # authoring. Make the same surface explicit first so each planar triangle receives a
+            # metric contour/slope basis. Positions, silhouette and collision are unchanged.
+            faces.extend(((base, base + 1, base + 2), (base, base + 2, base + 3)))
+            classes.extend((klass, klass))
+        else:
+            faces.append(tuple(range(base, base + len(points))))
+            classes.append(klass)
 
     def add_box(box_of, klass="trim") -> None:
         bx0, bx1, by0, by1, bz0, bz1 = box_of
@@ -2814,7 +2876,7 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=(), eaves=None
     for polygon, klass in zip(mesh.polygons, classes):
         polygon.material_index = SURFACE_ORDER.index(klass)
     weld(mesh)          # before the UVs: welding moves loops, and a face keeps its material
-    planar_uvs(mesh)
+    planar_uvs(mesh, pitch)
     obj = bpy.data.objects.new(name, mesh)
     bpy.context.scene.collection.objects.link(obj)
     return obj
@@ -3939,16 +4001,64 @@ def selftest(output: Path) -> int:
     # planes plus the dormers' own faces, not the whole planes plus them. A roof left whole under
     # a dormer is a roof across the inside of its window.
     pitch_here = float(construction["roofPitch"])
+    def emitted_roof_faces(entries, dormer=False):
+        count = 0
+        for corners, outward in entries:
+            roof_face = not dormer or outward[1] > 0.0
+            count += 2 if roof_face and nonplanar_quad(facing(corners, outward)) else 1
+        return count
+
     expected = (plain_roof_faces
-                - len(roof_planes(outer, eaves_y, pitch_here))
-                + len(roof_planes(outer, eaves_y, pitch_here, dormer_list))
-                + sum(len(dormer_shell(one[0], one[1], one[2], outer, eaves_y, pitch_here))
+                - emitted_roof_faces(roof_planes(outer, eaves_y, pitch_here))
+                + emitted_roof_faces(roof_planes(outer, eaves_y, pitch_here, dormer_list))
+                + sum(emitted_roof_faces(
+                              dormer_shell(one[0], one[1], one[2], outer, eaves_y, pitch_here),
+                              dormer=True)
                       + len(dormer_finish_faces(
                           one[0], one[1], one[2], outer, eaves_y, pitch_here))
                       for one in dormer_list))
     require(len(dormered.data.polygons) == expected,
             f"and the roof is its cut planes plus each dormer's own faces ({plain_roof_faces} -> "
             f"{len(dormered.data.polygons)}, expected {expected})")
+
+    # `HOUSE-00943`: roof UV0 is metric on the actual slope and its V coordinate follows height.
+    # That is what makes seven 143 mm shingle exposures seven real courses per surface metre on
+    # both the front/rear and side hip planes. The old dominant-axis plan projection made side
+    # planes read as a square ceramic grid and shortened every course by the roof slope.
+    roof_uv = dormered.data.uv_layers["UVMap"].data
+    metric_edges = 0
+    level_edges = 0
+    worst_uv_error = 0.0
+    worst_level_v = 0.0
+    for polygon in dormered.data.polygons:
+        if SURFACE_ORDER[polygon.material_index] != "roof":
+            continue
+        normal = polygon.normal
+        if math.hypot(normal.x, normal.y) <= 1.0e-6:
+            continue  # a small horizontal cap has no upslope course direction
+        loops = list(polygon.loop_indices)
+        for offset, loop_index in enumerate(loops):
+            next_loop = loops[(offset + 1) % len(loops)]
+            point = dormered.data.vertices[dormered.data.loops[loop_index].vertex_index].co
+            following = dormered.data.vertices[dormered.data.loops[next_loop].vertex_index].co
+            edge_length = (following - point).length
+            if edge_length <= 1.0e-6:
+                continue
+            uv = roof_uv[loop_index].uv
+            next_uv = roof_uv[next_loop].uv
+            uv_length = math.hypot(next_uv.x - uv.x, next_uv.y - uv.y)
+            uv_error = abs(uv_length - edge_length)
+            worst_uv_error = max(worst_uv_error, uv_error)
+            metric_edges += 1
+            if abs(following.z - point.z) < 1.0e-6:
+                level_v = abs(next_uv.y - uv.y)
+                worst_level_v = max(worst_level_v, level_v)
+                level_edges += 1
+    require(metric_edges > 20 and level_edges >= 4 and worst_uv_error < 1.0e-4 and
+            worst_level_v < 1.0e-4,
+            f"roof UV0 preserves slope metres and level courses ({metric_edges} metric, "
+            f"{level_edges} level, worst metric {worst_uv_error:.7f} m, "
+            f"level drift {worst_level_v:.7f})")
 
     # ---- `HOUSE-00463`: the attic structure -----------------------------------------------------
     ridge_run = (outer[1] - outer[0]) - (outer[3] - outer[2])

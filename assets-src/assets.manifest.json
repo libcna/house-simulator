@@ -27218,6 +27218,48 @@
       "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
+      "id": "TEXTURE_MATERIAL_ROOF_ASPHALT_SHINGLE_ALBEDO",
+      "category": "material",
+      "sourceFile": "assets-src/Textures/Materials/roof_asphalt_shingle_albedo.png",
+      "sourceSha256": "cfbe649bf0c6c253e115e6f6b371d51a088fae869bf27a0aa2e0bcc41c3f9b88",
+      "contentName": "Textures/Materials/roof_asphalt_shingle_albedo",
+      "kind": "texture",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Procedural tileable asphalt-shingle albedo",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/assets/exterior_materials.py for HOUSE-00943. Seven approximately 143 mm laminated courses and four staggered tabs per true roof-surface metre replace the former square ceramic-tile surrogate."
+      }
+    },
+    {
+      "id": "TEXTURE_MATERIAL_ROOF_ASPHALT_SHINGLE_NORMAL",
+      "category": "material",
+      "sourceFile": "assets-src/Textures/Materials/roof_asphalt_shingle_normal.png",
+      "sourceSha256": "99bc945332c41be5cfd5a4d20f847c27a56eeb12196424f46047511afccc1a30",
+      "contentName": "Textures/Materials/roof_asphalt_shingle_normal",
+      "kind": "texture",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Procedural tileable asphalt-shingle normal",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/assets/exterior_materials.py for HOUSE-00943 from the same periodic laminated-course, tab-slot and aggregate relief as the albedo. Linear +Y tangent normals support the approved normal-aware path."
+      }
+    },
+    {
       "id": "TEXTURE_MATERIAL_SIDING_CLAPBOARD_ALBEDO",
       "category": "material",
       "sourceFile": "assets-src/Textures/Materials/siding_clapboard_albedo.png",

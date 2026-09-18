@@ -3842,7 +3842,13 @@ namespace
                                          { return material.id == Intern("MAT_ROOF_SHINGLE"); });
         ASSERT_NE(roofAt, contents.materials.end());
         EXPECT_EQ(roofAt->materialClass, world::MaterialClass::Asphalt);
-        EXPECT_EQ(roofAt->albedo, "Textures/Materials/tile_light_square_albedo");
+        EXPECT_EQ(roofAt->albedo, "Textures/Materials/roof_asphalt_shingle_albedo");
+        EXPECT_EQ(roofAt->normal, "Textures/Materials/roof_asphalt_shingle_normal");
+        EXPECT_FLOAT_EQ(roofAt->tint.X, 0.68F);
+        EXPECT_FLOAT_EQ(roofAt->tint.Y, 0.66F);
+        EXPECT_FLOAT_EQ(roofAt->tint.Z, 0.64F);
+        EXPECT_FLOAT_EQ(roofAt->uvScaleU, 1.0F);
+        EXPECT_FLOAT_EQ(roofAt->uvScaleV, 1.0F);
         EXPECT_FLOAT_EQ(roofAt->snow.slopeLimitDeg, 55.0F);
         EXPECT_EQ(roofAt->footstepSurface, "asphalt");
 

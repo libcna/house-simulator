@@ -1,3 +1,52 @@
+# Visual-sprint handoff — 2026-09-18 (`HOUSE-00943` checkpoint)
+
+Branch `develop`. Task-start HEAD `eef24dca714258ed6eebd021207663b1501bc384` (`HOUSE-00942`).
+This file belongs to the single `HOUSE-00943` commit; use that commit as the ending HEAD.
+**VISUAL-GATE-1 still FAILS.** Normal gameplay remains production-material only and explicit debug
+blockout remains available.
+
+The principal and garage roofs no longer use the acknowledged ambientCG `Tiles140` square ceramic
+floor surrogate. Stable dry, wet and unbaked roof ids now resolve to a deterministic project-owned
+512 px asphalt-shingle albedo/linear-normal pair: seven approximately 143 mm courses and four
+staggered tabs per true surface metre, short exposed slots, restrained aggregate and a neutral
+charcoal result under the clear-day sky. Roof UV0 follows a horizontal contour axis and true slope
+distance. Five pre-existing twisted dormer transition quads are explicitly split on their existing
+export diagonal before UV assignment; world-space positions/silhouette, collision and lightmaps
+remain unchanged. CNAEXT stays off and the runtime still uses stock XNA effects.
+
+The canonical before views are Round 73's
+[garage approach](visual-review/captures/house-00942-single-door-joinery-day-r1/garage-approach.png)
+and [front exterior](visual-review/captures/house-00942-single-door-joinery-day-r1/exterior-front.png).
+The complete retained after sets are
+[clear day](visual-review/captures/house-00943-asphalt-shingle-day-r1) and
+[normal night](visual-review/captures/house-00943-asphalt-shingle-night-r1). All 42 images were
+inspected as contact sheets, and the two exterior images plus enlarged roof crops were opened at
+full size. A first cool/light tint was visibly rejected before the retained set. Against Round 73,
+`exterior-front` changes 17,722 day / 17,635 night pixels above two levels (1.2307% / 1.2247%;
+normalized RGB MAE 0.001026 / 0.000396); `garage-approach` changes 21,278 / 20,678 (1.4776% /
+1.4360%; 0.001266 / 0.000400). The final garage plane measures RGB 68/74/87–70/76/89 at three
+course samples and reads as horizontal shingles rather than a ceramic blob/grid.
+
+The world remains 688 chunks / 96 cells / 89 static props / 266 exterior hierarchy instances /
+57.024981 MB, with 202 materials, 908 manifest rows and 2,960 stable ids. All 1,409 unit and 135
+integration tests pass. All 48 active software-render tests pass; the inspected `fp-l3-room`, HUD
+and four seasonal exterior references were deliberately advanced, while explicit blockout goldens
+did not move. All eighteen culled-vs-unculled pairs remain under 0.2%, at 0.0558% worst
+(`l0-sunroom`). Material/source/licence/content/shell/chunk determinism gates pass, and
+`tools/ci/run_checks.sh` passes including all 323 strict-XNA translation units. Heavy work stayed
+on CPU 0-5 / at most six workers. The existing CMake tree still cannot auto-reconfigure inside the
+sandbox because an unrelated sharp-runtime test glob would write shared `~/deps/FNA3D`; exact
+stored Ninja compile/link commands were used without editing CNA, sharp-runtime or shared deps.
+
+Largest visible defects: the honest 22:00 roof/dormer silhouette is still dark outside bounded
+practicals; roof edges lack convincing ridge/hip caps, flashing and gutter depth; garage/side-yard
+and distant-neighbour context remains sparse; facade massing/window rhythm remains repetitive;
+formal living still lacks contact away from its bounded piano pool. The next highest-value work is
+physical roof-edge detail, then bounded garage/side-yard night depth. Do not raise global exposure
+or leave the visual slice for an unrelated subsystem.
+
+---
+
 # Visual-sprint handoff — 2026-09-18 (`HOUSE-00942` checkpoint)
 
 Branch `develop`. Task-start HEAD `5eadaee9d931` (`HOUSE-00941`). This file belongs to the single

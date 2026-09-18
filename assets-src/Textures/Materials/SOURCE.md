@@ -1,5 +1,15 @@
 # Material texture provenance
 
+## Project-generated asphalt-shingle maps
+
+`roof_asphalt_shingle_albedo.png` and `roof_asphalt_shingle_normal.png` are deterministic
+project-authored assets from `tools/assets/exterior_materials.py` (`HOUSE-00943`), licensed with
+the project under Ms-PL. The one-metre tile contains seven approximately 143 mm laminated asphalt
+courses and four staggered tabs; the slots stop below each covered head rather than forming a
+ceramic grout grid. Restrained cool-charcoal aggregate variation and the matching linear +Y
+tangent normal remain periodic at every boundary. There is no upstream asset or download. The
+ambientCG `Tiles140` maps remain unchanged for their legitimate interior tile uses.
+
 ## Project-generated painted clapboard maps
 
 `siding_clapboard_albedo.png` and `siding_clapboard_normal.png` are deterministic project-authored

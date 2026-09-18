@@ -51,6 +51,8 @@ selected correction for the coarse, dark formal-living piano composition. `HOUSE
 the facade's generic bare-wood map with measured painted clapboard at real-world course spacing.
 `HOUSE-00942` replaces five close-route single-leaf slabs with explicitly selected painted
 four-panel joinery and physical lever hardware without changing their portal/collision contract.
+`HOUSE-00943` replaces the roof's acknowledged square ceramic-tile surrogate with physically
+scaled project-authored asphalt shingles and aligns every course to the true sloping roof surface.
 Round 9 proves the exterior
 material omission is fixed; `HOUSE-00924`
 removes the
@@ -14029,6 +14031,50 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
                 pass, explicit blockout goldens remain unchanged, and all eighteen culling pairs
                 stay below 0.2% at 0.0558% worst (`l0-sunroom`). `tools/ci/run_checks.sh` is green,
                 including 323 strict-XNA units, with heavy work pinned to CPU 0-5 / six workers.
+- [x] HOUSE-00943 — Replace the roof's ceramic-tile surrogate with physically scaled asphalt shingles
+      dep: HOUSE-00461, HOUSE-00462, HOUSE-00903, HOUSE-00907, HOUSE-00941 · sys: content/materials · plat: TOOL · pri: MUST
+      accept: (1) the stable dry, wet and unbaked roof roles use one deterministic project-authored
+              asphalt-shingle albedo/normal pair rather than ambientCG `Tiles140`; (2) one world
+              surface metre carries seven approximately 143 mm courses with staggered tab slots,
+              restrained aggregate variation and no tile seam; (3) UV0 preserves metre scale on
+              every hip/dormer slope and holds courses level instead of plan-projecting a square
+              grid; (4) day/night fixed views prove a coherent roof without changing its
+              world-space surface or silhouette, lightmaps, exposure, celestial lighting,
+              collision, portals or debug blockout
+      verify: deterministic map and roof-UV selftests; provenance/content/material/wet/snow checks;
+              shell/chunk determinism; fixed visual review; unit, integration, render, culling and
+              strict-XNA gates
+      note: (2026-09-18) Round 73 confirms the largest remaining architectural surface still uses
+            the original library's explicitly documented fallback: a charcoal square ceramic floor
+            tile, tinted and reclassified as asphalt. It produces a bathroom-grid roof by day and
+            gives the already dim 22:00 silhouette no plausible aggregate/course structure. Keep
+            the stable material ids and established environmental semantics, author a purpose-made
+            pair in the existing deterministic material tool, and correct only roof-face UV0.
+      review: (2026-09-18) Round 74 retains complete 21-view clear-day and normal-night sets. The
+              first rendered pass proved the metre-scale courses were level but ranked an overly
+              light blue roof as the largest defect; it was rejected before the retained set and
+              the final warm-neutral tint was measured at RGB 68/74/87–70/76/89 on the garage
+              plane. Against Round 73, `exterior-front` changes 17,722 day / 17,635 night pixels
+              above two channel levels (1.2307% / 1.2247%; normalized RGB MAE 0.001026 / 0.000396)
+              and `garage-approach` changes 21,278 / 20,678 (1.4776% / 1.4360%; 0.001266 /
+              0.000400). Full-size inspection confirms horizontal shingle courses instead of the
+              former ceramic blob/grid, without pretending that unlit 22:00 roof planes are lit.
+              `VISUAL-GATE-1` still FAILS: bounded night-exterior readability, simple roof-edge /
+              dormer detailing and sparse garage/side-yard context remain larger visible defects.
+      verified: (2026-09-18) The generated 512 px albedo/linear-normal hashes are
+                `cfbe649bf0c6c253e115e6f6b371d51a088fae869bf27a0aa2e0bcc41c3f9b88` and
+                `99bc945332c41be5cfd5a4d20f847c27a56eeb12196424f46047511afccc1a30`;
+                provenance, content registration and dry/wet/outdoor material gates pass. The roof
+                selftest measures 127 sloping edges at 0.0000028 m worst error and 50 level edges
+                at zero V drift. All 99 shell files regenerate byte-identically; five twisted
+                dormer quads are explicitly triangulated on their existing export diagonal before
+                UV assignment. The world remains 688 chunks / 96 cells / 89 props / 57.024981 MB.
+                The inspected `fp-l3-room`, HUD and four seasonal exterior references were
+                intentionally advanced; explicit blockout goldens remain unchanged. All 1,409 unit,
+                135 integration and 48 active software-render tests pass; all eighteen culling
+                pairs remain below 0.2% at 0.0558% worst (`l0-sunroom`). `tools/ci/run_checks.sh`
+                passes including 323 strict-XNA translation units, with heavy work pinned to CPU
+                0-5 / six workers.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -19720,6 +19766,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-18 | `HOUSE-00943` | **New task, next free phase-12 id.** Replace the acknowledged `Tiles140` roof surrogate with a deterministic asphalt-shingle pair and slope-metric UV0 while preserving every stable roof material id and runtime effect contract. | Round 73 still ranks roof/dormer readability as the largest architectural defect. Direct source inspection proves the roof is literally using a square ceramic floor texture because the first fixed library had no roofing map. A project-authored pair through the existing stock-XNA material path is the smallest dependency-valid correction; changing exposure or inventing moonlight would hide rather than fix the surface. |
 | 2026-09-18 | `HOUSE-00942` | **New task, next free phase-12 id.** Add an explicit data-selected four-panel treatment and physical lever hardware to five close-route generated single leaves while leaving the full door population and later animated-door tasks open. | Round 72's family-media and hall views expose large plain painted slabs after the connected rooms, fixtures and furniture around them have converged. The existing deterministic shell/joinery and approved steel material can correct those high-frequency route defects without a room-id branch, download, renderer change, portal/collision change or a false claim that all interior doors are final. |
 | 2026-09-18 | `HOUSE-00941` | **New task, next free phase-12 id.** Replace only the three canonical siding finishes and their generated state/layout derivatives with a deterministic painted-clapboard material at six courses per world metre. | Round 71's fixed clear-day road/path images make the source mismatch visible across the largest surface in the frame: `MAT_SIDING_*` uses ambientCG `Wood095`, a generic orange bare board with broad grain bands rather than the Colonial Revival horizontal siding specified by §12.1. A project-authored tileable albedo/normal pair corrects material identity and scale through the existing stock-XNA path without geometry, exposure, renderer or lightmap changes. The same source remains independently available for doors, furniture and other legitimate bare wood. |
 | 2026-09-18 | `HOUSE-01066` | **New task, next free phase-13 id.** Refine the already approved formal upright as a bounded hero-asset checkpoint while leaving the full room furnishing task open. | Round 70 ranks the dark/coarse piano as the largest remaining interior defect. Its placement, lighting, bench and wall composition are already measured, so improving the deterministic model and material separation has higher visible value and lower risk than downloading a replacement, changing room exposure or widening `HOUSE-00988`. |

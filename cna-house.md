@@ -2674,6 +2674,17 @@ ownership and stock-XNA effect paths are unchanged. The approved bare-board sour
 library for joinery, furniture and fence pickets; changing the facade does not silently turn those
 unrelated objects into siding.
 
+`HOUSE-00943` makes the corresponding roof correction. The stable dry, wet and unbaked roof ids
+retain their asphalt class, weather response, audio semantics and stock-XNA effect mappings, but
+their visible source is a deterministic project-authored asphalt-shingle albedo/linear-normal pair
+instead of the acknowledged `Tiles140` square ceramic surrogate. One metre along the actual roof
+slope carries seven approximately 143 mm exposed courses with four staggered tabs. Roof UV0 uses
+an orthonormal contour/slope basis: U stays horizontal and V measures true surface distance, so hip
+and dormer courses retain physical scale without changing the world-space roof surface or
+silhouette, collision or lightmaps. Five pre-existing twisted dormer transition quads are split
+explicitly on the same export diagonal before UV generation so each rendered triangle has one
+metric basis instead of relying on an exporter-selected triangulation after UV assignment.
+
 `HOUSE-00904` fixes four glass and four water records. Clear, obscured, cabinet and shower glass
 retain the untextured tinted `BasicEffect` path; tap/shower flow, bath/basin level, toilet bowl and
 rain puddle share a deterministic tileable RGBA/normal pair with role-specific tint, opacity and UV
