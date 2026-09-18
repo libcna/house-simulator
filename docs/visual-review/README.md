@@ -3420,3 +3420,46 @@ was discarded.
 `VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
 debug blockout remains available. The next checkpoint should improve garage/facade massing or add
 a dependency-valid physical roof/dormer source—not global exposure or an unrelated subsystem.
+
+## Round 78 — sectional-door glazing and operating hardware
+
+Commit: `HOUSE-00947` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 77's [day garage approach](captures/house-00946-driveway-joints-day-r2/garage-approach.png)
+and matching [22:00 view](captures/house-00946-driveway-joints-night-r2/garage-approach.png) show a
+materially coherent arrival whose largest facade object is still one dark, monotonous sectional
+leaf. After: the complete twenty-one-camera
+[clear-day](captures/house-00947-garage-lites-day-r2) and
+[normal-night](captures/house-00947-garage-lites-night-r2) sets add four framed top lites and a
+physical centre pull. Both 21-frame contact sheets and the direct garage pairs were inspected at
+full size.
+
+Ranked visible defects remaining:
+
+1. Garage/facade massing and repeated window rhythm remain simple beyond the improved door detail.
+2. The property lacks a parked vehicle and richer distant-neighbour context, leaving the finished
+   driveway composition visually empty.
+3. The main roof/dormer silhouette remains honestly dark at 22:00 while the Moon is below the
+   horizon; any change still needs a bounded physical source.
+4. Formal living retains weak furniture/floor contact outside its bounded piano practical.
+5. Secondary rooms and elevations outside the connected slice remain sparse.
+
+Fixed: `DOOR_GARAGE_SECTIONAL` explicitly selects `top_lites`, clear glass and the approved bronze
+hardware finish. Its top raised-panel row becomes four 50 mm framed glass lites; the lower sixteen
+raised panels remain unchanged. A 300 mm pull and two 40 x 85 mm mounts appear at a plausible
+680 mm sill height on both visible faces. The lites share the garage's existing exterior-window
+glass chunk, so only the new hardware role raises the exact `L0_GARAGE` ceiling, from ten to eleven.
+The 4.86 x 2.35 m leaf, five-section contract, aperture, portal, collision, navigation and receiver
+lightmaps do not move. No material or model was downloaded.
+
+Against Round 77, `garage-approach` changes 5,290 day / 5,635 night pixels above two channel
+levels (0.3674% / 0.3913%; normalized RGB MAE 0.000280 / 0.000676). The day view gains cool panes
+and a readable upper rhythm instead of another painted band. At night the same details remain
+subdued under existing carriage/bollard light and do not glow. Other review views stay at roughly
+0.01--0.07% changed pixels. No strict golden changed; all 48 active render tests pass and all
+eighteen culled/unculled pairs remain below 0.2%, at 0.0558% worst (`l0-sunroom`).
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next checkpoint should add the next largest truthful facade
+or arrival cue—most likely a dependency-valid parked vehicle or stronger garage-wing massing and
+neighbour context—not a global exposure lift or unrelated subsystem.

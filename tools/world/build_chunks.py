@@ -146,11 +146,12 @@ CHUNK_BUDGET_EXCEPTIONS = {
                    "and the 2.1 m road-edge hedge add source-exact bark/cutout foliage with "
                    "measured vertex/Reach-cap splits; every placement remains a separately "
                    "bounded sub-range in the exterior BVH"),
-    "L0_GARAGE": (10,
+    "L0_GARAGE": (11,
                   "a garage is a room and stays one (`HOUSE-00487`). The four receiver classes, "
                   "plus the stair to the loft, glazing, trim and an outside window-frame chunk; "
                   "HOUSE-00935 adds separately exterior-resident painted sectional leaf and "
-                  "raised-panel roles"),
+                  "raised-panel roles. HOUSE-00947 reuses its glass role for four top lites and "
+                  "adds one exterior-visible hardware role for the measured centre pull"),
     "L0_FOYER": (20,
                   "HOUSE-01038's measured entrance: six shell finishes and an outside window "
                   "frame plus two source-specific CC0 furniture albedos. Keeping the carved "

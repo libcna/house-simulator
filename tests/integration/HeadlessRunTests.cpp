@@ -80,13 +80,13 @@ namespace
         const auto& list = game.RenderListForTesting();
         ASSERT_GT(list.Size(), 0U) << "the frame drew from an empty list";
         EXPECT_TRUE(list.IsSorted()) << "the pass read its slice, which is what sorts the list";
-        // HOUSE-00946's driveway detail brought the measured unculled house to 694
+        // HOUSE-00947's sectional-door pull brought the measured unculled house to 695
         // calls, over FOUR frames: a list that was not emptied between them would be four houses
         // long and would still draw a correct-looking picture. This diagnostic remains far below
         // §71.2's 1,400-call worst-case envelope; named visible poses protect its 644-call typical
         // opaque row. The control joints and stone inlays add two cell-scoped roles while reusing
         // existing canonical materials, so the measured state-change ceiling does not move.
-        EXPECT_LE(list.DrawCalls(), 694) << "the list was not cleared between frames";
+        EXPECT_LE(list.DrawCalls(), 695) << "the list was not cleared between frames";
 
         const cnahouse::debug::Counter* chunks = game.CountersForTesting().Find("static.chunks");
         const cnahouse::debug::Counter* states = game.CountersForTesting().Find("static.stateChanges");

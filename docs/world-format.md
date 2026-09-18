@@ -295,6 +295,10 @@ Selected generated painted interior leaves may name `"joineryStyle": "four_panel
 an approved `hardwareMaterial`. The style adds spatial painted moulding and two-sided lever
 hardware to the static closed leaf without changing its portal, hinge, swing or collision; both
 fields are required together so geometry never guesses a finish from a room id.
+The sectional door may similarly select `"sectionalStyle": "top_lites"` together with explicit
+`glazingMaterial` and `hardwareMaterial` ids. That treatment replaces only its upper raised-panel
+inserts with four framed panes and adds a measured centre pull. It preserves the five authored
+segments, leaf envelope, portal, animation contract and collision; all three fields are required.
 
 ```jsonc
 {

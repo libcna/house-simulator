@@ -14204,6 +14204,43 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
                 integration and 48 active software-render tests pass; all eighteen culling pairs
                 remain below 0.2% at 0.0558% worst (`l0-sunroom`). `run_checks.sh --staged` is
                 green and the separate strict-XNA gate reports all 323 translation units clean.
+- [x] HOUSE-00947 — Finish the sectional garage door with top-row glazing and physical pull hardware
+      dep: HOUSE-00377, HOUSE-00456, HOUSE-00487, HOUSE-00926, HOUSE-00935, HOUSE-00946 · sys: world/content/materials · plat: ALL · pri: MUST
+      accept: (1) `DOOR_GARAGE_SECTIONAL` explicitly selects a generated `top_lites` treatment
+              with four framed glass lites and a 300 mm centre pull with two physical mounts;
+              (2) the treatment reuses approved exterior-window glass and bronze hardware,
+              shares the garage's existing glass chunk, and raises its exact ceiling by only the
+              one new exterior-hardware role; (3) the aperture, five-section animation contract,
+              leaf/collision envelope, portal, navigation and lightmap receivers do not move;
+              (4) matched 21-camera day/night review makes the formerly monotonous door read as
+              finished joinery without a colour swap, renderer branch or downloaded asset
+      verify: openings schema/rules and mutation selftests; exact generated-face/material checks;
+              shell/material/manifest and chunk/content determinism; matched fixed visual review;
+              unit, integration, render, culling, formatting and strict-XNA gates
+      note: (2026-09-18) Round 77 leaves the 4.86 x 2.35 m garage leaf as the largest flat facade
+            object even after its raised sectional relief. The existing stock-XNA glass role,
+            approved bronze finish and deterministic shell grammar can add residential scale
+            without changing the door simulation or acquiring another asset.
+      review: (2026-09-18) Round 78 retains complete 21-view clear-day and normal-night sets; both
+              contact sheets and direct garage before/after pairs were inspected at full size.
+              `garage-approach` changes 5,290 day / 5,635 night pixels above two channel levels
+              (0.3674% / 0.3913%; normalized RGB MAE 0.000280 / 0.000676). Four cool glass lites
+              now interrupt the broad painted upper band, and the small centre pull supplies a
+              credible operating detail without glowing at night. Other fixed views remain at
+              0.01--0.07% changed pixels. `VISUAL-GATE-1` still FAILS: the facade massing and
+              neighbour context remain simple, the drive lacks a parked vehicle, and secondary
+              rooms/elevations remain sparse.
+      verified: (2026-09-18) Openings schema/rules and their mutations pass; the shell selftest
+                measures 384 opaque panel/frame faces, 36 hardware faces and 54 garage glass
+                faces. All 99 shell files unwrap with 5,252 unchanged receiver faces and 55,430
+                detail faces; the manifest/material checks and world content build pass. The
+                world contains 695 chunks / 96 cells / 92 static props / 273 exterior hierarchy
+                instances / 57.695654 MB; `L0_GARAGE` is exactly 11 chunks and the unculled
+                production frame is 650 opaque submissions plus 45 cutouts at 107 opaque state
+                changes. All 1,409 unit, 135 integration and 48 active software-render tests pass;
+                all eighteen culling pairs remain below 0.2% at 0.0558% worst (`l0-sunroom`).
+                `tools/ci/run_checks.sh --staged` is green and the separate strict-XNA gate
+                reports all 323 translation units clean with six workers on CPU 0-5.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -19895,6 +19932,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-18 | `HOUSE-00947` | **New task, next free phase-12 id.** Add data-selected top-row glazing and measured pull hardware to the canonical sectional door without changing its simulation envelope. | Round 77's fixed garage view ranks the broad, nearly featureless 4.86 m leaf as the largest remaining facade surface. Existing exterior glass, bronze hardware and deterministic shell grammar can supply believable residential detail with one new chunk and no asset acquisition, portal/collision change or renderer work. |
 | 2026-09-18 | `HOUSE-00946` | **New task, next free phase-12 id.** Add path-bound fine surface detail for measured concrete control joints and bluestone edge/transverse inlays without changing the canonical physical driveway. | Round 76's fixed garage view is still dominated by one uninterrupted grey slab. Existing stock-XNA terrain batching, the approved bluestone/asphalt materials and the path's exact boxes can supply construction scale with two shared roles; a first 30 mm-only capture was rejected because the detail disappeared at review distance. |
 | 2026-09-18 | `HOUSE-00945` | **New task, next free phase-12 id.** Add a measured planted strip and three reused low fixtures at the east driveway edge while preserving the independent manual garage flood and canonical exterior ownership. | Round 75's fixed day/night review ranks the sparse grass/fence edge and almost completely black garage approach as the largest remaining visible defect. Existing approved shrubs, mulch, stock-XNA fixture materials, bounded point-light routing and dusk automation can correct both conditions without a download, global exposure, fake moonlight, renderer change or unbounded scatter. |
 | 2026-09-18 | `HOUSE-00944` | **New task, next free phase-12 id.** Add physical caps/flashing and complete the canonical rainwater-good geometry while leaving roof planes, collision, drainage data and lightmaps authoritative. | Round 74's fixed daylight review ranks the uncapped hip/dormer seams and almost invisible incomplete gutter strips immediately behind the corrected shingle surface. Source inspection confirms the original gutter loop emits no outward longitudinal face on the road-facing runs and assigns the explicitly shingle-over ridge vent to zero-tint black gutter metal. Derived non-lightmapped finish in the existing shell generator is the smallest dependency-valid correction; changing exposure or another global material cannot supply missing silhouettes. |

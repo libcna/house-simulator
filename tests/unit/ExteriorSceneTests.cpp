@@ -334,8 +334,8 @@ TEST(ExteriorSceneTests, TheWholePropertysOutdoorsIsInTheHierarchy)
     EXPECT_GT(expected, 20u) << "the property has a lawn, a road, fences and a garden";
     EXPECT_GT(outerSkin, 50u) << "the canonical house facade was omitted from the hierarchy";
     EXPECT_GT(outsideWindows, 40u) << "weather-facing frames and glazing stayed room-culled";
-    EXPECT_EQ(outsideDoors, 8u)
-        << "both entries need body, panel and hardware chunks; the garage needs body and panels";
+    EXPECT_EQ(outsideDoors, 9u)
+        << "both entries need body, panel and hardware chunks; the garage needs body, panels and hardware";
     EXPECT_GT(ground, 0u) << "no chunk of the outdoors is the ground itself";
 
     // Every instance is inside the hierarchy's own root box, which is the invariant a wrong bounds

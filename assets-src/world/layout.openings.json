@@ -633,6 +633,8 @@
       "frame": { "asset": null, "casing": 0.090 },
       "asset": null, "material": "MAT_EXTERIOR_DOOR_GARAGE_PAINTED",
       "panelMaterial": "MAT_EXTERIOR_DOOR_GARAGE_PANEL_PAINTED",
+      "sectionalStyle": "top_lites", "glazingMaterial": "MAT_GLASS_CLEAR",
+      "hardwareMaterial": "MAT_EXTERIOR_DOOR_HARDWARE_BRONZE",
       "solid": true, "lockable": true
     },
 

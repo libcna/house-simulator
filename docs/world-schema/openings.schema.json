@@ -100,6 +100,9 @@
             "required": [],
             "type": "object"
           },
+          "glazingMaterial": {
+            "$ref": "#/$defs/id"
+          },
           "hardwareMaterial": {
             "$ref": "#/$defs/id"
           },
@@ -162,6 +165,11 @@
           },
           "portal": {
             "$ref": "#/$defs/id"
+          },
+          "sectionalStyle": {
+            "enum": [
+              "top_lites"
+            ]
           },
           "shutterMaterial": {
             "$ref": "#/$defs/id"

@@ -37,7 +37,7 @@
     "L0_DINING.glb": "sha256:4812b762b29b511a8192f95e42dbf81b2ed0ef258ef28999e409e93917cf2c4e",
     "L0_FAMILY.glb": "sha256:644f743dcd67ecebad0b0108983c50444ad5511ec8778fbd2abb51566de26f92",
     "L0_FOYER.glb": "sha256:6bea0d36f4637e61c2e0a240d2803dc9e3f2ac952bd2d42083ee779b78fd600e",
-    "L0_GARAGE.glb": "sha256:f0e873964b4bdd75aa583f1743c8c7f8e3bd51d62bdcfb08fb1b92b0edbd5a65",
+    "L0_GARAGE.glb": "sha256:85a273a228ddbccad1d76d14bc6e9a6d1a0f79a75f5e33511ab75b88a80b5a2d",
     "L0_GARAGE_LOFT.glb": "sha256:7d7471c63340ea8587daa0d026bf165c4ce63eaff559cacc56820e70748c9769",
     "L0_HALL.glb": "sha256:a68c5771456e49ca487eb01e6055620d9a1ab9639b73e3b982fa14263834b4e8",
     "L0_KITCHEN.glb": "sha256:3361a06f4e2cbcac91327b4581a3dd5d61f0054b066effd25970ef402910cc14",
@@ -101,7 +101,7 @@
     "ROOF_MAIN.glb": "sha256:1be0537a63187ff231a5347642b97affd4dd49b297478187419bcac3dc632987"
   },
   "generator": "tools/blender/house_shell_gen.py",
-  "generatorVersion": "sha256:a529815e8134b1abbbc00e8129976144f2ab7a28f939aa562a127a166e779717",
+  "generatorVersion": "sha256:6a9f6a2765085dbd9656fc49f6e851a4e1e6b05c909d0669ed1d4fd48acbf15f",
   "origin": {
     "attribution": "",
     "kind": "generated",

@@ -894,6 +894,12 @@ bluestone bands tie the drive to the front-walk palette. These are path-bound re
 4–5 mm anti-z-fight lift, not a second path: the canonical concrete height, collision, navigation
 and footstep class remain authoritative.
 
+`HOUSE-00947` finishes the canonical 4.86 m sectional leaf with four framed glass lites in its top
+band and a measured 300 mm centre pull on two mounts. The treatment is selected by the opening
+row, reuses the existing exterior-window glass and bronze hardware finishes, and remains shallow
+finish geometry around the same five authored sections. The aperture, leaf/collision envelope,
+portal, future spline animation and navigation stay authoritative.
+
 ### 11.4 The road and the neighbourhood
 
 | Feature | Z range | Notes |
@@ -1077,7 +1083,7 @@ data or UI.
 | Interior door leaf | 0.86 × 2.05 m; rough opening 0.90 × 2.10 m |
 | Front entry door | 1.00 × 2.15 m + two 0.30 m sidelights |
 | Rear/patio slider | 2.40 × 2.15 m |
-| Garage door | 4.90 × 2.40 m sectional, sill at the slab +0.15, centred on the driveway at X +13.20 |
+| Garage door | 4.90 × 2.40 m five-band sectional with four top lites and centre pull, sill at the slab +0.15, centred on the driveway at X +13.20 |
 | Cased opening (typical) | 1.60 × 2.20 m |
 | Stair balustrade height | 0.95 m; balcony/terrace railing 1.10 m |
 | Handrail | 0.90 m above the pitch line |
@@ -2019,6 +2025,12 @@ adds one shared asphalt-finish control-joint role and one shared bluestone-inlay
 authored strips compile into those two batches across both terrain tiles; they do not become
 twelve draws. Both canonical ids already existed, so the unculled house moves from 647 to 649
 opaque submissions while staying at 107 opaque state changes.
+
+`HOUSE-00947` (2026-09-18) measures `L0_GARAGE` at exactly **eleven chunks**. Four top-row lites
+join its existing exterior-window glass batch, while the physical centre pull adds one separately
+exterior-resident bronze-hardware role. The complete world is 695 chunks / 273 exterior hierarchy
+instances / 57.695654 MB: 650 opaque submissions plus 45 cutouts at 107 opaque state changes. The
+garage aperture, collision, portal, navigation and receiver-lightmap geometry are unchanged.
 
 `HOUSE-00930` (2026-09-16) isolates each weather-facing `D_ENTRY` leaf from ordinary hardwood
 joinery so the exterior hierarchy can retain it when its owning interior room is portal-culled.

@@ -1,3 +1,49 @@
+# Visual-sprint handoff — 2026-09-18 (`HOUSE-00947` checkpoint)
+
+Branch `develop`. Task-start HEAD `e7fc9a0027b52587ba247ea23c207cd12c95768a`
+(`HOUSE-00946`). This file belongs to the single `HOUSE-00947` commit; use that commit as the
+ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal gameplay remains production-material only and
+explicit debug blockout remains available.
+
+The canonical 4.86 x 2.35 m garage leaf now explicitly selects a `top_lites` treatment: four
+50 mm framed glass lites replace the top raised-panel row, while a 300 mm centre pull and two
+40 x 85 mm mounts give the door a plausible operating detail. The lower sixteen raised panels
+remain unchanged. Glass reuses the garage's existing exterior-window batch; only the approved
+bronze hardware adds one chunk. The aperture, five-section future-animation contract, leaf and
+collision envelope, portal, navigation and receiver lightmaps did not move. No asset/material
+download, runtime branch, renderer change or licence decision was needed.
+
+Round 77 supplies the before [day garage approach](visual-review/captures/house-00946-driveway-joints-day-r2/garage-approach.png)
+and [22:00 garage approach](visual-review/captures/house-00946-driveway-joints-night-r2/garage-approach.png).
+The complete retained after sets are [clear day](visual-review/captures/house-00947-garage-lites-day-r2)
+and [normal night](visual-review/captures/house-00947-garage-lites-night-r2). Both 21-frame contact
+sheets and direct garage pairs were opened at full size. The retained door changes 5,290 day /
+5,635 night pixels above two channel levels (0.3674% / 0.3913%; normalized RGB MAE 0.000280 /
+0.000676). Day now has a cool glazed upper rhythm and a small physical pull; night keeps both
+details subdued beneath existing practicals rather than making them emissive.
+
+The world is 695 chunks / 96 cells / 92 static props / 273 exterior hierarchy instances /
+57.695654 MB: 650 opaque submissions, 45 cutouts and 107 unculled opaque state changes.
+`L0_GARAGE` is exactly eleven chunks. The shell selftest measures 384 opaque panel/frame faces,
+36 hardware faces and 54 total garage glass faces; all 99 shells unwrap with 5,252 unchanged
+receiver faces and 55,430 detail faces. Schema/world mutations, material/manifest and compiled
+world-content checks pass. No strict golden required an update. All 1,409 unit, 135 integration
+and 48 active software-render tests pass; all eighteen culled-vs-unculled pairs remain below 0.2%,
+at 0.0558% worst (`l0-sunroom`). `tools/ci/run_checks.sh --staged` is green and the separate
+strict-XNA gate reports all 323 translation units clean. Compilation and heavy work stayed on
+CPU 0-5 / at most six workers. The existing CMake tree still cannot auto-reconfigure because an
+unrelated sharp-runtime glob would write shared `~/deps/FNA3D`; exact stored Ninja compile/link
+commands were used without modifying CNA, sharp-runtime or shared dependencies.
+
+Largest visible defects: garage-wing/facade massing and repeated window rhythm remain simple; the
+finished drive still lacks a parked vehicle and richer neighbour context; the main roof/dormer
+silhouette remains honestly dark at 22:00 while the Moon is below the horizon; formal living has
+weak furniture/floor contact outside its bounded piano practical; secondary rooms/elevations
+remain sparse. The next highest-value work is a dependency-valid parked vehicle or stronger
+garage/facade context—not global exposure, fake moonlight or an unrelated subsystem.
+
+---
+
 # Visual-sprint handoff — 2026-09-18 (`HOUSE-00946` checkpoint)
 
 Branch `develop`. Task-start HEAD `14ce711d44288c29c6667b39859d1a4df3ef5253`

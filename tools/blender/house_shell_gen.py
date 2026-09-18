@@ -697,6 +697,18 @@ GARAGE_PANEL_SIDE_MARGIN = 0.140
 GARAGE_PANEL_GAP = 0.090
 GARAGE_PANEL_VERTICAL_REVEAL = 0.055
 GARAGE_PANEL_RELIEF = 0.014
+#: `HOUSE-00947`: the data-selected top section uses four framed clear lites instead of pretending
+#: every garage panel is solid.  Fifty-millimetre painted-steel rails and a 300 mm centre pull are
+#: normal residential-door dimensions; all project outside the settled 50 mm animated leaf rather
+#: than changing its aperture, five-section envelope or collision representation.
+GARAGE_LITE_FRAME = 0.050
+GARAGE_GLASS_THICK = 0.006
+GARAGE_HANDLE_WIDTH = 0.300
+GARAGE_HANDLE_HEIGHT = 0.035
+GARAGE_HANDLE_MOUNT_WIDTH = 0.040
+GARAGE_HANDLE_MOUNT_HEIGHT = 0.085
+GARAGE_HANDLE_HEIGHT_ABOVE_SILL = 0.680
+GARAGE_HANDLE_PROJECTION = 0.038
 
 
 def entry_door_detail_boxes(lu0: float, lu1: float, lv0: float, lv1: float,
@@ -935,8 +947,8 @@ def single_door_detail_boxes(lu0: float, lu1: float, lv0: float, lv1: float,
 
 
 def garage_door_detail_boxes(lu0: float, lu1: float, lv0: float, lv1: float,
-                             depth_lo: float, depth_hi: float):
-    """Five rows of four raised steel panels on both faces of a sectional garage leaf.
+                             depth_lo: float, depth_hi: float, style: str | None = None):
+    """Five rows of four raised steel panels, optionally with top lites and a centre pull.
 
     The returned shallow closed boxes use the leaf's narrowly authored panel-material sibling.
     They finish the static closed representation without moving the aperture or pre-empting §54's
@@ -951,6 +963,17 @@ def garage_door_detail_boxes(lu0: float, lu1: float, lv0: float, lv1: float,
     panel_width = usable / GARAGE_PANEL_COLUMNS
     section_height = height / GARAGE_SECTION_COUNT
     boxes = []
+
+    def both_faces(u0, u1, v0, v1, klass, part, projection=GARAGE_PANEL_RELIEF,
+                   thickness=None):
+        face_thickness = projection if thickness is None else thickness
+        boxes.append((u0, u1, v0, v1,
+                      depth_lo - projection, depth_lo - projection + face_thickness,
+                      klass, part))
+        boxes.append((u0, u1, v0, v1,
+                      depth_hi + projection - face_thickness, depth_hi + projection,
+                      klass, part))
+
     for section in range(GARAGE_SECTION_COUNT):
         panel_v0 = lv0 + section * section_height + GARAGE_PANEL_VERTICAL_REVEAL
         panel_v1 = lv0 + (section + 1) * section_height - GARAGE_PANEL_VERTICAL_REVEAL
@@ -958,12 +981,47 @@ def garage_door_detail_boxes(lu0: float, lu1: float, lv0: float, lv1: float,
             panel_u0 = (lu0 + GARAGE_PANEL_SIDE_MARGIN
                         + column * (panel_width + GARAGE_PANEL_GAP))
             panel_u1 = panel_u0 + panel_width
-            boxes.append((panel_u0, panel_u1, panel_v0, panel_v1,
-                          depth_lo - GARAGE_PANEL_RELIEF, depth_lo,
-                          "exterior_door_panel", "section_panel"))
-            boxes.append((panel_u0, panel_u1, panel_v0, panel_v1,
-                          depth_hi, depth_hi + GARAGE_PANEL_RELIEF,
-                          "exterior_door_panel", "section_panel"))
+            if style == "top_lites" and section == GARAGE_SECTION_COUNT - 1:
+                frame = min(GARAGE_LITE_FRAME, panel_width * 0.12,
+                            (panel_v1 - panel_v0) * 0.18)
+                both_faces(panel_u0, panel_u0 + frame, panel_v0, panel_v1,
+                           "exterior_door_panel", "lite_frame")
+                both_faces(panel_u1 - frame, panel_u1, panel_v0, panel_v1,
+                           "exterior_door_panel", "lite_frame")
+                both_faces(panel_u0 + frame, panel_u1 - frame, panel_v0, panel_v0 + frame,
+                           "exterior_door_panel", "lite_frame")
+                both_faces(panel_u0 + frame, panel_u1 - frame, panel_v1 - frame, panel_v1,
+                           "exterior_door_panel", "lite_frame")
+                # The static representation retains its opaque door body as the dark garage-side
+                # backing. These thin sheets are the actual weather-facing glass role and sit
+                # behind the projecting rails, with no coplanar faces.
+                glass_projection = GARAGE_PANEL_RELIEF - 0.003
+                both_faces(panel_u0 + frame, panel_u1 - frame,
+                           panel_v0 + frame, panel_v1 - frame,
+                           "window_glass", "section_lite", glass_projection,
+                           GARAGE_GLASS_THICK)
+            else:
+                both_faces(panel_u0, panel_u1, panel_v0, panel_v1,
+                           "exterior_door_panel", "section_panel")
+
+    if style == "top_lites":
+        handle_u = (lu0 + lu1) / 2.0
+        handle_v = min(lv1 - GARAGE_PANEL_VERTICAL_REVEAL,
+                       lv0 + GARAGE_HANDLE_HEIGHT_ABOVE_SILL)
+        handle_u0 = handle_u - GARAGE_HANDLE_WIDTH / 2.0
+        handle_u1 = handle_u + GARAGE_HANDLE_WIDTH / 2.0
+        for mount_u in (handle_u0, handle_u1):
+            both_faces(mount_u - GARAGE_HANDLE_MOUNT_WIDTH / 2.0,
+                       mount_u + GARAGE_HANDLE_MOUNT_WIDTH / 2.0,
+                       handle_v - GARAGE_HANDLE_MOUNT_HEIGHT / 2.0,
+                       handle_v + GARAGE_HANDLE_MOUNT_HEIGHT / 2.0,
+                       "exterior_door_hardware", "centre_pull_mount",
+                       GARAGE_HANDLE_PROJECTION)
+        both_faces(handle_u0, handle_u1,
+                   handle_v - GARAGE_HANDLE_HEIGHT / 2.0,
+                   handle_v + GARAGE_HANDLE_HEIGHT / 2.0,
+                   "exterior_door_hardware", "centre_pull",
+                   GARAGE_HANDLE_PROJECTION)
     return boxes
 
 
@@ -1296,7 +1354,7 @@ def cell_surface_materials(cell: dict, openings=(), portals=(), flights=(),
         result["exterior"] = "MAT_BRICK_WATER_TABLE"
 
     portal_cells = {row["id"]: (row.get("cellA"), row.get("cellB")) for row in portals}
-    glass = {
+    glass_sources = {
         row.get("material")
         for row in openings
         if row.get("kind") == "window" and cell.get("id") in portal_cells.get(row.get("portal"), ())
@@ -1304,17 +1362,27 @@ def cell_surface_materials(cell: dict, openings=(), portals=(), flights=(),
         == cell.get("id")
         and row.get("material")
     }
-    if len(glass) > 1:
-        raise ValueError(
-            f"{cell.get('id')}: generated glass is one surface class but its windows name "
-            f"multiple materials: {', '.join(sorted(glass))}")
-    if glass:
-        source_glass = next(iter(glass))
-        result["glass"] = source_glass
-        result["window_glass"] = {
+    glass_sources.update(
+        row.get("glazingMaterial")
+        for row in openings
+        if row.get("kind") == "door" and row.get("sectionalStyle")
+        and cell.get("id") in portal_cells.get(row.get("portal"), ())
+        and row.get("glazingMaterial"))
+    exterior_glass = {
+        {
             "MAT_GLASS_CLEAR": "MAT_WINDOW_GLASS_CLEAR",
             "MAT_GLASS_OBSCURED": "MAT_WINDOW_GLASS_OBSCURED",
-        }.get(source_glass, source_glass)
+        }.get(source, source)
+        for source in glass_sources
+    }
+    if len(exterior_glass) > 1:
+        raise ValueError(
+            f"{cell.get('id')}: generated exterior glass is one surface class but its openings "
+            f"resolve to multiple materials: {', '.join(sorted(exterior_glass))}")
+    if glass_sources:
+        source_glass = next(iter(glass_sources))
+        result["glass"] = source_glass
+        result["window_glass"] = next(iter(exterior_glass))
 
     shutters = {
         row.get("shutterMaterial")
@@ -1359,6 +1427,21 @@ def cell_surface_materials(cell: dict, openings=(), portals=(), flights=(),
             f"{', '.join(sorted(exterior_door_panels))}")
     if exterior_door_panels:
         result["exterior_door_panel"] = next(iter(exterior_door_panels))
+
+    exterior_door_hardware = {
+        row.get("hardwareMaterial")
+        for row in openings
+        if row.get("kind") == "door"
+        and cell.get("id") in portal_cells.get(row.get("portal"), ())
+        and row.get("sectionalStyle")
+        and row.get("hardwareMaterial")
+    }
+    if len(exterior_door_hardware) > 1:
+        raise ValueError(
+            f"{cell.get('id')}: generated exterior door hardware names multiple materials: "
+            f"{', '.join(sorted(exterior_door_hardware))}")
+    if exterior_door_hardware:
+        result["exterior_door_hardware"] = next(iter(exterior_door_hardware))
 
     interior_door_hardware = {
         row.get("hardwareMaterial")
@@ -2228,7 +2311,8 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                         if leaf_class == "exterior_door" and opening.get("type") == "D_GARAGE":
                             for detail in garage_door_detail_boxes(
                                     lu0, lu1, lv0, lv1, middle - thickness / 2.0,
-                                    middle + thickness / 2.0):
+                                    middle + thickness / 2.0,
+                                    opening.get("sectionalStyle")):
                                 leaf_box(*detail[:6], detail[6])
                         # The lining: the reveal's full depth, filling what the leaf does not.
                         leaf_box(hu0, lu0, hv0, hv1, reveal_lo, reveal_hi, "trim")
@@ -4542,12 +4626,20 @@ def selftest(output: Path) -> int:
         openings=openings_by_portal, cells_by_id=cells)
     garage_classes = [SURFACE_ORDER[polygon.material_index]
                       for polygon in garage_shell.data.polygons]
-    expected_garage_panel_faces = GARAGE_SECTION_COUNT * GARAGE_PANEL_COLUMNS * 2 * 6
+    expected_solid_panel_faces = ((GARAGE_SECTION_COUNT - 1) * GARAGE_PANEL_COLUMNS * 2 * 6)
+    expected_lite_frame_faces = GARAGE_PANEL_COLUMNS * 4 * 2 * 6
+    expected_garage_panel_faces = expected_solid_panel_faces + expected_lite_frame_faces
     require(garage_classes.count("exterior_door") == 6,
             "the closed garage frontage retains one six-face leaf body")
     require(garage_classes.count("exterior_door_panel") == expected_garage_panel_faces,
-            f"and has five rows of four raised panels on both faces "
+            f"and has four raised-panel rows plus four framed top lites on both faces "
             f"({garage_classes.count('exterior_door_panel')} faces)")
+    require(garage_classes.count("exterior_door_hardware") == 36,
+            f"and its centre pull uses two mounts and one bar on each face "
+            f"({garage_classes.count('exterior_door_hardware')} faces)")
+    require(garage_classes.count("window_glass") >= GARAGE_PANEL_COLUMNS * 2 * 6,
+            f"and its four two-faced lites reach the existing weather-facing glass role "
+            f"({garage_classes.count('window_glass')} faces including the garage window)")
     garage_materials = cell_surface_materials(
         garage, openings_by_portal.values(), all_portals, cells_by_id=cells)
     require(garage_materials["exterior_door"] == "MAT_EXTERIOR_DOOR_GARAGE_PAINTED",
@@ -4556,6 +4648,11 @@ def selftest(output: Path) -> int:
     require(garage_materials["exterior_door_panel"]
             == "MAT_EXTERIOR_DOOR_GARAGE_PANEL_PAINTED",
             "while the opening row gives its raised panels a readable sibling finish")
+    require(garage_materials["window_glass"] == "MAT_WINDOW_GLASS_CLEAR",
+            "and its selected source glass resolves to the bounded exterior-glass sibling")
+    require(garage_materials["exterior_door_hardware"]
+            == "MAT_EXTERIOR_DOOR_HARDWARE_BRONZE",
+            "while the centre pull uses its explicitly selected exterior-visible metal")
 
     require(PORCH_COLUMNS == 4,
             f"§12.1 says the porch stands on FOUR square columns ({PORCH_COLUMNS})")

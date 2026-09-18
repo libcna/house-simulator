@@ -266,6 +266,11 @@ def build() -> dict[str, dict]:
          # Selected close-route single leaves opt into spatial painted joinery explicitly.  The
          # paired hardware material keeps the generator from inferring a finish from a room name.
          "joineryStyle": {"enum": ["four_panel"]},
+         # The canonical sectional leaf may opt into a measured top-lite treatment.  Glass and
+         # hardware remain explicit material references: the generator does not infer either
+         # finish from the garage cell or from a world-space coordinate.
+         "sectionalStyle": {"enum": ["top_lites"]},
+         "glazingMaterial": ID,
          "hardwareMaterial": ID,
          "asset": ID_OR_NULL, "material": ID_OR_NULL, "panelMaterial": ID,
          "solid": BOOL, "lockable": BOOL})))

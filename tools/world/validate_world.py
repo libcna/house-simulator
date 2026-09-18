@@ -1031,6 +1031,8 @@ def rule_6_references(world: World) -> list[Problem]:
               "material", have_materials)
         check("openings", index, "shutterMaterial", opening.get("shutterMaterial"), materials,
               "material", have_materials)
+        check("openings", index, "glazingMaterial", opening.get("glazingMaterial"), materials,
+              "material", have_materials)
         check("openings", index, "hardwareMaterial", opening.get("hardwareMaterial"), materials,
               "material", have_materials)
         check("openings", index, "asset", opening.get("asset"), assets, "asset", have_assets)
@@ -1421,12 +1423,19 @@ def rule_7_openings(world: World) -> list[Problem]:
                 f"{panel_material!r} without an exterior D_ENTRY/D_GARAGE leaf"))
 
         joinery = opening.get("joineryStyle")
+        sectional = opening.get("sectionalStyle")
+        glazing = opening.get("glazingMaterial")
         hardware = opening.get("hardwareMaterial")
-        if (joinery is None) != (hardware is None):
+        if joinery is not None and hardware is None:
             problems.append(Problem(
                 7, FILE_OF["openings"], f"openings/{index}",
                 f"opening {opening.get('id')} must author joineryStyle and hardwareMaterial "
                 "together"))
+        if hardware is not None and joinery is None and sectional is None:
+            problems.append(Problem(
+                7, FILE_OF["openings"], f"openings/{index}",
+                f"opening {opening.get('id')} supplies hardwareMaterial without a generated "
+                "joineryStyle or sectionalStyle"))
         if joinery is not None and (
                 opening.get("kind") != "door"
                 or opening.get("type") not in
@@ -1437,6 +1446,29 @@ def rule_7_openings(world: World) -> list[Problem]:
                 f"opening {opening.get('id')} assigns generated painted single-leaf joinery to "
                 f"unsupported type/material {opening.get('type')!r}/"
                 f"{opening.get('material')!r}"))
+
+        if sectional is not None and (glazing is None or hardware is None):
+            problems.append(Problem(
+                7, FILE_OF["openings"], f"openings/{index}",
+                f"opening {opening.get('id')} must author sectionalStyle, glazingMaterial and "
+                "hardwareMaterial together"))
+        if glazing is not None and sectional is None:
+            problems.append(Problem(
+                7, FILE_OF["openings"], f"openings/{index}/glazingMaterial",
+                f"opening {opening.get('id')} supplies glazingMaterial without a generated "
+                "sectionalStyle"))
+        if sectional is not None and (
+                opening.get("kind") != "door"
+                or opening.get("type") != "D_GARAGE"
+                or not str(opening.get("material") or "").startswith("MAT_EXTERIOR_DOOR_")
+                or opening.get("panelMaterial") is None
+                or glazing not in ("MAT_GLASS_CLEAR", "MAT_GLASS_OBSCURED")
+                or not str(hardware or "").startswith("MAT_EXTERIOR_DOOR_")):
+            problems.append(Problem(
+                7, FILE_OF["openings"], f"openings/{index}/sectionalStyle",
+                f"opening {opening.get('id')} assigns generated sectional joinery to unsupported "
+                f"type/material/glazing/hardware {opening.get('type')!r}/"
+                f"{opening.get('material')!r}/{glazing!r}/{hardware!r}"))
 
     for index, portal in enumerate(world.portals):
         kind = portal.get("kind")
@@ -4170,6 +4202,44 @@ def selftest() -> int:
         _, problems = validate(special_dir, wanted=[7])
         require(any("unsupported type/material" in p.message for p in problems),
                 f"special leaves cannot silently borrow the selected interior grammar "
+                f"({[str(p) for p in problems]})")
+
+        # `HOUSE-00947`: sectional glazing and hardware are one explicit exterior treatment. A
+        # half-authored set would leave glass without frames or a style without its physical
+        # finish; an interior/swinging leaf must not silently borrow the garage grammar.
+        sectional = copy.deepcopy(base)
+        sectional_door = row(sectional, "openings", "DOOR_WC1")
+        sectional_door.update({
+            "type": "D_GARAGE",
+            "material": "MAT_EXTERIOR_DOOR_GARAGE_PAINTED",
+            "panelMaterial": "MAT_EXTERIOR_DOOR_GARAGE_PANEL_PAINTED",
+            "sectionalStyle": "top_lites",
+            "glazingMaterial": "MAT_GLASS_CLEAR",
+            "hardwareMaterial": "MAT_EXTERIOR_DOOR_HARDWARE_BRONZE",
+        })
+        for material_id in ("MAT_EXTERIOR_DOOR_GARAGE_PAINTED",
+                            "MAT_EXTERIOR_DOOR_GARAGE_PANEL_PAINTED",
+                            "MAT_GLASS_CLEAR",
+                            "MAT_EXTERIOR_DOOR_HARDWARE_BRONZE"):
+            sectional["materials"]["materials"].append({
+                **copy.deepcopy(sectional["materials"]["materials"][0]),
+                "id": material_id,
+            })
+        sectional_dir = workspace / "selected-sectional-joinery"
+        write_fixture(sectional_dir, sectional)
+        _, problems = validate(sectional_dir, wanted=[7])
+        require(not problems,
+                f"an exterior D_GARAGE leaf may select complete sectional joinery "
+                f"({[str(p) for p in problems]})")
+
+        missing_glass = copy.deepcopy(sectional)
+        row(missing_glass, "openings", "DOOR_WC1").pop("glazingMaterial")
+        missing_glass_dir = workspace / "sectional-without-glass"
+        write_fixture(missing_glass_dir, missing_glass)
+        _, problems = validate(missing_glass_dir, wanted=[7])
+        require(any("sectionalStyle, glazingMaterial and hardwareMaterial together" in p.message
+                    for p in problems),
+                f"sectional joinery without its glass finish is caught "
                 f"({[str(p) for p in problems]})")
 
         # 14. Rule 11 is a proof about STANDING, and about the hole rather than the wall.
