@@ -1969,6 +1969,50 @@
       ]
     },
     {
+      "id": "MODEL_LIVING_FIREPLACE",
+      "category": "fireplace-surround",
+      "sourceFile": "assets-src/Models/Furniture/LivingRoom/living_fireplace.glb",
+      "sourceSha256": "0c886b217b657e26dd75d16b9028cc43c17124640b7ea3c05e40e1a05d2bf4d1",
+      "contentName": "Models/Furniture/LivingRoom/living_fireplace",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Formal-living marble and walnut fireplace composition",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored fireplace suite generated deterministically by tools/blender/living_fireplace.py for HOUSE-01060. It turns the canonical structural brick chimney into a room-side hearth with marble surround, walnut mantel, recessed iron firebox, grate, logs and original over-mantel relief. Approved project texture roles are reused; no third-party mesh or image was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.78,
+          2.325,
+          0.57
+        ],
+        "triangles": {
+          "LOD0": 5204
+        },
+        "collision": "living_fireplace_COL"
+      },
+      "materialMap": {
+        "FIREPLACE_STONE": "MAT_KITCHEN_COUNTER_STONE",
+        "FIREPLACE_IRON": "MAT_DOOR_STEEL",
+        "FIREPLACE_WOOD": "MAT_FURNITURE_PIANO_WOOD",
+        "FIREPLACE_CANVAS": "MAT_FAMILY_ART_CANVAS",
+        "FIREPLACE_BRASS": "MAT_FURNITURE_PIANO_BRASS"
+      },
+      "usedIn": [
+        "L0_LIVING"
+      ]
+    },
+    {
       "id": "MODEL_LIVING_PIANO_ART",
       "category": "picture",
       "sourceFile": "assets-src/Models/Furniture/LivingRoom/piano_art.glb",

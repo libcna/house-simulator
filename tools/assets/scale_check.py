@@ -119,6 +119,12 @@ CATEGORIES: dict[str, list[tuple[str, float, float, str]]] = {
     "wall-light": [("x", 0.10, 1.50, "domestic wall-light width"),
                    ("y", 0.05, 1.50, "domestic wall-light height"),
                    ("z", 0.05, 0.75, "domestic wall-light projection")],
+    # A complete floor-supported surround includes the over-mantel composition. All three axes
+    # are constrained because a plausible isolated fireplace is especially sensitive to an
+    # inch/centimetre import even though §70.5 did not originally name this furniture category.
+    "fireplace-surround": [("x", 1.40, 2.20, "domestic fireplace surround width"),
+                           ("y", 1.80, 2.80, "surround plus over-mantel composition height"),
+                           ("z", 0.30, 0.80, "hearth projection")],
 }
 
 #: Categories that exist in the manifest but carry no size expectation. Listed explicitly so that a

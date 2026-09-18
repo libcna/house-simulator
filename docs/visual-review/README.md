@@ -2798,3 +2798,46 @@ below 0.2%; full test and gate results are recorded in `docs/handoff.md`.
 debug blockout remains available. The next highest visible value is restrained formal-living
 grounding/wall dressing or a separate physical upper/side-facade layer—not global night exposure
 and not unrelated subsystem work.
+
+## Round 64 — formal-living fireplace composition
+
+Commit: `HOUSE-01060` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 63's [living composition](captures/house-01289-facade-uplights-day-final/living-composition.png)
+ends the formal room in one uninterrupted floor-to-ceiling structural brick stack. After: the
+complete matched eighteen-camera [clear-day](captures/house-01060-fireplace-day-final) and
+[normal-night](captures/house-01060-fireplace-night-final) sets add a real room-side hearth,
+surround, mantel, firebox/grate/logs and original over-mantel relief. The
+[day composition](captures/house-01060-fireplace-day-final/living-composition.png) and
+[night composition](captures/house-01060-fireplace-night-final/living-composition.png) show the
+change directly. All 36 final frames were opened; the canonical exterior, entrance, hall, kitchen,
+dining and family views show no new visible defect.
+
+Ranked visible defects remaining:
+
+1. Formal living remains too brown and dark overall; the large leather sofa and chairs have weak
+   contact with the floor and one another despite the new focal point.
+2. Broad formal-living, foyer and hall wall bays still need restrained art and domestic detail.
+3. The roof/dormer and far side elevations still collapse outside the bounded facade pools at
+   night; any improvement needs its own physical source and receiver boundary.
+4. Garage/side-yard terrain and distant neighbour context still lose depth at night.
+5. The simple facade massing and repetitive window rhythm remain conspicuous by day.
+
+Fixed: a deterministic project-authored 1.780 x 2.325 x 0.570 m suite contains 5,204 visible
+triangles and reuses approved marble, iron, walnut, canvas and brass roles. Its projecting body
+aligns to the canonical chimney/appliance focus. A 12-triangle proxy covers only the 170 mm-high
+hearth; a rejected full-height proxy trapped the wall-recovery test and does not survive. The
+origin validator now expresses the truthful floor-and-wall registration, and the scale validator
+bounds the complete surround. No renderer, exposure, lightmap, portal, room id or live-fire state
+changed.
+
+Against Round 63, the fixed living composition changes 57,874 day pixels and 58,396 night pixels
+above two channel levels (4.0190% / 4.0553% of the frame; normalized MAE 0.011887 / 0.003575).
+The new silhouette and depth read at both times without crowding the route. The world is 661 chunks
+/ 96 cells / 78 props / 266 exterior instances / 54.249842 MB; the unculled diagnostic is 617
+opaque, 44 cutout and 100 state changes. No strict golden moved, all eighteen culling pairs pass,
+and full test/gate results are recorded in `docs/handoff.md`.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next highest visible value is formal-living contact/colour
+balance and restrained wall dressing, followed by foyer/hall detail—not unrelated subsystem work.

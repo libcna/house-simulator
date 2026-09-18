@@ -51,6 +51,14 @@ WALL_MOUNTED = {
     "mirror",
 }
 
+#: Floor-supported architectural objects which also register against a wall plane. Unlike a
+#: cabinet, a fireplace must satisfy BOTH conditions: moving its origin to the depth centre makes
+#: canonical placement opaque, while treating it only as wall-mounted would stop checking that
+#: the hearth is actually grounded.
+FLOOR_AND_WALL = {
+    "fireplace-surround",
+}
+
 #: Categories with no meaningful support point.
 EXEMPT = {
     "fallback": "a placeholder whose origin is not used for placement",
@@ -82,10 +90,12 @@ def check(path: Path, category: str) -> list[str]:
     low, high = bounds
     problems: list[str] = []
 
-    # X and Z centred, for everything. An object whose origin is off to one side rotates about that
-    # side, which is visible the moment a door swings or a chair is turned.
+    wall_plane = category in WALL_MOUNTED or category in FLOOR_AND_WALL
+
+    # X and Z centred, except depth for anything registered to a wall plane. An object whose
+    # origin is off to one side rotates about that side, which is visible the moment it is turned.
     for axis, index in (("X", 0), ("Z", 2)):
-        if category in WALL_MOUNTED and axis == "Z":
+        if wall_plane and axis == "Z":
             continue
         centre = (low[index] + high[index]) / 2.0
         if abs(centre) > TOLERANCE:
@@ -94,14 +104,14 @@ def check(path: Path, category: str) -> list[str]:
                 f"±{TOLERANCE:.2f} m); the object will rotate about a point outside itself"
             )
 
-    if category in WALL_MOUNTED:
+    if wall_plane:
         # The back face -- the one against the wall -- at Z = 0.
         if abs(high[2]) > TOLERANCE:
             problems.append(
                 f"wall-mounted: the back face is at Z {high[2]:+.3f} m, not 0 (tolerance "
                 f"±{TOLERANCE:.2f} m); it will float off the wall or sink into it by that much"
             )
-    else:
+    if category not in WALL_MOUNTED or category in FLOOR_AND_WALL:
         # The support point: the lowest vertex, at Y = 0.
         if abs(low[1]) > TOLERANCE:
             direction = "above" if low[1] > 0 else "below"
@@ -174,6 +184,20 @@ def selftest() -> int:
                 [-0.30, 1.45, -0.25],
                 [0.30, 2.05, 0.10],
                 "cabinet-upper",
+                1,
+            ),
+            (
+                "a grounded fireplace registered to a wall",
+                [-0.90, 0.0, -0.60],
+                [0.90, 2.30, 0.0],
+                "fireplace-surround",
+                0,
+            ),
+            (
+                "a floating fireplace registered to a wall",
+                [-0.90, 0.10, -0.60],
+                [0.90, 2.40, 0.0],
+                "fireplace-surround",
                 1,
             ),
         ]

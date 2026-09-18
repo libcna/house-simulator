@@ -160,6 +160,9 @@ run_gate "formal-living-sofa" python3 tools/blender/living_sofa_prepare.py --che
 # HOUSE-01058: the formerly empty piano wall remains a measured bench/art/physical-light
 # composition, with the existing default-on accent linked to the exact diffuser slot.
 run_gate "living-piano-vignette" python3 tools/assets/living_piano_vignette_prepare.py --check
+# HOUSE-01060: the structural chimney keeps its measured room-side hearth/surround composition,
+# low collision proxy, exact canonical alignment and deterministic project-authored geometry.
+run_gate "living-fireplace" python3 tools/assets/living_fireplace_prepare.py --check
 # HOUSE-01053: the family focal wall retains the pinned CC0 low cabinet, exact canonical roles,
 # measured television gap and family-only placement without unsupported source metadata.
 run_gate "family-media-console" python3 tools/assets/family_media_console_prepare.py --check

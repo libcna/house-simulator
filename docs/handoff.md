@@ -1,3 +1,54 @@
+# Visual-sprint handoff — 2026-09-18 (`HOUSE-01060` checkpoint)
+
+Branch `develop`. Task-start HEAD `e1bdf45de4d6ed799373888c6829eb25787b76e2`
+(`HOUSE-01289`). This file belongs to the single `HOUSE-01060` commit; use that commit as the
+ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal gameplay remains production-material only and
+explicit debug blockout remains available.
+
+The formal living room now has a real room-side fireplace composition instead of an uninterrupted
+structural brick stack. The deterministic project-authored model is 1.780 x 2.325 x 0.570 m with
+5,204 visible triangles: a projecting two-step hearth, marble jamb/lintel/plinth assembly, walnut
+mantel/corbels, recessed iron firebox and grate, three unlit logs and an original framed relief.
+`PROP_LIVING_FIREPLACE` aligns its local wall plane to the existing chimney and canonical
+`APPL_L0_LIVING_FIREPLACE` focus. Its 12-triangle proxy covers only the low hearth; a first
+full-height proxy failed the real wall-recovery test by making an artificial pinch and was
+rejected. Five approved stock-`BasicEffect` roles are reused. Live fire remains `HOUSE-02691`.
+
+The canonical before frame is Round 63's
+[day composition](visual-review/captures/house-01289-facade-uplights-day-final/living-composition.png).
+The complete matched eighteen-camera after sets are
+[clear day](visual-review/captures/house-01060-fireplace-day-final) and
+[normal night](visual-review/captures/house-01060-fireplace-night-final). The
+[day fireplace](visual-review/captures/house-01060-fireplace-day-final/living-composition.png) and
+[night fireplace](visual-review/captures/house-01060-fireplace-night-final/living-composition.png)
+show the result most clearly. All 36 final frames were opened. Against Round 63, that fixed camera
+changes 57,874 day pixels / 58,396 night pixels above two channel levels (4.0190% / 4.0553%;
+normalized MAE 0.011887 / 0.003575). No strict golden moved.
+
+The world is 661 chunks / 96 cells / 78 static props / 266 exterior hierarchy instances /
+54.249842 MB. The unculled diagnostic is 617 opaque submissions, 44 cutouts and 100 state changes.
+Stable-id validation records 2,930 ids; the asset manifest has 896 rows. The permanent gate
+regenerates the 372,328-byte GLB byte-for-byte, pins its five material slots, geometry/components,
+12-triangle collision proxy and canonical placement, and checks both floor and wall registration.
+
+All project gates are green, including provenance/licensing, budgets and all 323 strict-XNA
+translation units. All 1,409 unit and 135 integration tests pass. All 48 active software-render
+tests pass (eight capture-only generators remain disabled); all eighteen culled-vs-unculled pairs
+stay below 0.2%, at 0.0673% worst (`l0-sunroom`). Compilation and heavy tools stayed on CPU 0-5 /
+at most six workers. The configured build's automatic CMake glob recheck tried to write into the
+shared `/home/robertvokac/deps/FNA3D` tree and was correctly not authorized; the one changed test
+was compiled and linked with the exact existing Ninja commands through the required shared ccache,
+without modifying CNA or sharp-runtime. Content was rebuilt and copied into the existing build.
+
+Largest remaining visible defects: formal living is still dark and brown-heavy with weak
+furniture contact; its broad wall bays and the foyer/hall need restrained domestic detail; the
+roof/dormer and far side elevations remain black outside their bounded night sources; garage/yard
+and distant-neighbour depth remain sparse. The next highest-value checkpoint is formal-living
+contact/colour balance and wall dressing, then foyer/hall detail. Do not raise global exposure or
+leave the visual slice for unrelated systems.
+
+---
+
 # Visual-sprint handoff — 2026-09-18 (`HOUSE-01289` checkpoint)
 
 Branch `develop`. Task-start HEAD `32543ec73cbd02408d79435fac58cc849524725b`

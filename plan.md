@@ -38,7 +38,9 @@ front-balcony point into a real over-door lantern with one bounded L1 receiver b
 `HOUSE-01288` makes the four existing front-walk sources physical low bollards without taking
 their manual circuit away. `HOUSE-01289` adds four physical foundation-bed uplights and selected
 L1/L2 facade bakes, replacing the remaining broad black night elevation with restrained warm
-vertical pools without raising global exposure. Round 9 proves the exterior material omission is fixed; `HOUSE-00924`
+vertical pools without raising global exposure. `HOUSE-01060` turns the formal living room's bare
+structural chimney into a measured room-side fireplace composition. Round 9 proves the exterior
+material omission is fixed; `HOUSE-00924`
 removes the
 exposure-scaled glass tint, and `HOUSE-00925` keeps outdoor receivers from clipping when viewed
 from a dark room. Round 11 leaves the front façade and empty/dark entrance route as the largest
@@ -150,7 +152,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 10 | Exterior and property | 00761–00840 | 25 | Terrain, fences, gates, drive, garden |
 | 11 | Neighbourhood background | 00841–00890 | 17 | The house is not floating in nothing |
 | 12 | Materials and textures | 00891–00970 | 36 | The blockout reads as a building |
-| 13 | Static furniture and dressing | 00971–01120 | 65 | Every room furnished to density |
+| 13 | Static furniture and dressing | 00971–01120 | 66 | Every room furnished to density |
 | 14 | Interactable framework | 01121–01180 | 26 | The 12 behaviours and the data model |
 | 15 | Doors and windows | 01181–01250 | 22 | Portals are dynamic |
 | 16 | Lights and switches | 01251–01310 | 29 | The house can be lit — **first playable** |
@@ -14902,6 +14904,41 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             integration and 48 active render tests pass (eight render tests remain deliberately
             disabled). All eighteen culled/unculled poses pass at 0.1342% worst case
             (`l0-sunroom`), and the complete gate accepts all 323 strict-XNA translation units.
+- [x] HOUSE-01060 — Turn the bare formal-living chimney into a measured fireplace composition
+      dep: HOUSE-00215, HOUSE-00220, HOUSE-00296, HOUSE-00907, HOUSE-01058 · sys: content/world · plat: TOOL · pri: MUST
+      note: (2026-09-18) Round 63's fixed living composition makes the full-height exposed brick
+            stack the largest contained interior defect. Add only the room-side architectural
+            finish and domestic focal composition; keep the dependency-blocked full furnishing
+            task `HOUSE-00988` and later animated embers/audio task `HOUSE-02691` open.
+      accept: deterministically author a correctly scaled, floor-supported fireplace with a real
+            projecting hearth, stone surround, walnut mantel, recessed dark firebox, iron grate,
+            unlit logs and original over-mantel relief. Align it to the canonical chimney/appliance
+            focus, give the projecting body a bounded collision proxy, reuse approved marble and
+            dark-iron roles, preserve circulation and stock-XNA rendering,
+            capture and inspect the unchanged canonical day/night route, and pass content, world,
+            collision, render, culling and strict-XNA gates with heavy work capped at six CPUs.
+      result: (2026-09-18) A deterministic 1.780 x 2.325 x 0.570 m, 5,204-visible-triangle suite
+            now covers the room side of the canonical stack with a two-step projecting hearth,
+            marble jamb/lintel/plinth assembly, walnut mantel/corbels, recessed iron firebox and
+            grate, three unlit logs and an original framed relief. `PROP_LIVING_FIREPLACE` aligns
+            its wall plane to the existing chimney and `APPL_L0_LIVING_FIREPLACE`; its 12-triangle
+            proxy covers only the 170 mm-high hearth, so the canonical wall still closes the tall
+            body without creating a player-recovery pinch. Five approved stock-`BasicEffect`
+            roles are reused. The general origin gate now expresses floor-and-wall registration
+            explicitly, and the scale gate bounds the new category on all three axes.
+      review: Round 64's complete eighteen-camera clear-day and normal-night sets were opened.
+            Against Round 63 the fixed living composition changes 57,874 day pixels / 58,396 night
+            pixels above two channel levels (4.0190% / 4.0553%; normalized MAE 0.011887 /
+            0.003575). The former uninterrupted floor-to-ceiling brick stack now reads as a usable
+            domestic focal point without pretending that `HOUSE-02691`'s live fire is complete.
+            The remaining local defect is the room's dark brown-heavy balance and weak furniture
+            contact, not fireplace scale or alignment. No strict reference needed advancement.
+      verified: The deterministic model/provenance/content/world/budget gates and all 323
+            strict-XNA translation units pass. All 1,409 unit, 135 integration and 48 active
+            software-render tests pass (eight capture-only tests remain disabled). All eighteen
+            culled/unculled pairs pass at 0.0673% worst (`l0-sunroom`) against a 0.2% limit. The
+            world is 661 chunks / 96 cells / 78 static props / 266 exterior instances /
+            54.249842 MB; the unculled diagnostic is 617 opaque, 44 cutout and 100 state changes.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -19296,13 +19333,13 @@ Recorded so nobody has to re-derive the decision.
 |---|---|---|
 | Foundations, capability proof, build, pipeline, assets | 0–4 | 238 |
 | World data, blockout, collision, camera, visibility | 5–9 | 218 |
-| Exterior, neighbourhood, materials, furnishing | 10–13 | 136 |
+| Exterior, neighbourhood, materials, furnishing | 10–13 | 137 |
 | Interaction framework and the systems built on it | 14–21 | 159 |
 | Time, sun, moon, stars, sky, weather | 22–30 | 155 |
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 162 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 337** |
+| **Total** | **0–52** | **1 338** |
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
 disturbs an existing one.
@@ -19338,6 +19375,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-18 | `HOUSE-01060` | **New task, next free phase-13 id.** Add a bounded room-side fireplace composition at the already canonical chimney/appliance position while leaving the full-room furnishing and future live-fire tasks open. | Round 63's living composition still reads as an engineering shell because a 0.60 x 1.10 m structural brick stack runs floor-to-roof with no hearth, surround, mantel or domestic focal treatment. A deterministic authored suite fixes that dominant contained defect through the approved static-prop/material path without renderer changes, unlicensed input or pretending that fire simulation is complete. |
 | 2026-09-18 | `HOUSE-01289` | **New task, next free phase-16 id.** Add four measured upward fixtures inside the two completed foundation beds, own them through a distinct dusk group and bake only eight explicitly named front L1/L2 receivers. | Round 62 leaves the multi-storey facade as the largest normal-night defect after the bounded door, porch, garage and walk layers are physical. An attempted existing garage-flood control only blew out the apron and did not reach the elevation. Foundation uplights provide a real source, visible daytime hardware and selected receiver boundary without global exposure, an oversized porch lamp, manual-circuit changes or renderer work. |
 | 2026-09-17 | `HOUSE-01288` | **New task, next free phase-16 id.** Replace the four existing unlinked front-walk points with measured physical bollards at their stable positions, preserve the independent manual circuit and start that circuit on only for the selected normal-play arrival. | Round 61 leaves the close gate-to-step route as an empty underlit strip. A forced-on fixed-camera control proves the four existing sources improve wayfinding but have no visible fixture, while their manual switch remains a useful player boundary. Physicalizing that authored layer improves both day composition and night arrival without dusk automation, broad fake terrain pools, global exposure or renderer work. |
 | 2026-09-17 | `HOUSE-01287` | **New task, next free phase-16 id.** Replace the existing displaced front-balcony point with the approved physical wall lantern, give only its adjacent L1 landing shell an explicit selected bake and retain its existing manual group. | Round 60 names the broad black upper facade as the largest exterior defect. Source tracing finds a nominal balcony light 2.15 m above its door head, 1.35 m in front of the wall, unlinked to any prop and unbound to any useful receiver. A measured over-door practical improves both day composition and bounded night readability without global exposure, a new asset, an L2 light or renderer work. |

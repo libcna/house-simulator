@@ -5667,6 +5667,19 @@ its tint, alpha and specular colour, while the draw supplies both its albedo and
 baked cube plus blend amount, Fresnel factor and §31.5 fog. It is deliberately not a fifth primary
 `effectTierS`: §22.2's glass and chrome retain their Basic pass and reflect in an additional pass.
 
+### 59.5 Architectural furniture at shell interfaces
+
+`HOUSE-01060` establishes the boundary for a static furniture suite that finishes existing shell
+structure. The formal-living fireplace remains a prop owned by `L0_LIVING`; it does not replace,
+rename or special-case the canonical chimney, room or appliance. Its local wall plane registers to
+the chimney face while its support plane registers to the finished floor, so the asset-origin gate
+checks both conditions. The visible 1.780 x 2.325 x 0.570 m composition supplies a projecting
+hearth, stone surround, walnut mantel, recessed iron firebox/grate, unlit logs and original framed
+relief through five existing stock-`BasicEffect` roles. A 12-triangle proxy covers only the low
+projecting hearth: the existing shell already closes the tall body, and a second wall-height proxy
+would create an artificial recovery pinch. Live embers, smoke, audio and interaction remain the
+separate `HOUSE-02691` concern.
+
 ---
 
 ## 60. Dog
