@@ -4,7 +4,10 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
+import io
 import json
+import math
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -15,9 +18,17 @@ import pbr_to_stock  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
 MATERIALS_FILE = REPO / "assets-src" / "world" / "layout.materials.json"
+MANIFEST = REPO / "assets-src" / "assets.manifest.json"
+CONTENT_CONFIG = REPO / "assets-src" / "Textures" / ".cna-content.json"
+TEXTURES = REPO / "assets-src" / "Textures" / "Materials"
+SIDING_ALBEDO = TEXTURES / "siding_clapboard_albedo.png"
+SIDING_NORMAL = TEXTURES / "siding_clapboard_normal.png"
 PREVIEW = REPO / "docs" / "asset-review" / "materials" / "exterior" / "contact-sheet.png"
 BEGIN = "    // BEGIN GENERATED EXTERIOR MATERIALS (exterior_materials.py)"
 END = "    // END GENERATED EXTERIOR MATERIALS"
+SIDING_SIZE = 512
+SIDING_COURSES_PER_METRE = 6
+SIDING_ROUGHNESS = 0.72
 
 
 @dataclass(frozen=True)
@@ -71,6 +82,15 @@ def material_row(exterior: Exterior) -> dict:
         "coverable": exterior.snow[0],
         "slopeLimitDeg": exterior.snow[1],
     }
+    if exterior.role == "siding":
+        # Wood095 remains the approved generic bare-board source for joinery and furniture. The
+        # house itself is painted clapboard: six 167 mm exposed courses in the generator's
+        # one-world-metre UV tile, with a rough painted dielectric response.
+        mapped = pbr_to_stock.convert((1.0, 1.0, 1.0), 0.0, SIDING_ROUGHNESS)
+        row["albedo"] = "Textures/Materials/siding_clapboard_albedo"
+        row["normal"] = "Textures/Materials/siding_clapboard_normal"
+        row["specularColor"] = mapped["specularColour"]
+        row["specularPower"] = mapped["specularPower"]
     if exterior.class_override is not None:
         row["class"] = exterior.class_override
     if exterior.footstep_override is not None:
@@ -84,6 +104,76 @@ def material_row(exterior: Exterior) -> dict:
             "powerBoost": exterior.wet_override[2],
         }
     return row
+
+
+def siding_height(x: int, y: int) -> float:
+    """Periodic painted-board relief; the sawtooth reset is the physical overlapping lap."""
+    u = (x + 0.5) / SIDING_SIZE
+    v = (y + 0.5) / SIDING_SIZE
+    phase = (v * SIDING_COURSES_PER_METRE) % 1.0
+    grain = 0.012 * math.sin(2.0 * math.pi * (u * 3.0 + v))
+    grain += 0.006 * math.sin(2.0 * math.pi * (u * 11.0 - v * 2.0))
+    return 0.035 * phase + grain
+
+
+def siding_texture_images():
+    """Return one neutral painted albedo and matching +Y tangent normal, both tileable."""
+    from PIL import Image
+
+    albedo = Image.new("RGBA", (SIDING_SIZE, SIDING_SIZE))
+    normal = Image.new("RGB", (SIDING_SIZE, SIDING_SIZE))
+    albedo_pixels = albedo.load()
+    normal_pixels = normal.load()
+    heights = [[siding_height(x, y) for x in range(SIDING_SIZE)]
+               for y in range(SIDING_SIZE)]
+    for y in range(SIDING_SIZE):
+        v = (y + 0.5) / SIDING_SIZE
+        phase = (v * SIDING_COURSES_PER_METRE) % 1.0
+        # A narrow cool shadow identifies the overlap. Everything else stays neutral and subtle,
+        # so the three canonical paint tints, live sky and baked occlusion remain the colour source.
+        lap_shadow = 34.0 * math.exp(-0.5 * (phase / 0.045) ** 2)
+        lip_highlight = 7.0 * math.exp(-0.5 * ((phase - 0.105) / 0.045) ** 2)
+        face_gradient = 5.0 * (0.5 - phase)
+        for x in range(SIDING_SIZE):
+            u = (x + 0.5) / SIDING_SIZE
+            paint = 2.2 * math.sin(2.0 * math.pi * (u * 2.0 + v))
+            paint += 1.3 * math.sin(2.0 * math.pi * (u * 13.0 - v * 2.0))
+            value = max(0, min(255, round(210.0 - lap_shadow + lip_highlight + face_gradient + paint)))
+            albedo_pixels[x, y] = (value, value, max(0, value - 1), 255)
+
+            dx = heights[y][(x + 1) % SIDING_SIZE] - heights[y][(x - 1) % SIDING_SIZE]
+            dy = heights[(y + 1) % SIDING_SIZE][x] - heights[(y - 1) % SIDING_SIZE][x]
+            nx = -16.0 * dx
+            ny = -16.0 * dy
+            nz = 1.0
+            length = math.sqrt(nx * nx + ny * ny + nz * nz)
+            normal_pixels[x, y] = (
+                round((nx / length * 0.5 + 0.5) * 255.0),
+                round((ny / length * 0.5 + 0.5) * 255.0),
+                round((nz / length * 0.5 + 0.5) * 255.0),
+            )
+    return albedo, normal
+
+
+def png_bytes(image) -> bytes:
+    output = io.BytesIO()
+    image.save(output, format="PNG", optimize=True)
+    return output.getvalue()
+
+
+def compare_image(path: Path, expected, problems: list[str]) -> None:
+    from PIL import Image, ImageChops
+
+    try:
+        with Image.open(path) as source:
+            actual = source.convert(expected.mode)
+            actual.load()
+        if actual.size != expected.size:
+            problems.append(f"{path}: size {actual.size}, expected {expected.size}")
+        elif ImageChops.difference(actual, expected).getbbox() is not None:
+            problems.append(f"{path}: pixels are stale; regenerate with --write")
+    except OSError as error:
+        problems.append(f"{path}: {error}")
 
 
 def validate_definitions() -> list[str]:
@@ -137,11 +227,16 @@ def preview_image():
     sheet = Image.new("RGB", (columns * tile_width, rows * (image_height + label_height)),
                       (31, 34, 40))
     draw = ImageDraw.Draw(sheet)
+    siding_albedo, _ = siding_texture_images()
     for index, exterior in enumerate(EXTERIORS):
-        with Image.open(pbr_to_stock.TEXTURES / f"{exterior.source}_albedo.png") as source:
-            albedo = source.convert("RGB").resize(
-                (tile_width, image_height), Image.Resampling.LANCZOS
-            )
+        if exterior.role == "siding":
+            albedo = siding_albedo.convert("RGB").resize(
+                (tile_width, image_height), Image.Resampling.LANCZOS)
+        else:
+            with Image.open(pbr_to_stock.TEXTURES / f"{exterior.source}_albedo.png") as source:
+                albedo = source.convert("RGB").resize(
+                    (tile_width, image_height), Image.Resampling.LANCZOS
+                )
         tint = tuple(round(channel * 255.0) for channel in exterior.tint)
         pixels = ImageChops.multiply(albedo, Image.new("RGB", albedo.size, tint))
         x = (index % columns) * tile_width
@@ -174,6 +269,38 @@ def check() -> int:
                     f"{exterior.material_id}/{field}: {actual.get(field)!r}, "
                     f"expected {expected.get(field)!r}"
                 )
+    expected_albedo, expected_normal = siding_texture_images()
+    compare_image(SIDING_ALBEDO, expected_albedo, problems)
+    compare_image(SIDING_NORMAL, expected_normal, problems)
+    try:
+        manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+        manifest_rows = {row.get("id"): row for row in manifest.get("assets", [])}
+        expected_manifest = {
+            "TEXTURE_MATERIAL_SIDING_CLAPBOARD_ALBEDO": SIDING_ALBEDO,
+            "TEXTURE_MATERIAL_SIDING_CLAPBOARD_NORMAL": SIDING_NORMAL,
+        }
+        for asset_id, path in expected_manifest.items():
+            row = manifest_rows.get(asset_id)
+            if row is None:
+                problems.append(f"{MANIFEST}: missing {asset_id}")
+                continue
+            digest = hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else "missing"
+            if row.get("sourceSha256") != digest:
+                problems.append(f"{asset_id}: manifest hash is stale")
+            if row.get("origin", {}).get("kind") != "generated":
+                problems.append(f"{asset_id}: siding source must be project-generated")
+        config = json.loads(CONTENT_CONFIG.read_text(encoding="utf-8"))
+        configured = config.get("assets", {})
+        expected_parameters = {
+            "generateMipmaps": {"type": "bool", "value": True},
+            "premultiplyAlpha": {"type": "bool", "value": False},
+        }
+        for name in ("Materials/siding_clapboard_albedo.png",
+                     "Materials/siding_clapboard_normal.png"):
+            if configured.get(name, {}).get("parameters") != expected_parameters:
+                problems.append(f"{CONTENT_CONFIG}: {name} must pin mips=true, premultiply=false")
+    except (OSError, json.JSONDecodeError) as error:
+        problems.append(f"could not verify siding registration: {error}")
     try:
         with Image.open(PREVIEW) as source:
             actual_preview = source.convert("RGB")
@@ -233,7 +360,11 @@ def write() -> int:
     _, after = remainder.split(END, 1)
     MATERIALS_FILE.write_text(before + BEGIN + "\n" + rendered + "\n" + END + after,
                               encoding="utf-8")
-    print(f"exterior_materials: wrote {len(EXTERIORS)} materials to {MATERIALS_FILE}")
+    albedo, normal = siding_texture_images()
+    SIDING_ALBEDO.write_bytes(png_bytes(albedo))
+    SIDING_NORMAL.write_bytes(png_bytes(normal))
+    print(f"exterior_materials: wrote {len(EXTERIORS)} materials and two "
+          f"{SIDING_SIZE}x{SIDING_SIZE} painted-clapboard maps")
     return 0
 
 
@@ -259,6 +390,37 @@ def selftest() -> int:
     if sum(row["snowResponse"]["coverable"] for row in rows) != 8:
         print("exterior_materials: exactly the downward-facing soffit must reject snow",
               file=sys.stderr)
+        return 1
+    siding_rows = [row for row in rows if row["id"].startswith("MAT_SIDING_")]
+    if (len(siding_rows) != 3 or
+            any(row["albedo"] != "Textures/Materials/siding_clapboard_albedo"
+                or row["normal"] != "Textures/Materials/siding_clapboard_normal"
+                for row in siding_rows)):
+        print("exterior_materials: the three siding colours do not share the clapboard maps",
+              file=sys.stderr)
+        return 1
+    albedo, normal = siding_texture_images()
+    if png_bytes(albedo) != png_bytes(siding_texture_images()[0]) or \
+            png_bytes(normal) != png_bytes(siding_texture_images()[1]):
+        print("exterior_materials: clapboard map generation is not byte-deterministic",
+              file=sys.stderr)
+        return 1
+    for coordinate in range(0, SIDING_SIZE, 37):
+        if (abs(siding_height(coordinate, coordinate) -
+                siding_height(coordinate + SIDING_SIZE, coordinate)) > 1e-12 or
+                abs(siding_height(coordinate, coordinate) -
+                    siding_height(coordinate, coordinate + SIDING_SIZE)) > 1e-12):
+            print("exterior_materials: clapboard height field is not exactly periodic",
+                  file=sys.stderr)
+            return 1
+    centre_x = SIDING_SIZE // 2
+    values = [albedo.getpixel((centre_x, y))[0] for y in range(SIDING_SIZE)]
+    minima = sum(values[y] < values[(y - 1) % SIDING_SIZE]
+                 and values[y] <= values[(y + 1) % SIDING_SIZE] and values[y] < 190
+                 for y in range(SIDING_SIZE))
+    if minima != SIDING_COURSES_PER_METRE:
+        print(f"exterior_materials: detected {minima} lap shadows, expected "
+              f"{SIDING_COURSES_PER_METRE}", file=sys.stderr)
         return 1
     print("exterior_materials: selftest passed")
     return 0

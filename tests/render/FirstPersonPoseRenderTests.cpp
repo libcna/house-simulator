@@ -210,9 +210,11 @@ namespace
         ASSERT_EQ(image->width, 1600);
         ASSERT_EQ(image->height, 900);
 
-        // A real, repeated wood source covers this central front panel. Its 40x70 crop was exactly
-        // one colour after the HUD's default LinearClamp was retained in slot 0, despite 48
-        // distinct deployed UV0s. Frame 3 is essential: frame 1 still has CNA's initial wrap.
+        // A real, repeated painted-clapboard source covers this central front panel. Its 40x70
+        // crop was exactly one colour after the HUD's default LinearClamp was retained in slot 0,
+        // despite 48 distinct deployed UV0s. The deliberately restrained paint still carries far
+        // more than the single clamped sample; frame 3 is essential because frame 1 still has
+        // CNA's initial wrap.
         std::set<std::uint32_t> sidingColours;
         for (int y = 260; y < 330; ++y)
         {
@@ -225,7 +227,7 @@ namespace
                                      static_cast<std::uint32_t>(pixel.getBProperty()));
             }
         }
-        EXPECT_GT(sidingColours.size(), 40u)
+        EXPECT_GT(sidingColours.size(), 24u)
             << "the close production facade collapsed a physically tiled source to one texel";
         const auto& midWall = image->pixels[150u * 1600u + 400u];
         // The current 256-sample L1 atlas now contains the window/shutter and cornice occlusion

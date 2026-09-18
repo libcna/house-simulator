@@ -1,3 +1,55 @@
+# Visual-sprint handoff — 2026-09-18 (`HOUSE-00941` checkpoint)
+
+Branch `develop`. Task-start HEAD `ab37c13` (`HOUSE-01066`). This file belongs to the single
+`HOUSE-00941` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit debug blockout remains available.
+
+The principal facade no longer stretches the generic orange `Wood095` furniture-board grain over
+every siding field. A deterministic project-authored 512 px albedo/normal pair now presents pale
+painted horizontal clapboard at six 167 mm exposed courses per world metre, with restrained paint
+variation, clean tiling and matching lap relief. All three canonical siding colours, their wet
+derivatives and `MAT_OUTDOOR_SIDING` use the new source. The outdoor fence is explicitly kept on
+the legitimate bare-board source. Both generated textures have permanent manifest ids, complete
+Ms-PL provenance and CNA content recipes. Geometry, UVs, lightmaps, exposure, renderer, portals,
+collision and the explicit debug palette are unchanged.
+
+The canonical before is Round 71's
+[front exterior](visual-review/captures/house-01066-piano-refinement-day-final/exterior-front.png).
+The complete twenty-one-camera after sets are
+[clear day](visual-review/captures/house-00941-clapboard-day-r1) and
+[normal night](visual-review/captures/house-00941-clapboard-night-r1). All 42 frames were inspected
+as complete contact sheets, with the three direct exterior views also opened individually.
+Against Round 71, `exterior-front`, `garage-approach` and `front-path` change 146,872 / 249,086 /
+245,052 day pixels above two channel levels (10.1994% / 17.2976% / 17.0175%; normalized RGB MAE
+0.012966 / 0.022354 / 0.021640). Their night changes remain on the same silhouette at only
+0.000835–0.001291 MAE; interior control views remain at 0.0131–0.0456%. Four seasonal exterior
+references changed 10.3255–12.0686%; amplified masks were inspected, proved facade-local and were
+advanced with their official generators. Explicit blockout references did not move.
+
+The world remains 682 chunks / 96 cells / 89 static props / 266 exterior hierarchy instances /
+56.735979 MB. Its 202 materials, 906 manifest rows and 2,958 stable ids produce 638 opaque
+submissions, 44 cutouts and 107 unculled state changes. All 1,409 unit, 135 integration and 48
+active software-render tests pass; eight capture-only generators remain disabled. All eighteen
+culled-vs-unculled pairs remain below 0.2%, at 0.0558% worst (`l0-sunroom`). Compilation and heavy
+tools stayed on CPU 0-5 / at most six workers. The siding sampler regression now requires more
+than 24 crop colours instead of more than 40: the restrained paint supplies 40 while the original
+clamp failure supplied one, so the test retains its failure boundary without requiring coarse
+wood-grain variation. Content, deterministic material regeneration,
+provenance/licence and all project static gates plus all strict-XNA translation units pass. The
+existing CMake tree still cannot reconfigure inside the sandbox because that would write shared
+`~/deps/FNA3D`; exact stored Ninja commands were used instead, with no CNA, sharp-runtime or
+shared-dependency edit.
+
+Largest remaining visible defects: the roof/dormers and far-side elevations remain black outside
+bounded night sources; the canonical 22:00 review has the Moon below the horizon, so adding a
+moon key would be physically false. Garage/side-yard and neighbour depth remain sparse at night;
+facade massing/window rhythm remains repetitive by day; formal living still has weak local contact
+away from the bounded piano pool. The next highest-value checkpoint is honest local night-
+exterior readability for roof/dormers or garage/side yard, then daytime facade massing. Do not
+raise global exposure or leave the slice for unrelated systems.
+
+---
+
 # Visual-sprint handoff — 2026-09-18 (`HOUSE-01066` checkpoint)
 
 Branch `develop`. Task-start HEAD `823fe51` (`HOUSE-01065`). This file belongs to the single

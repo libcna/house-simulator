@@ -47,7 +47,9 @@ set. `HOUSE-01064` carries that restrained surface-dressing discipline into the 
 arrival with a runner, console objects and portal-flanking art. `HOUSE-01290` replaces the three
 remaining bare foyer/hall main-light points with physical ceiling fixtures. `HOUSE-01065` gives
 both remaining hall side-wall bays a measured nine-frame family gallery. `HOUSE-01066` is the
-selected correction for the coarse, dark formal-living piano composition. Round 9 proves the exterior
+selected correction for the coarse, dark formal-living piano composition. `HOUSE-00941` replaces
+the facade's generic bare-wood map with measured painted clapboard at real-world course spacing.
+Round 9 proves the exterior
 material omission is fixed; `HOUSE-00924`
 removes the
 exposure-scaled glass tint, and `HOUSE-00925` keeps outdoor receivers from clipping when viewed
@@ -159,7 +161,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 9 | Room/portal visibility | 00661–00760 | 40 | Culling correct, proved, and within budget |
 | 10 | Exterior and property | 00761–00840 | 25 | Terrain, fences, gates, drive, garden |
 | 11 | Neighbourhood background | 00841–00890 | 17 | The house is not floating in nothing |
-| 12 | Materials and textures | 00891–00970 | 36 | The blockout reads as a building |
+| 12 | Materials and textures | 00891–00970 | 37 | The blockout reads as a building |
 | 13 | Static furniture and dressing | 00971–01120 | 72 | Every room furnished to density |
 | 14 | Interactable framework | 01121–01180 | 26 | The 12 behaviours and the data model |
 | 15 | Doors and windows | 01181–01250 | 22 | Portals are dynamic |
@@ -13952,6 +13954,41 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
                 all eighteen culling pairs pass at 0.1338% worst (`l0-sunroom`). Full repository
                 and strict-XNA checks pass with compilation/heavy work restricted to CPU 0-5 / at
                 most six workers.
+- [x] HOUSE-00941 — Replace the generic bare-wood facade map with physically scaled painted clapboard
+      dep: HOUSE-00903, HOUSE-00907, HOUSE-00923, HOUSE-00927, HOUSE-00934 · sys: materials/content · plat: ALL · pri: MUST
+      accept: (1) the three canonical siding colours and their wet/unbaked variants use one
+              deterministic, provenance-complete painted-clapboard source rather than the generic
+              furniture/board grain; (2) six 167 mm exposed courses occupy each world metre, with
+              restrained lap shadow and paint variation that tile cleanly; (3) fixed front/path
+              day and night captures show coherent siding scale and less block-like facade banding
+              without changing geometry, exposure, lightmaps or the debug palette
+      verify: exterior-material determinism/checks; material/content/provenance gates; fixed visual
+              review; affected render references inspected selectively; culling/full suites
+      note: (2026-09-18) A deterministic project-authored 512 px albedo/normal pair now gives all
+            three canonical siding colours, their wet derivatives and `MAT_OUTDOOR_SIDING` six
+            horizontal 167 mm exposed courses per world metre. Subtle paint variation and the
+            matching +Y tangent-space lap normal tile without returning to the broad orange
+            `Wood095` furniture-board grain. `MAT_OUTDOOR_FENCE_BOARD` deliberately keeps that
+            bare-wood source, because fence pickets are boards rather than clapboard. Both new
+            generated sources have permanent manifest ids, Ms-PL provenance and explicit CNA
+            content recipes. Geometry, UVs, lightmaps, exposure, renderer behaviour and the
+            explicit debug palette are unchanged.
+      review: Round 72's 21-camera clear-day and normal-night sets were both opened as complete
+              contact sheets, with front/path/garage views also inspected directly. Against Round
+              71, the three direct day exterior views change 146,872–249,086 pixels above two
+              channel levels (10.1994–17.2976%; normalized RGB MAE 0.012966–0.022354), while
+              entrance/foyer and living-composition remain at 0.0131–0.0337%. Night changes stay
+              on the same facade silhouette at lower energy. The four season-reference diffs were
+              inspected amplified, proved facade-local and advanced through their official
+              generators; explicit blockout references remain unchanged. `VISUAL-GATE-1` still
+              FAILS because night roof/dormer depth, garage/side-yard context and facade massing
+              remain visibly weak.
+      verified: (2026-09-18) Exterior-material write/check/self-test, wet/outdoor/ambientCG
+                derivative checks, content compilation, 1,409 unit and 135 integration tests pass.
+                All 48 active software-render tests pass after the four intended season references
+                were advanced; all eighteen culling pairs pass at 0.0558% worst (`l0-sunroom`).
+                Full repository/content/provenance and strict-XNA gates pass with compilation and
+                heavy work restricted to CPU 0-5 / at most six workers.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -19595,19 +19632,19 @@ Recorded so nobody has to re-derive the decision.
 
 ## Task count
 
-**1 345 numbered tasks across 53 phases.**
+**1 346 numbered tasks across 53 phases.**
 
 | Phase group | Phases | Tasks |
 |---|---|---|
 | Foundations, capability proof, build, pipeline, assets | 0–4 | 238 |
 | World data, blockout, collision, camera, visibility | 5–9 | 218 |
-| Exterior, neighbourhood, materials, furnishing | 10–13 | 143 |
+| Exterior, neighbourhood, materials, furnishing | 10–13 | 144 |
 | Interaction framework and the systems built on it | 14–21 | 160 |
 | Time, sun, moon, stars, sky, weather | 22–30 | 155 |
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 162 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 345** |
+| **Total** | **0–52** | **1 346** |
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
 disturbs an existing one.
@@ -19643,6 +19680,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-18 | `HOUSE-00941` | **New task, next free phase-12 id.** Replace only the three canonical siding finishes and their generated state/layout derivatives with a deterministic painted-clapboard material at six courses per world metre. | Round 71's fixed clear-day road/path images make the source mismatch visible across the largest surface in the frame: `MAT_SIDING_*` uses ambientCG `Wood095`, a generic orange bare board with broad grain bands rather than the Colonial Revival horizontal siding specified by §12.1. A project-authored tileable albedo/normal pair corrects material identity and scale through the existing stock-XNA path without geometry, exposure, renderer or lightmap changes. The same source remains independently available for doors, furniture and other legitimate bare wood. |
 | 2026-09-18 | `HOUSE-01066` | **New task, next free phase-13 id.** Refine the already approved formal upright as a bounded hero-asset checkpoint while leaving the full room furnishing task open. | Round 70 ranks the dark/coarse piano as the largest remaining interior defect. Its placement, lighting, bench and wall composition are already measured, so improving the deterministic model and material separation has higher visible value and lower risk than downloading a replacement, changing room exposure or widening `HOUSE-00988`. |
 | 2026-09-18 | `HOUSE-01065` | **New task, next free phase-13 id.** Resolve the hall's nine-frame gallery as a bounded deterministic surface-dressing checkpoint while leaving the full furnishing/stair-wall task open. | Round 69 makes the two long bare side-wall bays the largest remaining arrival defect. The already approved static-prop and canonical-material path can implement §20.4's non-identifiable route 2 without a download, likeness/AI issue, renderer work, collision or false completion of `HOUSE-00987`. |
 | 2026-09-18 | `HOUSE-01290` | **New task, next free phase-16 id.** Reuse the approved semi-flush fixture for the one foyer and two hall main sources, relocate their optics to the real diffuser plane and rebake only the two affected receiver cells. | Round 68 resolves the hall floor, terminal wall and console but exposes three warm ceiling pools with no physical source. The existing deterministic fixture and established main groups can correct that visible cause without a new asset, global exposure, renderer work, switch change or unrelated subsystem. |

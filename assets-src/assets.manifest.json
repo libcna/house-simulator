@@ -27218,6 +27218,48 @@
       "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
+      "id": "TEXTURE_MATERIAL_SIDING_CLAPBOARD_ALBEDO",
+      "category": "material",
+      "sourceFile": "assets-src/Textures/Materials/siding_clapboard_albedo.png",
+      "sourceSha256": "b8a25f78f55d9581642beefdee625fe6195d9392250db0ac613a26de9443ecb5",
+      "contentName": "Textures/Materials/siding_clapboard_albedo",
+      "kind": "texture",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Procedural tileable painted-clapboard albedo",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/assets/exterior_materials.py for HOUSE-00941. Six 167 mm exposed courses per world metre provide neutral tintable paint variation and restrained overlap shadow."
+      }
+    },
+    {
+      "id": "TEXTURE_MATERIAL_SIDING_CLAPBOARD_NORMAL",
+      "category": "material",
+      "sourceFile": "assets-src/Textures/Materials/siding_clapboard_normal.png",
+      "sourceSha256": "03f4a3483e3f96fa7930f8fc75c09c2901bf8cb55fb024bc3c935a7e527ff9d6",
+      "contentName": "Textures/Materials/siding_clapboard_normal",
+      "kind": "texture",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Procedural tileable painted-clapboard normal",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/assets/exterior_materials.py for HOUSE-00941 from the same six-course periodic lap profile as the albedo. Linear +Y tangent normals support the approved normal-aware path."
+      }
+    },
+    {
       "id": "TEXTURE_MATERIAL_SNOW_SHELL_ALBEDO",
       "category": "material",
       "sourceFile": "assets-src/Textures/Materials/snow_shell_albedo.png",

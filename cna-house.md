@@ -2658,6 +2658,15 @@ shingle-course source, then gives it explicit asphalt wet, snow and audio semant
 the only member that rejects snow because it faces downward. Exact rows and the review sheet are
 in `docs/asset-selection/exterior-materials.md`; shell assignment remains `HOUSE-00907`'s work.
 
+`HOUSE-00941` corrects the siding source after fixed-camera review proved the original ambientCG
+`Wood095` base reads as broad orange bare-board grain across the largest facade surface. The three
+stable siding ids now share a deterministic neutral painted-clapboard albedo and matching linear
+normal: one world-metre UV tile contains six 167 mm exposed horizontal courses, with a narrow lap
+shadow and restrained paint variation. Their tint, wet/snow/audio semantics, shell/lightmap
+ownership and stock-XNA effect paths are unchanged. The approved bare-board source remains in the
+library for joinery, furniture and fence pickets; changing the facade does not silently turn those
+unrelated objects into siding.
+
 `HOUSE-00904` fixes four glass and four water records. Clear, obscured, cabinet and shower glass
 retain the untextured tinted `BasicEffect` path; tap/shower flow, bath/basin level, toilet bowl and
 rain puddle share a deterministic tileable RGBA/normal pair with role-specific tint, opacity and UV

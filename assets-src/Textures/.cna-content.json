@@ -842,6 +842,30 @@
         }
       }
     },
+    "Materials/siding_clapboard_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/siding_clapboard_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
     "Materials/snow_shell_albedo.png": {
       "parameters": {
         "generateMipmaps": {

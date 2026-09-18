@@ -1,5 +1,15 @@
 # Material texture provenance
 
+## Project-generated painted clapboard maps
+
+`siding_clapboard_albedo.png` and `siding_clapboard_normal.png` are deterministic project-authored
+assets from `tools/assets/exterior_materials.py` (`HOUSE-00941`), licensed with the project under
+Ms-PL. The one-metre tile contains six 167 mm exposed horizontal courses. A restrained neutral
+paint variation and narrow overlap shadow remain tintable across the three canonical siding
+colours; the matching linear +Y tangent normal preserves the same periodic lap profile for the
+approved normal-aware path. There is no upstream asset or download. The ambientCG `Wood095` maps
+remain unchanged for legitimate bare-board joinery and furniture uses.
+
 ## Project-generated snow-shell maps
 
 `snow_shell_albedo.png` and `snow_shell_normal.png` are deterministic project-authored assets from

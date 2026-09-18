@@ -3146,3 +3146,51 @@ remain at 0.0558% worst (`l0-sunroom`); complete test and gate results are in `d
 debug blockout remains available. The next highest visible value is the screenshot-ranked night
 exterior collapse—especially roof/dormer and garage/side-yard readability—without raising global
 exposure or leaving the slice for an unrelated subsystem.
+
+## Round 72 — physically scaled painted clapboard
+
+Commit: `HOUSE-00941` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 71's [front exterior](captures/house-01066-piano-refinement-day-final/exterior-front.png)
+maps the generic orange `Wood095` bare-board grain across every principal siding field, producing
+broad furniture-like bands on the largest architectural surface in the view. After: the complete
+twenty-one-camera [clear-day](captures/house-00941-clapboard-day-r1) and
+[normal-night](captures/house-00941-clapboard-night-r1) sets show pale painted horizontal
+clapboard at six 167 mm courses per world metre. All 42 frames were inspected as complete contact
+sheets, and the front, path and garage approaches were also opened directly.
+
+Ranked visible defects remaining:
+
+1. The roof, dormers and far-side elevations still collapse outside bounded night sources; the
+   canonical 22:00 review has the Moon below the horizon, so a fake moon key is not an honest fix.
+2. Garage/side-yard terrain and distant-neighbour context remain sparse and lose depth at night.
+3. The simple facade massing and repetitive window rhythm remain conspicuous even though the
+   material identity and scale are now coherent.
+4. Formal living remains deliberately dark with weak furniture/floor contact away from the
+   piano's bounded practical pool.
+5. Several secondary rooms and exterior surfaces remain sparse beyond the connected slice.
+
+Fixed: a deterministic 512 px project-authored albedo/normal pair supplies restrained paint
+variation, a clean tile boundary and a matching +Y tangent-space lap normal. All three dry siding
+roles, their wet derivatives and the shared outdoor siding role use it. The outdoor fence role is
+explicitly rebased to the still-approved bare-board material so its pickets do not become siding.
+Both sources have permanent manifest ids, complete Ms-PL provenance and explicit mipmapped CNA
+content recipes. No geometry, UV, lightmap, exposure, renderer, portal, collision or debug-palette
+change was made.
+
+Against Round 71, `exterior-front`, `garage-approach` and `front-path` respectively change
+146,872 / 249,086 / 245,052 day pixels above two channel levels (10.1994% / 17.2976% / 17.0175%;
+normalized RGB MAE 0.012966 / 0.022354 / 0.021640). The same night views change 139,989 / 241,675
+/ 231,696 pixels (9.7215% / 16.7830% / 16.0900%) at only 0.000835–0.001291 normalized MAE.
+`entrance-foyer` and `living-composition` stay effectively stable at 0.0131–0.0456%. Four seasonal
+exterior references changed 10.3255–12.0686%; their amplified masks were inspected, confined to
+the siding-bearing house silhouette and advanced through the official generators. Explicit
+blockout references did not move. The world remains 682 chunks / 96 cells / 89 props / 266
+exterior instances / 56.735979 MB; 202 materials, 906 manifest rows and 2,958 stable ids still
+produce 638 opaque submissions, 44 cutouts and 107 unculled state changes. All 48 active software-
+render tests pass, and all eighteen culling pairs remain at 0.0558% worst (`l0-sunroom`).
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next highest-value checkpoint is honest night-exterior
+readability for the roof/dormers or garage/side yard, followed by the daytime facade massing—not
+an unrelated subsystem or a global exposure lift.

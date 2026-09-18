@@ -31,6 +31,7 @@ class Variant:
     base_id: str
     tint: tuple[float, float, float] | None = None
     footstep: str | None = None
+    snow_slope: float | None = None
 
 
 VARIANTS = (
@@ -39,7 +40,11 @@ VARIANTS = (
     Variant("MAT_OUTDOOR_BRICK", "MAT_BRICK_WATER_TABLE"),
     Variant("MAT_OUTDOOR_CONCRETE", "MAT_CONCRETE_BROOM"),
     Variant("MAT_OUTDOOR_DECK", "MAT_DECK_WOOD"),
-    Variant("MAT_OUTDOOR_FENCE_BOARD", "MAT_SIDING_WARM_WHITE", (0.82, 0.77, 0.68)),
+    # Fence pickets are exposed bare boards, not clapboard. They used the siding row only while
+    # HOUSE-00903's siding itself incorrectly reused Wood095; retain that approved source directly
+    # now that HOUSE-00941 gives the house envelope its own painted-lap map.
+    Variant("MAT_OUTDOOR_FENCE_BOARD", "MAT_BASE_WOOD_BOARD", (0.82, 0.77, 0.68),
+            snow_slope=40.0),
     Variant("MAT_OUTDOOR_FENCE_METAL", "MAT_METAL_GUTTER", (0.84, 0.85, 0.81)),
     Variant("MAT_OUTDOOR_GARDEN_WOOD", "MAT_DECK_WOOD", (0.68, 0.60, 0.47)),
     Variant("MAT_OUTDOOR_GRASS", "MAT_GROUND_LAWN", (0.82, 0.66, 0.88)),
@@ -69,6 +74,8 @@ def variant_row(variant: Variant, rows: dict[str, dict]) -> dict:
         row["tint"] = list(variant.tint)
     if variant.footstep is not None:
         row["footstepSurface"] = variant.footstep
+    if variant.snow_slope is not None:
+        row["snowResponse"]["slopeLimitDeg"] = variant.snow_slope
     if variant.material_id == "MAT_OUTDOOR_ROAD_MARKING":
         row["snowResponse"] = {"coverable": False, "slopeLimitDeg": 0.0}
     return row

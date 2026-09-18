@@ -242,7 +242,7 @@ namespace
                 const MaterialDesc* outdoorSiding = binder.Find(Id::Of("MAT_OUTDOOR_SIDING"));
                 ASSERT_NE(outdoorSiding, nullptr);
                 EXPECT_EQ(outdoorSiding->kind, MaterialKind::Basic);
-                EXPECT_EQ(outdoorSiding->diffuseTexture, "Textures/Materials/wood_board_albedo");
+                EXPECT_EQ(outdoorSiding->diffuseTexture, "Textures/Materials/siding_clapboard_albedo");
 
                 const MaterialDesc* upholstery = binder.Find(Id::Of("MAT_FURNITURE_WHITE_ROOM_PALETTE"));
                 ASSERT_NE(upholstery, nullptr);
@@ -336,7 +336,7 @@ namespace
                 const MaterialDesc* siding = binder.Find(Id::Of("MAT_SIDING_SAGE"));
                 ASSERT_NE(siding, nullptr);
                 EXPECT_EQ(siding->kind, MaterialKind::DualTexture);
-                EXPECT_EQ(siding->diffuseTexture, "Textures/Materials/wood_board_albedo");
+                EXPECT_EQ(siding->diffuseTexture, "Textures/Materials/siding_clapboard_albedo");
                 EXPECT_FLOAT_EQ(siding->diffuse[1], 0.78F);
 
                 const MaterialDesc* flow = binder.Find(Id::Of("MAT_WATER_FLOW"));
