@@ -1,3 +1,56 @@
+# Visual-sprint handoff — 2026-09-18 (`HOUSE-00948` checkpoint)
+
+Branch `develop`. Task-start HEAD `1040a02f445a7ab1943ee40859213ee6673dea16`
+(`HOUSE-00947`). This file belongs to the single `HOUSE-00948` commit; use that commit as the
+ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal gameplay remains production-material only and
+explicit debug blockout remains available.
+
+The canonical sectional opening now explicitly selects a measured Colonial surround in the
+approved exterior-white frame finish. Two 240 mm pilasters rise from grounded 300 mm plinths to
+320 mm capitals; a 300 mm frieze and 120 mm stepped crown close the head. All eight closed pieces
+embed 6 mm behind the weather skin and project 55–95 mm, so the surround reads as physical
+millwork rather than a colour patch or coplanar applique. It reuses the existing window-frame
+batch. The aperture, five-section leaf, collision, portal, navigation and receiver lightmaps did
+not move. No asset/material download, runtime branch, renderer change or licence decision was
+needed.
+
+Round 78 supplies the before [day garage approach](visual-review/captures/house-00947-garage-lites-day-r2/garage-approach.png)
+and [22:00 garage approach](visual-review/captures/house-00947-garage-lites-night-r2/garage-approach.png).
+The complete retained after sets are [clear day](visual-review/captures/house-00948-garage-surround-day-r1)
+and [normal night](visual-review/captures/house-00948-garage-surround-night-r1). Both 21-frame
+contact sheets, both direct garage images and all changed strict-reference pairs were opened at
+full size. The surround changes 18,549 day / 17,934 night pixels above two channel levels
+(1.2881% / 1.2454%; normalized RGB MAE 0.001762 / 0.000299). Day gains a coherent pale frame and
+layered shadow edge; night keeps it subdued under the existing carriage practicals. Interior
+controls remain below 0.00014 normalized MAE.
+
+The world remains 695 chunks / 96 cells / 92 static props / 273 exterior hierarchy instances and
+grows only to 57.702063 MB. `L0_GARAGE` remains exactly eleven chunks. The shell selftest measures
+eight surround pieces / 48 new faces and 102 total garage `window_frame`-role faces; all 99 shells
+unwrap with 5,252 receiver faces and 55,526 detail triangles. Schema/world mutations,
+material/manifest and compiled content checks pass. Ten strict references with a genuine line of
+sight were inspected and advanced; an unrelated one-pixel attic regeneration was discarded. All
+1,409 unit, 135 integration and 48 active software-render tests pass; all eighteen
+culled-vs-unculled pairs remain below 0.2%, at 0.0558% worst (`l0-sunroom`).
+`tools/ci/run_checks.sh --staged` is green and the separate strict-XNA gate reports all 323
+translation units clean. Compilation and heavy work stayed on CPU 0-5 / at most six workers.
+
+The full world deploy deliberately reused the unchanged navigation product: this checkpoint adds
+only shallow exterior finish geometry and changes no aperture, collision or navigation envelope,
+so rerunning `build_nav.py` would provide no relevant evidence. No `build_nav.py` process is left
+running. The known `FRIDGE_L0_KITCHEN` nested-container cut diagnostic remains recorded in
+`plan.md`; it is unrelated to this garage change.
+
+Largest visible defects: the broad upper garage wall and repeated facade/window rhythm remain
+simple; the driveway still lacks a rendered parked vehicle and richer neighbour context; the main
+roof/dormer silhouette remains honestly dark at 22:00 while the Moon is below the horizon; formal
+living still has weak furniture/floor contact outside its bounded piano practical; secondary
+rooms/elevations remain sparse. The next highest-value work is a truthful garage-wing massing or
+facade-scale cue. Do not schedule the parked car until its world/runtime ownership actually renders
+it, and do not replace missing geometry with global exposure or unrelated infrastructure.
+
+---
+
 # Visual-sprint handoff — 2026-09-18 (`HOUSE-00947` checkpoint)
 
 Branch `develop`. Task-start HEAD `e7fc9a0027b52587ba247ea23c207cd12c95768a`

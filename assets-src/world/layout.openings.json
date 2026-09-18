@@ -635,6 +635,7 @@
       "panelMaterial": "MAT_EXTERIOR_DOOR_GARAGE_PANEL_PAINTED",
       "sectionalStyle": "top_lites", "glazingMaterial": "MAT_GLASS_CLEAR",
       "hardwareMaterial": "MAT_EXTERIOR_DOOR_HARDWARE_BRONZE",
+      "surroundStyle": "colonial", "surroundMaterial": "MAT_WINDOW_FRAME_WHITE",
       "solid": true, "lockable": true
     },
 

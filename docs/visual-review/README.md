@@ -3463,3 +3463,48 @@ eighteen culled/unculled pairs remain below 0.2%, at 0.0558% worst (`l0-sunroom`
 debug blockout remains available. The next checkpoint should add the next largest truthful facade
 or arrival cue—most likely a dependency-valid parked vehicle or stronger garage-wing massing and
 neighbour context—not a global exposure lift or unrelated subsystem.
+
+## Round 79 — layered garage-opening surround
+
+Commit: `HOUSE-00948` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 78's [day garage approach](captures/house-00947-garage-lites-day-r2/garage-approach.png)
+and matching [22:00 view](captures/house-00947-garage-lites-night-r2/garage-approach.png) show a
+finished leaf still cut directly into a broad flat siding plane. After: the complete twenty-one-
+camera [clear-day](captures/house-00948-garage-surround-day-r1) and
+[normal-night](captures/house-00948-garage-surround-night-r1) sets add a layered painted opening
+surround. Both contact sheets, both direct garage images and all changed strict references were
+inspected at full size.
+
+Ranked visible defects remaining:
+
+1. The broad upper garage wall and repeated facade/window rhythm remain simple beyond the new
+   grounded opening edge.
+2. The driveway still lacks a parked vehicle and the distant neighbour context is thin, leaving
+   the otherwise coherent arrival composition visually empty.
+3. The main roof/dormer silhouette remains honestly dark at 22:00 while the Moon is below the
+   horizon; any change still needs a bounded physical source.
+4. Formal living retains weak furniture/floor contact outside its bounded piano practical.
+5. Secondary rooms and elevations outside the connected slice remain sparse.
+
+Fixed: `DOOR_GARAGE_SECTIONAL` now explicitly selects a `colonial` surround in the approved
+exterior-white frame finish. Two 240 mm pilasters rise from 300 mm plinths to 320 mm capitals; a
+300 mm frieze and 120 mm projecting crown close the head. All eight closed pieces embed 6 mm into
+the settled exterior skin and project only 55–95 mm, avoiding a floating applique or coplanar
+z-fight. They share the existing `window_frame` material role, so `L0_GARAGE` remains exactly
+eleven chunks. The aperture, five-section leaf, portal, collision, navigation and receiver
+lightmaps are unchanged; no asset, material or renderer branch was added.
+
+Against Round 78, `garage-approach` changes 18,549 day / 17,934 night pixels above two channel
+levels (1.2881% / 1.2454%; normalized RGB MAE 0.001762 / 0.000299). Day now has a coherent pale
+architectural frame and layered shadow edge around the dark door. At night the surround remains
+subdued beneath the existing carriage lamps rather than glowing. The `entrance-foyer`,
+`central-hall` and `family-media` controls remain below 0.00014 normalized MAE. Ten strict
+references with a real line of sight to the surround were advanced after old/new inspection; an
+unrelated one-pixel `blockout-l3-store-w` regeneration was discarded.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next checkpoint should reduce the broad upper garage-wing
+mass or add another truthful facade-scale cue; the already-authored parked car is not useful until
+its neighbourhood/prop runtime path actually renders it. Do not substitute global exposure or an
+unrelated subsystem.

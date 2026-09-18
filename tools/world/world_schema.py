@@ -272,6 +272,11 @@ def build() -> dict[str, dict]:
          "sectionalStyle": {"enum": ["top_lites"]},
          "glazingMaterial": ID,
          "hardwareMaterial": ID,
+         # The weather-side garage opening may opt into a physical architectural surround.  The
+         # style and finish are both explicit so shell generation never infers either from a room
+         # id, coordinate or screenshot.
+         "surroundStyle": {"enum": ["colonial"]},
+         "surroundMaterial": ID,
          "asset": ID_OR_NULL, "material": ID_OR_NULL, "panelMaterial": ID,
          "solid": BOOL, "lockable": BOOL})))
 

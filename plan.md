@@ -59,6 +59,10 @@ complete K-profile rainwater goods instead of incomplete black strips.
 dusk-controlled low fixtures without enabling its independent manual flood.
 `HOUSE-00946` gives the broad concrete driveway construction scale with fine control joints and
 two shared bluestone-inlay batches, without changing its physical surface or circulation.
+`HOUSE-00947` gives the canonical sectional leaf four real top-row lites and physical operating
+hardware. `HOUSE-00948` frames that leaf with layered painted pilasters, plinths, capitals, frieze
+and crown, breaking the garage wing's largest remaining flat facade edge without changing the
+opening or adding a draw role.
 Round 9 proves the exterior
 material omission is fixed; `HOUSE-00924`
 removes the
@@ -14241,6 +14245,45 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
                 all eighteen culling pairs remain below 0.2% at 0.0558% worst (`l0-sunroom`).
                 `tools/ci/run_checks.sh --staged` is green and the separate strict-XNA gate
                 reports all 323 translation units clean with six workers on CPU 0-5.
+- [x] HOUSE-00948 — Frame the sectional garage opening with layered Colonial painted millwork
+      dep: HOUSE-00377, HOUSE-00456, HOUSE-00487, HOUSE-00935, HOUSE-00941, HOUSE-00947 · sys: world/content/materials · plat: ALL · pri: MUST
+      accept: (1) `DOOR_GARAGE_SECTIONAL` explicitly selects a `colonial` surround and the
+              approved exterior-white frame finish; (2) its weather side has two 240 mm
+              pilasters with grounded 300 mm plinths and 320 mm capitals, a 300 mm frieze and a
+              stepped 120 mm crown, all embedded behind the siding plane rather than floating or
+              z-fighting; (3) the pieces reuse the existing window-frame role so `L0_GARAGE`
+              remains exactly eleven chunks, while aperture, leaf, portal, collision, navigation
+              and receiver lightmaps remain unchanged; (4) matched 21-camera day/night review
+              shows a finished architectural opening instead of a door cut into a flat box
+      verify: openings schema/rules and mutation selftests; exact generated-piece/face/material
+              checks; shell/material/manifest and chunk/content determinism; matched fixed visual
+              review; inspected selective strict-reference advances; unit, integration, render,
+              culling, formatting and strict-XNA gates
+      note: (2026-09-18) Round 78 leaves the improved leaf surrounded by a broad, unarticulated
+            siding plane. A measured surround is the shortest truthful facade-massing correction:
+            it uses the existing approved painted-millwork material and deterministic shell
+            grammar, needs no asset acquisition and does not alter the simulated door.
+      review: (2026-09-18) Round 79 retains complete 21-view clear-day and normal-night sets; both
+              contact sheets, the direct garage pair and all changed strict references were
+              opened at full size. Against Round 78, `garage-approach` changes 18,549 day / 17,934
+              night pixels above two channel levels (1.2881% / 1.2454%; normalized RGB MAE
+              0.001762 / 0.000299). The pale stepped surround now gives the door a grounded
+              architectural edge by day and stays subdued under the existing carriage lights at
+              night. `entrance-foyer`, `central-hall` and `family-media` remain below 0.00014 MAE.
+              `VISUAL-GATE-1` still FAILS: the broad upper garage wall and repeated facade rhythm,
+              empty driveway composition and sparse secondary rooms/elevations remain.
+      verified: (2026-09-18) Openings schema/rules and their mutations pass; the shell selftest
+                measures eight closed surround pieces / 48 faces and 102 total garage
+                window-frame-role faces. All 99 shells unwrap with 5,252 receiver faces and
+                55,526 detail triangles; material/manifest and compiled world-content checks
+                pass. The world contains 695 chunks / 96 cells / 92 static props / 273 exterior
+                hierarchy instances / 57.702063 MB; `L0_GARAGE` remains exactly eleven chunks.
+                Ten intended strict views were inspected and advanced; one unrelated one-pixel
+                attic regeneration was discarded. All 1,409 unit, 135 integration and 48 active
+                software-render tests pass; all eighteen culling pairs remain below 0.2% at
+                0.0558% worst (`l0-sunroom`). `tools/ci/run_checks.sh --staged` is green and the
+                separate strict-XNA gate reports all 323 translation units clean; compilation and
+                heavy work stayed on CPU 0-5 / at most six workers.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -19884,19 +19927,19 @@ Recorded so nobody has to re-derive the decision.
 
 ## Task count
 
-**1 346 numbered tasks across 53 phases.**
+**1 347 numbered tasks across 53 phases.**
 
 | Phase group | Phases | Tasks |
 |---|---|---|
 | Foundations, capability proof, build, pipeline, assets | 0–4 | 238 |
 | World data, blockout, collision, camera, visibility | 5–9 | 218 |
-| Exterior, neighbourhood, materials, furnishing | 10–13 | 144 |
+| Exterior, neighbourhood, materials, furnishing | 10–13 | 145 |
 | Interaction framework and the systems built on it | 14–21 | 160 |
 | Time, sun, moon, stars, sky, weather | 22–30 | 155 |
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 162 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 346** |
+| **Total** | **0–52** | **1 347** |
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
 disturbs an existing one.
@@ -19932,6 +19975,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-18 | `HOUSE-00948` | **New task, next free phase-12 id.** Add a data-selected, measured Colonial surround to the weather side of the canonical sectional opening while retaining the existing aperture, simulation envelope and white exterior-frame batch. | Round 78's fixed garage view ranks the unarticulated siding-to-door edge as the largest immediately actionable facade defect. Eight deterministic painted-millwork boxes supply architectural depth with no download, new material role, renderer change, collision/navigation change or licence decision. |
 | 2026-09-18 | `HOUSE-00947` | **New task, next free phase-12 id.** Add data-selected top-row glazing and measured pull hardware to the canonical sectional door without changing its simulation envelope. | Round 77's fixed garage view ranks the broad, nearly featureless 4.86 m leaf as the largest remaining facade surface. Existing exterior glass, bronze hardware and deterministic shell grammar can supply believable residential detail with one new chunk and no asset acquisition, portal/collision change or renderer work. |
 | 2026-09-18 | `HOUSE-00946` | **New task, next free phase-12 id.** Add path-bound fine surface detail for measured concrete control joints and bluestone edge/transverse inlays without changing the canonical physical driveway. | Round 76's fixed garage view is still dominated by one uninterrupted grey slab. Existing stock-XNA terrain batching, the approved bluestone/asphalt materials and the path's exact boxes can supply construction scale with two shared roles; a first 30 mm-only capture was rejected because the detail disappeared at review distance. |
 | 2026-09-18 | `HOUSE-00945` | **New task, next free phase-12 id.** Add a measured planted strip and three reused low fixtures at the east driveway edge while preserving the independent manual garage flood and canonical exterior ownership. | Round 75's fixed day/night review ranks the sparse grass/fence edge and almost completely black garage approach as the largest remaining visible defect. Existing approved shrubs, mulch, stock-XNA fixture materials, bounded point-light routing and dusk automation can correct both conditions without a download, global exposure, fake moonlight, renderer change or unbounded scatter. |

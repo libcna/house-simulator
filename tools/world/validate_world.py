@@ -1426,6 +1426,8 @@ def rule_7_openings(world: World) -> list[Problem]:
         sectional = opening.get("sectionalStyle")
         glazing = opening.get("glazingMaterial")
         hardware = opening.get("hardwareMaterial")
+        surround = opening.get("surroundStyle")
+        surround_material = opening.get("surroundMaterial")
         if joinery is not None and hardware is None:
             problems.append(Problem(
                 7, FILE_OF["openings"], f"openings/{index}",
@@ -1469,6 +1471,21 @@ def rule_7_openings(world: World) -> list[Problem]:
                 f"opening {opening.get('id')} assigns generated sectional joinery to unsupported "
                 f"type/material/glazing/hardware {opening.get('type')!r}/"
                 f"{opening.get('material')!r}/{glazing!r}/{hardware!r}"))
+        if (surround is None) != (surround_material is None):
+            problems.append(Problem(
+                7, FILE_OF["openings"], f"openings/{index}",
+                f"opening {opening.get('id')} must author surroundStyle and surroundMaterial "
+                "together"))
+        if surround is not None and (
+                opening.get("kind") != "door"
+                or opening.get("type") != "D_GARAGE"
+                or not str(opening.get("material") or "").startswith("MAT_EXTERIOR_DOOR_")
+                or not str(surround_material or "").startswith("MAT_WINDOW_FRAME_")):
+            problems.append(Problem(
+                7, FILE_OF["openings"], f"openings/{index}/surroundStyle",
+                f"opening {opening.get('id')} assigns generated garage surround to unsupported "
+                f"type/material/finish {opening.get('type')!r}/"
+                f"{opening.get('material')!r}/{surround_material!r}"))
 
     for index, portal in enumerate(world.portals):
         kind = portal.get("kind")
@@ -4216,11 +4233,14 @@ def selftest() -> int:
             "sectionalStyle": "top_lites",
             "glazingMaterial": "MAT_GLASS_CLEAR",
             "hardwareMaterial": "MAT_EXTERIOR_DOOR_HARDWARE_BRONZE",
+            "surroundStyle": "colonial",
+            "surroundMaterial": "MAT_WINDOW_FRAME_WHITE",
         })
         for material_id in ("MAT_EXTERIOR_DOOR_GARAGE_PAINTED",
                             "MAT_EXTERIOR_DOOR_GARAGE_PANEL_PAINTED",
                             "MAT_GLASS_CLEAR",
-                            "MAT_EXTERIOR_DOOR_HARDWARE_BRONZE"):
+                            "MAT_EXTERIOR_DOOR_HARDWARE_BRONZE",
+                            "MAT_WINDOW_FRAME_WHITE"):
             sectional["materials"]["materials"].append({
                 **copy.deepcopy(sectional["materials"]["materials"][0]),
                 "id": material_id,
@@ -4240,6 +4260,16 @@ def selftest() -> int:
         require(any("sectionalStyle, glazingMaterial and hardwareMaterial together" in p.message
                     for p in problems),
                 f"sectional joinery without its glass finish is caught "
+                f"({[str(p) for p in problems]})")
+
+        missing_surround_finish = copy.deepcopy(sectional)
+        row(missing_surround_finish, "openings", "DOOR_WC1").pop("surroundMaterial")
+        missing_surround_dir = workspace / "garage-surround-without-finish"
+        write_fixture(missing_surround_dir, missing_surround_finish)
+        _, problems = validate(missing_surround_dir, wanted=[7])
+        require(any("surroundStyle and surroundMaterial together" in p.message
+                    for p in problems),
+                f"a garage surround without its physical finish is caught "
                 f"({[str(p) for p in problems]})")
 
         # 14. Rule 11 is a proof about STANDING, and about the hole rather than the wall.

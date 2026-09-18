@@ -900,6 +900,13 @@ row, reuses the existing exterior-window glass and bronze hardware finishes, and
 finish geometry around the same five authored sections. The aperture, leaf/collision envelope,
 portal, future spline animation and navigation stay authoritative.
 
+`HOUSE-00948` makes the weather-side opening part of the Colonial Revival facade rather than a
+bare cut through siding. The same opening row selects two 240 mm painted pilasters on grounded
+300 mm plinths, restrained 320 mm capitals, a 300 mm frieze and stepped 120 mm crown. Their backs
+embed 6 mm behind the wall plane and their visible faces project 55–95 mm, so they neither float
+nor compete with the door's aperture. The pieces reuse the approved white window-frame finish and
+batch; the simulated leaf, wall opening, collision, navigation and receiver lightmaps do not move.
+
 ### 11.4 The road and the neighbourhood
 
 | Feature | Z range | Notes |
@@ -2031,6 +2038,12 @@ join its existing exterior-window glass batch, while the physical centre pull ad
 exterior-resident bronze-hardware role. The complete world is 695 chunks / 273 exterior hierarchy
 instances / 57.695654 MB: 650 opaque submissions plus 45 cutouts at 107 opaque state changes. The
 garage aperture, collision, portal, navigation and receiver-lightmap geometry are unchanged.
+
+`HOUSE-00948` (2026-09-18) keeps `L0_GARAGE` at exactly **eleven chunks**. Its eight closed
+surround pieces add 96 detail triangles to the existing white exterior-frame batch rather than a
+new role; the complete world remains 695 chunks / 273 exterior hierarchy instances and grows only
+to 57.702063 MB. The exterior hierarchy bounds include the new 55–95 mm projections, while the
+garage aperture, collision, portal, navigation and receiver-lightmap geometry remain unchanged.
 
 `HOUSE-00930` (2026-09-16) isolates each weather-facing `D_ENTRY` leaf from ordinary hardwood
 joinery so the exterior hierarchy can retain it when its owning interior room is portal-culled.

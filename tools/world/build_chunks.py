@@ -151,7 +151,9 @@ CHUNK_BUDGET_EXCEPTIONS = {
                   "plus the stair to the loft, glazing, trim and an outside window-frame chunk; "
                   "HOUSE-00935 adds separately exterior-resident painted sectional leaf and "
                   "raised-panel roles. HOUSE-00947 reuses its glass role for four top lites and "
-                  "adds one exterior-visible hardware role for the measured centre pull"),
+                  "adds one exterior-visible hardware role for the measured centre pull. "
+                  "HOUSE-00948's physical surround reuses the existing white exterior-frame "
+                  "finish, so the measured ceiling remains unchanged"),
     "L0_FOYER": (20,
                   "HOUSE-01038's measured entrance: six shell finishes and an outside window "
                   "frame plus two source-specific CC0 furniture albedos. Keeping the carved "

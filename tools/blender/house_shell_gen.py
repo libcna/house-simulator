@@ -709,6 +709,24 @@ GARAGE_HANDLE_MOUNT_WIDTH = 0.040
 GARAGE_HANDLE_MOUNT_HEIGHT = 0.085
 GARAGE_HANDLE_HEIGHT_ABOVE_SILL = 0.680
 GARAGE_HANDLE_PROJECTION = 0.038
+#: `HOUSE-00948`: an exterior sectional opening needs architectural scale around the leaf, not a
+#: larger colour patch on it. These are ordinary painted-millwork sections: 240 mm pilasters,
+#: grounded plinths, restrained capitals, a 300 mm frieze and a stepped 120 mm crown. Every piece
+#: stands outside the settled exterior wall and therefore changes neither aperture nor collision.
+GARAGE_SURROUND_PILASTER_WIDTH = 0.240
+GARAGE_SURROUND_PILASTER_GAP = 0.050
+GARAGE_SURROUND_BASE_WIDTH = 0.300
+GARAGE_SURROUND_BASE_HEIGHT = 0.300
+GARAGE_SURROUND_CAP_WIDTH = 0.320
+GARAGE_SURROUND_CAP_HEIGHT = 0.140
+GARAGE_SURROUND_FRIEZE_HEIGHT = 0.300
+GARAGE_SURROUND_CROWN_HEIGHT = 0.120
+GARAGE_SURROUND_SHAFT_PROJECTION = 0.055
+GARAGE_SURROUND_BASE_PROJECTION = 0.075
+GARAGE_SURROUND_CAP_PROJECTION = 0.085
+GARAGE_SURROUND_FRIEZE_PROJECTION = 0.065
+GARAGE_SURROUND_CROWN_PROJECTION = 0.095
+GARAGE_SURROUND_EMBED = 0.006
 
 
 def entry_door_detail_boxes(lu0: float, lu1: float, lv0: float, lv1: float,
@@ -1022,6 +1040,61 @@ def garage_door_detail_boxes(lu0: float, lu1: float, lv0: float, lv1: float,
                    handle_v + GARAGE_HANDLE_HEIGHT / 2.0,
                    "exterior_door_hardware", "centre_pull",
                    GARAGE_HANDLE_PROJECTION)
+    return boxes
+
+
+def garage_door_surround_boxes(hu0: float, hu1: float, hv0: float, hv1: float,
+                               wall_plane: float, side: str, style: str | None = None):
+    """Weather-side painted pilasters, frieze and crown around one sectional opening.
+
+    Tuples use the wall-local ``(u0, u1, v0, v1, d0, d1)`` convention. The back of each closed
+    box is embedded six millimetres into the existing exterior skin, so its hidden face cannot
+    z-fight with the wall; the visible depth projects in the side's actual outward direction.
+    """
+    if style is None:
+        return []
+    if style != "colonial":
+        raise ValueError(f"unsupported garage-door surround style {style!r}")
+    if hu1 <= hu0 or hv1 <= hv0 or side not in ("-X", "+X", "-Z", "+Z"):
+        return []
+
+    outward = -1.0 if side in ("-X", "-Z") else 1.0
+    boxes = []
+
+    def piece(u0, u1, v0, v1, projection, part):
+        front = wall_plane + outward * projection
+        back = wall_plane - outward * GARAGE_SURROUND_EMBED
+        boxes.append((u0, u1, v0, v1, min(front, back), max(front, back),
+                      "window_frame", part))
+
+    shaft_left_1 = hu0 - GARAGE_SURROUND_PILASTER_GAP
+    shaft_left_0 = shaft_left_1 - GARAGE_SURROUND_PILASTER_WIDTH
+    shaft_right_0 = hu1 + GARAGE_SURROUND_PILASTER_GAP
+    shaft_right_1 = shaft_right_0 + GARAGE_SURROUND_PILASTER_WIDTH
+    shaft_top = hv1 + GARAGE_SURROUND_CAP_HEIGHT
+    for u0, u1 in ((shaft_left_0, shaft_left_1), (shaft_right_0, shaft_right_1)):
+        piece(u0, u1, hv0, shaft_top, GARAGE_SURROUND_SHAFT_PROJECTION, "pilaster")
+
+    base_expand = (GARAGE_SURROUND_BASE_WIDTH - GARAGE_SURROUND_PILASTER_WIDTH) / 2.0
+    for u0, u1 in ((shaft_left_0 - base_expand, shaft_left_1 + base_expand),
+                   (shaft_right_0 - base_expand, shaft_right_1 + base_expand)):
+        piece(u0, u1, hv0, hv0 + GARAGE_SURROUND_BASE_HEIGHT,
+              GARAGE_SURROUND_BASE_PROJECTION, "plinth")
+
+    cap_expand = (GARAGE_SURROUND_CAP_WIDTH - GARAGE_SURROUND_PILASTER_WIDTH) / 2.0
+    for u0, u1 in ((shaft_left_0 - cap_expand, shaft_left_1 + cap_expand),
+                   (shaft_right_0 - cap_expand, shaft_right_1 + cap_expand)):
+        piece(u0, u1, hv1, shaft_top, GARAGE_SURROUND_CAP_PROJECTION, "capital")
+
+    header_u0 = shaft_left_0 - cap_expand
+    header_u1 = shaft_right_1 + cap_expand
+    piece(header_u0, header_u1, hv1, hv1 + GARAGE_SURROUND_FRIEZE_HEIGHT,
+          GARAGE_SURROUND_FRIEZE_PROJECTION, "frieze")
+    crown_overhang = 0.080
+    crown_v0 = hv1 + GARAGE_SURROUND_FRIEZE_HEIGHT
+    piece(header_u0 - crown_overhang, header_u1 + crown_overhang,
+          crown_v0, crown_v0 + GARAGE_SURROUND_CROWN_HEIGHT,
+          GARAGE_SURROUND_CROWN_PROJECTION, "crown")
     return boxes
 
 
@@ -1442,6 +1515,24 @@ def cell_surface_materials(cell: dict, openings=(), portals=(), flights=(),
             f"{', '.join(sorted(exterior_door_hardware))}")
     if exterior_door_hardware:
         result["exterior_door_hardware"] = next(iter(exterior_door_hardware))
+
+    garage_door_surrounds = {
+        row.get("surroundMaterial")
+        for row in openings
+        if row.get("kind") == "door"
+        and cell.get("id") in portal_cells.get(row.get("portal"), ())
+        and row.get("surroundStyle")
+        and row.get("surroundMaterial")
+    }
+    if len(garage_door_surrounds) > 1:
+        raise ValueError(
+            f"{cell.get('id')}: generated garage-door surrounds name multiple materials: "
+            f"{', '.join(sorted(garage_door_surrounds))}")
+    if garage_door_surrounds:
+        # The physical surround and the outside sash are one painted weather-facing millwork
+        # family. Sharing their existing semantic slot also preserves the garage's exact draw
+        # budget instead of splitting identical white paint into a second chunk.
+        result["window_frame"] = next(iter(garage_door_surrounds))
 
     interior_door_hardware = {
         row.get("hardwareMaterial")
@@ -2050,6 +2141,21 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                             solid(lo_face, hi_face, bv0, bv1, bu0, bu1, "trim")
                         else:
                             solid(bu0, bu1, bv0, bv1, lo_face, hi_face, "trim")
+                    # `HOUSE-00948`: only the house cell owns an exterior wall, so it also owns
+                    # the weather-side surround. It is expressed in this opening's local axes,
+                    # then mapped back exactly like the leaf and lining; the yard cell remains a
+                    # ground/sky region and cannot duplicate it.
+                    if (outside and opening.get("type") == "D_GARAGE"
+                            and opening.get("surroundStyle")):
+                        for detail in garage_door_surround_boxes(
+                                hu0, hu1, hv0, hv1, outer_plane, side,
+                                opening.get("surroundStyle")):
+                            if side in ("-X", "+X"):
+                                solid(detail[4], detail[5], detail[2], detail[3],
+                                      detail[0], detail[1], detail[6])
+                            else:
+                                solid(detail[0], detail[1], detail[2], detail[3],
+                                      detail[4], detail[5], detail[6])
                     # The threshold: a board across the opening, this room's half of the wall.
                     sill_lo, sill_hi = min(plane, far), max(plane, far)
                     if side in ("-X", "+X"):
@@ -4637,6 +4743,11 @@ def selftest(output: Path) -> int:
     require(garage_classes.count("exterior_door_hardware") == 36,
             f"and its centre pull uses two mounts and one bar on each face "
             f"({garage_classes.count('exterior_door_hardware')} faces)")
+    expected_garage_window_faces = 9 * 6  # frame, sash and one meeting rail
+    require(garage_classes.count("window_frame") == expected_garage_window_faces + 8 * 6,
+            f"and the weather side gains two pilasters, two plinths, two capitals, a frieze and "
+            f"a crown as eight closed pieces in the existing painted-millwork role "
+            f"({garage_classes.count('window_frame')} faces including the garage window)")
     require(garage_classes.count("window_glass") >= GARAGE_PANEL_COLUMNS * 2 * 6,
             f"and its four two-faced lites reach the existing weather-facing glass role "
             f"({garage_classes.count('window_glass')} faces including the garage window)")
@@ -4653,6 +4764,14 @@ def selftest(output: Path) -> int:
     require(garage_materials["exterior_door_hardware"]
             == "MAT_EXTERIOR_DOOR_HARDWARE_BRONZE",
             "while the centre pull uses its explicitly selected exterior-visible metal")
+    require(garage_materials["window_frame"] == "MAT_WINDOW_FRAME_WHITE",
+            "and the surround selects the existing approved exterior-white millwork finish")
+    surround_probe = garage_door_surround_boxes(
+        10.75, 15.65, 0.15, 2.55, -13.15, "-Z", "colonial")
+    require(len(surround_probe) == 8
+            and all(box[4] < -13.15 < box[5] for box in surround_probe),
+            f"the eight surround pieces project outside and embed behind a -Z facade instead "
+            f"of floating on its plane ({len(surround_probe)} pieces)")
 
     require(PORCH_COLUMNS == 4,
             f"§12.1 says the porch stands on FOUR square columns ({PORCH_COLUMNS})")

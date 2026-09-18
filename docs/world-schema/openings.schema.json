@@ -177,6 +177,14 @@
           "solid": {
             "type": "boolean"
           },
+          "surroundMaterial": {
+            "$ref": "#/$defs/id"
+          },
+          "surroundStyle": {
+            "enum": [
+              "colonial"
+            ]
+          },
           "swing": {
             "anyOf": [
               {
