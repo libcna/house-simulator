@@ -23,7 +23,9 @@ arrival composition, while this closer frame exposes foundation planting scale a
 overlap that the picket fence hides.
 `HOUSE-00940` adds a sixteenth foyer-side view of the formal paired doors without moving any prior
 camera. `HOUSE-01287` adds the seventeenth view on the front balcony, facing its over-door lantern;
-the road and path cameras retain the wider arrival comparison.
+the road and path cameras retain the wider arrival comparison. `HOUSE-01288` adds an eighteenth
+downward approach view between the gate and steps, where the path fixtures and their circulation
+clearance remain legible without moving any earlier camera.
 
 ## Round 0 — visual-convergence baseline
 
@@ -2689,3 +2691,51 @@ Compilation and heavy work stayed on CPU 0-5 / at most six workers.
 debug blockout remains available. The next highest-value work is a physically bounded upper/side
 facade layer or close front-step/yard readability, then formal-living contact grounding and wall
 dressing—not a global night-exposure increase.
+
+## Round 62 — physical front-walk bollards
+
+Commit: `HOUSE-01288` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 61's [day path](captures/house-01287-balcony-lantern-day-final/front-path.png) and
+[night path](captures/house-01287-balcony-lantern-night-final/front-path.png) contain four
+authored sources but no source geometry, so the long gate-to-step walk reads as an empty strip and
+loses its manually switched wayfinding layer in the normal starting state. After: the complete
+matched eighteen-camera [day](captures/house-01288-path-bollards-day-final) and
+[night](captures/house-01288-path-bollards-night-final) sets show four physical low fixtures; the
+new [close approach](captures/house-01288-path-bollards-night-final/front-walk-bollards.png) keeps
+their scale and walking clearance reviewable. Three exact
+[off controls](captures/house-01288-path-bollards-controls-final) isolate the current sources.
+All 39 final frames and the four affected strict-reference pairs were inspected.
+
+Ranked visible defects remaining:
+
+1. Most of the upper and side facade remains a broad black plane at night; the bounded arrival
+   fixtures correctly do not fake-light the whole mansion.
+2. Terrain between the guidance points and the garage apron remains dark; any improvement needs a
+   physical source and receiver boundary rather than global exposure.
+3. The formal living room is readable but still brown-heavy, with weak furniture contact shading.
+4. Several broad interior wall bays need restrained art and domestic detail.
+5. The garage frontage, foundation planting and distant neighbour context remain sparse by day.
+
+Fixed: a deterministic project-authored 144-triangle bollard supplies a 200 mm anchored bronze
+foot/frame and a separately switched opal chamber within 200 x 544 x 200 mm bounds. Four static,
+collision-free instances retain the exact stable source positions, alternating at x = ±0.75 m
+outside the clear lane. Their linked optical centres sit at y = 0.43 m; each becomes a restrained
+180 lm / 2,700 K, 70/120-degree downward spot with 3.2 m range. The existing switch and persistence
+group stay manual while the selected normal-play arrival begins on. No renderer, exposure,
+portal/collision, dusk-automation or broad terrain-lighting rule changes.
+
+Against Round 61, the fixed road/path frames change 3,679 / 162,679 pixels above two channel
+levels by day (normalized MAE 0.000234 / 0.002518) and 2,958 / 162,406 at night
+(0.000241 / 0.002500). Exact night off/on controls change 2,775 road, 162,673 path and 45,669
+close-view pixels (0.000233 / 0.002606 / 0.000950 MAE). Day inspection confirms credible half-
+metre scale and a clear route; night inspection shows four warm guidance points and slightly
+clearer steps without lawn flood. The world is 655 chunks / 96 cells / 73 props / 262 exterior
+instances / 53.842684 MB; the unculled diagnostic is 611 opaque, 44 cutout and 109 state changes.
+Four strict debug/property references were selectively advanced after pairwise inspection; full
+test and gate results are recorded in `docs/handoff.md`.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next highest visible value is a measured physical layer for
+the remaining black facade/garage approach or formal-living grounding and wall dressing—not a
+global night-exposure increase.

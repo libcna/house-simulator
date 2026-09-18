@@ -34,8 +34,10 @@ The first minimum real static prop kit (`HOUSE-01037`) uses completed
 `HOUSE-01280` corrects the measured receiver/furniture lighting mismatch visible in its reviewed
 images. `HOUSE-01283` replaces the kitchen island's bare, wrongly oriented point sources with
 three physical downlighting pendants on the real long island axis. `HOUSE-01287` turns the nominal
-front-balcony point into a real over-door lantern with one bounded L1 receiver bake. Round 9 proves the exterior
-material omission is fixed; `HOUSE-00924` removes the
+front-balcony point into a real over-door lantern with one bounded L1 receiver bake, and
+`HOUSE-01288` makes the four existing front-walk sources physical low bollards without taking
+their manual circuit away. Round 9 proves the exterior material omission is fixed; `HOUSE-00924`
+removes the
 exposure-scaled glass tint, and `HOUSE-00925` keeps outdoor receivers from clipping when viewed
 from a dark room. Round 11 leaves the front façade and empty/dark entrance route as the largest
 defects; the chimney's flat source-texture presentation also needs inspection. Primary
@@ -15526,6 +15528,46 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             intended facade references were inspected pairwise and selectively advanced. All
             eighteen culling pairs pass at 0.1338% worst (`l0-sunroom`), and the complete repository
             gate passes all 323 strict-XNA translation units with heavy work restricted to CPU 0-5.
+- [x] HOUSE-01288 — Replace the bare front-walk points with physical low bollards
+      dep: HOUSE-00929, HOUSE-00937, HOUSE-01256, HOUSE-01259, HOUSE-01260, HOUSE-01262, HOUSE-01282, HOUSE-01287 · sys: world, content, lighting, rendering · plat: ALL · pri: MUST
+      note: (2026-09-17) Round 61 leaves the close gate-to-step route as an underlit empty strip.
+            Four stable `LG_EXT_WALK_PATH` points already alternate along that walk, but they have
+            no source geometry and their default-off data makes the selected normal-play arrival
+            lose the authored wayfinding layer. Give those exact positions measured low fixtures
+            and bounded downward optics while retaining their independent manual switch; do not
+            turn them into dusk automation, fake broad terrain pools or raise exterior exposure.
+      accept: four correctly scaled, project-authored bronze/opal bollards alternate outside the
+              clear circulation lane and link their exact optical slots to the four stable sources.
+              Their restrained 2,700 K downward light is visible in the normal night arrival,
+              starts on for the selected playable state and remains manually switchable. Complete
+              matched eighteen-camera day/night sets and exact off controls are inspected; only
+              intended strict references advance, and deterministic asset, world, content, unit,
+              integration, render, culling, provenance and strict-XNA gates pass with compilation
+              and heavy work restricted to CPU 0-5 / at most six workers.
+      done: (2026-09-17) A deterministic 144-triangle, 200 x 544 x 200 mm fixture provides a dark-
+            bronze base/frame and separately switchable opal chamber. Four collision-free static
+            instances retain the exact existing x/z source positions in `EXT_WALK`; their optical
+            centres move to y 0.43 m and each stable source becomes a 180 lm / 2,700 K downward
+            70/120-degree spot with 3.2 m range. The existing switch and persist group remain
+            manual; only the selected normal-play default begins on. No exposure, renderer,
+            portal, collision or terrain-lighting architecture changed.
+      review: (2026-09-17) Round 62 opens complete matched eighteen-camera clear-day and 22:00
+            sets plus three exact current `--light-off` controls. Daylight shows credible half-
+            metre fixture scale, alternating placement and a clear walking lane. Night establishes
+            four restrained warm wayfinding points and improves step approach readability without
+            flooding the lawn. Against Round 61, road/path normalized MAE is 0.000234 / 0.002518
+            by day and 0.000241 / 0.002500 at night. Exact night off/on controls change 2,775 road,
+            162,673 path and 45,669 close-view pixels above two channel levels, with normalized
+            MAE 0.000233 / 0.002606 / 0.000950.
+      verified: (2026-09-17) The permanent generator gate recreates the GLB byte-for-byte and pins
+            its two slots, all four transforms, exact optical links, cone/range/default state and
+            unchanged manual switch. Stable-id validation records 2,910 live ids. The world is
+            655 chunks / 73 props / 262 exterior instances / 53.842684 MB; the unculled diagnostic
+            is 611 opaque, 44 cutout and 109 state changes. Four strict blockout/property
+            references were opened pairwise and selectively advanced. All thirteen world rules,
+            1,409 unit, 135 integration and 48 active software-render tests pass; all eighteen
+            culling pairs remain below 0.2% at 0.1338% worst (`l0-sunroom`). Content, budget,
+            licence/provenance and all 323 strict-XNA translation-unit gates pass.
 - [x] HOUSE-01261 — Implement the per-object three-directional-light assignment (key/fill/bounce) for dynamic objects
       dep: HOUSE-01251, HOUSE-00892 · sys: lighting · plat: ALL · pri: MUST
       accept: `BasicEffect` and `SkinnedEffect` receive the same stable key/fill/bounce slot
@@ -19252,6 +19294,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-17 | `HOUSE-01288` | **New task, next free phase-16 id.** Replace the four existing unlinked front-walk points with measured physical bollards at their stable positions, preserve the independent manual circuit and start that circuit on only for the selected normal-play arrival. | Round 61 leaves the close gate-to-step route as an empty underlit strip. A forced-on fixed-camera control proves the four existing sources improve wayfinding but have no visible fixture, while their manual switch remains a useful player boundary. Physicalizing that authored layer improves both day composition and night arrival without dusk automation, broad fake terrain pools, global exposure or renderer work. |
 | 2026-09-17 | `HOUSE-01287` | **New task, next free phase-16 id.** Replace the existing displaced front-balcony point with the approved physical wall lantern, give only its adjacent L1 landing shell an explicit selected bake and retain its existing manual group. | Round 60 names the broad black upper facade as the largest exterior defect. Source tracing finds a nominal balcony light 2.15 m above its door head, 1.35 m in front of the wall, unlinked to any prop and unbound to any useful receiver. A measured over-door practical improves both day composition and bounded night readability without global exposure, a new asset, an L2 light or renderer work. |
 | 2026-09-17 | `HOUSE-01286` | **New task, next free phase-16 id.** Reuse the approved physical semi-flush fixture for the four already-authored formal-living main sources, replace their near-ceiling point singularities with measured broad downward optics and promote only the selected-cell bake. | Round 59's largest remaining defect is the nearly black formal living room. A fixed-camera `--light-on=LG_L0_LIVING_MAIN` control proves this is not merely an off switch: the current atlas adds four tiny ceiling spots but leaves the room black. Bake evidence explains it quantitatively (10.5507 peak / 0.0110 mean) and the completed family fixture provides a dependency-valid 0.2292 peak / 0.0454 mean reference without a new asset, renderer or global-exposure change. |
 | 2026-09-17 | `HOUSE-00940` | **New task, next free phase-12 id.** Interpret the already-authored `D_DOUBLE` leaf width as one member of its full portal pair, and generate opaque panelled or translucent glazed joinery from the portal's existing semantics. | Round 58's straight living view exposes a broad blank rectangle beside the finished piano. The opening schedule explicitly says its 860 mm row is “one leaf of a pair,” while the shell centres only that one leaf in a 1.80 m portal and fills the two 470 mm remnants as lining. Correcting the general static closed-leaf grammar improves all four formal-room pairs without a prop, room-name exception, new renderer or changed portal/collision dimensions. |

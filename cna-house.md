@@ -3433,6 +3433,14 @@ it. This is the technique lightmapped games used for twenty years and it is a pe
 > fixture's optical centre. Only `L1_LANDING` is named as a foreign fixed receiver: its selected
 > atlas peaks at 2.9429 with mean 0.000702, while the global 683 lm/W calibration preserves the
 > pre-existing landing groups. No L2 receiver, global exposure change or renderer path is added.
+>
+> `HOUSE-01288` gives the four stable front-walk sources real 200 x 544 x 200 mm low-voltage
+> bollards at their unchanged alternating positions. Each linked `BollardShade` is the optical
+> centre of a 180 lm / 2,700 K downward 70/120-degree spot with 3.2 m range. The selected normal
+> arrival starts their existing group on, but `SWITCH_EXT_WALK` remains the independent manual
+> control and persistence owner; the group is not converted to dusk automation. The fixtures are
+> deterministic project-authored content, preserve the clear circulation lane and add no fake
+> terrain illumination, exposure change, cross-cell receiver or renderer path.
 
 ### 28.4 Daylight through windows
 

@@ -838,6 +838,46 @@
       ]
     },
     {
+      "id": "MODEL_FIXTURE_PATH_BOLLARD",
+      "category": "fixture",
+      "sourceFile": "assets-src/Models/Fixtures/path_bollard.glb",
+      "sourceSha256": "4787039ecb67ff8f293274b43320fb6eab977b8bdc72f701d45ffe31e36497e9",
+      "contentName": "Models/Fixtures/path_bollard",
+      "kind": "model",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "generated",
+        "name": "Measured low-voltage front-walk bollard",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored dark-bronze and opal path fixture generated deterministically by tools/assets/path_bollard.py for HOUSE-01288. Its bottom-centre pivot and separate BollardShade optical slot match the four canonical low-voltage front-walk sources. No third-party mesh or texture is embedded."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.2,
+          0.544,
+          0.2
+        ],
+        "triangles": {
+          "LOD0": 144
+        }
+      },
+      "materialMap": {
+        "BollardMetal": "MAT_FIXTURE_DARK_BRONZE",
+        "BollardShade": "MAT_FIXTURE_EMISSIVE_WARM"
+      },
+      "usedIn": [
+        "EXT_WALK"
+      ]
+    },
+    {
       "id": "MODEL_FIXTURE_PORCH_LANTERN",
       "category": "fixture",
       "sourceFile": "assets-src/Models/Fixtures/porch_lantern.glb",

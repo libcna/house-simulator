@@ -1,3 +1,58 @@
+# Visual-sprint handoff — 2026-09-18 (`HOUSE-01288` checkpoint)
+
+Branch `develop`. Task-start HEAD `25e2bd386a86f0c52de22ab15df177a1387498bd`
+(`HOUSE-01287`). This file belongs to the single `HOUSE-01288` commit; use that commit as the
+ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal gameplay remains production-material only and
+explicit debug blockout remains available.
+
+The four existing front-walk points are now real low-voltage bollards rather than invisible light
+sources. The deterministic project-authored model is 200 x 544 x 200 mm and 144 triangles, with a
+dark-bronze base/frame and separate `BollardShade`. Four collision-free static instances retain
+the stable alternating positions along `EXT_WALK`; each linked optical centre is at y = 0.43 m and
+drives a 180 lm / 2,700 K downward 70/120-degree spot with 3.2 m range. Their existing independent
+manual switch and persistence group are unchanged. The selected normal-play arrival starts the
+group on, but it is not dusk-automated. No exposure, renderer, portal/collision, cross-cell bake or
+broad terrain-lighting rule changed.
+
+The canonical before views are Round 61's
+[day path](visual-review/captures/house-01287-balcony-lantern-day-final/front-path.png) and
+[night path](visual-review/captures/house-01287-balcony-lantern-night-final/front-path.png).
+The complete matched eighteen-camera after sets are
+[clear day](visual-review/captures/house-01288-path-bollards-day-final) and
+[normal night](visual-review/captures/house-01288-path-bollards-night-final); the added
+[close approach](visual-review/captures/house-01288-path-bollards-night-final/front-walk-bollards.png)
+shows all four fixtures, their scale and clear walking lane. Three
+[exact off controls](visual-review/captures/house-01288-path-bollards-controls-final) isolate the
+current sources. All 39 final frames were opened. Against Round 61, fixed road/path normalized MAE
+is 0.000234 / 0.002518 by day and 0.000241 / 0.002500 at night. Exact night off/on controls change
+2,775 road, 162,673 path and 45,669 close-view pixels above two channel levels, with normalized MAE
+0.000233 / 0.002606 / 0.000950. Day reads as credible half-metre hardware; night adds restrained
+warm guidance and slightly clearer steps without flooding the lawn.
+
+Four strict blockout/property reference pairs were opened and intentionally advanced. Three show
+the new bollards directly; the wide `blockout-01` crossed its tolerance through the cumulative
+approved small facade/path fixtures and was inspected at its full 1600 x 900 resolution. No
+unrelated golden moved. The world is 655 chunks / 96 cells / 73 static props / 262 exterior
+hierarchy instances / 53.842684 MB. The unculled diagnostic is 611 opaque submissions, 44 cutouts
+and 109 state changes. The integration draw-list guard now records the measured 655-call world,
+still far below the 1,400-call worst-case envelope.
+
+The permanent bollard gate regenerates the GLB byte-for-byte and pins geometry, slots, all four
+transforms, exact optical links, cones, range, default state and unchanged manual switch. All
+thirteen world validators, all 1,409 unit and 135 integration tests, and all 48 active software-
+render tests pass; eight capture-only cases remain disabled. All eighteen culled-vs-unculled poses
+pass at 0.1338% worst (`l0-sunroom`). Stable-id (2,910 ids), manifest, budget,
+provenance/licensing, content and all 323 strict-XNA translation-unit gates pass. Compilation and
+heavy tools stayed on CPU 0-5 / at most six workers.
+
+The largest remaining visible defect is the broad black upper/side facade and dark garage/yard
+terrain between physically bounded fixtures at night. The next highest-value work is either a
+measured architectural source/receiver layer for that arrival or formal-living contact grounding
+and restrained wall dressing. Do not raise global night exposure or leave the vertical slice for
+unrelated systems.
+
+---
+
 # Visual-sprint handoff — 2026-09-17 (`HOUSE-01287` checkpoint)
 
 Branch `develop`. Task-start HEAD `d1978de5f3f45aac03ab2d6c56480525d4740bb7`

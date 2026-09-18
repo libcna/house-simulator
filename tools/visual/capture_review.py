@@ -24,6 +24,9 @@ POSES = (
     # in one deterministic frame so planting scale and accidental porch/driveway overlap remain
     # human-reviewable.
     ("front-path", "0.00,0.60,-8.50,0.0,0.0"),
+    # HOUSE-01288: this low, downward approach sees the alternating path fixtures at human scale
+    # and keeps their clear walking lane visible; the road and porch cameras retain the context.
+    ("front-walk-bollards", "0.00,0.00,-5.00,0.0,-15.0"),
     # HOUSE-01287: stand on the canonical front balcony and look directly at its over-door
     # lantern. The road view proves composition; this one proves physical scale, mounting height,
     # daytime appearance and the bounded pool on the door rather than a floating debug source.

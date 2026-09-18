@@ -2187,39 +2187,43 @@
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
-    // ---- LG_EXT_WALK_PATH x4 -- §11.4's "4 low path lights" along the bluestone walk, 0.50 m
-    // ---- bollards alternating either side of it
+    // ---- LG_EXT_WALK_PATH x4 -- §11.4's physical low-voltage bollards alternate along the
+    // ---- bluestone walk. Their independent manual group starts on for the playable arrival.
     {
       "id": "LIGHT_EXT_WALK_PATH_1", "cell": "EXT_WALK", "group": "LG_EXT_WALK_PATH",
-      "type": "point", "position": [-0.75, 0.50, -9.50],
+      "type": "spot", "position": [-0.75, 0.43, -9.50],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 120.0, "range": 4.00,
-      "fixtureProp": null, "emissiveMaterialSlot": "shade",
-      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
+      "coneInnerDeg": 70.0, "coneOuterDeg": 120.0,
+      "colorK": 2700, "intensityLm": 180.0, "range": 3.20,
+      "fixtureProp": "PROP_EXT_WALK_BOLLARD_1", "emissiveMaterialSlot": "BollardShade",
+      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": true
     },
     {
       "id": "LIGHT_EXT_WALK_PATH_2", "cell": "EXT_WALK", "group": "LG_EXT_WALK_PATH",
-      "type": "point", "position": [0.75, 0.50, -6.60],
+      "type": "spot", "position": [0.75, 0.43, -6.60],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 120.0, "range": 4.00,
-      "fixtureProp": null, "emissiveMaterialSlot": "shade",
-      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
+      "coneInnerDeg": 70.0, "coneOuterDeg": 120.0,
+      "colorK": 2700, "intensityLm": 180.0, "range": 3.20,
+      "fixtureProp": "PROP_EXT_WALK_BOLLARD_2", "emissiveMaterialSlot": "BollardShade",
+      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": true
     },
     {
       "id": "LIGHT_EXT_WALK_PATH_3", "cell": "EXT_WALK", "group": "LG_EXT_WALK_PATH",
-      "type": "point", "position": [-0.75, 0.50, -3.70],
+      "type": "spot", "position": [-0.75, 0.43, -3.70],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 120.0, "range": 4.00,
-      "fixtureProp": null, "emissiveMaterialSlot": "shade",
-      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
+      "coneInnerDeg": 70.0, "coneOuterDeg": 120.0,
+      "colorK": 2700, "intensityLm": 180.0, "range": 3.20,
+      "fixtureProp": "PROP_EXT_WALK_BOLLARD_3", "emissiveMaterialSlot": "BollardShade",
+      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": true
     },
     {
       "id": "LIGHT_EXT_WALK_PATH_4", "cell": "EXT_WALK", "group": "LG_EXT_WALK_PATH",
-      "type": "point", "position": [0.75, 0.50, -0.80],
+      "type": "spot", "position": [0.75, 0.43, -0.80],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 120.0, "range": 4.00,
-      "fixtureProp": null, "emissiveMaterialSlot": "shade",
-      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
+      "coneInnerDeg": 70.0, "coneOuterDeg": 120.0,
+      "colorK": 2700, "intensityLm": 180.0, "range": 3.20,
+      "fixtureProp": "PROP_EXT_WALK_BOLLARD_4", "emissiveMaterialSlot": "BollardShade",
+      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": true
     },
 
     // ---- LG_EXT_SHED_MAIN x1 -- one bulb under the shed's 2.35 m roof

@@ -855,6 +855,58 @@
       "interactable": null
     },
     {
+      "id": "PROP_EXT_WALK_BOLLARD_1",
+      "asset": "MODEL_FIXTURE_PATH_BOLLARD",
+      "cell": "EXT_WALK",
+      "position": [-0.75, 0.0, -9.50],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_EXT_WALK_BOLLARD_2",
+      "asset": "MODEL_FIXTURE_PATH_BOLLARD",
+      "cell": "EXT_WALK",
+      "position": [0.75, 0.0, -6.60],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_EXT_WALK_BOLLARD_3",
+      "asset": "MODEL_FIXTURE_PATH_BOLLARD",
+      "cell": "EXT_WALK",
+      "position": [-0.75, 0.0, -3.70],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_EXT_WALK_BOLLARD_4",
+      "asset": "MODEL_FIXTURE_PATH_BOLLARD",
+      "cell": "EXT_WALK",
+      "position": [0.75, 0.0, -0.80],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
       "id": "PROP_EXT_DRIVEWAY_FLOODLIGHT",
       "asset": "MODEL_FIXTURE_GARAGE_FLOODLIGHT",
       "cell": "EXT_DRIVEWAY",
