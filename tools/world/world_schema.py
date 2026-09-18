@@ -437,6 +437,15 @@ def build() -> dict[str, dict]:
                 ["id", "boxes", "material"],
                 {"id": ID, "boxes": {"type": "array", "items": BOX, "minItems": 1},
                  "material": ID})},
+            # Fine render-only surface marks remain tied to the path whose physical surface,
+            # collision and footstep material stay authoritative. A few-millimetre lift avoids
+            # z-fighting; this is for control joints and similar detail, not another path layer.
+            "surfaceDetails": {"type": "array", "items": obj(
+                ["id", "path", "boxes", "lift", "material"],
+                {"id": ID, "path": ID,
+                 "boxes": {"type": "array", "items": BOX, "minItems": 1},
+                 "lift": {"type": "number", "minimum": 0, "maximum": 0.02},
+                 "material": ID})},
             # A structure with a `cell` is a BUILDING -- you stand inside it, and its heights
             # come from the cell and from `eavesY`/`ridgeY`. One without a cell is garden
             # furniture: §11.1's raised beds, its trellis and the compost bin, which have no

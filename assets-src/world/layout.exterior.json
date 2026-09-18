@@ -135,6 +135,33 @@
       "material": "MAT_OUTDOOR_MULCH" }
   ],
 
+  // Fine surface-only detail follows an authored path without changing its terrain height,
+  // collision or footstep class. The driveway control/isolation joints divide the two-car slab
+  // into buildable panels at roughly 2.8 m centres; the 4 mm render lift prevents coplanar
+  // flicker while the narrow dark strip reads as the shadow inside a saw-cut/formed joint.
+  "surfaceDetails": [
+    { "id": "DETAIL_DRIVEWAY_CONTROL_JOINTS", "path": "PATH_DRIVEWAY",
+      "boxes": [
+        { "x": [13.185, 13.215], "z": [-13.25, -6.03] },
+        { "x": [13.185, 13.215], "z": [-5.97, -0.05] },
+        { "x": [9.33, 17.07], "z": [-11.215, -11.185] },
+        { "x": [9.33, 17.07], "z": [-8.415, -8.385] },
+        { "x": [9.63, 16.77], "z": [-5.515, -5.485] },
+        { "x": [9.63, 16.77], "z": [-2.815, -2.785] }
+      ],
+      "lift": 0.004, "material": "MAT_ASPHALT_01" },
+    { "id": "DETAIL_DRIVEWAY_BLUESTONE_INLAYS", "path": "PATH_DRIVEWAY",
+      "boxes": [
+        { "x": [9.33, 17.07], "z": [-10.15, -9.85] },
+        { "x": [9.63, 16.77], "z": [-3.85, -3.55] },
+        { "x": [9.30, 9.45], "z": [-13.25, -6.03] },
+        { "x": [16.95, 17.10], "z": [-13.25, -6.03] },
+        { "x": [9.60, 9.75], "z": [-5.97, -0.05] },
+        { "x": [16.65, 16.80], "z": [-5.97, -0.05] }
+      ],
+      "lift": 0.005, "material": "MAT_BLUESTONE_PAVER" }
+  ],
+
 
   // §11.4's neighbourhood: 60 buildings and the street furniture, none of it enterable.
   // `HOUSE-00391`. Positions are deterministic -- a fixed seed for the jitter -- so the street

@@ -888,6 +888,12 @@ the front elevation depth. The driveway runs straight from the vehicle gate to t
 concrete, wide enough to park a second car beside the door. A 1.0 m concrete path links the
 driveway to the front walk at `z = −6.0` so the player never has to cross grass.
 
+`HOUSE-00946` gives that broad two-car slab buildable visual scale: six 30 mm control-joint runs
+divide it into roughly 2.8 m panels, while a 150 mm bluestone edge and two 300 mm transverse
+bluestone bands tie the drive to the front-walk palette. These are path-bound render details at
+4–5 mm anti-z-fight lift, not a second path: the canonical concrete height, collision, navigation
+and footstep class remain authoritative.
+
 ### 11.4 The road and the neighbourhood
 
 | Feature | Z range | Notes |
@@ -2007,6 +2013,12 @@ ceiling records those visible roles while retaining the ordinary six-chunk targe
 over-ceiling and stale-exception failures. The front 16 m terrain tile owns the part of the same
 mulch strip nearest the road, so its one shared mulch chunk is correctly resident in `EXT_ROAD`
 and moves that exterior aggregation's exact ceiling from seventeen to eighteen.
+
+`HOUSE-00946` (2026-09-18) measures `EXT_SIDEYARD_E` at **eleven chunks** after the driveway
+adds one shared asphalt-finish control-joint role and one shared bluestone-inlay role. Twelve
+authored strips compile into those two batches across both terrain tiles; they do not become
+twelve draws. Both canonical ids already existed, so the unculled house moves from 647 to 649
+opaque submissions while staying at 107 opaque state changes.
 
 `HOUSE-00930` (2026-09-16) isolates each weather-facing `D_ENTRY` leaf from ordinary hardwood
 joinery so the exterior hierarchy can retain it when its owning interior room is portal-culled.

@@ -1,3 +1,52 @@
+# Visual-sprint handoff — 2026-09-18 (`HOUSE-00946` checkpoint)
+
+Branch `develop`. Task-start HEAD `14ce711d44288c29c6667b39859d1a4df3ef5253`
+(`HOUSE-00945`). This file belongs to the single `HOUSE-00946` commit; use that commit as the
+ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal gameplay remains production-material only and
+explicit debug blockout remains available.
+
+The 13 m two-car concrete driveway no longer reads as one unscaled grey plane. Six 30 mm dark
+control-joint runs divide it at roughly 2.8 m centres; a 150 mm bluestone edge and two 300 mm
+transverse bluestone bands tie the drive to the front-walk palette. All twelve strips are authored
+inside `PATH_DRIVEWAY`, reuse approved asphalt/bluestone finishes and compile into exactly two
+cell-scoped roles. They share the terrain tile's lightmap island. The canonical concrete height,
+material index, collision, navigation, footstep class and circulation envelope do not move. No
+download, licence change, runtime/API branch or new renderer was added.
+
+Round 76 supplies the before [day garage approach](visual-review/captures/house-00945-driveway-border-day-r1/garage-approach.png)
+and [22:00 garage approach](visual-review/captures/house-00945-driveway-border-night-r1/garage-approach.png).
+The complete retained after sets are [clear day](visual-review/captures/house-00946-driveway-joints-day-r2)
+and [normal night](visual-review/captures/house-00946-driveway-joints-night-r2). Both 21-frame
+contact sheets and direct garage pairs were opened at full size. A first joints-only capture was
+rejected because 30 mm lines disappeared into the concrete texture at review distance. The retained
+iteration changes 20,771 day / 16,265 night pixels above two channel levels (1.4424% / 1.1295%;
+normalized RGB MAE 0.000932 / 0.000317). Night changes remain subdued and physically lit.
+
+The world is 694 chunks / 96 cells / 92 static props / 272 exterior hierarchy instances /
+57.665213 MB: 649 opaque submissions, 45 cutouts and 107 unculled opaque state changes.
+`EXT_SIDEYARD_E` is exactly eleven chunks after the two shared detail roles. Two fresh complete
+terrain generations produce the same aggregate SHA-256; all 20 tiles contain 12,311 triangles.
+Nine strict references with a line of sight to the changed drive were inspected and deliberately
+advanced; an unrelated one-pixel attic regeneration was discarded.
+
+All 1,409 unit, 135 integration and 48 active software-render tests pass. All eighteen
+culled-vs-unculled pairs remain below 0.2%, at 0.0558% worst (`l0-sunroom`). Terrain/schema/world
+rules, stable IDs and compiled content pass; `tools/ci/run_checks.sh --staged` reports `all gates
+green`, and the separate full strict-XNA gate reports all 323 translation units clean. Compilation
+and heavy work stayed on CPU 0-5.
+The existing CMake tree still cannot auto-reconfigure in this sandbox because an unrelated
+sharp-runtime glob would write shared `~/deps/FNA3D`; exact stored Ninja compile/link commands
+were used without modifying CNA, sharp-runtime or shared dependencies.
+
+Largest visible defects: garage/facade massing and repeated window rhythm remain simple; the main
+roof/dormer mass still disappears honestly at 22:00 while the Moon is below the horizon; the
+property lacks a parked vehicle and richer distant-neighbour context; formal living retains weak
+furniture/floor contact outside its bounded piano practical; secondary rooms/elevations remain
+sparse. The next highest-value work is garage/facade massing or a dependency-valid physical
+roof/dormer source—not global exposure or an unrelated subsystem.
+
+---
+
 # Visual-sprint handoff — 2026-09-18 (`HOUSE-00945` checkpoint)
 
 Branch `develop`. Task-start HEAD `432ad7a764ac377a36837f75d38334d8e0ab6ae1`

@@ -378,6 +378,43 @@
       },
       "type": "array"
     },
+    "surfaceDetails": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "boxes": {
+            "items": {
+              "$ref": "#/$defs/box"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "lift": {
+            "maximum": 0.02,
+            "minimum": 0,
+            "type": "number"
+          },
+          "material": {
+            "$ref": "#/$defs/id"
+          },
+          "path": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "required": [
+          "id",
+          "path",
+          "boxes",
+          "lift",
+          "material"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
     "terrain": {
       "additionalProperties": false,
       "properties": {

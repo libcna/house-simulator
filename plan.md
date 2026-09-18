@@ -57,6 +57,8 @@ scaled project-authored asphalt shingles and aligns every course to the true slo
 complete K-profile rainwater goods instead of incomplete black strips.
 `HOUSE-00945` gives the sparse garage approach a measured planted border and three physical,
 dusk-controlled low fixtures without enabling its independent manual flood.
+`HOUSE-00946` gives the broad concrete driveway construction scale with fine control joints and
+two shared bluestone-inlay batches, without changing its physical surface or circulation.
 Round 9 proves the exterior
 material omission is fixed; `HOUSE-00924`
 removes the
@@ -14167,6 +14169,41 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
                 an isolated writable test profile. `tools/ci/run_checks.sh --staged` is green and
                 the separate full strict-XNA gate reports all 323 translation units clean;
                 compilation and heavy work stayed on CPU 0-5 / six workers.
+- [x] HOUSE-00946 — Break up the broad concrete driveway with measured joints and bluestone inlays
+      dep: HOUSE-00390, HOUSE-00762, HOUSE-00764, HOUSE-00945 · sys: world/content/materials · plat: ALL · pri: MUST
+      accept: (1) the canonical two-car drive has a continuous 150 mm bluestone edge, two 300 mm
+              transverse stone bands and six 30 mm control-joint runs at roughly 2.8 m centres,
+              all wholly contained by `PATH_DRIVEWAY`; (2) the detail reuses approved bluestone
+              and asphalt finishes, batches as exactly two cell-scoped roles rather than one draw
+              per strip, and shares the terrain tile's lightmap island; (3) render detail does not
+              change the concrete height/material index, collision, navigation, footstep class or
+              circulation envelope; (4) matched 21-camera day/night review proves the drive reads
+              as constructed panels by day and reflects only existing physical light at night
+      verify: terrain/schema/world/stable-id selftests; deterministic tile/chunk/content build;
+              matched fixed visual review; inspected selective strict-reference advances; unit,
+              integration, render, culling and XNA-only gates
+      note: (2026-09-18) Round 76 leaves the garage arrival materially coherent but dominated by
+            one broad uninterrupted grey slab. The first 30 mm-only capture was technically valid
+            but visually ineffective: only one boundary survived the concrete texture at review
+            distance. The retained iteration keeps fine joints and adds restrained stone inlays
+            using an existing palette/material rather than a new asset or a colour swap.
+      review: (2026-09-18) Round 77 retains complete 21-view clear-day and normal-night sets; both
+              contact sheets and direct garage before/after pairs were opened at full size.
+              `garage-approach` changes 20,771 day / 16,265 night pixels above two channel levels
+              (1.4424% / 1.1295%; normalized RGB MAE 0.000932 / 0.000317). The day view now has
+              readable panel scale and a walk-related stone border; the night view shows only the
+              portions reached by existing bollards/carriage lights. Interior controls remain
+              below 0.00024 MAE. `VISUAL-GATE-1` still FAILS: garage/facade massing, the honest
+              dark roof silhouette and sparse secondary elevations remain.
+      verified: (2026-09-18) All terrain, schema, thirteen world-rule, stable-id and deterministic
+                content gates pass. The world contains 694 chunks / 96 cells / 92 static props /
+                272 exterior hierarchy instances / 57.665213 MB; its 649 opaque submissions,
+                45 cutouts and 107 opaque state changes retain the §71 envelope. Nine intended
+                strict views with a line to the changed drive were inspected and advanced; an
+                unrelated one-pixel attic regeneration was discarded. All 1,409 unit, 135
+                integration and 48 active software-render tests pass; all eighteen culling pairs
+                remain below 0.2% at 0.0558% worst (`l0-sunroom`). `run_checks.sh --staged` is
+                green and the separate strict-XNA gate reports all 323 translation units clean.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -19858,6 +19895,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-18 | `HOUSE-00946` | **New task, next free phase-12 id.** Add path-bound fine surface detail for measured concrete control joints and bluestone edge/transverse inlays without changing the canonical physical driveway. | Round 76's fixed garage view is still dominated by one uninterrupted grey slab. Existing stock-XNA terrain batching, the approved bluestone/asphalt materials and the path's exact boxes can supply construction scale with two shared roles; a first 30 mm-only capture was rejected because the detail disappeared at review distance. |
 | 2026-09-18 | `HOUSE-00945` | **New task, next free phase-12 id.** Add a measured planted strip and three reused low fixtures at the east driveway edge while preserving the independent manual garage flood and canonical exterior ownership. | Round 75's fixed day/night review ranks the sparse grass/fence edge and almost completely black garage approach as the largest remaining visible defect. Existing approved shrubs, mulch, stock-XNA fixture materials, bounded point-light routing and dusk automation can correct both conditions without a download, global exposure, fake moonlight, renderer change or unbounded scatter. |
 | 2026-09-18 | `HOUSE-00944` | **New task, next free phase-12 id.** Add physical caps/flashing and complete the canonical rainwater-good geometry while leaving roof planes, collision, drainage data and lightmaps authoritative. | Round 74's fixed daylight review ranks the uncapped hip/dormer seams and almost invisible incomplete gutter strips immediately behind the corrected shingle surface. Source inspection confirms the original gutter loop emits no outward longitudinal face on the road-facing runs and assigns the explicitly shingle-over ridge vent to zero-tint black gutter metal. Derived non-lightmapped finish in the existing shell generator is the smallest dependency-valid correction; changing exposure or another global material cannot supply missing silhouettes. |
 | 2026-09-18 | `HOUSE-00943` | **New task, next free phase-12 id.** Replace the acknowledged `Tiles140` roof surrogate with a deterministic asphalt-shingle pair and slope-metric UV0 while preserving every stable roof material id and runtime effect contract. | Round 73 still ranks roof/dormer readability as the largest architectural defect. Direct source inspection proves the roof is literally using a square ceramic floor texture because the first fixed library had no roofing map. A project-authored pair through the existing stock-XNA material path is the smallest dependency-valid correction; changing exposure or inventing moonlight would hide rather than fix the surface. |

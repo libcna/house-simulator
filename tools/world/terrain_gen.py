@@ -21,7 +21,8 @@ the one line of arithmetic §10.2 states.
 The **material index** is the same argument: §11.5 wants grass, worn lawn, soil, gravel, concrete,
 asphalt, bluestone and mulch, and every one of those is already a `paths` row's material or a
 cell's `footstepSurface`. Reading them is how the ground and the footsteps agree without anybody
-maintaining two lists.
+maintaining two lists. Fine `surfaceDetails` are separately rendered, path-bound marks: they do
+not lie about the terrain's physical or footstep material.
 
 ## The encoding
 
@@ -212,6 +213,44 @@ def surfaces(directory: Path):
         surface = cell.get("footstepSurface") or "grass"
         name = surface if surface in MATERIALS else "bluestone"
         out.append((cell["boxes"], floor, name))
+    return out
+
+
+def surface_details(directory: Path) -> list[dict]:
+    """Validated fine overlays tied to one authored path.
+
+    A control joint is visible geometry but it is not a second driveway: the named path still owns
+    height, collision, navigation and footsteps. Requiring every detail box to sit wholly inside
+    one of that path's boxes prevents an innocent-looking dark strip from escaping onto the lawn.
+    """
+    layout = layout_io.load_layout(directory)
+    exterior = layout.get("exterior") or {}
+    paths = {row["id"]: row for row in exterior.get("paths", [])}
+    out = []
+    for row in exterior.get("surfaceDetails", []):
+        path = paths.get(row.get("path"))
+        if path is None:
+            raise LayoutError(f"surface detail {row.get('id')} names unknown path "
+                              f"{row.get('path')!r}")
+        material = BY_MATERIAL.get(row.get("material"))
+        if material is None:
+            raise LayoutError(f"surface detail {row.get('id')} has unsupported material "
+                              f"{row.get('material')!r}")
+        for box in row["boxes"]:
+            if not any(float(owner["x"][0]) <= float(box["x"][0])
+                       and float(box["x"][1]) <= float(owner["x"][1])
+                       and float(owner["z"][0]) <= float(box["z"][0])
+                       and float(box["z"][1]) <= float(owner["z"][1])
+                       for owner in path["boxes"]):
+                raise LayoutError(f"surface detail {row.get('id')} escapes path {path['id']}")
+        out.append({
+            "id": row["id"],
+            "path": path["id"],
+            "boxes": row["boxes"],
+            "material": f"{material}_detail",
+            "ground": BY_MATERIAL.get(path.get("material"), "grass"),
+            "y": float(path.get("y") or 0.0) + float(row["lift"]),
+        })
     return out
 
 
@@ -724,6 +763,8 @@ def _edge_with_ground(rows: list[dict]) -> float:
         box = _tile_box(tile)
         lines = [(0, box["x"][0]), (0, box["x"][1]), (1, box["z"][0]), (1, box["z"][1])]
         for primitive in tile["primitives"]:
+            if primitive["material"].endswith("_detail"):
+                continue
             for triple in _triples(primitive["indices"]):
                 corners = [primitive["vertices"][index] for index in triple]
                 if abs(corners[0][1][1]) <= 1e-6:
@@ -762,15 +803,19 @@ def tiles(directory: Path) -> list[dict]:
     columns, rows = tile_grid()
     per = int(TILE_METRES / STEP)
     cut = excavations(directory, heights)
+    details = surface_details(directory)
 
     out = []
     for row in range(rows):
         for column in range(columns):
             primitives: dict[str, dict] = {}
 
-            def add(name: str, corners: list[tuple]) -> None:
-                entry = primitives.setdefault(name, {"material": f"TERRAIN_{name}", "ground": name,
+            def add(name: str, corners: list[tuple], ground: str | None = None) -> None:
+                entry = primitives.setdefault(name, {"material": f"TERRAIN_{name}",
+                                                     "ground": ground or name,
                                                      "vertices": [], "index": {}, "indices": []})
+                if ground is not None and entry["ground"] != ground:
+                    raise LayoutError(f"terrain source role {name} has two physical materials")
                 for corner in corners:
                     # Welded on the WHOLE vertex and not on the position: the skirt's top row
                     # stands exactly on the ground's edge and points sideways, so welding on
@@ -782,6 +827,16 @@ def tiles(directory: Path) -> list[dict]:
                         entry["index"][corner] = position
                         entry["vertices"].append(corner)
                     entry["indices"].append(position)
+
+            def detail_vertex(x: float, y: float, z: float) -> tuple:
+                """A path-bound overlay vertex in this tile's existing lightmap island."""
+                pitch = TILE_METRES * LIGHTMAP_DENSITY + 2 * LIGHTMAP_GUTTER
+                tile_x = ORIGIN_X + column * TILE_METRES
+                tile_z = ORIGIN_Z + row * TILE_METRES
+                u = column * pitch + LIGHTMAP_GUTTER + (x - tile_x) * LIGHTMAP_DENSITY
+                v = row * pitch + LIGHTMAP_GUTTER + (z - tile_z) * LIGHTMAP_DENSITY
+                return ((x, y, z), (0.0, 1.0, 0.0), (x, z),
+                        (u / LIGHTMAP_ATLAS, v / LIGHTMAP_ATLAS))
 
             for dz in range(per):
                 for dx in range(per):
@@ -800,6 +855,32 @@ def tiles(directory: Path) -> list[dict]:
                         # what it was.
                         for part in _outside(corners, cut):
                             add(name, part)
+
+            # Render-only path detail keeps the coarse height/material field authoritative while
+            # giving large paved surfaces human-scale construction joints. Clip to this tile so
+            # the ordinary 16 m residency/culling boundary remains exact.
+            tile_x0 = ORIGIN_X + column * TILE_METRES
+            tile_z0 = ORIGIN_Z + row * TILE_METRES
+            tile_x1 = tile_x0 + TILE_METRES
+            tile_z1 = tile_z0 + TILE_METRES
+            for detail in details:
+                for box in detail["boxes"]:
+                    x0 = max(tile_x0, float(box["x"][0]))
+                    x1 = min(tile_x1, float(box["x"][1]))
+                    z0 = max(tile_z0, float(box["z"][0]))
+                    z1 = min(tile_z1, float(box["z"][1]))
+                    if x1 - x0 <= 1e-9 or z1 - z0 <= 1e-9:
+                        continue
+                    corners = {
+                        (0, 0): detail_vertex(x0, detail["y"], z0),
+                        (1, 0): detail_vertex(x1, detail["y"], z0),
+                        (0, 1): detail_vertex(x0, detail["y"], z1),
+                        (1, 1): detail_vertex(x1, detail["y"], z1),
+                    }
+                    add(detail["material"],
+                        [corners[(0, 0)], corners[(1, 1)], corners[(1, 0)]], detail["ground"])
+                    add(detail["material"],
+                        [corners[(0, 0)], corners[(0, 1)], corners[(1, 1)]], detail["ground"])
 
             # The skirt, round the tile's own edge. Its vertices carry the edge's UVs and a normal
             # that points OUT of the tile, so a skirt lit as ground would not glow at grazing sun.
@@ -832,7 +913,9 @@ def tiles(directory: Path) -> list[dict]:
                             add(name, [top[0], skirt[0], top[1]])
                             add(name, [top[1], skirt[0], skirt[1]])
 
-            ordered = [primitives[name] for name in MATERIALS if name in primitives]
+            ordered_names = [name for name in MATERIALS if name in primitives]
+            ordered_names.extend(sorted(name for name in primitives if name not in MATERIALS))
+            ordered = [primitives[name] for name in ordered_names]
             points = [vertex[0] for primitive in ordered for vertex in primitive["vertices"]]
             out.append({
                 "id": f"TERRAIN_R{row}C{column}",
@@ -1350,6 +1433,7 @@ def selftest() -> int:
         removed = _union_area(cut, lot)
         drawn = sum(_area([primitive["vertices"][index] for index in triple])
                     for tile in rows for primitive in tile["primitives"]
+                    if not primitive["material"].endswith("_detail")
                     for triple in _triples(primitive["indices"])
                     if abs(primitive["vertices"][triple[0]][1][1]) > 1e-6)
         whole = (lot["x"][1] - lot["x"][0]) * (lot["z"][1] - lot["z"][0])
@@ -1362,6 +1446,8 @@ def selftest() -> int:
         intruders = []
         for tile in rows:
             for primitive in tile["primitives"]:
+                if primitive["material"].endswith("_detail"):
+                    continue
                 for triple in _triples(primitive["indices"]):
                     corners = [primitive["vertices"][index] for index in triple]
                     if abs(corners[0][1][1]) <= 1e-6:
@@ -1486,6 +1572,35 @@ def selftest() -> int:
         require(present == {MATERIALS[value] for value in set(index)},
                 f"and the materials the tiles carry are exactly the ones the index image uses "
                 f"({sorted(present)})")
+
+        # HOUSE-00946: the broad two-car concrete surface gets physical construction scale
+        # without becoming a second path or changing what the player collides with/steps on.
+        details = surface_details(SOURCE)
+        require(len(details) == 2 and details[0]["id"] == "DETAIL_DRIVEWAY_CONTROL_JOINTS"
+                and details[0]["path"] == "PATH_DRIVEWAY" and len(details[0]["boxes"]) == 6
+                and details[0]["material"] == "asphalt_detail"
+                and details[0]["ground"] == "concrete"
+                and abs(details[0]["y"] - 0.004) < 1e-9
+                and details[1]["id"] == "DETAIL_DRIVEWAY_BLUESTONE_INLAYS"
+                and details[1]["path"] == "PATH_DRIVEWAY" and len(details[1]["boxes"]) == 6
+                and details[1]["material"] == "bluestone_detail"
+                and details[1]["ground"] == "concrete"
+                and abs(details[1]["y"] - 0.005) < 1e-9,
+                f"the driveway owns six fine control-joint runs and six bluestone inlays "
+                f"({details})")
+        drive_tile = next(tile for tile in rows if tile["id"] == "TERRAIN_R2C3")
+        joint = next((primitive for primitive in drive_tile["primitives"]
+                      if primitive["material"] == "TERRAIN_asphalt_detail"), None)
+        inlay = next((primitive for primitive in drive_tile["primitives"]
+                      if primitive["material"] == "TERRAIN_bluestone_detail"), None)
+        require(joint is not None and len(joint["indices"]) // 3 == 10
+                and all(abs(vertex[0][1] - 0.004) < 1e-9 for vertex in joint["vertices"]),
+                f"and its rear/mid runs batch as exactly 10 lifted asphalt triangles in the "
+                f"driveway tile ({0 if joint is None else len(joint['indices']) // 3})")
+        require(inlay is not None and len(inlay["indices"]) // 3 == 10
+                and all(abs(vertex[0][1] - 0.005) < 1e-9 for vertex in inlay["vertices"]),
+                f"and its rear/mid inlays batch as exactly 10 lifted bluestone triangles in the "
+                f"driveway tile ({0 if inlay is None else len(inlay['indices']) // 3})")
 
         first = _tile_document(rows[0])
         again = _tile_document(tiles(SOURCE)[0])

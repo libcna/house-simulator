@@ -3379,3 +3379,44 @@ was discarded.
 debug blockout remains available. The next checkpoint should address the screenshot-ranked roof /
 dormer night silhouette with a truthful bounded source, or the large daytime garage/facade massing
 if no such source is dependency-valid—not a global exposure lift or unrelated subsystem.
+
+## Round 77 — constructed driveway panels and stone inlays
+
+Commit: `HOUSE-00946` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 76's [day garage approach](captures/house-00945-driveway-border-day-r1/garage-approach.png)
+has a planted/lit edge but the two-car concrete surface is still one broad uninterrupted grey
+plane. After: the complete twenty-one-camera
+[clear-day](captures/house-00946-driveway-joints-day-r2) and
+[normal-night](captures/house-00946-driveway-joints-night-r2) sets add measured construction
+scale. Both contact sheets and the direct garage day/night pairs were opened at full size.
+
+Ranked visible defects remaining:
+
+1. Garage/facade massing and repeated window rhythm remain simple despite the stronger foreground.
+2. The main roof/dormer silhouette remains honestly dark at 22:00 with the Moon below the horizon;
+   any improvement still needs a physical bounded source.
+3. The property lacks a parked vehicle and richer distant-neighbour context, so the improved drive
+   remains visually empty.
+4. Formal living retains weak furniture/floor contact outside its bounded piano practical.
+5. Secondary rooms and elevations outside the connected slice remain sparse.
+
+Fixed: six 30 mm dark control-joint runs divide the canonical concrete drive at approximately
+2.8 m centres. A 150 mm bluestone edge and two 300 mm transverse bands reuse the same material
+family as the front walk. Twelve authored strips compile into one asphalt-finish and one
+bluestone-finish role for `EXT_SIDEYARD_E`; both use the terrain tile's existing lightmap island.
+They are render-only path-bound detail, so height, material index, concrete footsteps, collision,
+navigation and circulation remain unchanged. The first capture with only fine joints was rejected
+because the lines disappeared into the concrete texture at review distance.
+
+Against Round 76, `garage-approach` changes 20,771 day / 16,265 night pixels above two channel
+levels (1.4424% / 1.1295%; normalized RGB MAE 0.000932 / 0.000317). Day now reads as bounded,
+buildable panels; night changes are subdued and confined to existing carriage/bollard reach rather
+than emissive stone or a new light. `entrance-foyer`, `central-hall` and `family-media` controls
+remain at 0.0220--0.0472% day and 0.0467--0.0749% night. Nine strict views with a visible line to
+the drive were deliberately advanced after inspection; the unrelated one-pixel attic regeneration
+was discarded.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next checkpoint should improve garage/facade massing or add
+a dependency-valid physical roof/dormer source—not global exposure or an unrelated subsystem.

@@ -134,11 +134,13 @@ CHUNK_BUDGET_EXCEPTIONS = {
                         "plus measured source-exact bark and cutout foliage, including Reach-cap "
                         "splits. HOUSE-00937's foundation-mulch primitive shares the adjoining "
                         "16 m terrain tile; per-instance sub-ranges retain BVH culling"),
-    "EXT_SIDEYARD_E": (9,
+    "EXT_SIDEYARD_E": (11,
                         "HOUSE-00945's measured driveway border: the existing concrete, grass, "
                         "fence and street-tree roles plus one shared shrub atlas, mulch, and the "
                         "two shared bronze/emissive roles of three low bollards. The outdoor "
-                        "landscape cell keeps all repeated instances in bounded sub-ranges"),
+                        "landscape cell keeps all repeated instances in bounded sub-ranges. "
+                        "HOUSE-00946 adds one asphalt-finish batch for narrow control joints and "
+                        "one bluestone batch for the driveway's inset border/bands"),
     "EXT_WORLD": (24,
                    "the neighbourhood ring is not a room. HOUSE-00772's two rows of street trees "
                    "and the 2.1 m road-edge hedge add source-exact bark/cutout foliage with "

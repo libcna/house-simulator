@@ -8,7 +8,11 @@ These mappings are offline content-tool choices, never runtime room/material-nam
 
 ROLE_IDS = {
     "TERRAIN_asphalt": "MAT_OUTDOOR_ASPHALT",
+    # A separate source role lets terrain integrity tests distinguish the raised render-only
+    # driveway joints from the physical asphalt field; both truthfully bind the same finish.
+    "TERRAIN_asphalt_detail": "MAT_OUTDOOR_ASPHALT",
     "TERRAIN_bluestone": "MAT_OUTDOOR_BLUESTONE",
+    "TERRAIN_bluestone_detail": "MAT_OUTDOOR_BLUESTONE",
     "TERRAIN_concrete": "MAT_OUTDOOR_CONCRETE",
     "TERRAIN_grass": "MAT_OUTDOOR_GRASS",
     "TERRAIN_lawn_worn": "MAT_OUTDOOR_LAWN_WORN",

@@ -142,6 +142,8 @@ exterior/groundCovers	COVER_DRIVEWAY_MULCH_E
 exterior/groundCovers	COVER_FOUNDATION_MULCH_E
 exterior/groundCovers	COVER_FOUNDATION_MULCH_W
 assets	DATA_SKY_BSC5P
+exterior/surfaceDetails	DETAIL_DRIVEWAY_BLUESTONE_INLAYS
+exterior/surfaceDetails	DETAIL_DRIVEWAY_CONTROL_JOINTS
 interactables/interactables	DOOR_B1_CELLAR
 interactables/interactables	DOOR_B1_CINEMA
 openings/openings	DOOR_B1_CINEMA__B1_UTILITY
