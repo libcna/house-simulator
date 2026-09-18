@@ -163,6 +163,9 @@ run_gate "living-piano-vignette" python3 tools/assets/living_piano_vignette_prep
 # HOUSE-01060: the structural chimney keeps its measured room-side hearth/surround composition,
 # low collision proxy, exact canonical alignment and deterministic project-authored geometry.
 run_gate "living-fireplace" python3 tools/assets/living_fireplace_prepare.py --check
+# HOUSE-01062: the camera-near formal-sofa arm retains a deterministic curved, thick, fringed
+# textile accent in exact physical contact, without a collision or copied sofa geometry.
+run_gate "living-sofa-throw" python3 tools/assets/living_sofa_throw_prepare.py --check
 # HOUSE-01053: the family focal wall retains the pinned CC0 low cabinet, exact canonical roles,
 # measured television gap and family-only placement without unsupported source metadata.
 run_gate "family-media-console" python3 tools/assets/family_media_console_prepare.py --check

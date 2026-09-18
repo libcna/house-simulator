@@ -125,6 +125,9 @@ CATEGORIES: dict[str, list[tuple[str, float, float, str]]] = {
     "fireplace-surround": [("x", 1.40, 2.20, "domestic fireplace surround width"),
                            ("y", 1.80, 2.80, "surround plus over-mantel composition height"),
                            ("z", 0.30, 0.80, "hearth projection")],
+    "throw-blanket": [("x", 0.30, 1.20, "folded throw width"),
+                      ("y", 0.30, 1.20, "draped throw height"),
+                      ("z", 0.30, 1.50, "draped throw depth")],
 }
 
 #: Categories that exist in the manifest but carry no size expectation. Listed explicitly so that a

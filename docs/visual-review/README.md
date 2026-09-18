@@ -2882,3 +2882,42 @@ all eighteen culling pairs pass, and full test/gate results are recorded in `doc
 `VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
 debug blockout remains available. The next highest visible value is restrained formal-living soft
 dressing/table detail, followed by foyer/hall wall dressing—not unrelated subsystem work.
+
+## Round 66 — formal-sofa draped wool throw
+
+Commit: `HOUSE-01062` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 65's [day living composition](captures/house-01061-living-rug-day-final/living-composition.png)
+leaves the closest sofa arm as one broad, nearly black brown foreground mass. After: the complete
+matched eighteen-camera [clear-day](captures/house-01062-sofa-throw-day-final) and
+[normal-night](captures/house-01062-sofa-throw-night-final) sets add a tailored pale-blue woven
+throw over that arm. The [day composition](captures/house-01062-sofa-throw-day-final/living-composition.png)
+and [night composition](captures/house-01062-sofa-throw-night-final/living-composition.png) show
+the accepted third placement. Two earlier scratch captures were rejected for clipping into the
+sofa and reading as a dark slab. All 36 final frames were opened; no other route view regressed.
+
+Ranked visible defects remaining:
+
+1. Broad formal-living, foyer and hall wall bays still need restrained art and domestic detail.
+2. The formal conversation group needs controlled coffee/side-table objects rather than more
+   large furniture or another broad colour correction.
+3. The roof/dormer and far side elevations still collapse outside bounded night sources.
+4. Garage/side-yard terrain and distant neighbour context still lose depth at night.
+5. The simple facade massing and repetitive window rhythm remain conspicuous by day.
+
+Fixed: the deterministic 1,460-triangle throw has a curved folded body, 12 mm thickness and nine
+physical fringe cords. At 0.75 placement scale it follows the real camera-near arm, adds neither
+collision nor light and copies no licensed sofa geometry. `MAT_LIVING_THROW_WOOL` reuses the
+approved fabric weave/normal with a low-sheen pale-blue tint. Its permanent gate checks byte-for-
+byte regeneration, source hash, dimensions, components, role and exact canonical placement.
+
+Against Round 65, the fixed composition changes 76,006 day pixels and 75,861 night pixels above
+two channel levels (5.2782% / 5.2681%; normalized MAE 0.004745 / 0.004006). The world is 662 chunks
+/ 96 cells / 79 props / 266 exterior instances / 54.282701 MB; 197 materials produce 618 opaque,
+44 cutout and 102 unculled state changes. The one affected explicit-debug blockout reference was
+visually inspected and advanced; all eighteen culling pairs pass. Full gate results are in
+`docs/handoff.md`.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next highest visible value is restrained formal-living wall
+art and table-scale lived-in detail, followed by foyer/hall wall dressing—not unrelated systems.

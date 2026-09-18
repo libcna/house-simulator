@@ -1182,6 +1182,41 @@
       ]
     },
     {
+      "id": "MODEL_LIVING_SOFA_THROW",
+      "category": "throw-blanket",
+      "sourceFile": "assets-src/Models/Furniture/LivingRoom/living_sofa_throw.glb",
+      "sourceSha256": "4574eaec3989d1a7ca69fb53558ed09d02ad64611cd7b8035adabb92dae066b0",
+      "contentName": "Models/Furniture/LivingRoom/living_sofa_throw",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Formal-sofa draped woven throw",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored curved, solidified and fringed sofa throw generated deterministically by tools/blender/living_sofa_throw.py for HOUSE-01062. It is tailored to the camera-near arm of the separately licensed formal sofa but copies no source geometry or image. Approved project fabric maps are reused through a dedicated canonical material role."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [0.470347, 0.647536, 0.621618],
+        "triangles": {
+          "LOD0": 1460
+        }
+      },
+      "materialMap": {
+        "THROW_WOOL": "MAT_LIVING_THROW_WOOL"
+      },
+      "usedIn": [
+        "L0_LIVING"
+      ]
+    },
+    {
       "id": "MODEL_FURNITURE_FOYER_ARMCHAIR",
       "category": "chair",
       "sourceFile": "assets-src/Models/Furniture/Foyer/upholstered_armchair.glb",

@@ -1514,6 +1514,20 @@
       "footstepSurface": "carpet", "audioAbsorption": 0.72,
       "effectTierS": "Basic", "effectTierE": "RoomLit"
     },
+    // HOUSE-01062: a pale, low-sheen sibling of the approved neutral weave breaks up the formal
+    // sofa's closest brown mass. It is a material role, not another texture asset or emissive fix.
+    {
+      "id": "MAT_LIVING_THROW_WOOL", "class": "fabric",
+      "albedo": "Textures/Materials/fabric_weave_albedo",
+      "normal": "Textures/Materials/fabric_weave_normal", "lightmapChannel": 0,
+      "tint": [0.78, 0.88, 1.0], "specularColor": [0.04, 0.045, 0.055],
+      "specularPower": 5.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": true, "uvScale": [6.0, 6.0],
+      "wetResponse": { "albedoDarken": 0.12, "specularBoost": 1.1, "powerBoost": 1.1 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "carpet", "audioAbsorption": 0.62,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
     {
       "id": "MAT_FURNITURE_LAMP_SHADE", "class": "fabric",
       "albedo": "Textures/Furniture/LivingRoom/lamp_shade_stripes",

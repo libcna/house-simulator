@@ -5686,6 +5686,14 @@ material override, `MAT_LIVING_RUG_WOOL`, which reuses the approved fabric weave
 scale and a low-specular oatmeal tint. The family and dining placements retain charcoal. A palette
 choice therefore neither duplicates geometry nor becomes a room-name branch in runtime code.
 
+`HOUSE-01062` adds a second bounded soft-furnishing pattern: a project-authored throw can be
+tailored to a licensed hero sofa without modifying or copying that sofa. Its curved surface,
+12 mm solidified thickness, folds and nine physical fringe cords remain one collision-free static
+prop; the placement owns contact with the camera-near arm. The dedicated pale-blue wool role reuses
+approved weave maps but does not make every use of that shared texture the same colour. The
+deterministic preparation gate pins the 1,460-triangle geometry, component names, source hash,
+material role and placement, keeping this close-range dressing out of runtime special cases.
+
 ---
 
 ## 60. Dog

@@ -40,8 +40,9 @@ their manual circuit away. `HOUSE-01289` adds four physical foundation-bed uplig
 L1/L2 facade bakes, replacing the remaining broad black night elevation with restrained warm
 vertical pools without raising global exposure. `HOUSE-01060` turns the formal living room's bare
 structural chimney into a measured room-side fireplace composition; `HOUSE-01061` separates its
-dark conversation group from the walnut floor with a room-specific woven wool rug. Round 9 proves
-the exterior material omission is fixed; `HOUSE-00924`
+dark conversation group from the walnut floor with a room-specific woven wool rug; `HOUSE-01062`
+breaks up the remaining foreground sofa mass with a physically draped textile accent. Round 9
+proves the exterior material omission is fixed; `HOUSE-00924`
 removes the
 exposure-scaled glass tint, and `HOUSE-00925` keeps outdoor receivers from clipping when viewed
 from a dark room. Round 11 leaves the front façade and empty/dark entrance route as the largest
@@ -153,7 +154,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 10 | Exterior and property | 00761–00840 | 25 | Terrain, fences, gates, drive, garden |
 | 11 | Neighbourhood background | 00841–00890 | 17 | The house is not floating in nothing |
 | 12 | Materials and textures | 00891–00970 | 36 | The blockout reads as a building |
-| 13 | Static furniture and dressing | 00971–01120 | 67 | Every room furnished to density |
+| 13 | Static furniture and dressing | 00971–01120 | 68 | Every room furnished to density |
 | 14 | Interactable framework | 01121–01180 | 26 | The 12 behaviours and the data model |
 | 15 | Doors and windows | 01181–01250 | 22 | Portals are dynamic |
 | 16 | Lights and switches | 01251–01310 | 29 | The house can be lit — **first playable** |
@@ -14969,6 +14970,37 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             integration and 48 active render tests pass (eight capture-only tests remain disabled);
             all eighteen culling pairs pass at 0.0673% worst (`l0-sunroom`) against 0.2%. All
             project static gates and 323 strict-XNA translation units pass.
+- [x] HOUSE-01062 — Add a physically draped textile accent to the formal sofa
+      dep: HOUSE-00215, HOUSE-00220, HOUSE-00296, HOUSE-01057, HOUSE-01061 · sys: content/world · plat: TOOL · pri: MUST
+      note: (2026-09-18) Round 65 isolates the rug successfully and leaves the closest end of the
+            large formal sofa as the dominant dark brown foreground mass. Add one restrained cool
+            textile accent tailored to the real arm geometry; do not recolour the licensed hero
+            sofa, fake contact through exposure or claim the full furnishing task.
+      accept: deterministically author a curved, finite-thickness woven throw with visible folds
+            and fringe, place it in physical contact over the camera-near sofa arm without floating,
+            clipping or blocking circulation, reuse approved textile maps through a canonical
+            stock-XNA material role, add no collision or light, preserve the source sofa and
+            provenance, capture and inspect the complete matched day/night route, and pass content,
+            budget, render, culling and strict-XNA gates with heavy work capped at six CPUs
+      result: A deterministic Blender source now builds a 0.470 x 0.648 x 0.622 m curved textile
+            body with 12 mm thickness, folded longitudinal relief and nine physical fringe cords.
+            The 1,460-triangle / 40,760-byte GLB sits at 0.75 scale over the camera-near formal-sofa
+            arm with no collision, light or copied sofa geometry. `MAT_LIVING_THROW_WOOL` reuses the
+            approved weave albedo/normal through a dedicated low-sheen pale-blue role. The permanent
+            preparation gate pins source hash, exact geometry, components, role and placement.
+      review: Two dark/clipping placements were captured to scratch and rejected. All 36 final
+            Round 66 route frames were opened: the accepted throw follows the arm, breaks up the
+            closest brown mass and remains a textile rather than a luminous patch; every other view
+            retains its prior presentation. Against Round 65, `living-composition` changes 76,006
+            day and 75,861 night pixels above two channel levels (5.2782% / 5.2681%; normalized MAE
+            0.004745 / 0.004006). The one affected explicit-debug blockout golden was inspected and
+            advanced intentionally; no production golden was changed.
+      verified: The world has 197 materials and 2,934 stable ids; its 662 chunks, 79 props, 266
+            exterior instances and 54.282701 MB upload remain inside budget. The unculled diagnostic
+            is 618 opaque / 44 cutout / 102 state changes. All 1,409 unit, 135 integration and 48
+            active render tests pass (eight capture-only tests remain disabled); all eighteen
+            culling pairs pass at 0.0673% worst (`l0-sunroom`) against 0.2%. All project static gates
+            and 323 strict-XNA translation units pass with heavy work restricted to CPU 0-5.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -19363,13 +19395,13 @@ Recorded so nobody has to re-derive the decision.
 |---|---|---|
 | Foundations, capability proof, build, pipeline, assets | 0–4 | 238 |
 | World data, blockout, collision, camera, visibility | 5–9 | 218 |
-| Exterior, neighbourhood, materials, furnishing | 10–13 | 138 |
+| Exterior, neighbourhood, materials, furnishing | 10–13 | 139 |
 | Interaction framework and the systems built on it | 14–21 | 159 |
 | Time, sun, moon, stars, sky, weather | 22–30 | 155 |
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 162 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 339** |
+| **Total** | **0–52** | **1 340** |
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
 disturbs an existing one.
@@ -19405,6 +19437,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-18 | `HOUSE-01062` | **New task, next free phase-13 id.** Add one tailored static throw over the camera-near arm of the completed formal sofa while leaving the source sofa, lighting and full-room furnishing task intact. | Round 65's lighter rug exposes the remaining closest brown sofa end as the largest contained mass. A deterministic folded textile with real thickness/fringe and an existing approved woven role adds controlled lived-in contrast without recolouring third-party hero geometry, changing exposure or creating a generic primitive placeholder. |
 | 2026-09-18 | `HOUSE-01061` | **New task, next free phase-13 id.** Give only the existing formal-living rug a room-specific woven wool material while retaining the approved geometry and full furnishing task. | Round 64 shows the 3 m-scale charcoal field merging the brown seating into the walnut floor. A canonical per-prop material override and existing approved textile maps can restore a believable anchoring plane without new assets, global exposure, light changes, runtime logic or claiming the dependency-blocked room furnishing task. |
 | 2026-09-18 | `HOUSE-01060` | **New task, next free phase-13 id.** Add a bounded room-side fireplace composition at the already canonical chimney/appliance position while leaving the full-room furnishing and future live-fire tasks open. | Round 63's living composition still reads as an engineering shell because a 0.60 x 1.10 m structural brick stack runs floor-to-roof with no hearth, surround, mantel or domestic focal treatment. A deterministic authored suite fixes that dominant contained defect through the approved static-prop/material path without renderer changes, unlicensed input or pretending that fire simulation is complete. |
 | 2026-09-18 | `HOUSE-01289` | **New task, next free phase-16 id.** Add four measured upward fixtures inside the two completed foundation beds, own them through a distinct dusk group and bake only eight explicitly named front L1/L2 receivers. | Round 62 leaves the multi-storey facade as the largest normal-night defect after the bounded door, porch, garage and walk layers are physical. An attempted existing garage-flood control only blew out the apron and did not reach the elevation. Foundation uplights provide a real source, visible daytime hardware and selected receiver boundary without global exposure, an oversized porch lamp, manual-circuit changes or renderer work. |

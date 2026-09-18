@@ -954,12 +954,13 @@ materials/materials	MAT_KITCHEN_COUNTER_STONE
 materials/materials	MAT_KITCHEN_HARDWARE_STEEL
 materials/materials	MAT_KITCHEN_OVEN_GLASS
 materials/materials	MAT_KITCHEN_PRODUCE_LEMON
+materials/materials	MAT_LIVING_RUG_WOOL
 materials/materials	MAT_LIVING_SOFA_FRAME
 materials/materials	MAT_LIVING_SOFA_FRINGE
 materials/materials	MAT_LIVING_SOFA_LEATHER
 materials/materials	MAT_LIVING_SOFA_PAISLEY
 materials/materials	MAT_LIVING_SOFA_STRIPE
-materials/materials	MAT_LIVING_RUG_WOOL
+materials/materials	MAT_LIVING_THROW_WOOL
 materials/materials	MAT_METAL_BALCONY
 materials/materials	MAT_METAL_GUTTER
 materials/materials	MAT_OUTDOOR_ASPHALT
@@ -1086,6 +1087,7 @@ assets	MODEL_KITCHEN_RANGE_WALL
 assets	MODEL_KITCHEN_REFRIGERATOR
 assets	MODEL_LIVING_FIREPLACE
 assets	MODEL_LIVING_PIANO_ART
+assets	MODEL_LIVING_SOFA_THROW
 assets	MODEL_PROP_KITCHEN_CANISTERS
 assets	MODEL_PROP_KITCHEN_ISLAND_DRESSING
 assets	MODEL_PROP_KITCHEN_KETTLE
@@ -1661,6 +1663,7 @@ props/props	PROP_LIVING_PIANO_LIGHT
 props/props	PROP_LIVING_PLANT
 props/props	PROP_LIVING_RUG
 props/props	PROP_LIVING_SOFA
+props/props	PROP_LIVING_SOFA_THROW
 props/props	PROP_LIVING_UPRIGHT_PIANO
 portals/portals	P_B1_CINEMA__B1_UTILITY
 portals/portals	P_B1_GYM__B1_WORKSHOP
