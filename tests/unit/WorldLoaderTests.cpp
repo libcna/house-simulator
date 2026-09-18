@@ -3620,7 +3620,8 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 201U) << "HOUSE-01064 adds ceramic and two hall-runner finishes";
+        EXPECT_EQ(contents.materials.size(), 202U)
+            << "HOUSE-01066 separates the formal piano's charcoal lacquer finish";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
@@ -3637,8 +3638,8 @@ namespace
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
                                 { return IdRegistry::NameOf(material.id).starts_with("MAT_FURNITURE_"); }),
-                  16)
-            << "HOUSE-01055 adds chair velvet to the fifteen prior furniture materials";
+                  17)
+            << "HOUSE-01066 adds piano lacquer to the sixteen prior furniture materials";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)

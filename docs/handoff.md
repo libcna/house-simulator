@@ -1,3 +1,50 @@
+# Visual-sprint handoff — 2026-09-18 (`HOUSE-01066` checkpoint)
+
+Branch `develop`. Task-start HEAD `823fe51` (`HOUSE-01065`). This file belongs to the single
+`HOUSE-01066` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit debug blockout remains available.
+
+The formal-living upright no longer reads as one coarse reddish cabinet. Its deterministic
+project-authored replacement preserves the exact 1.485 x 1.240 x 0.7325 m bounds, support origin,
+world placement, collision proxy, bench clearance and all 52 white / 36 black independent keys.
+The 18,852 visible triangles now compose a charcoal lacquer case around warm walnut panels with
+finer bevelled joinery, physical brass hinges and anonymous plaque, front caster stems/wheels and
+an open original abstract practice folio. Five approved stock-XNA roles are used; no external
+mesh/texture, brand, copied score, renderer path, light or exposure was introduced.
+
+The canonical before is Round 70's
+[living room](visual-review/captures/house-01065-hall-gallery-day-final/living-room.png). The full
+after sets expand to twenty-one cameras with a direct hero view:
+[clear day](visual-review/captures/house-01066-piano-refinement-day-final) and
+[normal night](visual-review/captures/house-01066-piano-refinement-night-final). All 42 frames were
+opened at full resolution and as complete contact sheets. Against Round 70, `living-room` changes
+85,952 day / 86,360 night pixels above two channel levels (5.9689% / 5.9972%; normalized RGB MAE
+0.004986 / 0.005235), while `living-composition` changes only 164 / 801 (0.0114% / 0.0556%;
+0.000038 / 0.000188). The new close view proves the folio, keys, joinery and grounded silhouette
+in both states. The only strict reference advanced is `blockout-l0-living`; its inspected
+5,228-pixel / 2.2691% amplified diff is confined to the piano. An unrelated four-pixel exterior
+regeneration was explicitly discarded.
+
+The world is 682 chunks / 96 cells / 89 static props / 266 exterior hierarchy instances /
+56.735979 MB. Its 202 materials, 904 manifest rows and 2,956 stable ids produce 638 opaque
+submissions, 44 cutouts and 107 unculled state changes, inside §71.2. All 1,409 unit, 135
+integration and 48 active software-render tests pass; eight capture-only generators remain
+disabled. All eighteen culled-vs-unculled pairs stay below 0.2%, at 0.0558% worst
+(`l0-sunroom`). Compilation and heavy tools stayed on CPU 0-5 / at most six workers. Content,
+deterministic piano regeneration, provenance/licence and all project static gates plus all 323
+strict-XNA translation units pass. The existing CMake tree attempted an unrelated automatic
+reconfigure that would write shared `~/deps/FNA3D`; it was refused, and only the stored exact
+Ninja compile/link commands were used, with no CNA, sharp-runtime or shared-dependency edit.
+
+Largest remaining visible defects: the roof/dormers and far-side elevations remain black outside
+bounded night sources; garage/side-yard and neighbour depth remain sparse at night; facade
+massing/window rhythm is still repetitive by day; formal living still has weak local contact away
+from the bounded piano pool. The next highest-value checkpoint is the screenshot-ranked night
+exterior collapse, especially roof/dormer or garage/side-yard readability. Do not raise global
+exposure or leave the slice for unrelated systems.
+
+---
+
 # Visual-sprint handoff — 2026-09-18 (`HOUSE-01065` checkpoint)
 
 Branch `develop`. Task-start HEAD `54a7002` (`HOUSE-01290`). This file belongs to the single

@@ -67,7 +67,8 @@ def validate(path: Path, row: dict) -> None:
                      not node.get("name", "").endswith("_COL")]
     names = {node.get("name", "") for node in visible_nodes}
     for fragment in ("upper_inset", "key_shelf", "lower_inset", "music_desk",
-                     "pedal_stem_0", "pedal_pad_2"):
+                     "folio_page_-1", "folio_page_1", "lid_hinge", "caster_wheel_-1",
+                     "caster_wheel_1", "maker_plaque", "pedal_stem_0", "pedal_pad_2"):
         if not any(fragment in name for name in names):
             raise RuntimeError(f"piano is missing authored component {fragment}")
     if sum("white_key_" in name for name in names) != 52:
@@ -79,7 +80,9 @@ def validate(path: Path, row: dict) -> None:
                  for node in visible_nodes
                  for primitive in document["meshes"][node["mesh"]]["primitives"]
                  if "material" in primitive}
-    expected_materials = {"PIANO_WOOD", "PIANO_IVORY", "PIANO_EBONITE", "PIANO_BRASS"}
+    expected_materials = {
+        "PIANO_LACQUER", "PIANO_WOOD", "PIANO_IVORY", "PIANO_EBONITE", "PIANO_BRASS"
+    }
     if materials != expected_materials:
         raise RuntimeError(f"unexpected piano finishes {sorted(materials)}")
     visible = [primitive for node in visible_nodes
@@ -102,7 +105,7 @@ def main() -> int:
     mode.add_argument("--write", action="store_true")
     options = parser.parse_args()
     try:
-        with tempfile.TemporaryDirectory(prefix="house01045-piano-", dir="/tmp") as scratch:
+        with tempfile.TemporaryDirectory(prefix="house01066-piano-", dir="/tmp") as scratch:
             generated = generate(Path(scratch))
             if options.write:
                 TARGET.parent.mkdir(parents=True, exist_ok=True)

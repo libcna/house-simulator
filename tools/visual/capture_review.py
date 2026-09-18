@@ -45,6 +45,10 @@ POSES = (
     ("hall-gallery-east", "-0.60,0.60,-19.47,90.0,0.0"),
     ("kitchen-from-hall", "0.00,0.60,-23.55,285.0,0.0"),
     ("living-room", "-5.20,0.60,-17.25,90.0,0.0"),
+    # HOUSE-01066: the straight room view proves wall composition but is too distant to judge the
+    # 88-key instrument's joinery, folio, hardware and floor contact. This clear standing position
+    # stays west of the bench proxy and looks squarely at the piano without changing the room.
+    ("living-piano-detail", "-4.45,0.60,-18.65,90.0,0.0"),
     ("living-composition", "-3.10,0.60,-18.50,270.0,0.0"),
     # HOUSE-01048: look east along the formal dining room's long axis so table scale, all eight
     # chair positions, the hall door and the living/kitchen circulation edges remain reviewable.

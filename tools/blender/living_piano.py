@@ -21,6 +21,7 @@ from mathutils import Matrix, Vector
 
 
 MATERIAL_COLOURS = {
+    "PIANO_LACQUER": (0.055, 0.050, 0.047, 1.0),
     "PIANO_WOOD": (0.12, 0.055, 0.028, 1.0),
     "PIANO_IVORY": (0.92, 0.89, 0.79, 1.0),
     "PIANO_EBONITE": (0.018, 0.020, 0.024, 1.0),
@@ -75,7 +76,7 @@ def metre_uv(obj, tile_metres: float = 0.35):
 
 
 def box(label, location, size, finish="PIANO_WOOD", bevel=0.004,
-        rotate_x_deg=0.0):
+        rotate_x_deg=0.0, rotate_y_deg=0.0, bevel_segments=2):
     global COUNTER
     COUNTER += 1
     bpy.ops.mesh.primitive_cube_add(size=1, location=blender_xyz(location))
@@ -84,13 +85,15 @@ def box(label, location, size, finish="PIANO_WOOD", bevel=0.004,
     obj.dimensions = (size[0], size[2], size[1])
     # glTF X maps directly to Blender X; the sign gives a backward-leaning music desk.
     obj.rotation_euler.x = math.radians(-rotate_x_deg)
+    # glTF Y-up yaw maps to a negative Blender Z rotation.
+    obj.rotation_euler.z = math.radians(-rotate_y_deg)
     bake_world_vertices(obj)
     obj.data.materials.append(material(finish))
     metre_uv(obj, 0.22 if finish in {"PIANO_IVORY", "PIANO_EBONITE"} else 0.35)
     if bevel:
         modifier = obj.modifiers.new("crafted_edge", "BEVEL")
         modifier.width = min(bevel, min(size) * 0.2)
-        modifier.segments = 2
+        modifier.segments = bevel_segments
         bpy.context.view_layer.objects.active = obj
         bpy.ops.object.modifier_apply(modifier=modifier.name)
     for polygon in obj.data.polygons:
@@ -121,22 +124,40 @@ def author():
     """A 1.48 x 1.24 x 0.62 m domestic upright, front toward local -Z."""
     # Structural back/case.  The shallow inset front and separate frame prevent the silhouette
     # from reading as one dark cuboid at the fixed room camera.
-    box("case_back", (0.0, 0.68, 0.145), (1.42, 1.08, 0.27), bevel=0.010)
-    box("top_lid", (0.0, 1.205, 0.075), (1.48, 0.070, 0.39), bevel=0.012)
-    box("upper_inset", (0.0, 1.005, -0.012), (1.20, 0.285, 0.035), bevel=0.006)
-    box("upper_rail_top", (0.0, 1.165, -0.040), (1.31, 0.060, 0.060), bevel=0.006)
-    box("upper_rail_bottom", (0.0, 0.835, -0.040), (1.31, 0.060, 0.060), bevel=0.006)
+    box("case_back", (0.0, 0.68, 0.145), (1.42, 1.08, 0.27),
+        finish="PIANO_LACQUER", bevel=0.012)
+    box("top_lid", (0.0, 1.205, 0.075), (1.48, 0.070, 0.39),
+        finish="PIANO_LACQUER", bevel=0.016, bevel_segments=3)
+    box("upper_inset", (0.0, 1.005, -0.012), (1.20, 0.285, 0.035),
+        finish="PIANO_WOOD", bevel=0.009)
+    box("upper_rail_top", (0.0, 1.165, -0.040), (1.31, 0.060, 0.060),
+        finish="PIANO_LACQUER", bevel=0.008)
+    box("upper_rail_bottom", (0.0, 0.835, -0.040), (1.31, 0.060, 0.060),
+        finish="PIANO_LACQUER", bevel=0.008)
     for side in (-1, 1):
         box(f"upper_stile_{side}", (side * 0.625, 1.000, -0.040),
-            (0.060, 0.290, 0.060), bevel=0.006)
+            (0.060, 0.290, 0.060), finish="PIANO_LACQUER", bevel=0.008)
+        box(f"upper_capital_{side}", (side * 0.625, 1.174, -0.050),
+            (0.105, 0.050, 0.082), finish="PIANO_BRASS", bevel=0.010)
+
+    # A warm crown line and physical hinge break the broad case planes into crafted joinery.
+    box("crown_moulding", (0.0, 1.158, -0.082), (1.37, 0.038, 0.055),
+        finish="PIANO_WOOD", bevel=0.012, bevel_segments=3)
+    rod("lid_hinge", (-0.43, 1.168, -0.093), (0.43, 1.168, -0.093),
+        radius=0.008, finish="PIANO_BRASS", vertices=16)
 
     # Keyboard shelf, fallboard and cheek blocks establish the characteristic stepped profile.
-    box("key_shelf", (0.0, 0.738, -0.155), (1.46, 0.075, 0.55), bevel=0.008)
-    box("fallboard", (0.0, 0.838, -0.055), (1.285, 0.145, 0.105), bevel=0.010,
-        rotate_x_deg=5.0)
+    box("key_shelf", (0.0, 0.738, -0.155), (1.46, 0.075, 0.55),
+        finish="PIANO_LACQUER", bevel=0.011)
+    box("fallboard", (0.0, 0.838, -0.055), (1.285, 0.145, 0.105),
+        finish="PIANO_LACQUER", bevel=0.013, rotate_x_deg=5.0)
     for side in (-1, 1):
         box(f"key_cheek_{side}", (side * 0.682, 0.790, -0.245),
-            (0.075, 0.160, 0.335), bevel=0.008)
+            (0.075, 0.160, 0.335), finish="PIANO_LACQUER", bevel=0.012)
+    box("maker_plaque", (0.0, 0.875, -0.116), (0.255, 0.028, 0.009),
+        finish="PIANO_BRASS", bevel=0.006)
+    rod("fallboard_hinge", (-0.46, 0.780, -0.102), (0.46, 0.780, -0.102),
+        radius=0.006, finish="PIANO_BRASS", vertices=16)
 
     # A full 88-key keyboard.  MIDI pitches 21..108 produce exactly 52 white and 36 black keys.
     pitches = list(range(21, 109))
@@ -162,23 +183,58 @@ def author():
 
     # Framed lower panel, legs and feet retain air under the keyboard instead of filling the
     # entire instrument with a collision-looking slab.
-    box("lower_inset", (0.0, 0.435, 0.010), (0.98, 0.410, 0.045), bevel=0.006)
-    box("lower_rail_top", (0.0, 0.665, -0.010), (1.10, 0.070, 0.070), bevel=0.006)
-    box("lower_rail_bottom", (0.0, 0.195, -0.005), (1.10, 0.075, 0.070), bevel=0.006)
+    box("lower_inset", (0.0, 0.435, 0.010), (0.98, 0.410, 0.045),
+        finish="PIANO_WOOD", bevel=0.009)
+    box("lower_rail_top", (0.0, 0.665, -0.010), (1.10, 0.070, 0.070),
+        finish="PIANO_LACQUER", bevel=0.009)
+    box("lower_rail_bottom", (0.0, 0.195, -0.005), (1.10, 0.075, 0.070),
+        finish="PIANO_LACQUER", bevel=0.009)
     for side in (-1, 1):
         box(f"lower_stile_{side}", (side * 0.515, 0.430, -0.010),
-            (0.070, 0.410, 0.070), bevel=0.006)
+            (0.070, 0.410, 0.070), finish="PIANO_LACQUER", bevel=0.009)
         box(f"leg_{side}", (side * 0.625, 0.360, -0.135),
-            (0.095, 0.610, 0.105), bevel=0.010)
+            (0.095, 0.610, 0.105), finish="PIANO_LACQUER", bevel=0.014,
+            bevel_segments=3)
         box(f"foot_{side}", (side * 0.625, 0.050, -0.165),
-            (0.235, 0.100, 0.395), bevel=0.016)
-    box("base_plinth", (0.0, 0.060, 0.085), (1.34, 0.120, 0.300), bevel=0.012)
+            (0.235, 0.100, 0.395), finish="PIANO_LACQUER", bevel=0.020,
+            bevel_segments=3)
+        # Two front casters visibly carry the case rather than letting its feet melt into the floor.
+        rod(f"caster_stem_{side}", (side * 0.625, 0.105, -0.305),
+            (side * 0.625, 0.070, -0.325), radius=0.010,
+            finish="PIANO_BRASS", vertices=12)
+        rod(f"caster_wheel_{side}", (side * 0.590, 0.052, -0.335),
+            (side * 0.660, 0.052, -0.335), radius=0.043,
+            finish="PIANO_EBONITE", vertices=16)
+    box("base_plinth", (0.0, 0.060, 0.085), (1.34, 0.120, 0.300),
+        finish="PIANO_LACQUER", bevel=0.016, bevel_segments=3)
 
     # The tilted music desk and its ledge add a recognizable focal plane above the keys.
-    box("music_desk", (0.0, 0.995, -0.145), (0.66, 0.245, 0.025), bevel=0.010,
-        rotate_x_deg=10.0)
+    box("music_desk", (0.0, 0.995, -0.145), (0.66, 0.245, 0.025),
+        finish="PIANO_WOOD", bevel=0.012, rotate_x_deg=10.0,
+        bevel_segments=3)
     box("music_ledge", (0.0, 0.866, -0.190), (0.72, 0.045, 0.095), bevel=0.006,
         rotate_x_deg=5.0)
+
+    # Original abstract practice folio: two physical pages with staff and note relief. It is not a
+    # copied musical work or brand, and the normal camera now reads what this object is for.
+    for side in (-1, 1):
+        page_x = side * 0.165
+        box(f"folio_page_{side}", (page_x, 1.045, -0.183),
+            (0.315, 0.355, 0.008), finish="PIANO_IVORY", bevel=0.008,
+            rotate_y_deg=side * 2.5, bevel_segments=3)
+        for line in range(5):
+            box(f"folio_staff_{side}_{line}",
+                (page_x, 0.970 + line * 0.031, -0.190),
+                (0.245, 0.005, 0.005), finish="PIANO_EBONITE", bevel=0.002)
+        for note in range(6):
+            note_x = page_x - 0.105 + note * 0.042
+            note_y = 0.981 + ((note * 2 + (1 if side > 0 else 0)) % 5) * 0.031
+            box(f"folio_note_{side}_{note}", (note_x, note_y, -0.194),
+                (0.017, 0.013, 0.006), finish="PIANO_EBONITE", bevel=0.006,
+                rotate_y_deg=side * 2.5, bevel_segments=3)
+            box(f"folio_stem_{side}_{note}", (note_x + 0.007, note_y + 0.027, -0.194),
+                (0.004, 0.052, 0.006), finish="PIANO_EBONITE", bevel=0.001,
+                rotate_y_deg=side * 2.5)
 
     # Three separate brass pedals on real stems, rather than a gold decal on the lower panel.
     for index, x in enumerate((-0.075, 0.0, 0.075)):

@@ -936,6 +936,7 @@ materials/materials	MAT_FURNITURE_LAMP_SHADE
 materials/materials	MAT_FURNITURE_PIANO_BRASS
 materials/materials	MAT_FURNITURE_PIANO_EBONITE
 materials/materials	MAT_FURNITURE_PIANO_IVORY
+materials/materials	MAT_FURNITURE_PIANO_LACQUER
 materials/materials	MAT_FURNITURE_PIANO_WOOD
 materials/materials	MAT_FURNITURE_PLANT_LEAF
 materials/materials	MAT_FURNITURE_RUG_CHARCOAL

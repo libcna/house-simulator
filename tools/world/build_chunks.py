@@ -180,7 +180,7 @@ CHUNK_BUDGET_EXCEPTIONS = {
                   "replaces its old cushion while walnut and steel already exist. HOUSE-00938 "
                   "splits the shared ceiling fixture's always-visible opal bowl from its switched "
                   "emitter, adding one truthful glass role; 25 stays exact"),
-    "L0_LIVING": (33,
+    "L0_LIVING": (34,
                   "measured with HOUSE-01037's first furnished conversation group: six shell "
                   "finishes plus eight source-specific furniture albedos and one split to respect "
                   "Reach's per-draw primitive cap, plus one outside window-frame chunk. The extra "
@@ -199,7 +199,9 @@ CHUNK_BUDGET_EXCEPTIONS = {
                   "HOUSE-01062 adds one approved cool textile role for the physically draped "
                   "sofa throw. HOUSE-01063 reuses the room's wood, brass, canvas and stone while "
                   "adding approved book-binding and non-lightmapped art-paper roles for the two "
-                  "dressing surfaces; 33 is the measured base exception"),
+                  "dressing surfaces. HOUSE-01066 separates the close hero piano's polished "
+                  "charcoal lacquer from its walnut inset panels with one truthful finish role; "
+                  "34 is the measured base exception"),
     "L0_DINING": (10,
                   "HOUSE-01048's measured formal composition: four shell finishes plus walnut, "
                   "brass, upholstered fabric, rug, chandelier metal and the independently switched "

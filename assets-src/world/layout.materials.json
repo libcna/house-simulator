@@ -1853,7 +1853,19 @@
     // END FORMAL DINING FURNITURE MATERIALS
     // BEGIN FORMAL LIVING PIANO MATERIALS (HOUSE-01045)
     // These close-range static finishes deliberately use stock-XNA BasicEffect: the piano has
-    // physical UV0 but no shell UV2. All four reuse already approved project texture sources.
+    // physical UV0 but no shell UV2. All finishes reuse already approved project texture sources.
+    {
+      "id": "MAT_FURNITURE_PIANO_LACQUER", "class": "wood",
+      "albedo": "Textures/Materials/paint_grey_fine_albedo",
+      "normal": "Textures/Materials/paint_grey_fine_normal", "lightmapChannel": 0,
+      "tint": [0.105, 0.095, 0.090], "specularColor": [0.32, 0.29, 0.27],
+      "specularPower": 96.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.06, "specularBoost": 1.2, "powerBoost": 1.2 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "hardwood", "audioAbsorption": 0.12,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
     {
       "id": "MAT_FURNITURE_PIANO_WOOD", "class": "wood",
       "albedo": "Textures/Materials/wood_board_albedo",

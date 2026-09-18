@@ -1761,7 +1761,7 @@
       "id": "MODEL_FURNITURE_UPRIGHT_PIANO",
       "category": "upright-piano",
       "sourceFile": "assets-src/Models/Furniture/LivingRoom/upright_piano.glb",
-      "sourceSha256": "3208d3717cd8482cae4a75b1c700bf7d2435a50e026891369f5aefaa6bfab86d",
+      "sourceSha256": "df69a84ae6db1b88d1a645f439e0502bc1a20802b3bd6e822c402bd6b2c46e39",
       "contentName": "Models/Furniture/LivingRoom/upright_piano",
       "kind": "model",
       "residencyPack": "house-l0",
@@ -1775,7 +1775,7 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Project-authored measured upright from tools/blender/living_piano.py for HOUSE-01045: inset casework, a 52/36-key keyboard, music desk, legs, feet and three physical pedals. Approved project material maps are bound during content build; no third-party mesh or texture was copied."
+        "note": "Project-authored measured upright from tools/blender/living_piano.py for HOUSE-01045 and visibly refined by HOUSE-01066: inset lacquer/walnut casework, a 52/36-key keyboard, open original abstract practice folio, physical hinges/plaque/casters, music desk, legs, feet and three pedals. Approved project material maps are bound during content build; no third-party mesh, texture, brand or musical work was copied."
       },
       "geometry": {
         "unitScale": 1,
@@ -1786,11 +1786,12 @@
           0.7325
         ],
         "triangles": {
-          "LOD0": 12444
+          "LOD0": 18852
         },
-        "collision": "upright_piano_001_case_back_COL"
+        "collision": "upright_piano_002_top_lid_COL"
       },
       "materialMap": {
+        "PIANO_LACQUER": "MAT_FURNITURE_PIANO_LACQUER",
         "PIANO_WOOD": "MAT_FURNITURE_PIANO_WOOD",
         "PIANO_IVORY": "MAT_FURNITURE_PIANO_IVORY",
         "PIANO_EBONITE": "MAT_FURNITURE_PIANO_EBONITE",

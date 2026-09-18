@@ -1977,6 +1977,16 @@ circulation route. The deliberately unculled whole-house diagnostic is now 603 d
 changes, inside §71.2's 1,400 / 210 worst-case envelope; named visible poses continue to protect
 the 620 / 90 typical row.
 
+`HOUSE-01066` (2026-09-18) refines that same fixed placement without widening its 1.485 × 1.240 ×
+0.733 m bounds, support origin or collision/circulation envelope. The 18,852-triangle visible
+model retains all 52/36 independent keys and adds a charcoal lacquer role distinct from the warm
+walnut inset panels, finer bevelled joinery, physical hinges and maker plaque, front casters and
+an open project-authored abstract practice folio. The folio copies no score, brand or likeness.
+Its five approved stock-`BasicEffect` roles make the measured `L0_LIVING` base exception **34**;
+the already measured shutter and double-door roles make the final cell **38 chunks**. The complete
+unculled house is 638 opaque + 44 alpha-tested submissions and 107 opaque state changes, still
+well inside §71.2's 1,400 / 210 envelope.
+
 `HOUSE-00930` (2026-09-16) isolates each weather-facing `D_ENTRY` leaf from ordinary hardwood
 joinery so the exterior hierarchy can retain it when its owning interior room is portal-culled.
 `HOUSE-00932` gives that generated leaf four-panel millwork on both faces, paired bronze

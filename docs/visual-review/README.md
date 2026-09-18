@@ -3102,3 +3102,47 @@ worst (`l0-sunroom`); complete test and gate results are in `docs/handoff.md`.
 debug blockout remains available. The next highest visible value is replacing or substantially
 refining the coarse formal-living piano composition, followed by the next screenshot-ranked route
 or exterior defect—not an unrelated subsystem.
+
+## Round 71 — formal-living upright hero refinement
+
+Commit: `HOUSE-01066` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 70's [living-room](captures/house-01065-hall-gallery-day-final/living-room.png)
+shows the approved upright as one coarse reddish cabinet despite its correct placement, 88-key
+layout and physical accent light. After: the expanded twenty-one-camera
+[clear-day](captures/house-01066-piano-refinement-day-final) and
+[normal-night](captures/house-01066-piano-refinement-night-final) sets add a fixed
+[piano detail](captures/house-01066-piano-refinement-day-final/living-piano-detail.png) view.
+All 42 frames were opened at full size and as complete contact sheets.
+
+Ranked visible defects remaining:
+
+1. The roof, dormers and far-side elevations still collapse outside bounded night sources.
+2. Garage/side-yard terrain and distant-neighbour context lose depth at night.
+3. The simple facade massing and repetitive window rhythm remain conspicuous by day.
+4. Formal living remains deliberately dark and still has weak local furniture/floor contact away
+   from the piano's bounded pool.
+5. Several secondary surfaces remain sparse; the hall gallery still awaits its later fictional
+   character-consistent route-3 imagery and six stair-wall frames.
+
+Fixed: the same 1.485 x 1.240 x 0.7325 m placement now presents an 18,852-triangle charcoal
+lacquer and walnut upright, retaining 52 white and 36 black independent keys while adding finer
+bevelled joinery, physical brass hinges and anonymous plaque, grounded front casters, and an open
+original abstract practice folio. Bounds, origin, proxy, bench, wall art, accent light, collision
+and circulation are unchanged. Its fifth approved stock-XNA material role is the only new finish;
+no third-party mesh or texture, brand, copied music, renderer path or exposure change was added.
+
+Against Round 70, `living-room` changes 85,952 day / 86,360 night pixels above two channel levels
+(5.9689% / 5.9972%; normalized RGB MAE 0.004986 / 0.005235), while the distant
+`living-composition` remains effectively stable at 164 / 801 pixels (0.0114% / 0.0556%;
+0.000038 / 0.000188). The only strict reference advanced is `blockout-l0-living`; its amplified
+5,228-pixel / 2.2691% diff is confined to the piano silhouette. A four-pixel unrelated
+`blockout-ext-road` regeneration was inspected and rejected. The world is 682 chunks / 96 cells /
+89 props / 266 exterior instances / 56.735979 MB; 202 materials produce 638 opaque, 44 cutout and
+107 unculled state changes. All 48 active software-render tests pass and all eighteen culling pairs
+remain at 0.0558% worst (`l0-sunroom`); complete test and gate results are in `docs/handoff.md`.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next highest visible value is the screenshot-ranked night
+exterior collapse—especially roof/dormer and garage/side-yard readability—without raising global
+exposure or leaving the slice for an unrelated subsystem.

@@ -80,11 +80,11 @@ namespace
         const auto& list = game.RenderListForTesting();
         ASSERT_GT(list.Size(), 0U) << "the frame drew from an empty list";
         EXPECT_TRUE(list.IsSorted()) << "the pass read its slice, which is what sorts the list";
-        // HOUSE-01290's measured unculled house is 681 calls, over FOUR frames: a list that was not
+        // HOUSE-01066's measured unculled house is 682 calls, over FOUR frames: a list that was not
         // emptied between them would be four houses long and would still draw a correct-looking
         // picture. This diagnostic is still far below §71.2's 1,400-call worst-case envelope;
         // named visible poses protect its 637-call typical row.
-        EXPECT_LE(list.DrawCalls(), 681) << "the list was not cleared between frames";
+        EXPECT_LE(list.DrawCalls(), 682) << "the list was not cleared between frames";
 
         const cnahouse::debug::Counter* chunks = game.CountersForTesting().Find("static.chunks");
         const cnahouse::debug::Counter* states = game.CountersForTesting().Find("static.stateChanges");
@@ -133,10 +133,10 @@ namespace
         // not find. Alpha-tested leaves belong to AlphaTestPass, not this debug opaque pass.
         EXPECT_EQ(static_cast<std::size_t>(chunks->Max()), opaque);
         // And the material was bound once per run, not once per chunk. The unculled diagnostic
-        // remains 106 after HOUSE-01290 adds three ceiling-fixture props without adding a finish.
+        // reaches 107 after HOUSE-01066 separates the piano lacquer into one truthful finish.
         // That remains below §71.2's 210 worst case; visible poses protect smaller rows.
         EXPECT_GT(states->Max(), 0);
-        EXPECT_LE(states->Max(), 106);
+        EXPECT_LE(states->Max(), 107);
         EXPECT_LT(states->Max(), chunks->Max() / 4)
             << "the sort bought nothing: the pass is rebinding almost per chunk";
         // The pass's own count and the list's agree, which is what says the two are counting the

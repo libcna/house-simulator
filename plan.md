@@ -46,8 +46,8 @@ breaks up the remaining foreground sofa mass with a physically draped textile ac
 set. `HOUSE-01064` carries that restrained surface-dressing discipline into the empty foyer/hall
 arrival with a runner, console objects and portal-flanking art. `HOUSE-01290` replaces the three
 remaining bare foyer/hall main-light points with physical ceiling fixtures. `HOUSE-01065` gives
-both remaining hall side-wall bays a measured nine-frame family gallery. The next screenshot-
-ranked route defect is the coarse, dark formal-living piano composition. Round 9 proves the exterior
+both remaining hall side-wall bays a measured nine-frame family gallery. `HOUSE-01066` is the
+selected correction for the coarse, dark formal-living piano composition. Round 9 proves the exterior
 material omission is fixed; `HOUSE-00924`
 removes the
 exposure-scaled glass tint, and `HOUSE-00925` keeps outdoor receivers from clipping when viewed
@@ -160,7 +160,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 10 | Exterior and property | 00761–00840 | 25 | Terrain, fences, gates, drive, garden |
 | 11 | Neighbourhood background | 00841–00890 | 17 | The house is not floating in nothing |
 | 12 | Materials and textures | 00891–00970 | 36 | The blockout reads as a building |
-| 13 | Static furniture and dressing | 00971–01120 | 71 | Every room furnished to density |
+| 13 | Static furniture and dressing | 00971–01120 | 72 | Every room furnished to density |
 | 14 | Interactable framework | 01121–01180 | 26 | The 12 behaviours and the data model |
 | 15 | Doors and windows | 01181–01250 | 22 | Portals are dynamic |
 | 16 | Lights and switches | 01251–01310 | 30 | The house can be lit — **first playable** |
@@ -15124,6 +15124,47 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             remain disabled); all eighteen culling pairs pass at 0.0558% worst (`l0-sunroom`)
             against 0.2%. All project static gates and 323 strict-XNA translation units pass with
             compilation and heavy work restricted to CPU 0-5.
+- [x] HOUSE-01066 — Refine the formal-living upright into a credible close hero instrument
+      dep: HOUSE-00215, HOUSE-00220, HOUSE-00296, HOUSE-01045, HOUSE-01058, HOUSE-01286 · sys: content/world · plat: TOOL · pri: MUST
+      note: (2026-09-18) Round 70 makes the straight formal-living camera the highest remaining
+            interior defect. Lighting, bench, wall art and fixture are already physical, but the
+            older all-walnut upright still reads as a coarse reddish cabinet at close range.
+            Refine the existing deterministic asset rather than downloading an uncertain model or
+            changing the renderer, placement, collision route or approved room lighting.
+      accept: preserve the measured domestic bounds, 88 independently modelled keys, support
+            origin, exact world placement and collision clearance while adding a coherent polished
+            case treatment, finer joinery, an open original practice folio, hardware and grounded
+            caster detail; use metre-scale UV0 and approved stock-XNA texture sources with no copied
+            brand or musical work; add a fixed close review camera, capture and inspect matched
+            day/night route sets, and pass deterministic regeneration, content, budget, render,
+            culling, provenance and strict-XNA gates with heavy work capped at six CPUs
+      result: The deterministic project-authored upright retains its exact 1.485 x 1.240 x
+            0.7325 m bounds, support origin, world transform, box proxy, circulation clearance and
+            52 white / 36 black independent keys. Its 18,852 visible triangles now compose a
+            charcoal lacquer case around warm walnut inset panels, finer bevelled rails/stiles,
+            physical brass hinges and anonymous maker plaque, front caster stems/wheels and an
+            open two-page original geometric practice folio. The fifth finish role uses an
+            approved stock texture through `BasicEffect`; no third-party mesh/texture, brand or
+            musical work was copied. The permanent preparation gate pins byte regeneration, hash,
+            dimensions, triangle count, proxy, named components, UV0 and all five source roles.
+      review: All 42 frames in the expanded Round 71 clear-day/normal-night sets were opened as
+            full-size hero views and complete contact sheets. The new fixed close camera proves
+            the folio, joinery, key count, stepped silhouette and grounded hardware remain readable
+            in both states. Against Round 70, `living-room` changes 85,952 day / 86,360 night
+            pixels above two channel levels (5.9689% / 5.9972%; normalized RGB MAE 0.004986 /
+            0.005235), while `living-composition` remains effectively stable at 164 / 801 pixels
+            (0.0114% / 0.0556%; 0.000038 / 0.000188). The sole changed strict reference is
+            `blockout-l0-living`: its inspected amplified diff contains only the instrument
+            silhouette (5,228 pixels / 2.2691%); a four-pixel unrelated exterior regeneration was
+            explicitly rejected.
+      verified: The world has 202 materials, 2,956 stable ids and 904 manifest rows; its 682 chunks,
+            89 props, 266 exterior instances and 56.735979 MB upload remain inside budget. The
+            unculled diagnostic is 638 opaque / 44 cutout / 107 state changes. All 1,409 unit, 135
+            integration and 48 active software-render cases pass (eight capture-only generators
+            remain disabled); all eighteen culling pairs pass at 0.0558% worst (`l0-sunroom`)
+            against 0.2%. Deterministic regeneration, content, provenance/licence, all project
+            static gates and 323 strict-XNA translation units pass with compilation and heavy work
+            restricted to CPU 0-5.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -19554,19 +19595,19 @@ Recorded so nobody has to re-derive the decision.
 
 ## Task count
 
-**1 344 numbered tasks across 53 phases.**
+**1 345 numbered tasks across 53 phases.**
 
 | Phase group | Phases | Tasks |
 |---|---|---|
 | Foundations, capability proof, build, pipeline, assets | 0–4 | 238 |
 | World data, blockout, collision, camera, visibility | 5–9 | 218 |
-| Exterior, neighbourhood, materials, furnishing | 10–13 | 142 |
+| Exterior, neighbourhood, materials, furnishing | 10–13 | 143 |
 | Interaction framework and the systems built on it | 14–21 | 160 |
 | Time, sun, moon, stars, sky, weather | 22–30 | 155 |
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 162 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 344** |
+| **Total** | **0–52** | **1 345** |
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
 disturbs an existing one.
@@ -19602,6 +19643,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-18 | `HOUSE-01066` | **New task, next free phase-13 id.** Refine the already approved formal upright as a bounded hero-asset checkpoint while leaving the full room furnishing task open. | Round 70 ranks the dark/coarse piano as the largest remaining interior defect. Its placement, lighting, bench and wall composition are already measured, so improving the deterministic model and material separation has higher visible value and lower risk than downloading a replacement, changing room exposure or widening `HOUSE-00988`. |
 | 2026-09-18 | `HOUSE-01065` | **New task, next free phase-13 id.** Resolve the hall's nine-frame gallery as a bounded deterministic surface-dressing checkpoint while leaving the full furnishing/stair-wall task open. | Round 69 makes the two long bare side-wall bays the largest remaining arrival defect. The already approved static-prop and canonical-material path can implement §20.4's non-identifiable route 2 without a download, likeness/AI issue, renderer work, collision or false completion of `HOUSE-00987`. |
 | 2026-09-18 | `HOUSE-01290` | **New task, next free phase-16 id.** Reuse the approved semi-flush fixture for the one foyer and two hall main sources, relocate their optics to the real diffuser plane and rebake only the two affected receiver cells. | Round 68 resolves the hall floor, terminal wall and console but exposes three warm ceiling pools with no physical source. The existing deterministic fixture and established main groups can correct that visible cause without a new asset, global exposure, renderer work, switch change or unrelated subsystem. |
 | 2026-09-18 | `HOUSE-01064` | **New task, next free phase-13 id.** Finish the currently bare foyer console, hall floor and two end-wall flanks as one bounded arrival composition while keeping full room-density tasks open. | Round 67's fixed foyer/hall cameras show these three connected surfaces as the largest remaining domestic-identity defect. Deterministic project-authored dressing can finish them through the approved prop/material path without a download, collision, light change, runtime branch or false completion of `HOUSE-00986`/`HOUSE-00987`. |

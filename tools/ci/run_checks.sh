@@ -179,8 +179,9 @@ run_gate "family-media-console" python3 tools/assets/family_media_console_prepar
 # HOUSE-01285: the family room's four main lights are physical linked fixtures, and its existing
 # floor lamp emits from its real shade rather than from an unrelated bare point in the room.
 run_gate "family-ceiling-light" python3 tools/assets/family_ceiling_light_prepare.py --check
-# HOUSE-01045: the formal-room piano is a close-range deterministic authored asset, not a
-# one-off binary or a cuboid standing in for furniture.
+# HOUSE-01045/HOUSE-01066: the formal-room piano is a close-range deterministic authored asset,
+# not a one-off binary or a cuboid standing in for furniture; its lacquer, folio, joinery and
+# grounded hardware remain reproducible.
 run_gate "living-piano" python3 tools/assets/living_piano_prepare.py --check
 # HOUSE-01048: the formal table, chair and physical chandelier remain reproducible measured assets.
 run_gate "dining-suite" python3 tools/assets/dining_suite_prepare.py --check
