@@ -3332,3 +3332,50 @@ materials and the explicit diagnostic palette remains available.
 `VISUAL-GATE-1` still **FAILS**. The next highest-value checkpoint is bounded, physically sourced
 night depth around the garage/side yard plus enough day context to stop the wing reading in an
 empty plane—not unrelated systems or a global exposure change.
+
+## Round 76 — planted driveway edge and bounded dusk layer
+
+Commit: `HOUSE-00945` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 75's [garage approach](captures/house-00944-roof-edge-day-r1/garage-approach.png)
+ends the asphalt directly in a broad empty grass/fence strip, while its matching
+[22:00 view](captures/house-00944-roof-edge-night-r1/garage-approach.png) loses the complete east
+edge outside the two carriage-lantern pools. After: the complete twenty-one-camera
+[clear-day](captures/house-00945-driveway-border-day-r1) and
+[normal-night](captures/house-00945-driveway-border-night-r1) sets add a measured planted edge and
+physical wayfinding layer. Both 21-frame contact sheets and the direct day/night garage images
+were opened at full size.
+
+Ranked visible defects remaining:
+
+1. The main roof/dormer silhouette remains honestly dark at 22:00 with the Moon below the horizon;
+   any next improvement needs a physical source rather than fake moonlight or global exposure.
+2. Garage/facade massing and the repeated window rhythm remain simple at road distance even though
+   the approach now has human-scale detail and night depth.
+3. The driveway is still a large uninterrupted asphalt plane and distant-neighbour context is
+   sparse by day.
+4. Formal living retains weak furniture/floor contact outside its bounded piano practical.
+5. Secondary rooms and exterior elevations outside the connected slice remain sparse.
+
+Fixed: a 2.1 m-wide authored mulch strip carries five approved shrub instances with restrained
+scale/yaw variation and three reused 0.20 x 0.544 x 0.20 m bronze bollards. Their distinct dusk
+group drives three 2,700 K / 160 lm downward spots, owns only `EXT_SIDEYARD_E` and explicitly
+spills only to the adjacent drive. The 3,000 lm garage flood remains a separate manual/default-off
+circuit. The drive and side-yard circulation stay clear. Repeated geometry shares four new
+material roles in one exact nine-chunk landscape-cell ceiling; no downloaded asset, broad ambient
+lift, celestial change or renderer branch was added.
+
+Against Round 75, `garage-approach` changes 24,169 day / 568,044 night pixels above two channel
+levels (1.6784% / 39.4475%; normalized RGB MAE 0.001541 / 0.015645). The much larger night mask is
+the intended newly readable east landscape/fence boundary, not an exposure change. Night
+`exterior-front` changes 18,286 pixels (1.2699%, 0.000785 MAE); `entrance-foyer`, `central-hall`
+and `family-media` controls remain at 0.0495--0.0687% day and 0.0487--0.0612% night. Ten strict
+views with a visible line to the new border were deliberately advanced after old/new inspection:
+the overview plus five exterior blockout poses, the kitchen's narrow exterior glimpse, two
+property poses and `sun-season-03`. The unrelated one-pixel `blockout-l3-store-w` regeneration
+was discarded.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next checkpoint should address the screenshot-ranked roof /
+dormer night silhouette with a truthful bounded source, or the large daytime garage/facade massing
+if no such source is dependency-valid—not a global exposure lift or unrelated subsystem.

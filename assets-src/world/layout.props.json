@@ -1154,6 +1154,45 @@
       "interactable": null
     },
     {
+      "id": "PROP_EXT_DRIVEWAY_EDGE_BOLLARD_1",
+      "asset": "MODEL_FIXTURE_PATH_BOLLARD",
+      "cell": "EXT_SIDEYARD_E",
+      "position": [17.55, 0.0, -3.20],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_EXT_DRIVEWAY_EDGE_BOLLARD_2",
+      "asset": "MODEL_FIXTURE_PATH_BOLLARD",
+      "cell": "EXT_SIDEYARD_E",
+      "position": [17.55, 0.0, -7.10],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_EXT_DRIVEWAY_EDGE_BOLLARD_3",
+      "asset": "MODEL_FIXTURE_PATH_BOLLARD",
+      "cell": "EXT_SIDEYARD_E",
+      "position": [17.55, 0.0, -11.00],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
       "id": "PROP_L0_PORCH_LANTERN_1",
       "asset": "MODEL_FIXTURE_PORCH_LANTERN",
       "cell": "L0_PORCH",

@@ -1,3 +1,56 @@
+# Visual-sprint handoff — 2026-09-18 (`HOUSE-00945` checkpoint)
+
+Branch `develop`. Task-start HEAD `432ad7a764ac377a36837f75d38334d8e0ab6ae1`
+(`HOUSE-00944`). This file belongs to the single `HOUSE-00945` commit; use that commit as the
+ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal gameplay remains production-material only and
+explicit debug blockout remains available.
+
+The formerly empty east driveway edge now has a 2.1 m-wide authored mulch strip, five deliberately
+varied instances of the approved shrub model and three measured instances of the existing
+0.20 × 0.544 × 0.20 m bronze path bollard. Each physical fitting links to one 2,700 K / 160 lm
+downward spot. Their new group follows the dusk sensor, owns only `EXT_SIDEYARD_E`, spills only
+to `EXT_DRIVEWAY`, and remains independent of the existing 3,000 lm manual/default-off garage
+flood. Driveway and side-yard circulation remain clear. No download, licence decision, renderer
+branch, broad exposure change, celestial key or CNAEXT API was added.
+
+Round 75 supplies the before [day garage approach](visual-review/captures/house-00944-roof-edge-day-r1/garage-approach.png)
+and [22:00 garage approach](visual-review/captures/house-00944-roof-edge-night-r1/garage-approach.png).
+The complete retained after sets are [clear day](visual-review/captures/house-00945-driveway-border-day-r1)
+and [normal night](visual-review/captures/house-00945-driveway-border-night-r1). Both 21-frame
+contact sheets and the direct garage images were inspected at full size. Against Round 75,
+`garage-approach` changes 24,169 day / 568,044 night pixels above two channel levels (1.6784% /
+39.4475%; normalized RGB MAE 0.001541 / 0.015645). Day gains a material boundary and human scale;
+night gains a continuous, physically bounded east edge instead of losing the fence and landscape
+to black. Interior controls remain below 0.0002 MAE.
+
+The world is 692 chunks / 96 cells / 92 static props / 270 exterior hierarchy instances /
+57.663210 MB: 647 opaque submissions, 45 cutouts and 107 unculled opaque state changes. Five shrubs
+remain one shared foliage batch with bounded instance sub-ranges; the three fittings share bronze
+and emissive roles. `EXT_SIDEYARD_E` is exactly nine chunks, while the road-owned front terrain
+tile truthfully moves `EXT_ROAD` from seventeen to eighteen for its part of the mulch strip.
+Ten strict references with a line of sight to the change were opened and deliberately advanced;
+an unrelated one-pixel attic regeneration was discarded.
+
+All 1,409 unit, 135 integration and 48 active software-render tests pass. All eighteen
+culled-vs-unculled pairs remain below 0.2%, at 0.0558% worst (`l0-sunroom`). Every non-compiler
+`tools/ci/run_checks.sh` gate passed before the wrapper received an external SIGTERM at its final
+`xna-strict` step; rerunning that step alone with the same six-worker cap completed cleanly for
+all 323 translation units, and the final staged wrapper reports `all gates green`. Compilation and
+heavy work stayed on CPU 0-5. The existing CMake tree
+still cannot auto-reconfigure in this sandbox because an unrelated sharp-runtime glob would write
+shared `~/deps/FNA3D`; exact stored Ninja compile/link commands were used without modifying CNA,
+sharp-runtime or shared dependencies.
+
+Largest visible defects: the main roof/dormer mass still disappears honestly at 22:00 while the
+Moon is below the horizon; the garage/facade massing and repeated window rhythm remain simple;
+the driveway is still a broad uninterrupted asphalt plane; formal living retains weak furniture /
+floor contact outside its bounded piano practical; secondary rooms and elevations outside the
+connected slice remain sparse. The next highest-value checkpoint is a truthful bounded source for
+roof/dormer silhouette if one is dependency-valid, otherwise daytime garage/facade massing and
+driveway breakup—not global exposure or an unrelated subsystem.
+
+---
+
 # Visual-sprint handoff — 2026-09-18 (`HOUSE-00944` checkpoint)
 
 Branch `develop`. Task-start HEAD `4ed85cc2af0a6fa6652f82e895aac452a690723c`

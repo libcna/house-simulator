@@ -2653,6 +2653,7 @@
       "acoustic": { "roomTone": "AMB_OUTDOOR", "absorption": 0.92, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "E", "exposure": 0.92 },
+      "lightGroups": ["LG_EXT_DRIVEWAY_EDGE"],
       "residencyPack": "exterior", "visibilityHint": "open"
     },
     {

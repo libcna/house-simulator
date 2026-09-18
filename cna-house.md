@@ -1999,6 +1999,15 @@ the already measured shutter and double-door roles make the final cell **38 chun
 unculled house is 638 opaque + 44 alpha-tested submissions and 107 opaque state changes, still
 well inside §71.2's 1,400 / 210 envelope.
 
+`HOUSE-00945` (2026-09-18) measures the east driveway-border landscape cell at **nine chunks**:
+its existing concrete, grass, fence and street-tree roles plus one shared shrub atlas, mulch and
+the shared bronze/emissive roles of three low bollards. Five shrubs and three fixtures remain
+separately bounded exterior-hierarchy sub-ranges, not eight new draws. The exact cell-specific
+ceiling records those visible roles while retaining the ordinary six-chunk target and both the
+over-ceiling and stale-exception failures. The front 16 m terrain tile owns the part of the same
+mulch strip nearest the road, so its one shared mulch chunk is correctly resident in `EXT_ROAD`
+and moves that exterior aggregation's exact ceiling from seventeen to eighteen.
+
 `HOUSE-00930` (2026-09-16) isolates each weather-facing `D_ENTRY` leaf from ordinary hardwood
 joinery so the exterior hierarchy can retain it when its owning interior room is portal-culled.
 `HOUSE-00932` gives that generated leaf four-panel millwork on both faces, paired bronze
@@ -5370,7 +5379,7 @@ decal. That is the right scope.
 
 ## 53. Lights and switches
 
-* **128 switch groups** control **220 fixtures** inside the house; **135 groups and 243 fixtures**
+* **128 switch groups** control **220 fixtures** inside the house; **138 groups and 254 fixtures**
   counting the exterior. A group is what a real wall switch controls — the four kitchen
   down-lights, the two porch lanterns, the single closet bulb. Corrected 2026-09-08 from "84
   groups, 169 fixtures", which §13's own per-room column never added up to (`HOUSE-00382`).
@@ -5396,8 +5405,13 @@ decal. That is the right scope.
   arrival state (`HOUSE-01045`); its main ceiling group remains off. This is an authored switch
   state, not an exposure override, and saved state can still turn either group on or off.
 * Persistence: one bit per group plus a dimmer byte for the 6 dimmable groups.
-* Exterior lights: 2 porch lanterns, 1 garage flood, 2 rear terrace lights, 4 path lights,
-  1 shed light, plus the 9 street lights and the neighbours' porch lights (not player-controlled).
+* Exterior lights: 4 porch sources (2 wall lanterns and 2 semi-flush ceiling fixtures), 4 facade
+  uplights, 2 garage carriage lanterns, 3 driveway-border bollards, 1 independent manual garage
+  flood, 2 rear terrace lights, 4 front-walk lights and 1 shed light, plus the 9 street lights and
+  the neighbours' 4 porch lights (not player-controlled). The driveway-border fittings sit in a
+  narrow mulched strip inside `EXT_SIDEYARD_E`; their 2,700 K / 160 lm downward spots share
+  `LG_EXT_DRIVEWAY_EDGE`, follow the dusk sensor and explicitly spill only to `EXT_DRIVEWAY`.
+  They do not change or automatically enable `LG_EXT_DRIVEWAY_FLOOD` (`HOUSE-00945`).
   The neighbours' porch lights are two per facade on N1 and N2, placed by `HOUSE-00391` with the
   houses they hang on. The **balconies** are missing from that list and §13.4 gives them three
   groups — two wall

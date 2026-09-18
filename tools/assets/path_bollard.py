@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Author and validate the four low luminaires along the canonical front walk.
+"""Author and validate the low luminaires along the front walk and driveway border.
 
 The model is a project-authored, deterministic low-voltage bollard: a compact dark-bronze base
 and shaft support a framed opal light chamber below a rain cap.  ``BollardShade`` remains a
@@ -33,6 +33,11 @@ PLACEMENTS = (
     ("PROP_EXT_WALK_BOLLARD_2", "LIGHT_EXT_WALK_PATH_2", [0.75, 0.0, -6.60]),
     ("PROP_EXT_WALK_BOLLARD_3", "LIGHT_EXT_WALK_PATH_3", [-0.75, 0.0, -3.70]),
     ("PROP_EXT_WALK_BOLLARD_4", "LIGHT_EXT_WALK_PATH_4", [0.75, 0.0, -0.80]),
+)
+DRIVEWAY_PLACEMENTS = (
+    ("PROP_EXT_DRIVEWAY_EDGE_BOLLARD_1", "LIGHT_EXT_DRIVEWAY_EDGE_1", [17.55, 0.0, -3.20]),
+    ("PROP_EXT_DRIVEWAY_EDGE_BOLLARD_2", "LIGHT_EXT_DRIVEWAY_EDGE_2", [17.55, 0.0, -7.10]),
+    ("PROP_EXT_DRIVEWAY_EDGE_BOLLARD_3", "LIGHT_EXT_DRIVEWAY_EDGE_3", [17.55, 0.0, -11.00]),
 )
 
 
@@ -200,6 +205,26 @@ def validate_instances() -> None:
                 light["castsBlobShadow"] or not light["bakedIntoLightmap"] or \
                 not light["defaultOn"]:
             raise RuntimeError(f"canonical path-bollard optics changed: {light_id}")
+
+    for prop_id, light_id, position in DRIVEWAY_PLACEMENTS:
+        prop = props[prop_id]
+        light = lights[light_id]
+        if prop["asset"] != "MODEL_FIXTURE_PATH_BOLLARD" or \
+                prop["cell"] != "EXT_SIDEYARD_E" or prop["position"] != position or \
+                prop["yawDeg"] != 0 or prop["scale"] != 1 or not prop["static"] or \
+                prop["collision"] != "none":
+            raise RuntimeError(f"canonical driveway-edge bollard placement changed: {prop_id}")
+        expected_light = [position[0], 0.43, position[2]]
+        if light["cell"] != "EXT_SIDEYARD_E" or light["group"] != "LG_EXT_DRIVEWAY_EDGE" or \
+                light["type"] != "spot" or light["position"] != expected_light or \
+                light["direction"] != [0.0, -1.0, 0.0] or light["coneInnerDeg"] != 70.0 or \
+                light["coneOuterDeg"] != 120.0 or light["colorK"] != 2700 or \
+                light["intensityLm"] != 160.0 or light["range"] != 3.0 or \
+                light["spillCells"] != ["EXT_DRIVEWAY"] or light["fixtureProp"] != prop_id or \
+                light["emissiveMaterialSlot"] != "BollardShade" or \
+                light["castsBlobShadow"] or not light["bakedIntoLightmap"] or \
+                light["defaultOn"] or not light["duskSensor"]:
+            raise RuntimeError(f"canonical driveway-edge bollard optics changed: {light_id}")
 
     switches = {row["id"]: row for row in
                 layout_io.load_file(INTERACTABLES, "interactables")["interactables"]}

@@ -2064,8 +2064,9 @@
     },
     // ================================================================== the exterior lights
     // `HOUSE-00383`. §53's list, in full: 2 porch lanterns, 1 garage flood, 2 rear terrace
-    // lights, 2 garage carriage lights, 4 path lights, 1 shed light and the 9 street lights.
-    // 21 fixtures in 7 groups.
+    // lights, 2 garage carriage lights, 3 driveway-edge lights, 4 path lights, 1 shed light and
+    // the 9 street lights. Later visual-slice work added two broad porch sources and four facade
+    // uplights: 30 fixtures in 9 groups today.
     //
     // These are the only lights in the file whose height is measured from the ground rather than
     // down from a ceiling: an exterior cell's `yOverride` top is the sky at +20, and a lantern
@@ -2213,6 +2214,43 @@
       "spillCells": ["L0_GARAGE", "EXT_SIDEYARD_E"],
       "fixtureProp": "PROP_EXT_GARAGE_LANTERN_2", "emissiveMaterialSlot": "LanternShade",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false,
+      "duskSensor": true
+    },
+
+    // ---- LG_EXT_DRIVEWAY_EDGE x3 -- low warm landscape lights in the planted strip just east
+    // ---- of the drive. Their downward cones overlap neither the whole apron nor the side yard;
+    // ---- explicit spill reaches only the adjacent driveway surface.
+    {
+      "id": "LIGHT_EXT_DRIVEWAY_EDGE_1", "cell": "EXT_SIDEYARD_E", "group": "LG_EXT_DRIVEWAY_EDGE",
+      "type": "spot", "position": [17.55, 0.43, -3.20],
+      "direction": [0.0, -1.0, 0.0],
+      "coneInnerDeg": 70.0, "coneOuterDeg": 120.0,
+      "colorK": 2700, "intensityLm": 160.0, "range": 3.00,
+      "spillCells": ["EXT_DRIVEWAY"],
+      "fixtureProp": "PROP_EXT_DRIVEWAY_EDGE_BOLLARD_1", "emissiveMaterialSlot": "BollardShade",
+      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false,
+      "duskSensor": true
+    },
+    {
+      "id": "LIGHT_EXT_DRIVEWAY_EDGE_2", "cell": "EXT_SIDEYARD_E", "group": "LG_EXT_DRIVEWAY_EDGE",
+      "type": "spot", "position": [17.55, 0.43, -7.10],
+      "direction": [0.0, -1.0, 0.0],
+      "coneInnerDeg": 70.0, "coneOuterDeg": 120.0,
+      "colorK": 2700, "intensityLm": 160.0, "range": 3.00,
+      "spillCells": ["EXT_DRIVEWAY"],
+      "fixtureProp": "PROP_EXT_DRIVEWAY_EDGE_BOLLARD_2", "emissiveMaterialSlot": "BollardShade",
+      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false,
+      "duskSensor": true
+    },
+    {
+      "id": "LIGHT_EXT_DRIVEWAY_EDGE_3", "cell": "EXT_SIDEYARD_E", "group": "LG_EXT_DRIVEWAY_EDGE",
+      "type": "spot", "position": [17.55, 0.43, -11.00],
+      "direction": [0.0, -1.0, 0.0],
+      "coneInnerDeg": 70.0, "coneOuterDeg": 120.0,
+      "colorK": 2700, "intensityLm": 160.0, "range": 3.00,
+      "spillCells": ["EXT_DRIVEWAY"],
+      "fixtureProp": "PROP_EXT_DRIVEWAY_EDGE_BOLLARD_3", "emissiveMaterialSlot": "BollardShade",
+      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false,
       "duskSensor": true
     },
 

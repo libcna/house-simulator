@@ -80,12 +80,12 @@ namespace
         const auto& list = game.RenderListForTesting();
         ASSERT_GT(list.Size(), 0U) << "the frame drew from an empty list";
         EXPECT_TRUE(list.IsSorted()) << "the pass read its slice, which is what sorts the list";
-        // HOUSE-00942's selected four-panel leaves brought the measured unculled house to 688
+        // HOUSE-00945's driveway border brought the measured unculled house to 692
         // calls, over FOUR frames: a list that was not emptied between them would be four houses
         // long and would still draw a correct-looking picture. This diagnostic remains far below
         // §71.2's 1,400-call worst-case envelope; named visible poses protect its 644-call typical
-        // opaque row. HOUSE-00943 changes roof vertices and material data, not this draw count.
-        EXPECT_LE(list.DrawCalls(), 688) << "the list was not cleared between frames";
+        // opaque row. The border adds four shared visible roles to the previous 688-call world.
+        EXPECT_LE(list.DrawCalls(), 692) << "the list was not cleared between frames";
 
         const cnahouse::debug::Counter* chunks = game.CountersForTesting().Find("static.chunks");
         const cnahouse::debug::Counter* states = game.CountersForTesting().Find("static.stateChanges");
@@ -123,11 +123,10 @@ namespace
             previousOpaque = &item;
             ++opaque;
         }
-        // HOUSE-00937 composes the same twelve foundation shrubs into two actual beds instead of
-        // filing a continuous under-porch/driveway line across more exterior cells. That merges
-        // three cell-scoped foliage batches without deleting an instance: 44 is the measured
-        // world-wide alpha-test slice, including the formal sofa fringe and two indoor plants.
-        EXPECT_EQ(cutouts, 44U)
+        // HOUSE-00945 adds one cell-scoped batch for five driveway-border shrubs: 45 is the
+        // measured world-wide alpha-test slice, including the formal sofa fringe and two indoor
+        // plants. Five repeated shrubs remain sub-ranges of that one draw.
+        EXPECT_EQ(cutouts, 45U)
             << "the formal sofa fringe, two indoor plant leaves and exterior foliage batches";
         EXPECT_EQ(opaque + cutouts, list.Size()) << "unexpected pass items entered the blockout list";
         // Every opaque item was drawn: nothing in that slice named a chunk the runtime could

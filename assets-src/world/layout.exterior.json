@@ -129,6 +129,9 @@
       "material": "MAT_OUTDOOR_MULCH" },
     { "id": "COVER_FOUNDATION_MULCH_E",
       "boxes": [{ "x": [3.6, 8.9], "z": [-14.0, -12.5] }],
+      "material": "MAT_OUTDOOR_MULCH" },
+    { "id": "COVER_DRIVEWAY_MULCH_E",
+      "boxes": [{ "x": [17.1, 19.2], "z": [-13.0, -0.8] }],
       "material": "MAT_OUTDOOR_MULCH" }
   ],
 
@@ -821,6 +824,16 @@
       { "position": [3.2, 0.00, -9.8], "yawDeg": 44.0, "scale": 0.94 },
       { "position": [6.7, 0.00, -10.3], "yawDeg": 116.0, "scale": 1.03 },
       { "position": [8.7, 0.00, -9.7], "yawDeg": 186.0, "scale": 0.91 }
+    ] },
+    // HOUSE-00945: a measured border rather than loose procedural scatter. The five existing
+    // approved shrubs alternate with three low fittings and keep the drive/side-yard circulation
+    // clear; their small yaw/scale variation avoids an obvious repeated stamp.
+    { "id": "VEG_DRIVEWAY_BORDER", "asset": "MODEL_VEGETATION_SHRUB_04", "instances": [
+      { "position": [18.35, 0.00, -1.65], "yawDeg": 24.0, "scale": 0.82 },
+      { "position": [18.45, 0.00, -4.80], "yawDeg": 137.0, "scale": 0.94 },
+      { "position": [18.30, 0.00, -6.25], "yawDeg": 251.0, "scale": 0.78 },
+      { "position": [18.45, 0.00, -8.85], "yawDeg": 318.0, "scale": 0.91 },
+      { "position": [18.30, 0.00, -12.15], "yawDeg": 73.0, "scale": 0.86 }
     ] }
   ],
 

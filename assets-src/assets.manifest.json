@@ -19085,7 +19085,7 @@
       "id": "TERRAIN_MATERIAL_INDEX",
       "category": "terrain",
       "sourceFile": "assets-src/world/terrain_materials.png",
-      "sourceSha256": "ec89c872921a62397bfd787869bd3cfcf5f989f81eae0d88bc7d41f4c391588f",
+      "sourceSha256": "901f65ffb5192337e50a5439039b6d4b98ce78031606b98383524ce44df43a88",
       "origin": {
         "kind": "generated",
         "name": "Site material index, one of §11.5's eight classes per sample",

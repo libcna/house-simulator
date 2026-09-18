@@ -4056,7 +4056,7 @@ namespace
         // `HOUSE-00381` authored `B1` and `L0`, `HOUSE-00382` the three upper floors and
         // `HOUSE-00383` §53's exterior. §28.2 said 169 fixtures in 84 groups, and §13's own
         // per-room column never added up to that.
-        EXPECT_EQ(contents.lights.size(), 251U) << "HOUSE-01289 adds four physical front-facade uplights";
+        EXPECT_EQ(contents.lights.size(), 254U) << "HOUSE-00945 adds three physical driveway-border bollards";
         std::map<cnahouse::util::Id, std::set<cnahouse::util::Id>> groupsIn;
         for (const world::Light& light : contents.lights)
         {
@@ -4070,7 +4070,7 @@ namespace
             (void)cell;
             distinct.insert(groups.begin(), groups.end());
         }
-        EXPECT_EQ(distinct.size(), 137U)
+        EXPECT_EQ(distinct.size(), 138U)
             << "§13's Lights column, the exterior groups and the neighbours' porches";
 
         // §15.7 rule 6's index, asserted by the other implementation: a cell's `lightGroups` is

@@ -110,13 +110,14 @@ MAX_PRIMITIVES_REACH = 0xFFFF
 #: Every maximum below is the measured count on 2026-09-10, not a round number with room in it.
 #: §71's frame budget is what may tighten or restructure them later.
 CHUNK_BUDGET_EXCEPTIONS = {
-    "EXT_ROAD": (17,
+    "EXT_ROAD": (18,
                  "not a room: the residency key for the property's outdoors. The carriageway's "
                  "own six ground and marking materials, the ornamental fence and gate that stand "
                  "on it, and -- since `HOUSE-00494` -- the house's two roofs and its chimney, "
                  "which have to load with the exterior rather than with the neighbourhood. "
                  "HOUSE-00772 adds AlphaTest foliage, BasicEffect bark and measured Reach-cap "
-                 "splits for the street trees and the far road-edge hedge"),
+                 "splits for the street trees and the far road-edge hedge. HOUSE-00945 adds one "
+                 "mulch role where the front terrain tile contains the driveway-border bed"),
     "EXT_FRONTYARD_E": (15,
                          "HOUSE-00772's planted east lawn: its existing ground/building finishes "
                          "plus measured source-exact bark, branch, leaf, flower and grass atlases. "
@@ -133,6 +134,11 @@ CHUNK_BUDGET_EXCEPTIONS = {
                         "plus measured source-exact bark and cutout foliage, including Reach-cap "
                         "splits. HOUSE-00937's foundation-mulch primitive shares the adjoining "
                         "16 m terrain tile; per-instance sub-ranges retain BVH culling"),
+    "EXT_SIDEYARD_E": (9,
+                        "HOUSE-00945's measured driveway border: the existing concrete, grass, "
+                        "fence and street-tree roles plus one shared shrub atlas, mulch, and the "
+                        "two shared bronze/emissive roles of three low bollards. The outdoor "
+                        "landscape cell keeps all repeated instances in bounded sub-ranges"),
     "EXT_WORLD": (24,
                    "the neighbourhood ring is not a room. HOUSE-00772's two rows of street trees "
                    "and the 2.1 m road-edge hedge add source-exact bark/cutout foliage with "

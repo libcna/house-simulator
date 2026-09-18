@@ -138,6 +138,7 @@ cells/cells	CELL_FRIDGE_INTERIOR
 sky/cloudLayers	CL_HIGH
 sky/cloudLayers	CL_LOW
 sky/cloudLayers	CL_MID
+exterior/groundCovers	COVER_DRIVEWAY_MULCH_E
 exterior/groundCovers	COVER_FOUNDATION_MULCH_E
 exterior/groundCovers	COVER_FOUNDATION_MULCH_W
 assets	DATA_SKY_BSC5P
@@ -481,6 +482,7 @@ lights/groups	LG_B1_WC7_MAIN
 lights/groups	LG_B1_WORKSHOP_BENCH
 lights/groups	LG_B1_WORKSHOP_MAIN
 lights/groups	LG_CELL_FRIDGE_INTERIOR_LAMP
+lights/groups	LG_EXT_DRIVEWAY_EDGE
 lights/groups	LG_EXT_DRIVEWAY_FLOOD
 lights/groups	LG_EXT_FACADE_UPLIGHT
 lights/groups	LG_EXT_GARAGE_LANTERN
@@ -629,6 +631,9 @@ lights/lights	LIGHT_B1_WORKSHOP_BENCH_1
 lights/lights	LIGHT_B1_WORKSHOP_MAIN_1
 lights/lights	LIGHT_B1_WORKSHOP_MAIN_2
 lights/lights	LIGHT_CELL_FRIDGE_INTERIOR_LAMP_1
+lights/lights	LIGHT_EXT_DRIVEWAY_EDGE_1
+lights/lights	LIGHT_EXT_DRIVEWAY_EDGE_2
+lights/lights	LIGHT_EXT_DRIVEWAY_EDGE_3
 lights/lights	LIGHT_EXT_DRIVEWAY_FLOOD_1
 lights/lights	LIGHT_EXT_FACADE_UPLIGHT_E1
 lights/lights	LIGHT_EXT_FACADE_UPLIGHT_E2
@@ -1598,6 +1603,9 @@ nav/perches	PERCH_L2_LIBRARY_LADDER
 nav/perches	PERCH_L2_LIBRARY_SILL
 nav/perches	PERCH_L2_SITTING_SOFA
 nav/perches	PERCH_L3_ROOM_SOFA
+props/props	PROP_EXT_DRIVEWAY_EDGE_BOLLARD_1
+props/props	PROP_EXT_DRIVEWAY_EDGE_BOLLARD_2
+props/props	PROP_EXT_DRIVEWAY_EDGE_BOLLARD_3
 props/props	PROP_EXT_DRIVEWAY_FLOODLIGHT
 props/props	PROP_EXT_FACADE_UPLIGHT_E1
 props/props	PROP_EXT_FACADE_UPLIGHT_E2
@@ -2812,6 +2820,7 @@ interactables/interactables	TV_L1_MASTER_BED
 exterior/vegetation	VEG_BED
 exterior/vegetation	VEG_BED_PERIWINKLE
 exterior/vegetation	VEG_BIRCH
+exterior/vegetation	VEG_DRIVEWAY_BORDER
 exterior/vegetation	VEG_FRUIT
 exterior/vegetation	VEG_GRASS_FRONT_E
 exterior/vegetation	VEG_GRASS_FRONT_W
