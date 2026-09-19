@@ -11699,6 +11699,22 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             against 1 793 + 1 602 + 1 730). Three injections, all CAUGHT -- asking only the first
             live cone about an instance, passing the live set down as the inside set, and
             descending into a node no cone can see.
+- [x] HOUSE-00701 — Root render visibility and camera-cell lighting at the camera's exact cell while the gameplay body retains doorway hysteresis
+      dep: HOUSE-00356, HOUSE-00670, HOUSE-00688 · sys: visibility · plat: ALL · pri: MUST
+      note: (2026-09-19) **New task, next free phase-9 id.** In a real first-person doorway walk,
+            §16.4 correctly keeps the body in its previous cell for 5 cm. The eye has already
+            crossed the portal plane, so starting the render traversal in the sticky body cell
+            leaves the room ahead behind the near plane and exposes the clear sky for several
+            frames. Keep that gameplay hysteresis for collision/audio; query the exact eye cell
+            for visibility and room-light selection, and report the actual render root in F3.
+      verify: the headless hallway→kitchen threshold test samples the 5 cm band while gameplay
+              still reports `L0_HALL` and requires `L0_KITCHEN` to be the render root and visible;
+              full visibility/unit, integration and 18-pose culled-vs-unculled gates remain green.
+      measured: the baseline threshold test failed both render-root and visible-room assertions;
+                after the fix it passed across 90 fixed steps. Full build, 1,410 unit tests,
+                138 integration tests and all 18 culled/unculled comparisons pass; the latter's
+                worst pose is 0.0558% against the unchanged 0.2% limit. `run_checks.sh` is green,
+                including 323 strict-XNA translation units. No golden changed.
 
 ---
 
@@ -20732,6 +20748,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-19 | `HOUSE-00701` | **New task, next free phase-9 id.** Separate render-camera cell selection from §16.4's intentionally sticky gameplay cell. | A headless northbound hall→kitchen walk reproduced the owner's brief doorway sky leak exactly: in the first 5 cm past the portal, the body remains in `L0_HALL`, the eye is in `L0_KITCHEN`, and the old visibility root omits the room ahead. The original behavior is correct for collision stability but not for rendering. |
 | 2026-09-19 | `HOUSE-01073` | **New task, next free phase-13 id.** Give the occupied dining room a measured surface-scale composition and local furniture finish; do not claim the dependency-blocked full `HOUSE-00989` task. | Round 95's matched day/night route shows the shell now readable but a bare, visually dark table dominates the dining camera. A material-only probe barely changes its human-scale appearance, while an eight-place linen/ceramic composition makes the room's purpose immediate. This is a room-scale coverage defect, not another narrow exterior or hero-prop polish round. |
 | 2026-09-19 | `HOUSE-01072` | **New task, next free phase-13 id.** Fit one physically measured butler's-pantry work/storage run while leaving the full dependency-blocked `HOUSE-00991` task open. | Round 94's built-game threshold camera proves the kitchen's newly readable open service room is empty. Its west window leaves only 0.90 m below the sash, requiring a specifically measured low run rather than a generic kitchen cabinet. This fixes a whole-route furnishing gap with the approved authored-content pipeline and no architecture change. |
 | 2026-09-19 | `HOUSE-01297` | **New task, next free phase-16 id.** Light only the open `L0_BUTLERS` service transition with approved physical fixtures and a selected receiver bake; keep the full `HOUSE-00991` furnishing task open. | Round 93's kitchen west view has a black gap beside the range, and a close camera proves it is the open, still-empty butler's pantry. Its old default-off 3.28 m point pair bakes mostly ceiling fireflies rather than readable walls. Fixing this room-sized L0 discontinuity is dependency-valid visual coverage, whereas inventing another kitchen cabinet in the adjacent narrow range bay was not. |

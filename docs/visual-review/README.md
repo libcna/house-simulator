@@ -4231,3 +4231,36 @@ the most visible dining defect. Address room-scale object lighting, not another
 small table prop, and compare the entire connected route. The flat family
 garden view, weak living piano visibility and unimplemented gate `E` action
 remain. `HOUSE-00989` and **VISUAL-GATE-1 remain open.**
+
+## Round 97 — doorway sky flash during an actual walk
+
+Commit: `HOUSE-00701` checkpoint (`2026-09-19`). Reviewed the player's reported
+hall→kitchen threshold at normal eye height with a 90-fixed-step headless walk;
+the exact 5 cm transition band is sampled every frame. The fixed-pose
+`build/test-output/door-hall_kitchen-*-{culled,unculled}.png` pair was also
+inspected, but a teleport cannot reproduce a transient that exists only while
+the gameplay cell lags the moving eye. The exterior road's normal and
+unculled captures were separately inspected as a still-open exterior defect.
+
+Ranked defects before:
+
+1. For several frames at a doorway, the room ahead disappears and sky shows
+   through because the render traversal starts in the previous gameplay cell.
+2. The road view still shows under-rendered interiors behind some front glass;
+   roof/edge details also differ from the unculled view. This is independent
+   of the doorway crossing and is not claimed fixed here.
+3. Main stair access and the Shift speed toggle remain reported gameplay gaps.
+
+Fixed: the render and room-light camera cell now comes from the exact eye
+position; §16.4's 5 cm body hysteresis remains for collision. The new test
+failed before the fix while the eye was in `L0_KITCHEN` and the body still in
+`L0_HALL`, then passed with the kitchen both root and visible. All 18 existing
+culled/unculled poses remain under the unchanged 0.2% threshold, worst 0.0558%.
+No strict golden was changed. The road-view experiment that seeded every
+projected front window was rejected: it reached 25 cells from the road and
+still left thin exterior geometry differences, so it was not shipped as a
+broad overdraw workaround.
+
+Remaining: solve the exterior glazing/envelope ownership with a bounded
+render comparison, then fix the real stair approach and Shift toggle. The
+complete L0 route and **VISUAL-GATE-1 remain open.**

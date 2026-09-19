@@ -19,16 +19,19 @@ row budgets; step 5 is charged to draw submission, because the game builds the r
 
 | Step | What it does | Where it lives |
 |---|---|---|
-| 1. locate the camera cell | §16.4's point query | `player::CellTracker` (not this subsystem) |
+| 1. locate the camera cell | §16.4's point query without the gameplay body's 5 cm hysteresis | `CnaHouseGame::VisualCell` over `world::SpatialIndex` |
 | 2. portal traversal | camera cell → visible cells, each with up to four cones | `visibility::PortalTraversal`, driven by `VisibilitySystem` |
 | 3. per-cell chunk test | §17.4's chunks of a visible cell against that cell's own cones | `visibility::ChunkCuller`; instances by `visibility::InstanceCuller` |
 | 3′. exterior | §25.6's loose BVH against the cones that reached the outdoors | `visibility::ExteriorCones` and `ExteriorCuller` |
 | 4. distance cull and LOD | per-category distances, §68's view-distance scale, §26.4's detail sets | `visibility::CullDistanceFor`, `DetailSets` |
 | 5. sort | by pass, then effect, then material; transparent back-to-front | `visibility::RenderList` |
 
-One walk a frame, and everything downstream reads the same answer. Chunk culling, lighting, audio
-and residency all consume `VisibilitySystem::Visible()`; a second walk in the same frame would
-answer a slightly different question the moment the camera moved between the two calls.
+One walk a frame, and every render-culling consumer reads the same answer. The camera's exact eye
+cell also selects room lighting. The gameplay `CellTracker` remains sticky for the body/collision
+step and its world overlay: for 5 cm after crossing a doorway it may still name the old room, but
+that old room is no longer a valid portal-traversal root because its opening is already behind the eye.
+A second render walk in the same frame would answer a slightly different question the moment the
+camera moved between the two calls.
 
 ## 2. Step 2 in detail — the walk
 

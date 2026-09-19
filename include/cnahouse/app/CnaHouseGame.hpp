@@ -555,6 +555,12 @@ namespace cnahouse::app
         /// `HOUSE-00684`'s `cull off` will need exactly this separation anyway.
         void UpdateVisibility(const FrameContext& frame);
 
+        /// @brief The room containing the camera eye, without §16.4's sticky body-cell margin.
+        ///
+        /// Gameplay keeps the prior cell for 5 cm to stabilize collision and room transitions;
+        /// rendering cannot, because a doorway's portal is already behind the eye in that band.
+        [[nodiscard]] util::Id VisualCell() const;
+
         /// @brief What §25.8's `F3` shows about this frame.
         [[nodiscard]] debug::VisibilitySnapshot VisibilitySnapshot() const;
 

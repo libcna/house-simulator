@@ -1137,7 +1137,7 @@ namespace cnahouse::app
                 {
                     throw std::runtime_error("validated weather published an invalid cloud cover");
                 }
-                lighting_->SetCameraCell(tracker_.Current());
+                lighting_->SetCameraCell(VisualCell());
                 lighting_->Update(frame);
                 // Drawing consumes the lighting stage's one celestial answer. There is no second
                 // sun or moon model in rendering, so room light, sky and disc cannot disagree
@@ -1446,6 +1446,19 @@ namespace cnahouse::app
         DrawPhysicsOverlay();
     }
 
+    util::Id CnaHouseGame::VisualCell() const
+    {
+        if (world_.has_value() && index_.has_value())
+        {
+            const util::Id exact = index_->Find(*world_, view_.Camera().Pose().eye, util::Id{});
+            if (exact.IsValid())
+            {
+                return exact;
+            }
+        }
+        return tracker_.Current();
+    }
+
     void CnaHouseGame::UpdateVisibility(const FrameContext& frame)
     {
         if (visibilityFrozen_)
@@ -1455,7 +1468,7 @@ namespace cnahouse::app
             return;
         }
         visibility::CameraView view;
-        view.cell = tracker_.Current();
+        view.cell = VisualCell();
         const player::FirstPersonCamera& camera = view_.Camera();
         view.eye = camera.Pose().eye;
         view.viewProjection = camera.View() * camera.Projection();
@@ -1485,7 +1498,8 @@ namespace cnahouse::app
         {
             return snapshot;
         }
-        snapshot.cell = util::IdRegistry::NameOf(tracker_.Current());
+        snapshot.cell = util::IdRegistry::NameOf(
+            visibility_->Visible().empty() ? tracker_.Current() : visibility_->Visible().front().cell);
         snapshot.eye = view_.Camera().Pose().eye;
         snapshot.yaw = view_.Camera().Pose().yaw;
         snapshot.cellsInWorld = static_cast<int>(world_->Cells().size());

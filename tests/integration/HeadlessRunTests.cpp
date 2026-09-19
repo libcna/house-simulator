@@ -6,6 +6,7 @@
 // throws during `Initialize`, content that cannot be found from the working directory, a `Draw`
 // that leaves the device in a state the next frame rejects. It runs under the `headless` preset,
 // which `HOUSE-00105` measured doing 600 frames with `DISPLAY` unset.
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 
@@ -1122,6 +1123,95 @@ namespace
         EXPECT_TRUE(game.CellForTesting().IsValid());
         EXPECT_NE(cnahouse::util::IdRegistry::NameOf(game.CellForTesting()), "L0_FOYER")
             << "the body walked out of the foyer and the cell tracking stayed in it";
+    }
+
+    TEST(HeadlessRunTests, ACameraCrossingADoorwaySeesTheNewRoomBeforeTheBodyCellHysteresisEnds)
+    {
+        // §16.4 keeps the old gameplay cell for 5 cm after the centre crosses a doorway. The
+        // camera and its near plane are already in the new room; starting the render walk in
+        // the sticky body cell drops that new room for a few frames and shows the sky through it.
+        class ThresholdInput final : public cnahouse::player::IInputSource
+        {
+        public:
+            explicit ThresholdInput(CnaHouseGame& game)
+                : game_(game)
+            {
+                state_.move.Y = 1.0F;
+            }
+
+            void Update(float) override
+            {
+                const auto& eye = game_.ViewForTesting().Camera().Pose().eye;
+                if (cnahouse::util::IdRegistry::NameOf(game_.CellForTesting()) != "L0_HALL" ||
+                    eye.Z >= -23.005F || eye.Z <= -23.045F)
+                {
+                    return;
+                }
+                sawBand_ = true;
+                const auto snapshot = game_.VisibilitySnapshotForTesting();
+                newRoomWasRoot_ = newRoomWasRoot_ && snapshot.cell == "L0_KITCHEN";
+                newRoomWasVisible_ =
+                    newRoomWasVisible_ && std::any_of(snapshot.visible.begin(),
+                                                      snapshot.visible.end(),
+                                                      [](const cnahouse::debug::VisibleCellLine& row)
+                                                      { return row.cell == "L0_KITCHEN"; });
+            }
+
+            [[nodiscard]] const cnahouse::player::InputState& Current() const noexcept override
+            {
+                return state_;
+            }
+
+            [[nodiscard]] bool LookAvailable() const noexcept override
+            {
+                return false;
+            }
+
+            [[nodiscard]] bool SawBand() const noexcept
+            {
+                return sawBand_;
+            }
+
+            [[nodiscard]] bool NewRoomWasRoot() const noexcept
+            {
+                return newRoomWasRoot_;
+            }
+
+            [[nodiscard]] bool NewRoomWasVisible() const noexcept
+            {
+                return newRoomWasVisible_;
+            }
+
+        private:
+            CnaHouseGame& game_;
+            cnahouse::player::InputState state_;
+            bool sawBand_ = false;
+            bool newRoomWasRoot_ = true;
+            bool newRoomWasVisible_ = true;
+        };
+
+        cnahouse::util::Log::ResetForTesting();
+        Options options;
+        options.headless = true;
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+        options.noAudio = true;
+        options.scene = "walk";
+        options.player = std::array<float, 5>{0.0F, 0.60F, -22.80F, 0.0F, 0.0F};
+        Settings settings = Settings::Defaults();
+        settings.backBufferWidth = 320;
+        settings.backBufferHeight = 180;
+        settings.verticalSync = false;
+
+        CnaHouseGame game(options, settings);
+        ThresholdInput input(game);
+        game.SetInputSourceForTesting(&input);
+        game.SetFixedStepLimit(90);
+        game.SetFrameLimit(3000);
+        game.Run();
+        ASSERT_EQ(game.ExitCode(), 0);
+        EXPECT_TRUE(input.SawBand()) << "the walking test never sampled the 5 cm doorway band";
+        EXPECT_TRUE(input.NewRoomWasRoot()) << "render visibility followed the sticky body cell";
+        EXPECT_TRUE(input.NewRoomWasVisible()) << "the room ahead vanished while crossing its threshold";
     }
 
     TEST(HeadlessRunTests, AWalkSceneAskedForAnImpossiblePlaceDrawsAFrameAnyway)
