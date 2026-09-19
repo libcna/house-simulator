@@ -3648,3 +3648,61 @@ pairs remain below 0.2%, at 0.0558% worst (`l0-sunroom`).
 debug blockout remains available. The next checkpoint should furnish and light the visible
 `L0_SUNROOM`/slider volume or otherwise fix that specific black opening—not raise global exposure,
 spread the rear lantern bake across unrelated cells or leave the vertical slice.
+
+## Round 83 — furnished and physically lit sunroom
+
+Commit: `HOUSE-01068` checkpoint (`2026-09-19`; exact HEAD in `docs/handoff.md`).
+
+Before: the four retained [selected controls](captures/house-01068-sunroom-before-selected) show
+an empty cold shell by day and either a black room or small white ceiling singularities when the
+old nominal main group is forced on. After: the six retained
+[selected results](captures/house-01068-sunroom-after-selected), complete 26-camera
+[clear-day](captures/house-01068-sunroom-day-r1) and
+[normal-night](captures/house-01068-sunroom-night-r1) sets add the room composition and two fixed
+reciprocal review cameras. Both contact sheets and the direct breakfast, wet-bar, rear-terrace,
+kitchen and family boundary views were opened at full size.
+
+Ranked visible defects remaining:
+
+1. The broad pale closed slider leaf reads as an opaque slab rather than a credible glazed rear
+   door; it is the largest newly exposed defect in both direct sunroom views.
+2. The rear exterior remains very dark beyond the deliberately bounded terrace lanterns, while
+   foliage still catches disproportionately strong highlights.
+3. The broad upper rear elevation and balcony rail remain architecturally simple.
+4. Formal living retains weak furniture/floor contact outside its bounded piano practical.
+5. Secondary rooms, side elevations and distant-neighbour context remain sparse.
+
+Fixed: a deterministic 4,324-triangle round-oak four-seat wicker breakfast group includes woven
+chair backs, cushions, plates, mugs and fruit; a separate 4,208-triangle fitted wet bar includes
+shaker fronts, stone worktop, tiled upstand, sink/faucet, shelves, carafe, tumblers, bottles and
+bowls. Two reused plants finish the south corners. Four approved linked semi-flush fixtures replace
+the old point singularities with broad 1,200 lm / 3,000 K spots, and two linked 350 lm task pucks
+give the bar a local pool. Selected 100 lm-calibrated artificial atlases bind only the sunroom
+main/bar groups. The manual two-gang owner, exterior dusk circuit, portals, daylight and renderer
+architecture remain intact.
+
+Against the exact retained yaw-0 control, the finished normal-play room changes 1,265,751 day /
+1,294,367 night pixels above two channel levels (87.8994% / 89.8866%; normalized RGB MAE
+0.089862 / 0.041061). This is intentionally a composition-scale difference: the formerly empty
+room now has visible physical fixtures, furniture and a different valid selected light state. Day
+reads as an inhabited breakfast/bar room and night has warm layered depth without a global
+exposure lift. Three strict references with a genuine line of sight were inspected and advanced:
+`blockout-l0-kitchen` changes 4,923 pixels / 2.1367%, `fp-l0-hall` 9,888 / 4.2917% and
+`fp-l0-kitchen` 49,415 / 21.4475%. Their amplified differences contain only the newly visible
+breakfast silhouette, physical fixtures and valid selected-room lighting; no other golden moved.
+
+The world is 720 chunks / 116 props / 59.826849 MB. `L0_SUNROOM` is exactly 20 chunks / 19
+materials; collision is 1,654 shapes and navigation completes in seconds at 893 nodes / 3,954
+edges with the authored terrace and kitchen links retained. Permanent validation pins both GLBs'
+byte regeneration, hashes, bounds, triangles, UV0, roles, components, scale/origin, proxy names,
+canonical placements, fixture optics and review cameras.
+
+All 1,409 unit, 135 integration and 48 active software-render tests pass; eight capture-only
+generators remain disabled. All eighteen culled/unculled pairs remain below 0.2%, at 0.0558% worst
+(`l0-sunroom`). The 31-stage content graph, budget, provenance/licensing and all strict-XNA/static
+gates pass with heavy work restricted to CPU 0-5.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next checkpoint should fix the visibly opaque rear slider
+and its glass/frame composition—not lift exposure, redesign the renderer or leave the connected
+route for unrelated work.

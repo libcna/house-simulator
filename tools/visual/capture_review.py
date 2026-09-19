@@ -73,6 +73,10 @@ POSES = (
     # A room-side reciprocal view keeps the exact defect that selected HOUSE-00771 in the fixed
     # set: the rear composition must contribute domestic depth through the family picture window.
     ("family-garden-view", "5.70,0.60,-23.05,0.0,0.0"),
+    # HOUSE-01068: the kitchen threshold proves the breakfast group and the uninterrupted route
+    # to the slider; the reciprocal view proves fitted bar depth, shelf dressing and floor contact.
+    ("sunroom-breakfast", "-2.00,0.60,-27.35,340.0,0.0"),
+    ("sunroom-wet-bar", "-2.00,0.60,-31.45,180.0,0.0"),
 )
 SCENARIOS = {
     "clear-day": (10.5, "W_CLEAR"),

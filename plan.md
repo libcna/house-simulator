@@ -15580,6 +15580,55 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             at 0.0558% worst (`l0-sunroom`) against 0.2%. Deterministic regeneration, stable ids,
             world/content, provenance/licence and project static gates pass; all 323 strict-XNA
             translation units are clean, with compilation and heavy work restricted to CPU 0-5.
+- [x] HOUSE-01068 — Furnish and physically light the visible `L0_SUNROOM` breakfast/bar composition
+      dep: HOUSE-00215, HOUSE-00220, HOUSE-00296, HOUSE-00907, HOUSE-01256, HOUSE-01265, HOUSE-01266, HOUSE-01291 · sys: content/world/render · plat: TOOL · pri: MUST
+      note: (2026-09-19) Round 82's complete rear-route sheets expose the sunroom behind the
+            terrace as the largest continuous-route defect: it is empty by day and a black void at
+            night. The full phase-13 room task remains dependency-blocked by `HOUSE-00986`; this
+            bounded dependency-valid checkpoint supplies the exact visible breakfast/bar layer and
+            physical lighting without claiming that task or changing renderer architecture.
+      accept: capture an exact before control; deterministically author a grounded four-seat
+            wicker breakfast group and fitted wet bar with close-range geometry, real-scale UV0,
+            distinct approved stock-XNA finish roles and named collision proxies; compose plants,
+            tableware and bar clutter while preserving kitchen/terrace circulation and the existing
+            cat perch; replace the unphysical points with linked visible ceiling fixtures and task
+            pucks, bounded selected-cell artificial atlases and one manual two-gang owner; add two
+            fixed reciprocal room cameras; rebuild collision, navigation, chunks and content;
+            inspect complete matched day/night sets; and pass deterministic, scale/origin,
+            stable-id, world, budget, licence/provenance, render, culling and strict-XNA gates with
+            compilation and heavy work capped at six CPUs
+      result: Two deterministic project-authored GLBs provide a 2.387063 x 0.945 x 2.387063 m /
+            4,324-triangle round-oak four-seat wicker breakfast composition and a fitted
+            2.43 x 2.64 x 0.675 m / 4,208-triangle shaker-front wet bar. The table is set with
+            plates, mugs and fruit; the bar includes stone worktop, tiled upstand, sink/faucet,
+            shelves, carafe, tumblers, bottles and bowls. Two reused plants frame the south corners.
+            Four linked semi-flush fixtures now drive measured 1,200 lm / 3,000 K broad spots; two
+            linked 350 lm / 3,000 K pucks supply local bar task light. Both manual groups start on
+            in the selected normal-play state. Two selected artificial atlases are rebuilt at the
+            100 lm calibration, while daylight, terrace automation, portals and renderer paths stay
+            unchanged. Ten new prop rows preserve the kitchen/terrace aisle and cat perch.
+      review: The four retained exact before controls and complete 26-camera clear-day/normal-night
+            Round 83 sets were opened, including both new direct sunroom views and the reciprocal
+            terrace boundary. The empty cold shell now reads as an inhabited breakfast/bar room by
+            day and has warm layered depth at 22:00; the bar pucks make the worktop locally legible
+            without lifting global exposure. The largest newly exposed defect is the broad pale
+            closed slider leaf, which reads as an opaque slab and becomes the next visual target.
+            The existing exterior night view remains deliberately dark beyond the bounded terrace
+            circuit. Three references with direct line of sight were opened old/actual/amplified-
+            difference and intentionally advanced: blockout kitchen 4,923 pixels / 2.1367%, first-
+            person hall 9,888 / 4.2917% and first-person kitchen 49,415 / 21.4475%; no other golden
+            moved. The exact yaw-0 normal-play control changes 87.8994% day / 89.8866% night.
+      verified: The world has 205 materials, 3,008 stable ids and 918 manifest rows; its 720 chunks,
+            116 props and 59.826849 MB upload remain inside budget. `L0_SUNROOM` is exactly 20
+            chunks / 19 materials. Collision is 1,654 shapes (1,577 OBB / 77 mesh) and navigation
+            finishes in seconds at 893 nodes / 3,954 edges with both authored terrace/kitchen
+            routes retained. Deterministic asset regeneration, all thirteen world rules, stable
+            ids, manifest/licence/provenance, budget and the 31-stage content graph pass. The
+            unculled diagnostic is 673 opaque / 47 cutout / 111 state changes. All 1,409 unit, 135
+            integration and 48 active software-render cases pass (eight capture-only generators
+            remain disabled); all eighteen culling pairs pass at 0.0558% worst (`l0-sunroom`)
+            against 0.2%. Project static gates and all 323 strict-XNA translation units are clean;
+            compilation and heavy work remain restricted to CPU 0-5.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -20100,6 +20149,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-19 | `HOUSE-01068` | **New task, next free phase-13 id.** Add the exact visible breakfast/bar composition and physical sunroom lighting as a bounded checkpoint while leaving the bulk-acquisition-dependent full `HOUSE-00993` room task open. | Round 82 ranks the empty day/black night sunroom behind the newly lit terrace as the largest continuous-route defect. The approved project-authored prop, stock-XNA material, linked-fixture and selected-atlas paths can correct it now without falsifying `HOUSE-00986`/`HOUSE-00993`, downloading an asset, changing exposure or introducing a renderer branch. |
 | 2026-09-19 | `HOUSE-01291` | **New task, next free phase-16 id.** Reuse the approved wall lantern for the two existing rear-terrace sources, bind one selected adjacent receiver and make the group dusk-owned; remove its old wall switch and add a validator against mixed automatic/manual ownership. | Round 81's fixed night views rank the black terrace as the largest visible defect. Source inspection finds two unphysical points with neither linked fixtures nor useful receiver contribution, plus an unwired wall plate whose saved state would be overwritten every frame by dusk automation. §35.3 already forbids one group having two control owners, so retaining both is not a harmless future interaction. The bounded lantern, cross-cell receiver and spill paths are already approved; this correction needs no renderer, exposure, collision, navigation or licence change. |
 | 2026-09-19 | `HOUSE-01067` | **New task, next free phase-13 id.** Add one reusable measured open-curtain treatment to both family-room picture windows while leaving later interactive blinds and the full room-furnishing task open. | Round 79's complete day/night sheets expose the two broad bare apertures as the largest immediately actionable interior defect. A deterministic static treatment can reuse the approved fabric/steel and prop paths, preserve the glass, light, portals, view and circulation, and add domestic scale without a download, renderer branch, collision/nav change or false completion of `HOUSE-00992`/phase 45. |
 | 2026-09-18 | `HOUSE-00948` | **New task, next free phase-12 id.** Add a data-selected, measured Colonial surround to the weather side of the canonical sectional opening while retaining the existing aperture, simulation envelope and white exterior-frame batch. | Round 78's fixed garage view ranks the unarticulated siding-to-door edge as the largest immediately actionable facade defect. Eight deterministic painted-millwork boxes supply architectural depth with no download, new material role, renderer change, collision/navigation change or licence decision. |

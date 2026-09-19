@@ -138,6 +138,15 @@ CATEGORIES: dict[str, list[tuple[str, float, float, str]]] = {
     "garden-dining-set": [("x", 2.40, 3.20, "four-place outdoor dining-group width"),
                           ("y", 0.70, 1.10, "outdoor dining-group height"),
                           ("z", 2.40, 3.20, "four-place outdoor dining-group depth")],
+    # HOUSE-01068's breakfast composition is validated as one reusable group because all four
+    # chairs have measured clearances to one fixed table. The fitted bar includes open shelves;
+    # its full height, not merely the 0.94 m worktop, catches centimetre-scale imports.
+    "breakfast-dining-group": [("x", 2.15, 2.80, "four-place breakfast-group width"),
+                               ("y", 0.80, 1.10, "breakfast-group chair/back height"),
+                               ("z", 2.15, 2.80, "four-place breakfast-group depth")],
+    "wet-bar": [("x", 2.10, 2.70, "fitted wet-bar width"),
+                ("y", 2.10, 2.70, "wet bar plus dressed open shelves height"),
+                ("z", 0.50, 0.85, "fitted wet-bar working depth")],
     "garden-lounger": [("x", 0.55, 0.90, "garden lounger width"),
                        ("y", 0.55, 1.10, "raised garden lounger height"),
                        ("z", 1.60, 2.30, "garden lounger length")],

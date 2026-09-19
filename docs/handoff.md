@@ -1,3 +1,75 @@
+# Visual-sprint handoff — 2026-09-19 (`HOUSE-01068` checkpoint)
+
+Branch `develop`. Task-start HEAD `61795b00e05e0e0d92b43cd5d504287648544a92`
+(`HOUSE-01291`). This file belongs to the single `HOUSE-01068` commit; use that commit as the
+ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal gameplay remains production-material only and
+explicit debug blockout remains available. The full bulk-furnishing task `HOUSE-00993` remains
+open because its original dependency on `HOUSE-00986` is unsatisfied; this checkpoint is the
+smallest dependency-valid visible sunroom slice and does not falsify either task.
+
+The formerly empty/dark `L0_SUNROOM` now has one deterministic project-authored round-oak
+four-seat wicker breakfast composition (4,324 visible triangles), one fitted shaker-front wet bar
+with stone worktop, tiled upstand, sink and dressed shelving (4,208), and two reused approved
+plants. Plates, mugs, fruit, carafe, tumblers, bottles and bowls make the two groups read as used
+rather than catalogue blocks. Named table/base proxies enter the ordinary collision/nav pipeline;
+the kitchen-to-terrace aisle and `PERCH_L0_SUNROOM_WICKER` remain clear. Two new stock-XNA
+rattan/cushion roles reuse approved project textures; no download, third-party licence or runtime
+dependency was added.
+
+Four bare 700 lm points are replaced by linked approved semi-flush fixtures driving broad
+1,200 lm / 3,000 K spots. Two linked 350 lm / 3,000 K pucks provide local bar task light. The
+existing two-gang manual control remains the sole owner and both groups start on in the selected
+normal-play state. Their selected 256-sample artificial atlases use the explicit 100 lm calibration
+and peak at 0.1715 main / 0.1988 bar. Exterior dusk automation, daylight, portals, exposure and
+the strict stock-XNA renderer do not change.
+
+The retained before set is
+[house-01068-sunroom-before-selected](visual-review/captures/house-01068-sunroom-before-selected);
+six direct after controls are in
+[house-01068-sunroom-after-selected](visual-review/captures/house-01068-sunroom-after-selected).
+The complete retained 26-view sets are
+[clear day](visual-review/captures/house-01068-sunroom-day-r1) and
+[normal night](visual-review/captures/house-01068-sunroom-night-r1), each with an inspected contact
+sheet and two new fixed sunroom cameras. Against the exact yaw-0 before control the final normal
+state changes 1,265,751 day / 1,294,367 night pixels above two channel levels (87.8994% /
+89.8866%; normalized RGB MAE 0.089862 / 0.041061). The empty cold shell now reads as an inhabited
+breakfast/bar room by day and has warm layered depth at night.
+
+Three strict references with a genuine line of sight were opened old/actual/amplified-difference
+and intentionally advanced: `blockout-l0-kitchen` changes 4,923 pixels (2.1367%) only where the
+breakfast silhouette enters the opening; `fp-l0-hall` changes 9,888 (4.2917%) in the distant lit
+sunroom rectangle; `fp-l0-kitchen` changes 49,415 (21.4475%) across the directly visible physical
+fixtures, breakfast group and valid selected room lighting. No other golden moved.
+
+The world is 205 materials / 3,008 stable ids / 918 manifest rows / 720 chunks / 96 cells /
+116 static props / 284 exterior hierarchy instances / 59.826849 MB. `L0_SUNROOM` is exactly
+20 chunks / 19 materials. The unculled diagnostic is 673 opaque + 47 cutout submissions and 111
+opaque state changes. Collision is 1,654 shapes (1,577 OBB / 77 mesh); navigation completes in
+seconds at 893 nodes / 3,954 edges and retains both authored kitchen/sunroom and sunroom/terrace
+links. The 31-stage content graph is fresh. Deterministic model regeneration, manifest,
+licence/provenance, stable ids, all thirteen world rules and the updated budget report pass.
+
+All 1,409 unit and 135 integration tests pass; SaveStore's ten cases use an isolated writable
+`XDG_DATA_HOME`. All 48 active software-render tests pass after the three inspected references
+advance; eight capture-only generators remain disabled. All eighteen culled/unculled pairs stay
+under 0.2%, at 0.0558% worst (`l0-sunroom`). All project static gates and 323 strict-XNA
+translation units pass. Compilation and heavy tooling stay on CPU 0-5 / at most six workers.
+
+The normal Ninja target still attempts the known unrelated configure-time write to shared
+`~/deps/FNA3D`, which the sandbox rejects. Stored direct compile/link actions were used for the
+three updated test translation units with ccache bypassed only for those commands; no CNA,
+sharp-runtime or shared dependency was modified. Navigation finished normally in seconds; no
+`build_nav.py`, render-test or review-capture process remains running.
+
+Largest visible defects: the broad pale closed rear slider reads as an opaque slab in both direct
+sunroom views; the exterior beyond the bounded terrace circuit is still very dark while foliage
+catches strong highlights; the upper rear elevation/balcony rail remain simple; formal living has
+weak floor contact outside the piano practical; secondary rooms/elevations remain sparse. The next
+checkpoint should correct the rear slider's glass/frame composition through the canonical opening
+path—not lift exposure, redesign the renderer or leave the connected route.
+
+---
+
 # Visual-sprint handoff — 2026-09-19 (`HOUSE-01291` checkpoint)
 
 Branch `develop`. Task-start HEAD `936c8fe8ac350441867ec6f2aaeb1b6a88510417`

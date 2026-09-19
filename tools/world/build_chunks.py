@@ -273,6 +273,13 @@ for window_cell in (
         7, "six measured shell finish chunks plus one weather-facing window-frame chunk; "
            "ordinary room trim and borrowed-light glass stay portal-owned")
 
+CHUNK_BUDGET_EXCEPTIONS["L0_SUNROOM"] = (
+    20, "HOUSE-01068's measured breakfast room: seven established shell/window roles plus five "
+        "breakfast finishes; the fitted bar shares cabinet, oak and ceramic, adding only stone "
+        "and steel; two reused plant roles and the physical ceiling fixtures' bronze, opal and "
+        "switched diffuser remain visually distinct. One exact Reach-cap split preserves the "
+        "woven four-chair group rather than flattening its material sub-ranges")
+
 CHUNK_BUDGET_EXCEPTIONS["L1_LANDING"] = (
     10, "six measured shell finish chunks plus a weather-facing window-frame chunk, "
         "HOUSE-00930's isolated upper-balcony entry leaf and HOUSE-00932's raised-panel hardwood "

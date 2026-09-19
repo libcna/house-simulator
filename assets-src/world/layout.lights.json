@@ -820,45 +820,59 @@
     // ---- LG_L0_SUNROOM_MAIN x4
     {
       "id": "LIGHT_L0_SUNROOM_MAIN_1", "cell": "L0_SUNROOM", "group": "LG_L0_SUNROOM_MAIN",
-      "type": "point", "position": [-3.57, 3.28, -30.43],
-      "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 700.0, "range": 8.09,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
-      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+      "type": "spot", "position": [-3.57, 3.12, -30.43],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 72.0, "coneOuterDeg": 140.0,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 1200.0, "range": 6.62,
+      "bakeLumensPerRadiantWatt": 100.0,
+      "fixtureProp": "PROP_L0_SUNROOM_CEILING_1", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
     {
       "id": "LIGHT_L0_SUNROOM_MAIN_2", "cell": "L0_SUNROOM", "group": "LG_L0_SUNROOM_MAIN",
-      "type": "point", "position": [-0.43, 3.28, -30.43],
-      "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 700.0, "range": 8.09,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
-      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+      "type": "spot", "position": [-0.43, 3.12, -30.43],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 72.0, "coneOuterDeg": 140.0,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 1200.0, "range": 6.62,
+      "bakeLumensPerRadiantWatt": 100.0,
+      "fixtureProp": "PROP_L0_SUNROOM_CEILING_2", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
     {
       "id": "LIGHT_L0_SUNROOM_MAIN_3", "cell": "L0_SUNROOM", "group": "LG_L0_SUNROOM_MAIN",
-      "type": "point", "position": [-3.57, 3.28, -28.77],
-      "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 700.0, "range": 8.09,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
-      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+      "type": "spot", "position": [-3.57, 3.12, -28.77],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 72.0, "coneOuterDeg": 140.0,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 1200.0, "range": 6.62,
+      "bakeLumensPerRadiantWatt": 100.0,
+      "fixtureProp": "PROP_L0_SUNROOM_CEILING_3", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
     {
       "id": "LIGHT_L0_SUNROOM_MAIN_4", "cell": "L0_SUNROOM", "group": "LG_L0_SUNROOM_MAIN",
-      "type": "point", "position": [-0.43, 3.28, -28.77],
-      "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 700.0, "range": 8.09,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
-      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+      "type": "spot", "position": [-0.43, 3.12, -28.77],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 72.0, "coneOuterDeg": 140.0,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 1200.0, "range": 6.62,
+      "bakeLumensPerRadiantWatt": 100.0,
+      "fixtureProp": "PROP_L0_SUNROOM_CEILING_4", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
 
-    // ---- LG_L0_SUNROOM_BAR x1 -- over the wet bar
+    // ---- LG_L0_SUNROOM_BAR x2 -- physical pucks below the wet-bar shelf
     {
       "id": "LIGHT_L0_SUNROOM_BAR_1", "cell": "L0_SUNROOM", "group": "LG_L0_SUNROOM_BAR",
-      "type": "spot", "position": [-2.00, 3.00, -29.60],
-      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 30.0, "coneOuterDeg": 55.0,
-      "colorK": 3500, "bulbClass": "led", "intensityLm": 500.0, "range": 6.34,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
-      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
+      "type": "spot", "position": [0.65, 2.1425, -27.48],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 50.0, "coneOuterDeg": 100.0,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 350.0, "range": 2.40,
+      "bakeLumensPerRadiantWatt": 100.0,
+      "fixtureProp": "PROP_L0_SUNROOM_BAR_PUCK_1", "emissiveMaterialSlot": "PuckDiffuser",
+      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": true
+    },
+    {
+      "id": "LIGHT_L0_SUNROOM_BAR_2", "cell": "L0_SUNROOM", "group": "LG_L0_SUNROOM_BAR",
+      "type": "spot", "position": [1.65, 2.1425, -27.48],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 50.0, "coneOuterDeg": 100.0,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 350.0, "range": 2.40,
+      "bakeLumensPerRadiantWatt": 100.0,
+      "fixtureProp": "PROP_L0_SUNROOM_BAR_PUCK_2", "emissiveMaterialSlot": "PuckDiffuser",
+      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": true
     },
 
     // ---- LG_L0_GARAGE_MAIN x4 -- fluorescent: §53 gives it a 0.4 s flicker-start

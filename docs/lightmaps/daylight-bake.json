@@ -358,8 +358,8 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "lumensPerRadiantWatt": 683.0,
-      "shellHash": "sha256:9ed4e61c767c817d510b79da3b7b5b0002ec27345bc7fdd215a15613bda2c5fe"
+      "lumensPerRadiantWatt": 100.0,
+      "shellHash": "sha256:b412177cdd91b09bd625188eb7eb02f9343460daf45839652cfacf6dc9985208"
     },
     {
       "cell": "L0_WC1",

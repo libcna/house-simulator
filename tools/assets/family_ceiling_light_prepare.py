@@ -49,6 +49,12 @@ HALL_POSITIONS = (
     [0.00, 3.12, -22.10],
     [0.00, 3.12, -20.35],
 )
+SUNROOM_POSITIONS = (
+    [-3.57, 3.12, -30.43],
+    [-0.43, 3.12, -30.43],
+    [-3.57, 3.12, -28.77],
+    [-0.43, 3.12, -28.77],
+)
 PORCH_POSITIONS = (
     [-2.45, 3.17, -12.95],
     [2.45, 3.17, -12.95],
@@ -167,6 +173,25 @@ def validate_world() -> None:
                 light["emissiveMaterialSlot"] != "FamilyCeilingDiffuser" or \
                 not light["bakedIntoLightmap"] or not light["defaultOn"]:
             raise RuntimeError(f"living ceiling optical linkage changed: {light_id}")
+
+    for index, position in enumerate(SUNROOM_POSITIONS, 1):
+        prop_id = f"PROP_L0_SUNROOM_CEILING_{index}"
+        light_id = f"LIGHT_L0_SUNROOM_MAIN_{index}"
+        prop = props[prop_id]
+        light = lights[light_id]
+        if prop["asset"] != ASSET_ID or prop["cell"] != "L0_SUNROOM" or \
+                prop["position"] != position or prop["yawDeg"] != 0 or \
+                prop["scale"] != 1 or not prop["static"] or prop["collision"] != "none":
+            raise RuntimeError(f"canonical sunroom ceiling placement changed: {prop_id}")
+        if light["fixtureProp"] != prop_id or light["position"] != position or \
+                light["type"] != "spot" or light["direction"] != [0.0, -1.0, 0.0] or \
+                light["coneInnerDeg"] != 72.0 or light["coneOuterDeg"] != 140.0 or \
+                light["colorK"] != 3000 or light["bulbClass"] != "led" or \
+                light["intensityLm"] != 1200.0 or light["range"] != 6.62 or \
+                light["bakeLumensPerRadiantWatt"] != 100.0 or \
+                light["emissiveMaterialSlot"] != "FamilyCeilingDiffuser" or \
+                not light["bakedIntoLightmap"] or not light["defaultOn"]:
+            raise RuntimeError(f"sunroom ceiling optical linkage changed: {light_id}")
 
     arrival = (("L0_FOYER", "FOYER", (FOYER_POSITION,), 1100.0, 4.00, 13.5),
                ("L0_HALL", "HALL", HALL_POSITIONS, 900.0, 5.17, 18.75))

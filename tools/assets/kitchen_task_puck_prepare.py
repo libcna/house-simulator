@@ -25,6 +25,10 @@ MANIFEST = REPO / "assets-src" / "assets.manifest.json"
 ASSET_ID = "MODEL_FIXTURE_KITCHEN_TASK_PUCK"
 EXPECTED_MATERIALS = {"PUCK_METAL", "PuckDiffuser"}
 EXPECTED_Z = (-25.375, -25.175, -24.975, -24.775)
+SUNROOM_PUCKS = (
+    ([0.65, 2.1525, -27.48], [0.65, 2.1425, -27.48]),
+    ([1.65, 2.1525, -27.48], [1.65, 2.1425, -27.48]),
+)
 
 
 def sha256(path: Path) -> str:
@@ -103,6 +107,26 @@ def validate_world() -> None:
                 light["castsBlobShadow"] or not light["bakedIntoLightmap"] or \
                 light["defaultOn"]:
             raise RuntimeError(f"task-puck optical linkage changed: {light_id}")
+
+    for index, (prop_position, light_position) in enumerate(SUNROOM_PUCKS, 1):
+        prop_id = f"PROP_L0_SUNROOM_BAR_PUCK_{index}"
+        light_id = f"LIGHT_L0_SUNROOM_BAR_{index}"
+        prop = props[prop_id]
+        light = lights[light_id]
+        if prop["asset"] != ASSET_ID or prop["cell"] != "L0_SUNROOM" or \
+                prop["position"] != prop_position or prop["yawDeg"] != 0 or \
+                prop["scale"] != 1 or not prop["static"] or prop["collision"] != "none":
+            raise RuntimeError(f"canonical sunroom task-puck placement changed: {prop_id}")
+        if light["fixtureProp"] != prop_id or light["position"] != light_position or \
+                light["type"] != "spot" or light["direction"] != [0.0, -1.0, 0.0] or \
+                light["coneInnerDeg"] != 50.0 or light["coneOuterDeg"] != 100.0 or \
+                light["colorK"] != 3000 or light["bulbClass"] != "led" or \
+                light["intensityLm"] != 350.0 or light["range"] != 2.40 or \
+                light["bakeLumensPerRadiantWatt"] != 100.0 or \
+                light["emissiveMaterialSlot"] != "PuckDiffuser" or \
+                light["castsBlobShadow"] or not light["bakedIntoLightmap"] or \
+                not light["defaultOn"]:
+            raise RuntimeError(f"sunroom task-puck optical linkage changed: {light_id}")
 
 
 def main() -> int:

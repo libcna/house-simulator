@@ -1307,7 +1307,7 @@ Footprint: the main block only, interior X −12.70 … +8.70, Z −27.10 … �
 | `L0_BUTLERS` | Butler's pantry | −12.70 … −8.20 | −25.00 … −22.60 | 10.8 | 1 | 1 | 2 | Glass-front cabinets, counter, second sink, wine fridge |
 | `L0_PANTRY` | Walk-in pantry | −12.70 … −8.20 | −27.10 … −25.00 | 9.5 | 1 | 1 | 3 | Shelved dry goods, **chest freezer**, step stool |
 | `L0_KITCHEN` | Kitchen | −8.20 … +2.20 | −27.10 … −23.00 | 42.6 | 4 | 2 | 2 | Island, **large refrigerator**, range, ovens, dishwasher, sink |
-| `L0_SUNROOM` | Sunroom / breakfast room (rear extension) | −6.70 … +2.70 | −32.10 … −27.10 | 47.0 | 2 | 6 | 1 | Breakfast table, wicker chairs, plants, wet bar; five fixed panels and a slider to the terrace; roof = rear balcony |
+| `L0_SUNROOM` | Sunroom / breakfast room (rear extension) | −6.70 … +2.70 | −32.10 … −27.10 | 47.0 | 2 | 6 | 1 | Breakfast table, wicker chairs, plants and wet bar; the visible suite and physical main/task fixtures are established by `HOUSE-01068`; five fixed panels and a slider to the terrace; roof = rear balcony |
 | `L0_GARAGE` | Garage | +8.70 … +17.10 | −21.70 … −13.30 | 70.6 | 2 | 1 | 4 | **One car**, workbench, shelving, bins, bikes; sectional, side and house doors, plus the loft hatch |
 | `L0_GARAGE_LOFT` | Garage storage loft | +9.20 … +16.60 | −21.20 … −17.50 | 27.4 | 1 | — | 1 | Nested in `L0_GARAGE` at +2.90; reached by a ladder through a 0.90 m hatch (`HOUSE-00377`) |
 | `L0_PORCH` | Front porch (exterior cell) | −3.60 … +3.60 | −14.30 … −11.60 | 19.4 | 1 | 3 | 1 | Two rockers, a doormat, a wall lantern each side of the door |
@@ -2060,6 +2060,13 @@ triangles add only one opaque draw/state. The complete world is 696 chunks / 94 
 exterior hierarchy instances / 58.178427 MB: 651 opaque submissions plus 45 cutouts at 108 opaque
 state changes. Both props are collision-free static dressing; no aperture, portal, glass,
 lightmap, light, collision or navigation geometry changes.
+
+`HOUSE-01068` (2026-09-19) measures `L0_SUNROOM` at exactly **20 chunks / 19 materials**: seven
+shell/window roles, five breakfast-group roles, two additional wet-bar roles, two plant roles and
+three shared physical-fixture roles, with one exact Reach primitive-cap split. The complete world
+is 720 chunks / 116 props / 284 exterior hierarchy instances / 59.826849 MB. Both furniture GLBs
+retain separately bounded named collision proxies, while the plants and fixture bodies remain
+collision-free; collision is 1,654 shapes and the rebuilt pet graph is 893 nodes / 3,954 edges.
 
 `HOUSE-00930` (2026-09-16) isolates each weather-facing `D_ENTRY` leaf from ordinary hardwood
 joinery so the exterior hierarchy can retain it when its owning interior room is portal-culled.
@@ -3579,6 +3586,14 @@ it. This is the technique lightmapped games used for twenty years and it is a pe
 > fixed receiver and `EXT_BACKYARD` the only unbaked-detail spill cell. The selected atlas uses a
 > restrained 0.03 source calibration and measures 0.778957 peak / 0.000364078 mean, retaining a
 > local facade/terrace cue rather than lifting exposure across the rear elevation.
+>
+> `HOUSE-01068` replaces `L0_SUNROOM`'s four bare 700 lm ceiling points with linked approved
+> semi-flush fixtures and broad 72/140-degree 1,200 lm / 3,000 K spots. Two linked 350 lm /
+> 3,000 K pucks add a separately switched 50/100-degree bar-task group. Both manual groups start
+> on in the selected normal-play state and are owned by the room's existing two-gang plate. Their
+> selected 256-sample artificial atlases use the explicit 100 lm-per-radiant-watt offline
+> calibration and peak at 0.1715 (main) and 0.1988 (bar). Exterior dusk ownership, daylight,
+> exposure and runtime renderer paths do not change.
 
 ### 28.4 Daylight through windows
 
@@ -5872,6 +5887,19 @@ and preserve glass, daylight, portals, views and circulation. They deliberately 
 authored new-game open state: phase 45 still owns `blindFraction`, movement, light transmission and
 interaction. The preparation gate regenerates the GLB byte-for-byte and pins its hash, bounds,
 triangles, UV0, named components, material roles, support/wall origin and both world transforms.
+
+`HOUSE-01068` extends the same bounded data-owned approach into the visible sunroom without
+claiming completion of the dependency-blocked bulk furnishing task. One deterministic
+2.387063 x 0.945 x 2.387063 m / 4,324-triangle model composes a round oak table, four woven rattan
+chairs, cushions and table setting. A separate 2.43 x 2.64 x 0.675 m / 4,208-triangle fitted wet
+bar supplies shaker fronts, stone worktop, tiled upstand, sink/faucet, two dressed shelves and
+restrained drinkware. Two approved plant instances finish the corners. The breakfast and bar
+placements preserve the kitchen-to-terrace circulation line and the authored cat perch; their
+named proxies enter ordinary collision and navigation generation. Two new stock-`BasicEffect`
+rattan/cushion roles reuse approved project textures, while all remaining wood, stone, tile,
+metal, ceramic, glass and foliage roles are canonical. The preparation gate pins byte
+regeneration, hashes, dimensions, triangle counts, UV0, components, roles, proxies, origin/scale,
+support planes and all canonical placements.
 
 ---
 

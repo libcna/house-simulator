@@ -851,11 +851,12 @@
           "group": "LG_L0_SUNROOM_BAR",
           "image": "L0_SUNROOM_LM_LG_L0_SUNROOM_BAR.png",
           "lights": [
-            "LIGHT_L0_SUNROOM_BAR_1"
+            "LIGHT_L0_SUNROOM_BAR_1",
+            "LIGHT_L0_SUNROOM_BAR_2"
           ],
-          "mean": 8.558945194029241e-05,
-          "peak": 0.003468880197033286,
-          "scale": 0.003468880197033286
+          "mean": 0.002776932954222154,
+          "peak": 0.1987954080104828,
+          "scale": 0.1987954080104828
         },
         {
           "group": "LG_L0_SUNROOM_MAIN",
@@ -866,13 +867,13 @@
             "LIGHT_L0_SUNROOM_MAIN_3",
             "LIGHT_L0_SUNROOM_MAIN_4"
           ],
-          "mean": 0.009612445171979487,
-          "peak": 14.07666301727295,
-          "scale": 14.07666301727295
+          "mean": 0.02946064335469458,
+          "peak": 0.17145319283008575,
+          "scale": 0.17145319283008575
         }
       ],
-      "lumensPerRadiantWatt": 683.0,
-      "shellHash": "sha256:9ed4e61c767c817d510b79da3b7b5b0002ec27345bc7fdd215a15613bda2c5fe"
+      "lumensPerRadiantWatt": 100.0,
+      "shellHash": "sha256:b412177cdd91b09bd625188eb7eb02f9343460daf45839652cfacf6dc9985208"
     },
     {
       "cell": "L0_WC1",
@@ -2055,6 +2056,6 @@
   "rgba8Bytes": 8126464,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 1071842,
+  "sourceBytes": 1080963,
   "tool": "bake_house_lightmaps.py"
 }

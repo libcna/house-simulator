@@ -3620,8 +3620,8 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 203U)
-            << "HOUSE-01067 adds the family room's dedicated woven curtain finish";
+        EXPECT_EQ(contents.materials.size(), 205U)
+            << "HOUSE-01068 adds distinct sunroom rattan and cushion finishes";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
@@ -4056,7 +4056,8 @@ namespace
         // `HOUSE-00381` authored `B1` and `L0`, `HOUSE-00382` the three upper floors and
         // `HOUSE-00383` §53's exterior. §28.2 said 169 fixtures in 84 groups, and §13's own
         // per-room column never added up to that.
-        EXPECT_EQ(contents.lights.size(), 254U) << "HOUSE-00945 adds three physical driveway-border bollards";
+        EXPECT_EQ(contents.lights.size(), 255U)
+            << "HOUSE-01068 replaces five bare sunroom sources with six physical fixtures";
         std::map<cnahouse::util::Id, std::set<cnahouse::util::Id>> groupsIn;
         for (const world::Light& light : contents.lights)
         {
