@@ -1089,6 +1089,39 @@
       ]
     },
     {
+      "id": "MODEL_FOYER_ENTRY_RUG",
+      "category": "rug",
+      "sourceFile": "assets-src/Models/Furniture/Foyer/entry_rug.glb",
+      "sourceSha256": "86d19e990e3e74727027b25b9415ea0cc2824308a4d78af1ec58a42de865afc3",
+      "contentName": "Models/Furniture/Foyer/entry_rug",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Foyer flatwoven entry rug",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored broad flatwoven entry rug, with a light wool field and distinct central medallion, generated deterministically by tools/blender/foyer_hall_dressing.py for HOUSE-01071. Approved metre-scaled wool roles are bound by the canonical material table; no external mesh or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [2.12, 0.0275, 2.5],
+        "triangles": {"LOD0": 1776}
+      },
+      "materialMap": {
+        "ARRIVAL_RUNNER_BASE": "MAT_HALL_RUNNER_WOOL",
+        "ARRIVAL_RUNNER_BORDER": "MAT_HALL_RUNNER_BORDER_WOOL",
+        "ARRIVAL_ENTRY_LIGHT": "MAT_LIVING_RUG_WOOL"
+      },
+      "usedIn": ["L0_FOYER"]
+    },
+    {
       "id": "MODEL_FURNITURE_COFFEE_TABLE",
       "category": "occasional-table",
       "sourceFile": "assets-src/Models/Furniture/LivingRoom/coffee_table.glb",
@@ -1704,7 +1737,8 @@
       },
       "usedIn": [
         "L0_LIVING",
-        "L0_FAMILY"
+        "L0_FAMILY",
+        "L0_FOYER"
       ]
     },
     {

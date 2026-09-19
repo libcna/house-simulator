@@ -32,6 +32,9 @@ POSES = (
     # daytime appearance and the bounded pool on the door rather than a floating debug source.
     ("front-balcony-light", "0.00,3.65,-12.10,0.0,12.0"),
     ("entrance-foyer", "0.00,0.60,-14.90,0.0,0.0"),
+    # HOUSE-01071: the horizontal door camera sees only the leading edge of the entry rug.
+    # A fixed, gently downward eye-height view checks its whole footprint and door clearance.
+    ("foyer-entry-floor", "0.00,0.60,-15.00,0.0,-15.0"),
     # HOUSE-00940: the route camera sees the foyer/living pair only at the extreme left edge and
     # the living-room camera sees its unlit face. This measured foyer-side view keeps both raised
     # panels, the centre meeting stile and the matched passage/dummy hardware reviewable.

@@ -1,3 +1,51 @@
+# Visual-sprint handoff — 2026-09-19 (`HOUSE-01071` checkpoint)
+
+Branch `develop`, task-start HEAD `b6c241a` (`HOUSE-01070`). The owner-authorized
+capture cleanup already finished in `HOUSE-00043`/`HOUSE-00044`: review PNGs stay
+ignored locally, no capture objects are reachable in Git history, strict render
+references stay versioned, and no repeat rewrite or push is pending. The isolated
+`build/isolated-deps/FNA3D` build still uses `CNA_CNAEXT=OFF`; do not modify the
+shared `~/deps/FNA3D/MojoShader` checkout. Build with the prescribed shared ccache
+and no more than six CPU workers.
+
+**VISUAL-GATE-1 still FAILS.** Normal gameplay uses production materials; the coloured
+blockout remains an explicit diagnostic. Round 91 [day](visual-review/captures/house-01070-family-cabinet-day-r2)/
+[night](visual-review/captures/house-01070-family-cabinet-night-r2) showed a bare
+foyer arrival bay. Round 92 [day](visual-review/captures/house-01071-foyer-arrival-day-r1)/
+[night](visual-review/captures/house-01071-foyer-arrival-night-r1) contains 28
+deterministic built-game views, including new downward `foyer-entry-floor.png`.
+Full-size entrance, foyer floor, hall and neighboring room views were inspected.
+The project-authored broad wool rug and one reused, approved potted plant make the
+first interior bay visibly domestic; front-door leaf, threshold and side clearances
+are measured. The rug uses existing metre-scaled wool materials and a medallion
+distinct from the hall runner. Whole-world unculled draw calls rise 728 → 733, with
+one new alpha-test foliage batch; only the measured foyer chunk exception changes.
+The narrow `blockout-l0-hall` golden update was inspected as a 2.8355% foyer-only
+image difference, not blindly regenerated. No other room, light, exterior source
+or production render path changed.
+
+The established L0 route now has production finishes and primary furnishing in
+foyer, hall, living, family, kitchen and dining. Foyer arrival density has improved;
+none of these rooms should yet be described as final. The largest remaining visible
+breadth defects are the dark/sparse kitchen west/north recess and the very dark
+dining wall/table, followed by flat exterior through family glazing and weak natural
+living daylight. A kitchen end-cabinet probe and moving existing kitchen lights west
+were rejected because normal-route screenshots barely changed; do not revive them
+without a new full-size comparison. Exterior front is sufficient for now. A real
+road→gate→foyer→dining first-person walk remains blocked because the phase-14 `E`
+interaction dispatcher does not yet actuate the pedestrian gate. Do not claim that
+walk was completed.
+
+The new asset's deterministic validator, 31-stage content graph, full six-core build,
+1,410/1,410 unit and 137/137 integration tests plus content-current passed. All 49
+active software render cases plus content-current, all 18 culled/unculled pose pairs
+and complete static/strict-XNA checks (323 translation units) passed; eight
+capture-only render generators remain disabled. Next highest-value visual work:
+solve kitchen and dining room-scale darkness/composition across matched day and
+night route poses, without another tiny lamp or exterior-detail polish round.
+
+---
+
 # Visual-sprint handoff — 2026-09-19 (`HOUSE-01070` checkpoint)
 
 Branch `develop`, task-start HEAD `34bd981` (`HOUSE-01295`). This section belongs to the

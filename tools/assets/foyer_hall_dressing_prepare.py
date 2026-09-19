@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate and validate HOUSE-01064's foyer/hall arrival dressing."""
+"""Regenerate and validate HOUSE-01064/01071's foyer/hall arrival dressing."""
 
 from __future__ import annotations
 
@@ -29,12 +29,14 @@ ASSETS = {
     "console": ("MODEL_FOYER_CONSOLE_DRESSING", FOYER_TARGET / "console_dressing.glb",
                 "console-decor"),
     "runner": ("MODEL_HALL_RUNNER", HALL_TARGET / "hall_runner.glb", "rug"),
+    "entry": ("MODEL_FOYER_ENTRY_RUG", FOYER_TARGET / "entry_rug.glb", "rug"),
     "art": ("MODEL_HALL_PORTAL_ART_PAIR", HALL_TARGET / "portal_art_pair.glb", "picture"),
 }
 EXPECTED_MATERIALS = {
     "console": {"ARRIVAL_WOOD", "ARRIVAL_BRASS", "ARRIVAL_CANVAS", "ARRIVAL_CREAM",
                 "ARRIVAL_CERAMIC"},
     "runner": {"ARRIVAL_RUNNER_BASE", "ARRIVAL_RUNNER_BORDER"},
+    "entry": {"ARRIVAL_RUNNER_BASE", "ARRIVAL_RUNNER_BORDER", "ARRIVAL_ENTRY_LIGHT"},
     "art": {"ARRIVAL_WOOD", "ARRIVAL_BRASS", "ARRIVAL_CANVAS", "ARRIVAL_CREAM"},
 }
 EXPECTED_MAPS = {
@@ -49,6 +51,11 @@ EXPECTED_MAPS = {
         "ARRIVAL_RUNNER_BASE": "MAT_HALL_RUNNER_WOOL",
         "ARRIVAL_RUNNER_BORDER": "MAT_HALL_RUNNER_BORDER_WOOL",
     },
+    "entry": {
+        "ARRIVAL_RUNNER_BASE": "MAT_HALL_RUNNER_WOOL",
+        "ARRIVAL_RUNNER_BORDER": "MAT_HALL_RUNNER_BORDER_WOOL",
+        "ARRIVAL_ENTRY_LIGHT": "MAT_LIVING_RUG_WOOL",
+    },
     "art": {
         "ARRIVAL_WOOD": "MAT_FURNITURE_PIANO_WOOD",
         "ARRIVAL_BRASS": "MAT_FURNITURE_PIANO_BRASS",
@@ -59,6 +66,8 @@ EXPECTED_MAPS = {
 REQUIRED_COMPONENTS = {
     "console": ("vase_body", "branch_leaf", "photo_field", "key_tray", "keys"),
     "runner": ("runner_body", "runner_long_border", "runner_diamond", "runner_fringe"),
+    "entry": ("entry_rug_body", "entry_rug_field", "entry_centre_medallion",
+              "entry_centre_inlay", "entry_corner_mark"),
     "art": ("relief_back", "relief_canvas", "relief_horizon", "relief_mark"),
 }
 
@@ -131,6 +140,8 @@ def validate_world(rows: dict[str, dict]) -> None:
         "PROP_FOYER_CONSOLE_DRESSING": (ASSETS["console"][0], "L0_FOYER",
                                           [1.39, 1.207883, -14.52], 0),
         "PROP_HALL_RUNNER": (ASSETS["runner"][0], "L0_HALL", [0.0, 0.602, -20.65], 0),
+        "PROP_FOYER_ENTRY_RUG": (ASSETS["entry"][0], "L0_FOYER",
+                                   [0.0, 0.602, -16.55], 0),
         "PROP_HALL_PORTAL_ART_PAIR": (ASSETS["art"][0], "L0_HALL",
                                        [0.0, 1.90, -22.98], 180),
     }
@@ -158,6 +169,27 @@ def validate_world(rows: dict[str, dict]) -> None:
     side_clearance = ((hall_box["x"][1] - hall_box["x"][0]) - width) * 0.5
     if abs(runner["position"][1] - 0.602) > 0.000001 or side_clearance < 1.20:
         raise RuntimeError("hall runner no longer retains the measured circulation clearance")
+    entry = props["PROP_FOYER_ENTRY_RUG"]
+    foyer_box = cells["L0_FOYER"]["boxes"][0]
+    entry_width, _, entry_length = rows[ASSETS["entry"][0]]["geometry"]["boundsMetres"]
+    front_clearance = foyer_box["z"][1] - (entry["position"][2] + entry_length * 0.5)
+    hall_clearance = (entry["position"][2] - entry_length * 0.5) - foyer_box["z"][0]
+    side_clearance = ((foyer_box["x"][1] - foyer_box["x"][0]) - entry_width) * 0.5
+    if (entry_width < 2.0 or entry_length < 2.4 or front_clearance < 0.96 or
+            hall_clearance < 0.45 or side_clearance < 1.10):
+        raise RuntimeError("foyer entry rug blocks door swing, hall or side circulation")
+    plant = props["PROP_FOYER_ARRIVAL_PLANT"]
+    if (plant["asset"] != "MODEL_FURNITURE_POTTED_PLANT_A" or
+            plant["cell"] != "L0_FOYER" or plant["position"] != [-1.78, 0.6, -17.84] or
+            plant["yawDeg"] != 35 or plant["scale"] != 1.2 or
+            plant["collision"] != "none"):
+        raise RuntimeError("foyer arrival plant placement changed")
+    plant_width = rows["MODEL_FURNITURE_POTTED_PLANT_A"]["geometry"]["boundsMetres"][0]
+    plant_depth = rows["MODEL_FURNITURE_POTTED_PLANT_A"]["geometry"]["boundsMetres"][2]
+    if (plant["position"][0] - plant_width * plant["scale"] * 0.5 < -2.20 or
+            plant["position"][2] - plant_depth * plant["scale"] * 0.5 < -18.30 or
+            plant["position"][2] + plant_depth * plant["scale"] * 0.5 > -17.30):
+        raise RuntimeError("foyer arrival plant intersects the living or hall opening")
     art_width = rows[ASSETS["art"][0]]["geometry"]["boundsMetres"][0]
     if art_width < 3.50 or art_width > 4.10:
         raise RuntimeError("portal relief no longer spans both flanks as one composed asset")

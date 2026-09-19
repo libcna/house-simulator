@@ -165,7 +165,7 @@ CHUNK_BUDGET_EXCEPTIONS = {
                   "adds one exterior-visible hardware role for the measured centre pull. "
                   "HOUSE-00948's physical surround reuses the existing white exterior-frame "
                   "finish, so the measured ceiling remains unchanged"),
-    "L0_FOYER": (20,
+    "L0_FOYER": (25,
                   "HOUSE-01038's measured entrance: six shell finishes and an outside window "
                   "frame plus two source-specific CC0 furniture albedos. Keeping the carved "
                   "console wood and upholstered chair separate avoids repainting either as trim; "
@@ -173,7 +173,11 @@ CHUNK_BUDGET_EXCEPTIONS = {
                   "HOUSE-00932 adds distinct raised-panel hardwood and bronze hardware groups; "
                   "HOUSE-01064 reuses four canonical formal-room finishes and adds one ceramic "
                   "role for the supported console vignette; HOUSE-01290 adds the shared bronze, "
-                  "opal-glass and independently switched optical-disc fixture roles"),
+                  "opal-glass and independently switched optical-disc fixture roles; "
+                  "HOUSE-01071 adds three measured wool roles for a broad, contrasting entry "
+                  "rug rather than recolouring its dark field, warm border and light centre; "
+                  "the existing houseplant adds its two already approved leaf/pot finish roles "
+                  "to this cell's measured resident set"),
     "L0_HALL": (15,
                 "six existing shell/door finish groups plus HOUSE-01064's four canonical relief "
                 "finishes and two distinct woven-runner roles. The paired relief is one end-wall "

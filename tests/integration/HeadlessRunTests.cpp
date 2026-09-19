@@ -80,12 +80,12 @@ namespace
         const auto& list = game.RenderListForTesting();
         ASSERT_GT(list.Size(), 0U) << "the frame drew from an empty list";
         EXPECT_TRUE(list.IsSorted()) << "the pass read its slice, which is what sorts the list";
-        // HOUSE-01070's family cabinet adds brass and ceramic roles to the existing walnut,
-        // bringing the measured unculled house to 728 calls over FOUR frames: a list not emptied
+        // HOUSE-01071's foyer entry rug and plant add three textile and two leaf/pot roles,
+        // bringing the measured unculled house to 733 calls over FOUR frames: a list not emptied
         // between them would be four houses long and still draw a correct-looking picture. This
-        // diagnostic remains far below §71.2's 1,400-call worst-case envelope; the new cabinet
-        // retains its truthful close-range materials instead of flattening them into wall paint.
-        EXPECT_LE(list.DrawCalls(), 728) << "the list was not cleared between frames";
+        // diagnostic remains far below §71.2's 1,400-call worst-case envelope; the materials
+        // stay truthful instead of being flattened into a shell finish to satisfy the snapshot.
+        EXPECT_LE(list.DrawCalls(), 733) << "the list was not cleared between frames";
 
         const cnahouse::debug::Counter* chunks = game.CountersForTesting().Find("static.chunks");
         const cnahouse::debug::Counter* states = game.CountersForTesting().Find("static.stateChanges");
@@ -123,10 +123,10 @@ namespace
             previousOpaque = &item;
             ++opaque;
         }
-        // HOUSE-01068 adds one cell-scoped sunroom plant-foliage batch: 47 is the measured
-        // world-wide alpha-test slice, including the formal sofa fringe, indoor plants and the
-        // existing exterior vegetation. Repeated plants remain sub-ranges of shared draws.
-        EXPECT_EQ(cutouts, 47U) << "the formal sofa fringe, indoor plant leaves and exterior foliage batches";
+        // HOUSE-01071 adds one foyer-scoped plant-foliage batch: 48 is the measured world-wide
+        // alpha-test slice, including the formal sofa fringe, indoor plants and exterior trees.
+        // Repeated plants remain sub-ranges of shared draws within each owner cell.
+        EXPECT_EQ(cutouts, 48U) << "the formal sofa fringe, indoor plant leaves and exterior foliage batches";
         EXPECT_EQ(opaque + cutouts, list.Size()) << "unexpected pass items entered the blockout list";
         // Every opaque item was drawn: nothing in that slice named a chunk the runtime could
         // not find. Alpha-tested leaves belong to AlphaTestPass, not this debug opaque pass.

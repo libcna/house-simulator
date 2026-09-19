@@ -4025,3 +4025,44 @@ unreachable 222 mm wall/cabinet gap while its normal walking tour remains clean.
 Remaining: the view beyond the family glass is still too flat, the kitchen far recess still
 looks dark/empty, dining's close wall lacks room-scale bounce, and foyer/hall arrival bays
 remain sparse. No lightmap or strict render golden changed. **VISUAL-GATE-1 still fails.**
+
+## Round 92 — ground the foyer arrival bay
+
+Commit: `HOUSE-01071` checkpoint (`2026-09-19`). Before: Round 91's 27-camera
+[day](captures/house-01070-family-cabinet-day-r2) and
+[night](captures/house-01070-family-cabinet-night-r2) sets. After: the 28-view fixed
+[day](captures/house-01071-foyer-arrival-day-r1) and
+[night](captures/house-01071-foyer-arrival-night-r1) built-game sets, adding a fixed
+`foyer-entry-floor.png` downward view. The day floor pose was captured separately with
+the same deterministic camera/time settings after it joined the standard review set.
+The matched normal-height entrance, downward floor, hall, exterior, living, family,
+kitchen and dining views were inspected at full size.
+
+Ranked defects before this checkpoint:
+
+1. The foyer's first two-and-a-half-metre stone arrival bay was empty in the ordinary
+   entrance view, despite the finished hall runner, nearby chair and console.
+2. Kitchen's west/north recess is dark and sparse, and dining's close wall and table
+   remain substantially too dark in both day and night route views.
+3. The family picture window looks onto a flat exterior; the pedestrian gate still
+   lacks an interaction dispatcher for a genuine continuous first-person walk.
+
+Fixed: a project-authored 2.12 × 2.50 m flatwoven wool entry rug with a distinct
+light-centred medallion now anchors the foyer stone bay; a single already vetted,
+provenanced potted plant balances the existing chair across the door sightline. The
+rug clears the 0.96 m door leaf by 1.00 m, the hall threshold by 0.50 m and each side
+by 1.14 m. In the normal entrance view the rug is visible at the lower frame edge;
+the new downward view confirms its complete footprint, border, scale and no floating
+or collision with the chair or doorway. Its wool finish differs from the hall runner
+without inventing a new unlicensed texture. Three rug material roles and two plant
+roles raise only the measured foyer chunk exception 20 → 25 (final resident 27);
+world-wide unculled calls rise 728 → 733, alpha-test batches 47 → 48. The inspected
+`blockout-l0-hall` strict-reference update changes 6,533/230,400 pixels (2.8355%),
+confined to the entry rug through the hall portal and a tiny plant edge; the other
+strict references remain unchanged.
+
+Two exploratory kitchen alternatives were deliberately rejected before this task:
+a short end cabinet was hidden by the range from normal route poses, and moving the
+existing main lights west barely changed the dark recess. Neither was promoted or
+committed. The kitchen/dining darkness is therefore still the highest-impact breadth
+defect, not a problem claimed fixed by this foyer checkpoint. **VISUAL-GATE-1 fails.**

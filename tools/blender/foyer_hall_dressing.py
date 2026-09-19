@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Deterministically author HOUSE-01064's foyer/hall arrival dressing.
+"""Deterministically author HOUSE-01064/01071's foyer/hall arrival dressing.
 
-The three assets are intentionally bounded: a supported console vignette, a long floor runner,
-and one paired relief whose geometry occupies only the wall flanks around the kitchen portal.
+The assets are intentionally bounded: a supported console vignette, a long hall runner, a
+distinct broad foyer entry rug, and paired relief on the kitchen-portal wall flanks.
 Wall-art local +Z is the wall plane and -Z faces the viewer; floor/table assets use Y=0 as their
 support plane. Every visible primitive has metre-scaled UV0 and a canonical material slot.
 
 Run with: blender --background --python tools/blender/foyer_hall_dressing.py --
-          --asset console|runner|art --out PATH
+          --asset console|runner|entry|art --out PATH
 """
 
 from __future__ import annotations
@@ -29,6 +29,7 @@ COLOURS = {
     "ARRIVAL_CERAMIC": (0.44, 0.52, 0.48, 1.0),
     "ARRIVAL_RUNNER_BASE": (0.34, 0.22, 0.18, 1.0),
     "ARRIVAL_RUNNER_BORDER": (0.68, 0.50, 0.31, 1.0),
+    "ARRIVAL_ENTRY_LIGHT": (0.78, 0.68, 0.52, 1.0),
 }
 MATERIALS = {}
 COUNTER = 0
@@ -260,6 +261,30 @@ def author_runner():
                 "ARRIVAL_RUNNER_BORDER", bevel=0.005)
 
 
+def author_entry():
+    """A broad 2.12 × 2.50 m flatwoven arrival rug, not a repeated hall runner."""
+    box("entry_rug_body", (0.0, 0.006, 0.0), (2.12, 0.012, 2.50),
+        "ARRIVAL_RUNNER_BASE", bevel=0.005)
+    box("entry_rug_field", (0.0, 0.013, 0.0), (1.88, 0.005, 2.26),
+        "ARRIVAL_ENTRY_LIGHT", bevel=0.004)
+    for side in (-1, 1):
+        box(f"entry_long_border_{side}", (side * 0.87, 0.018, 0.0),
+            (0.055, 0.007, 2.10), "ARRIVAL_RUNNER_BORDER", bevel=0.003)
+        box(f"entry_end_border_{side}", (0.0, 0.018, side * 1.055),
+            (1.74, 0.007, 0.055), "ARRIVAL_RUNNER_BORDER", bevel=0.003)
+    # A centred medallion and four corner marks distinguish the foyer's broader
+    # domestic composition from the hall's repeated five-diamond cadence.
+    box("entry_centre_medallion", (0.0, 0.020, 0.0), (0.62, 0.009, 0.62),
+        "ARRIVAL_RUNNER_BASE", bevel=0.023, yaw_deg=45, bevel_segments=3)
+    box("entry_centre_inlay", (0.0, 0.025, 0.0), (0.27, 0.005, 0.27),
+        "ARRIVAL_RUNNER_BORDER", bevel=0.012, yaw_deg=45, bevel_segments=3)
+    for x in (-0.61, 0.61):
+        for z in (-0.80, 0.80):
+            box(f"entry_corner_mark_{x}_{z}", (x, 0.019, z),
+                (0.18, 0.007, 0.18), "ARRIVAL_RUNNER_BASE",
+                bevel=0.009, yaw_deg=45, bevel_segments=3)
+
+
 def one_relief(side: int):
     centre = side * 1.58
     box(f"relief_back_{side}", (centre, 0.0, -0.025), (0.76, 1.05, 0.050),
@@ -294,14 +319,15 @@ def main():
     global PREFIX
     arguments = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--asset", choices=("console", "runner", "art"), required=True)
+    parser.add_argument("--asset", choices=("console", "runner", "entry", "art"), required=True)
     parser.add_argument("--out", type=Path, required=True)
     options = parser.parse_args(arguments)
 
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.object.delete(use_global=False)
     PREFIX = f"arrival_dressing_{options.asset}"
-    {"console": author_console, "runner": author_runner, "art": author_art}[options.asset]()
+    {"console": author_console, "runner": author_runner,
+     "entry": author_entry, "art": author_art}[options.asset]()
     options.out.parent.mkdir(parents=True, exist_ok=True)
     bpy.ops.export_scene.gltf(filepath=str(options.out), export_format="GLB",
                               export_yup=True, export_apply=True,

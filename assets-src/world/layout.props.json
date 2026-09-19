@@ -41,6 +41,32 @@
       "interactable": null
     },
     {
+      "id": "PROP_FOYER_ENTRY_RUG",
+      "asset": "MODEL_FOYER_ENTRY_RUG",
+      "cell": "L0_FOYER",
+      "position": [0.0, 0.602, -16.55],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_FOYER_ARRIVAL_PLANT",
+      "asset": "MODEL_FURNITURE_POTTED_PLANT_A",
+      "cell": "L0_FOYER",
+      "position": [-1.78, 0.6, -17.84],
+      "yawDeg": 35,
+      "scale": 1.2,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
       "id": "PROP_HALL_RUNNER",
       "asset": "MODEL_HALL_RUNNER",
       "cell": "L0_HALL",

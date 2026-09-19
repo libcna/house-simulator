@@ -15838,6 +15838,41 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             remain green. Unit 1,410/1,410 and integration 137/137 plus content-current
             pass after the exact measured 728-draw snapshot was advanced. The six-core
             static/strict-XNA gate is green; `CNA_CNAEXT=OFF` and isolated FNA3D remain.
+- [x] HOUSE-01071 — Ground the foyer arrival with a broad woven entry rug and one vetted plant
+      dep: HOUSE-00907, HOUSE-01038, HOUSE-01064 · sys: world/content · plat: TOOL · pri: MUST
+      note: Round 91's whole-route views show the first room still has a broad bare stone
+            arrival floor despite its console and chair. A floor-scale original rug, not a
+            duplicate hall runner, plus one already approved plant can give the entry an
+            obvious domestic composition while the dependency-blocked full `HOUSE-00986`
+            task remains open. An initially tested narrow kitchen cabinet and a westward
+            light relocation were rejected when matched ordinary views barely changed;
+            neither candidate was committed or made a new HOUSE task.
+      accept: author a deterministic close-range, physically textured foyer rug with a
+              different pattern from the hall runner; keep the front-door swing, hall opening,
+              living-room leaf, chair and walking clearances measurable. Reuse one fully
+              provenanced plant without an artificial direct-repeat composition. Inspect
+              the complete fixed L0 day/night route plus a downward entry-floor view from
+              the built game; advance only proven intended strict references. Pass content,
+              asset, stable-ID, budget, licence, unit, integration, render, culling and
+              strict-XNA gates with at most six build workers. Leave `HOUSE-00986` open.
+      done: A deterministic 1,776-triangle, 2.12 × 2.50 m flatwoven rug uses three
+            approved metre-scaled wool finishes and a medallion distinct from the hall
+            runner. One already provenanced potted plant balances the existing chair.
+            The rug clears the 0.96 m front leaf by 1.00 m, the hall threshold by
+            0.50 m and each side by 1.14 m. The foyer-only material exception rises
+            20 → 25 (final resident 27); unculled world calls 728 → 733. Fixed
+            28-camera day/night built-game reviews show the changed arrival bay at
+            ordinary eye height and the complete rug in the new downward floor view.
+            `HOUSE-00986` and VISUAL-GATE-1 correctly remain open.
+      verified: The four-asset deterministic validator, 31-stage content pipeline,
+            licence/budget/stable-ID gates, six-worker build, 1,410/1,410 unit and
+            137/137 integration cases plus content-current pass. All 49 active render
+            cases pass after the sole inspected `blockout-l0-hall` reference advance;
+            its 6,533/230,400 changed pixels (2.8355%) are confined to the foyer
+            entry rug and a small plant edge seen from the hall. All 18
+            culled/unculled comparisons and complete static/strict-XNA checks pass,
+            including 323 translation units. `CNA_CNAEXT=OFF` and the isolated
+            FNA3D/MojoShader build remain intact; no shared dependency was edited.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -20534,6 +20569,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-19 | `HOUSE-01071` | **New task, next free phase-13 id.** Add a measured foyer floor-scale furnishing and vetted greenery without claiming completion of the dependency-blocked full `HOUSE-00986`. | Round 91's complete route shows the entrance's still-bare stone arrival bay. Two kitchen-corner candidates were first rejected after built-game captures because they barely changed normal views; the foyer rug/plant changes a plainly visible route-space while preserving the complete furnishing DAG. |
 | 2026-09-19 | `HOUSE-01070` | **New task, next free phase-13 id.** Reuse one vetted cabinet as a measured family picture-window storage composition, leaving the bulk-acquisition-dependent full `HOUSE-00992` task open. | Round 90's whole-route cameras show an empty lower window wall even after family lighting is corrected. A physically fitting, approved asset can improve room-scale coverage now without spending another round on intensity or a narrow exterior detail; matched views must reject it if the reuse looks artificial. |
 | 2026-09-19 | `HOUSE-01295` | **New task, next free phase-16 id.** Recalibrate only the four existing family main practicals with the receiver's established 100 lm/radiant-watt baseline. | Round 89's full-route review finds a furnished but dark `L0_FAMILY` from both window and kitchen sides. The current 4,800 lm installed circuit bakes to only 0.04538 mean/0.22923 peak. Its already physical fixtures and selected-cell pipeline can improve the whole connected room without another local prop, global exposure or unrelated renderer work; preserve the independent media/reading groups. |
 | 2026-09-19 | `HOUSE-01294` | **New task, next free phase-16 id.** Recalibrate only the existing physical formal-living main circuit and its selected receiver atlas. | Round 88's 27-camera day/night route review shows the room has its primary furniture and four real default-on ceiling fixtures, but its wall/floor remain much darker than the connected hall. The physical source-to-atlas energy, not another hero prop or exterior detail, is the current room-scale visual defect. A local rebake can test and correct it without a renderer or global-exposure change. |
