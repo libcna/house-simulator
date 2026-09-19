@@ -14328,6 +14328,44 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
                 0.0558% worst (`l0-sunroom`). `tools/ci/run_checks.sh --staged` is green and the
                 separate strict-XNA gate reports all 323 translation units clean; compilation and
                 heavy work stayed on CPU 0-5 / at most six workers.
+
+- [x] HOUSE-00949 — Replace both opaque patio-slider shell fallbacks with glazed aluminium units
+      dep: HOUSE-00377, HOUSE-00456, HOUSE-00486, HOUSE-00907, HOUSE-00924, HOUSE-00948, HOUSE-01068 · sys: world/content/materials · plat: ALL · pri: MUST
+      note: (2026-09-19) Round 83 shows the sunroom's broad closed rear leaf as a pale opaque
+            slab, directly contradicting its authored glass portal and the furnished view onto
+            the terrace. The canonical second slider at the master balcony shares the same
+            generator defect. Correct the opening-type grammar, not room-specific runtime code.
+      accept: both `D_SLIDER` rows explicitly select approved clear glazing and validate the
+              aluminium/non-solid/hingeless contract; deterministic shell generation emits a
+              full-depth perimeter, two shallow overlapping sash tracks, two 8 mm panes and
+              two-sided pull hardware, with no opaque body; the exact aluminium role enters
+              the exterior hierarchy without leaking room walls; authored portal, aperture,
+              collision, navigation, future animated leaf envelope and receiver UV2 stay intact;
+              measured chunk exceptions and deterministic manifests/content remain current;
+              matched 26-camera day/night sets are inspected before advancing only directly
+              affected strict references; all render/culling/XNA gates pass at six CPUs or fewer
+      review: Round 84's before/after sunroom-breakfast and backyard-to-house pairs and both
+              complete contact sheets were inspected. The opaque 2.36 m slab is replaced by a
+              readable two-panel glazed opening, with terrace/room seen through it by day and
+              restrained dark glass at night. The final direct breakfast view changes 138,826
+              day / 138,658 night pixels above two channel levels; backyard-to-house changes
+              14,864 / 15,157. Rear-terrace stays nearly identical (158 / 150). Seven references with
+              actual line of sight were individually inspected old/new/diff and advanced.
+              `VISUAL-GATE-1` still fails on broader route/facade/night-depth defects.
+      verified: Both shell and world-validation mutation selftests pass. The generated sunroom
+                has 126 slider-frame faces and shares the existing exterior-glass chunk; its
+                budget is now 21 chunks, and the master room is eight. The complete world has
+                722 chunks / 96 cells / 116 props / 286 exterior instances / 59.850882 MB.
+                Two selected receiver unwraps keep 350 receiver faces unchanged. The 31-stage
+                content graph, 99-file shell manifest/material checks and the shell-realism gate
+                pass; the latter now verifies both broad panes plus the centre stile and rejects
+                either missing piece. All 1,409 unit / 135 integration / 48 active render cases
+                pass, with eight capture-only generators disabled. All eighteen culling pairs
+                remain under 0.2%, worst 0.0558% (`l0-sunroom`). The full project static gates
+                and all 323 strict-XNA translation units pass. The separate compiled budget
+                enforcement reports pre-existing `audio-core` 30.05/30 MB; the committed
+                source-only budget gate is green and this task adds no audio. Compilation and
+                heavy work stayed on CPU 0-5 / at most six workers.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -20149,6 +20187,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-19 | `HOUSE-00949` | **New task, next free phase-12 id.** Make both authored sliders real glazed aluminium assemblies instead of the shell generator's opaque generic-door fallback. | Round 83's direct sunroom view ranks the broad pale rear slab as the largest newly exposed defect, and the master balcony uses the same type. The existing shell grammar, approved clear glass/aluminium finishes and exact exterior-fenestration role can correct both without a runtime room branch, new renderer, downloaded asset or simulation change. |
 | 2026-09-19 | `HOUSE-01068` | **New task, next free phase-13 id.** Add the exact visible breakfast/bar composition and physical sunroom lighting as a bounded checkpoint while leaving the bulk-acquisition-dependent full `HOUSE-00993` room task open. | Round 82 ranks the empty day/black night sunroom behind the newly lit terrace as the largest continuous-route defect. The approved project-authored prop, stock-XNA material, linked-fixture and selected-atlas paths can correct it now without falsifying `HOUSE-00986`/`HOUSE-00993`, downloading an asset, changing exposure or introducing a renderer branch. |
 | 2026-09-19 | `HOUSE-01291` | **New task, next free phase-16 id.** Reuse the approved wall lantern for the two existing rear-terrace sources, bind one selected adjacent receiver and make the group dusk-owned; remove its old wall switch and add a validator against mixed automatic/manual ownership. | Round 81's fixed night views rank the black terrace as the largest visible defect. Source inspection finds two unphysical points with neither linked fixtures nor useful receiver contribution, plus an unwired wall plate whose saved state would be overwritten every frame by dusk automation. §35.3 already forbids one group having two control owners, so retaining both is not a harmless future interaction. The bounded lantern, cross-cell receiver and spill paths are already approved; this correction needs no renderer, exposure, collision, navigation or licence change. |
 | 2026-09-19 | `HOUSE-01067` | **New task, next free phase-13 id.** Add one reusable measured open-curtain treatment to both family-room picture windows while leaving later interactive blinds and the full room-furnishing task open. | Round 79's complete day/night sheets expose the two broad bare apertures as the largest immediately actionable interior defect. A deterministic static treatment can reuse the approved fabric/steel and prop paths, preserve the glass, light, portals, view and circulation, and add domestic scale without a download, renderer branch, collision/nav change or false completion of `HOUSE-00992`/phase 45. |

@@ -49,7 +49,7 @@
     "L0_PORCH.glb": "sha256:f2bae036f00d94c91854ca48cd67a3f69604aa2b9bf174395ced6b545e11d2f8",
     "L0_STAIR_MAIN.glb": "sha256:51fb7f4671e3698d88e8f8700315af1eb9dc05144df4c4b67f24ad1b1224b514",
     "L0_STOR.glb": "sha256:c39f7785963330337ad319dce96d76bacce7c38b2efa8a739ae7b4558f7d4354",
-    "L0_SUNROOM.glb": "sha256:478705513fa1126762dff5bae4c6fd1358bcbfa7b3127c8f5abfb1429de42037",
+    "L0_SUNROOM.glb": "sha256:bbf3822e9f80cd8e23e3d87f4657890053b081c4132865a66b67e7cb8bc8d10b",
     "L0_WC1.glb": "sha256:25c79a7751f69cb5128c14337851b2b68f5718062c9d7f34ddaabad3cc4e0eae",
     "L0_WC2.glb": "sha256:1f8e7e976a523d22cac43329ec8a450d4523463196b629aec575fc82df530a95",
     "L1_BALCONY_FRONT.glb": "sha256:ca753c13df3715b14be5ba29ddd736f669bfccd8765b234ec31180bdf80ffc1a",
@@ -67,7 +67,7 @@
     "L1_LANDING.glb": "sha256:e7bd4ec9d7a82796b75083627539cbc9d77907d7e95fbd5bcff183d02e990c8b",
     "L1_LINEN.glb": "sha256:c9f5e1471bb8f24ae1a5479fe568b268d22160556365a0bbd420e2d58831d178",
     "L1_MASTER_BATH.glb": "sha256:904f84d0f0e1892f320e475de1041bb3d288a93800eb52c74cd1190fe7ab56f7",
-    "L1_MASTER_BED.glb": "sha256:1f89554859fd77fdaef2d9d56d342116b6665d0ccbec213cd53db714b080e737",
+    "L1_MASTER_BED.glb": "sha256:ae5644d816efa112e5014b0779b20bb130ae962505b05c3ec5d2e2a9a85ef85d",
     "L1_MASTER_CLOSET.glb": "sha256:e56c2e8625551bf871a6f841aa82345f4052e25e4fc7bfc9b346ee0398bdc30e",
     "L1_STAIR_MAIN.glb": "sha256:390c02060068bd71dba6a057d4a6dfc7da8c20098d8d4477a472f10c4a9a64f8",
     "L1_STOR.glb": "sha256:8b6883d8a8ae61cfb9b80b56f9b41cbdf6dea7e46634625410d5bba1a436e694",
@@ -101,7 +101,7 @@
     "ROOF_MAIN.glb": "sha256:a31c23077a6e78e4fbb780102b8aae8e4dcf0e4293a53773582b2fa623fe70c9"
   },
   "generator": "tools/blender/house_shell_gen.py",
-  "generatorVersion": "sha256:74d86c2bf78a7de44d5e258a71e79e91a803fa4f54990e77a2da06db6965c763",
+  "generatorVersion": "sha256:7df3c2eb7f3833ff8849126706d3d206e77aded3786da9341fc0b8433f059a4a",
   "origin": {
     "attribution": "",
     "kind": "generated",

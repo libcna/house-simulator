@@ -1467,11 +1467,11 @@ def rule_7_openings(world: World) -> list[Problem]:
                 7, FILE_OF["openings"], f"openings/{index}",
                 f"opening {opening.get('id')} must author sectionalStyle, glazingMaterial and "
                 "hardwareMaterial together"))
-        if glazing is not None and sectional is None:
+        if glazing is not None and sectional is None and opening.get("type") != "D_SLIDER":
             problems.append(Problem(
                 7, FILE_OF["openings"], f"openings/{index}/glazingMaterial",
                 f"opening {opening.get('id')} supplies glazingMaterial without a generated "
-                "sectionalStyle"))
+                "sectionalStyle or D_SLIDER unit"))
         if sectional is not None and (
                 opening.get("kind") != "door"
                 or opening.get("type") != "D_GARAGE"
@@ -1484,6 +1484,20 @@ def rule_7_openings(world: World) -> list[Problem]:
                 f"opening {opening.get('id')} assigns generated sectional joinery to unsupported "
                 f"type/material/glazing/hardware {opening.get('type')!r}/"
                 f"{opening.get('material')!r}/{glazing!r}/{hardware!r}"))
+        if opening.get("type") == "D_SLIDER" and (
+                opening.get("kind") != "door"
+                or opening.get("material") != "MAT_FRAME_ALUMINIUM"
+                or glazing not in ("MAT_GLASS_CLEAR", "MAT_GLASS_OBSCURED")
+                or opening.get("solid") is not False
+                or opening.get("hinge") is not None
+                or opening.get("swing") is not None):
+            problems.append(Problem(
+                7, FILE_OF["openings"], f"openings/{index}",
+                f"opening {opening.get('id')} must author a non-solid, unhinged D_SLIDER with "
+                f"MAT_FRAME_ALUMINIUM and explicit approved glazing, got "
+                f"{opening.get('kind')!r}/{opening.get('material')!r}/{glazing!r}/"
+                f"solid={opening.get('solid')!r}/hinge={opening.get('hinge')!r}/"
+                f"swing={opening.get('swing')!r}"))
         if (surround is None) != (surround_material is None):
             problems.append(Problem(
                 7, FILE_OF["openings"], f"openings/{index}",
@@ -4294,6 +4308,51 @@ def selftest() -> int:
         require(any("surroundStyle and surroundMaterial together" in p.message
                     for p in problems),
                 f"a garage surround without its physical finish is caught "
+                f"({[str(p) for p in problems]})")
+
+        # `HOUSE-00949`: a patio slider's frame and glass are both authored. Accepting a bare
+        # D_SLIDER would send the shell generator back to an opaque fallback slab; accepting a
+        # solid or hinged one would contradict the established sliding-door simulation contract.
+        slider = copy.deepcopy(base)
+        slider_door = row(slider, "openings", "DOOR_WC1")
+        slider_door.update({
+            "type": "D_SLIDER",
+            "material": "MAT_FRAME_ALUMINIUM",
+            "glazingMaterial": "MAT_GLASS_CLEAR",
+            "solid": False,
+            "hinge": None,
+            "swing": None,
+        })
+        for material_id in ("MAT_FRAME_ALUMINIUM", "MAT_GLASS_CLEAR"):
+            slider["materials"]["materials"].append({
+                **copy.deepcopy(slider["materials"]["materials"][0]),
+                "id": material_id,
+            })
+        slider_dir = workspace / "selected-slider-joinery"
+        write_fixture(slider_dir, slider)
+        _, problems = validate(slider_dir, wanted=[7])
+        require(not problems,
+                f"an unhinged aluminium D_SLIDER may select explicit approved glass "
+                f"({[str(p) for p in problems]})")
+
+        missing_slider_glass = copy.deepcopy(slider)
+        row(missing_slider_glass, "openings", "DOOR_WC1").pop("glazingMaterial")
+        missing_slider_glass_dir = workspace / "slider-without-glass"
+        write_fixture(missing_slider_glass_dir, missing_slider_glass)
+        _, problems = validate(missing_slider_glass_dir, wanted=[7])
+        require(any("must author a non-solid, unhinged D_SLIDER" in p.message
+                    for p in problems),
+                f"a D_SLIDER without its glass finish is caught "
+                f"({[str(p) for p in problems]})")
+
+        solid_slider = copy.deepcopy(slider)
+        row(solid_slider, "openings", "DOOR_WC1")["solid"] = True
+        solid_slider_dir = workspace / "solid-slider"
+        write_fixture(solid_slider_dir, solid_slider)
+        _, problems = validate(solid_slider_dir, wanted=[7])
+        require(any("must author a non-solid, unhinged D_SLIDER" in p.message
+                    for p in problems),
+                f"an opaque-collision slider contradiction is caught "
                 f"({[str(p) for p in problems]})")
 
         # 14. Rule 11 is a proof about STANDING, and about the hole rather than the wall.

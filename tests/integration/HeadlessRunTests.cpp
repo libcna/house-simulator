@@ -80,12 +80,12 @@ namespace
         const auto& list = game.RenderListForTesting();
         ASSERT_GT(list.Size(), 0U) << "the frame drew from an empty list";
         EXPECT_TRUE(list.IsSorted()) << "the pass read its slice, which is what sorts the list";
-        // HOUSE-01068's furnished and physically lit sunroom brought the measured unculled house to 720
+        // HOUSE-00949's two real aluminium-slider roles bring the measured unculled house to 722
         // calls, over FOUR frames: a list that was not emptied between them would be four houses
         // long and would still draw a correct-looking picture. This diagnostic remains far below
         // §71.2's 1,400-call worst-case envelope. The breakfast, bar, plants and two fixture types
         // retain truthful close-range material roles rather than flattening the room into one draw.
-        EXPECT_LE(list.DrawCalls(), 720) << "the list was not cleared between frames";
+        EXPECT_LE(list.DrawCalls(), 722) << "the list was not cleared between frames";
 
         const cnahouse::debug::Counter* chunks = game.CountersForTesting().Find("static.chunks");
         const cnahouse::debug::Counter* states = game.CountersForTesting().Find("static.stateChanges");
@@ -132,10 +132,10 @@ namespace
         // not find. Alpha-tested leaves belong to AlphaTestPass, not this debug opaque pass.
         EXPECT_EQ(static_cast<std::size_t>(chunks->Max()), opaque);
         // And the material was bound once per run, not once per chunk. The unculled diagnostic
-        // reaches 111 after HOUSE-01068 adds its distinct rattan/cushion finishes and fixture runs.
+        // reaches 112 after HOUSE-00949 adds the aluminium slider run to the existing finishes.
         // That remains below §71.2's 210 worst case; visible poses protect smaller rows.
         EXPECT_GT(states->Max(), 0);
-        EXPECT_LE(states->Max(), 111);
+        EXPECT_LE(states->Max(), 112);
         EXPECT_LT(states->Max(), chunks->Max() / 4)
             << "the sort bought nothing: the pass is rebinding almost per chunk";
         // The pass's own count and the list's agree, which is what says the two are counting the
@@ -417,7 +417,7 @@ namespace
             << "§25.6 found " << snapshot.exteriorDrawn << " instances and all " << added
             << " went into the list, so the walk's own chunks are being drawn a second time";
         // The visible sunroom now contributes its real breakfast, bar, plant and fixture batches
-        // through the open kitchen boundary; 102 of 720 remains a narrow visible-set result.
+        // through the open kitchen boundary; 102 of 722 remains a narrow visible-set result.
         EXPECT_LT(snapshot.drawCalls, 110) << "the frame is still drawing most of the house";
     }
 

@@ -728,6 +728,21 @@ GARAGE_SURROUND_FRIEZE_PROJECTION = 0.065
 GARAGE_SURROUND_CROWN_PROJECTION = 0.095
 GARAGE_SURROUND_EMBED = 0.006
 
+#: `HOUSE-00949`: the two canonical 2.36 m patio units are aluminium two-panel sliders, not
+#: opaque door slabs. These are ordinary residential aluminium sections: a 55 mm perimeter,
+#: 45 mm panel stiles/rails, 45 mm meeting-stile overlap, panel centres 24 mm apart and 8 mm glass.
+#: The pull is a 28 x 320 mm vertical extrusion standing 24 mm proud on both faces. The authored
+#: leaf still owns the overall width, height and depth; these dimensions only articulate it.
+SLIDER_FRAME_SECTION = 0.055
+SLIDER_SASH_SECTION = 0.045
+SLIDER_SASH_DEPTH = 0.018
+SLIDER_MEETING_OVERLAP = 0.045
+SLIDER_TRACK_OFFSET = 0.012
+SLIDER_GLASS_THICK = 0.008
+SLIDER_PULL_WIDTH = 0.028
+SLIDER_PULL_HEIGHT = 0.320
+SLIDER_PULL_PROJECTION = 0.024
+
 
 def entry_door_detail_boxes(lu0: float, lu1: float, lv0: float, lv1: float,
                             depth_lo: float, depth_hi: float, hinge: str):
@@ -897,6 +912,83 @@ def double_door_boxes(hu0: float, hu1: float, lv0: float, lv1: float,
     both_faces(centre - DOUBLE_DOOR_ASTRAGAL / 2.0,
                centre + DOUBLE_DOOR_ASTRAGAL / 2.0,
                lv0, lv1, "trim", "astragal", DOUBLE_DOOR_PANEL_RELIEF * 0.5)
+    return boxes
+
+
+def sliding_door_boxes(lu0: float, lu1: float, lv0: float, lv1: float,
+                       depth_lo: float, depth_hi: float):
+    """A closed two-panel aluminium slider with real glass and a two-sided pull.
+
+    Tuples are ``(u0, u1, v0, v1, d0, d1, surface_class, part)``. The fixed and moving panels
+    overlap at the meeting stile and occupy two shallow tracks, which makes their construction
+    readable from either side without changing the authored aperture, leaf envelope or future
+    phase-15 animation contract.
+    """
+    width = lu1 - lu0
+    height = lv1 - lv0
+    depth = depth_hi - depth_lo
+    if width <= 0.0 or height <= 0.0 or depth <= 0.0:
+        return []
+
+    frame = min(SLIDER_FRAME_SECTION, width * 0.04, height * 0.04)
+    sash = min(SLIDER_SASH_SECTION, width * 0.035, height * 0.035)
+    inner_u0, inner_u1 = lu0 + frame, lu1 - frame
+    inner_v0, inner_v1 = lv0 + frame, lv1 - frame
+    if inner_u1 <= inner_u0 + 2.0 * sash or inner_v1 <= inner_v0 + 2.0 * sash:
+        return []
+
+    boxes = []
+
+    def box(u0, u1, v0, v1, d0, d1, klass, part):
+        if u1 - u0 > 1e-9 and v1 - v0 > 1e-9 and d1 - d0 > 1e-9:
+            boxes.append((u0, u1, v0, v1, d0, d1, klass, part))
+
+    # One full-depth perimeter/track occupies the authored leaf envelope.
+    box(lu0, lu1, lv0, lv0 + frame, depth_lo, depth_hi,
+        "slider_frame", "outer_rail")
+    box(lu0, lu1, lv1 - frame, lv1, depth_lo, depth_hi,
+        "slider_frame", "outer_rail")
+    box(lu0, lu0 + frame, lv0 + frame, lv1 - frame, depth_lo, depth_hi,
+        "slider_frame", "outer_jamb")
+    box(lu1 - frame, lu1, lv0 + frame, lv1 - frame, depth_lo, depth_hi,
+        "slider_frame", "outer_jamb")
+
+    centre = (inner_u0 + inner_u1) / 2.0
+    overlap = min(SLIDER_MEETING_OVERLAP, (inner_u1 - inner_u0) * 0.08)
+    panels = ((inner_u0, centre + overlap / 2.0, -1.0, "fixed"),
+              (centre - overlap / 2.0, inner_u1, 1.0, "moving"))
+    depth_centre = (depth_lo + depth_hi) / 2.0
+    sash_depth = min(SLIDER_SASH_DEPTH, depth * 0.40)
+    track_offset = min(SLIDER_TRACK_OFFSET, max(0.0, (depth - sash_depth) / 2.0))
+
+    for panel_u0, panel_u1, track_sign, part in panels:
+        panel_depth = depth_centre + track_sign * track_offset
+        sash_d0 = max(depth_lo, panel_depth - sash_depth / 2.0)
+        sash_d1 = min(depth_hi, panel_depth + sash_depth / 2.0)
+        box(panel_u0, panel_u0 + sash, inner_v0, inner_v1,
+            sash_d0, sash_d1, "slider_frame", f"{part}_stile")
+        box(panel_u1 - sash, panel_u1, inner_v0, inner_v1,
+            sash_d0, sash_d1, "slider_frame", f"{part}_stile")
+        box(panel_u0 + sash, panel_u1 - sash, inner_v0, inner_v0 + sash,
+            sash_d0, sash_d1, "slider_frame", f"{part}_rail")
+        box(panel_u0 + sash, panel_u1 - sash, inner_v1 - sash, inner_v1,
+            sash_d0, sash_d1, "slider_frame", f"{part}_rail")
+        glass_d0 = max(depth_lo, panel_depth - SLIDER_GLASS_THICK / 2.0)
+        glass_d1 = min(depth_hi, panel_depth + SLIDER_GLASS_THICK / 2.0)
+        box(panel_u0 + sash, panel_u1 - sash, inner_v0 + sash, inner_v1 - sash,
+            glass_d0, glass_d1, "window_glass", f"{part}_glass")
+
+    # A recognisable vertical pull belongs to the moving panel's meeting stile. Both faces are
+    # present because the terrace and room are equally valid close-range viewpoints.
+    pull_u = centre - overlap / 2.0 + sash * 0.5
+    pull_v = lv0 + min(1.02, height * 0.49)
+    for d0, d1 in ((depth_lo - SLIDER_PULL_PROJECTION, depth_lo),
+                   (depth_hi, depth_hi + SLIDER_PULL_PROJECTION)):
+        box(pull_u - SLIDER_PULL_WIDTH / 2.0,
+            pull_u + SLIDER_PULL_WIDTH / 2.0,
+            pull_v - SLIDER_PULL_HEIGHT / 2.0,
+            pull_v + SLIDER_PULL_HEIGHT / 2.0,
+            d0, d1, "slider_frame", "pull")
     return boxes
 
 
@@ -1276,6 +1368,7 @@ SURFACE_COLOURS = {
     "window_frame": (0.96, 0.94, 0.90, 1.0),
     "window_shutter": (0.11, 0.12, 0.14, 1.0),
     "window_glass": (0.55, 0.72, 0.80, 0.35),
+    "slider_frame": (0.38, 0.40, 0.43, 1.0),
     "stair":     (0.55, 0.42, 0.30, 1.0),
     "roof":      (0.32, 0.30, 0.30, 1.0),
     "structure": (0.68, 0.58, 0.44, 1.0),
@@ -1301,6 +1394,7 @@ SHELL_MATERIALS = {
     "window_frame": "MAT_WINDOW_FRAME_WHITE",
     "window_shutter": "MAT_WINDOW_SHUTTER_BLACK",
     "window_glass": "MAT_WINDOW_GLASS_CLEAR",
+    "slider_frame": "MAT_FRAME_ALUMINIUM",
     "stair": "MAT_DOOR_HARDWOOD",
     "roof": "MAT_ROOF_SHINGLE",
     "structure": "MAT_HATCH_PLY",
@@ -1438,7 +1532,8 @@ def cell_surface_materials(cell: dict, openings=(), portals=(), flights=(),
     glass_sources.update(
         row.get("glazingMaterial")
         for row in openings
-        if row.get("kind") == "door" and row.get("sectionalStyle")
+        if row.get("kind") == "door"
+        and (row.get("sectionalStyle") or row.get("type") == "D_SLIDER")
         and cell.get("id") in portal_cells.get(row.get("portal"), ())
         and row.get("glazingMaterial"))
     exterior_glass = {
@@ -1456,6 +1551,20 @@ def cell_surface_materials(cell: dict, openings=(), portals=(), flights=(),
         source_glass = next(iter(glass_sources))
         result["glass"] = source_glass
         result["window_glass"] = next(iter(exterior_glass))
+
+    slider_frames = {
+        row.get("material")
+        for row in openings
+        if row.get("kind") == "door" and row.get("type") == "D_SLIDER"
+        and cell.get("id") in portal_cells.get(row.get("portal"), ())
+        and row.get("material")
+    }
+    if len(slider_frames) > 1:
+        raise ValueError(
+            f"{cell.get('id')}: generated slider frames name multiple materials: "
+            f"{', '.join(sorted(slider_frames))}")
+    if slider_frames:
+        result["slider_frame"] = next(iter(slider_frames))
 
     shutters = {
         row.get("shutterMaterial")
@@ -2136,11 +2245,13 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                     near, deep = plane, plane + ARCHITRAVE_PROUD * (
                         1.0 if side in ("-X", "-Z") else -1.0)
                     lo_face, hi_face = min(near, deep), max(near, deep)
+                    door_trim_class = (
+                        "slider_frame" if opening.get("type") == "D_SLIDER" else "trim")
                     for bu0, bu1, bv0, bv1 in architrave_boards(hu0, hu1, hv0, hv1, casing):
                         if side in ("-X", "+X"):
-                            solid(lo_face, hi_face, bv0, bv1, bu0, bu1, "trim")
+                            solid(lo_face, hi_face, bv0, bv1, bu0, bu1, door_trim_class)
                         else:
-                            solid(bu0, bu1, bv0, bv1, lo_face, hi_face, "trim")
+                            solid(bu0, bu1, bv0, bv1, lo_face, hi_face, door_trim_class)
                     # `HOUSE-00948`: only the house cell owns an exterior wall, so it also owns
                     # the weather-side surround. It is expressed in this opening's local axes,
                     # then mapped back exactly like the leaf and lining; the yard cell remains a
@@ -2159,9 +2270,11 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                     # The threshold: a board across the opening, this room's half of the wall.
                     sill_lo, sill_hi = min(plane, far), max(plane, far)
                     if side in ("-X", "+X"):
-                        solid(sill_lo, sill_hi, hv0, hv0 + THRESHOLD_THICK, hu0, hu1, "trim")
+                        solid(sill_lo, sill_hi, hv0, hv0 + THRESHOLD_THICK,
+                              hu0, hu1, door_trim_class)
                     else:
-                        solid(hu0, hu1, hv0, hv0 + THRESHOLD_THICK, sill_lo, sill_hi, "trim")
+                        solid(hu0, hu1, hv0, hv0 + THRESHOLD_THICK,
+                              sill_lo, sill_hi, door_trim_class)
 
                 # `HOUSE-00458`: the skirting and the cornice, along the foot and the head of
                 # this run of wall. Interrupted wherever an opening crosses the band -- a doorway
@@ -2360,7 +2473,17 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                         else:
                             solid(u0, u1, v0, v1, d0, d1, klass)
 
-                    if opening.get("type") == "D_DOUBLE":
+                    if opening.get("type") == "D_SLIDER":
+                        for detail in sliding_door_boxes(
+                                lu0, lu1, lv0, lv1,
+                                middle - thickness / 2.0, middle + thickness / 2.0):
+                            leaf_box(*detail[:6], detail[6])
+                        # Only the authored clearance above/beside the unit is lining. The broad
+                        # leaf itself is glass and aluminium, never an opaque fallback body.
+                        leaf_box(hu0, lu0, hv0, hv1, reveal_lo, reveal_hi, "slider_frame")
+                        leaf_box(lu1, hu1, hv0, hv1, reveal_lo, reveal_hi, "slider_frame")
+                        leaf_box(lu0, lu1, lv1, hv1, reveal_lo, reveal_hi, "slider_frame")
+                    elif opening.get("type") == "D_DOUBLE":
                         # The schedule stores ONE 860 mm leaf while the 1.80 m portal carries the
                         # pair.  Build both, and let the portal's existing translucency decide
                         # whether they are solid panelled doors or framed glass doors.
@@ -3830,6 +3953,35 @@ def selftest(output: Path) -> int:
             f"and its stiles, rails, astragal and matched two-sided levers remain physical joinery "
             f"({glazed_classes.count('trim')} timber, {glazed_classes.count('metal')} metal boxes)")
 
+    # `HOUSE-00949`: prove the slider grammar independently of the two canonical rows. A broad
+    # opaque `leaf` is precisely the visual defect this unit exists to prevent.
+    slider = sliding_door_boxes(0.0, 2.36, 0.60, 2.70, -0.0225, 0.0225)
+    slider_parts = [row[7] for row in slider]
+    slider_classes = [row[6] for row in slider]
+    require("leaf" not in slider_parts
+            and slider_classes.count("slider_frame") == 14
+            and slider_classes.count("window_glass") == 2,
+            f"a D_SLIDER is fourteen physical aluminium pieces around two glass panes and no "
+            f"opaque fallback body ({slider_classes.count('slider_frame')} frame, "
+            f"{slider_classes.count('window_glass')} glass, leaf={slider_parts.count('leaf')})")
+    slider_glass = [row for row in slider if row[7].endswith("_glass")]
+    require(all(row[1] - row[0] > 1.0 and row[3] - row[2] > 1.8
+                and abs((row[5] - row[4]) - SLIDER_GLASS_THICK) < 1e-9
+                for row in slider_glass),
+            "and both panes retain domestic full-height proportions and the measured 8 mm glass")
+    require(abs(((slider_glass[1][4] + slider_glass[1][5])
+                 - (slider_glass[0][4] + slider_glass[0][5])) / 2.0
+                - 2.0 * SLIDER_TRACK_OFFSET) < 1e-9,
+            "and the fixed/moving panels occupy two visibly distinct authored-depth tracks")
+    require(slider_parts.count("pull") == 2,
+            f"and the moving meeting stile has a pull on both valid viewpoints "
+            f"({slider_parts.count('pull')})")
+    moving_meeting_stile = min((row for row in slider if row[7] == "moving_stile"),
+                              key=lambda row: row[0])
+    require(all(moving_meeting_stile[0] <= row[0] < row[1] <= moving_meeting_stile[1]
+                for row in slider if row[7] == "pull"),
+            "and both pulls sit on the moving meeting stile, never float on the glass")
+
     # `HOUSE-00942`: the single-leaf grammar is independent of today's five selected rows.  This
     # catches a nominal `four_panel` style that emits a flat slab, one-sided detail or a handle on
     # the hinge stile even if the canonical house and a weakened expectation later drift together.
@@ -4116,6 +4268,27 @@ def selftest(output: Path) -> int:
     require(family_materials["interior_door_hardware"]
             == "MAT_KITCHEN_HARDWARE_STEEL",
             "and their authored approved hardware finish reaches the shell material slot")
+
+    sunroom = cells["L0_SUNROOM"]
+    sunroom_extent = extent_of(sunroom, levels[sunroom["level"]])[0]
+    sunroom_mesh = build_cell(
+        sunroom, sunroom_extent, neighbours=neighbours, construction=construction,
+        level=levels[sunroom["level"]], levels=levels, portals=all_portals,
+        openings=openings_by_portal, cells_by_id=cells)
+    sunroom_classes = [
+        SURFACE_ORDER[polygon.material_index] for polygon in sunroom_mesh.data.polygons]
+    require(sunroom_classes.count("slider_frame") == 21 * 6
+            and sunroom_classes.count("window_glass") >= 2 * 6,
+            f"the canonical sunroom emits the full aluminium/glass unit plus its three-piece "
+            f"casing, threshold and three clearance linings "
+            f"({sunroom_classes.count('slider_frame')} frame faces, "
+            f"{sunroom_classes.count('window_glass')} exterior-glass faces)")
+    sunroom_materials = cell_surface_materials(
+        sunroom, openings_by_portal.values(), all_portals, cells_by_id=cells)
+    require(sunroom_materials["slider_frame"] == "MAT_FRAME_ALUMINIUM"
+            and sunroom_materials["window_glass"] == "MAT_WINDOW_GLASS_CLEAR",
+            f"and both explicit opening finishes reach stable production roles "
+            f"({sunroom_materials['slider_frame']}, {sunroom_materials['window_glass']})")
     document, _error = gltf_validate.read_gltf_json(output / "L0_KITCHEN.glb")
     require(len(document.get("materials", [])) >= 6,
             f"the exported file carries them ({len(document.get('materials', []))})")
@@ -4153,6 +4326,7 @@ def selftest(output: Path) -> int:
     require(not (set(LIGHTMAP_RECEIVERS) & {"trim", "glass", "metal", "stair", "structure",
                                             "roof", "dormer_siding", "window_frame",
                                             "window_shutter", "window_glass",
+                                            "slider_frame",
                                             "exterior_door", "exterior_door_panel",
                                             "exterior_door_hardware"}),
             "and no detail class is one of them")

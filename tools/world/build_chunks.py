@@ -274,11 +274,19 @@ for window_cell in (
            "ordinary room trim and borrowed-light glass stay portal-owned")
 
 CHUNK_BUDGET_EXCEPTIONS["L0_SUNROOM"] = (
-    20, "HOUSE-01068's measured breakfast room: seven established shell/window roles plus five "
+    21, "HOUSE-01068's measured breakfast room: seven established shell/window roles plus five "
         "breakfast finishes; the fitted bar shares cabinet, oak and ceramic, adding only stone "
         "and steel; two reused plant roles and the physical ceiling fixtures' bronze, opal and "
         "switched diffuser remain visually distinct. One exact Reach-cap split preserves the "
-        "woven four-chair group rather than flattening its material sub-ranges")
+        "woven four-chair group rather than flattening its material sub-ranges; HOUSE-00949 "
+        "finally draws the authored aluminium slider frame as one additional close architectural "
+        "finish while its panes share the established exterior-glass chunk")
+
+_master_limit, _master_reason = CHUNK_BUDGET_EXCEPTIONS["L1_MASTER_BED"]
+CHUNK_BUDGET_EXCEPTIONS["L1_MASTER_BED"] = (
+    _master_limit + 1,
+    _master_reason + "; HOUSE-00949 adds the authored aluminium slider frame while its panes "
+    "share the established exterior-glass chunk")
 
 CHUNK_BUDGET_EXCEPTIONS["L1_LANDING"] = (
     10, "six measured shell finish chunks plus a weather-facing window-frame chunk, "

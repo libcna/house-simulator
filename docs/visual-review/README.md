@@ -3706,3 +3706,55 @@ gates pass with heavy work restricted to CPU 0-5.
 debug blockout remains available. The next checkpoint should fix the visibly opaque rear slider
 and its glass/frame composition—not lift exposure, redesign the renderer or leave the connected
 route for unrelated work.
+
+## Round 84 — real glazing in both patio sliders
+
+Commit: `HOUSE-00949` checkpoint (`2026-09-19`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 83's complete 26-camera [clear-day](captures/house-01068-sunroom-day-r1) and
+[normal-night](captures/house-01068-sunroom-night-r1) sets show the sunroom rear opening as a
+broad opaque pale/brown slab. After: matched 26-camera
+[clear-day](captures/house-00949-slider-day-r1) and
+[normal-night](captures/house-00949-slider-night-r1) sets. Both contact sheets and direct
+`sunroom-breakfast`, `backyard-to-house` and `rear-terrace` pairs were opened at full size.
+
+Ranked visible defects remaining:
+
+1. The garden beyond the bounded terrace lantern circuit is almost black at 22:00, while nearby
+   foliage catches disproportionately bright points; a physical night-depth solution is needed.
+2. The broad upper rear elevation and long balcony rail remain simple, and the flat distant
+   fence/lawn is conspicuous through the newly transparent slider in daylight.
+3. The sunroom floor/ceiling and its window-side dark wall are still coarse compared with its
+   furnished breakfast/bar layer; the just-visible terrace lantern cuts into the upper left
+   glazing edge from this fixed camera.
+4. Formal living still has weak furniture/floor contact away from its piano practical, while
+   secondary rooms/elevations remain sparse.
+
+Fixed: both canonical `D_SLIDER` leaves now explicitly choose approved clear glazing. The shared
+generator makes a full-depth aluminium perimeter, two overlapping shallow sashes on separate
+tracks, two 8 mm panes and a two-sided pull, instead of using the generic opaque door slab.
+Weather-facing aluminium is individually exterior-resident; it does not pull the room walls or
+trim through the portal. The sunroom's terrace furniture and lawn are now visible through the
+door by day; the night view retains a dark outdoor separation rather than becoming a bright
+fake interior window. The master-balcony slider shares the same correction without a room branch.
+
+Against the exact Round 83 frames, `sunroom-breakfast` changes 138,826 day / 138,658 night pixels
+above two channel levels (9.64% / 9.63%; normalized RGB MAE 0.019784 / 0.008334);
+`backyard-to-house` changes 14,864 / 15,157 (1.032% / 1.053%; MAE 0.000778 / 0.000864).
+`rear-terrace`, facing away from the leaf, changes only 158 / 150 pixels (0.011% / 0.010%).
+Seven strict references with a visible line of sight were each opened old/actual/diff and
+intentionally advanced: exterior north/northeast blockout, master-bedroom blockout, first-person
+hall/foyer-stair and property orchard/terrace. No other golden was regenerated.
+
+The world is 722 chunks / 116 props / 286 exterior instances / 59.850882 MB. `L0_SUNROOM` is
+21 chunks and `L1_MASTER_BED` eight, one new aluminium batch each; the clear panes share existing
+glass batches. The selected unwrap holds its 350 receiver faces unchanged. World validation,
+shell generation, material assignment, manifest, content, render/culling and XNA-only gates pass.
+The independent shell-realism check requires both panes and the meeting stile rather than treating
+the former opaque-slab predicate as an exemption. All 1,409 unit, 135 integration and 48 active
+render tests pass; eighteen culling pairs stay below 0.2% and 323 strict-XNA translation units
+are clean. Heavy work stays on CPU 0-5 / at most six workers.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay uses production materials, not the optional
+debug blockout view. The next review should address the largest physical night-depth/nearby
+garden defect or a better rear elevation, guided by these unchanged cameras—not by task numbers.

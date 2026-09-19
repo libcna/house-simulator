@@ -612,6 +612,7 @@
       "hinge": null, "swing": null,
       "frame": { "asset": null, "casing": 0.090 },
       "asset": null, "material": "MAT_FRAME_ALUMINIUM",
+      "glazingMaterial": "MAT_GLASS_CLEAR",
       "solid": false, "lockable": true
     },
     {
@@ -621,6 +622,7 @@
       "hinge": null, "swing": null,
       "frame": { "asset": null, "casing": 0.090 },
       "asset": null, "material": "MAT_FRAME_ALUMINIUM",
+      "glazingMaterial": "MAT_GLASS_CLEAR",
       "solid": false, "lockable": true
     },
 

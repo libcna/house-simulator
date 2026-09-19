@@ -51,8 +51,9 @@ RISE_TOLERANCE = 0.002
 HEADROOM_MIN = 2.00
 #: How close a measured face has to be to an authored plane to be that face, in metres.
 EPS = 1e-4
-#: Door slabs are ordinary interior joinery except for the weather-facing role added by
-#: `HOUSE-00930`. Both classes must satisfy the same geometric doorway-fill claim.
+#: Opaque door slabs are ordinary interior joinery except for the weather-facing role added by
+#: `HOUSE-00930`. `HOUSE-00949` measures a glazed slider separately from its panes and meeting
+#: stile, so an empty opening cannot pass just because it has a casing.
 DOOR_LEAF_SURFACE_CLASSES = ("trim", "exterior_door")
 
 
@@ -354,6 +355,37 @@ def headroom_rows(shell: dict, layout: dict) -> list[dict]:
     return rows
 
 
+def slider_glazing_present(surfaces: dict, axis: int, cross: int, value: float,
+                           u0: float, u1: float, v0: float, v1: float) -> bool:
+    """A slider has both full-height glass panels and a physical meeting stile.
+
+    Door casings, thresholds and a lonely narrow lite do not satisfy this closed-leaf claim.
+    This examines the projected triangle dimensions and two interior samples, not the opening's
+    type string alone; removing either pane or the centre sash breaks the shell gate.
+    """
+    def covers(klass: str, sample_u: float, min_width: float, max_width: float) -> bool:
+        mesh = surfaces.get(klass)
+        if mesh is None:
+            return False
+        sample_v = v0 + (v1 - v0) * 2.0 / 3.0
+        for a, b, c in mesh["triangles"]:
+            points = [mesh["positions"][i] for i in (a, b, c)]
+            if min(abs(p[axis] - value) for p in points) > 0.35:
+                continue
+            lo_u, hi_u = min(p[cross] for p in points), max(p[cross] for p in points)
+            lo_v, hi_v = min(p[1] for p in points), max(p[1] for p in points)
+            if (lo_u < sample_u < hi_u and lo_v < sample_v < hi_v
+                    and min_width < hi_u - lo_u < max_width
+                    and hi_v - lo_v > 1.2):
+                return True
+        return False
+
+    width = u1 - u0
+    return (covers("window_glass", u0 + width * 0.25, 0.5, width)
+            and covers("window_glass", u0 + width * 0.75, 0.5, width)
+            and covers("slider_frame", (u0 + u1) / 2.0, 0.001, 0.12))
+
+
 def opening_rows(shell: dict, layout: dict) -> list[dict]:
     """Every authored door and window, and whether the shell actually has a hole for it.
 
@@ -398,13 +430,16 @@ def opening_rows(shell: dict, layout: dict) -> list[dict]:
                         break
         # `HOUSE-00486`: and the LEAF, which is the opposite question. `blocked` asks whether the
         # wall was cut; this asks whether what was cut was then filled with a door. A leaf is
-        # An interior leaf is `trim` -- a door is joinery, like the architrave round it. A
-        # weather-facing leaf has the stable `exterior_door` role needed by the exterior BVH.
-        # Those are the only two surface classes allowed to satisfy this claim; their leaf face
-        # crosses the middle of the opening while architraves and thresholds do not.
+        # An opaque interior leaf is `trim`; a weather-facing one has `exterior_door`. A slider
+        # is a different closed form: two broad panes and a meeting stile. Its empty centre
+        # between panels must not be mistaken for a missing opaque slab.
         leafed = []
         for cell_id in (portal.get("cellA"), portal.get("cellB")):
             surfaces = shell.get(cell_id) or {}
+            if opening.get("type") == "D_SLIDER":
+                if slider_glazing_present(surfaces, axis, cross, value, u0, u1, v0, v1):
+                    leafed.append(cell_id)
+                continue
             found_leaf = False
             for name in DOOR_LEAF_SURFACE_CLASSES:
                 mesh = surfaces.get(name)
@@ -937,6 +972,30 @@ def selftest() -> int:
             "an opening that was never cut is reported")
     require(not one("openings", dict(opening="O", kind="door", width=0.9, height=2.0, blocked=[])),
             "...and one that was is not")
+
+    # `HOUSE-00949`: the slider is closed by two glazed panels, not by an opaque slab. A frame
+    # alone or a single remaining pane must not turn the old leaf-presence gate green.
+    def quad(lo_u: float, hi_u: float, lo_v: float, hi_v: float) -> dict:
+        return {"positions": [(lo_u, lo_v, 0.0), (hi_u, lo_v, 0.0),
+                              (hi_u, hi_v, 0.0), (lo_u, hi_v, 0.0)],
+                "triangles": [(0, 1, 2), (0, 2, 3)]}
+
+    left = quad(0.10, 1.17, 0.10, 2.05)
+    right = quad(1.22, 2.30, 0.10, 2.05)
+    glazing = {"positions": left["positions"] + right["positions"],
+               "triangles": left["triangles"] +
+               [tuple(i + 4 for i in tri) for tri in right["triangles"]]}
+    meeting = quad(1.1775, 1.2225, 0.10, 2.05)
+    slider_surfaces = {"window_glass": glazing, "slider_frame": meeting}
+    def filled(surfaces: dict) -> bool:
+        return slider_glazing_present(surfaces, 2, 0, 0.0, 0.0, 2.4, 0.0, 2.15)
+
+    require(filled(slider_surfaces),
+            "two broad panes and a full-height meeting stile close a glazed slider")
+    require(not filled({"window_glass": left, "slider_frame": meeting}),
+            "but one missing pane cannot satisfy both halves of that opening")
+    require(not filled({"window_glass": glazing}),
+            "and two panes without their centre sash do not silently pass")
 
     # And the measurement itself, where the injections found it silent.
     slabs = [(name, surfaces[name]) for surfaces in shell.values()

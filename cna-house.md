@@ -2068,6 +2068,14 @@ is 720 chunks / 116 props / 284 exterior hierarchy instances / 59.826849 MB. Bot
 retain separately bounded named collision proxies, while the plants and fixture bodies remain
 collision-free; collision is 1,654 shapes and the rebuilt pet graph is 893 nodes / 3,954 edges.
 
+`HOUSE-00949` (2026-09-19) measures `L0_SUNROOM` at exactly **21 chunks / 20 materials** and
+`L1_MASTER_BED` at exactly **eight chunks**. Each now has one additional aluminium-frame role;
+the two broad clear panes join the existing exterior-glass batch in their respective cells. The
+complete world is 722 chunks / 116 props / 286 exterior hierarchy instances / 59.850882 MB.
+The selective UV2 unwrap retains all 350 receiver faces across these two cells; slider details
+have no lightmap-receiver surfaces. Collision, nav, apertures and portal graph retain their
+canonical authored inputs rather than acquiring a transparent collision surrogate.
+
 `HOUSE-00930` (2026-09-16) isolates each weather-facing `D_ENTRY` leaf from ordinary hardwood
 joinery so the exterior hierarchy can retain it when its owning interior room is portal-culled.
 `HOUSE-00932` gives that generated leaf four-panel millwork on both faces, paired bronze
@@ -2128,6 +2136,15 @@ move them, not an assertion in either direction.
   authored hinge. The moulding reuses the cell's painted door role; the hardware uses the authored
   approved steel role. Unselected leaves remain plain, no room id selects geometry, and portal,
   aperture, collision, lightmap-receiver and later animation semantics remain unchanged.
+  `HOUSE-00949` corrects the static closed form of both `D_SLIDER` rows. Each opening explicitly
+  names approved clear glazing and a non-solid aluminium leaf with no hinge or swing. The 2.36 ×
+  2.10 m leaf envelope contains a 55 mm full-depth perimeter, two shallow 45 mm sash rings with
+  a 45 mm meeting overlap and 24 mm centre-to-centre track separation, two 8 mm glass panes and
+  320 mm pulls on both faces of the moving meeting stile. The generated shell never emits the
+  generic opaque leaf for this type. The aluminium frame is a weather-facing fenestration role
+  in §25.6's exterior hierarchy, while surrounding walls and room trim remain portal-owned.
+  This is still a static closed-shell representation: the portal's glass opacity, collision/nav
+  opening contract and phase-15 motion/state remain separately data-driven and unchanged.
 
 ### 17.5 Directory layout
 

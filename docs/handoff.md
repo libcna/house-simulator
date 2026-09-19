@@ -1,3 +1,70 @@
+# Visual-sprint handoff — 2026-09-19 (`HOUSE-00949` checkpoint)
+
+Branch `develop`. Task-start HEAD `455795957d34451c61c5b019c3a105a69e3beb49`
+(`HOUSE-01068`). This file belongs to the single `HOUSE-00949` commit; use that commit as ending
+HEAD. **VISUAL-GATE-1 still FAILS.** Normal gameplay uses production materials; the coloured
+blockout is an explicitly requested debug view only. Compilation and heavy tooling are restricted
+to CPUs 0–5 and at most six workers as the owner requested.
+
+The two canonical `D_SLIDER` openings now explicitly select approved clear glazing. The static
+shell no longer fills either 2.36 × 2.10 m leaf with an opaque generic box: a 55 mm perimeter,
+two shallow overlapping 45 mm sash rings on separate tracks, two 8 mm panes and two-sided moving
+stile pull supply a readable residential assembly. Aluminium casing, threshold and clearances
+share one stable material role, and the glass joins the existing exterior clear-glass role. The
+aluminium is individually exterior-resident so its weather face remains readable without
+pulling room walls into the outdoor hierarchy. Apertures, authored portal opacity, collision,
+navigation, phase-15 leaf envelope/state and receiver lightmap geometry do not change. A late
+geometry review found the pull offset onto glass; it was moved fully onto the moving meeting
+stile and pinned by a permanent selftest before the final captures.
+
+The before controls are Round 83's complete 26-view
+[clear-day](visual-review/captures/house-01068-sunroom-day-r1) and
+[normal-night](visual-review/captures/house-01068-sunroom-night-r1) sets. The matched final
+[clear-day](visual-review/captures/house-00949-slider-day-r1) and
+[normal-night](visual-review/captures/house-00949-slider-night-r1) sets have contact sheets;
+open `sunroom-breakfast.png` to see the previously opaque slab become a terrace view, and
+`backyard-to-house.png` to see the exterior framing. Both day/night direct pairs and both full
+contact sheets were inspected. The final images should be the visual starting point for the next
+checkpoint; do not replace visual review with passing pixel tests.
+
+The world is 205 materials / 3,008 stable ids / 918 manifest rows / 722 chunks / 96 cells /
+116 props / 286 exterior hierarchy instances / 59.850882 MB. The unculled diagnostic is 675
+opaque + 47 cutout submissions and 112 opaque state changes. `L0_SUNROOM` is 21 chunks / 20
+materials and `L1_MASTER_BED` eight chunks. Selective unwrap holds 350 receiver faces unchanged.
+Collision/nav inputs are the previously authored ones; the graph still has 893 nodes / 3,954
+edges and both kitchen/sunroom and sunroom/terrace links. The content graph rebuilds only the
+selected chunk/shading derivatives after the final pull alignment, 31 stages total. Seven strict
+references with an actual sight line were opened old/new/diff and intentionally advanced:
+`blockout-ext-north`, `blockout-ext-northeast`, `blockout-l1-master-bed`, `fp-l0-hall`,
+`fp-l0-foyer-stair`, `property-orchard` and `property-terrace`; no unrelated goldens were moved.
+
+All 1,409 unit and 135 integration tests pass with the correct offscreen software-GL environment
+and an isolated writable `XDG_DATA_HOME` for SaveStore. All 48 active software-render tests pass;
+eight capture-only generators remain disabled. The 18 culled/unculled pairs are under 0.2%,
+worst 0.0558% (`l0-sunroom`). Shell/world mutation selftests, 99-file manifest, material assignment
+and the full content graph pass. The shell-realism gate now requires both broad glass panels and
+the physical meeting stile and rejects either missing component; it proves all 63 fillable doors
+remain closed. All project static gates and 323 strict-XNA translation units pass. The source-only
+committed budget report remains current; a separate exploratory compiled
+`--enforce` reports the pre-existing `audio-core` 30.05 MB against 30 MB, unrelated to these
+two glass units. Do not describe that compiled-budget check as green.
+
+Normal Ninja reconfiguration still attempts an unrelated shared `~/deps/FNA3D` patch write which
+the sandbox denies. Changed C++ translation units were compiled via stored build commands in the
+existing `build/` tree, with ccache bypassed for only those writes; no CNA, sharp-runtime or
+sibling repository was modified. `build_nav.py` completed in seconds on the prior content build,
+and navigation was fresh on the final geometry-only derivative rebuild.
+
+Largest visible defects: the garden beyond the physical terrace light circuit is almost black
+at 22:00 while foliage is overlit; the upper rear elevation/balcony rail and distant fence/lawn
+are simple; the sunroom floor/ceiling and dark window-side wall remain coarse next to its new
+furniture; formal living has weak contact away from the piano practical; secondary rooms remain
+sparse. The next checkpoint should fix the largest visible rear-route issue through approved
+local physical lighting/scene content, not global exposure or unrelated infrastructure. The
+source/asset/test status in the latest `plan.md` row is the authoritative task ledger.
+
+---
+
 # Visual-sprint handoff — 2026-09-19 (`HOUSE-01068` checkpoint)
 
 Branch `develop`. Task-start HEAD `61795b00e05e0e0d92b43cd5d504287648544a92`

@@ -74,8 +74,11 @@ namespace cnahouse::visibility
 
     bool IsExteriorWindowMaterial(std::string_view material) noexcept
     {
+        // Room-owned patio-slider aluminium is also weather-facing fenestration. Keep only
+        // this exact role outdoors; the surrounding room's wall/trim chunks stay portal-owned.
         return material == "MAT_WINDOW_FRAME_WHITE" || material == "MAT_WINDOW_GLASS_CLEAR" ||
-               material == "MAT_WINDOW_GLASS_OBSCURED" || material == "MAT_WINDOW_SHUTTER_BLACK";
+               material == "MAT_WINDOW_GLASS_OBSCURED" || material == "MAT_WINDOW_SHUTTER_BLACK" ||
+               material == "MAT_FRAME_ALUMINIUM";
     }
 
     bool IsExteriorDoorMaterial(std::string_view material) noexcept
