@@ -58,7 +58,7 @@
   // is therefore absent: the four rows below are the only things that do not start at rest.
   //
   // These four ids are an obligation on the task that authors the door and window interactables.
-  // `interactables.json` holds the 80 switch plates so far (`HOUSE-00384`), so none of the four
+  // `interactables.json` holds the 79 current switch plates, so none of the four
   // resolves yet -- exactly like the `MAT_*` references in `layout.openings.json`, and rule 6
   // will hold this file to them the moment those rows exist.
   "interactables": {

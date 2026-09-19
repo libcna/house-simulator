@@ -1375,6 +1375,32 @@
       "interactable": null
     },
     {
+      "id": "PROP_EXT_TERRACE_LANTERN_1",
+      "asset": "MODEL_FIXTURE_PORCH_LANTERN",
+      "cell": "EXT_TERRACE",
+      "position": [-2.5, 2.475, -32.11025],
+      "yawDeg": 180,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_EXT_TERRACE_LANTERN_2",
+      "asset": "MODEL_FIXTURE_PORCH_LANTERN",
+      "cell": "EXT_TERRACE",
+      "position": [2.5, 2.475, -32.11025],
+      "yawDeg": 180,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
       "id": "PROP_L1_BALCONY_FRONT_LANTERN",
       "asset": "MODEL_FIXTURE_PORCH_LANTERN",
       "cell": "L1_BALCONY_FRONT",

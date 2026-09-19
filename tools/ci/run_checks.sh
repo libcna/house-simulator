@@ -118,8 +118,9 @@ run_gate "effects-baseline" tools/effects/build_effects.sh --check
 # `cna-house.md` §20.1: no row, no build. An unlisted file under `assets-src/` is a file whose
 # licence nobody has looked at, and a gate is the only moment anyone reliably looks (`HOUSE-00196`).
 run_gate "manifest"   python3 tools/ci/check_manifest.py
-# HOUSE-01259: the close-range porch fixture is a deterministic project-authored GLB, and its
-# exact two-slot split is what lets the runtime switch only the diffuser rather than the cage.
+# HOUSE-01259/HOUSE-01291: the close-range wall fixture is a deterministic project-authored GLB,
+# and its exact two-slot split is what lets porch, balcony and terrace circuits switch only the
+# diffuser rather than the cage. The checker also pins every reused exterior placement/optic.
 run_gate "porch-lantern" python3 tools/assets/porch_lantern.py --check
 # HOUSE-01288: the independently switched path circuit is four real low fixtures rather than
 # bare light points; preserve their deterministic model, exact positions and bounded optics.

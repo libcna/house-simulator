@@ -134,10 +134,12 @@ CHUNK_BUDGET_EXCEPTIONS = {
                       "and the garden suite's reusable wood, metal, stone, soil and textile roles "
                       "separate; one exact Reach-cap split preserves the collidable swing/fire-pit "
                       "sub-ranges instead of flattening their materials"),
-    "EXT_TERRACE": (7,
+    "EXT_TERRACE": (9,
                      "HOUSE-00771's terrace composition reuses five coherent garden-suite roles "
                      "across the dining group, two loungers and four planters while preserving "
-                     "the paving and foliage as independently bounded static batches"),
+                     "the paving and foliage as independently bounded static batches. "
+                     "HOUSE-01291 adds one shared bronze fixture body and one independently "
+                     "emissive warm diffuser across both rear-wall lanterns"),
     "EXT_SIDEYARD_W": (12,
                         "HOUSE-00772's densely planted west border: existing exterior finishes "
                         "plus measured source-exact bark and cutout foliage, including Reach-cap "

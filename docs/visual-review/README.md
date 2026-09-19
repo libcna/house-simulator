@@ -3597,3 +3597,54 @@ not regenerated.
 debug blockout remains available. The next checkpoint should make the already-authored rear
 lighting physical and useful, or fix the precise source/receiver defect if those sources are not
 reaching the terrace—not lift global exposure or leave the vertical slice for unrelated work.
+
+## Round 82 — physical rear-terrace dusk lanterns
+
+Commit: `HOUSE-01291` checkpoint (`2026-09-19`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 81's complete [clear-day](captures/house-00771-garden-furniture-day-final) and
+[normal-night](captures/house-00771-garden-furniture-night-final) sets show an inhabited rear
+terrace whose furniture and paving disappear at 22:00. After: the complete twenty-four-camera
+[clear-day](captures/house-01291-terrace-lanterns-day-final) and
+[normal-night](captures/house-01291-terrace-lanterns-night-final) sets add two physical wall
+lanterns and their bounded contribution. Both contact sheets and the direct `rear-terrace`,
+`backyard-to-house` and `family-garden-view` pairs were opened at full size.
+
+Ranked visible defects remaining:
+
+1. The open slider and `L0_SUNROOM` volume behind the terrace remain black and visibly empty at
+   night; this is now the largest continuous-route defect.
+2. The broad upper rear elevation and long balcony rail remain architecturally simple outside the
+   lanterns' deliberately local reach.
+3. The garden furniture is correctly scaled and composed, but its geometry/material response is
+   simpler than the strongest finished interior hero assets.
+4. Formal living retains weak furniture/floor contact outside its bounded piano practical.
+5. Secondary rooms, side elevations and distant-neighbour context remain sparse.
+
+Fixed: two reused approved 232-triangle bronze/opal lanterns sit at x = ±2.50 m on the rear
+sunroom wall. Their linked optical centres drive 1,600 lm / 2,700 K / 8.5 m point sources under the
+one dusk-sensor owner. A selected cross-cell bake reaches only the `L0_SUNROOM` outer skin and an
+explicit unbaked-detail spill reaches only `EXT_BACKYARD`; the obsolete terrace wall plate is
+removed. A new C++/Python validation rule prevents any automatic dusk group from also acquiring a
+wall switch. No exposure, renderer, collision, navigation, opening or material architecture
+changed.
+
+Against Round 81, `rear-terrace` changes 194 day / 387,605 night pixels above two channel levels
+(0.013% / 26.917%; normalized RGB MAE 0.000034 / 0.010901), `backyard-to-house` changes 617 /
+75,708 (0.043% / 5.257%; 0.000105 / 0.002194), and `family-garden-view` changes 300 / 11,185
+(0.021% / 0.777%; 0.000055 / 0.000451). Day retains the established composition with small
+credible fixture bodies and no orange glow. Night gains visible warm emitters, a restrained pool
+over the terrace and more legible furniture without bleaching the lawn or facade. A wall-facing
+spot iteration left the terrace black; a 900 lm/high-efficacy point iteration produced tiny hot
+patches and daylight glow. Both were rejected before the retained set.
+
+The world is 707 chunks / 106 props / 284 exterior instances / 59.102034 MB. The selected
+`L0_SUNROOM` foreign atlas peaks at 0.778957 with mean 0.000364078. The only strict reference that
+advances is the inspected explicit-debug `property-terrace` frame, where the physical lantern is
+now present; the other seven property frames were not regenerated. All eighteen culled/unculled
+pairs remain below 0.2%, at 0.0558% worst (`l0-sunroom`).
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next checkpoint should furnish and light the visible
+`L0_SUNROOM`/slider volume or otherwise fix that specific black opening—not raise global exposure,
+spread the rear lantern bake across unrelated cells or leave the vertical slice.

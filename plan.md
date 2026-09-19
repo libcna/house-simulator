@@ -67,7 +67,9 @@ family-room picture windows measured open woven curtains, physical support hardw
 scale without claiming phase 45's later interactive blind state. `HOUSE-00771` then addresses the
 empty view through those windows with a coherent project-authored terrace dining group, two
 loungers, swing bench, fire pit, birdbath and four planters, and makes the rear composition a fixed
-visual-review boundary.
+visual-review boundary. `HOUSE-01291` turns the two nominal rear-terrace points into physical
+dusk-owned wall lanterns, gives the adjacent sunroom skin one bounded selected receiver bake and
+removes the contradictory unused wall switch so the group has exactly one control owner.
 Round 9 proves the exterior
 material omission is fixed; `HOUSE-00924`
 removes the
@@ -6307,10 +6309,14 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       note: 80 plates, 121 gangs. 15 groups have no plate, exactly as §53 lists: the table and
             floor lamps are switched at the lamp, the refrigerator's interior light by its door,
             and the porch lanterns and street lights by a dusk sensor.
+            `HOUSE-01291` later removes the rear-terrace plate when that group becomes an
+            automatic physical dusk layer; the current authored census is 79 plates / 120 gangs
+            and 16 groups without a plate. This line retains the historical delivery census.
       note: this is the first content of `interactables.json`. §53 wants 640 rows there in twelve
             behaviour classes; these are the light switches and the file grows.
-      note: `AuthoredWorldTest` asserts the 80 plates, the 121 gangs, that every gang names a real
-            group, and that exactly two groups are on two plates each.
+      note: At delivery `AuthoredWorldTest` asserted the 80 plates and 121 gangs. It now asserts
+            `HOUSE-01291`'s 79 / 120 current census, that every gang names a real group and that
+            exactly two groups are on two plates each.
 - [x] HOUSE-00385 — Author `layout.materials.json`: the material class table of §22.2 with all fields
       dep: HOUSE-00296 · sys: world · plat: TOOL · pri: MUST
       finding: **§22.2's clear-glass opacity was impossible to author.** The class table requires
@@ -16326,6 +16332,48 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             eighteen culling pairs pass at 0.0558% worst (`l0-sunroom`) against 0.2%. Content,
             provenance/licence and project static gates plus all 323 strict-XNA translation units
             pass with compilation and heavy work restricted to CPU 0-5 / at most six workers.
+- [x] HOUSE-01291 — Make the rear-terrace sources physical dusk lanterns
+      dep: HOUSE-00771, HOUSE-00910, HOUSE-01259, HOUSE-01260, HOUSE-01269, HOUSE-01281 · sys: world, content, lighting, rendering · plat: ALL · pri: MUST
+      note: (2026-09-19) Round 81 leaves the new terrace suite and paving nearly black at 22:00,
+            while the two existing rear-wall points have no visible source, useful selected
+            receiver or automatic normal-night owner. Reuse the approved wall lantern and the
+            established cross-cell bake/spill contracts; do not raise global exposure or alter
+            terrace collision, navigation, portals or production-material architecture.
+      accept: two correctly scaled approved lanterns register to the rear sunroom wall and link
+            their exact optical slots to bounded warm sources; the group has one unambiguous dusk
+            owner, the selected sunroom outer skin and terrace detail receive only physically
+            plausible local contribution, and complete matched day/night review sets are opened.
+            Deterministic fixture, world, content, budget, stable-id, unit, integration, render,
+            culling, provenance and strict-XNA gates pass with compilation and heavy work limited
+            to CPU 0-5 / at most six workers; only inspected strict references may advance.
+      done: Two existing approved 232-triangle bronze/opal porch-lantern instances now sit at
+            x = ±2.50 m on the rear wall, with their linked `LanternShade` optical centres at
+            y = 2.75 m / z = -32.23 m. The stable `LG_EXT_TERRACE_MAIN` sources become 1,600 lm,
+            2,700 K, 8.5 m range points owned by the dusk sensor. `L0_SUNROOM` is the sole fixed
+            foreign receiver and `EXT_BACKYARD` the sole unbaked-detail spill cell. The former
+            unused wall plate is removed: a new C++/Python rule now rejects any light group that
+            mixes dusk automation with a wall switch. Collision, navigation, openings, runtime
+            exposure and renderer paths do not change.
+      review: Round 82 retains complete 24-camera clear-day and normal-night sets. Against Round
+            81, `rear-terrace` changes 194 day / 387,605 night pixels above two channel levels
+            (0.013% / 26.917%; normalized RGB MAE 0.000034 / 0.010901), while
+            `backyard-to-house` changes 617 / 75,708 (0.043% / 5.257%; 0.000105 / 0.002194) and
+            `family-garden-view` 300 / 11,185 (0.021% / 0.777%; 0.000055 / 0.000451). The final
+            night set gains visible emitters, a restrained warm terrace pool and more legible
+            furniture; the intentionally honest next defect is the black/empty slider and
+            sunroom beyond it. A first wall-facing spot and a hot 900 lm/high-efficacy point bake
+            were inspected and rejected. Only the affected explicit-debug `property-terrace`
+            golden advances after paired inspection.
+      verified: The selected 256-sample `L0_SUNROOM` foreign atlas peaks at 0.778957 with mean
+            0.000364078. The world has 707 chunks / 96 cells / 106 props / 284 exterior hierarchy
+            instances / 59.102034 MB uploaded; the unculled diagnostic is 661 opaque / 46 cutout /
+            109 state changes. Stable ids contain 2,993 live rows, the manifest 916 files and the
+            current switch census is 79 plates / 120 gangs. All thirteen world rules, fixture
+            regeneration, manifest/licence, budget and content checks pass. All 1,409 unit and
+            135 integration cases pass; all 48 active software-render cases pass after the one
+            inspected golden update, with eight capture-only generators disabled. All eighteen
+            culled/unculled pairs remain below 0.2%, at 0.0558% worst (`l0-sunroom`). Project
+            static and strict-XNA gates pass with heavy work restricted to CPU 0-5.
 - [x] HOUSE-01261 — Implement the per-object three-directional-light assignment (key/fill/bounce) for dynamic objects
       dep: HOUSE-01251, HOUSE-00892 · sys: lighting · plat: ALL · pri: MUST
       accept: `BasicEffect` and `SkinnedEffect` receive the same stable key/fill/bounce slot
@@ -20052,6 +20100,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-19 | `HOUSE-01291` | **New task, next free phase-16 id.** Reuse the approved wall lantern for the two existing rear-terrace sources, bind one selected adjacent receiver and make the group dusk-owned; remove its old wall switch and add a validator against mixed automatic/manual ownership. | Round 81's fixed night views rank the black terrace as the largest visible defect. Source inspection finds two unphysical points with neither linked fixtures nor useful receiver contribution, plus an unwired wall plate whose saved state would be overwritten every frame by dusk automation. §35.3 already forbids one group having two control owners, so retaining both is not a harmless future interaction. The bounded lantern, cross-cell receiver and spill paths are already approved; this correction needs no renderer, exposure, collision, navigation or licence change. |
 | 2026-09-19 | `HOUSE-01067` | **New task, next free phase-13 id.** Add one reusable measured open-curtain treatment to both family-room picture windows while leaving later interactive blinds and the full room-furnishing task open. | Round 79's complete day/night sheets expose the two broad bare apertures as the largest immediately actionable interior defect. A deterministic static treatment can reuse the approved fabric/steel and prop paths, preserve the glass, light, portals, view and circulation, and add domestic scale without a download, renderer branch, collision/nav change or false completion of `HOUSE-00992`/phase 45. |
 | 2026-09-18 | `HOUSE-00948` | **New task, next free phase-12 id.** Add a data-selected, measured Colonial surround to the weather side of the canonical sectional opening while retaining the existing aperture, simulation envelope and white exterior-frame batch. | Round 78's fixed garage view ranks the unarticulated siding-to-door edge as the largest immediately actionable facade defect. Eight deterministic painted-millwork boxes supply architectural depth with no download, new material role, renderer change, collision/navigation change or licence decision. |
 | 2026-09-18 | `HOUSE-00947` | **New task, next free phase-12 id.** Add data-selected top-row glazing and measured pull hardware to the canonical sectional door without changing its simulation envelope. | Round 77's fixed garage view ranks the broad, nearly featureless 4.86 m leaf as the largest remaining facade surface. Existing exterior glass, bronze hardware and deterministic shell grammar can supply believable residential detail with one new chunk and no asset acquisition, portal/collision change or renderer work. |

@@ -474,6 +474,30 @@ namespace cnahouse::world
                 }
             }
 
+            // §35.3 gives an automatic group exactly one owner: the sun. A wall plate for the
+            // same group would be overwritten on the next lighting update and would persist a
+            // state the player does not actually control.
+            for (const Interactable& item : world.Interactables())
+            {
+                if (item.kind != "light_switch")
+                {
+                    continue;
+                }
+                for (const StateTable::Field& gang : item.state.Fields())
+                {
+                    const Id group = util::Intern(gang.name);
+                    const auto found = duskByGroup.find(group);
+                    if (found != duskByGroup.end() && found->second)
+                    {
+                        sink.Add(6,
+                                 "interactables.json",
+                                 "interactables/" + Name(item.id) + "/state/" + gang.name,
+                                 "dusk-controlled group " + gang.name + " also has wall switch " +
+                                     Name(item.id) + "; one group has one control owner");
+                    }
+                }
+            }
+
             // A duct branch and its cells agree.
             std::set<Id> branches;
             for (const HvacBranch& branch : world.HvacBranches())

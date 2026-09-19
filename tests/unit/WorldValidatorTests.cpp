@@ -279,6 +279,21 @@ namespace
             EXPECT_TRUE(Fired(ProblemsFor(std::move(contents)), 6)) << "a dusk light defaulted on";
         }
 
+        // Rule 6: an automatic group has no wall switch whose state the next solar update would
+        // immediately overwrite.
+        {
+            auto contents = Fixture();
+            contents.lights.front().duskSensor = true;
+            world::Interactable plate;
+            plate.id = Intern("SWITCH_HALL");
+            plate.kind = "light_switch";
+            plate.cell = Intern("L0_HALL");
+            plate.state.Declare("LG_HALL", world::StateValue{false});
+            contents.interactables.push_back(plate);
+            EXPECT_TRUE(Said(ProblemsFor(std::move(contents)), "also has wall switch"))
+                << "a dusk-controlled group with a manual plate";
+        }
+
         // Rule 6: a static-detail spill names another real receiver, never its source cell.
         {
             auto contents = Fixture();

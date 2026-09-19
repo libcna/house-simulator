@@ -1,3 +1,60 @@
+# Visual-sprint handoff — 2026-09-19 (`HOUSE-01291` checkpoint)
+
+Branch `develop`. Task-start HEAD `936c8fe8ac350441867ec6f2aaeb1b6a88510417`
+(`HOUSE-00771`). This file belongs to the single `HOUSE-01291` commit; use that commit as the
+ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal gameplay remains production-material only and
+explicit debug blockout remains available.
+
+The two nominal rear-terrace point lights are now physical approved bronze/opal wall lanterns at
+x = ±2.50 m on the sunroom rear wall. Each linked `LanternShade` optical centre drives a 1,600 lm,
+2,700 K, 8.5 m point source. Their established group is now owned only by the dusk sensor. The
+obsolete `SWITCH_EXT_TERRACE` row was removed because a saved wall-switch state would be
+overwritten every frame by automation; a new C++/Python world rule rejects any future group with
+both owners. `L0_SUNROOM` is the sole selected fixed receiver, `EXT_BACKYARD` the sole unbaked
+detail spill cell, and the selected atlas measures 0.778957 peak / 0.000364078 mean. Collision,
+navigation, openings, exposure, production materials and renderer architecture did not change.
+
+Round 81's retained [clear-day](visual-review/captures/house-00771-garden-furniture-day-final) and
+[normal-night](visual-review/captures/house-00771-garden-furniture-night-final) sets are the before
+control. The complete retained after sets contain 24 fixed
+[clear-day](visual-review/captures/house-01291-terrace-lanterns-day-final) and 24 fixed
+[normal-night](visual-review/captures/house-01291-terrace-lanterns-night-final) images. Both contact
+sheets and the direct rear-terrace, backyard-to-house and family-garden pairs were opened at full
+size. `rear-terrace` changes 194 day / 387,605 night pixels above two channel levels (0.013% /
+26.917%; normalized RGB MAE 0.000034 / 0.010901); `backyard-to-house` changes 617 / 75,708
+(0.043% / 5.257%; 0.000105 / 0.002194); `family-garden-view` changes 300 / 11,185 (0.021% /
+0.777%; 0.000055 / 0.000451). Day remains stable apart from credible fixture bodies. Night gains
+warm visible emitters, a restrained local terrace pool and readable furniture. A wall-facing spot
+and then a hot 900 lm/high-efficacy point bake were inspected and rejected before the retained
+result.
+
+The world is 707 chunks / 96 cells / 106 static props / 284 exterior hierarchy instances /
+59.102034 MB uploaded. It contains 2,993 stable ids, 916 manifest rows and a current 79-plate /
+120-gang switch census. The unculled diagnostic is 661 opaque + 46 cutout submissions and 109
+opaque state changes. Fixture regeneration, all thirteen world rules, stable ids, manifest,
+licence/provenance, budget and compiled content pass. All 1,409 unit and 135 integration tests
+pass. All 48 active software-render cases pass after the one inspected explicit-debug
+`property-terrace` reference advances; eight capture-only generators remain disabled. All eighteen
+culled/unculled pairs stay below 0.2%, at 0.0558% worst (`l0-sunroom`). Project static gates and
+all strict-XNA translation units pass. Compilation and heavy work stayed on CPU 0-5 / at most six
+workers.
+
+The normal Ninja target still attempts the known unrelated configure-time write to shared
+`~/deps/FNA3D`, which the sandbox rejects. Stored direct compile/link actions were used for the
+changed objects with ccache disabled only for those actions; no CNA, sharp-runtime or shared
+dependency was modified. Navigation was deliberately not rebuilt: both new prop rows declare
+`collision: none`, and no opening, collision or navigation input changed. No `build_nav.py`,
+render-test or virtual-display process remains running.
+
+Largest visible defects: the open slider and `L0_SUNROOM` volume behind the terrace are still
+black and visibly empty at night; the broad upper rear elevation and balcony rail remain simple;
+garden furniture is less detailed than the strongest interior hero assets; formal living still
+has weak furniture/floor contact outside its bounded piano practical; secondary rooms/elevations
+remain sparse. The next checkpoint should furnish and light the visible sunroom/slider volume as
+the highest-impact dependency-valid defect—not lift global exposure or leave the vertical slice.
+
+---
+
 # Visual-sprint handoff — 2026-09-19 (`HOUSE-00771` checkpoint)
 
 Branch `develop`. Task-start HEAD `d82de7c075865cac08e46eaf615b87a8db0d8e26`

@@ -1104,6 +1104,19 @@ def rule_6_references(world: World) -> list[Problem]:
                 f"dusk-controlled light {light.get('id')} must start off; "
                 "the live sun decides its state"))
 
+    # §35.3 gives an automatic group exactly one owner: the sun. A wall plate for the same
+    # group would be overwritten by the next lighting update and persist a state the player does
+    # not actually control.
+    for index, item in enumerate(world.interactables):
+        if item.get("kind") != "light_switch":
+            continue
+        for field in sorted((item.get("state") or {})):
+            if dusk_by_group.get(field, False):
+                problems.append(Problem(
+                    6, FILE_OF["interactables"], f"interactables/{index}/state/{field}",
+                    f"dusk-controlled group {field} also has wall switch {item.get('id')}; "
+                    "one group has one control owner"))
+
     for index, prop in enumerate(world.props):
         check("props", index, "cell", prop.get("cell"), cells, "cell", have_cells)
         check("props", index, "asset", prop.get("asset"), assets, "asset", have_assets)
@@ -2934,6 +2947,17 @@ def selftest() -> int:
         _, problems = validate(defaulted_dir, wanted=[6])
         require(any("must start off" in x.message for x in problems),
                 f"a dusk-controlled light cannot also be default-on "
+                f"({[str(x) for x in problems]})")
+
+        switched_automatic = copy.deepcopy(base)
+        row(switched_automatic, "lights", "LIGHT_HALL")["duskSensor"] = True
+        plate = row(switched_automatic, "interactables", "SWITCH_HALL")
+        plate["state"] = {"LG_HALL": False}
+        switched_automatic_dir = workspace / "switched-dusk-light"
+        write_fixture(switched_automatic_dir, switched_automatic)
+        _, problems = validate(switched_automatic_dir, wanted=[6])
+        require(any("also has wall switch" in x.message for x in problems),
+                f"a dusk-controlled group cannot also have a wall switch "
                 f"({[str(x) for x in problems]})")
 
         spill = copy.deepcopy(base)

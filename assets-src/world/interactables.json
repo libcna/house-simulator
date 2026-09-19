@@ -16,9 +16,9 @@
   //
   // Two groups are switched from the NEXT room, because their own is too low to stand up in: the
   // garage loft (1.40 m under its rafters) is switched at the bottom of the ladder and the
-  // under-stair cupboard (1.75 m) from the hall. Fifteen groups have no plate at all, which §53
+  // under-stair cupboard (1.75 m) from the hall. Sixteen groups have no plate at all, which §53
   // lists: the table and floor lamps are switched at the lamp, the refrigerator's interior light
-  // by its door, and the porch lanterns and street lights by a dusk sensor.
+  // by its door, and the porch lanterns, rear-terrace lanterns and street lights by a dusk sensor.
   "schema": "cna-house/interactables/1",
   "interactables": [
     // ---- SWITCH_B1_CELLAR: 1 gang
@@ -256,20 +256,6 @@
       "state": { "LG_EXT_SHED_MAIN": false },
       "persist": ["LG_EXT_SHED_MAIN"],
       "portal": "P_EXT_GARDEN__EXT_SHED"
-    },
-
-    // ---- SWITCH_EXT_TERRACE: 1 gang
-    {
-      "id": "SWITCH_EXT_TERRACE", "kind": "light_switch", "cell": "EXT_TERRACE",
-      "prop": null,
-      "focus": { "point": [-3.30, 1.65, -35.94], "normal": [0.0, 0.0, 1.0], "radius": 0.30 },
-      "actions": [
-        { "verb": "lights", "do": "toggle(state.LG_EXT_TERRACE_MAIN)",
-          "sound": "SFX_SWITCH_CLICK", "duration": 0.12 }
-      ],
-      "state": { "LG_EXT_TERRACE_MAIN": false },
-      "persist": ["LG_EXT_TERRACE_MAIN"],
-      "portal": "P_EXT_BACKYARD__EXT_TERRACE"
     },
 
     // ---- SWITCH_EXT_WALK: 1 gang

@@ -3997,8 +3997,8 @@ namespace
                                   std::size_t{0},
                                   [](std::size_t count, const world::Cell& cell)
                                   { return count + cell.lightmaps.artificial.size(); }),
-                  137U)
-            << "the canonical bindings include 124 owned-room bakes and thirteen explicit cross-cell bakes";
+                  138U)
+            << "the canonical bindings include 124 owned-room bakes and fourteen explicit cross-cell bakes";
 
         // 179 and 66 until `HOUSE-00491` retired §12.6's two `W_GABLE` louvres: they were in
         // "attic gable ends" and §12.1's roof is a hip with none, so both stood 1.44 m inside
@@ -4224,8 +4224,8 @@ namespace
                 ++platesPerGroup[gang.name];
             }
         }
-        EXPECT_EQ(plates, 80);
-        EXPECT_EQ(gangs, 121);
+        EXPECT_EQ(plates, 79);
+        EXPECT_EQ(gangs, 120);
         // ...and exactly two groups are on two plates each: §53's three-way pairs.
         const auto shared = std::count_if(platesPerGroup.begin(),
                                           platesPerGroup.end(),

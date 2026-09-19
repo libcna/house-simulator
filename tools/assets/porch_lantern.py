@@ -235,8 +235,8 @@ def validate(path: Path) -> tuple[int, list[float], str]:
     return triangles, bounds, hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def validate_front_balcony_instance() -> None:
-    """Keep HOUSE-01287's physical source, receiver and manual-control boundary pinned."""
+def validate_reused_instances() -> None:
+    """Keep the balcony and rear-terrace physical-source contracts pinned."""
     props = {row["id"]: row for row in layout_io.load_file(PROPS, "props")["props"]}
     lights = {row["id"]: row for row in layout_io.load_file(LIGHTS, "lights")["lights"]}
     prop = props["PROP_L1_BALCONY_FRONT_LANTERN"]
@@ -261,6 +261,29 @@ def validate_front_balcony_instance() -> None:
             not light["defaultOn"]:
         raise RuntimeError("front-balcony lantern optical linkage changed")
 
+    for index, x in enumerate((-2.5, 2.5), start=1):
+        prop_id = f"PROP_EXT_TERRACE_LANTERN_{index}"
+        light_id = f"LIGHT_EXT_TERRACE_MAIN_{index}"
+        prop = props[prop_id]
+        light = lights[light_id]
+        if prop["asset"] != "MODEL_FIXTURE_PORCH_LANTERN" or \
+                prop["cell"] != "EXT_TERRACE" or \
+                prop["position"] != [x, 2.475, -32.11025] or prop["yawDeg"] != 180 or \
+                prop["scale"] != 1 or not prop["static"] or prop["collision"] != "none":
+            raise RuntimeError(f"canonical rear-terrace lantern placement changed: {prop_id}")
+        if light["cell"] != "EXT_TERRACE" or light["group"] != "LG_EXT_TERRACE_MAIN" or \
+                light["type"] != "point" or light["position"] != [x, 2.75, -32.23] or \
+                light["direction"] != [0.0, -0.75, -0.661438] or \
+                light["colorK"] != 2700 or light["intensityLm"] != 1600.0 or \
+                light["range"] != 8.5 or light["bakeLumensPerRadiantWatt"] != 0.03 or \
+                light["bakeCells"] != ["L0_SUNROOM"] or \
+                light["spillCells"] != ["EXT_BACKYARD"] or \
+                light["fixtureProp"] != prop_id or \
+                light["emissiveMaterialSlot"] != "LanternShade" or \
+                not light["castsBlobShadow"] or not light["bakedIntoLightmap"] or \
+                light["defaultOn"] or not light.get("duskSensor", False):
+            raise RuntimeError(f"canonical rear-terrace lantern optics changed: {light_id}")
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -277,7 +300,7 @@ def main() -> int:
             if candidate.read_bytes() != expected:
                 raise RuntimeError("committed porch lantern is not byte-identical to its generator")
         triangles, bounds, digest = validate(TARGET)
-        validate_front_balcony_instance()
+        validate_reused_instances()
     elif args.selftest:
         with tempfile.TemporaryDirectory(prefix="porch-lantern-selftest-") as scratch:
             target = Path(scratch) / TARGET.name

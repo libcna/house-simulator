@@ -2254,22 +2254,32 @@
       "duskSensor": true
     },
 
-    // ---- LG_EXT_TERRACE_MAIN x2 -- on the sunroom's north wall, over the terrace
+    // ---- LG_EXT_TERRACE_MAIN x2 -- physical rear-wall lanterns over the terrace. Their broad
+    // ---- wall-lantern pools light the deck locally, spill only into the immediately
+    // ---- adjacent rear lawn and bake a bounded pool onto the sunroom's outside skin.
     {
       "id": "LIGHT_EXT_TERRACE_MAIN_1", "cell": "EXT_TERRACE", "group": "LG_EXT_TERRACE_MAIN",
-      "type": "point", "position": [-2.50, 2.75, -32.15],
-      "direction": [0.0, -1.0, 0.0],
-      "colorK": 2400, "intensityLm": 350.0, "range": 7.00,
-      "fixtureProp": null, "emissiveMaterialSlot": "shade",
-      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+      "type": "point", "position": [-2.50, 2.75, -32.23],
+      "direction": [0.0, -0.75, -0.661438],
+      "colorK": 2700, "intensityLm": 1600.0, "range": 8.50,
+      "bakeLumensPerRadiantWatt": 0.03,
+      "bakeCells": ["L0_SUNROOM"],
+      "spillCells": ["EXT_BACKYARD"],
+      "fixtureProp": "PROP_EXT_TERRACE_LANTERN_1", "emissiveMaterialSlot": "LanternShade",
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false,
+      "duskSensor": true
     },
     {
       "id": "LIGHT_EXT_TERRACE_MAIN_2", "cell": "EXT_TERRACE", "group": "LG_EXT_TERRACE_MAIN",
-      "type": "point", "position": [2.50, 2.75, -32.15],
-      "direction": [0.0, -1.0, 0.0],
-      "colorK": 2400, "intensityLm": 350.0, "range": 7.00,
-      "fixtureProp": null, "emissiveMaterialSlot": "shade",
-      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+      "type": "point", "position": [2.50, 2.75, -32.23],
+      "direction": [0.0, -0.75, -0.661438],
+      "colorK": 2700, "intensityLm": 1600.0, "range": 8.50,
+      "bakeLumensPerRadiantWatt": 0.03,
+      "bakeCells": ["L0_SUNROOM"],
+      "spillCells": ["EXT_BACKYARD"],
+      "fixtureProp": "PROP_EXT_TERRACE_LANTERN_2", "emissiveMaterialSlot": "LanternShade",
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false,
+      "duskSensor": true
     },
 
     // ---- LG_EXT_WALK_PATH x4 -- §11.4's physical low-voltage bollards alternate along the

@@ -837,6 +837,17 @@
       "daylight": null,
       "groups": [
         {
+          "group": "LG_EXT_TERRACE_MAIN",
+          "image": "L0_SUNROOM_LM_LG_EXT_TERRACE_MAIN.png",
+          "lights": [
+            "LIGHT_EXT_TERRACE_MAIN_1",
+            "LIGHT_EXT_TERRACE_MAIN_2"
+          ],
+          "mean": 0.00036407758150334643,
+          "peak": 0.7789570689201355,
+          "scale": 0.7789570689201355
+        },
+        {
           "group": "LG_L0_SUNROOM_BAR",
           "image": "L0_SUNROOM_LM_LG_L0_SUNROOM_BAR.png",
           "lights": [
@@ -860,7 +871,8 @@
           "scale": 14.07666301727295
         }
       ],
-      "shellHash": "sha256:186dd631678d4367b2e619ebc584f14e288a9fc0d91b2aa0af07d3ef261d09ba"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:9ed4e61c767c817d510b79da3b7b5b0002ec27345bc7fdd215a15613bda2c5fe"
     },
     {
       "cell": "L0_WC1",
@@ -2037,13 +2049,12 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_FOYER",
-    "L0_HALL"
+    "L0_SUNROOM"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 8126464,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 1071190,
+  "sourceBytes": 1071842,
   "tool": "bake_house_lightmaps.py"
 }

@@ -1623,6 +1623,8 @@ props/props	PROP_EXT_FACADE_UPLIGHT_W1
 props/props	PROP_EXT_FACADE_UPLIGHT_W2
 props/props	PROP_EXT_GARAGE_LANTERN_1
 props/props	PROP_EXT_GARAGE_LANTERN_2
+props/props	PROP_EXT_TERRACE_LANTERN_1
+props/props	PROP_EXT_TERRACE_LANTERN_2
 props/props	PROP_EXT_WALK_BOLLARD_1
 props/props	PROP_EXT_WALK_BOLLARD_2
 props/props	PROP_EXT_WALK_BOLLARD_3
@@ -2384,7 +2386,6 @@ interactables/interactables	SWITCH_B1_WC7
 interactables/interactables	SWITCH_B1_WORKSHOP
 interactables/interactables	SWITCH_EXT_DRIVEWAY
 interactables/interactables	SWITCH_EXT_SHED
-interactables/interactables	SWITCH_EXT_TERRACE
 interactables/interactables	SWITCH_EXT_WALK
 interactables/interactables	SWITCH_L0_BUTLERS
 interactables/interactables	SWITCH_L0_CLOSET_W
@@ -2576,6 +2577,7 @@ assets	TEXTURE_L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_STEP
 assets	TEXTURE_L0_STOR_LM_DAY
 assets	TEXTURE_L0_STOR_LM_LG_L0_STOR_MAIN
 assets	TEXTURE_L0_SUNROOM_LM_DAY
+assets	TEXTURE_L0_SUNROOM_LM_LG_EXT_TERRACE_MAIN
 assets	TEXTURE_L0_SUNROOM_LM_LG_L0_SUNROOM_BAR
 assets	TEXTURE_L0_SUNROOM_LM_LG_L0_SUNROOM_MAIN
 assets	TEXTURE_L0_WC1_LM_DAY

@@ -1864,14 +1864,22 @@
       "geometry": {
         "unitScale": 1,
         "upAxis": "Y",
-        "boundsMetres": [0.75, 0.905, 0.75],
-        "triangles": { "LOD0": 816 },
+        "boundsMetres": [
+          0.75,
+          0.905,
+          0.75
+        ],
+        "triangles": {
+          "LOD0": 816
+        },
         "collision": "garden_birdbath_004_basin_rim_COL"
       },
       "materialMap": {
         "GARDEN_STONE": "MAT_OUTDOOR_BLUESTONE"
       },
-      "usedIn": ["EXT_BACKYARD"]
+      "usedIn": [
+        "EXT_BACKYARD"
+      ]
     },
     {
       "id": "MODEL_GARDEN_DINING_SET",
@@ -1896,8 +1904,14 @@
       "geometry": {
         "unitScale": 1,
         "upAxis": "Y",
-        "boundsMetres": [2.58, 0.940505, 2.58],
-        "triangles": { "LOD0": 5112 },
+        "boundsMetres": [
+          2.58,
+          0.940505,
+          2.58
+        ],
+        "triangles": {
+          "LOD0": 5112
+        },
         "collision": "garden_dining_001_table_top_COL"
       },
       "materialMap": {
@@ -1905,7 +1919,9 @@
         "GARDEN_TEXTILE": "MAT_FAMILY_CURTAIN_WOOL",
         "GARDEN_WOOD": "MAT_OUTDOOR_GARDEN_WOOD"
       },
-      "usedIn": ["EXT_TERRACE"]
+      "usedIn": [
+        "EXT_TERRACE"
+      ]
     },
     {
       "id": "MODEL_GARDEN_FIRE_PIT",
@@ -1930,8 +1946,14 @@
       "geometry": {
         "unitScale": 1,
         "upAxis": "Y",
-        "boundsMetres": [1.2, 0.45, 1.2],
-        "triangles": { "LOD0": 972 },
+        "boundsMetres": [
+          1.2,
+          0.45,
+          1.2
+        ],
+        "triangles": {
+          "LOD0": 972
+        },
         "collision": "garden_firepit_002_stone_ring_COL"
       },
       "materialMap": {
@@ -1940,7 +1962,9 @@
         "GARDEN_STONE": "MAT_OUTDOOR_BLUESTONE",
         "GARDEN_WOOD": "MAT_OUTDOOR_GARDEN_WOOD"
       },
-      "usedIn": ["EXT_BACKYARD"]
+      "usedIn": [
+        "EXT_BACKYARD"
+      ]
     },
     {
       "id": "MODEL_GARDEN_LOUNGER",
@@ -1965,8 +1989,14 @@
       "geometry": {
         "unitScale": 1,
         "upAxis": "Y",
-        "boundsMetres": [0.695, 0.887765, 1.924598],
-        "triangles": { "LOD0": 2032 },
+        "boundsMetres": [
+          0.695,
+          0.887765,
+          1.924598
+        ],
+        "triangles": {
+          "LOD0": 2032
+        },
         "collision": "garden_lounger_001_side_rail_-1_COL"
       },
       "materialMap": {
@@ -1974,7 +2004,9 @@
         "GARDEN_TEXTILE": "MAT_FAMILY_CURTAIN_WOOL",
         "GARDEN_WOOD": "MAT_OUTDOOR_GARDEN_WOOD"
       },
-      "usedIn": ["EXT_TERRACE"]
+      "usedIn": [
+        "EXT_TERRACE"
+      ]
     },
     {
       "id": "MODEL_GARDEN_PLANTER",
@@ -1999,8 +2031,14 @@
       "geometry": {
         "unitScale": 1,
         "upAxis": "Y",
-        "boundsMetres": [0.674339, 1.034, 0.58],
-        "triangles": { "LOD0": 756 },
+        "boundsMetres": [
+          0.674339,
+          1.034,
+          0.58
+        ],
+        "triangles": {
+          "LOD0": 756
+        },
         "collision": "garden_planter_002_pot_rim_COL"
       },
       "materialMap": {
@@ -2008,7 +2046,9 @@
         "GARDEN_SOIL": "MAT_OUTDOOR_SOIL",
         "GARDEN_STONE": "MAT_OUTDOOR_BLUESTONE"
       },
-      "usedIn": ["EXT_TERRACE"]
+      "usedIn": [
+        "EXT_TERRACE"
+      ]
     },
     {
       "id": "MODEL_GARDEN_SWING_BENCH",
@@ -2033,8 +2073,14 @@
       "geometry": {
         "unitScale": 1,
         "upAxis": "Y",
-        "boundsMetres": [2.42, 2.130818, 1.2],
-        "triangles": { "LOD0": 1856 },
+        "boundsMetres": [
+          2.42,
+          2.130818,
+          1.2
+        ],
+        "triangles": {
+          "LOD0": 1856
+        },
         "collision": "garden_swing_003_foot_-1_front_COL"
       },
       "materialMap": {
@@ -2042,7 +2088,9 @@
         "GARDEN_TEXTILE": "MAT_FAMILY_CURTAIN_WOOL",
         "GARDEN_WOOD": "MAT_OUTDOOR_GARDEN_WOOD"
       },
-      "usedIn": ["EXT_BACKYARD"]
+      "usedIn": [
+        "EXT_BACKYARD"
+      ]
     },
     {
       "id": "MODEL_HALL_GALLERY_EAST",
@@ -22059,6 +22107,33 @@
         "commercialUse": true,
         "modification": true,
         "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L0_SUNROOM_LM_LG_EXT_TERRACE_MAIN",
+      "category": "lightmap-artificial",
+      "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_SUNROOM_LM_LG_EXT_TERRACE_MAIN.png",
+      "sourceSha256": "bbfcd10065a5309c9a0497e7cf368c81be21f784b6dbe07400611140d4291a33",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Artificial/L0_SUNROOM_LM_LG_EXT_TERRACE_MAIN",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical artificial lightmap for L0_SUNROOM",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 256 samples and 683 lm per radiant watt; selected-cell calibration, not a full-house rebake."
       }
     },
     {

@@ -3570,6 +3570,15 @@ it. This is the technique lightmapped games used for twenty years and it is a pe
 > sources use 18.75, preserving their established peaks at 0.4852 and 0.5133 while distributing
 > useful mean irradiance to 0.0686 and 0.1155. These are offline artistic conversions only: the
 > 2,700 K groups, ranges, switches, default-on state, stock-XNA runtime and exposure are unchanged.
+>
+> `HOUSE-01291` physicalises the two rear-terrace sources with approved 232-triangle wall
+> lanterns at x = ±2.50 m on the sunroom's rear wall. Each stable point originates from its linked
+> `LanternShade` at y = 2.75 m / z = -32.23 m and emits 1,600 lm at 2,700 K over 8.5 m. The group
+> follows its one dusk-sensor owner; its obsolete wall plate is removed, and both validators reject
+> any future group that mixes dusk automation with a wall switch. `L0_SUNROOM` is the only named
+> fixed receiver and `EXT_BACKYARD` the only unbaked-detail spill cell. The selected atlas uses a
+> restrained 0.03 source calibration and measures 0.778957 peak / 0.000364078 mean, retaining a
+> local facade/terrace cue rather than lifting exposure across the rear elevation.
 
 ### 28.4 Daylight through windows
 
@@ -5442,8 +5451,9 @@ decal. That is the right scope.
 * Three-way switching: `L0_STAIR_MAIN`'s lights and the `L1_HALL` lights each have two plates; the
   group toggles from either. Data expresses this as a group with two switch props.
 * Some groups have no wall switch: table and floor lamps are switched by interacting with the lamp
-  itself; the fridge interior light is driven by the door; the porch lantern and the street lights
-  have a dusk sensor with a per-fixture random offset.
+  itself; the fridge interior light is driven by the door; the porch lantern, rear-terrace lanterns
+  and street lights have a dusk sensor with a per-fixture random offset. A group may not combine
+  an automatic dusk owner with a wall plate (`HOUSE-01291`).
 * Turning a group on: the baked `LM_ART_<group>` pass fades in over 0.12 s (a filament ramp for the
   warm bulbs, instant for the LEDs, a 0.4 s flicker-start for the garage fluorescent), the
   fixture's emissive material lights, its glow quad appears, dynamic objects in the room pick it up
@@ -5465,6 +5475,10 @@ decal. That is the right scope.
   narrow mulched strip inside `EXT_SIDEYARD_E`; their 2,700 K / 160 lm downward spots share
   `LG_EXT_DRIVEWAY_EDGE`, follow the dusk sensor and explicitly spill only to `EXT_DRIVEWAY`.
   They do not change or automatically enable `LG_EXT_DRIVEWAY_FLOOD` (`HOUSE-00945`).
+  The two rear-terrace sources are physical bronze/opal wall lanterns on the sunroom at x =
+  ±2.50 m. Their 2,700 K / 1,600 lm / 8.5 m points follow the dusk sensor, bake only onto the
+  selected adjacent `L0_SUNROOM` outer skin and spill only to `EXT_BACKYARD`; they have no wall
+  switch (`HOUSE-01291`).
   The neighbours' porch lights are two per facade on N1 and N2, placed by `HOUSE-00391` with the
   houses they hang on. The **balconies** are missing from that list and §13.4 gives them three
   groups — two wall

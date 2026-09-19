@@ -80,13 +80,12 @@ namespace
         const auto& list = game.RenderListForTesting();
         ASSERT_GT(list.Size(), 0U) << "the frame drew from an empty list";
         EXPECT_TRUE(list.IsSorted()) << "the pass read its slice, which is what sorts the list";
-        // HOUSE-00771's coherent garden suite brought the measured unculled house to 705
+        // HOUSE-01291's two physical terrace lanterns brought the measured unculled house to 707
         // calls, over FOUR frames: a list that was not emptied between them would be four houses
         // long and would still draw a correct-looking picture. This diagnostic remains far below
-        // §71.2's 1,400-call worst-case envelope. Ten placements reuse six assets and six already
-        // canonical finishes; the measured increase is nine chunks, including one independently
-        // bounded foliage cutout, rather than one draw per chair, slat or planter.
-        EXPECT_LE(list.DrawCalls(), 705) << "the list was not cleared between frames";
+        // §71.2's 1,400-call worst-case envelope. Both placements reuse one approved fixture;
+        // the measured increase is one shared body and one independently emissive diffuser chunk.
+        EXPECT_LE(list.DrawCalls(), 707) << "the list was not cleared between frames";
 
         const cnahouse::debug::Counter* chunks = game.CountersForTesting().Find("static.chunks");
         const cnahouse::debug::Counter* states = game.CountersForTesting().Find("static.stateChanges");

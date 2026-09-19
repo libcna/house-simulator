@@ -402,7 +402,7 @@ TEST(LightingSystemTests, InitialGroupsMatchAuthoredDefaultsAndEntryLightsCanBeS
     EXPECT_FLOAT_EQ(hall->artificial, 0.0F);
 }
 
-TEST(LightingSystemTests, AllTwentySixAuthoredDuskFixturesFollowDayNightWithAVisibleStagger)
+TEST(LightingSystemTests, AllTwentyEightAuthoredDuskFixturesFollowDayNightWithAVisibleStagger)
 {
     if (!ContentIsBuilt())
     {
@@ -414,18 +414,20 @@ TEST(LightingSystemTests, AllTwentySixAuthoredDuskFixturesFollowDayNightWithAVis
     const Id facadeUplights = Id::Of("LG_EXT_FACADE_UPLIGHT");
     const Id garageLanterns = Id::Of("LG_EXT_GARAGE_LANTERN");
     const Id drivewayEdge = Id::Of("LG_EXT_DRIVEWAY_EDGE");
+    const Id terrace = Id::Of("LG_EXT_TERRACE_MAIN");
     const Id street = Id::Of("LG_EXT_STREET");
     const Id neighbours = Id::Of("LG_EXT_NEIGHBOUR_PORCH");
     ASSERT_TRUE(house.lighting.IsGroupDuskControlled(porch));
     ASSERT_TRUE(house.lighting.IsGroupDuskControlled(facadeUplights));
     ASSERT_TRUE(house.lighting.IsGroupDuskControlled(garageLanterns));
     ASSERT_TRUE(house.lighting.IsGroupDuskControlled(drivewayEdge));
+    ASSERT_TRUE(house.lighting.IsGroupDuskControlled(terrace));
     ASSERT_TRUE(house.lighting.IsGroupDuskControlled(street));
     ASSERT_TRUE(house.lighting.IsGroupDuskControlled(neighbours));
     EXPECT_EQ(std::count_if(house.world.Lights().begin(),
                             house.world.Lights().end(),
                             [](const world::Light& light) { return light.duskSensor; }),
-              26);
+              28);
 
     cnahouse::environment::CivilTime time;
     time.year = 2031;
