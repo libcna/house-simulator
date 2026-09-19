@@ -188,7 +188,7 @@ def validate_world() -> None:
                 light["coneInnerDeg"] != 72.0 or light["coneOuterDeg"] != 140.0 or \
                 light["colorK"] != 3000 or light["bulbClass"] != "led" or \
                 light["intensityLm"] != 1200.0 or light["range"] != 6.62 or \
-                light["bakeLumensPerRadiantWatt"] != 100.0 or \
+                light["bakeLumensPerRadiantWatt"] != 25.0 or \
                 light["emissiveMaterialSlot"] != "FamilyCeilingDiffuser" or \
                 not light["bakedIntoLightmap"] or not light["defaultOn"]:
             raise RuntimeError(f"sunroom ceiling optical linkage changed: {light_id}")

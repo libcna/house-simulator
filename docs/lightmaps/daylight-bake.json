@@ -358,8 +358,8 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "lumensPerRadiantWatt": 100.0,
-      "shellHash": "sha256:b412177cdd91b09bd625188eb7eb02f9343460daf45839652cfacf6dc9985208"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:df41e75c2585ce13607ae2e9d8159f51590fce3c39cc7241e9cea47d33eb1872"
     },
     {
       "cell": "L0_WC1",
@@ -818,6 +818,6 @@
   "rgba8Bytes": 5111808,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 517545,
+  "sourceBytes": 517531,
   "tool": "bake_house_lightmaps.py"
 }

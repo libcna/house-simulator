@@ -3621,6 +3621,16 @@ it. This is the technique lightmapped games used for twenty years and it is a pe
 > selected 256-sample artificial atlases use the explicit 100 lm-per-radiant-watt offline
 > calibration and peak at 0.1715 (main) and 0.1988 (bar). Exterior dusk ownership, daylight,
 > exposure and runtime renderer paths do not change.
+>
+> `HOUSE-01292` measures a clear-day anomaly: switching both sunroom groups off makes the sage
+> wall brighter because the full-on group fraction drives camera exposure to 1 despite their
+> original artificial atlas mean of only 0.02946. Rather than change adaptation for every room,
+> the same six physical fixtures retain their 5,500 lm and use a source-local 25 instead of
+> 100 lm-per-radiant-watt offline calibration. The selected main/bar means rise to
+> 0.11499/0.011037 and peaks to 0.67001/0.79517, with coherent warm daytime and night room
+> views. The 0.778957 rear-terrace product and all other cells, switches, daylight scale and
+> XNA-only runtime remain unchanged. This does not claim to solve the wider exposure-bake
+> mismatch or garden ground lighting.
 
 ### 28.4 Daylight through windows
 

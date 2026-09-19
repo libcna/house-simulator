@@ -22179,7 +22179,7 @@
       "id": "TEXTURE_L0_SUNROOM_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_SUNROOM_LM_DAY.png",
-      "sourceSha256": "76f0397ccea96ca6947e6fe9374068ea04bc2d46c98faa1aaa31f13cc6e7e7a1",
+      "sourceSha256": "c7d29be03abcb516880bdbfcb5ac8c12b75335c8fa2fc2d549f83f85e16245d9",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22233,7 +22233,7 @@
       "id": "TEXTURE_L0_SUNROOM_LM_LG_L0_SUNROOM_BAR",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_SUNROOM_LM_LG_L0_SUNROOM_BAR.png",
-      "sourceSha256": "ec23ba35fe7b861d2640bd970cc3181232cdf6af14234ae82a6ebf221b0d9bda",
+      "sourceSha256": "e53123148b199c2979b75f280aee17aedd8124e39067e1680b7a5fdf48b9c675",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22260,7 +22260,7 @@
       "id": "TEXTURE_L0_SUNROOM_LM_LG_L0_SUNROOM_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_SUNROOM_LM_LG_L0_SUNROOM_MAIN.png",
-      "sourceSha256": "0dc734472e72c74bc2b760633445ce492e1540ee986be2e72123ec2e14ce14a3",
+      "sourceSha256": "58db59ccd926cec7cc61e7e6131019a1184e57e99e46b52692c969f88fc15ef2",
       "texture": {
         "width": 128,
         "height": 128,

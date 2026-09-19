@@ -823,7 +823,7 @@
       "type": "spot", "position": [-3.57, 3.12, -30.43],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 72.0, "coneOuterDeg": 140.0,
       "colorK": 3000, "bulbClass": "led", "intensityLm": 1200.0, "range": 6.62,
-      "bakeLumensPerRadiantWatt": 100.0,
+      "bakeLumensPerRadiantWatt": 25.0,
       "fixtureProp": "PROP_L0_SUNROOM_CEILING_1", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
@@ -832,7 +832,7 @@
       "type": "spot", "position": [-0.43, 3.12, -30.43],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 72.0, "coneOuterDeg": 140.0,
       "colorK": 3000, "bulbClass": "led", "intensityLm": 1200.0, "range": 6.62,
-      "bakeLumensPerRadiantWatt": 100.0,
+      "bakeLumensPerRadiantWatt": 25.0,
       "fixtureProp": "PROP_L0_SUNROOM_CEILING_2", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
@@ -841,7 +841,7 @@
       "type": "spot", "position": [-3.57, 3.12, -28.77],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 72.0, "coneOuterDeg": 140.0,
       "colorK": 3000, "bulbClass": "led", "intensityLm": 1200.0, "range": 6.62,
-      "bakeLumensPerRadiantWatt": 100.0,
+      "bakeLumensPerRadiantWatt": 25.0,
       "fixtureProp": "PROP_L0_SUNROOM_CEILING_3", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
@@ -850,7 +850,7 @@
       "type": "spot", "position": [-0.43, 3.12, -28.77],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 72.0, "coneOuterDeg": 140.0,
       "colorK": 3000, "bulbClass": "led", "intensityLm": 1200.0, "range": 6.62,
-      "bakeLumensPerRadiantWatt": 100.0,
+      "bakeLumensPerRadiantWatt": 25.0,
       "fixtureProp": "PROP_L0_SUNROOM_CEILING_4", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
@@ -861,7 +861,7 @@
       "type": "spot", "position": [0.65, 2.1425, -27.48],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 50.0, "coneOuterDeg": 100.0,
       "colorK": 3000, "bulbClass": "led", "intensityLm": 350.0, "range": 2.40,
-      "bakeLumensPerRadiantWatt": 100.0,
+      "bakeLumensPerRadiantWatt": 25.0,
       "fixtureProp": "PROP_L0_SUNROOM_BAR_PUCK_1", "emissiveMaterialSlot": "PuckDiffuser",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": true
     },
@@ -870,7 +870,7 @@
       "type": "spot", "position": [1.65, 2.1425, -27.48],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 50.0, "coneOuterDeg": 100.0,
       "colorK": 3000, "bulbClass": "led", "intensityLm": 350.0, "range": 2.40,
-      "bakeLumensPerRadiantWatt": 100.0,
+      "bakeLumensPerRadiantWatt": 25.0,
       "fixtureProp": "PROP_L0_SUNROOM_BAR_PUCK_2", "emissiveMaterialSlot": "PuckDiffuser",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": true
     },

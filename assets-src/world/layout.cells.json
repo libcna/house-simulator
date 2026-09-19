@@ -1003,7 +1003,7 @@
       "daylight": { "orientation": "S", "exposure": 0.82 },
       "lightGroups": ["LG_L0_SUNROOM_MAIN", "LG_L0_SUNROOM_BAR"],
       "lightmaps": {
-        "shellHash": "sha256:b412177cdd91b09bd625188eb7eb02f9343460daf45839652cfacf6dc9985208",
+        "shellHash": "sha256:df41e75c2585ce13607ae2e9d8159f51590fce3c39cc7241e9cea47d33eb1872",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_SUNROOM_LM_DAY",
           "scale": 1.000000238418579
@@ -1017,12 +1017,12 @@
           {
             "group": "LG_L0_SUNROOM_BAR",
             "contentName": "Textures/Lightmaps/Artificial/L0_SUNROOM_LM_LG_L0_SUNROOM_BAR",
-            "scale": 0.1987954080104828
+            "scale": 0.7951695322990417
           },
           {
             "group": "LG_L0_SUNROOM_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_SUNROOM_LM_LG_L0_SUNROOM_MAIN",
-            "scale": 0.17145319283008575
+            "scale": 0.670008659362793
           }
         ]
       },

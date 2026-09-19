@@ -3799,3 +3799,39 @@ are recorded in `plan.md` and the latest handoff.
 `VISUAL-GATE-1` still **FAILS**. Normal gameplay uses only production materials; the debug
 blockout remains explicit. The next work must make a meaningful daylight or physically grounded
 night improvement rather than hiding the remaining defect behind global exposure.
+
+## Round 86 — sunroom practicals light the room, not only themselves
+
+Commit: `HOUSE-01292` checkpoint (`2026-09-19`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 85's complete [clear-day](captures/house-00950-limestone-day-r1) and
+[normal-night](captures/house-00950-limestone-night-r1) controls. After: matched 26-camera
+[clear-day](captures/house-01292-sunroom-day-r1) and
+[normal-night](captures/house-01292-sunroom-night-r1) sets. Both contact sheets and the full-size
+`sunroom-breakfast` and `sunroom-wet-bar` pairs were opened. An additional clear-day
+sunroom-breakfast capture with both sunroom groups OFF proved the baseline anomaly: the same
+sage wall at pixel (750,440) read RGB (22,27,22) with both ON but (39,58,59) with both OFF.
+
+Ranked visible defects remaining:
+
+1. At 22:00 the garden beyond the terrace is nearly black while isolated foliage glows. The
+   16 m Basic terrain batch cannot correctly rank short-range garden fixtures by its single
+   centre; lighting the ground calls for a receiver-aware solution, not scattered bulbs.
+2. Across the open wet-bar/kitchen threshold, sunroom floor and wall are now warmly legible
+   while the neighbouring kitchen recess is much darker. The per-room exposure and bake
+   calibration mismatch deserves a separate measured investigation; do not lift all exposure.
+3. Rear upper elevation, balcony rail and fence/lawn remain geometrically simple. The sunroom
+   breakfast still has too little layered decor for a convincing inhabited space.
+
+Fixed: only the six approved, physically placed sunroom fixtures use a lower source-local
+offline lumens/radiant-watt calibration. At the same emitted 5,500 lm, the main 256-sample
+atlas mean/peak rises 0.02946/0.17145 → 0.11499/0.67001; the wet-bar group rises
+0.002777/0.19880 → 0.011037/0.79517. The night room becomes readable without turning the
+outside lawn orange, and the clear-day wall, ceiling and tile regain depth. The matched
+breakfast/wet-bar frames change by normalized RGB MAE 0.063509/0.064766 by day and
+0.063545/0.064717 by night; `rear-terrace` is unchanged in daylight. This is a calibrated
+local irradiance bake, not a global exposure, renderer, source-lumen or geometry change.
+
+Only the `fp-l0-hall` and `fp-l0-kitchen` strict references advance after individual old/new/diff
+inspection of the visible sunroom region. `VISUAL-GATE-1` still **FAILS**: the night garden,
+cross-room contrast and rear exterior remain the highest-value next work.

@@ -57,7 +57,9 @@ scaled project-authored asphalt shingles and aligns every course to the true slo
 complete K-profile rainwater goods instead of incomplete black strips.
 `HOUSE-00950` replaces the sunroom's continuous grey marble with one room-owned, physically
 scaled warm tile using the approved stock-XNA material path; the other three marble rooms keep
-their finish. This does not solve the separate too-dark daylight bake or the night garden.
+their finish. `HOUSE-01292` then calibrates only the six installed sunroom practicals against
+their own 256-sample bake, making the wall, ceiling and tile visible with the lights on in both
+day and evening. It does not lift global exposure or light the night garden.
 `HOUSE-00945` gives the sparse garage approach a measured planted border and three physical,
 dusk-controlled low fixtures without enabling its independent manual flood.
 `HOUSE-00946` gives the broad concrete driveway construction scale with fine control joints and
@@ -16502,6 +16504,48 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             inspected golden update, with eight capture-only generators disabled. All eighteen
             culled/unculled pairs remain below 0.2%, at 0.0558% worst (`l0-sunroom`). Project
             static and strict-XNA gates pass with heavy work restricted to CPU 0-5.
+- [x] HOUSE-01292 — Calibrate the sunroom's physical ceiling and bar lightmap contribution
+      dep: HOUSE-00950, HOUSE-01068, HOUSE-01256, HOUSE-01264, HOUSE-01266, HOUSE-01285, HOUSE-01291 · sys: world, content, lighting · plat: ALL · pri: MUST
+      note: (2026-09-19) Round 85's exact sunroom camera with both default-on groups disabled
+            is paradoxically brighter than with them enabled at clear 10:30: sage wall pixel
+            (750,440) changes RGB (22,27,22) on → (39,58,59) off. The camera adaptation uses
+            the *fraction* of installed lumens switched on, reaching exposure 1 with all groups
+            enabled even though the selected main bake averaged only 0.0295. This is a real model
+            mismatch, but changing the global exposure curve would disturb every established
+            room. Calibrate the six existing sunroom emitters in their own offline bake first;
+            retain the actual 4 × 1,200 + 2 × 350 lm, geometry, switch ownership and runtime API.
+      accept: selected 256-sample sunroom artificial/daylight products are deterministically
+            rebaked and promoted together with hashes/provenance; floor, wall, ceiling and bar
+            become useful with default-on lights in the fixed day and night views, without
+            flooding the terrace or changing any other room's receiver, global exposure,
+            collision, navigation or portal contract. Compare the exact 26 day and night poses,
+            advance only inspected references, run unit/integration/render/culling/content,
+            provenance and strict-XNA gates with no more than six CPUs.
+      done: Six source-local `bakeLumensPerRadiantWatt` conversions change 100 → 25 without
+            changing emitted lumens or source placement. `LG_L0_SUNROOM_MAIN` mean/peak rises
+            0.02946/0.17145 → 0.11499/0.67001, `BAR` 0.002777/0.19880 →
+            0.011037/0.79517. The cross-cell terrace product stays 0.000364/0.778957.
+            Only `L0_SUNROOM` is promoted; its daylight atlas is revalidated against the new
+            light-definition shell hash, with a stable 1.000000 daylight scale. The complete
+            78-cell unwrap report was regenerated before the selected bake.
+      review: Round 86's fixed 26-camera clear-day and normal-night sets were opened alongside
+            Round 85. The breakfast/wet-bar matched normalized RGB MAE is 0.063509/0.064766
+            by day and 0.063545/0.064717 by night. Floor joints, rear sage wall and ceiling are
+            visibly readable under the warm physical fixtures, including from the kitchen/hall
+            route. The exterior-facing `rear-terrace` frame is byte-identical by day and nearly
+            identical by night; no additional light is cast into the lawn. The dark room beyond
+            the wet-bar aperture and almost black 22:00 garden remain separate visual defects.
+            The only strict references advanced after old/new/diff inspection are
+            `fp-l0-hall` and `fp-l0-kitchen`, whose changed pixels lie on the visible sunroom.
+      verified: Complete 31-stage content graph fresh after the selected promotion; both
+            fixture-generation guards updated and passing at 25 without weakening any other
+            world-placement or optical checks. Budget, manifest/licence, stable world IDs, source
+            shell and all project static gates green, including 323 strict-XNA translation
+            units. All 1,409 unit, 135 integration and 48 active software-render tests pass;
+            eight capture-only generators remain disabled. Eighteen culled/unculled pairs stay
+            below 0.2%, worst 0.0558% in `l0-sunroom`. `CNA_CNAEXT=OFF` unchanged. The nav
+            generator completed in 6.08 s; no zombie process. All compilation/heavy tooling
+            was affinity-limited to CPUs 0–5 with no more than six workers.
 - [x] HOUSE-01261 — Implement the per-object three-directional-light assignment (key/fill/bounce) for dynamic objects
       dep: HOUSE-01251, HOUSE-00892 · sys: lighting · plat: ALL · pri: MUST
       accept: `BasicEffect` and `SkinnedEffect` receive the same stable key/fill/bounce slot
@@ -20228,6 +20272,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-19 | `HOUSE-01292` | **New task, next free phase-16 id.** Locally recalibrate the six approved sunroom practicals and promote only their receiver's selected daylight/artificial products. | Round 85's same-pose ON/OFF control shows that switching on all installed sunroom lumens collapses the camera target exposure to 1 while the actual main atlas averages 0.02946: the player sees a darker occupied room with more lights. Its existing four ceiling fixtures and two bar task lights already provide the physical sources. A local offline irradiance correction has bounded visual value and preserves the runtime adaptation contract while wider exposure/atlas reconciliation is investigated separately. |
 | 2026-09-19 | `HOUSE-00950` | **New task, next free phase-12 id.** Give only the sunroom a physically scaled warm tile instead of the original continuous cold marble. | Round 84's matched views make the floor the largest independently tractable material defect inside the connected rear route. The approved Tiles139 source and existing stock-XNA DualTexture role can change that surface without global recolouring, new asset/provenance, a renderer branch or lightmap-layout change. Simple garden bollards were investigated first but would not ground the dark lawn under the present 16 m Basic-terrain assignment. |
 | 2026-09-19 | `HOUSE-00949` | **New task, next free phase-12 id.** Make both authored sliders real glazed aluminium assemblies instead of the shell generator's opaque generic-door fallback. | Round 83's direct sunroom view ranks the broad pale rear slab as the largest newly exposed defect, and the master balcony uses the same type. The existing shell grammar, approved clear glass/aluminium finishes and exact exterior-fenestration role can correct both without a runtime room branch, new renderer, downloaded asset or simulation change. |
 | 2026-09-19 | `HOUSE-01068` | **New task, next free phase-13 id.** Add the exact visible breakfast/bar composition and physical sunroom lighting as a bounded checkpoint while leaving the bulk-acquisition-dependent full `HOUSE-00993` room task open. | Round 82 ranks the empty day/black night sunroom behind the newly lit terrace as the largest continuous-route defect. The approved project-authored prop, stock-XNA material, linked-fixture and selected-atlas paths can correct it now without falsifying `HOUSE-00986`/`HOUSE-00993`, downloading an asset, changing exposure or introducing a renderer branch. |

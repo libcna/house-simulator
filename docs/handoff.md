@@ -1,3 +1,52 @@
+# Visual-sprint handoff — 2026-09-19 (`HOUSE-01292` checkpoint)
+
+Branch `develop`. Task-start HEAD `57cb4c214b1b0abd5629ce7200725473f3573ab6`
+(`HOUSE-00950`). This section belongs to the single `HOUSE-01292` commit; use its final commit
+as ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal gameplay uses production materials; the
+coloured blockout remains explicit debug only. All heavy work and compilation used CPUs 0–5,
+at most six workers. The tree should be clean after the checkpoint.
+
+Round 85's [clear-day](visual-review/captures/house-00950-limestone-day-r1) and
+[normal-night](visual-review/captures/house-00950-limestone-night-r1) 26-camera sets are the
+before controls. Round 86's matched
+[clear-day](visual-review/captures/house-01292-sunroom-day-r1) and
+[normal-night](visual-review/captures/house-01292-sunroom-night-r1) sets are the inspected after
+views, each with a contact sheet. Open `sunroom-breakfast.png` and `sunroom-wet-bar.png` at
+full resolution. The default-on ceiling and wet-bar practicals now visibly light the sage wall,
+ceiling, bar and measured tile floor. At 10:30, the exact wall sample with both groups OFF was
+RGB (39,58,59), but with the old ON bake was (22,27,22): installed-lumen-fraction exposure
+constricted although the actual artificial atlas was weak. This task did not change global
+exposure. Six source-local bake conversions 100 → 25 lm/radiant-watt raise main mean/peak
+0.02946/0.17145 → 0.11499/0.67001 and bar 0.002777/0.19880 → 0.011037/0.79517.
+The unchanged terrace cross-cell mean/peak remains 0.000364/0.778957. The daylight selected
+product was deterministically rebaked only to revalidate the light-definition hash; its scale
+remains 1.000000. No geometry, portal, collision, navigation, lumen, switch, renderer or XNA
+API changed. Complete 78-cell unwrap report preceded the selected promotion; other cell
+atlases are untouched.
+
+The matched breakfast/wet-bar frames differ by normalized RGB MAE 0.063509/0.064766 in day and
+0.063545/0.064717 at night; `rear-terrace` is byte-identical in day and effectively identical
+at night. Two strict golden images with the sunroom in view were individually inspected and
+advanced: `fp-l0-hall` and `fp-l0-kitchen`. No unrelated reference was moved. Unit tests passed
+1,409/1,409, integration 135/135 and the final direct software-render suite 48/48 (eight
+capture-only cases remain disabled). The first render pass had only those two expected reference
+drifts; all 18 culling equivalence pairs passed at 0.0558% worst (`l0-sunroom`). The complete
+31-stage content graph is fresh. Content and licence provenance and the source-only budget
+report were regenerated. All project static gates pass, including 323 strict-XNA translation
+units; `CNA_CNAEXT=OFF` remains forced. The first static run reported only two task-local
+fixture selftest expectations and a stale generated budget report; all were corrected and the
+complete rerun is green. `git diff --check` passes. No CNA, sharp-runtime or sibling repository
+was edited. `build_nav.py` completed in six seconds, not a zombie.
+
+Next visible priorities: night garden ground remains nearly black with disconnected bright
+foliage; do not add short-range lights without addressing the 16 m terrain receiver/fixture
+ranking. Across the sunroom→kitchen wet-bar opening, the adjacent room remains dark against
+the now warm sunroom; diagnose the cross-cell exposure/bake relation rather than applying a
+global exposure hack. The broad rear upper elevation, balcony rail and flat lawn/fence still
+need visual depth. No partial work is left from this task after the commit.
+
+---
+
 # Visual-sprint handoff — 2026-09-19 (`HOUSE-00950` checkpoint)
 
 Branch `develop`. Task-start HEAD `cab5b805d330fd3e832065128bbf4cfb8c449404`

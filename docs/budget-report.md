@@ -774,10 +774,10 @@ A `+` after a total means at least one row in that pack could not be measured, s
 | `house-l0` | `TEXTURE_L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_STEP` | texture | `Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_STEP` | 10,490 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_STOR_LM_DAY` | texture | `Textures/Lightmaps/Daylight/L0_STOR_LM_DAY` | 598 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_STOR_LM_LG_L0_STOR_MAIN` | texture | `Textures/Lightmaps/Artificial/L0_STOR_LM_LG_L0_STOR_MAIN` | 5,599 | -- | 65,536 | · | · |
-| `house-l0` | `TEXTURE_L0_SUNROOM_LM_DAY` | texture | `Textures/Lightmaps/Daylight/L0_SUNROOM_LM_DAY` | 14,374 | -- | 65,536 | · | · |
+| `house-l0` | `TEXTURE_L0_SUNROOM_LM_DAY` | texture | `Textures/Lightmaps/Daylight/L0_SUNROOM_LM_DAY` | 14,360 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_SUNROOM_LM_LG_EXT_TERRACE_MAIN` | texture | `Textures/Lightmaps/Artificial/L0_SUNROOM_LM_LG_EXT_TERRACE_MAIN` | 652 | -- | 65,536 | · | · |
-| `house-l0` | `TEXTURE_L0_SUNROOM_LM_LG_L0_SUNROOM_BAR` | texture | `Textures/Lightmaps/Artificial/L0_SUNROOM_LM_LG_L0_SUNROOM_BAR` | 9,497 | -- | 65,536 | · | · |
-| `house-l0` | `TEXTURE_L0_SUNROOM_LM_LG_L0_SUNROOM_MAIN` | texture | `Textures/Lightmaps/Artificial/L0_SUNROOM_LM_LG_L0_SUNROOM_MAIN` | 13,557 | -- | 65,536 | · | · |
+| `house-l0` | `TEXTURE_L0_SUNROOM_LM_LG_L0_SUNROOM_BAR` | texture | `Textures/Lightmaps/Artificial/L0_SUNROOM_LM_LG_L0_SUNROOM_BAR` | 9,472 | -- | 65,536 | · | · |
+| `house-l0` | `TEXTURE_L0_SUNROOM_LM_LG_L0_SUNROOM_MAIN` | texture | `Textures/Lightmaps/Artificial/L0_SUNROOM_LM_LG_L0_SUNROOM_MAIN` | 13,615 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_WC1_LM_DAY` | texture | `Textures/Lightmaps/Daylight/L0_WC1_LM_DAY` | 596 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_WC1_LM_LG_L0_WC1_MAIN` | texture | `Textures/Lightmaps/Artificial/L0_WC1_LM_LG_L0_WC1_MAIN` | 2,907 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_WC2_LM_DAY` | texture | `Textures/Lightmaps/Daylight/L0_WC2_LM_DAY` | 497 | -- | 65,536 | · | · |

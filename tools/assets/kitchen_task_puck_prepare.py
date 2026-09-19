@@ -122,7 +122,7 @@ def validate_world() -> None:
                 light["coneInnerDeg"] != 50.0 or light["coneOuterDeg"] != 100.0 or \
                 light["colorK"] != 3000 or light["bulbClass"] != "led" or \
                 light["intensityLm"] != 350.0 or light["range"] != 2.40 or \
-                light["bakeLumensPerRadiantWatt"] != 100.0 or \
+                light["bakeLumensPerRadiantWatt"] != 25.0 or \
                 light["emissiveMaterialSlot"] != "PuckDiffuser" or \
                 light["castsBlobShadow"] or not light["bakedIntoLightmap"] or \
                 not light["defaultOn"]:
