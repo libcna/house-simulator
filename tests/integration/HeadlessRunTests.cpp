@@ -194,6 +194,50 @@ namespace
         bool fired_ = false;
     };
 
+    TEST(HeadlessRunTests, AltEnterSwitchesTheGraphicsManagerInBothDirections)
+    {
+        for (const bool startFullscreen : {false, true})
+        {
+            OneKeyPress input(&cnahouse::player::InputState::toggleFullscreenPressed);
+            Options options;
+            options.headless = true;
+            options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+            options.noAudio = true;
+            Settings settings = Settings::Defaults();
+            settings.backBufferWidth = 320;
+            settings.backBufferHeight = 180;
+            settings.fullscreen = startFullscreen;
+            settings.verticalSync = false;
+
+            CnaHouseGame game(options, settings);
+            game.SetInputSourceForTesting(&input);
+            game.SetFrameLimit(4);
+            game.Run();
+            ASSERT_EQ(game.ExitCode(), 0);
+            EXPECT_EQ(game.FullscreenForTesting(), !startFullscreen)
+                << "one fullscreen request must change the XNA graphics manager";
+        }
+    }
+
+    TEST(HeadlessRunTests, InitialFullscreenSettingIsAppliedToTheGraphicsDevice)
+    {
+        Options options;
+        options.headless = true;
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+        options.noAudio = true;
+        Settings settings = Settings::Defaults();
+        settings.backBufferWidth = 320;
+        settings.backBufferHeight = 180;
+        settings.fullscreen = true;
+        settings.verticalSync = false;
+
+        CnaHouseGame game(options, settings);
+        game.SetFrameLimit(4);
+        game.Run();
+        ASSERT_EQ(game.ExitCode(), 0);
+        EXPECT_TRUE(game.FullscreenForTesting());
+    }
+
     TEST(HeadlessRunTests, TheSessionHasSection35sClockAndItRan)
     {
         // §35.1: *"everything time-dependent reads it; nothing else keeps its own."* Nothing reads

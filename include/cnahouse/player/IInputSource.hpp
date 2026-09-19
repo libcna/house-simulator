@@ -59,6 +59,9 @@ namespace cnahouse::player
         /// changed.
         bool freeCursorHeld = false;
 
+        /// @brief Request a switch between windowed and fullscreen display modes.
+        bool toggleFullscreenPressed = false;
+
         /// @brief Debug toggles, compiled out of a build without debug tools.
         bool toggleOverlayPressed = false;
         /// @brief §69's `F2`: the world overlay -- cell, position, yaw/pitch, surface, target.

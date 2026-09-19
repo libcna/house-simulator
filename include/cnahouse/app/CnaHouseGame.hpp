@@ -101,6 +101,9 @@ namespace cnahouse::app
             return framesDrawn_;
         }
 
+        /// @brief The graphics device's applied display mode, for an end-to-end input test.
+        [[nodiscard]] bool FullscreenForTesting() const;
+
         /// @brief Stops after this many frames. 0 means run until the user exits.
         void SetFrameLimit(std::uint64_t frames) noexcept
         {

@@ -107,6 +107,7 @@ namespace cnahouse::player
         state_.runPressed = edge(Edge::WalkMode, Keys::LeftShift);
         state_.cancelPressed = edge(Edge::Cancel, Keys::Escape);
         state_.menuPressed = edge(Edge::Menu, Keys::Tab);
+        state_.toggleFullscreenPressed = edge(Edge::ToggleFullscreen, Keys::Enter) && state_.freeCursorHeld;
         state_.toggleOverlayPressed = edge(Edge::ToggleOverlay, Keys::F1);
         state_.toggleWorldOverlayPressed = edge(Edge::ToggleWorldOverlay, Keys::F2);
         state_.toggleVisibilityOverlayPressed = edge(Edge::ToggleVisibilityOverlay, Keys::F3);

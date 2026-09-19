@@ -143,6 +143,8 @@ paths and `fxc` reads a leading `/` as an option. The preset already points at i
 ./build/cna-house
 ```
 
+`Alt+Enter` switches between windowed and fullscreen display.
+
 | Option | Effect |
 |---|---|
 | `--tier=s` | Force Tier S (stock XNA effects only), whatever the build supports |

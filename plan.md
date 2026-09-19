@@ -229,7 +229,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 40 | Reset House | 02371–02390 | 10 | |
 | 41 | Culling and LOD optimisation | 02391–02450 | 19 | All budgets met |
 | 42 | Streaming and loading | 02451–02500 | 13 | Gated on `HOUSE-02451` |
-| 43 | Debug tools and settings | 02501–02570 | 31 | |
+| 43 | Debug tools and settings | 02501–02570 | 32 | |
 | 44 | Automated tests | 02571–02680 | 31 | Full suite green |
 | 45 | Visual polish and habitation | 02681–02780 | 34 | |
 | 46 | Linux desktop stabilisation | 02781–02840 | 17 | **Feature-complete desktop** |
@@ -19888,7 +19888,12 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
 - [ ] HOUSE-02530 — Render tests: every menu and overlay at three aspect ratios
       dep: HOUSE-02527 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-02531 — Phase-43 review and commit
-      dep: HOUSE-02501…HOUSE-02530 · sys: — · plat: ALL · pri: MUST
+      dep: HOUSE-02501…HOUSE-02530, HOUSE-02532 · sys: — · plat: ALL · pri: MUST
+- [x] HOUSE-02532 — Toggle fullscreen with `Alt+Enter` and apply the initial fullscreen setting
+      dep: HOUSE-00131, HOUSE-00140 · sys: app/player · plat: LNX · pri: SHOULD
+      verify: unit InputTests.AltEnterTogglesFullscreenOncePerEnterPress; integration HeadlessRunTests.AltEnterSwitchesTheGraphicsManagerInBothDirections and HeadlessRunTests.InitialFullscreenSettingIsAppliedToTheGraphicsDevice
+      note: `F11` is reserved for the save overlay by §69. `Alt+Enter` is handled through `IInputSource` and XNA's `GraphicsDeviceManager`, with no native window access.
+      result: (2026-09-19) The application and both test binaries built; all 1,410 unit tests and the focused fullscreen integration tests passed under `SDL_VIDEODRIVER=offscreen`. `check_xna_only.py` and the 323-translation-unit strict XNA gate passed. The full `run_checks.sh` reported only the budget gate: `docs/budget-report.md` is stale against concurrent dining content edits. The broader integration suite had one content-dependent draw-call limit failure (726 vs 724); eight save-store tests initially lacked sandbox write access and all passed with `XDG_DATA_HOME` under `build/`.
 
 ---
 

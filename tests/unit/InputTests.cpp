@@ -173,6 +173,27 @@ namespace
         EXPECT_FALSE(source.Current().toggleOverlayPressed);
     }
 
+    TEST(InputTests, AltEnterTogglesFullscreenOncePerEnterPress)
+    {
+        KeyboardMouseSource source;
+        source.Apply(KeyboardState{Keys::Enter}, At(0, 0), 0.016f);
+        EXPECT_FALSE(source.Current().toggleFullscreenPressed);
+
+        source.Apply(KeyboardState{Keys::LeftAlt, Keys::Enter}, At(0, 0), 0.016f);
+        EXPECT_FALSE(source.Current().toggleFullscreenPressed)
+            << "holding Enter and then pressing Alt must not produce an Enter edge";
+
+        source.Apply(KeyboardState{Keys::LeftAlt}, At(0, 0), 0.016f);
+        source.Apply(KeyboardState{Keys::LeftAlt, Keys::Enter}, At(0, 0), 0.016f);
+        EXPECT_TRUE(source.Current().toggleFullscreenPressed);
+        source.Apply(KeyboardState{Keys::LeftAlt, Keys::Enter}, At(0, 0), 0.016f);
+        EXPECT_FALSE(source.Current().toggleFullscreenPressed) << "holding Enter must not toggle again";
+
+        source.Apply(KeyboardState({}), At(0, 0), 0.016f);
+        source.Apply(KeyboardState{Keys::RightAlt, Keys::Enter}, At(0, 0), 0.016f);
+        EXPECT_TRUE(source.Current().toggleFullscreenPressed) << "either Alt key can request fullscreen";
+    }
+
     TEST(InputTests, EachOverlayHasItsOwnFunctionKeyAndNobodyElsesEdge)
     {
         // §69's `F2`, §25.8's `F3`, §71's `F8` and `F9`, each to its own field. A scripted input source

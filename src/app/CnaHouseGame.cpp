@@ -117,11 +117,19 @@ namespace cnahouse::app
     {
         graphics_.setPreferredBackBufferWidthProperty(settings_.backBufferWidth);
         graphics_.setPreferredBackBufferHeightProperty(settings_.backBufferHeight);
+        graphics_.setIsFullScreenProperty(settings_.fullscreen);
         graphics_.setSynchronizeWithVerticalRetraceProperty(settings_.verticalSync);
         // Variable timestep: the fixed step is `FrameTimer`'s business, and letting XNA also enforce
         // one would give two accumulators disagreeing about how much time has passed.
         setIsFixedTimeStepProperty(false);
         getContentProperty().setRootDirectoryProperty(options_.contentRoot);
+    }
+
+    bool CnaHouseGame::FullscreenForTesting() const
+    {
+        return graphics_.getGraphicsDeviceProperty()
+            ->getPresentationParametersProperty()
+            .getIsFullScreenProperty();
     }
 
     /// The render target a capture frame is drawn into. Created on demand, because most sessions
@@ -1069,6 +1077,12 @@ namespace cnahouse::app
             {
                 const debug::Timing::Scope scope(timing_, UpdateStage::Input);
                 Input().Update(frame.deltaSeconds);
+            }
+            if (Input().Current().toggleFullscreenPressed)
+            {
+                graphics_.ToggleFullScreen();
+                settings_.fullscreen = graphics_.getIsFullScreenProperty();
+                Log::Info(LogCat::App, "display {}", settings_.fullscreen ? "fullscreen" : "windowed");
             }
 
             if (weather_.has_value())
