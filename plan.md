@@ -193,7 +193,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 4 | Asset provenance and licensing | 00261–00340 | 42 | Manifest tooling green; NOX imported; every source licence verified |
 | 5 | World and floor-plan data | 00341–00450 | 81 | The full layout authored, validated and loaded |
 | 6 | Blockout house geometry | 00451–00540 | 46 | The generated shell renders |
-| 7 | Collision and player controller | 00541–00620 | 38 | You can walk the whole blockout |
+| 7 | Collision and player controller | 00541–00620 | 39 | You can walk the whole blockout |
 | 8 | First-person camera | 00621–00660 | 14 | It feels right and is tested |
 | 9 | Room/portal visibility | 00661–00760 | 40 | Culling correct, proved, and within budget |
 | 10 | Exterior and property | 00761–00840 | 25 | Terrain, fences, gates, drive, garden |
@@ -9489,6 +9489,17 @@ never escapes and never penetrates.
       verified: 528 probes dropped from 9.6 m over the real lot, none reported inside the ground
             and none landing more than 0.35 m from it; and the sphere/capsule pair at the unit
             level. Injection: the old one-sided `prism.solid`, CAUGHT.
+- [x] HOUSE-00570 — Deliver a Shift toggle once across variable frame-to-physics step counts
+      dep: HOUSE-00556 · sys: player · plat: ALL · pri: MUST
+      verify: integration HeadlessRunTests.AShiftEdgeSurvivesZeroStepsAndTogglesOnlyOnceAcrossMultipleSteps
+      note: (2026-09-19) The keyboard source correctly emitted one `runPressed` edge per key
+            press, but `UpdateWalk` passed that one frame state to every 120 Hz step. A 2- or
+            4-step frame toggled twice or four times, apparently doing nothing; a zero-step
+            frame could discard the edge. The game now latches its parity until a real player
+            step consumes it, then clears the edge for all later steps in that frame. The
+            integration regression observes actual step counts around both a zero-step and an
+            even multi-step input frame and checks toggling in both directions. The multi-step
+            case failed before this fix. No speed or D-09 persistence contract changed.
 - [x] HOUSE-00612 — Guarantee test: the player cannot pass any closed door (all 62, both sides)
       dep: HOUSE-00554 · sys: physics · plat: CI · pri: MUST
       verify: unit ClosedDoorTests.NoClosedDoorInTheHouseCanBeWalkedThrough
@@ -20700,19 +20711,19 @@ Recorded so nobody has to re-derive the decision.
 
 ## Task count
 
-**1 348 numbered tasks across 53 phases.**
+**1 349 numbered tasks across 53 phases.**
 
 | Phase group | Phases | Tasks |
 |---|---|---|
 | Foundations, capability proof, build, pipeline, assets | 0–4 | 238 |
-| World data, blockout, collision, camera, visibility | 5–9 | 218 |
+| World data, blockout, collision, camera, visibility | 5–9 | 219 |
 | Exterior, neighbourhood, materials, furnishing | 10–13 | 146 |
 | Interaction framework and the systems built on it | 14–21 | 160 |
 | Time, sun, moon, stars, sky, weather | 22–30 | 155 |
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 162 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 348** |
+| **Total** | **0–52** | **1 349** |
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
 disturbs an existing one.
@@ -20748,6 +20759,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-19 | `HOUSE-00570` | **New task, next free phase-7 id.** Carry the existing Shift edge across the variable frame-to-physics boundary exactly once. | The original `HOUSE-00556` unit test proved edge creation and per-step toggling, but the real game reuses a frame's input over 0–4 fixed steps. An even-step frame cancels one key press, which reproduces the owner's report without changing the approved two-speed design. |
 | 2026-09-19 | `HOUSE-00701` | **New task, next free phase-9 id.** Separate render-camera cell selection from §16.4's intentionally sticky gameplay cell. | A headless northbound hall→kitchen walk reproduced the owner's brief doorway sky leak exactly: in the first 5 cm past the portal, the body remains in `L0_HALL`, the eye is in `L0_KITCHEN`, and the old visibility root omits the room ahead. The original behavior is correct for collision stability but not for rendering. |
 | 2026-09-19 | `HOUSE-01073` | **New task, next free phase-13 id.** Give the occupied dining room a measured surface-scale composition and local furniture finish; do not claim the dependency-blocked full `HOUSE-00989` task. | Round 95's matched day/night route shows the shell now readable but a bare, visually dark table dominates the dining camera. A material-only probe barely changes its human-scale appearance, while an eight-place linen/ceramic composition makes the room's purpose immediate. This is a room-scale coverage defect, not another narrow exterior or hero-prop polish round. |
 | 2026-09-19 | `HOUSE-01072` | **New task, next free phase-13 id.** Fit one physically measured butler's-pantry work/storage run while leaving the full dependency-blocked `HOUSE-00991` task open. | Round 94's built-game threshold camera proves the kitchen's newly readable open service room is empty. Its west window leaves only 0.90 m below the sash, requiring a specifically measured low run rather than a generic kitchen cabinet. This fixes a whole-route furnishing gap with the approved authored-content pipeline and no architecture change. |

@@ -7,8 +7,10 @@
 // that leaves the device in a state the next frame rejects. It runs under the `headless` preset,
 // which `HOUSE-00105` measured doing 600 frames with `DISPLAY` unset.
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstdio>
+#include <thread>
 
 #include <gtest/gtest.h>
 
@@ -24,6 +26,7 @@
 #include "cnahouse/environment/SunModel.hpp"
 #include "cnahouse/lighting/LightingSystem.hpp"
 #include "cnahouse/player/FirstPersonView.hpp"
+#include "cnahouse/player/FixedStep.hpp"
 #include "cnahouse/player/IInputSource.hpp"
 #include "cnahouse/util/Ids.hpp"
 #include "cnahouse/util/Log.hpp"
@@ -1212,6 +1215,112 @@ namespace
         EXPECT_TRUE(input.SawBand()) << "the walking test never sampled the 5 cm doorway band";
         EXPECT_TRUE(input.NewRoomWasRoot()) << "render visibility followed the sticky body cell";
         EXPECT_TRUE(input.NewRoomWasVisible()) << "the room ahead vanished while crossing its threshold";
+    }
+
+    TEST(HeadlessRunTests, AShiftEdgeSurvivesZeroStepsAndTogglesOnlyOnceAcrossMultipleSteps)
+    {
+        class RunPulseInput final : public cnahouse::player::IInputSource
+        {
+        public:
+            RunPulseInput(const CnaHouseGame& game, bool onZeroStep)
+                : game_(game)
+                , onZeroStep_(onZeroStep)
+            {
+            }
+
+            void Update(float deltaSeconds) override
+            {
+                if (awaitingStepCount_)
+                {
+                    pulseSteps_ = game_.FixedStepsForTesting() - stepsBeforePulse_;
+                    awaitingStepCount_ = false;
+                }
+                const int steps = cnahouse::player::FixedSteps(predictedAccumulator_, deltaSeconds);
+                state_.runPressed = false;
+                if (!sent_ && (onZeroStep_ ? steps == 0 : steps >= 2 && steps % 2 == 0))
+                {
+                    state_.runPressed = true;
+                    sent_ = true;
+                    stepsBeforePulse_ = game_.FixedStepsForTesting();
+                    awaitingStepCount_ = true;
+                }
+                if (!sent_ && !onZeroStep_)
+                {
+                    // The sleep affects the NEXT frame's delta, not the current input frame.
+                    // Pulse only when FixedSteps predicts an even multi-step frame, so a level
+                    // accidentally applied on every step is guaranteed to cancel itself.
+                    std::this_thread::sleep_for(std::chrono::milliseconds(17));
+                }
+            }
+
+            [[nodiscard]] const cnahouse::player::InputState& Current() const noexcept override
+            {
+                return state_;
+            }
+
+            [[nodiscard]] bool LookAvailable() const noexcept override
+            {
+                return false;
+            }
+
+            [[nodiscard]] bool Sent() const noexcept
+            {
+                return sent_;
+            }
+
+            [[nodiscard]] std::uint64_t PulseSteps() const noexcept
+            {
+                return pulseSteps_;
+            }
+
+        private:
+            const CnaHouseGame& game_;
+            cnahouse::player::InputState state_;
+            float predictedAccumulator_ = 0.0F;
+            bool onZeroStep_ = false;
+            bool sent_ = false;
+            bool awaitingStepCount_ = false;
+            std::uint64_t stepsBeforePulse_ = 0;
+            std::uint64_t pulseSteps_ = 0;
+        };
+
+        for (const bool onZeroStep : {true, false})
+        {
+            cnahouse::util::Log::ResetForTesting();
+            Options options;
+            options.headless = true;
+            options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+            options.noAudio = true;
+            options.scene = "walk";
+            options.player = std::array<float, 5>{0.0F, 0.60F, -20.65F, 0.0F, 0.0F};
+            Settings settings = Settings::Defaults();
+            settings.backBufferWidth = 320;
+            settings.backBufferHeight = 180;
+            settings.verticalSync = false;
+            settings.fastWalk = onZeroStep;
+
+            CnaHouseGame game(options, settings);
+            RunPulseInput input(game, onZeroStep);
+            game.SetInputSourceForTesting(&input);
+            game.SetFixedStepLimit(60);
+            game.SetFrameLimit(3000);
+            game.Run();
+            ASSERT_EQ(game.ExitCode(), 0);
+            ASSERT_TRUE(input.Sent())
+                << (onZeroStep ? "no zero-step input frame" : "no even multi-step frame");
+            if (onZeroStep)
+            {
+                EXPECT_EQ(input.PulseSteps(), 0U);
+            }
+            else
+            {
+                EXPECT_GE(input.PulseSteps(), 2U);
+                EXPECT_EQ(input.PulseSteps() % 2U, 0U);
+            }
+            EXPECT_EQ(game.PlayerForTesting().fastWalk, !onZeroStep)
+                << (onZeroStep ? "Shift edge was lost before a physics tick"
+                               : "Shift edge toggled more than once in a multi-step frame");
+        }
     }
 
     TEST(HeadlessRunTests, AWalkSceneAskedForAnImpossiblePlaceDrawsAFrameAnyway)

@@ -542,6 +542,7 @@ namespace cnahouse::app
         }
 
         player_ = player::PlayerState{};
+        pendingRunToggle_ = false;
         player_.position =
             Microsoft::Xna::Framework::Vector3(feet.X, feet.Y + player_.Rise() + 0.02F, feet.Z);
         player_.yaw = look_.yaw;
@@ -762,9 +763,17 @@ namespace cnahouse::app
 
     void CnaHouseGame::UpdateWalk(float deltaSeconds)
     {
+        const player::InputState frameInput = Input().Current();
         // §44's mouse look, from the source that owns the devices (`HOUSE-00622`).
-        player::ApplyLook(look_, Input().Current(), Input().LookAvailable());
+        player::ApplyLook(look_, frameInput, Input().LookAvailable());
         player_.yaw = look_.yaw;
+
+        // Shift is a one-frame edge, but a frame can contain zero or several physics steps.
+        // Preserve its parity until a step can consume it, then never replay it in that frame.
+        if (frameInput.runPressed)
+        {
+            pendingRunToggle_ = !pendingRunToggle_;
+        }
 
         // §49.3: dt = 1/120 s, accumulated from the frame time, at most four steps. The cap is
         // what stops a loading hitch from being simulated in full and walking the body through a
@@ -780,8 +789,11 @@ namespace cnahouse::app
                 break;
             }
             player_.cellId = cell->id;
-            const player::PlayerStepReport report = player::PlayerStep(
-                *collision_, *cell, broad_, player_, Input().Current(), player::kFixedStepSeconds);
+            player::InputState stepInput = frameInput;
+            stepInput.runPressed = pendingRunToggle_;
+            const player::PlayerStepReport report =
+                player::PlayerStep(*collision_, *cell, broad_, player_, stepInput, player::kFixedStepSeconds);
+            pendingRunToggle_ = false;
             if (report.walkModeChanged)
             {
                 // D-09: the walk mode is a SETTING, so the game writes it back rather than the

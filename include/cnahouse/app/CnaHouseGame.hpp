@@ -665,6 +665,8 @@ namespace cnahouse::app
         std::unique_ptr<debug::DebugDraw> debugDraw_;
         /// §49.3's leftover time: the fixed step is 1/120 s and a frame is not.
         float stepAccumulator_ = 0.0F;
+        /// @brief A frame-edge survives zero-step frames and reaches exactly one physics step.
+        bool pendingRunToggle_ = false;
         bool walking_ = false;
         std::uint64_t fixedSteps_ = 0;
         /// @brief Set by `SetInputSourceForTesting`; null means the keyboard and mouse.

@@ -1,3 +1,49 @@
+# Gameplay/visual handoff — 2026-09-19 (`HOUSE-00570` checkpoint)
+
+The owner reopened work after the older stop instruction below. Branch `develop`; the
+doorway render-root correction is commit `c8dfec1` (`HOUSE-00701`), followed by the
+`HOUSE-00570` Shift-toggle commit recorded in `git log`. Do not treat the older
+`HOUSE-01073` request to stop as current. Do not rewrite capture history again;
+the authorized cleanup is already complete. Keep strict XNA, `CNA_CNAEXT=OFF`,
+the project-isolated `build/isolated-deps/FNA3D`, and at most six build CPUs.
+
+The owner's current gameplay reports are: (1) sky briefly appears inside
+doorways, (2) sky/under-rendered interiors appear from outside in some house
+parts, (3) the main stair approach is implausible/inaccessible, and (4) Shift
+should toggle the faster walking mode. `HOUSE-00701` fixes **(1)** by rooting
+render visibility in the actual camera eye cell rather than the gameplay
+tracker's intentional 5 cm doorway hysteresis. Its crossing integration test
+failed before the fix and passed after; all 18 culled/unculled poses remain in
+the 0.2% limit. `HOUSE-00570` fixes **(4)**: a one-frame Shift edge now survives
+zero-step frames and is consumed once, not 2–4 times, by fixed-step physics.
+The new integration test observes both actual step counts and toggles in both
+directions. This remains the approved 1.35/2.05 m/s walk-mode toggle, not a
+new hold-to-sprint mechanic. Neither task changes a golden image.
+
+**Still open:** (2) and (3). Road captures
+`build/test-output/door-exterior-front-{culled,unculled}.png` show the exterior
+front-glazing difference. An experiment seeding every visible front window
+expanded the road draw to 25 cells and still failed paired image comparison
+(0.4557% vs 0.2%); it was reverted, not shipped. Investigate exact facade,
+roof and glazing ownership with bounded paired captures, rather than broad
+overdraw or changing the culling threshold. Then inspect the canonical main
+stair geometry, circulation path and collision with an ordinary first-person
+walk before changing data. `docs/visual-review/README.md` Round 97 records the
+doorway screenshot review. Owner F12 captures remain byte-for-byte in ignored
+`docs/visual-review/captures/owner-f12-20260919/` (not in Git).
+
+Verification through `HOUSE-00570`: full build; 1,410/1,410 unit and 139/139
+integration tests (the latter with isolated writable `XDG_DATA_HOME`); first-
+person reference and 18-pose culling render tests pass, worst 0.0558%; full
+`tools/ci/run_checks.sh` passes including 323 strict-XNA translation units.
+The initial integration attempt without writable XDG storage failed in eight
+environment-dependent cases; rerunning in the documented isolated test home
+passed all 139. `VISUAL-GATE-1` and the complete L0 route remain open. Keep
+coverage across L0 higher than narrow micro-polish once these reported
+gameplay defects are resolved.
+
+---
+
 # Visual-sprint handoff — 2026-09-19 (`HOUSE-01073` checkpoint)
 
 Read this section first in the next context, then the current `plan.md` task
