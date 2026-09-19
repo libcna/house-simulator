@@ -16733,6 +16733,41 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             sandbox; correctly configured offscreen and isolated-XDG reruns were green.
             `tools/ci/run_checks.sh` is fully green, including 323 strict-XNA translation
             units; `CNA_CNAEXT=OFF`, project-isolated FNA3D and at most six CPUs are retained.
+- [x] HOUSE-01295 — Bring the existing family-room practicals up to room-scale brightness
+      dep: HOUSE-01051, HOUSE-01256, HOUSE-01266, HOUSE-01285, HOUSE-01292 · sys: world, content, lighting · plat: ALL · pri: MUST
+      note: Round 89's complete L0 day/night views show that the family room has real
+            ceiling fixtures, seating, media and secondary dressing but its floor and window
+            wall still collapse into dark brown at 22:00. The selected main atlas has
+            mean/peak 0.04538/0.22923 with the original 100 lm/radiant-watt cell bake.
+            Calibrate only the four established main fixtures; preserve the separate media
+            and reading groups, wider renderer/exposure, geometry and full `HOUSE-00992` task.
+      accept: the four 1,200 lm/3,000 K physical ceiling sources retain their stable links,
+              positions and default-on switch; their source-local bake conversion gives
+              useful room-wide wall/floor depth without a clipped ceiling or false adjacent
+              light. Re-bake/promote only `L0_FAMILY` at 256 samples with the original
+              100 lm/radiant-watt receiver baseline so media/reading are not dimmed.
+              Inspect matched complete-route day/night views, selected atlas provenance and
+              only intentional strict-reference differences; pass content, licence, stable
+              IDs, unit, integration, render, culling and strict-XNA gates at most six CPUs.
+      done: (2026-09-19) The four existing 1,200 lm/3,000 K family main sources retain
+            IDs, fixture links, transforms and default-on ownership; only their source-local
+            offline conversion is 30 lm/radiant-watt. Selected 256-sample `L0_FAMILY`
+            artificial/daylight bakes retain the receiver's 100 baseline, preserving the
+            separate media/reading groups. Main atlas mean/peak rises 0.04538/0.22923 →
+            0.15094/0.76469. Round 90's fixed 27-camera day/night sets and contact sheets
+            show broader warm wall/floor depth from both family and kitchen sides without
+            ceiling clipping or false adjacent bloom; same night wall/floor crops rise
+            0.5625/0.5657 → 0.6575/0.6207. A wrong-683 diagnostic bake was rejected
+            before promotion. Family's sparse window-side composition remains future breadth
+            work; VISUAL-GATE-1 still fails.
+      verified: The 31-stage content pipeline, exact fixture-regeneration check, all asset/
+            licence/stable-ID gates and full six-core build pass. Unit 1,410/1,410 and
+            integration 137/137 plus content-current pass. Active software render 48/48
+            plus content-current pass, including all 18 culled/unculled pairs. Only
+            `fp-l0-hall`'s strict golden advanced: its 745 changed pixels (0.3234%) were
+            inspected old/new and amplified and lie in the narrow visible family-room
+            opening. `tools/ci/run_checks.sh` passes including strict XNA; `CNA_CNAEXT=OFF`
+            and the isolated FNA3D checkout remain unchanged.
 - [x] HOUSE-01261 — Implement the per-object three-directional-light assignment (key/fill/bounce) for dynamic objects
       dep: HOUSE-01251, HOUSE-00892 · sys: lighting · plat: ALL · pri: MUST
       accept: `BasicEffect` and `SkinnedEffect` receive the same stable key/fill/bounce slot
@@ -20464,6 +20499,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-19 | `HOUSE-01295` | **New task, next free phase-16 id.** Recalibrate only the four existing family main practicals with the receiver's established 100 lm/radiant-watt baseline. | Round 89's full-route review finds a furnished but dark `L0_FAMILY` from both window and kitchen sides. The current 4,800 lm installed circuit bakes to only 0.04538 mean/0.22923 peak. Its already physical fixtures and selected-cell pipeline can improve the whole connected room without another local prop, global exposure or unrelated renderer work; preserve the independent media/reading groups. |
 | 2026-09-19 | `HOUSE-01294` | **New task, next free phase-16 id.** Recalibrate only the existing physical formal-living main circuit and its selected receiver atlas. | Round 88's 27-camera day/night route review shows the room has its primary furniture and four real default-on ceiling fixtures, but its wall/floor remain much darker than the connected hall. The physical source-to-atlas energy, not another hero prop or exterior detail, is the current room-scale visual defect. A local rebake can test and correct it without a renderer or global-exposure change. |
 | 2026-09-19 | `HOUSE-01069` | **New task, next free phase-13 id.** Add a bounded dining service-wall furnishing and linked-practical checkpoint without claiming the dependency-blocked full `HOUSE-00989` room task. | Round 87's complete L0 sheets show a furnished dining table under a physical chandelier but a dark, nearly empty side wall. A measured cabinet and real table lamps can use the existing deterministic asset, stock-XNA prop/light and selected lightmap pipeline now, improving room-scale coverage before more exterior or hero-object detail. |
 | 2026-09-19 | `HOUSE-00044` | **New task, next free phase-0 id.** Record the owner-authorized unpushed-history cleanup as its own audited checkpoint after `HOUSE-00043`. | Rewriting 95 local commit hashes is a materially different operation from untracking files in the current tree. Fresh remote-history checks, evidence preservation, subject comparison, fast-forward and `fsck` proofs deserve an explicit durable ledger entry. |

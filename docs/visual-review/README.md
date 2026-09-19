@@ -3955,3 +3955,43 @@ camera, and the piano's dark body remains less legible than the room envelope. D
 with another piano-only polish while family, kitchen recess, dining side wall and arrival bays
 need broader coverage. The gate/door interaction prerequisite remains a separate gameplay
 route blocker. **VISUAL-GATE-1 still fails.**
+
+## Round 90 — family room gains full-room practical light
+
+Commit: `HOUSE-01295` checkpoint (`2026-09-19`). Before: Round 89's 27-camera
+[day](captures/house-01294-living-day-r2) and
+[night](captures/house-01294-living-night-r2) sets. After: the same built-game 27-camera
+[day](captures/house-01295-family-day-r1) and
+[night](captures/house-01295-family-night-r1) sets; each has the eight-view
+`l0-route-contact.png`. Both contact sheets and full-size family window, family-to-kitchen,
+living, foyer/hall and reciprocal kitchen views were opened at normal eye height.
+
+Ranked defects before this checkpoint:
+
+1. The four physical, default-on family main fixtures emitted 4,800 lm but the original
+   main atlas averaged only 0.04538 and peaked at 0.22923. The furnished room looked
+   mostly unlit at night and weak beside its connected kitchen even in daytime.
+2. Family's window-facing side remains sparse and the large glazing frames a bare, flat
+   exterior. Kitchen's far recess, dining's close side wall and arrival bays still need
+   broader furnishing/lighting attention.
+3. The closed front pedestrian gate remains an interaction-system prerequisite before a
+   genuine road-to-dining first-person walkthrough is possible.
+
+Fixed: add a 30 lm/radiant-watt offline conversion only to the four existing family main
+sources, retaining their 1,200 lm/3,000 K real fixtures and current switch ownership. The
+selected 256-sample `L0_FAMILY` bake keeps its established 100 lm/radiant-watt receiver
+baseline so independently switched media/reading groups are not silently dimmed. Main
+mean/peak rises 0.04538/0.22923 → 0.15094/0.76469. Same-pose 22:00 grayscale wall/floor
+crops rise 0.5625/0.5657 → 0.6575/0.6207. The room reads as a warm occupied family space
+from both window and kitchen sides; ceiling and windows retain their shape rather than
+washing out. No geometry, renderer exposure, other receiver cells or furniture moved. A
+diagnostic bake with the wrong default 683 was rejected before promotion because it halved
+the main contribution and dimmed both other groups; it is not evidence for this result.
+The sole strict-reference change is `fp-l0-hall`: old/new/amplified-diff inspection confines
+its 745 changed pixels (0.3234%) to the narrow family-room sliver beyond the kitchen opening.
+The other active references and all 18 culled/unculled comparisons stayed within contract.
+
+Remaining: window-side furnishing and believable exterior context are now the room's largest
+visible deficits. Continue with connected L0 coverage, especially kitchen recess and dining
+side wall; do not turn this into another sequence of tiny lamp/intensity tweaks.
+**VISUAL-GATE-1 still fails.**

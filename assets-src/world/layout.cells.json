@@ -681,7 +681,7 @@
       "daylight": { "orientation": "S", "exposure": 0.52 },
       "lightGroups": ["LG_L0_FAMILY_MAIN", "LG_L0_FAMILY_MEDIA", "LG_L0_FAMILY_READING"],
       "lightmaps": {
-        "shellHash": "sha256:84f9dbbd22ddbbb07332c569d17b2ae83d5dd7ab4678aaef38a5fb095a5b2f9f",
+        "shellHash": "sha256:6664630ccccec72b873ac315919d3842d7a5e74536642f5be67117b0b569bd23",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_FAMILY_LM_DAY",
           "scale": 1.0000001192092896
@@ -690,17 +690,17 @@
           {
             "group": "LG_L0_FAMILY_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_FAMILY_LM_LG_L0_FAMILY_MAIN",
-            "scale": 0.22922636568546295
+            "scale": 0.7646910548210144
           },
           {
             "group": "LG_L0_FAMILY_MEDIA",
             "contentName": "Textures/Lightmaps/Artificial/L0_FAMILY_LM_LG_L0_FAMILY_MEDIA",
-            "scale": 0.11613651365041733
+            "scale": 0.11581051349639893
           },
           {
             "group": "LG_L0_FAMILY_READING",
             "contentName": "Textures/Lightmaps/Artificial/L0_FAMILY_LM_LG_L0_FAMILY_READING",
-            "scale": 0.5822224617004395
+            "scale": 0.5821033120155334
           }
         ]
       },

@@ -1,3 +1,55 @@
+# Visual-sprint handoff — 2026-09-19 (`HOUSE-01295` checkpoint)
+
+Branch `develop`, task-start HEAD `3b2514c` (`HOUSE-01294`). This section belongs to the
+single `HOUSE-01295` commit. The owner-requested local capture-history cleanup is already
+complete in `HOUSE-00043`/`HOUSE-00044`; do not repeat it. Ignored review captures remain
+on disk and strict render references remain versioned. No push or shared-dependency rewrite
+is pending.
+
+**VISUAL-GATE-1 still FAILS.** Normal play uses production materials, and coloured blockout
+is only an explicit diagnostic. This checkpoint raises the existing furnished family room's
+room-wide practical contribution instead of micro-polishing a fixture or exterior detail.
+All four established 1,200 lm/3,000 K ceiling lights keep stable IDs, transforms, fixture
+links and default-on ownership. Their source-local offline conversion becomes 30
+lm/radiant-watt; the selected `L0_FAMILY` 256-sample artificial/daylight receiver bake keeps
+its original 100 baseline so separately switched media and reading groups stay coherent.
+The main atlas mean/peak rises 0.04538/0.22923 → 0.15094/0.76469. Only the selected family
+atlases, their manifests/credits and source metadata changed; no runtime renderer, exposure,
+other room or furniture moved. A 683-baseline diagnostic candidate was rejected before
+promotion because it dimmed the independent groups.
+
+Before: Round 89 [day](visual-review/captures/house-01294-living-day-r2) and
+[night](visual-review/captures/house-01294-living-night-r2). Current after: Round 90
+[day](visual-review/captures/house-01295-family-day-r1) and
+[night](visual-review/captures/house-01295-family-night-r1), each 27 fixed built-game views
+plus an eight-view `l0-route-contact.png`. The full-size family window, family-to-kitchen,
+reciprocal kitchen and route transitions were inspected. Night wall/floor crops rise
+0.5625/0.5657 → 0.6575/0.6207; the room reads as warmly occupied from both sides without
+clipped ceiling, false upstairs halo or a changed adjacent kitchen. The broad window-facing
+side and bare exterior through the glass remain the largest family defects.
+
+The 31-stage content pipeline, full six-core build, 1,410/1,410 unit and 137/137 integration
+tests plus content-current pass. Active software render 48/48 plus content-current pass;
+eight capture-only generators remain disabled and all 18 culling equivalence pairs pass.
+Only the `fp-l0-hall` strict golden moved: old/new and amplified differences were inspected,
+and the 745 changed pixels (0.3234%) lie in the narrow family sliver visible through the
+kitchen opening. Complete static/XNA checks pass, including 323 strict-XNA translation
+units. The build retains `CNA_CNAEXT=OFF`, project-isolated `build/isolated-deps/FNA3D`,
+prescribed shared ccache and at most six CPUs; no CNA or shared `~/deps` source was edited.
+
+Current L0 baseline: foyer/hall have production finishes, runner/console/chair/art but
+broad bare bays; living has primary furniture and now legible warm practical lighting but
+weak natural daylight; family has seating/media and newly readable wall/floor, but its
+window-side composition is sparse; kitchen has the fitted work zone but a dark, empty far
+recess; dining has table/eight chairs/chandelier/sideboard/lamps but a dark close side wall.
+Exterior approach remains adequate for this phase. A genuine road→dining first-person walk
+is **not** complete: the gate's `E` input is recorded but no phase-14 interaction dispatcher
+actuates it. Next highest-value visual breadth is family window-side furnishing and the
+kitchen recess, then foyer/hall arrival bays and dining transition. Do not start another
+lamp-calibration or driveway/gutter/piano micro-polish round while those remain.
+
+---
+
 # Visual-sprint handoff — 2026-09-19 (`HOUSE-01294` checkpoint)
 
 Branch `develop`, task-start HEAD `1f07770` (`HOUSE-01069`). This section belongs to one

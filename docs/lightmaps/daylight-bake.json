@@ -222,7 +222,7 @@
       },
       "groups": [],
       "lumensPerRadiantWatt": 100.0,
-      "shellHash": "sha256:84f9dbbd22ddbbb07332c569d17b2ae83d5dd7ab4678aaef38a5fb095a5b2f9f"
+      "shellHash": "sha256:6664630ccccec72b873ac315919d3842d7a5e74536642f5be67117b0b569bd23"
     },
     {
       "cell": "L0_FOYER",
@@ -813,12 +813,12 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_LIVING"
+    "L0_FAMILY"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 5111808,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 517522,
+  "sourceBytes": 517554,
   "tool": "bake_house_lightmaps.py"
 }

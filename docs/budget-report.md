@@ -734,10 +734,10 @@ A `+` after a total means at least one row in that pack could not be measured, s
 | `house-l0` | `TEXTURE_L0_DINING_LM_DAY` | texture | `Textures/Lightmaps/Daylight/L0_DINING_LM_DAY` | 16,313 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_DINING_LM_LG_L0_DINING_CHANDELIER` | texture | `Textures/Lightmaps/Artificial/L0_DINING_LM_LG_L0_DINING_CHANDELIER` | 12,071 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_DINING_LM_LG_L0_DINING_SIDE` | texture | `Textures/Lightmaps/Artificial/L0_DINING_LM_LG_L0_DINING_SIDE` | 9,603 | -- | 65,536 | · | · |
-| `house-l0` | `TEXTURE_L0_FAMILY_LM_DAY` | texture | `Textures/Lightmaps/Daylight/L0_FAMILY_LM_DAY` | 14,270 | -- | 65,536 | · | · |
-| `house-l0` | `TEXTURE_L0_FAMILY_LM_LG_L0_FAMILY_MAIN` | texture | `Textures/Lightmaps/Artificial/L0_FAMILY_LM_LG_L0_FAMILY_MAIN` | 13,804 | -- | 65,536 | · | · |
-| `house-l0` | `TEXTURE_L0_FAMILY_LM_LG_L0_FAMILY_MEDIA` | texture | `Textures/Lightmaps/Artificial/L0_FAMILY_LM_LG_L0_FAMILY_MEDIA` | 10,969 | -- | 65,536 | · | · |
-| `house-l0` | `TEXTURE_L0_FAMILY_LM_LG_L0_FAMILY_READING` | texture | `Textures/Lightmaps/Artificial/L0_FAMILY_LM_LG_L0_FAMILY_READING` | 11,129 | -- | 65,536 | · | · |
+| `house-l0` | `TEXTURE_L0_FAMILY_LM_DAY` | texture | `Textures/Lightmaps/Daylight/L0_FAMILY_LM_DAY` | 14,302 | -- | 65,536 | · | · |
+| `house-l0` | `TEXTURE_L0_FAMILY_LM_LG_L0_FAMILY_MAIN` | texture | `Textures/Lightmaps/Artificial/L0_FAMILY_LM_LG_L0_FAMILY_MAIN` | 13,819 | -- | 65,536 | · | · |
+| `house-l0` | `TEXTURE_L0_FAMILY_LM_LG_L0_FAMILY_MEDIA` | texture | `Textures/Lightmaps/Artificial/L0_FAMILY_LM_LG_L0_FAMILY_MEDIA` | 10,907 | -- | 65,536 | · | · |
+| `house-l0` | `TEXTURE_L0_FAMILY_LM_LG_L0_FAMILY_READING` | texture | `Textures/Lightmaps/Artificial/L0_FAMILY_LM_LG_L0_FAMILY_READING` | 11,135 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_FOYER_LM_DAY` | texture | `Textures/Lightmaps/Daylight/L0_FOYER_LM_DAY` | 12,600 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_FOYER_LM_LG_L0_FOYER_ACCENT` | texture | `Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_FOYER_ACCENT` | 11,149 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_FOYER_LM_LG_L0_FOYER_MAIN` | texture | `Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_FOYER_MAIN` | 11,489 | -- | 65,536 | · | · |
