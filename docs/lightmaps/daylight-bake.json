@@ -276,7 +276,7 @@
       },
       "groups": [],
       "lumensPerRadiantWatt": 100.0,
-      "shellHash": "sha256:00509badae4dc23f43add68f88cbfd69d20a4ab643b415a99981ddf10c0f12e4"
+      "shellHash": "sha256:8c17537fd780f11f2d27043ebc09bb16a3f35694a8310e6e7a09d0c488772d97"
     },
     {
       "cell": "L0_LAUNDRY",
@@ -812,12 +812,12 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_SUNROOM"
+    "L0_KITCHEN"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 5111808,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 517531,
+  "sourceBytes": 517536,
   "tool": "bake_house_lightmaps.py"
 }

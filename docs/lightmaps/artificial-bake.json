@@ -599,7 +599,7 @@
             "LIGHT_L0_KITCHEN_ISLAND_2",
             "LIGHT_L0_KITCHEN_ISLAND_3"
           ],
-          "mean": 0.008371901410593097,
+          "mean": 0.008368972083000263,
           "peak": 0.15177986025810242,
           "scale": 0.15177986025810242
         },
@@ -612,9 +612,9 @@
             "LIGHT_L0_KITCHEN_MAIN_3",
             "LIGHT_L0_KITCHEN_MAIN_4"
           ],
-          "mean": 0.02837831398086983,
-          "peak": 0.16986533999443054,
-          "scale": 0.16986533999443054
+          "mean": 0.07020991808616735,
+          "peak": 0.41957035660743713,
+          "scale": 0.41957035660743713
         },
         {
           "group": "LG_L0_KITCHEN_SINK",
@@ -622,7 +622,7 @@
           "lights": [
             "LIGHT_L0_KITCHEN_SINK_1"
           ],
-          "mean": 0.000726861911777804,
+          "mean": 0.000726670358616647,
           "peak": 0.023883968591690063,
           "scale": 0.023883968591690063
         },
@@ -635,13 +635,13 @@
             "LIGHT_L0_KITCHEN_UNDERCAB_3",
             "LIGHT_L0_KITCHEN_UNDERCAB_4"
           ],
-          "mean": 0.008422138777164774,
-          "peak": 0.2341105192899704,
-          "scale": 0.2341105192899704
+          "mean": 0.008401560852865274,
+          "peak": 0.23413318395614624,
+          "scale": 0.23413318395614624
         }
       ],
       "lumensPerRadiantWatt": 100.0,
-      "shellHash": "sha256:00509badae4dc23f43add68f88cbfd69d20a4ab643b415a99981ddf10c0f12e4"
+      "shellHash": "sha256:8c17537fd780f11f2d27043ebc09bb16a3f35694a8310e6e7a09d0c488772d97"
     },
     {
       "cell": "L0_LAUNDRY",
@@ -2050,12 +2050,12 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_SUNROOM"
+    "L0_KITCHEN"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 8126464,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 1080996,
+  "sourceBytes": 1080904,
   "tool": "bake_house_lightmaps.py"
 }

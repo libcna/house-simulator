@@ -27,6 +27,15 @@ number order. The first slice is the continuous route from the front approach th
 `L0_DINING`. Normal gameplay must use production materials; the hashed blockout palette may remain
 only as an explicit debug view.
 
+As of 2026-09-19 the scheduler explicitly favours **coverage across that whole connected L0
+route** over additional driveway, roof, piano, wall-gallery or other narrow micro-polish. Inspect
+the fixed exterior, foyer, hall, living, family, kitchen and dining views together, plus an
+ordinary first-person walk. Prioritise an unfinished/empty room, missing primary furniture or
+bad room-scale lighting before small detail in an already credible view. The existing full-room
+furnishing tasks `HOUSE-00986`–`HOUSE-00990` and `HOUSE-00992` remain open until their own
+acceptance criteria are met; smaller completed vignettes do not silently close them. Establish
+a consistent L0 baseline before expanding the sprint to L1.
+
 The initial material/daylight chain `HOUSE-00909` → `HOUSE-00910` → `HOUSE-00912` has reached
 normal rendering, and `HOUSE-00923` restored canonical outdoor material parity at the start view.
 The first minimum real static prop kit (`HOUSE-01037`) uses completed
@@ -59,7 +68,9 @@ complete K-profile rainwater goods instead of incomplete black strips.
 scaled warm tile using the approved stock-XNA material path; the other three marble rooms keep
 their finish. `HOUSE-01292` then calibrates only the six installed sunroom practicals against
 their own 256-sample bake, making the wall, ceiling and tile visible with the lights on in both
-day and evening. It does not lift global exposure or light the night garden.
+day and evening. `HOUSE-01293` applies the same measured discipline to the connected kitchen's
+four bare main points, giving them real approved ceiling bodies and a selected room-side bake.
+Neither task lifts global exposure or lights the night garden.
 `HOUSE-00945` gives the sparse garage approach a measured planted border and three physical,
 dusk-controlled low fixtures without enabling its independent manual flood.
 `HOUSE-00946` gives the broad concrete driveway construction scale with fine control joints and
@@ -16546,6 +16557,57 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             below 0.2%, worst 0.0558% in `l0-sunroom`. `CNA_CNAEXT=OFF` unchanged. The nav
             generator completed in 6.08 s; no zombie process. All compilation/heavy tooling
             was affinity-limited to CPUs 0–5 with no more than six workers.
+- [x] HOUSE-01293 — Physicalise and calibrate the kitchen's four main ceiling lights
+      dep: HOUSE-01039, HOUSE-01041, HOUSE-01256, HOUSE-01266, HOUSE-01283, HOUSE-01285, HOUSE-01290, HOUSE-01292 · sys: world, content, lighting · plat: ALL · pri: MUST
+      note: (2026-09-19) Round 86's newly readable sunroom exposes the still-dark kitchen
+            beyond its open wet-bar threshold. Kitchen's 4,000 lm main group already starts on
+            but remains four bare 3.02 m ceiling points with no linked physical fixture;
+            its current selected atlas has mean 0.02838 and peak 0.16987. Use the already
+            approved residential semi-flush fixture and the same source-local bake approach,
+            preserving the island pendants and all existing light-group/switch ownership.
+      accept: four physical approved fixtures contact the 3.30 m kitchen ceiling without
+            intersecting the pendants; exact stable source↔diffuser links, 1,000 lm/3,000 K
+            four-lamp main circuit and its other three 100-calibrated kitchen circuits retain
+            independent state. Selected kitchen artificial and daylight products are rebaked
+            and promoted with correct provenance. Fixed 26-camera day/night sets show an
+            improved kitchen from hall, within room and from sunroom, without changing outdoor
+            illumination or global exposure. Inspect strict-reference differences; validate
+            measured batch budget, stable IDs, tests, culling, content and strict-XNA gates with
+            at most six CPUs.
+      done: Four approved 636-triangle semi-flush practicals at the established main-source
+            x/z coordinates put their opal optics at y = 3.12 m against the 3.30 m ceiling;
+            the former source-only 3.02 m points and null links are removed. They are 0.68 m
+            from the nearest pendant canopy in plan and share three established material roles.
+            The main group uses a source-local 40 lm/radiant-watt conversion: 256-sample
+            receiver mean/peak 0.02838/0.16987 → 0.07021/0.41957. The other three groups
+            retain the established 100 lm/radiant-watt offline calibration; a diagnostic bake
+            at tool default 683 was rejected before promotion because it would quietly dim
+            the island/sink/undercab atlases. The kitchen batch ceiling is measured 20 → 22,
+            with exactly two additional shared roles (dark bronze and opal glass; the switched
+            emitter already existed), no Reach split.
+      review: Round 87's complete matched clear-day and night sets compare against Round 86;
+            `central-hall` / `kitchen-from-hall` / `kitchen-facing-west` normalized RGB MAE
+            by day 0.013219 / 0.035704 / 0.038979 and by night 0.013241 / 0.036761 /
+            0.040176. Physical emitters, work floor and rear working wall now carry warm depth
+            without ceiling clipping; the reciprocal `sunroom-wet-bar` changes only 0.005863
+            day / 0.005357 night, while the rear terrace remains effectively unchanged.
+            Full-size foyer, hall, living, family, kitchen and dining views were inspected
+            together. The family window wall, formal dining sidewalls and parts of the foyer
+            still read sparse; the night garden ground is still almost black. Coverage across
+            the L0 route outranks further kitchen or exterior micro-polish. VISUAL-GATE-1 fails.
+      verified: Build configured against a 32 MB project-isolated FNA3D/MojoShader copy under
+            `build/isolated-deps/FNA3D`, with the current CNA-required pinned patch stamp;
+            the shared dependency's source diff hash stayed unchanged. `CNA_CNAEXT=OFF` and
+            CPUs 0–5 / at most six workers remain enforced. 1,409 unit, 135 integration and
+            48 active render tests pass; eight capture generators stay disabled. The initial
+            master-bedroom reference failure (0.9457% differing pixels) was diagnosed as a
+            camera-facing halo crossing the structural deck, not accepted as a new golden.
+            A source-side vertical-envelope guard removes that visible false halo and the
+            original bedroom reference passes. Precisely three inspected strict references
+            advance: `blockout-l0-kitchen`, `fp-l0-hall`, `fp-l0-kitchen`. Eighteen
+            culled/unculled pairs are below 0.2%, worst 0.0558% (`l0-sunroom`). All 31
+            content stages, project static/manifest/provenance gates and 323 strict-XNA
+            translation units pass. The measured unculled list guard was updated 722 → 724.
 - [x] HOUSE-01261 — Implement the per-object three-directional-light assignment (key/fill/bounce) for dynamic objects
       dep: HOUSE-01251, HOUSE-00892 · sys: lighting · plat: ALL · pri: MUST
       accept: `BasicEffect` and `SkinnedEffect` receive the same stable key/fill/bounce slot
@@ -20272,6 +20334,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-19 | `HOUSE-01293` | **New task, next free phase-16 id.** Reuse the approved physical ceiling practical for the four existing kitchen main points and locally rebake the one connected room. | Round 86 makes the sunroom readable and reveals the dark kitchen through its open wet-bar threshold. The four default-on kitchen main spots still have `fixtureProp: null`, and their atlas mean 0.02838 under-represents their 4,000 lm installed circuit. A physical linked fixture plus selected calibration is a dependency-valid, bounded visible correction; keeping the island/sink/under-cab group's existing 100 conversion avoids turning one room improvement into three regressions. |
 | 2026-09-19 | `HOUSE-01292` | **New task, next free phase-16 id.** Locally recalibrate the six approved sunroom practicals and promote only their receiver's selected daylight/artificial products. | Round 85's same-pose ON/OFF control shows that switching on all installed sunroom lumens collapses the camera target exposure to 1 while the actual main atlas averages 0.02946: the player sees a darker occupied room with more lights. Its existing four ceiling fixtures and two bar task lights already provide the physical sources. A local offline irradiance correction has bounded visual value and preserves the runtime adaptation contract while wider exposure/atlas reconciliation is investigated separately. |
 | 2026-09-19 | `HOUSE-00950` | **New task, next free phase-12 id.** Give only the sunroom a physically scaled warm tile instead of the original continuous cold marble. | Round 84's matched views make the floor the largest independently tractable material defect inside the connected rear route. The approved Tiles139 source and existing stock-XNA DualTexture role can change that surface without global recolouring, new asset/provenance, a renderer branch or lightmap-layout change. Simple garden bollards were investigated first but would not ground the dark lawn under the present 16 m Basic-terrain assignment. |
 | 2026-09-19 | `HOUSE-00949` | **New task, next free phase-12 id.** Make both authored sliders real glazed aluminium assemblies instead of the shell generator's opaque generic-door fallback. | Round 83's direct sunroom view ranks the broad pale rear slab as the largest newly exposed defect, and the master balcony uses the same type. The existing shell grammar, approved clear glass/aluminium finishes and exact exterior-fenestration role can correct both without a runtime room branch, new renderer, downloaded asset or simulation change. |

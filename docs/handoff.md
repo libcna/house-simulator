@@ -1,3 +1,71 @@
+# Visual-sprint handoff — 2026-09-19 (`HOUSE-01293` checkpoint)
+
+Branch `develop`, task-start HEAD `6afed160da057ba96d2c4733a026995021ee0453`
+(`HOUSE-01292`). This section belongs to the one `HOUSE-01293` commit; use its final commit as
+ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal gameplay uses production materials; the
+coloured blockout is explicit debug only. No CNA, sharp-runtime, sibling repository or shared
+`~/deps/FNA3D` source was edited. All compilation/heavy work used CPUs 0–5, at most six workers.
+
+Four approved 636-triangle bronze/opal semi-flush fixtures now cover the formerly bare
+`L0_KITCHEN` main points and retain the 4×1,000 lm / 3,000 K default-on circuit. Their linked
+optics sit at y3.12 m against the 3.30 m ceiling, clear of the island pendants. Source-local
+offline calibration 100 → 40 lm/radiant-watt raises the kitchen main 256-sample bake mean/peak
+0.02838/0.16987 → 0.07021/0.41957; island, sink and under-cab retain their original 100
+conversion. Exactly four stable prop IDs, two shared material roles and two measured chunk
+submissions were added (kitchen 20 → 22). Room/collision/portal/switch ownership and global
+exposure are unchanged. Selected daylight/artificial atlases, manifest, licences, world-ID
+golden and budget report were promoted; the 31-stage content graph passed.
+
+The first render run exposed an unintended halo through the 0.35 m deck into
+`fp-l1-master-bed` (0.9457% pixels differ). A rejected 4 cm lowering probe left it visible and
+made the mount float. The accepted stock-XNA `TransparentPass` fix draws the camera-facing
+presentation halo only inside its owning storey's vertical envelope, leaving the physical
+emissive mesh and all lightmap ownership intact. The original bedroom strict reference passes
+without update. Three individually inspected intentional references advance:
+`blockout-l0-kitchen`, `fp-l0-hall`, `fp-l0-kitchen`. Final rebuilt suites pass 1,409/1,409 unit,
+135/135 integration and 48/48 active software render; eight capture-only generators remain
+disabled. All 18 culled/unculled pairs stay below 0.2%, worst 0.0558% (`l0-sunroom`). The
+measured unculled integration guard is now 724, not the former 722. The complete static gate is
+green, including 323 strict-XNA translation units; `CNA_CNAEXT=OFF` remains forced.
+
+The game and test build now uses a 32 MB project-isolated copied source tree at
+`build/isolated-deps/FNA3D`, configured with
+`FETCHCONTENT_SOURCE_DIR_FNA3D=/rv/data/development/github.com/libcna/house-simulator/build/isolated-deps/FNA3D`.
+Its own MojoShader `.git` resolves within that copy; CNA's current required combined patch and
+stamp agree at SHA-256 `52dbaec0ccef88ae74a54d74b26749e549a9d81e3b9ee7ff8fa60fd31c3f6c8e`.
+The shared checkout's source diff hash stayed `f8c6073d...` before/after. CMake reconfiguration
+was justified by this dependency-path change, not a new build tree; ccache remained the one
+approved `/rv/cnaccache`. If `build/` is ever recreated, repoint FNA3D to an isolated copy
+before configuring; never run the patch command on shared `~/deps/FNA3D`.
+
+Round 86's [day](visual-review/captures/house-01292-sunroom-day-r1) / [night](visual-review/captures/house-01292-sunroom-night-r1)
+sets precede the compiled final 26-camera [day](visual-review/captures/house-01293-kitchen-day-final)
+and [night](visual-review/captures/house-01293-kitchen-night-final) sets, each with a contact
+sheet. The initial `-r1` candidates are retained as diagnostic evidence. Open
+`kitchen-facing-west`, `kitchen-from-hall` and `sunroom-wet-bar`; the nearby work floor and
+walls gain warm depth, while exterior terrace day is effectively unchanged. Full-size L0
+foyer, hall, living, family, kitchen and dining views were also inspected. Coverage status:
+foyer/hall have runner, art, console/seat and useful lights but broad bare bays; living has its
+seating/fireplace/piano/rug yet remains dark; family has seating/media but a sparse window wall;
+kitchen has island, sink, range, refrigerator and practicals but an underdeveloped far recess;
+dining has table/chairs/pendants but dark empty side walls. Their full-room `HOUSE-00986`–
+`HOUSE-00992` tasks remain open; none is falsely declared complete. A continuous walking
+route check remains for the next coverage batch. The rear night lawn is still nearly black.
+
+Next, after this commit, follow the owner's repository-size cleanup request: keep every capture
+and strict reference file on disk, verify the four exact leaked `build/p2-vegetation-*` targets
+are unheld using fresh `ps` and `/proc/*/{cwd,fd}` checks before deleting only those proven
+regenerable temporary copies; then ignore/untrack captures while leaving
+`docs/visual-review/README.md` versioned. Fetch and verify neither `origin/develop` nor
+`origin/main` contains captures before considering a rewrite of **only unpushed** commits.
+Never force-push. Preliminary sizes were `.git` 2.7 GiB, captures 2.6 GiB and four temporary
+copies at 337 MiB each, but remeasure. After cleanup, obey the new coverage-first L0 scheduler:
+inspect existing phase-13 room/acquisition dependencies and improve foyer→hall→living→family→
+kitchen→dining breadth, not more driveway/roof/piano micro-polish. The ranked current defects
+are in Round 87 of `docs/visual-review/README.md`.
+
+---
+
 # Visual-sprint handoff — 2026-09-19 (`HOUSE-01292` checkpoint)
 
 Branch `develop`. Task-start HEAD `57cb4c214b1b0abd5629ce7200725473f3573ab6`

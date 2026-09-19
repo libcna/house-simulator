@@ -3631,6 +3631,19 @@ it. This is the technique lightmapped games used for twenty years and it is a pe
 > views. The 0.778957 rear-terrace product and all other cells, switches, daylight scale and
 > XNA-only runtime remain unchanged. This does not claim to solve the wider exposure-bake
 > mismatch or garden ground lighting.
+>
+> `HOUSE-01293` makes the four existing 1,000 lm / 3,000 K kitchen-main spots physical:
+> approved 636-triangle semi-flush fixtures put the optical centres at y = 3.12 m against the
+> 3.30 m ceiling and link each source to its own switched `FamilyCeilingDiffuser`. The 256-sample
+> `L0_KITCHEN` main atlas uses a source-local 40 lm-per-radiant-watt offline conversion, increasing
+> mean/peak 0.02838/0.16987 to 0.07021/0.41957; the independent island, sink and under-cab
+> groups retain their established 100 conversion, source lumens and switch state. The measured
+> static batch grows from 20 to 22 material roles, not four separate roles per fixture.
+> Camera-facing fixture-glow billboards are now suppressed when the eye lies above the owning
+> storey's ceiling plus structural deck or below its floor minus structural depth: the actual
+> emissive mesh remains depth-tested and the kitchen lightmap remains cell-local. This prevents
+> a visible false halo on the master-bedroom floor above, without changing gameplay light or
+> portal/collision ownership. All of this remains in the strict stock-XNA rendering path.
 
 ### 28.4 Daylight through windows
 

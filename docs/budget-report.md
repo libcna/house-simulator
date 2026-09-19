@@ -749,11 +749,11 @@ A `+` after a total means at least one row in that pack could not be measured, s
 | `house-l0` | `TEXTURE_L0_HALL_LM_DAY` | texture | `Textures/Lightmaps/Daylight/L0_HALL_LM_DAY` | 16,559 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_HALL_LM_LG_L0_HALL_GALLERY` | texture | `Textures/Lightmaps/Artificial/L0_HALL_LM_LG_L0_HALL_GALLERY` | 12,947 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_HALL_LM_LG_L0_HALL_MAIN` | texture | `Textures/Lightmaps/Artificial/L0_HALL_LM_LG_L0_HALL_MAIN` | 14,627 | -- | 65,536 | · | · |
-| `house-l0` | `TEXTURE_L0_KITCHEN_LM_DAY` | texture | `Textures/Lightmaps/Daylight/L0_KITCHEN_LM_DAY` | 17,496 | -- | 65,536 | · | · |
-| `house-l0` | `TEXTURE_L0_KITCHEN_LM_LG_L0_KITCHEN_ISLAND` | texture | `Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_ISLAND` | 13,495 | -- | 65,536 | · | · |
-| `house-l0` | `TEXTURE_L0_KITCHEN_LM_LG_L0_KITCHEN_MAIN` | texture | `Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_MAIN` | 15,116 | -- | 65,536 | · | · |
-| `house-l0` | `TEXTURE_L0_KITCHEN_LM_LG_L0_KITCHEN_SINK` | texture | `Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_SINK` | 12,703 | -- | 65,536 | · | · |
-| `house-l0` | `TEXTURE_L0_KITCHEN_LM_LG_L0_KITCHEN_UNDERCAB` | texture | `Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_UNDERCAB` | 12,613 | -- | 65,536 | · | · |
+| `house-l0` | `TEXTURE_L0_KITCHEN_LM_DAY` | texture | `Textures/Lightmaps/Daylight/L0_KITCHEN_LM_DAY` | 17,501 | -- | 65,536 | · | · |
+| `house-l0` | `TEXTURE_L0_KITCHEN_LM_LG_L0_KITCHEN_ISLAND` | texture | `Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_ISLAND` | 13,519 | -- | 65,536 | · | · |
+| `house-l0` | `TEXTURE_L0_KITCHEN_LM_LG_L0_KITCHEN_MAIN` | texture | `Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_MAIN` | 15,055 | -- | 65,536 | · | · |
+| `house-l0` | `TEXTURE_L0_KITCHEN_LM_LG_L0_KITCHEN_SINK` | texture | `Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_SINK` | 12,695 | -- | 65,536 | · | · |
+| `house-l0` | `TEXTURE_L0_KITCHEN_LM_LG_L0_KITCHEN_UNDERCAB` | texture | `Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_UNDERCAB` | 12,566 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_LAUNDRY_LM_DAY` | texture | `Textures/Lightmaps/Daylight/L0_LAUNDRY_LM_DAY` | 6,155 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_LAUNDRY_LM_LG_L0_LAUNDRY_MAIN` | texture | `Textures/Lightmaps/Artificial/L0_LAUNDRY_LM_LG_L0_LAUNDRY_MAIN` | 5,812 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_LIVING_LM_DAY` | texture | `Textures/Lightmaps/Daylight/L0_LIVING_LM_DAY` | 15,040 | -- | 65,536 | · | · |

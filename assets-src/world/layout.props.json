@@ -119,6 +119,34 @@
       "interactable": null
     },
     {
+      "id": "PROP_L0_KITCHEN_CEILING_1",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L0_KITCHEN",
+      "position": [-4.73, 3.12, -25.73], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none",
+      "material": null, "interactable": null
+    },
+    {
+      "id": "PROP_L0_KITCHEN_CEILING_2",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L0_KITCHEN",
+      "position": [0.10, 3.12, -26.05], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none",
+      "material": null, "interactable": null
+    },
+    {
+      "id": "PROP_L0_KITCHEN_CEILING_3",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L0_KITCHEN",
+      "position": [-4.73, 3.12, -24.37], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none",
+      "material": null, "interactable": null
+    },
+    {
+      "id": "PROP_L0_KITCHEN_CEILING_4",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L0_KITCHEN",
+      "position": [0.10, 3.12, -24.37], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none",
+      "material": null, "interactable": null
+    },
+    {
       "id": "PROP_L0_KITCHEN_PENDANT_1",
       "asset": "MODEL_FIXTURE_KITCHEN_PENDANT",
       "cell": "L0_KITCHEN",

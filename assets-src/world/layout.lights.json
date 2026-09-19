@@ -716,34 +716,38 @@
     // ---- LG_L0_KITCHEN_MAIN x4 -- §53's example of a group: four down-lights, one switch
     {
       "id": "LIGHT_L0_KITCHEN_MAIN_1", "cell": "L0_KITCHEN", "group": "LG_L0_KITCHEN_MAIN",
-      "type": "spot", "position": [-4.73, 3.02, -25.73],
+      "type": "spot", "position": [-4.73, 3.12, -25.73],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 75.0, "coneOuterDeg": 140.0,
       "colorK": 3000, "bulbClass": "led", "intensityLm": 1000.0, "range": 8.42,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "bakeLumensPerRadiantWatt": 40.0,
+      "fixtureProp": "PROP_L0_KITCHEN_CEILING_1", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
     {
       "id": "LIGHT_L0_KITCHEN_MAIN_2", "cell": "L0_KITCHEN", "group": "LG_L0_KITCHEN_MAIN",
-      "type": "spot", "position": [0.10, 3.02, -26.05],
+      "type": "spot", "position": [0.10, 3.12, -26.05],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 75.0, "coneOuterDeg": 140.0,
       "colorK": 3000, "bulbClass": "led", "intensityLm": 1000.0, "range": 8.42,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "bakeLumensPerRadiantWatt": 40.0,
+      "fixtureProp": "PROP_L0_KITCHEN_CEILING_2", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
     {
       "id": "LIGHT_L0_KITCHEN_MAIN_3", "cell": "L0_KITCHEN", "group": "LG_L0_KITCHEN_MAIN",
-      "type": "spot", "position": [-4.73, 3.02, -24.37],
+      "type": "spot", "position": [-4.73, 3.12, -24.37],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 75.0, "coneOuterDeg": 140.0,
       "colorK": 3000, "bulbClass": "led", "intensityLm": 1000.0, "range": 8.42,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "bakeLumensPerRadiantWatt": 40.0,
+      "fixtureProp": "PROP_L0_KITCHEN_CEILING_3", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
     {
       "id": "LIGHT_L0_KITCHEN_MAIN_4", "cell": "L0_KITCHEN", "group": "LG_L0_KITCHEN_MAIN",
-      "type": "spot", "position": [0.10, 3.02, -24.37],
+      "type": "spot", "position": [0.10, 3.12, -24.37],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 75.0, "coneOuterDeg": 140.0,
       "colorK": 3000, "bulbClass": "led", "intensityLm": 1000.0, "range": 8.42,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "bakeLumensPerRadiantWatt": 40.0,
+      "fixtureProp": "PROP_L0_KITCHEN_CEILING_4", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
 

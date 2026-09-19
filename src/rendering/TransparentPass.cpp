@@ -312,6 +312,18 @@ namespace cnahouse::rendering
                               camera_.target.Z - camera_.eye.Z);
         for (const world::Light* light : glowLights_)
         {
+            // The camera-facing clearance below can otherwise lift a ceiling optic's halo
+            // through the structural deck into the storey above. The fixture's own emissive
+            // material is still depth-tested normally; only this presentation billboard is
+            // suppressed when the eye is outside its owning storey's vertical envelope.
+            const world::Cell* owner = world_.FindCell(light->cell);
+            const world::Level* level = owner != nullptr ? world_.FindLevel(owner->level) : nullptr;
+            if (level != nullptr && level->ceiling.has_value() &&
+                (camera_.eye.Y > *level->ceiling + level->structureDepth ||
+                 camera_.eye.Y < level->ffl - level->structureDepth))
+            {
+                continue;
+            }
             const FixtureGlowVisual glow = FixtureGlowFor(*light,
                                                           lighting_->GroupOutputLevel(light->group),
                                                           lighting_->GroupColor(light->group),

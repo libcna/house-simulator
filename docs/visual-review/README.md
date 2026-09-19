@@ -3835,3 +3835,41 @@ local irradiance bake, not a global exposure, renderer, source-lumen or geometry
 Only the `fp-l0-hall` and `fp-l0-kitchen` strict references advance after individual old/new/diff
 inspection of the visible sunroom region. `VISUAL-GATE-1` still **FAILS**: the night garden,
 cross-room contrast and rear exterior remain the highest-value next work.
+
+## Round 87 — kitchen ceiling practicals and complete-L0 coverage review
+
+Commit: `HOUSE-01293` checkpoint (`2026-09-19`; exact HEAD in `docs/handoff.md`). Before:
+Round 86's matched [day](captures/house-01292-sunroom-day-r1) and
+[night](captures/house-01292-sunroom-night-r1) sets. The first candidate
+[day](captures/house-01293-kitchen-day-r1) / [night](captures/house-01293-kitchen-night-r1)
+sets exposed a wrong halo in the bedroom above. Final compiled-game 26-camera
+[day](captures/house-01293-kitchen-day-final) and
+[night](captures/house-01293-kitchen-night-final) sets each have a contact sheet. The whole
+foyer→hall→living→family→kitchen→dining route was inspected through fixed eye-height views,
+not just the kitchen crop; a continuous walking check remains for the next coverage batch.
+Four approved bronze/opal semi-flush fixtures are visible; the kitchen floor and
+work zone gain warm depth. Main-bake mean/peak 0.02838/0.16987 → 0.07021/0.41957; the
+independent island/sink/under-cab calibrations remain intact.
+
+Ranked visible defects remaining across the route:
+
+1. `L0_FAMILY` has recognisable seating/media, but the window-facing view retains a broad bare
+   wall and sparse furniture composition. The complete-room `HOUSE-00992` task remains open.
+2. `L0_DINING` has a table, chairs and pendants but dark, nearly empty side walls; foyer's large
+   arrival wall and hall-to-kitchen transition also feel sparse. Close the real full-room
+   furnishing tasks before adding detail to an already strong piano or facade screenshot.
+3. The kitchen far recess is still less legible than its work floor, while at 22:00 the rear
+   garden ground is almost black despite detached bright foliage. The 16 m terrain receiver
+   mismatch remains; random short-range bulbs are not an answer.
+
+The first strict render exposed a false two-spot halo in `fp-l1-master-bed`: a camera-facing
+presentation billboard crossed the 0.35 m structural deck. A 4 cm lowering probe reduced but
+did not solve it and was reverted. The accepted stock-XNA source fix clips presentation halos
+outside their owning storey's vertical envelope; the original bedroom reference now passes
+unchanged. Only the individually inspected `blockout-l0-kitchen`, `fp-l0-hall` and
+`fp-l0-kitchen` references advance. Final day `central-hall` / `kitchen-from-hall` /
+`kitchen-facing-west` normalised RGB MAE against Round 86 is 0.013219 / 0.035704 / 0.038979;
+night is 0.013241 / 0.036761 / 0.040176. The rear terrace remains effectively unchanged.
+All 1,409 unit, 135 integration and 48 active render tests, 18 culling pairs and strict-XNA
+gates pass. **VISUAL-GATE-1 still fails**; the next sprint scheduler explicitly favours breadth
+across the connected L0 rooms before micro-polish.

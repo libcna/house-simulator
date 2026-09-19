@@ -21504,7 +21504,7 @@
       "id": "TEXTURE_L0_KITCHEN_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_KITCHEN_LM_DAY.png",
-      "sourceSha256": "326c811eb917a816b362a1858c0b020b4a631f465ed969ece93dbbf28a202e07",
+      "sourceSha256": "c5d64faaae51b88b35a3be0e5b973cebfa037b1763fbddffa5d0dfd62caad654",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21531,7 +21531,7 @@
       "id": "TEXTURE_L0_KITCHEN_LM_LG_L0_KITCHEN_ISLAND",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_ISLAND.png",
-      "sourceSha256": "447c96aab6103ae849d2f64835473f23cf3ce1044a6e280ba323a1034c2e8063",
+      "sourceSha256": "8b08219067ef7469a467e630943480a2c899e9843080e831b17affdaa761df05",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21558,7 +21558,7 @@
       "id": "TEXTURE_L0_KITCHEN_LM_LG_L0_KITCHEN_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_MAIN.png",
-      "sourceSha256": "e1b6cc83282050e2d3a6bdff6d59438701ad263ca47c2a3895cd725d84df9c16",
+      "sourceSha256": "2f38ce330f12da6845e7b6731f645737992cbd17c118e5a29c1a1236a4dbd71b",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21585,7 +21585,7 @@
       "id": "TEXTURE_L0_KITCHEN_LM_LG_L0_KITCHEN_SINK",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_SINK.png",
-      "sourceSha256": "99d96f56e30047849a4c261eec90f923321104b56a03ac37de880a1367366518",
+      "sourceSha256": "5adc6345a44a5ad0bd71c903b4fb5ddc72b84c85a52dba4b4db25d31b798f843",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21612,7 +21612,7 @@
       "id": "TEXTURE_L0_KITCHEN_LM_LG_L0_KITCHEN_UNDERCAB",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_UNDERCAB.png",
-      "sourceSha256": "c072666c979da6ba239a3fd46edd1db9b47d7c12fe57546040fec0e14d4d9a7d",
+      "sourceSha256": "24ebe2ed364653629d915547ece16d1454d34f918b887ee5fb11dd5549cef088",
       "texture": {
         "width": 128,
         "height": 128,
