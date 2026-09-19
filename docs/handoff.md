@@ -1,3 +1,51 @@
+# Visual-sprint handoff — 2026-09-19 (`HOUSE-01296` checkpoint)
+
+Branch `develop`, task-start HEAD `1d15684` (`HOUSE-01071`). The owner-requested
+capture-history removal is already complete in `HOUSE-00043`/`HOUSE-00044`;
+review captures remain ignored and locally accessible, no capture PNG is reachable
+in Git, and no further rewrite or push is pending. The build remains strict XNA,
+`CNA_CNAEXT=OFF`, project-isolated `build/isolated-deps/FNA3D` and six CPUs maximum;
+shared `~/deps`/CNA sources were not edited.
+
+**VISUAL-GATE-1 still FAILS.** Round 92
+[day](visual-review/captures/house-01071-foyer-arrival-day-r1)/
+[night](visual-review/captures/house-01071-foyer-arrival-night-r1) exposed the
+nearly black dining walls and ceiling within an otherwise furnished L0 route.
+Round 93 [day](visual-review/captures/house-01296-dining-cal100-day-probe)/
+[night](visual-review/captures/house-01296-dining-cal100-night-probe) repeats all
+28 fixed built-game poses. Full-size dining, sideboard, reciprocal kitchen/hall,
+living, family, foyer and exterior frames were inspected. Only `L0_DINING`'s
+256-sample artificial/daylight receiver pair changes calibration 300 → 100
+lm/radiant-watt; the three linked physical sources, 2,100 installed lumens,
+switches, fixture geometry, renderer/exposure and all other cells stay intact.
+Main/side atlas mean rises 0.02319/0.00515 → 0.06957/0.01544. Matched dining
+left-wall/ceiling/side-wall grayscale crops rise 0.0568/0.1022/0.1729 →
+0.1411/0.2475/0.2673, day and night. The sideboard and table still need work:
+the non-lightmapped walnut tabletop crop remains precisely 0.1120, so do not
+claim the whole dining room is lit. No PNG source bytes or strict render golden
+changed; the selected scale bindings and bake provenance are the durable result.
+
+L0 status: exterior/front supports the route; foyer, hall, living, family, kitchen
+and dining have production materials and recognizable primary furniture. Foyer's
+new arrival rug/plant and dining's brighter envelope improve continuity, but the
+connected route is not yet uniformly believable. Next highest-value breadth work
+is a useful kitchen west/north work-zone composition and more readable dining
+furniture/table surface, then weak living piano visibility and the flat family
+garden view. Two earlier kitchen probes (a hidden end cabinet and westward main
+light relocation) barely affected ordinary views and were rejected. Do not spend
+another checkpoint on minor exterior, fixture or hero-prop polish while these
+whole-route problems remain. The gate's `E` action still lacks the phase-14
+dispatcher, so a genuine road→dining first-person walkthrough is not complete.
+
+The selected-cell bake/content graph, full built-game review, 1,410/1,410 unit,
+serial integration 137/137 plus content-current, and all 49 active render cases
+plus content-current (including 18 culling pairs) passed without a strict golden
+update. One weather integration case failed only in the first parallel run,
+then passed both alone and in the full serial rerun. Complete static gates and
+323 strict-XNA translation units pass. **Do not repeat the history cleanup.**
+
+---
+
 # Visual-sprint handoff — 2026-09-19 (`HOUSE-01071` checkpoint)
 
 Branch `develop`, task-start HEAD `b6c241a` (`HOUSE-01070`). The owner-authorized

@@ -395,9 +395,9 @@
           "lights": [
             "LIGHT_L0_DINING_CHANDELIER_1"
           ],
-          "mean": 0.023190569483422355,
-          "peak": 0.30894333124160767,
-          "scale": 0.30894333124160767
+          "mean": 0.0695717117837886,
+          "peak": 0.9268302321434021,
+          "scale": 0.9268302321434021
         },
         {
           "group": "LG_L0_DINING_SIDE",
@@ -406,13 +406,13 @@
             "LIGHT_L0_DINING_SIDE_1",
             "LIGHT_L0_DINING_SIDE_2"
           ],
-          "mean": 0.00514551586834416,
-          "peak": 0.38377293944358826,
-          "scale": 0.38377293944358826
+          "mean": 0.015436546982291126,
+          "peak": 1.1513179540634155,
+          "scale": 1.1513179540634155
         }
       ],
-      "lumensPerRadiantWatt": 300.0,
-      "shellHash": "sha256:ed1f599076d03172372ac9b1b0119be11776fb69d7603dbd9d69ca6a2f2b52b8"
+      "lumensPerRadiantWatt": 100.0,
+      "shellHash": "sha256:3fcee70148bb00187a34bfdb606b521152c0e0a2ee8594b8dee852546593677f"
     },
     {
       "cell": "L0_FAMILY",
@@ -2051,7 +2051,7 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_FAMILY"
+    "L0_DINING"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 8126464,

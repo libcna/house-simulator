@@ -210,8 +210,8 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "lumensPerRadiantWatt": 300.0,
-      "shellHash": "sha256:ed1f599076d03172372ac9b1b0119be11776fb69d7603dbd9d69ca6a2f2b52b8"
+      "lumensPerRadiantWatt": 100.0,
+      "shellHash": "sha256:3fcee70148bb00187a34bfdb606b521152c0e0a2ee8594b8dee852546593677f"
     },
     {
       "cell": "L0_FAMILY",
@@ -813,7 +813,7 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_FAMILY"
+    "L0_DINING"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 5111808,

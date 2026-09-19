@@ -16838,6 +16838,48 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             inspected old/new and amplified and lie in the narrow visible family-room
             opening. `tools/ci/run_checks.sh` passes including strict XNA; `CNA_CNAEXT=OFF`
             and the isolated FNA3D checkout remain unchanged.
+- [x] HOUSE-01296 — Give the connected dining-room shell readable room-scale practical light
+      dep: HOUSE-01048, HOUSE-01069, HOUSE-01256, HOUSE-01264, HOUSE-01266 · sys: world, content, lighting · plat: ALL · pri: MUST
+      note: Round 92's complete L0 route shows the furnished dining room collapsing to
+            near-black walls and ceiling in both day and night, despite its installed
+            1,800 lm chandelier and two 150 lm sideboard lamps. Its selected artificial
+            means are only 0.02319 and 0.00515 at a 300 lm/radiant-watt conversion.
+            A one-cell bake candidate at 100 raises shell readability without a new
+            fixture, changed source position, global exposure or other room bake.
+            This is room-scale L0 coverage, not another fixture micro-polish round.
+      accept: retain both existing group IDs, physical fixture links, lumens, default-on
+              switch ownership and the original daylight shape; re-bake/promote only
+              `L0_DINING` at 256 samples with an auditable selected calibration. Inspect
+              matched full-route day/night built-game captures, showing readable walls
+              and ceiling without a clipped pool or false adjacent/upper-floor glow.
+              State explicitly that non-lightmapped dark walnut furniture still needs
+              a separate solution; do not claim this task lights those objects. Advance
+              only proven intended strict references. Pass content, unit, integration,
+              render, culling, budget/licence and strict-XNA gates using at most six CPUs.
+      done: (2026-09-19) Retained the 1,800 lm/2,700 K physical chandelier and the two
+            150 lm/2,400 K linked table lamps, all stable IDs and default-on group
+            ownership. Only `L0_DINING`'s 256-sample artificial/daylight receiver
+            pair changes 300 → 100 lm/radiant-watt; the daylight peak remains 0.68927
+            and normalized PNG bytes are unchanged. Main mean/peak rises
+            0.02319/0.30894 → 0.06957/0.92683; side rises 0.00515/0.38377 →
+            0.01544/1.15132. Round 93's matched 28-camera day/night sets show
+            broad dining-wall/ceiling depth without clipping or false spill.
+            Left-wall/ceiling/side-wall grayscale crops rise
+            0.0568/0.1022/0.1729 → 0.1411/0.2475/0.2673; 50.07% of the
+            dining long-axis image changes versus only 0.51% of the reciprocal
+            kitchen-facing-west image. The dark walnut table remains exactly
+            0.1120 in the same crop and requires separate non-lightmap work;
+            `HOUSE-00989` and VISUAL-GATE-1 remain open.
+      verified: The selected-cell bake sidecars, durable reports, unchanged atlas
+            hashes, manifest/licence/budget, 31-stage content graph, six-worker
+            build and full fixed-view built-game captures pass. Unit 1,410/1,410,
+            serial integration 137/137 plus content-current, and all 49 active
+            software render cases plus content-current pass with no golden update;
+            all 18 culled/unculled comparisons remain green. A parallel weather
+            integration case failed once, then passed alone and in the complete
+            serial rerun; it is not attributable to this static lighting change.
+            `tools/ci/run_checks.sh` passes including 323 strict-XNA translation
+            units. `CNA_CNAEXT=OFF`, isolated FNA3D and six-core affinity persist.
 - [x] HOUSE-01261 — Implement the per-object three-directional-light assignment (key/fill/bounce) for dynamic objects
       dep: HOUSE-01251, HOUSE-00892 · sys: lighting · plat: ALL · pri: MUST
       accept: `BasicEffect` and `SkinnedEffect` receive the same stable key/fill/bounce slot
@@ -20569,6 +20611,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-19 | `HOUSE-01296` | **New task, next free phase-16 id.** Recalibrate only the existing dining practicals' selected receiver maps for room-scale shell readability; leave the full furnishing task and dark furniture-object issue open. | Round 92's day/night whole-route views show the dining envelope nearly black after the connected hall, despite 2,100 lm installed. The original 300 lm/radiant-watt receiver means are 0.02319/0.00515; a 100-calibration candidate visibly brightens broad wall/ceiling areas without touching other cells or global exposure. |
 | 2026-09-19 | `HOUSE-01071` | **New task, next free phase-13 id.** Add a measured foyer floor-scale furnishing and vetted greenery without claiming completion of the dependency-blocked full `HOUSE-00986`. | Round 91's complete route shows the entrance's still-bare stone arrival bay. Two kitchen-corner candidates were first rejected after built-game captures because they barely changed normal views; the foyer rug/plant changes a plainly visible route-space while preserving the complete furnishing DAG. |
 | 2026-09-19 | `HOUSE-01070` | **New task, next free phase-13 id.** Reuse one vetted cabinet as a measured family picture-window storage composition, leaving the bulk-acquisition-dependent full `HOUSE-00992` task open. | Round 90's whole-route cameras show an empty lower window wall even after family lighting is corrected. A physically fitting, approved asset can improve room-scale coverage now without spending another round on intensity or a narrow exterior detail; matched views must reject it if the reuse looks artificial. |
 | 2026-09-19 | `HOUSE-01295` | **New task, next free phase-16 id.** Recalibrate only the four existing family main practicals with the receiver's established 100 lm/radiant-watt baseline. | Round 89's full-route review finds a furnished but dark `L0_FAMILY` from both window and kitchen sides. The current 4,800 lm installed circuit bakes to only 0.04538 mean/0.22923 peak. Its already physical fixtures and selected-cell pipeline can improve the whole connected room without another local prop, global exposure or unrelated renderer work; preserve the independent media/reading groups. |

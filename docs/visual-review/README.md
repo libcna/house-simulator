@@ -4066,3 +4066,47 @@ a short end cabinet was hidden by the range from normal route poses, and moving 
 existing main lights west barely changed the dark recess. Neither was promoted or
 committed. The kitchen/dining darkness is therefore still the highest-impact breadth
 defect, not a problem claimed fixed by this foyer checkpoint. **VISUAL-GATE-1 fails.**
+
+## Round 93 — lift the dining-room envelope, not its unlit furniture
+
+Commit: `HOUSE-01296` checkpoint (`2026-09-19`). Before: Round 92's 28-camera
+[day](captures/house-01071-foyer-arrival-day-r1) and
+[night](captures/house-01071-foyer-arrival-night-r1) sets. After: matched 28-camera
+[day](captures/house-01296-dining-cal100-day-probe) and
+[night](captures/house-01296-dining-cal100-night-probe) built-game sets. Full-size
+dining long-axis and sideboard, kitchen reciprocal, central hall, living, family,
+foyer and exterior views were opened; the matched fixed time/weather/exposure and
+camera poses are unchanged.
+
+Ranked defects before:
+
+1. The dining-room walls and ceiling were almost black from its own camera, despite
+   the linked, default-on chandelier and two side lamps; the adjacent hall felt like
+   a different, much more finished house.
+2. The dining table and chair objects remain very dark even where shell lighting
+   improves. The kitchen's west/north work recess is likewise sparse and dark.
+3. Family glazing frames a flat exterior, and a real continuous gate-to-dining walk
+   still awaits phase-14 interaction dispatch.
+
+Fixed: only the selected `L0_DINING` artificial/daylight receiver pair was rebaked
+at 256 samples with a 100 instead of 300 lm/radiant-watt calibration; its three
+existing physical fixtures, 2,100 installed lumens, switches, geometry, exposure
+and other rooms did not change. Main and side atlas mean/peak rise
+0.02319/0.30894 → 0.06957/0.92683 and 0.00515/0.38377 →
+0.01544/1.15132. The daylight atlas peak remains 0.68927 and all normalized PNG
+bytes stay unchanged; the binding scales and auditable shell hash carry the change.
+On the matched dining long-axis frame, normalized grayscale crops rise left wall
+0.0568 → 0.1411, ceiling 0.1022 → 0.2475 and side wall 0.1729 → 0.2673 in both
+day and night, without a clipped ceiling or visible spill into the reciprocal
+kitchen/hall frames. At a channel delta above two, 50.07% of dining long-axis
+pixels change, versus 0.51% of the kitchen-facing-west frame and under 0.11%
+of each other tested exterior/foyer/hall/living/family/kitchen route view.
+The table crop stays exactly 0.1120: these non-lightmapped
+objects do not receive the changed shell bake. This is a meaningful envelope
+improvement, not a claim that dining furnishing/lighting is finished. All active
+strict render references pass unchanged; the separate visual-review views are
+what reveal and judge this room-scale change.
+
+Remaining highest visible breadth defects: dark dining furniture/table surface,
+the kitchen's west/north working bay, weak living piano/body visibility and the
+flat view beyond family glazing. **VISUAL-GATE-1 still fails.**
