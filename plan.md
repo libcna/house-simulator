@@ -186,7 +186,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 
 | Phase | Name | ID range | Tasks | Exit criterion |
 |---|---|---|---|---|
-| 0 | Repository, conventions, decisions | 00001–00060 | 42 | The repo builds an empty `Game` and CI is green |
+| 0 | Repository, conventions, decisions | 00001–00060 | 43 | The repo builds an empty `Game` and CI is green |
 | 1 | CNA capability verification | 00061–00120 | 60 | Every §5 claim re-proved; `BL-09` settled; probes deleted |
 | 2 | Build skeleton and CI | 00121–00180 | 48 | `Game` clears the screen; HEADLESS tests run in CI |
 | 3 | Content pipeline | 00181–00260 | 47 | glTF, PNG, WAV, SpriteFont and FX all compile and load |
@@ -555,6 +555,28 @@ acceptance criterion; it is not marked complete on the strength of the code havi
             fixtures; `p0-result-check` passed in both configurations and was then deleted.
             "CI green on a fresh clone" is not lost — it is the acceptance criterion of
             `HOUSE-00133` (lint CI) and `HOUSE-00134` (build + `unit` CI), where it is executable.
+- [x] HOUSE-00043 — Keep visual-review captures as local evidence, not Git-tracked binaries
+      dep: HOUSE-00038, HOUSE-00039 · sys: repository, visual tooling · plat: ALL · pri: MUST
+      note: (2026-09-19) The visual sprint produced over 2,500 large PNG/JPEG review files.
+            They are human inspection evidence, distinct from strict render-reference goldens;
+            tracking their compressed bytes has enlarged `.git` without helping regression
+            checks. The owner requests preserving every file on disk while removing this one
+            directory from the tracked tree. Historical removal, separately verified against
+            freshly fetched remote refs, follows this checkpoint; no force push is authorized.
+      accept: an anchored `.gitignore` rule covers only `docs/visual-review/captures/`, and
+            `git rm -r --cached` untracks its contents without deleting them on disk. The
+            text ledger `docs/visual-review/README.md` and strict `tests/render/reference/`
+            PNGs stay versioned. Prove the review tool can still write its destination and
+            that CI/tests do not require the review PNGs to be Git-tracked. Record before/after
+            file counts and run project gates, `git diff --check` and one task commit.
+      verified: Before/after on-disk census is exactly 2,570/2,570 files and the sampled final
+            kitchen PNG retains SHA-256 `67ac41b...`; the tracked capture count is 2,570 → 0.
+            The anchored ignore rule matches the sample, the destination remains writable, the
+            ledger plus 48 strict-reference files remain tracked, and targeted `rg` plus review
+            tool inspection find no CI/test dependency on Git tracking these captures.
+            `tools/ci/run_checks.sh` is green, including 323 strict-XNA translation units;
+            staged and unstaged whitespace checks are clean. Commit verification is part of
+            this checkpoint.
 
 ---
 
@@ -20334,6 +20356,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-19 | `HOUSE-00043` | **New task, next free phase-0 id.** Keep human visual-review captures as ignored local evidence, separate from versioned strict render references; defer the explicitly authorized unpushed-history rewrite until after this commit and fresh remote verification. | The reviewed 2,570 compressed images occupy 2.7 GiB on disk and have no CI/test dependency on Git tracking, while the text ledger and 48 strict goldens do. Untracking preserves the working files and provides a safe, verifiable checkpoint before changing history. |
 | 2026-09-19 | `HOUSE-01293` | **New task, next free phase-16 id.** Reuse the approved physical ceiling practical for the four existing kitchen main points and locally rebake the one connected room. | Round 86 makes the sunroom readable and reveals the dark kitchen through its open wet-bar threshold. The four default-on kitchen main spots still have `fixtureProp: null`, and their atlas mean 0.02838 under-represents their 4,000 lm installed circuit. A physical linked fixture plus selected calibration is a dependency-valid, bounded visible correction; keeping the island/sink/under-cab group's existing 100 conversion avoids turning one room improvement into three regressions. |
 | 2026-09-19 | `HOUSE-01292` | **New task, next free phase-16 id.** Locally recalibrate the six approved sunroom practicals and promote only their receiver's selected daylight/artificial products. | Round 85's same-pose ON/OFF control shows that switching on all installed sunroom lumens collapses the camera target exposure to 1 while the actual main atlas averages 0.02946: the player sees a darker occupied room with more lights. Its existing four ceiling fixtures and two bar task lights already provide the physical sources. A local offline irradiance correction has bounded visual value and preserves the runtime adaptation contract while wider exposure/atlas reconciliation is investigated separately. |
 | 2026-09-19 | `HOUSE-00950` | **New task, next free phase-12 id.** Give only the sunroom a physically scaled warm tile instead of the original continuous cold marble. | Round 84's matched views make the floor the largest independently tractable material defect inside the connected rear route. The approved Tiles139 source and existing stock-XNA DualTexture role can change that surface without global recolouring, new asset/provenance, a renderer branch or lightmap-layout change. Simple garden bollards were investigated first but would not ground the dark lawn under the present 16 m Basic-terrain assignment. |

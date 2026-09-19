@@ -1,3 +1,34 @@
+# Visual-sprint handoff — 2026-09-19 (`HOUSE-00043` checkpoint)
+
+Branch `develop`, task-start HEAD `781cb4c47c26509585ec7745b1a73d865d63c5ff`
+(`HOUSE-01293`). This checkpoint is the one `HOUSE-00043` commit. The four exact abandoned
+`build/p2-vegetation-4tp3pccx`, `-9_yu_5xj`, `-idgcq1fw` and `-ngbm4igx` temporary staging
+directories were verified unheld via `ps` and `/proc/*/{cwd,fd}` and removed, freeing about
+1.35 GB. `build/p2-vegetation-review`, the isolated FNA3D/MojoShader dependency, all visual
+captures and all render references were retained. Those four staging copies are regenerable;
+their deletion is not a capture/reference cleanup.
+
+An anchored ignore rule and cached-only removal now keep all 2,570 human-review captures on
+disk but none tracked in the current tree; a final kitchen PNG's SHA-256 was unchanged. The
+text [visual ledger](visual-review/README.md) and all 48 strict render-reference images remain
+tracked. `capture_review.py` still writes the ignored directory and no CI/test gate assumes
+Git-tracked review captures. `tools/ci/run_checks.sh` passed, including 323 strict-XNA TUs;
+heavy checks used at most six CPUs. Existing local capture links in this handoff/ledger work
+in the preserved workspace, not in a fresh clone. **VISUAL-GATE-1 still FAILS** for the L0
+breadth deficiencies listed in the next checkpoint.
+
+Next: fetch `origin`, verify both `origin/develop` and `origin/main` contain no capture object
+in their reachable histories and record their hashes. Only then rewrite `origin/develop..develop`
+to remove `docs/visual-review/captures/`; restore the `origin` URL if the tool removes it.
+Confirm both remote-ref hashes and the on-disk 2,570 files are unchanged, `develop` remains a
+fast-forward, commit messages/HOUSE IDs remain, and no capture path survives in
+`git rev-list --objects --all`. Only after those checks expire reflogs and run GC; no force
+push. Then return immediately to the coverage-first foyer→hall→living→family→kitchen→dining
+visual work, including an actual first-person route walk. Do not substitute more exterior or
+single-object micro-polish.
+
+---
+
 # Visual-sprint handoff — 2026-09-19 (`HOUSE-01293` checkpoint)
 
 Branch `develop`, task-start HEAD `6afed160da057ba96d2c4733a026995021ee0453`

@@ -2,6 +2,11 @@
 
 These captures answer “does the playable house look good?”, not “did a pixel change?”. Run
 `python3 tools/visual/capture_review.py <short-head>-<round>` from the repository root. The tool
+still writes `docs/visual-review/captures/`, but since `HOUSE-00043` those large human-review
+images are local, ignored evidence rather than Git-tracked assets; links below work in a
+workspace that retains the captures, not a fresh clone. This text ledger and the separate
+`tests/render/reference/` strict goldens remain versioned. Keep the local captures on disk for
+before/after inspection; the ignore rule is not permission to delete review evidence. The tool
 fixes six route poses plus two composition poses (added for HOUSE-01037 after the original
 living/family cameras proved to face away from their seating groups), Tier S/High, software Mesa,
 clear weather, 10:30, the session seed and capture frame. Strict golden render tests remain

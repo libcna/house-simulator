@@ -52,6 +52,10 @@ assets-src/**/*.blend@
 /screenshots/
 /test-output/
 
+# Human visual-review captures are local evidence, not pixel-regression goldens. Keep the
+# text ledger in Git, and keep these large reproducible PNGs on disk for local comparisons.
+/docs/visual-review/captures/
+
 # ---------------------------------------------------------------------------
 # Editors and tooling
 # ---------------------------------------------------------------------------
