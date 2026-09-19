@@ -1,3 +1,71 @@
+# Visual-sprint handoff — 2026-09-19 (`HOUSE-01073` checkpoint)
+
+Read this section first in the next context, then the current `plan.md` task
+entries and architecture references; do not reread the entire master plan.
+Branch is `develop`; task-start HEAD was `57029dd` (`HOUSE-01072`). The
+completed task commit is `030829c` (`HOUSE-01073`), pushed as a fast-forward to
+`origin/develop` before this separate handoff commit. This checkpoint closes
+only `HOUSE-01073`. The current owner explicitly requested that the task and
+handoff be committed and pushed, then that the agent **stop**;
+do not autonomously begin another task in the same session. The earlier
+capture-history cleanup finished in `HOUSE-00043`/`HOUSE-00044`; do not repeat
+or rewrite history. The old handoff sections saying “do not push” describe that
+earlier cleanup, not this explicit owner instruction.
+
+**VISUAL-GATE-1 still FAILS.** Normal gameplay uses production materials, not
+the explicit debug blockout view. The connected L0 route now has materially
+coherent architecture and recognizable primary furnishings in the foyer, hall,
+living, family, kitchen and dining, plus a credible front approach. None of
+those rooms should be declared completely polished: furniture-object lighting
+and some sightlines are weak. The true continuous road→gate→dining walking
+check is still unavailable because the gate `E` interaction needs its phase-14
+dispatcher; fixed ordinary-eye-height route cameras are the current evidence.
+Do not start L1 or return to narrow exterior/hero-object micro-polish until
+the whole L0 route is consistently believable.
+
+Round 96 matching [29-view day](visual-review/captures/house-01073-dining-table-day-r1)/
+[night](visual-review/captures/house-01073-dining-table-night-r1) captures were
+inspected against Round 95 [day](visual-review/captures/house-01072-butlers-run-day-r1)/
+[night](visual-review/captures/house-01072-butlers-run-night-r1). The former
+blank eight-seat dining table is now visibly occupied by a reproducibly authored
+runner, eight ceramic settings, six sage napkins and a low central bowl. The
+room-specific warm walnut and lighter upholstery improve the furniture group.
+The 3,436-triangle setting rests precisely on the top, stays within its bounds,
+has no collision and does not impede circulation. Its deterministic Blender
+source, validator, approved reused textures, source hash, provenance and stable
+IDs are in the commit. `L0_DINING` chunks rise 15→17 and the shared-walnut
+`L0_FAMILY` sideboard adds one batch (28→29): 743 unculled calls world-wide,
+3,031 stable IDs. Review PNGs are ignored local evidence, not committed; if
+this checkout loses them, regenerate with the established capture tool and
+fixed camera set rather than adding them to Git.
+
+The largest remaining visible defect is **insufficient light on the dining
+furniture objects**: day and 22:00 views both retain a near-black sideboard
+and chair fronts while the lightmapped shell is readable. Avoid one more
+tiny tabletop embellishment. Determine a dependency-valid, room-scale way to
+light normal Basic furniture within the approved strict-XNA Tier S/E renderer,
+capture the complete route again, and verify that neighboring rooms and night
+behavior remain coherent. Next broad defect is the flat family garden view;
+the weak living piano/body visibility follows. Full `HOUSE-00989` dining and
+VISUAL-GATE-1 remain open. `docs/visual-review/README.md` Round 96 records the
+ranked image review. Keep coverage-before-micro-polish priority.
+
+Verification for this checkpoint: 31-stage content graph and
+`world-content-current` pass; deterministic Blender/hash/geometry/UV/placement,
+scale, source manifest, licence, budget and ID gates pass. Unit 1,410/1,410;
+integration 137/137 with isolated `XDG_DATA_HOME`; 44 general render cases
+pass with four strict-software cases skipped in that mode, then all four
+forced-software goldens pass separately. All 18 culled/unculled comparisons
+pass. No golden changed. Full `tools/ci/run_checks.sh` passed after
+clang-format, including 323 strict-XNA translation units. Build only with
+`CNA_CNAEXT=OFF`, project-isolated `build/isolated-deps/FNA3D` and the one
+shared ccache (`CCACHE_DIR=/rv/cnaccache`, `CCACHE_BASEDIR=/rv`), at most six
+CPU workers as the owner's explicit limit. Never modify the shared
+`~/deps/FNA3D/MojoShader`, CNA or sibling repositories from here. Build tree
+and captures are local; strict goldens and textual review ledger are tracked.
+
+---
+
 # Visual-sprint handoff — 2026-09-19 (`HOUSE-01072` checkpoint)
 
 Branch `develop`, task-start HEAD `dc66898` (`HOUSE-01297`). The local-only,
