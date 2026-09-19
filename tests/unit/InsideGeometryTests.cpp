@@ -84,6 +84,10 @@ namespace
             "CELL_FRIDGE_INTERIOR east",
             "CELL_FRIDGE_INTERIOR north",
             "CELL_FRIDGE_INTERIOR west",
+            // HOUSE-01072's fitted service run sits only 0.032 m off the west masonry. The
+            // deliberate west-midpoint teleport starts a 0.62 m capsule between these two
+            // solids, which is not a walkable region. The portal tour above must remain clear.
+            "L0_BUTLERS west",
             // HOUSE-01070's collidable family window cabinet sits 0.222 m inside the north
             // wall, leaving less than a 0.62 m player capsule behind it. The test teleports a
             // body into that inaccessible wall/cabinet gap at the room's exact midpoint;
@@ -308,9 +312,9 @@ TEST(InsideGeometryTests, NoStepOfTheTourEndsInsideAnything)
 
     // These appliance interiors have no room to push a body OUT to. A body in the 1.4 x 0.7 m
     // chest freezer or 1.60 x 0.50 m refrigerator is inside the box on every side at once and
-    // there is no outside to reach. The fitted range is flush with the kitchen's west wall, so a
-    // capsule teleported into both solids at their midpoint is the same deliberately unreachable
-    // case.
+    // there is no outside to reach. The fitted kitchen range and butler's service run sit close
+    // to their west walls, so a capsule teleported into those inaccessible gaps cannot clear
+    // both solids.
     //
     // None of them is reachable by walking. `HOUSE-00613`'s 1 894 pushes and the tour above never
     // put a body inside anything at all, which is the guarantee that matters; this list is what

@@ -80,12 +80,12 @@ namespace
         const auto& list = game.RenderListForTesting();
         ASSERT_GT(list.Size(), 0U) << "the frame drew from an empty list";
         EXPECT_TRUE(list.IsSorted()) << "the pass read its slice, which is what sorts the list";
-        // HOUSE-01297's two butler-pantry ceiling fixtures add three shared material roles,
-        // bringing the measured unculled house to 736 calls over FOUR frames: a list not emptied
+        // HOUSE-01072's fitted service run adds four measured material batches,
+        // bringing the unculled house to 740 calls over FOUR frames: a list not emptied
         // between them would be four houses long and still draw a correct-looking picture. This
         // diagnostic remains far below §71.2's 1,400-call worst-case envelope; the materials
         // stay truthful instead of being flattened into a shell finish to satisfy the snapshot.
-        EXPECT_LE(list.DrawCalls(), 736) << "the list was not cleared between frames";
+        EXPECT_LE(list.DrawCalls(), 740) << "the list was not cleared between frames";
 
         const cnahouse::debug::Counter* chunks = game.CountersForTesting().Find("static.chunks");
         const cnahouse::debug::Counter* states = game.CountersForTesting().Find("static.stateChanges");

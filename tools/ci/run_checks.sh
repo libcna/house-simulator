@@ -134,6 +134,9 @@ run_gate "garage-floodlight" python3 tools/assets/garage_floodlight.py --check
 # HOUSE-01040: the project-authored close-range kitchen joinery must remain reproducible from
 # its measured Blender source, including the same small collidable GLBs and manifest hashes.
 run_gate "kitchen-builtins" python3 tools/assets/kitchen_builtins_prepare.py --check
+# HOUSE-01072: the open service-pantry sightline uses a genuinely fitted, measured
+# under-window sink/wine-cooler run, not a hidden primitive or unvalidated GLB.
+run_gate "butlers-service" python3 tools/assets/butlers_service_prepare.py --check
 # HOUSE-01049: the measured counter stools and three restrained worktop groupings remain
 # reproducible from their authored Blender source, with exact material slots and placement.
 run_gate "kitchen-dressing" python3 tools/assets/kitchen_dressing_prepare.py --check

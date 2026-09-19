@@ -1,3 +1,61 @@
+# Visual-sprint handoff — 2026-09-19 (`HOUSE-01072` checkpoint)
+
+Branch `develop`, task-start HEAD `dc66898` (`HOUSE-01297`). The local-only,
+owner-authorized capture-history cleanup is already finished; do not repeat it
+or push. This task uses only the existing project-isolated
+`build/isolated-deps/FNA3D`, strict XNA with `CNA_CNAEXT=OFF`, the shared ccache
+and at most six build workers. No shared dependency or sibling repository was
+edited. The full `HOUSE-00991` pantry/butler furnishing task remains open.
+
+**VISUAL-GATE-1 still FAILS.** Round 94's now-lit kitchen service transition
+was visibly empty. `HOUSE-01072` adds a project-authored, reproducibly generated
+1.62 m shaker work run under its west window, with a genuine cutout sink and
+short tap, three drawer fronts, black-glass wine cooler, approved kitchen
+finishes and a 12-triangle box collision proxy. The 0.893 m counter reaches
+world Y=1.493, seven millimetres below the sill, while the tap rises only
+136 mm into the lower sash. Side doors, floor contact and circulation were
+measured. Stable IDs rise 3,024→3,026; only `L0_BUTLERS`' measured chunk
+exception changes 10→14, giving 740 unculled world calls.
+
+Round 95 [29-view day](visual-review/captures/house-01072-butlers-run-day-r1)/
+[night](visual-review/captures/house-01072-butlers-run-night-r1) captures were
+inspected against Round 94's matching
+[day](visual-review/captures/house-01297-butlers-day-r1)/
+[night](visual-review/captures/house-01297-butlers-night-r1) frames. The former
+empty recess is a recognizable service workspace from the kitchen and threshold,
+without blocked glazing. Its side walls remain sparse; avoid another local
+butler-pantry polish round while the dark dining table/chairs and flat family
+garden view are larger route defects. The foyer, hall, living, family, kitchen
+and dining have production materials and recognizable primary furniture, but
+the full connected route is not yet uniformly believable. The gate `E` action
+still lacks its phase-14 dispatcher, so a genuine continuous first-person
+road→dining walkthrough remains incomplete.
+
+The deterministic Blender/hash/scale/placement validator, selected content,
+manifest/licence/budget/stable-ID gates and six-worker build pass. The relevant
+strict first-person views and all 18 culling pairs pass unchanged. A full
+software-golden run exposed only `property-sideyard-west`: the fitted cabinet
+is now seen as a sliver through the west service window. The actual/reference
+and sixfold-amplified difference were inspected; 791/230,400 pixels over
+channel delta two (0.3433%) are confined to that window edge. Only this
+reference was advanced, and all four software-golden checks then pass. The new
+collidable run exposes one deliberately unreachable test teleport at the
+west-wall midpoint: the wall/cabinet gap is 32 mm, far below the 620 mm player
+capsule. The existing bidirectional push-out test now records that exact
+`L0_BUTLERS west` exception while its 38,546-step portal walking tour still
+finds no step inside static geometry. Full unit 1,410/1,410, integration
+137/137 in isolated `XDG_DATA_HOME`, and all 48 active render cases pass
+(44 general offscreen + four forced-software strict golden cases). Static
+gates pass, including a dedicated physically measured service-run scale category
+and 323 strict-XNA translation units. The complete 31-stage content graph,
+manifest/licence/budget/stable-ID checks and content-current test pass after
+the final metadata correction; `CNA_CNAEXT=OFF` remains forced. Next highest-value
+breadth work: make the dining furniture/readability credible, then reassess the
+family garden sightline from ordinary eye height. Do not start L1 or return to
+minor exterior/micro-polish before L0 coverage is coherent.
+
+---
+
 # Visual-sprint handoff — 2026-09-19 (`HOUSE-01297` checkpoint)
 
 Branch `develop`, task-start HEAD `6ad12d2` (`HOUSE-01296`). This section belongs

@@ -25,6 +25,7 @@ MATERIAL_COLOURS = {
     "CAB_STEEL": (0.44, 0.47, 0.50, 1.0),
     "CAB_TILE": (0.77, 0.80, 0.79, 1.0),
     "CAB_OVEN_GLASS": (0.035, 0.055, 0.075, 1.0),
+    "CAB_WINE_GLASS": (0.045, 0.065, 0.080, 1.0),
 }
 MATERIALS = {}
 COUNTERS = {"north_run": 0, "island": 0, "range_wall": 0}

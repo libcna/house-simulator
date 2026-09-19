@@ -4147,3 +4147,46 @@ not the still-open full `HOUSE-00991` furnishing task.
 Remaining highest visible breadth defects: equip the now-visible service room
 with fitted storage/worktop, make the dining table readable, and improve the
 flat family garden sightline. **VISUAL-GATE-1 still fails.**
+
+## Round 95 — fit a real work run into the open service passage
+
+Commit: `HOUSE-01072` checkpoint (`2026-09-19`). Before: Round 94's 29-camera
+[day](captures/house-01297-butlers-day-r1) and
+[night](captures/house-01297-butlers-night-r1) sets. After: matched 29-camera
+[day](captures/house-01072-butlers-run-day-r1) and
+[night](captures/house-01072-butlers-run-night-r1) built-game sets. The new
+`butlers-from-kitchen.png` view and unchanged `kitchen-facing-west.png` frame
+were opened full-size in both lighting conditions; the dining, family and other
+route views were checked as the next breadth candidates.
+
+Ranked defects before:
+
+1. The lit `L0_BUTLERS` threshold is conspicuously empty, a whole-room gap
+   visible beside the kitchen range in ordinary play.
+2. The dining table, chairs and sideboard still read too dark even after its
+   room envelope was recalibrated; the family garden beyond the glazing is flat.
+3. The gate interaction still prevents a genuine continuous road-to-dining walk.
+
+Fixed: a reproducible 1.62 m wide under-window shaker work run now visibly
+equips the service room. It has a real stone sink cutout, compact steel tap,
+three recessed drawers, a glass-front wine cooler, physical handles and a box
+collision proxy. Its 0.893 m counter is 7 mm below the window sill, and the
+136 mm faucet intrusion remains within the lower sash. The fitted geometry
+clears both side doors and contacts the floor; from the kitchen it turns the
+former bare recess into a readable work area without blocking the window.
+Project-authored Blender source, source hash, approved existing material IDs,
+manifest, licence and stable prop/model IDs remain auditable. Only the measured
+butler's-pantry chunk exception rises 10→14 (world calls 736→740). All strict
+first-person references and 18 culled/unculled pairs pass unchanged. The sole
+strict property-pose difference is a narrow view through the west-sideyard
+service window: 791/230,400 pixels above channel delta 2 (0.3433%), confined
+to the new under-window cabinet and one edge pixel. The old/new and amplified
+diff were inspected before deliberately advancing only
+`property-sideyard-west.png`; all four software goldens then pass.
+
+Remaining highest visible breadth defects: brighten/dress the dark dining
+furniture at room scale, improve the flat family-garden sightline, then examine
+the weak living piano/body and any remaining major route discontinuity. The
+service room's side walls are still spare, so full `HOUSE-00991` remains open;
+do not immediately spend another checkpoint micro-polishing it while the larger
+connected rooms need work. **VISUAL-GATE-1 still fails.**

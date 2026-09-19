@@ -133,6 +133,13 @@
       "material": null, "interactable": null
     },
     {
+      "id": "PROP_L0_BUTLERS_SERVICE_RUN",
+      "asset": "MODEL_BUTLERS_SERVICE_RUN", "cell": "L0_BUTLERS",
+      "position": [-12.33, 0.6, -23.80], "yawDeg": 270, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "proxy",
+      "material": null, "interactable": null
+    },
+    {
       "id": "PROP_L0_KITCHEN_NORTH_BASE_RUN",
       "asset": "MODEL_KITCHEN_NORTH_BASE_RUN",
       "cell": "L0_KITCHEN",

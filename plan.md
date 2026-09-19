@@ -15873,6 +15873,45 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             culled/unculled comparisons and complete static/strict-XNA checks pass,
             including 323 translation units. `CNA_CNAEXT=OFF` and the isolated
             FNA3D/MojoShader build remain intact; no shared dependency was edited.
+- [x] HOUSE-01072 — Fit an under-window service work run into the open kitchen passage
+      dep: HOUSE-01040, HOUSE-01044, HOUSE-01297 · sys: world/content · plat: TOOL · pri: MUST
+      note: Round 94's whole-route capture proves the newly lit `L0_BUTLERS` room
+            is an empty, ordinary-play kitchen sightline. A single fitted work/storage
+            composition closes its largest missing furnishing without claiming the
+            broader, still dependency-blocked `HOUSE-00991` room task.
+      accept: author one reproducible close-range service run with real sink, drawers,
+              wine cooler, coherent approved materials and collision; fit it below
+              the west window without blocking the two side doors or walking route.
+              Check physical scale, source provenance, IDs, budget, content and all
+              relevant render/XNA gates. Inspect matched full-route day/night images,
+              advance a strict golden only for a proven intended difference, and
+              keep the full `HOUSE-00991` task open.
+      done: Project-authored 5,364-triangle shaker run with stone basin cutout,
+            compact tap, three inset drawers and glass-front wine cooler sits at
+            (-12.33, 0.60, -23.80), yaw 270 degrees. Its 1.62 × 1.036 × 0.676 m
+            bounds, 0.893 m counter and 12-triangle box proxy are regenerated and
+            checked byte-for-byte from Blender source. Counter reaches world Y=1.493,
+            7 mm below the sill; faucet rises only 136 mm into the lower window.
+            Four measured finish batches raise only `L0_BUTLERS` 10→14 chunks and
+            whole-world unculled calls 736→740. Matched 29-view day/night Round 95
+            shows a recognizable work run through the kitchen opening and confirms
+            no blocked sash, side door or floor contact. The wider room remains
+            sparse; `HOUSE-00991` and VISUAL-GATE-1 stay open.
+      verified: Deterministic regeneration, selected content build, manifest,
+            licence, budget and stable-ID checks and the six-worker C++ build pass.
+            The only strict-reference change is the inspected west-sideyard
+            blockout property pose: 791/230,400 pixels above channel delta 2
+            (0.3433%), confined to the under-window interior sliver where the
+            new run is now visible. All 18 culling pairs and all four software
+            golden checks pass after that single deliberate reference advance.
+            Full unit 1,410/1,410 (after documenting the unreachable 32 mm
+            wall/cabinet teleport gap), integration 137/137 with isolated
+            `XDG_DATA_HOME`, and all 48 active render cases pass: 44 offscreen
+            scene cases plus four forced-software strict golden cases. The
+            full static gate is green, including the new measured service-run
+            scale category and 323 strict-XNA translation units. The full
+            31-stage content graph and content-current test pass after the
+            manifest category correction; `CNA_CNAEXT=OFF` remains forced.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -20657,6 +20696,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-19 | `HOUSE-01072` | **New task, next free phase-13 id.** Fit one physically measured butler's-pantry work/storage run while leaving the full dependency-blocked `HOUSE-00991` task open. | Round 94's built-game threshold camera proves the kitchen's newly readable open service room is empty. Its west window leaves only 0.90 m below the sash, requiring a specifically measured low run rather than a generic kitchen cabinet. This fixes a whole-route furnishing gap with the approved authored-content pipeline and no architecture change. |
 | 2026-09-19 | `HOUSE-01297` | **New task, next free phase-16 id.** Light only the open `L0_BUTLERS` service transition with approved physical fixtures and a selected receiver bake; keep the full `HOUSE-00991` furnishing task open. | Round 93's kitchen west view has a black gap beside the range, and a close camera proves it is the open, still-empty butler's pantry. Its old default-off 3.28 m point pair bakes mostly ceiling fireflies rather than readable walls. Fixing this room-sized L0 discontinuity is dependency-valid visual coverage, whereas inventing another kitchen cabinet in the adjacent narrow range bay was not. |
 | 2026-09-19 | `HOUSE-01296` | **New task, next free phase-16 id.** Recalibrate only the existing dining practicals' selected receiver maps for room-scale shell readability; leave the full furnishing task and dark furniture-object issue open. | Round 92's day/night whole-route views show the dining envelope nearly black after the connected hall, despite 2,100 lm installed. The original 300 lm/radiant-watt receiver means are 0.02319/0.00515; a 100-calibration candidate visibly brightens broad wall/ceiling areas without touching other cells or global exposure. |
 | 2026-09-19 | `HOUSE-01071` | **New task, next free phase-13 id.** Add a measured foyer floor-scale furnishing and vetted greenery without claiming completion of the dependency-blocked full `HOUSE-00986`. | Round 91's complete route shows the entrance's still-bare stone arrival bay. Two kitchen-corner candidates were first rejected after built-game captures because they barely changed normal views; the foyer rug/plant changes a plainly visible route-space while preserving the complete furnishing DAG. |

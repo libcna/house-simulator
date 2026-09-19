@@ -49,6 +49,12 @@ CATEGORIES: dict[str, list[tuple[str, float, float, str]]] = {
     "kitchen-sink-run": [("x", 2.70, 2.95, "kitchen sink run width"),
                          ("z", 0.72, 0.95, "kitchen sink run depth including tap"),
                          ("y", 0.88, 0.95, "kitchen counter height under faucet")],
+    # The butler's west window starts only 0.90 m above its floor. Its fitted
+    # three-bay run is narrower and shallower than the main kitchen sink wall;
+    # the separately measured stone worktop must clear that low sill.
+    "kitchen-service-run": [("x", 1.50, 1.70, "butler service run width"),
+                            ("z", 0.60, 0.72, "butler service run depth including pulls"),
+                            ("y", 0.88, 0.90, "under-window service counter height")],
     # The fitted cooking wall includes 2.65 m upper cabinets and hood. Its working top is a
     # separately measured manifest property, exactly as for the sink/faucet assembly.
     "kitchen-cooking-wall": [("x", 0.95, 1.05, "fitted cooking bay width"),
@@ -275,7 +281,7 @@ def check(path: Path, category: str, geometry: dict | None = None) -> list[str]:
                     f"{what}: measured seat {value:.3f} m must lie within the model's "
                     f"{size[1]:.3f} m height")
                 continue
-        if category in {"kitchen-sink-run", "kitchen-cooking-wall"} and axis == "y":
+        if category in {"kitchen-sink-run", "kitchen-service-run", "kitchen-cooking-wall"} and axis == "y":
             counter = (geometry or {}).get("counterHeightMetres")
             if not isinstance(counter, (int, float)):
                 problems.append(
@@ -394,6 +400,23 @@ def selftest() -> int:
             print("  SELFTEST FAILED: 0.84 m sink counter was accepted", file=sys.stderr)
             failures += 1
         print("  sink run requires a measured in-band counter despite its 1.25 m tap")
+
+        # HOUSE-01072: the window limits the smaller service run to an 0.90 m top.
+        service = Path(work) / "service_run.glb"
+        service.write_bytes(make(1.62, 1.036, 0.676))
+        if check(service, "kitchen-service-run", {"counterHeightMetres": 0.893}):
+            print("  SELFTEST FAILED: measured under-window service run was rejected",
+                  file=sys.stderr)
+            failures += 1
+        if not check(service, "kitchen-service-run"):
+            print("  SELFTEST FAILED: service run without measured counter was accepted",
+                  file=sys.stderr)
+            failures += 1
+        if not check(service, "kitchen-service-run", {"counterHeightMetres": 0.94}):
+            print("  SELFTEST FAILED: service counter above the window sill was accepted",
+                  file=sys.stderr)
+            failures += 1
+        print("  service run requires a measured counter below its window")
 
         # HOUSE-01044: the hood raises the compact assembly to 2.65 m, while the two stone
         # scribe tops remain at the same human-scale 0.94 m datum as the sink run.

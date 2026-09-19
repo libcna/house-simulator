@@ -2461,6 +2461,43 @@
       ]
     },
     {
+      "id": "MODEL_BUTLERS_SERVICE_RUN",
+      "category": "kitchen-service-run",
+      "sourceFile": "assets-src/Models/Furniture/Kitchen/butlers_run.glb",
+      "sourceSha256": "43c2bbb373915f64020f646ffc1999ec58ddf851f90416db8b90819a09208a3b",
+      "contentName": "Models/Furniture/Kitchen/butlers_run",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "L0 butler-pantry under-window service run",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored measured joinery from tools/blender/butlers_service_run.py for HOUSE-01072: compact fitted sink, wine cooler and drawer run below the west window. Approved house material roles are reused; no third-party model is copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [1.62, 1.0355, 0.676182],
+        "counterHeightMetres": 0.893,
+        "triangles": {"LOD0": 5364},
+        "collision": "butlers_run_001_service_toe_COL"
+      },
+      "materialMap": {
+        "CAB_OAK": "MAT_DOOR_HARDWOOD",
+        "CAB_PAINT": "MAT_DOOR_PAINTED",
+        "CAB_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "CAB_WINE_GLASS": "MAT_KITCHEN_OVEN_GLASS",
+        "CAB_STONE": "MAT_KITCHEN_COUNTER_STONE"
+      },
+      "usedIn": ["L0_BUTLERS"]
+    },
+    {
       "id": "MODEL_KITCHEN_NORTH_BASE_RUN",
       "category": "kitchen-sink-run",
       "sourceFile": "assets-src/Models/Furniture/Kitchen/north_run.glb",
