@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate and validate the project-authored dining suite and HOUSE-01069 sideboard."""
+"""Regenerate the authored dining suite and validate both uses of its sideboard."""
 
 from __future__ import annotations
 
@@ -120,8 +120,11 @@ def validate(path: Path, name: str, row: dict) -> tuple[list[float], int, str | 
 
 
 def validate_world() -> None:
-    layout = layout_io.load_layout(REPO / "assets-src" / "world", ["props", "lights"])
+    layout = layout_io.load_layout(REPO / "assets-src" / "world",
+                                   ["props", "lights", "portals"])
     props = layout_io.by_id(layout_io.rows(layout, "props"), "prop")
+    portals = layout_io.by_id(layout_io.rows(layout, "portals"), "portal")
+    assets = {row["id"]: row for row in json.loads(MANIFEST.read_text())["assets"]}
     table = props["PROP_L0_DINING_TABLE"]
     chairs = [props[f"PROP_L0_DINING_CHAIR_{index}"] for index in range(1, 9)]
     chandelier = props["PROP_L0_DINING_CHANDELIER"]
@@ -145,6 +148,27 @@ def validate_world() -> None:
             sideboard["position"] != [-7.33, 0.6, -20.44] or \
             sideboard["collision"] != "proxy":
         raise RuntimeError("formal sideboard no longer fits the short north-wall bay")
+    family = props["PROP_FAMILY_WINDOW_CABINET"]
+    if (family["asset"] != ASSETS["sideboard"][0] or
+            family["cell"] != "L0_FAMILY" or
+            family["position"] != [5.40, 0.6, -26.65] or
+            family["yawDeg"] != 180 or family["scale"] != 0.88 or
+            family["collision"] != "proxy" or not family["static"] or
+            assets[ASSETS["sideboard"][0]]["usedIn"] != ["L0_DINING", "L0_FAMILY"]):
+        raise RuntimeError("family picture-window cabinet changed its measured placement/use")
+    width, height, depth = assets[ASSETS["sideboard"][0]]["geometry"]["boundsMetres"]
+    aperture = portals["P_L0_FAMILY__W1"]["rect"]
+    left = family["position"][0] - family["scale"] * width / 2
+    right = family["position"][0] + family["scale"] * width / 2
+    headroom = aperture["v"][0] - (family["position"][1] + family["scale"] * height)
+    if not (aperture["u"][0] < left < right < aperture["u"][1] and
+            0.02 <= headroom <= 0.06):
+        raise RuntimeError("family cabinet no longer fits below the picture-window sill")
+    curtain = props["PROP_FAMILY_CURTAIN_NORTH"]
+    curtain_depth = assets[curtain["asset"]]["geometry"]["boundsMetres"][2]
+    rear = family["position"][2] - family["scale"] * depth / 2
+    if rear - (curtain["position"][2] + curtain_depth) < 0.04:
+        raise RuntimeError("family cabinet would intersect the north curtain")
     for index, x in enumerate((-7.90, -6.76), start=1):
         lamp = props[f"PROP_L0_DINING_SIDE_LAMP_{index}"]
         side = lights[f"LIGHT_L0_DINING_SIDE_{index}"]

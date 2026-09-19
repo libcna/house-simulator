@@ -15803,6 +15803,41 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             `tools/ci/run_checks.sh`, including 323 strict-XNA translation units, and
             `git diff --check` pass. Build/strict compilation was pinned to CPUs 0–5 and
             `CNA_CNAEXT=OFF` remains forced with isolated FNA3D/MojoShader.
+- [x] HOUSE-01070 — Ground the family-room picture window with a measured storage cabinet
+      dep: HOUSE-01069, HOUSE-00907, HOUSE-01052, HOUSE-01067 · sys: world/content · plat: TOOL · pri: MUST
+      note: Round 90's complete route day/night review shows a furnished and now well-lit
+            family room, but the 2.4 m picture window floats above a broad empty wall and
+            bare floor. The approved, detailed walnut/ceramic sideboard can be repeated once
+            in a separate room as a coherent house cabinetry language; no new asset download,
+            renderer branch, fixture calibration or broad `HOUSE-00992` claim is needed.
+      accept: place one existing provenance-cleared sideboard beneath the family north
+              picture window at floor support, verify curtain clearance, chair/sofa circulation,
+              collision and portal sightlines with measured bounds, and update manifest use
+              and stable IDs. Inspect matched complete-route day/night screenshots from the
+              built game; retain the placement only if it visibly grounds the otherwise
+              empty family window wall without obvious repeated-copy artificiality. Pass
+              content, budget, licence, stable-ID, unit, integration, render, culling and
+              strict-XNA gates at no more than six CPUs. `HOUSE-00992` remains open.
+      done: (2026-09-19) Reused the deterministic 2,916-triangle walnut/brass/ceramic
+            sideboard at uniform 0.88 scale as a distinct family window cabinet. Its
+            1.426 × 0.823 × 0.456 m physical bounds sit 27 mm below the picture-window
+            sill, 68 mm from the curtain and clear of the chair/sofa. The first unscaled
+            candidate intersected the glazing and was rejected from matched screenshots.
+            Round 91's 27-camera day/night sets show the former empty lower window wall
+            grounded without a blocked view or visibly repetitive adjacent composition.
+            Provenance remains the original project-authored model, now used in two cells;
+            one new prop ID is recorded. Only `L0_FAMILY`'s measured chunk exception rises
+            26 → 28 for its two new close-range ceramic/brass roles; the unculled world is
+            728 chunks. The collidable cabinet leaves an unreachable 222 mm wall gap,
+            documented in the existing bidirectional push-out test; its walking tour stays
+            clean. The full `HOUSE-00992` room task and VISUAL-GATE-1 remain open.
+      verified: The complete content graph, manifest/licence/stable-ID/budget checks,
+            deterministic dining asset validation and all 13 world rules pass. Built-game
+            matched day/night review and all 48 active software render cases plus their
+            content-current prerequisite pass with no golden update; all 18 culling pairs
+            remain green. Unit 1,410/1,410 and integration 137/137 plus content-current
+            pass after the exact measured 728-draw snapshot was advanced. The six-core
+            static/strict-XNA gate is green; `CNA_CNAEXT=OFF` and isolated FNA3D remain.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -20499,6 +20534,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-19 | `HOUSE-01070` | **New task, next free phase-13 id.** Reuse one vetted cabinet as a measured family picture-window storage composition, leaving the bulk-acquisition-dependent full `HOUSE-00992` task open. | Round 90's whole-route cameras show an empty lower window wall even after family lighting is corrected. A physically fitting, approved asset can improve room-scale coverage now without spending another round on intensity or a narrow exterior detail; matched views must reject it if the reuse looks artificial. |
 | 2026-09-19 | `HOUSE-01295` | **New task, next free phase-16 id.** Recalibrate only the four existing family main practicals with the receiver's established 100 lm/radiant-watt baseline. | Round 89's full-route review finds a furnished but dark `L0_FAMILY` from both window and kitchen sides. The current 4,800 lm installed circuit bakes to only 0.04538 mean/0.22923 peak. Its already physical fixtures and selected-cell pipeline can improve the whole connected room without another local prop, global exposure or unrelated renderer work; preserve the independent media/reading groups. |
 | 2026-09-19 | `HOUSE-01294` | **New task, next free phase-16 id.** Recalibrate only the existing physical formal-living main circuit and its selected receiver atlas. | Round 88's 27-camera day/night route review shows the room has its primary furniture and four real default-on ceiling fixtures, but its wall/floor remain much darker than the connected hall. The physical source-to-atlas energy, not another hero prop or exterior detail, is the current room-scale visual defect. A local rebake can test and correct it without a renderer or global-exposure change. |
 | 2026-09-19 | `HOUSE-01069` | **New task, next free phase-13 id.** Add a bounded dining service-wall furnishing and linked-practical checkpoint without claiming the dependency-blocked full `HOUSE-00989` room task. | Round 87's complete L0 sheets show a furnished dining table under a physical chandelier but a dark, nearly empty side wall. A measured cabinet and real table lamps can use the existing deterministic asset, stock-XNA prop/light and selected lightmap pipeline now, improving room-scale coverage before more exterior or hero-object detail. |

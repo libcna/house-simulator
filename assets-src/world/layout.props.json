@@ -1104,6 +1104,19 @@
       "interactable": null
     },
     {
+      "id": "PROP_FAMILY_WINDOW_CABINET",
+      "asset": "MODEL_FURNITURE_DINING_SIDEBOARD",
+      "cell": "L0_FAMILY",
+      "position": [5.40, 0.6, -26.65],
+      "yawDeg": 180,
+      "scale": 0.88,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
       "id": "PROP_L0_SUNROOM_BREAKFAST",
       "asset": "MODEL_SUNROOM_BREAKFAST_GROUP",
       "cell": "L0_SUNROOM",

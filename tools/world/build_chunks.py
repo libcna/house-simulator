@@ -180,7 +180,7 @@ CHUNK_BUDGET_EXCEPTIONS = {
                 "asset whose empty centre preserves the kitchen portal; HOUSE-01290 adds the shared "
                 "bronze, opal-glass and independently switched optical-disc fixture roles; 15 is "
                 "measured"),
-    "L0_FAMILY": (26,
+    "L0_FAMILY": (28,
                   "measured with HOUSE-01037's first furnished media/seating group: five shell "
                   "finishes plus eight source-specific furniture albedos and one split to respect "
                   "Reach's per-draw primitive cap, plus one outside window-frame chunk. Merging "
@@ -203,7 +203,10 @@ CHUNK_BUDGET_EXCEPTIONS = {
                   "splits the shared ceiling fixture's always-visible opal bowl from its switched "
                   "emitter, adding one truthful glass role. HOUSE-01067 adds one shared woven "
                   "curtain role across both picture-window treatments while their steel hardware "
-                  "reuses the room's existing role; 26 is exact"),
+                  "reuses the room's existing role. HOUSE-01070 reuses the verified cabinet "
+                  "under the north picture window; its walnut role is already resident, while "
+                  "the restrained brass hardware and ceramic serving piece add two distinct "
+                  "close-range finish chunks; 28 is exact"),
     "L0_LIVING": (34,
                   "measured with HOUSE-01037's first furnished conversation group: six shell "
                   "finishes plus eight source-specific furniture albedos and one split to respect "

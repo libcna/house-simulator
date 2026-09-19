@@ -84,6 +84,11 @@ namespace
             "CELL_FRIDGE_INTERIOR east",
             "CELL_FRIDGE_INTERIOR north",
             "CELL_FRIDGE_INTERIOR west",
+            // HOUSE-01070's collidable family window cabinet sits 0.222 m inside the north
+            // wall, leaving less than a 0.62 m player capsule behind it. The test teleports a
+            // body into that inaccessible wall/cabinet gap at the room's exact midpoint;
+            // the walking tour above still proves no reachable step enters either solid.
+            "L0_FAMILY north",
             // The measured range is fitted against the kitchen's west wall. A capsule teleported
             // into their overlap at the room midpoint has no free side, though the circulation
             // path never enters either solid from outside.

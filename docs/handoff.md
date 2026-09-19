@@ -1,3 +1,55 @@
+# Visual-sprint handoff — 2026-09-19 (`HOUSE-01070` checkpoint)
+
+Branch `develop`, task-start HEAD `34bd981` (`HOUSE-01295`). This section belongs to the
+single `HOUSE-01070` commit. Capture-history cleanup already finished in `HOUSE-00043`/
+`HOUSE-00044`: ignored review PNGs remain locally, no captures are reachable from Git,
+strict render goldens remain tracked, and no new history rewrite or push is pending.
+
+**VISUAL-GATE-1 still FAILS.** Normal play remains production-material rendering; the
+coloured blockout is explicit debug only. The matched 27-camera Round 90
+[day](visual-review/captures/house-01295-family-day-r1)/
+[night](visual-review/captures/house-01295-family-night-r1) baseline exposed the empty
+family north picture-window wall. The accepted Round 91
+[day](visual-review/captures/house-01070-family-cabinet-day-r2)/
+[night](visual-review/captures/house-01070-family-cabinet-night-r2) sets show a grounded
+storage cabinet under that window; `family-garden-view.png`, `family-composition.png`,
+`kitchen.png`, and the foyer/hall/living/dining route views were opened full-size. The
+initial `day-r1` candidate at full scale was rejected because its top and bowl overlapped
+the window; only uniformly scaled `r2` is retained as the result.
+
+The cabinet is the already proven, project-authored 2,916-triangle dining sideboard reused
+once in a separate family room. Its final 1.426 × 0.823 × 0.456 m bounds sit 27 mm below
+the 1.45 m sill, about 68 mm from the north curtain and clear of the neighboring chair and
+sofa. It retains the collision proxy, provenance and real walnut/brass/ceramic material
+roles. One stable prop ID raises the registry to 3,019. Two newly resident material roles
+raise only `L0_FAMILY`'s measured exact chunk exception 26 → 28 and whole-world unculled
+chunks 726 → 728. The existing push-out test records the intentional unreachable 222 mm
+wall/cabinet gap; its 38,531-step walking tour stays clear. The four-frame integration
+draw-count snapshot was advanced exactly to 728. No lightmap, global exposure, renderer or
+strict golden was changed.
+
+The 31-stage content pipeline, deterministic asset validator, 13 world rules,
+manifest/provenance/licence, stable-ID and budget gates pass. Built game, 1,410/1,410 unit,
+137/137 integration plus content-current and 48/48 active software render plus
+content-current pass; eight capture-only render generators remain disabled and all 18
+culled/unculled pairs pass. Complete static/strict-XNA checks are green, including 323
+translation units. The build still uses at most six CPUs, the prescribed shared ccache,
+`CNA_CNAEXT=OFF` and project-isolated `build/isolated-deps/FNA3D`; no shared `~/deps` or
+CNA source was edited.
+
+L0 route baseline: foyer/hall, living, family, kitchen and dining now have production
+finishes, primary furnishing and useful practicals, but quality is not yet consistently
+believable. Family's wall is better furnished while its exterior view remains flat; the
+kitchen west/north recess looks dark and sparse; dining's close wall is still too dark;
+foyer/hall have bare arrival bays; living's daylight and piano-body visibility are weak.
+Exterior front is adequate for now. A true road→gate→foyer→dining first-person walkthrough
+is still blocked at the pedestrian gate because `E` input has no phase-14 dispatcher;
+do not claim route-walk completion. Next highest-value breadth task is the kitchen far
+recess, then foyer/hall arrival-bay density or the dining transition. Avoid another lamp,
+gutter, driveway or piano micro-polish round while those remain.
+
+---
+
 # Visual-sprint handoff — 2026-09-19 (`HOUSE-01295` checkpoint)
 
 Branch `develop`, task-start HEAD `3b2514c` (`HOUSE-01294`). This section belongs to the

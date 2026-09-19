@@ -1214,7 +1214,8 @@
         "SIDEBOARD_CERAMIC": "MAT_FOYER_CERAMIC"
       },
       "usedIn": [
-        "L0_DINING"
+        "L0_DINING",
+        "L0_FAMILY"
       ]
     },
     {

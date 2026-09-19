@@ -3995,3 +3995,33 @@ Remaining: window-side furnishing and believable exterior context are now the ro
 visible deficits. Continue with connected L0 coverage, especially kitchen recess and dining
 side wall; do not turn this into another sequence of tiny lamp/intensity tweaks.
 **VISUAL-GATE-1 still fails.**
+
+## Round 91 — family picture-window wall gains grounded storage
+
+Commit: `HOUSE-01070` checkpoint (`2026-09-19`). Before: Round 90's 27-camera
+[day](captures/house-01295-family-day-r1) and
+[night](captures/house-01295-family-night-r1) sets. After: the same 27 fixed built-game
+[day](captures/house-01070-family-cabinet-day-r2) and
+[night](captures/house-01070-family-cabinet-night-r2) sets. Full-size family garden,
+family composition, kitchen reciprocal, foyer, hall, living and dining views were opened.
+
+Ranked defects before: (1) the family picture window floated over a broad empty lower wall;
+(2) the kitchen's west recess and dining's close side wall remain dark, while foyer/hall have
+broad bare bays; (3) family glazing frames a flat, sparse exterior. The interaction-disabled
+pedestrian gate still prevents a genuine continuous road-to-dining first-person walk.
+
+Fixed: reuse the approved detailed walnut/brass/ceramic cabinet once, in a different room,
+below the family north picture window. Its uniformly scaled 1.426 × 0.823 × 0.456 m body
+stands on the real floor with a collision proxy. The top is 27 mm below the 1.45 m sill,
+the rear clears the curtain by about 68 mm, and the chair's x-bounds clear its left end by
+about 124 mm; the sofa has separate z clearance. The first full-scale capture was rejected:
+its top and ceramic bowl intruded into the window. At the accepted scale the window remains
+open in both fixed family views, the former empty wall has useful domestic storage, and the
+cabinet's repeated design is not visible alongside the dining original in any route frame.
+It brings two truthful ceramic/brass material chunks into family (26 → 28; unculled world
+726 → 728), not a general limit waiver. The collision push-out unit test records the exact
+unreachable 222 mm wall/cabinet gap while its normal walking tour remains clean.
+
+Remaining: the view beyond the family glass is still too flat, the kitchen far recess still
+looks dark/empty, dining's close wall lacks room-scale bounce, and foyer/hall arrival bays
+remain sparse. No lightmap or strict render golden changed. **VISUAL-GATE-1 still fails.**

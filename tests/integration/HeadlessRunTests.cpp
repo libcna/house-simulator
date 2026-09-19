@@ -80,12 +80,12 @@ namespace
         const auto& list = game.RenderListForTesting();
         ASSERT_GT(list.Size(), 0U) << "the frame drew from an empty list";
         EXPECT_TRUE(list.IsSorted()) << "the pass read its slice, which is what sorts the list";
-        // HOUSE-01069's ceramic and switched lamp shade bring the measured unculled house to 726
-        // calls, over FOUR frames: a list that was not emptied between them would be four houses
-        // long and would still draw a correct-looking picture. This diagnostic remains far below
-        // §71.2's 1,400-call worst-case envelope. The breakfast, bar, plants and two fixture types
-        // retain truthful close-range material roles rather than flattening the room into one draw.
-        EXPECT_LE(list.DrawCalls(), 726) << "the list was not cleared between frames";
+        // HOUSE-01070's family cabinet adds brass and ceramic roles to the existing walnut,
+        // bringing the measured unculled house to 728 calls over FOUR frames: a list not emptied
+        // between them would be four houses long and still draw a correct-looking picture. This
+        // diagnostic remains far below §71.2's 1,400-call worst-case envelope; the new cabinet
+        // retains its truthful close-range materials instead of flattening them into wall paint.
+        EXPECT_LE(list.DrawCalls(), 728) << "the list was not cleared between frames";
 
         const cnahouse::debug::Counter* chunks = game.CountersForTesting().Find("static.chunks");
         const cnahouse::debug::Counter* states = game.CountersForTesting().Find("static.stateChanges");
