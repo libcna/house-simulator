@@ -361,12 +361,13 @@
             "LIGHT_L0_BUTLERS_MAIN_1",
             "LIGHT_L0_BUTLERS_MAIN_2"
           ],
-          "mean": 0.014106529012676363,
-          "peak": 9.930042266845703,
-          "scale": 9.930042266845703
+          "mean": 0.06186464647919565,
+          "peak": 0.320772260427475,
+          "scale": 0.320772260427475
         }
       ],
-      "shellHash": "sha256:75d0e22d39fd9c6aa1c4e353c900f307b5c8002bbe05768d40bad2f007741e20"
+      "lumensPerRadiantWatt": 100.0,
+      "shellHash": "sha256:116e8dab0eb8801e06e6f2c85380dd07cbdfd3c6d228bd6304fba75fa2e4659a"
     },
     {
       "cell": "L0_CLOSET_W",
@@ -2051,12 +2052,12 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_DINING"
+    "L0_BUTLERS"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 8126464,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 1076950,
+  "sourceBytes": 1084577,
   "tool": "bake_house_lightmaps.py"
 }

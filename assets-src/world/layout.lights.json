@@ -692,19 +692,21 @@
     // ---- LG_L0_BUTLERS_MAIN x2
     {
       "id": "LIGHT_L0_BUTLERS_MAIN_1", "cell": "L0_BUTLERS", "group": "LG_L0_BUTLERS_MAIN",
-      "type": "point", "position": [-10.45, 3.28, -24.20],
-      "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 700.0, "range": 4.35,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
-      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+      "type": "spot", "position": [-11.55, 3.12, -23.80],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 75.0, "coneOuterDeg": 140.0,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 700.0, "range": 5.0,
+      "bakeLumensPerRadiantWatt": 40.0,
+      "fixtureProp": "PROP_L0_BUTLERS_CEILING_1", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
     {
       "id": "LIGHT_L0_BUTLERS_MAIN_2", "cell": "L0_BUTLERS", "group": "LG_L0_BUTLERS_MAIN",
-      "type": "point", "position": [-10.45, 3.28, -23.40],
-      "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 700.0, "range": 4.35,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
-      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+      "type": "spot", "position": [-9.35, 3.12, -23.80],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 75.0, "coneOuterDeg": 140.0,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 700.0, "range": 5.0,
+      "bakeLumensPerRadiantWatt": 40.0,
+      "fixtureProp": "PROP_L0_BUTLERS_CEILING_2", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
 
     // ---- LG_L0_PANTRY_MAIN x1

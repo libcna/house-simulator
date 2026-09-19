@@ -190,7 +190,8 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:75d0e22d39fd9c6aa1c4e353c900f307b5c8002bbe05768d40bad2f007741e20"
+      "lumensPerRadiantWatt": 100.0,
+      "shellHash": "sha256:116e8dab0eb8801e06e6f2c85380dd07cbdfd3c6d228bd6304fba75fa2e4659a"
     },
     {
       "cell": "L0_CLOSET_W",
@@ -813,7 +814,7 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_DINING"
+    "L0_BUTLERS"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 5111808,

@@ -119,6 +119,20 @@
       "interactable": null
     },
     {
+      "id": "PROP_L0_BUTLERS_CEILING_1",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L0_BUTLERS",
+      "position": [-11.55, 3.12, -23.80], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none",
+      "material": null, "interactable": null
+    },
+    {
+      "id": "PROP_L0_BUTLERS_CEILING_2",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L0_BUTLERS",
+      "position": [-9.35, 3.12, -23.80], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none",
+      "material": null, "interactable": null
+    },
+    {
       "id": "PROP_L0_KITCHEN_NORTH_BASE_RUN",
       "asset": "MODEL_KITCHEN_NORTH_BASE_RUN",
       "cell": "L0_KITCHEN",

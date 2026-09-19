@@ -64,6 +64,9 @@ POSES = (
     # east/west pose moves to the measured 1.04 m circulation lane beside its east end.
     ("kitchen", "-1.10,0.60,-25.05,90.0,0.0"),
     ("kitchen-facing-west", "-1.10,0.60,-25.05,270.0,0.0"),
+    # The kitchen's open service passage exposes this room on the L0 route. The long kitchen
+    # camera sees only a narrow recess, so review its actual envelope from the threshold too.
+    ("butlers-from-kitchen", "-8.55,0.60,-24.00,270.0,0.0"),
     ("family-room", "5.45,0.60,-24.55,270.0,0.0"),
     ("family-composition", "3.20,0.60,-25.80,90.0,0.0"),
     # HOUSE-01050: the paired family-room views look across the seating and kitchen opening but

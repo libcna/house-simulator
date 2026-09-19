@@ -273,7 +273,7 @@ CHUNK_BUDGET_EXCEPTIONS = {
 # remains visible in `--report`; a room that falls to six chunks makes its entry stale and fails.
 for window_cell in (
         "B1_GYM", "B1_MECHANICAL", "B1_STOR1", "B1_STOR2", "B1_WORKSHOP",
-        "L0_BUTLERS", "L0_MUDROOM", "L0_OFFICE", "L0_PANTRY", "L0_SUNROOM",
+        "L0_MUDROOM", "L0_OFFICE", "L0_PANTRY", "L0_SUNROOM",
         "L1_BATH2", "L1_BED2", "L1_BED3", "L1_BED4", "L1_BED5",
         "L1_MASTER_BATH", "L1_MASTER_BED",
         "L2_BATH4", "L2_BED6", "L2_BED7", "L2_GAMES", "L2_LANDING", "L2_LIBRARY",
@@ -281,6 +281,10 @@ for window_cell in (
     CHUNK_BUDGET_EXCEPTIONS[window_cell] = (
         7, "six measured shell finish chunks plus one weather-facing window-frame chunk; "
            "ordinary room trim and borrowed-light glass stay portal-owned")
+
+CHUNK_BUDGET_EXCEPTIONS["L0_BUTLERS"] = (
+    10, "seven established shell/window chunks plus HOUSE-01297's two shared physical "
+        "ceiling-fixture finishes and independently switched diffuser; no Reach split")
 
 CHUNK_BUDGET_EXCEPTIONS["L0_SUNROOM"] = (
     21, "HOUSE-01068's measured breakfast room: seven established shell/window roles plus five "

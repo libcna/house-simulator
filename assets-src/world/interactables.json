@@ -281,7 +281,7 @@
         { "verb": "lights", "do": "toggle(state.LG_L0_BUTLERS_MAIN)",
           "sound": "SFX_SWITCH_CLICK", "duration": 0.12 }
       ],
-      "state": { "LG_L0_BUTLERS_MAIN": false },
+      "state": { "LG_L0_BUTLERS_MAIN": true },
       "persist": ["LG_L0_BUTLERS_MAIN"],
       "portal": "P_L0_STOR__L0_BUTLERS"
     },

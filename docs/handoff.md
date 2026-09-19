@@ -1,3 +1,43 @@
+# Visual-sprint handoff — 2026-09-19 (`HOUSE-01297` checkpoint)
+
+Branch `develop`, task-start HEAD `6ad12d2` (`HOUSE-01296`). This section belongs
+to the one `HOUSE-01297` commit. The owner-authorized capture-history cleanup is
+already complete; do not repeat it or push. Review captures remain ignored local
+evidence, strict render goldens remain tracked. Build with the existing isolated
+`build/isolated-deps/FNA3D`, `CNA_CNAEXT=OFF`, the shared ccache and at most six CPUs;
+the shared `~/deps/FNA3D/MojoShader`, CNA and siblings were not edited.
+
+**VISUAL-GATE-1 still FAILS.** Round 93's west-kitchen view showed a black recess
+beside the range. A closer diagnostic identified the open, empty `L0_BUTLERS` service
+room. Forcing its old default-off points on lit only two ceiling fireflies; the
+old artificial atlas mean/peak was 0.01411/9.93004. `HOUSE-01297` reuses two
+approved 636-triangle semi-flush fixtures along that room's long axis, links their
+2×700 lm/3000 K switchable group, starts it on in clean normal play, and changes
+the selected 256-sample receiver atlas to 0.06186/0.32077 via source-local 40
+lm/radiant-watt and receiver 100. Only this cell's artificial/daylight pair was
+promoted; its daylight PNG did not change. Exact room chunks rise 7→10; whole-world
+unculled calls 733→736.
+
+Round 94's [29-view day](visual-review/captures/house-01297-butlers-day-r1)/
+[night](visual-review/captures/house-01297-butlers-night-r1) sets were inspected,
+including a new fixed threshold view. The kitchen no longer looks into a black
+void. The now-readable service room is plainly empty, so neither `HOUSE-00991`
+nor VISUAL-GATE-1 is complete. The next highest-value breadth task is a measured
+fitted work/storage composition in this passage (without blocking its doors or
+circulation), followed by the dark dining table and flat family garden view.
+
+The changed strict `fp-l0-kitchen` reference was inspected old/new and amplified:
+11,629/230,400 pixels above channel delta 2, dominantly the now-readable passage;
+only this reference was advanced. The master-bedroom on/off control is byte-
+identical at 1600×900, so there is no switched-source upstairs glow. A forced-off
+night room screenshot shows the light group remains independently switchable.
+The 31-stage content build, licence/budget/3,024-ID gates, 1,410/1,410 unit,
+137/137 integration and all 48 active render cases pass after that one inspected
+reference update, including all 18 culled/unculled comparisons. The content-current
+test and complete static gates pass, including 323 strict-XNA translation units.
+
+---
+
 # Visual-sprint handoff — 2026-09-19 (`HOUSE-01296` checkpoint)
 
 Branch `develop`, task-start HEAD `1d15684` (`HOUSE-01071`). The owner-requested

@@ -902,7 +902,7 @@
       "daylight": { "orientation": "W", "exposure": 0.14 },
       "lightGroups": ["LG_L0_BUTLERS_MAIN"],
       "lightmaps": {
-        "shellHash": "sha256:75d0e22d39fd9c6aa1c4e353c900f307b5c8002bbe05768d40bad2f007741e20",
+        "shellHash": "sha256:116e8dab0eb8801e06e6f2c85380dd07cbdfd3c6d228bd6304fba75fa2e4659a",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_BUTLERS_LM_DAY",
           "scale": 1.0000001192092896
@@ -911,7 +911,7 @@
           {
             "group": "LG_L0_BUTLERS_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_BUTLERS_LM_LG_L0_BUTLERS_MAIN",
-            "scale": 9.930042266845703
+            "scale": 0.320772260427475
           }
         ]
       },

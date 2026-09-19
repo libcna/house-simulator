@@ -30,7 +30,9 @@ overlap that the picket fence hides.
 camera. `HOUSE-01287` adds the seventeenth view on the front balcony, facing its over-door lantern;
 the road and path cameras retain the wider arrival comparison. `HOUSE-01288` adds an eighteenth
 downward approach view between the gate and steps, where the path fixtures and their circulation
-clearance remain legible without moving any earlier camera.
+clearance remain legible without moving any earlier camera. Later room and garden views expanded
+the set to 28. `HOUSE-01297` adds the twenty-ninth view just inside the kitchen's open butler-pantry
+passage; all earlier poses stay fixed for day/night comparison.
 
 ## Round 0 — visual-convergence baseline
 
@@ -4110,3 +4112,38 @@ what reveal and judge this room-scale change.
 Remaining highest visible breadth defects: dark dining furniture/table surface,
 the kitchen's west/north working bay, weak living piano/body visibility and the
 flat view beyond family glazing. **VISUAL-GATE-1 still fails.**
+
+## Round 94 — light the open kitchen service transition
+
+Commit: `HOUSE-01297` checkpoint (`2026-09-19`). Before: Round 93's 28-camera
+[day](captures/house-01296-dining-cal100-day-probe) and
+[night](captures/house-01296-dining-cal100-night-probe) sets, plus a close diagnostic
+at the service threshold. After: 29 fixed built-game
+[day](captures/house-01297-butlers-day-r1) and
+[night](captures/house-01297-butlers-night-r1) views, including the new
+`butlers-from-kitchen.png` threshold view. Kitchen west/hall, dining, living,
+family, foyer and exterior poses remain unchanged.
+
+Ranked defects before:
+
+1. The west-kitchen recess reads as a black hole beside the range. A close view proves
+   it is the open, unoccupied `L0_BUTLERS` room, not a missing cabinet.
+2. Dining's walnut table and chairs are still dark despite the brighter room envelope.
+3. The family garden view remains flat; the gate interaction prevents a genuine
+   continuous road-to-dining walking inspection.
+
+Fixed: two linked bronze/opal ceiling practicals replace bare, default-off point
+sources. Their 1,400 lm switchable circuit starts on in normal play, and its
+selected 256-sample atlas changes from a 0.01411 mean/9.93004 firefly peak to
+a broad 0.06186 mean/0.32077 peak. The kitchen west view now shows a lit service
+wall and floor rather than an unlit void, by day and night. The threshold view
+confirms physical fixtures, finish continuity and no clipped ceiling. A separate
+night forced-off capture verifies the independent switch. The strict
+`fp-l0-kitchen` difference was inspected before its single-reference update;
+an upper bedroom on/off control was byte-identical, so no switched-source halo
+was accepted there. The room itself is conspicuously empty: this fixes lighting,
+not the still-open full `HOUSE-00991` furnishing task.
+
+Remaining highest visible breadth defects: equip the now-visible service room
+with fitted storage/worktop, make the dining table readable, and improve the
+flat family garden sightline. **VISUAL-GATE-1 still fails.**

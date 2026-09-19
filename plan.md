@@ -16880,6 +16880,52 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             serial rerun; it is not attributable to this static lighting change.
             `tools/ci/run_checks.sh` passes including 323 strict-XNA translation
             units. `CNA_CNAEXT=OFF`, isolated FNA3D and six-core affinity persist.
+- [x] HOUSE-01297 — Make the kitchen's open butler-pantry sightline readable with real practicals
+      dep: HOUSE-01040, HOUSE-01256, HOUSE-01266, HOUSE-01293 · sys: world, content, lighting · plat: ALL · pri: MUST
+      note: Round 93's west-kitchen camera shows a black, open 1.10 m service passage
+            beside the range. A close diagnostic identifies `L0_BUTLERS`, not a missing
+            kitchen cabinet: its two unlinked 3.28 m point sources start off, and even
+            forcing the group on leaves black walls and two ceiling fireflies. The
+            old 256-sample atlas mean/peak is 0.01411/9.93004. This is a visible
+            connected L0 transition; full `HOUSE-00991` furnishing stays open.
+      accept: retain the butler-pantry group, switch and source IDs, fit two approved
+              physical ceiling practicals along the room's long axis, keep their
+              2×700 lm circuit independently switchable and normal-play readable,
+              and rebake/promote only this receiver's artificial/daylight pair at
+              256 samples. Inspect matched full-route day/night views plus a new
+              threshold camera, and reject false adjacent or upper-floor light.
+              Advance only proven intended strict references. Pass six-CPU build,
+              content, licence/budget/ID, unit, integration, render, culling and
+              strict-XNA gates. Do not mark the empty room furnished.
+      done: (2026-09-19) Two existing 636-triangle bronze/opal semi-flush fixtures
+            sit at x=-11.55/-9.35, y=3.12, z=-23.80 under the 3.30 m ceiling;
+            each links its existing stable 700 lm light to its switched optical
+            slot. The group starts on in a clean game and still switches off:
+            a forced-off night view darkens the room without changing kitchen
+            switch state. Downward 75°/140° spot emission and source-local 40
+            lm/radiant-watt conversion replace the ceiling-point fireflies.
+            Only `L0_BUTLERS`'s 256-sample pair is promoted at a 100 lm/W
+            receiver calibration; daylight PNG/peak is unchanged. Artificial
+            atlas mean/peak is 0.06186/0.32077 rather than 0.01411/9.93004.
+            Its exact chunk ceiling rises 7 → 10 from the three distinct shared
+            fixture roles; world unculled calls rise 733 → 736. Round 94's 29
+            fixed day/night views show the formerly black west-kitchen opening
+            and room envelope readable, but also expose an entirely empty service
+            room. `HOUSE-00991` and VISUAL-GATE-1 remain open; furnishing this
+            visible transition is the next breadth task.
+      verified: The selected bake provenance, 31-stage content build, budget,
+            licence and 3,024-ID golden gates, six-worker build, 29-view day/night
+            built-game captures, 1,410/1,410 unit and 137/137 integration tests
+            pass. The intentional `fp-l0-kitchen` strict-reference change was
+            inspected old/new and amplified (11,629/230,400 pixels above channel
+            delta 2, concentrated at the formerly black passage); no blanket
+            golden regeneration. An L1 master-bedroom on/off control renders
+            byte-identical at 1600×900, proving no switched source glow there.
+            All 48 active software render cases pass after the single inspected
+            reference update, including all 18 culled/unculled pose pairs; the
+            content-current test passes. Complete static gates pass, including
+            323 strict-XNA translation units. `CNA_CNAEXT=OFF` and isolated
+            FNA3D remain configured; all heavy work used at most six CPUs.
 - [x] HOUSE-01261 — Implement the per-object three-directional-light assignment (key/fill/bounce) for dynamic objects
       dep: HOUSE-01251, HOUSE-00892 · sys: lighting · plat: ALL · pri: MUST
       accept: `BasicEffect` and `SkinnedEffect` receive the same stable key/fill/bounce slot
@@ -20611,6 +20657,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-19 | `HOUSE-01297` | **New task, next free phase-16 id.** Light only the open `L0_BUTLERS` service transition with approved physical fixtures and a selected receiver bake; keep the full `HOUSE-00991` furnishing task open. | Round 93's kitchen west view has a black gap beside the range, and a close camera proves it is the open, still-empty butler's pantry. Its old default-off 3.28 m point pair bakes mostly ceiling fireflies rather than readable walls. Fixing this room-sized L0 discontinuity is dependency-valid visual coverage, whereas inventing another kitchen cabinet in the adjacent narrow range bay was not. |
 | 2026-09-19 | `HOUSE-01296` | **New task, next free phase-16 id.** Recalibrate only the existing dining practicals' selected receiver maps for room-scale shell readability; leave the full furnishing task and dark furniture-object issue open. | Round 92's day/night whole-route views show the dining envelope nearly black after the connected hall, despite 2,100 lm installed. The original 300 lm/radiant-watt receiver means are 0.02319/0.00515; a 100-calibration candidate visibly brightens broad wall/ceiling areas without touching other cells or global exposure. |
 | 2026-09-19 | `HOUSE-01071` | **New task, next free phase-13 id.** Add a measured foyer floor-scale furnishing and vetted greenery without claiming completion of the dependency-blocked full `HOUSE-00986`. | Round 91's complete route shows the entrance's still-bare stone arrival bay. Two kitchen-corner candidates were first rejected after built-game captures because they barely changed normal views; the foyer rug/plant changes a plainly visible route-space while preserving the complete furnishing DAG. |
 | 2026-09-19 | `HOUSE-01070` | **New task, next free phase-13 id.** Reuse one vetted cabinet as a measured family picture-window storage composition, leaving the bulk-acquisition-dependent full `HOUSE-00992` task open. | Round 90's whole-route cameras show an empty lower window wall even after family lighting is corrected. A physically fitting, approved asset can improve room-scale coverage now without spending another round on intensity or a narrow exterior detail; matched views must reject it if the reuse looks artificial. |
