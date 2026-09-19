@@ -80,12 +80,13 @@ namespace
         const auto& list = game.RenderListForTesting();
         ASSERT_GT(list.Size(), 0U) << "the frame drew from an empty list";
         EXPECT_TRUE(list.IsSorted()) << "the pass read its slice, which is what sorts the list";
-        // HOUSE-01072's fitted service run adds four measured material batches,
-        // bringing the unculled house to 740 calls over FOUR frames: a list not emptied
+        // HOUSE-01073's dining wood finish plus linen and porcelain setting add
+        // three measured batches, bringing the unculled house to 743 calls over FOUR
+        // frames: a list not emptied
         // between them would be four houses long and still draw a correct-looking picture. This
         // diagnostic remains far below §71.2's 1,400-call worst-case envelope; the materials
         // stay truthful instead of being flattened into a shell finish to satisfy the snapshot.
-        EXPECT_LE(list.DrawCalls(), 740) << "the list was not cleared between frames";
+        EXPECT_LE(list.DrawCalls(), 743) << "the list was not cleared between frames";
 
         const cnahouse::debug::Counter* chunks = game.CountersForTesting().Find("static.chunks");
         const cnahouse::debug::Counter* states = game.CountersForTesting().Find("static.stateChanges");
@@ -132,11 +133,11 @@ namespace
         // not find. Alpha-tested leaves belong to AlphaTestPass, not this debug opaque pass.
         EXPECT_EQ(static_cast<std::size_t>(chunks->Max()), opaque);
         // And the material was bound once per run, not once per chunk. The unculled diagnostic
-        // reaches 113 with the sunroom's distinct measured floor material. No chunk was added;
-        // the separate floor role contributes one sorted material bind.
+        // reaches 116 with HOUSE-01073's three dining finishes; each role contributes
+        // one sorted material bind.
         // That remains below §71.2's 210 worst case; visible poses protect smaller rows.
         EXPECT_GT(states->Max(), 0);
-        EXPECT_LE(states->Max(), 113);
+        EXPECT_LE(states->Max(), 116);
         EXPECT_LT(states->Max(), chunks->Max() / 4)
             << "the sort bought nothing: the pass is rebinding almost per chunk";
         // The pass's own count and the list's agree, which is what says the two are counting the

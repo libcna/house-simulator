@@ -70,6 +70,9 @@ CATEGORIES: dict[str, list[tuple[str, float, float, str]]] = {
                       ("z", 0.50, 0.76, "domestic upright piano depth including pedals")],
     "cabinet-upper": [("y", 1.40, 1.55, "upper cabinet underside")],
     "table-dining": [("y", 0.72, 0.78, "dining table top")],
+    "table-setting": [("x", 2.10, 2.30, "eight-place setting span"),
+                      ("z", 0.75, 0.92, "setting depth inside the dining top"),
+                      ("y", 0.06, 0.12, "low serving vessel height")],
     "dining-sideboard": [("x", 1.50, 1.70, "formal sideboard width"),
                           ("y", 0.85, 1.05, "cabinet and restrained table dressing height"),
                           ("z", 0.44, 0.52, "shallow dining sideboard depth")],
@@ -417,6 +420,20 @@ def selftest() -> int:
                   file=sys.stderr)
             failures += 1
         print("  service run requires a measured counter below its window")
+
+        setting = Path(work) / "dining_setting.glb"
+        setting.write_bytes(make(2.204, 0.0885, 0.834))
+        if check(setting, "table-setting"):
+            print("  SELFTEST FAILED: measured eight-place dressing was rejected",
+                  file=sys.stderr)
+            failures += 1
+        oversized_setting = Path(work) / "dining_setting_oversized.glb"
+        oversized_setting.write_bytes(make(2.50, 0.0885, 1.10))
+        if not check(oversized_setting, "table-setting"):
+            print("  SELFTEST FAILED: dressing beyond the tabletop was accepted",
+                  file=sys.stderr)
+            failures += 1
+        print("  dining setting is measured inside its physical tabletop")
 
         # HOUSE-01044: the hood raises the compact assembly to 2.65 m, while the two stone
         # scribe tops remain at the same human-scale 0.94 m datum as the sink run.

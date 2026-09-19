@@ -1201,7 +1201,7 @@
         "collision": "dining_chair_001_seat_frame_COL"
       },
       "materialMap": {
-        "DINING_WOOD": "MAT_FURNITURE_PIANO_WOOD",
+        "DINING_WOOD": "MAT_FURNITURE_DINING_WALNUT",
         "DINING_FABRIC": "MAT_FURNITURE_DINING_UPHOLSTERY"
       },
       "usedIn": [
@@ -1242,7 +1242,7 @@
         "collision": "dining_sideboard_029_ceramic_serving_bowl_COL"
       },
       "materialMap": {
-        "DINING_WOOD": "MAT_FURNITURE_PIANO_WOOD",
+        "DINING_WOOD": "MAT_FURNITURE_DINING_WALNUT",
         "DINING_BRASS": "MAT_FURNITURE_PIANO_BRASS",
         "SIDEBOARD_CERAMIC": "MAT_FOYER_CERAMIC"
       },
@@ -1285,12 +1285,45 @@
         "collision": "dining_table_001_top_panel_COL"
       },
       "materialMap": {
-        "DINING_WOOD": "MAT_FURNITURE_PIANO_WOOD",
+        "DINING_WOOD": "MAT_FURNITURE_DINING_WALNUT",
         "DINING_BRASS": "MAT_FURNITURE_PIANO_BRASS"
       },
       "usedIn": [
         "L0_DINING"
       ]
+    },
+    {
+      "id": "MODEL_DINING_TABLE_SETTING",
+      "category": "table-setting",
+      "sourceFile": "assets-src/Models/Furniture/Dining/table_setting.glb",
+      "sourceSha256": "305e8aa53f27d52cc7d8f0034097a81ab324c76c3776d65893ba16da9f2a4ecf",
+      "contentName": "Models/Furniture/Dining/table_setting",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Measured eight-place dining table setting",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored linen runner, eight ceramic settings, folded napkins and low centre vessel generated deterministically by tools/blender/dining_table_setting.py for HOUSE-01073. Approved source textures are reused; no third-party geometry is copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [2.204, 0.0885, 0.834],
+        "triangles": {"LOD0": 3436}
+      },
+      "materialMap": {
+        "DINING_LINEN": "MAT_FURNITURE_DINING_LINEN",
+        "DINING_PORCELAIN": "MAT_FURNITURE_DINING_PORCELAIN",
+        "DINING_FABRIC": "MAT_FURNITURE_DINING_UPHOLSTERY"
+      },
+      "usedIn": ["L0_DINING"]
     },
     {
       "id": "MODEL_FURNITURE_FLOOR_LAMP",

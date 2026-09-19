@@ -193,6 +193,9 @@ run_gate "family-ceiling-light" python3 tools/assets/family_ceiling_light_prepar
 run_gate "living-piano" python3 tools/assets/living_piano_prepare.py --check
 # HOUSE-01048: the formal table, chair and physical chandelier remain reproducible measured assets.
 run_gate "dining-suite" python3 tools/assets/dining_suite_prepare.py --check
+# HOUSE-01073: the eight-place linen/porcelain dressing rests on, rather than
+# replaces, the measured collidable dining table and regenerates byte-for-byte.
+run_gate "dining-table-setting" python3 tools/assets/dining_table_setting_prepare.py --check
 # And the credits document cannot drift from the manifest it is generated from (`HOUSE-00198`).
 run_gate "licences-selftest" python3 tools/assets/verify_licences.py --selftest
 run_gate "licences"   python3 tools/assets/verify_licences.py --check

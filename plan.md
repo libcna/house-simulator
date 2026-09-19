@@ -15912,6 +15912,42 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             scale category and 323 strict-XNA translation units. The full
             31-stage content graph and content-current test pass after the
             manifest category correction; `CNA_CNAEXT=OFF` remains forced.
+- [x] HOUSE-01073 — Give the formal dining table a readable eight-place composition
+      dep: HOUSE-01048, HOUSE-01069, HOUSE-01296 · sys: world/content · plat: TOOL · pri: MUST
+      note: Round 95's whole-route day/night views show a brighter dining shell
+            but its bare, dark walnut table remains an empty-looking slab between
+            eight already collidable chairs. A dedicated room finish and an
+            intentional linen/ceramic setting can improve the entire dining
+            sightline without claiming the dependency-blocked full `HOUSE-00989`
+            room task or changing global prop exposure.
+      accept: give the eight-place furniture a coherent, room-specific finish;
+              add a reproducible setting that actually rests on the table, stays
+              inside its physical top and does not alter player collision or
+              circulation. Use provenanced approved texture sources and stable
+              IDs, measure the exact chunk change, inspect matched full-route
+              clear-day/night images and any strict-reference differences.
+              Pass content, licence, asset, scale, budget, unit, integration,
+              render, culling and strict-XNA gates within six build workers.
+              Leave `HOUSE-00989` and VISUAL-GATE-1 open if still incomplete.
+      done: A dedicated warm-walnut finish now replaces the shared dark piano
+            wood on the dining table, chairs and sideboard; chair upholstery is
+            lightened. A deterministic 3,436-triangle authored setting fits
+            entirely within the table top and places eight ceramic settings,
+            six napkins, a linen runner and one low centre bowl on the surface.
+            Its support plane is exact, collision stays none, and the measured
+            `L0_DINING` chunk exception rises 15→17; shared sideboard walnut
+            also changes `L0_FAMILY` 28→29. Unculled world calls rise 740→743.
+            The full `HOUSE-00989` furnishing task and VISUAL-GATE-1 remain open.
+      verified: Blender hash/geometry/UV/placement regeneration, source manifest,
+                provenance/licence, scale, budget and 3,031 stable IDs pass.
+                Round 96 matched 29-view day/night built-game captures show the
+                former bare table now visibly set; neighboring kitchen/family
+                views remain coherent. No strict golden changed. Complete content
+                graph and content-current pass; unit 1,410/1,410, integration
+                137/137 and render 44 general + four forced-software golden
+                cases pass, including all 18 culled/unculled pairs. Full static
+                gates pass after formatting, including 323 strict-XNA TUs;
+                six-core build and isolated FNA3D/MojoShader remain intact.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -20696,6 +20732,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-19 | `HOUSE-01073` | **New task, next free phase-13 id.** Give the occupied dining room a measured surface-scale composition and local furniture finish; do not claim the dependency-blocked full `HOUSE-00989` task. | Round 95's matched day/night route shows the shell now readable but a bare, visually dark table dominates the dining camera. A material-only probe barely changes its human-scale appearance, while an eight-place linen/ceramic composition makes the room's purpose immediate. This is a room-scale coverage defect, not another narrow exterior or hero-prop polish round. |
 | 2026-09-19 | `HOUSE-01072` | **New task, next free phase-13 id.** Fit one physically measured butler's-pantry work/storage run while leaving the full dependency-blocked `HOUSE-00991` task open. | Round 94's built-game threshold camera proves the kitchen's newly readable open service room is empty. Its west window leaves only 0.90 m below the sash, requiring a specifically measured low run rather than a generic kitchen cabinet. This fixes a whole-route furnishing gap with the approved authored-content pipeline and no architecture change. |
 | 2026-09-19 | `HOUSE-01297` | **New task, next free phase-16 id.** Light only the open `L0_BUTLERS` service transition with approved physical fixtures and a selected receiver bake; keep the full `HOUSE-00991` furnishing task open. | Round 93's kitchen west view has a black gap beside the range, and a close camera proves it is the open, still-empty butler's pantry. Its old default-off 3.28 m point pair bakes mostly ceiling fireflies rather than readable walls. Fixing this room-sized L0 discontinuity is dependency-valid visual coverage, whereas inventing another kitchen cabinet in the adjacent narrow range bay was not. |
 | 2026-09-19 | `HOUSE-01296` | **New task, next free phase-16 id.** Recalibrate only the existing dining practicals' selected receiver maps for room-scale shell readability; leave the full furnishing task and dark furniture-object issue open. | Round 92's day/night whole-route views show the dining envelope nearly black after the connected hall, despite 2,100 lm installed. The original 300 lm/radiant-watt receiver means are 0.02319/0.00515; a 100-calibration candidate visibly brightens broad wall/ceiling areas without touching other cells or global exposure. |

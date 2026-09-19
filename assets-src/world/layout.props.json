@@ -729,6 +729,19 @@
       "interactable": null
     },
     {
+      "id": "PROP_L0_DINING_TABLE_SETTING",
+      "asset": "MODEL_DINING_TABLE_SETTING",
+      "cell": "L0_DINING",
+      "position": [-5.2, 1.36, -21.6],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
       "id": "PROP_L0_DINING_CHAIR_1",
       "asset": "MODEL_FURNITURE_DINING_CHAIR",
       "cell": "L0_DINING",

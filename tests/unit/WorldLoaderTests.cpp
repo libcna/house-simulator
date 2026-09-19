@@ -3620,8 +3620,8 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 206U)
-            << "the sunroom's measured limestone-look floor has its own canonical finish";
+        EXPECT_EQ(contents.materials.size(), 209U)
+            << "HOUSE-01073 adds three measured dining furniture and setting finishes";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
@@ -3638,8 +3638,8 @@ namespace
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
                                 { return IdRegistry::NameOf(material.id).starts_with("MAT_FURNITURE_"); }),
-                  17)
-            << "HOUSE-01066 adds piano lacquer to the sixteen prior furniture materials";
+                  20)
+            << "HOUSE-01073 adds dining walnut, linen and porcelain to the prior furniture materials";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)

@@ -184,7 +184,7 @@ CHUNK_BUDGET_EXCEPTIONS = {
                 "asset whose empty centre preserves the kitchen portal; HOUSE-01290 adds the shared "
                 "bronze, opal-glass and independently switched optical-disc fixture roles; 15 is "
                 "measured"),
-    "L0_FAMILY": (28,
+    "L0_FAMILY": (29,
                   "measured with HOUSE-01037's first furnished media/seating group: five shell "
                   "finishes plus eight source-specific furniture albedos and one split to respect "
                   "Reach's per-draw primitive cap, plus one outside window-frame chunk. Merging "
@@ -210,7 +210,10 @@ CHUNK_BUDGET_EXCEPTIONS = {
                   "reuses the room's existing role. HOUSE-01070 reuses the verified cabinet "
                   "under the north picture window; its walnut role is already resident, while "
                   "the restrained brass hardware and ceramic serving piece add two distinct "
-                  "close-range finish chunks; 28 is exact"),
+                  "close-range finish chunks. HOUSE-01073's dining-specific rubbed-walnut "
+                  "finish reaches the sideboard reused beneath this room's window, adding one "
+                  "measured furniture batch rather than repainting its trim or other walnut "
+                  "furnishings; 29 is exact"),
     "L0_LIVING": (34,
                   "measured with HOUSE-01037's first furnished conversation group: six shell "
                   "finishes plus eight source-specific furniture albedos and one split to respect "
@@ -354,6 +357,15 @@ CHUNK_BUDGET_EXCEPTIONS["L0_DINING"] = (
     _dining_limit + 2,
     _dining_reason + "; HOUSE-01069 adds one ceramic serving finish and one independently "
     "switched physical side-lamp diffuser group")
+
+# HOUSE-01073's eight-place table setting is one non-collidable, fitted composition.
+# Its linen and porcelain are two physically distinct close-range finishes; the
+# six napkins reuse the room's existing sage upholstery rather than adding a third.
+_dining_limit, _dining_reason = CHUNK_BUDGET_EXCEPTIONS["L0_DINING"]
+CHUNK_BUDGET_EXCEPTIONS["L0_DINING"] = (
+    _dining_limit + 2,
+    _dining_reason + "; HOUSE-01073 adds measured linen and porcelain table-setting "
+    "batches while its napkins reuse the already resident upholstery")
 
 #: The vertex layouts, one per stock effect, with the attributes that effect actually reads.
 #: `MaterialBinder`'s `MaterialKind` is the same closed list of four; `Skinned` never appears here

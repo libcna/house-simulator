@@ -4190,3 +4190,44 @@ the weak living piano/body and any remaining major route discontinuity. The
 service room's side walls are still spare, so full `HOUSE-00991` remains open;
 do not immediately spend another checkpoint micro-polishing it while the larger
 connected rooms need work. **VISUAL-GATE-1 still fails.**
+
+## Round 96 — make the dining table visibly occupied
+
+Commit: `HOUSE-01073` checkpoint (`2026-09-19`). Before: Round 95's 29-view
+[day](captures/house-01072-butlers-run-day-r1)/
+[night](captures/house-01072-butlers-run-night-r1) route. After: matching
+[day](captures/house-01073-dining-table-day-r1)/
+[night](captures/house-01073-dining-table-night-r1) built-game captures.
+The dining-room, sideboard, reciprocal kitchen, family and route-transition
+views were inspected full-size; the normal daytime and 22:00 night presentation
+both show the same designed table layout. These local capture PNGs are ignored
+review evidence, not strict Git goldens.
+
+Ranked defects before:
+
+1. The otherwise furnished dining room has a bare, near-black eight-seat table
+   dominating the ordinary dining camera.
+2. The table, chairs and sideboard remain too dark against the now-readable
+   room shell, by day and night.
+3. The family garden sightline remains flat; the gate interaction still prevents
+   a continuous road-to-dining first-person walk.
+
+Fixed: a measured warm-walnut room finish and lighter upholstery improve the
+dining furniture as a group, and an authored eight-place ceramic/linen setting
+turns the blank tabletop into an unmistakable dining surface. The eight places,
+runner, folded napkins and low bowl sit on the actual top, within its physical
+footprint, with no new collision or circulation obstruction. The setting has
+deterministic Blender source, exact hash and a geometry/UV/placement check;
+approved existing texture sources and licence records are retained. The room's
+measured opaque chunk exception rises 15→17, with one more shared-walnut batch
+in `L0_FAMILY` (28→29); world unculled calls rise 740→743. The full day/night
+route captures show no new obvious adjacent-room discontinuity. All strict
+references, including four software goldens and 18 culling pairs, pass without
+any reference update.
+
+Remaining: the non-lightmapped furniture still receives insufficient daytime
+and practical-light energy; the near-black sideboard and chair faces are now
+the most visible dining defect. Address room-scale object lighting, not another
+small table prop, and compare the entire connected route. The flat family
+garden view, weak living piano visibility and unimplemented gate `E` action
+remain. `HOUSE-00989` and **VISUAL-GATE-1 remain open.**
