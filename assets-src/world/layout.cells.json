@@ -845,21 +845,21 @@
       "daylight": { "orientation": "W", "exposure": 0.24 },
       "lightGroups": ["LG_L0_DINING_CHANDELIER", "LG_L0_DINING_SIDE"],
       "lightmaps": {
-        "shellHash": "sha256:94e3ab94a3561baaafbfaebaa4b986518781db84cea2fb6c07408e082a0e9760",
+        "shellHash": "sha256:ed1f599076d03172372ac9b1b0119be11776fb69d7603dbd9d69ca6a2f2b52b8",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_DINING_LM_DAY",
-          "scale": 0.6929526329040527
+          "scale": 0.6892715692520142
         },
         "artificial": [
           {
             "group": "LG_L0_DINING_CHANDELIER",
             "contentName": "Textures/Lightmaps/Artificial/L0_DINING_LM_LG_L0_DINING_CHANDELIER",
-            "scale": 0.1360144466161728
+            "scale": 0.30894333124160767
           },
           {
             "group": "LG_L0_DINING_SIDE",
             "contentName": "Textures/Lightmaps/Artificial/L0_DINING_LM_LG_L0_DINING_SIDE",
-            "scale": 0.021425170823931694
+            "scale": 0.38377293944358826
           }
         ]
       },

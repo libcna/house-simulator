@@ -53,6 +53,10 @@ POSES = (
     # HOUSE-01048: look east along the formal dining room's long axis so table scale, all eight
     # chair positions, the hall door and the living/kitchen circulation edges remain reviewable.
     ("dining-room", "-7.70,0.60,-21.60,90.0,0.0"),
+    # HOUSE-01069: the long-axis camera proves the table but hides the north-wall sideboard.
+    # This reciprocal standing pose keeps the cabinet, both linked lamps and the seating
+    # clearance in one unchanged-time room-scale comparison.
+    ("dining-sideboard", "-6.10,0.60,-22.95,210.0,0.0"),
     # HOUSE-01040: -3.0,-25.05 was inside the newly authored island's proxy. The paired
     # east/west pose moves to the measured 1.04 m circulation lane beside its east end.
     ("kitchen", "-1.10,0.60,-25.05,90.0,0.0"),

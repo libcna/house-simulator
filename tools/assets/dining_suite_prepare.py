@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate and validate HOUSE-01048's project-authored dining suite."""
+"""Regenerate and validate the project-authored dining suite and HOUSE-01069 sideboard."""
 
 from __future__ import annotations
 
@@ -27,16 +27,22 @@ ASSETS = {
     "table": ("MODEL_FURNITURE_DINING_TABLE", "dining_table.glb", "table-dining", True),
     "chair": ("MODEL_FURNITURE_DINING_CHAIR", "dining_chair.glb", "chair", True),
     "chandelier": ("MODEL_FIXTURE_DINING_CHANDELIER", "dining_chandelier.glb", "fixture", False),
+    "sideboard": ("MODEL_FURNITURE_DINING_SIDEBOARD", "sideboard.glb", "dining-sideboard", True),
+    "side_lamp": ("MODEL_FIXTURE_DINING_SIDE_LAMP", "side_lamp.glb", "table-lamp", False),
 }
 EXPECTED_MATERIALS = {
     "table": {"DINING_WOOD", "DINING_BRASS"},
     "chair": {"DINING_WOOD", "DINING_FABRIC"},
     "chandelier": {"CHANDELIER_METAL", "ChandelierShade"},
+    "sideboard": {"DINING_WOOD", "DINING_BRASS", "SIDEBOARD_CERAMIC"},
+    "side_lamp": {"DINING_BRASS", "SIDEBOARD_CERAMIC", "DiningSideShade"},
 }
 REQUIRED_COMPONENTS = {
     "table": ("top_panel", "breadboard_-1", "long_apron_1", "brass_foot"),
     "chair": ("seat_cushion", "front_leg", "back_pad", "back_crest"),
     "chandelier": ("ceiling_canopy", "drop_stem", "long_frame", "shade_"),
+    "sideboard": ("carcass", "raised_door", "top_drawer", "tapered_foot", "ceramic_serving_bowl"),
+    "side_lamp": ("brass_foot", "ceramic_urn", "side_shade"),
 }
 
 
@@ -109,7 +115,7 @@ def validate(path: Path, name: str, row: dict) -> tuple[list[float], int, str | 
     if ASSETS[name][3] and collision not in all_names:
         raise RuntimeError(f"{name}: declared collision proxy is missing")
     if not ASSETS[name][3] and any(node.endswith("_COL") for node in all_names):
-        raise RuntimeError(f"{name}: non-collidable chandelier contains a collision proxy")
+        raise RuntimeError(f"{name}: non-collidable fixture contains a collision proxy")
     return measured, triangles, collision
 
 
@@ -133,6 +139,28 @@ def validate_world() -> None:
             light["emissiveMaterialSlot"] != "ChandelierShade" or \
             light["position"] != [-5.2, 2.55, -21.6]:
         raise RuntimeError("dining chandelier is not linked to its exact shade/optical point")
+    sideboard = props["PROP_L0_DINING_SIDEBOARD"]
+    if sideboard["asset"] != ASSETS["sideboard"][0] or \
+            sideboard["cell"] != "L0_DINING" or \
+            sideboard["position"] != [-7.33, 0.6, -20.44] or \
+            sideboard["collision"] != "proxy":
+        raise RuntimeError("formal sideboard no longer fits the short north-wall bay")
+    for index, x in enumerate((-7.90, -6.76), start=1):
+        lamp = props[f"PROP_L0_DINING_SIDE_LAMP_{index}"]
+        side = lights[f"LIGHT_L0_DINING_SIDE_{index}"]
+        if lamp["asset"] != ASSETS["side_lamp"][0] or \
+                lamp["cell"] != "L0_DINING" or \
+                lamp["position"] != [x, 1.455, -20.46] or \
+                lamp["collision"] != "none" or \
+                side["fixtureProp"] != lamp["id"] or \
+                side["emissiveMaterialSlot"] != "DiningSideShade" or \
+                side["position"] != [x, 1.92, -20.46] or \
+                side["group"] != "LG_L0_DINING_SIDE" or \
+                side["colorK"] != 2400 or \
+                side["intensityLm"] != 150.0 or \
+                not side["bakedIntoLightmap"] or \
+                not side["defaultOn"]:
+            raise RuntimeError(f"dining side lamp {index} is ungrounded or unlinked")
 
 
 def main() -> int:

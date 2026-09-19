@@ -333,6 +333,16 @@ for single_door_cell in ("L0_DINING", "L0_HALL", "L0_PANTRY"):
         previous_limit + 1,
         previous_reason + "; HOUSE-00942 adds one shared steel single-door hardware role")
 
+# HOUSE-01069 is a measured room-wide furnishing/lighting step, not a generic budget increase.
+# The new walnut/brass cabinet shares both established dining roles. Its ceramic serving set is
+# one new finish, and the two sideboard lamps' exact independently switched shade group needs
+# one chunk apart from the chandelier despite using the same approved warm material.
+_dining_limit, _dining_reason = CHUNK_BUDGET_EXCEPTIONS["L0_DINING"]
+CHUNK_BUDGET_EXCEPTIONS["L0_DINING"] = (
+    _dining_limit + 2,
+    _dining_reason + "; HOUSE-01069 adds one ceramic serving finish and one independently "
+    "switched physical side-lamp diffuser group")
+
 #: The vertex layouts, one per stock effect, with the attributes that effect actually reads.
 #: `MaterialBinder`'s `MaterialKind` is the same closed list of four; `Skinned` never appears here
 #: because a skinned prop is an animated one and animated props are not batched (§17.4).

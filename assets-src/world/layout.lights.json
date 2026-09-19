@@ -657,22 +657,22 @@
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
 
-    // ---- LG_L0_DINING_SIDE x2 -- over the sideboard
+    // ---- LG_L0_DINING_SIDE x2 -- actual table lamps on the north-wall sideboard
     {
       "id": "LIGHT_L0_DINING_SIDE_1", "cell": "L0_DINING", "group": "LG_L0_DINING_SIDE",
-      "type": "point", "position": [-5.20, 2.25, -22.07],
+      "type": "point", "position": [-7.90, 1.92, -20.46],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 2400, "intensityLm": 300.0, "range": 4.40,
-      "fixtureProp": null, "emissiveMaterialSlot": "shade",
-      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
+      "colorK": 2400, "intensityLm": 150.0, "range": 4.40,
+      "fixtureProp": "PROP_L0_DINING_SIDE_LAMP_1", "emissiveMaterialSlot": "DiningSideShade",
+      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": true
     },
     {
       "id": "LIGHT_L0_DINING_SIDE_2", "cell": "L0_DINING", "group": "LG_L0_DINING_SIDE",
-      "type": "point", "position": [-5.20, 2.25, -21.13],
+      "type": "point", "position": [-6.76, 1.92, -20.46],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 2400, "intensityLm": 300.0, "range": 4.40,
-      "fixtureProp": null, "emissiveMaterialSlot": "shade",
-      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
+      "colorK": 2400, "intensityLm": 150.0, "range": 4.40,
+      "fixtureProp": "PROP_L0_DINING_SIDE_LAMP_2", "emissiveMaterialSlot": "DiningSideShade",
+      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": true
     },
 
     // ---- LG_L0_STOR_MAIN x1

@@ -3878,3 +3878,43 @@ night is 0.013241 / 0.036761 / 0.040176. The rear terrace remains effectively un
 All 1,409 unit, 135 integration and 48 active render tests, 18 culling pairs and strict-XNA
 gates pass. **VISUAL-GATE-1 still fails**; the next sprint scheduler explicitly favours breadth
 across the connected L0 rooms before micro-polish.
+
+## Round 88 — dining service wall, reviewed against the whole L0 route
+
+Commit: `HOUSE-01069` checkpoint (`2026-09-19`). Before: Round 87's 26-camera
+[day](captures/house-01293-kitchen-day-final) and
+[night](captures/house-01293-kitchen-night-final) sets. After: the built game's 27-camera
+[day](captures/house-01069-dining-day-final-r6) and
+[night](captures/house-01069-dining-night-final-r6) sets; each includes an eight-view
+`l0-route-contact.png`. Both full sets and the dining/adjacent-room views were inspected at
+normal eye height. Earlier `r1`/`r2` captures mixed a new bake with a stale deployed
+`build/content/world/chunks.bin` and are rejected as visual evidence; later calibration
+probes were also rejected rather than mistaken for the retained result.
+
+Ranked visible defects before this checkpoint:
+
+1. Dining's table and chandelier existed, but its side wall had no serving furniture and the
+   two nominal side lights were bare, unlinked points. The room still read as a dark corridor.
+2. Across the connected L0 route, living remains too dark, family has a sparse window-facing
+   composition, the kitchen far recess is underdeveloped, and foyer/hall retain broad bare bays.
+3. The exterior-to-interior route cannot yet be walked end to end in normal play: the physical
+   road/gate check reached `EXT_ROAD`, but the phase-14 interaction dispatch is unfinished, so
+   the pedestrian gate/front door cannot be opened by `E`. Interior visual cameras are fixed
+   review spawns, not a false claim that the gate route is currently traversable.
+
+Fixed: a deterministic 1.62 m walnut/brass/ceramic sideboard with a real collision proxy now
+occupies the solid dining bay; two 0.616 m ceramic/brass lamps sit on its 0.855 m cabinet top.
+Their exact `DiningSideShade` slots and optical positions link the existing side circuit, now
+2 × 150 lm at 2400 K and default-on. The selected 256-sample artificial/daylight bakes were
+promoted at 300 lm/radiant-watt, leaving every other receiver and global exposure unchanged.
+This local calibration compensates the room's normalised artificial-light level when its side
+circuit becomes active: in the unchanged long-axis day pose, the large left-wall crop mean is
+0.5317 before and 0.5282 after, while the sideboard/lamp view gains the physical composition.
+The deliberately narrow wall bay leaves about 0.63 m between the cabinet front and the end
+chair's proxy rather than intersecting the table group.
+
+Remaining: the cabinet and dining side wall are still very dark in close night view, so this
+bounded checkpoint is not the full `HOUSE-00989` room task. The stronger whole-route gains now
+lie in living-room readability, family-room furnishing density, kitchen recess completion and
+the real gate/door interaction prerequisite for a continuous first-person walk. No further
+driveway, gutter or single-hero-object polish outranks those. **VISUAL-GATE-1 still fails.**

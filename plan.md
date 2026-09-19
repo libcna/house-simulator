@@ -15765,6 +15765,44 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             remain disabled); all eighteen culling pairs pass at 0.0558% worst (`l0-sunroom`)
             against 0.2%. Project static gates and all 323 strict-XNA translation units are clean;
             compilation and heavy work remain restricted to CPU 0-5.
+- [x] HOUSE-01069 — Complete the formal dining service wall with a grounded sideboard and two practical lamps
+      dep: HOUSE-00215, HOUSE-00220, HOUSE-00296, HOUSE-00907, HOUSE-01048, HOUSE-01259, HOUSE-01264, HOUSE-01266 · sys: content/world/lighting · plat: TOOL · pri: MUST
+      note: (2026-09-19) Round 87's full L0 review ranks the dark, nearly bare dining side wall
+            above any further exterior or single-hero-object polish. This bounded project-authored
+            furnishing checkpoint is dependency-valid now; it does not falsely close the broader
+            `HOUSE-00989` task, which still depends on `HOUSE-00986`.
+      accept: deterministically author and provenance-record a support-grounded service cabinet
+            with a collision proxy and two physically scaled table lamps; place them in the solid
+            dining wall bay without obstructing seating or portals; link the existing side-light
+            group to the exact lamp shades and optical positions; calibrate and promote only the
+            selected dining lightmaps; inspect matched complete-route day/night screenshots from
+            the built game; and pass content, stable-id, scale, licence, render, culling and
+            strict-XNA gates with at most six build workers.
+      result: The project-authored 1.62 × 0.935 × 0.518 m / 2,916-visible-triangle walnut,
+            brass and ceramic cabinet has a named collision proxy; two 0.38 × 0.616 × 0.38 m /
+            540-triangle ceramic/brass lamps sit on its measured top. Three stable prop rows
+            preserve portals and roughly 0.63 m end-chair clearance. The two existing 2400 K
+            side lights are now physical, shade-linked, default-on 150 lm practicals. Only
+            `L0_DINING` daylight/artificial products were promoted at 256 samples and 300
+            lm/radiant-watt; chandelier and side atlas peaks are 0.30894 and 0.38377. Its
+            measured 15-chunk exception gains one ceramic and one independent emissive group.
+      review: Round 88's built-game 27-camera day and 27-camera night sets and both eight-view
+            L0 contact sheets were opened against Round 87. The once-empty service wall now
+            contains grounded storage and two visible practicals, while the long-axis wall crop
+            preserves its day brightness (0.5317 before versus 0.5282 after). An over-hot bake
+            and two stale-deployment captures were rejected. Only `fp-l0-hall` and
+            `fp-l0-kitchen` strict references, each inspected old/new and with an amplified
+            difference, advance for visible adjacent-room lighting; no other golden moved.
+            Living readability, family/window-wall density, kitchen recess and the unfinished
+            gate/door interaction remain the larger whole-route deficits; `HOUSE-00989` stays open.
+      verified: Deterministic suite regeneration, thirteen world rules, scale/origin,
+            manifest/licence/provenance, 3,018 stable IDs, 920 manifest rows and the 31-stage
+            content build pass. The world is 726 chunks / 96 cells / 123 static props; nav
+            rebuilt in 7.64 s. Final rebuilt tests pass 1,410/1,410 unit, 137/137 integration,
+            48/48 active software render and all 18 culling pairs (0.0558% worst against 0.2%).
+            `tools/ci/run_checks.sh`, including 323 strict-XNA translation units, and
+            `git diff --check` pass. Build/strict compilation was pinned to CPUs 0–5 and
+            `CNA_CNAEXT=OFF` remains forced with isolated FNA3D/MojoShader.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -20383,6 +20421,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-19 | `HOUSE-01069` | **New task, next free phase-13 id.** Add a bounded dining service-wall furnishing and linked-practical checkpoint without claiming the dependency-blocked full `HOUSE-00989` room task. | Round 87's complete L0 sheets show a furnished dining table under a physical chandelier but a dark, nearly empty side wall. A measured cabinet and real table lamps can use the existing deterministic asset, stock-XNA prop/light and selected lightmap pipeline now, improving room-scale coverage before more exterior or hero-object detail. |
 | 2026-09-19 | `HOUSE-00044` | **New task, next free phase-0 id.** Record the owner-authorized unpushed-history cleanup as its own audited checkpoint after `HOUSE-00043`. | Rewriting 95 local commit hashes is a materially different operation from untracking files in the current tree. Fresh remote-history checks, evidence preservation, subject comparison, fast-forward and `fsck` proofs deserve an explicit durable ledger entry. |
 | 2026-09-19 | `HOUSE-00043` | **New task, next free phase-0 id.** Keep human visual-review captures as ignored local evidence, separate from versioned strict render references; defer the explicitly authorized unpushed-history rewrite until after this commit and fresh remote verification. | The reviewed 2,570 compressed images occupy 2.7 GiB on disk and have no CI/test dependency on Git tracking, while the text ledger and 48 strict goldens do. Untracking preserves the working files and provides a safe, verifiable checkpoint before changing history. |
 | 2026-09-19 | `HOUSE-01293` | **New task, next free phase-16 id.** Reuse the approved physical ceiling practical for the four existing kitchen main points and locally rebake the one connected room. | Round 86 makes the sunroom readable and reveals the dark kitchen through its open wet-bar threshold. The four default-on kitchen main spots still have `fixtureProp: null`, and their atlas mean 0.02838 under-represents their 4,000 lm installed circuit. A physical linked fixture plus selected calibration is a dependency-valid, bounded visible correction; keeping the island/sink/under-cab group's existing 100 conversion avoids turning one room improvement into three regressions. |

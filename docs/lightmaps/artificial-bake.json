@@ -395,9 +395,9 @@
           "lights": [
             "LIGHT_L0_DINING_CHANDELIER_1"
           ],
-          "mean": 0.010285439185824521,
-          "peak": 0.1360144466161728,
-          "scale": 0.1360144466161728
+          "mean": 0.023190569483422355,
+          "peak": 0.30894333124160767,
+          "scale": 0.30894333124160767
         },
         {
           "group": "LG_L0_DINING_SIDE",
@@ -406,12 +406,13 @@
             "LIGHT_L0_DINING_SIDE_1",
             "LIGHT_L0_DINING_SIDE_2"
           ],
-          "mean": 0.0031845717969040594,
-          "peak": 0.021425170823931694,
-          "scale": 0.021425170823931694
+          "mean": 0.00514551586834416,
+          "peak": 0.38377293944358826,
+          "scale": 0.38377293944358826
         }
       ],
-      "shellHash": "sha256:94e3ab94a3561baaafbfaebaa4b986518781db84cea2fb6c07408e082a0e9760"
+      "lumensPerRadiantWatt": 300.0,
+      "shellHash": "sha256:ed1f599076d03172372ac9b1b0119be11776fb69d7603dbd9d69ca6a2f2b52b8"
     },
     {
       "cell": "L0_FAMILY",
@@ -2050,12 +2051,12 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_KITCHEN"
+    "L0_DINING"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 8126464,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 1080904,
+  "sourceBytes": 1076991,
   "tool": "bake_house_lightmaps.py"
 }

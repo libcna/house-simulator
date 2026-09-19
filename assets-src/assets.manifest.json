@@ -675,6 +675,47 @@
       ]
     },
     {
+      "id": "MODEL_FIXTURE_DINING_SIDE_LAMP",
+      "category": "table-lamp",
+      "sourceFile": "assets-src/Models/Furniture/Dining/side_lamp.glb",
+      "sourceSha256": "641ea424be219691e58056620a26c5428e66a57eae9f0e5c4ca042c5ec35e6c3",
+      "contentName": "Models/Furniture/Dining/side_lamp",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Formal dining ceramic and brass table lamp",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored measured lamp generated deterministically by tools/blender/dining_suite.py for HOUSE-01069. Two grounded instances sit on the new sideboard and bind DiningSideShade as the exact switched emissive slot. Existing approved fabric, ceramic and brass finishes are reused; no third-party source was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.38,
+          0.616,
+          0.38
+        ],
+        "triangles": {
+          "LOD0": 540
+        }
+      },
+      "materialMap": {
+        "DINING_BRASS": "MAT_FURNITURE_PIANO_BRASS",
+        "SIDEBOARD_CERAMIC": "MAT_FOYER_CERAMIC",
+        "DiningSideShade": "MAT_FIXTURE_EMISSIVE_WARM"
+      },
+      "usedIn": [
+        "L0_DINING"
+      ]
+    },
+    {
       "id": "MODEL_FIXTURE_FACADE_UPLIGHT",
       "category": "fixture",
       "sourceFile": "assets-src/Models/Fixtures/facade_uplight.glb",
@@ -1129,6 +1170,48 @@
       "materialMap": {
         "DINING_WOOD": "MAT_FURNITURE_PIANO_WOOD",
         "DINING_FABRIC": "MAT_FURNITURE_DINING_UPHOLSTERY"
+      },
+      "usedIn": [
+        "L0_DINING"
+      ]
+    },
+    {
+      "id": "MODEL_FURNITURE_DINING_SIDEBOARD",
+      "category": "dining-sideboard",
+      "sourceFile": "assets-src/Models/Furniture/Dining/sideboard.glb",
+      "sourceSha256": "759ca6f6e66602c18938b64c304616d504dc46973c20603131e318d6adb6c7dc",
+      "contentName": "Models/Furniture/Dining/sideboard",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Framed walnut formal dining sideboard",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored shallow 1.62 m sideboard generated deterministically by tools/blender/dining_suite.py for HOUSE-01069. Three framed doors and drawers, tapered brass-footed legs and a restrained ceramic serving arrangement suit the short north-wall bay without repeating the foyer's open console. A separate proxy covers the cabinet. Existing approved walnut, brass and ceramic finishes are reused; no third-party source was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.62,
+          0.935,
+          0.518
+        ],
+        "triangles": {
+          "LOD0": 2916
+        },
+        "collision": "dining_sideboard_029_ceramic_serving_bowl_COL"
+      },
+      "materialMap": {
+        "DINING_WOOD": "MAT_FURNITURE_PIANO_WOOD",
+        "DINING_BRASS": "MAT_FURNITURE_PIANO_BRASS",
+        "SIDEBOARD_CERAMIC": "MAT_FOYER_CERAMIC"
       },
       "usedIn": [
         "L0_DINING"
@@ -20964,7 +21047,7 @@
       "id": "TEXTURE_L0_DINING_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_DINING_LM_DAY.png",
-      "sourceSha256": "f5fbb832d4df35dc039ad1b9dc0434b56e14ddbc191f6cf94703b09c6878b920",
+      "sourceSha256": "dcbb0e3d4c9f80be3900ec0fb79c776db57293eb44d385a6936559c55e6af673",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20991,7 +21074,7 @@
       "id": "TEXTURE_L0_DINING_LM_LG_L0_DINING_CHANDELIER",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_DINING_LM_LG_L0_DINING_CHANDELIER.png",
-      "sourceSha256": "52f005df176e352c69750e6e22e368b78fff16a119bd2051d09ba8243365e662",
+      "sourceSha256": "18f38639c049eb2820b5ee4e599cb16ad7f785a59824625070401e70089a8ad7",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21018,7 +21101,7 @@
       "id": "TEXTURE_L0_DINING_LM_LG_L0_DINING_SIDE",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_DINING_LM_LG_L0_DINING_SIDE.png",
-      "sourceSha256": "865ffd066b16c835118b8073c6901471b2628b5b19228250c6e4148fee6c5ce7",
+      "sourceSha256": "7a01c473ed0b4d2d4bd571116ca97354aad4fd76c169f2b0ea10bf602286a624",
       "texture": {
         "width": 128,
         "height": 128,

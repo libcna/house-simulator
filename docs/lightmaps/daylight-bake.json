@@ -206,11 +206,12 @@
       "cell": "L0_DINING",
       "daylight": {
         "image": "L0_DINING_LM_DAY.png",
-        "scale": 0.6929526329040527,
+        "scale": 0.6892715692520142,
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:94e3ab94a3561baaafbfaebaa4b986518781db84cea2fb6c07408e082a0e9760"
+      "lumensPerRadiantWatt": 300.0,
+      "shellHash": "sha256:ed1f599076d03172372ac9b1b0119be11776fb69d7603dbd9d69ca6a2f2b52b8"
     },
     {
       "cell": "L0_FAMILY",
@@ -812,12 +813,12 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_KITCHEN"
+    "L0_DINING"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 5111808,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 517536,
+  "sourceBytes": 517522,
   "tool": "bake_house_lightmaps.py"
 }

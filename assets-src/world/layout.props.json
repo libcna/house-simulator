@@ -799,6 +799,45 @@
       "interactable": null
     },
     {
+      "id": "PROP_L0_DINING_SIDEBOARD",
+      "asset": "MODEL_FURNITURE_DINING_SIDEBOARD",
+      "cell": "L0_DINING",
+      "position": [-7.33, 0.6, -20.44],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_DINING_SIDE_LAMP_1",
+      "asset": "MODEL_FIXTURE_DINING_SIDE_LAMP",
+      "cell": "L0_DINING",
+      "position": [-7.90, 1.455, -20.46],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_DINING_SIDE_LAMP_2",
+      "asset": "MODEL_FIXTURE_DINING_SIDE_LAMP",
+      "cell": "L0_DINING",
+      "position": [-6.76, 1.455, -20.46],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
       "id": "PROP_L0_FAMILY_CEILING_1",
       "asset": "MODEL_FIXTURE_FAMILY_CEILING",
       "cell": "L0_FAMILY",

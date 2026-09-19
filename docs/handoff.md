@@ -1,3 +1,67 @@
+# Visual-sprint handoff — 2026-09-19 (`HOUSE-01069` checkpoint)
+
+Branch `develop`; this visual task began at `96e15f7` (`HOUSE-00044`), and an independent
+`HOUSE-02532` fullscreen commit advanced shared HEAD to `13d17f1` while it was in progress.
+This section belongs to the one `HOUSE-01069` commit; use that commit as ending HEAD. The
+unrelated fullscreen work was preserved, not included in this task's diff. All review captures
+remain ignored *on disk* after `HOUSE-00043`/`HOUSE-00044`; the versioned ledger and strict
+render goldens remain intact. No history rewrite or deletion is pending.
+
+**VISUAL-GATE-1 still FAILS.** Normal gameplay uses production materials; the coloured
+blockout remains an explicit diagnostic. The selected L0 rooms now have recognisable primary
+furniture, but their presentation is not yet consistently believable across the whole route.
+This checkpoint addresses dining breadth, not another exterior or hero-object micro-polish.
+
+`L0_DINING` now has a deterministic, project-authored 1.62 × 0.935 × 0.518 m / 2,916-visible-
+triangle walnut/brass/ceramic sideboard with a collision proxy, plus two 0.38 × 0.616 × 0.38 m /
+540-triangle ceramic/brass table lamps. Three stable prop IDs fit the solid north-west wall bay
+without cutting a portal; the nearest end-chair-to-cabinet clearance is about 0.63 m. The two
+existing side lights sit at the exact shade optics, link `DiningSideShade`, retain 2400 K and
+start on at 150 lm each. Their selected artificial/daylight bakes alone were promoted at 256
+samples and 300 lm/radiant-watt; every other room bake and global exposure stayed unchanged.
+The new on-group reduces the room's normalised exposure target, so the local chandelier atlas
+was compensated. In the fixed long-axis day view a large unchanged left-wall crop reads 0.5317
+before versus 0.5282 after; the sideboard and both physical lamps add the missing service-wall
+composition. A much hotter candidate and two captures made with stale deployed chunks were
+rejected, not treated as evidence.
+
+Canonical review: Round 87 [before day](visual-review/captures/house-01293-kitchen-day-final)
+and [before night](visual-review/captures/house-01293-kitchen-night-final); Round 88
+[after day](visual-review/captures/house-01069-dining-day-final-r6) and
+[after night](visual-review/captures/house-01069-dining-night-final-r6). Each after set has 27
+fixed full-size frames and an eight-view `l0-route-contact.png`, both opened for review. The
+shortest direct current views are `dining-room.png` and `dining-sideboard.png` in each set.
+
+Content and checks: five new stable IDs are recorded (3,018 total), manifest has 920 rows,
+world is 726 chunks / 96 cells / 123 static props and `L0_DINING` is exactly its measured
+15-chunk exception. The 31-stage content pipeline passed; navigation rebuilt in 7.64 s, not
+hours. Project-authored models regenerate byte-identically and world validation, scale,
+provenance, licence and budget checks pass. Final rebuilt suites pass 1,410/1,410 unit,
+137/137 integration and 48/48 active software-render tests; eight capture-only render
+generators remain disabled. All 18 culled/unculled pairs pass, worst 0.0558% (`l0-sunroom`)
+against 0.2%. Two strictly local first-person references (`fp-l0-hall`, `fp-l0-kitchen`)
+were opened old/new/amplified-difference and intentionally advanced for changed dining light
+through adjacent openings; no other reference moved. The six-core final static/XNA gate is
+recorded in the matching plan entry. `CNA_CNAEXT=OFF` remains forced; build still points to the
+project-isolated `build/isolated-deps/FNA3D`, not shared `~/deps`.
+
+Current room baseline from the full 27-camera route review: foyer and hall have production
+surfaces, fixtures, runner, chair/console and art but broad bare bays; living has sofa, rug,
+fireplace and piano but dark material readability; family has seating/media yet its large
+window-facing side remains sparse; kitchen has the fitted work zone and practicals but a weak
+far recess; dining has table, eight chairs, chandelier and now sideboard/lamps, yet its close
+night side-wall remains dark. Exterior approach is coherent enough for this L0 checkpoint.
+The attempted real road→gate walk reached `EXT_ROAD` near `(0.30, 1.23)`; pressing `E` cannot
+open the pedestrian gate because `KeyboardMouseSource` records `interactPressed` but no runtime
+dispatcher consumes it. Therefore the complete continuous walk is **not** falsely claimed;
+the phase-14 interaction tasks are a direct route prerequisite. Next highest-value visual
+work: fix room-scale living readability and family window-wall furnishing, then kitchen
+recess/foyer-hall coverage; separately close the gate/door interaction dependency so the
+normal first-person route can be walked end to end. Do not return to driveway/roof/piano
+micro-polish while these remain.
+
+---
+
 # Visual-sprint handoff — 2026-09-19 (`HOUSE-00044` checkpoint)
 
 Branch `develop`, task-start HEAD `aebfc7e47312b034a4e940b85b31daa1191ef8fa`

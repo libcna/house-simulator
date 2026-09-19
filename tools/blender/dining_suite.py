@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Deterministically author the formal dining table, chair and chandelier.
+"""Deterministically author the formal dining suite and its sideboard lamps.
 
-The three models are a coherent early-twentieth-century walnut set rather than blockout boxes:
+The five models form a coherent early-twentieth-century walnut set rather than blockout boxes:
 the table has breadboard ends, moulded aprons and tapered brass-footed legs; the chair has a real
 wood frame with separate upholstered seat/back; the six-shade chandelier has a ceiling canopy,
 stem, frame and exact emissive shade slot. Coordinates follow the repository's Y-up, -Z-forward
 glTF convention and every floor-standing asset is support-grounded.
 
 Run with: blender --background --python tools/blender/dining_suite.py --
-          --asset table|chair|chandelier --out PATH
+          --asset table|chair|chandelier|sideboard|side_lamp --out PATH
 """
 
 from __future__ import annotations
@@ -28,6 +28,8 @@ COLOURS = {
     "DINING_BRASS": (0.52, 0.32, 0.10, 1.0),
     "CHANDELIER_METAL": (0.11, 0.065, 0.035, 1.0),
     "ChandelierShade": (1.0, 0.80, 0.52, 1.0),
+    "SIDEBOARD_CERAMIC": (0.73, 0.69, 0.60, 1.0),
+    "DiningSideShade": (0.98, 0.82, 0.60, 1.0),
 }
 MATERIALS = {}
 COUNTER = 0
@@ -222,11 +224,64 @@ def author_chandelier():
                 polygon.use_smooth = True
 
 
+def author_sideboard():
+    """A shallow 1.62 m walnut cabinet for the short solid north-wall bay.
+
+    The enclosed carcass, framed door fronts and small drawers read as storage rather than a
+    repeated foyer console. Its 0.48 m depth preserves the living, kitchen and storeroom routes.
+    """
+    box("carcass", (0.0, 0.485, 0.0), (1.55, 0.620, 0.445), bevel=0.007)
+    box("top_cap", (0.0, 0.825, 0.0), (1.62, 0.060, 0.480), bevel=0.013)
+    box("bottom_shadow_rail", (0.0, 0.190, -0.205), (1.48, 0.040, 0.035), bevel=0.005)
+    for side in (-1, 1):
+        box(f"carcase_edge_{side}", (side * 0.758, 0.490, -0.224),
+            (0.040, 0.610, 0.035), bevel=0.005)
+        for z in (-0.170, 0.170):
+            vertical_taper(f"tapered_foot_{side}_{z:+.2f}",
+                           (side * 0.695, 0.090, z), 0.180, 0.040, 0.054)
+            vertical_cylinder(f"brass_sabot_{side}_{z:+.2f}",
+                              (side * 0.695, 0.018, z), 0.036, 0.043,
+                              finish="DINING_BRASS")
+    for x in (-0.50, 0.0, 0.50):
+        box(f"raised_door_{x:+.1f}", (x, 0.405, -0.231),
+            (0.455, 0.395, 0.026), bevel=0.012)
+        box(f"door_inset_{x:+.1f}", (x, 0.405, -0.249),
+            (0.340, 0.275, 0.014), bevel=0.008)
+        box(f"top_drawer_{x:+.1f}", (x, 0.690, -0.234),
+            (0.455, 0.115, 0.025), bevel=0.006)
+        box(f"drawer_pull_{x:+.1f}", (x, 0.690, -0.258),
+            (0.100, 0.012, 0.025), finish="DINING_BRASS", bevel=0.004)
+        box(f"door_pull_{x:+.1f}", (x + 0.155, 0.495, -0.266),
+            (0.012, 0.090, 0.024), finish="DINING_BRASS", bevel=0.003)
+    # One low ceramic bowl and a short serving-book stack keep the centre intentional without
+    # obstructing the two separately switched, physically placed table lamps.
+    vertical_taper("ceramic_serving_bowl", (0.0, 0.895, 0.015),
+                   0.080, 0.125, 0.185, finish="SIDEBOARD_CERAMIC", vertices=32)
+    for index, x in enumerate((-0.16, 0.17)):
+        box(f"serving_book_{index}", (x, 0.875 + index * 0.022, 0.095),
+            (0.20, 0.020, 0.14), finish="SIDEBOARD_CERAMIC", bevel=0.003)
+
+
+def author_side_lamp():
+    """A support-grounded 0.616 m ceramic/brass lamp with one exact switched shade slot."""
+    vertical_cylinder("brass_foot", (0.0, 0.018, 0.0), 0.036, 0.092,
+                      finish="DINING_BRASS", vertices=24)
+    vertical_taper("ceramic_urn", (0.0, 0.165, 0.0), 0.265, 0.105, 0.080,
+                   finish="SIDEBOARD_CERAMIC", vertices=32)
+    vertical_cylinder("brass_neck", (0.0, 0.320, 0.0), 0.050, 0.038,
+                      finish="DINING_BRASS", vertices=20)
+    vertical_taper("side_shade", (0.0, 0.465, 0.0), 0.280, 0.190, 0.125,
+                   finish="DiningSideShade", vertices=32)
+    vertical_cylinder("shade_top_ring", (0.0, 0.610, 0.0), 0.012, 0.125,
+                      finish="DINING_BRASS", vertices=32)
+
+
 def main():
     global PREFIX
     arguments = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--asset", choices=("table", "chair", "chandelier"), required=True)
+    parser.add_argument("--asset", choices=("table", "chair", "chandelier",
+                                             "sideboard", "side_lamp"), required=True)
     parser.add_argument("--out", type=Path, required=True)
     options = parser.parse_args(arguments)
 
@@ -234,7 +289,8 @@ def main():
     bpy.ops.object.delete(use_global=False)
     PREFIX = f"dining_{options.asset}"
     {"table": author_table, "chair": author_chair,
-     "chandelier": author_chandelier}[options.asset]()
+     "chandelier": author_chandelier, "sideboard": author_sideboard,
+     "side_lamp": author_side_lamp}[options.asset]()
     options.out.parent.mkdir(parents=True, exist_ok=True)
     bpy.ops.export_scene.gltf(filepath=str(options.out), export_format="GLB",
                               export_yup=True, export_apply=True,
