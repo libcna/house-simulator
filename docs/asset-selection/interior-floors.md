@@ -37,3 +37,9 @@ absorption. This is an application-owned semantic mapping, not a new rendering p
 source, verifies the exact requested role counts, refuses non-positive UV scales, checks that all
 12 remain lightmap receivers and non-snow-coverable, and compares the committed preview pixel for
 pixel. Room selection remains `HOUSE-00908`'s work.
+
+The visible sunroom is a later room-specific correction (`HOUSE-00950`), not a thirteenth
+member of the original fixed library. `MAT_SUNROOM_LIMESTONE_TILE` reuses approved CC0 ambientCG
+Tiles139 (`tile_grey_square` albedo and normal) with a near-neutral warm tint. Four source tiles
+per repeat at 0.45 repeats per world metre yield 0.556 m modules; the separate DualTexture row
+keeps UV2, the tile footstep and the rest of the house's original marble unchanged.

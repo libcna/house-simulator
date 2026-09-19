@@ -180,8 +180,10 @@ namespace
             {
                 ASSERT_TRUE(binder.RegisterAll(contents.materials).HasValue());
                 EXPECT_EQ(binder.Count(), contents.materials.size());
-                EXPECT_EQ(binder.Count(), 205U)
-                    << "HOUSE-01068 adds distinct sunroom rattan and cushion finishes";
+                EXPECT_EQ(binder.Count(), 206U) << "the sunroom has a distinct measured limestone-look tile";
+                const MaterialDesc* sunroomFloor = binder.Find(Id::Of("MAT_SUNROOM_LIMESTONE_TILE"));
+                ASSERT_NE(sunroomFloor, nullptr);
+                EXPECT_EQ(sunroomFloor->kind, MaterialKind::DualTexture);
                 const MaterialDesc* interiorPanel = binder.Find(Id::Of("MAT_DOOR_PANEL_HARDWOOD"));
                 ASSERT_NE(interiorPanel, nullptr);
                 EXPECT_EQ(interiorPanel->kind, MaterialKind::Basic);

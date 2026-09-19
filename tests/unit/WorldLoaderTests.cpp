@@ -3620,8 +3620,8 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 205U)
-            << "HOUSE-01068 adds distinct sunroom rattan and cushion finishes";
+        EXPECT_EQ(contents.materials.size(), 206U)
+            << "the sunroom's measured limestone-look floor has its own canonical finish";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
@@ -3686,6 +3686,19 @@ namespace
         EXPECT_EQ(frameAt->albedo, "Textures/Materials/paint_white_fine_albedo");
         EXPECT_EQ(frameAt->lightmapChannel, 0);
         EXPECT_EQ(frameAt->effectTierS, world::EffectTier::Basic);
+
+        const auto sunroomFloorAt =
+            std::find_if(contents.materials.begin(),
+                         contents.materials.end(),
+                         [](const world::MaterialDef& material)
+                         { return material.id == Intern("MAT_SUNROOM_LIMESTONE_TILE"); });
+        ASSERT_NE(sunroomFloorAt, contents.materials.end());
+        EXPECT_EQ(sunroomFloorAt->materialClass, world::MaterialClass::Tile);
+        EXPECT_EQ(sunroomFloorAt->albedo, "Textures/Materials/tile_grey_square_albedo");
+        EXPECT_EQ(sunroomFloorAt->lightmapChannel, 1);
+        EXPECT_EQ(sunroomFloorAt->effectTierS, world::EffectTier::DualTexture);
+        EXPECT_FLOAT_EQ(sunroomFloorAt->uvScaleU, 0.45F);
+        EXPECT_FLOAT_EQ(sunroomFloorAt->uvScaleV, 0.45F);
 
         const auto exteriorDoorAt =
             std::find_if(contents.materials.begin(),

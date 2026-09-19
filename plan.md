@@ -55,6 +55,9 @@ four-panel joinery and physical lever hardware without changing their portal/col
 scaled project-authored asphalt shingles and aligns every course to the true sloping roof surface.
 `HOUSE-00944` finishes that weather surface with physical hip/dormer caps, cheek flashing and
 complete K-profile rainwater goods instead of incomplete black strips.
+`HOUSE-00950` replaces the sunroom's continuous grey marble with one room-owned, physically
+scaled warm tile using the approved stock-XNA material path; the other three marble rooms keep
+their finish. This does not solve the separate too-dark daylight bake or the night garden.
 `HOUSE-00945` gives the sparse garage approach a measured planted border and three physical,
 dusk-controlled low fixtures without enabling its independent manual flood.
 `HOUSE-00946` gives the broad concrete driveway construction scale with fine control joints and
@@ -14366,6 +14369,44 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
                 enforcement reports pre-existing `audio-core` 30.05/30 MB; the committed
                 source-only budget gate is green and this task adds no audio. Compilation and
                 heavy work stayed on CPU 0-5 / at most six workers.
+- [x] HOUSE-00950 — Finish the sunroom floor with a measured warm limestone-look tile
+      dep: HOUSE-00902, HOUSE-00908, HOUSE-00912, HOUSE-00949, HOUSE-01068 · sys: world/content/materials · plat: ALL · pri: MUST
+      note: (2026-09-19) Round 84's two reciprocal sunroom views show a broad, continuous
+            cold grey marble sheet under the new breakfast/bar composition. A reused approved
+            Tiles139 source already reads as a warm honed module. Give only `L0_SUNROOM` a
+            separate role at four tiles per repeat and 0.45 repeat/m (0.556 m/tile), retaining
+            foyer/cellar/bath marble and the existing UV2/daylight/fixture contract. Adding
+            unbaked low garden fixtures first was rejected: 16 m exterior terrain chunks are
+            lit through centre-ranked Basic detail, so 3 m sources would not ground their pools.
+      accept: one data-selected DualTexture/lightmapped sunroom floor resolves the existing
+              provenanced CC0 tile albedo and normal at measured real-world scale; no other
+              room palette, shader, geometry, portal, collision, lighting or asset licence
+              changes; matched 26-camera day/night review visibly improves the room and only
+              genuinely affected strict references are advanced after old/new/diff inspection
+      verify: room palette selftest/check; world content, shell manifest/material assignment,
+              source/provenance and XNA gates; unit, integration and active software-render
+              suites including culling equivalence; complete fixed day/night visual review
+      review: Round 85's two full matched day/night contact sheets and both direct sunroom
+              reciprocal pairs were inspected. The breakfast and wet-bar floor now reads as
+              jointed warm 0.556 m modules instead of continuous grey marble. Matched day
+              MAE is 0.002364 / 0.002881 and night MAE 0.001333 / 0.001397; the terrace view
+              away from the room is unchanged to eight decimal places. Three intentionally
+              affected strict references were opened as old/actual/amplified diff and alone
+              advanced: blockout kitchen (5,827 changed pixels), first-person hall (2,695)
+              and kitchen (12,517). The too-dark sunroom and night garden remain visible;
+              `VISUAL-GATE-1` still FAILS.
+      verified: A distinct CC0-provenanced Tiles139 albedo/normal is selected through the
+                canonical room palette, material schema and stock-XNA DualTexture path; the
+                source shell manifest has only the sunroom hash changed, and its selected
+                unwrap holds 206 receiver faces over 159 m² with UV2 packing intact. The
+                31-stage world/content graph and shell/material checks pass. World is 206
+                materials / 3,009 ids / 918 manifest entries / 722 chunks / 116 props /
+                286 exterior instances / 59.850882 MB; no physical or receiver topology
+                changed. All 1,409 unit, 135 integration and 48 active software-render tests
+                pass (eight capture-only generators disabled). All eighteen culling pairs pass
+                below 0.2%, worst 0.0558% (`l0-sunroom`); the unculled diagnostic is 675
+                opaque + 47 cutouts / 113 opaque binds. The XNA-strict gate checks 323
+                translation units with compilation/heavy work restricted to CPU 0-5.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -20187,6 +20228,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-19 | `HOUSE-00950` | **New task, next free phase-12 id.** Give only the sunroom a physically scaled warm tile instead of the original continuous cold marble. | Round 84's matched views make the floor the largest independently tractable material defect inside the connected rear route. The approved Tiles139 source and existing stock-XNA DualTexture role can change that surface without global recolouring, new asset/provenance, a renderer branch or lightmap-layout change. Simple garden bollards were investigated first but would not ground the dark lawn under the present 16 m Basic-terrain assignment. |
 | 2026-09-19 | `HOUSE-00949` | **New task, next free phase-12 id.** Make both authored sliders real glazed aluminium assemblies instead of the shell generator's opaque generic-door fallback. | Round 83's direct sunroom view ranks the broad pale rear slab as the largest newly exposed defect, and the master balcony uses the same type. The existing shell grammar, approved clear glass/aluminium finishes and exact exterior-fenestration role can correct both without a runtime room branch, new renderer, downloaded asset or simulation change. |
 | 2026-09-19 | `HOUSE-01068` | **New task, next free phase-13 id.** Add the exact visible breakfast/bar composition and physical sunroom lighting as a bounded checkpoint while leaving the bulk-acquisition-dependent full `HOUSE-00993` room task open. | Round 82 ranks the empty day/black night sunroom behind the newly lit terrace as the largest continuous-route defect. The approved project-authored prop, stock-XNA material, linked-fixture and selected-atlas paths can correct it now without falsifying `HOUSE-00986`/`HOUSE-00993`, downloading an asset, changing exposure or introducing a renderer branch. |
 | 2026-09-19 | `HOUSE-01291` | **New task, next free phase-16 id.** Reuse the approved wall lantern for the two existing rear-terrace sources, bind one selected adjacent receiver and make the group dusk-owned; remove its old wall switch and add a validator against mixed automatic/manual ownership. | Round 81's fixed night views rank the black terrace as the largest visible defect. Source inspection finds two unphysical points with neither linked fixtures nor useful receiver contribution, plus an unwired wall plate whose saved state would be overwritten every frame by dusk automation. §35.3 already forbids one group having two control owners, so retaining both is not a harmless future interaction. The bounded lantern, cross-cell receiver and spill paths are already approved; this correction needs no renderer, exposure, collision, navigation or licence change. |

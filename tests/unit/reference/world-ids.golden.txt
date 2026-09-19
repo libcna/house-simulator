@@ -1031,6 +1031,7 @@ materials/materials	MAT_SOFFIT_WHITE
 materials/materials	MAT_SOIL_GARDEN
 materials/materials	MAT_SOIL_GARDEN_WET
 materials/materials	MAT_SUNROOM_CUSHION
+materials/materials	MAT_SUNROOM_LIMESTONE_TILE
 materials/materials	MAT_SUNROOM_RATTAN
 materials/materials	MAT_TILE_CERAMIC_DARK
 materials/materials	MAT_TILE_CERAMIC_LIGHT

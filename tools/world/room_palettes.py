@@ -35,6 +35,7 @@ FLOORS = {
     "tile_dark": "MAT_TILE_CERAMIC_DARK",
     "concrete": "MAT_FLOOR_CONCRETE",
     "stone": "MAT_FLOOR_STONE",
+    "sunroom_limestone": "MAT_SUNROOM_LIMESTONE_TILE",
     "vinyl": "MAT_FLOOR_VINYL",
 }
 WALLS = {
@@ -119,7 +120,7 @@ PALETTES = {
     "L0_BUTLERS": p("tile_warm", "linen", "warm", "hardwood"),
     "L0_PANTRY": p("vinyl", "warm_white", "warm"),
     "L0_KITCHEN": p("tile_grey", "warm_white", "warm"),
-    "L0_SUNROOM": p("stone", "sage", "warm"),
+    "L0_SUNROOM": p("sunroom_limestone", "sage", "warm"),
     "L0_GARAGE": p("concrete", "aged", "attic", "ply"),
     "L0_GARAGE_LOFT": p("oak", "aged", "attic", "ply"),
     "CELL_FRIDGE_INTERIOR": p("tile_light", "soft_white", "moisture"),

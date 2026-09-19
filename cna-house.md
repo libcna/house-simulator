@@ -2076,6 +2076,16 @@ The selective UV2 unwrap retains all 350 receiver faces across these two cells; 
 have no lightmap-receiver surfaces. Collision, nav, apertures and portal graph retain their
 canonical authored inputs rather than acquiring a transparent collision surrogate.
 
+`HOUSE-00950` (2026-09-19) gives only `L0_SUNROOM` a measured limestone-look ceramic floor.
+The approved ambientCG Tiles139 (`tile_grey_square`) albedo/normal is reused by a distinct
+lightmapped `MAT_SUNROOM_LIMESTONE_TILE` row, so the 4 × 4 source tile repeat at 0.45 UV repeats
+per metre makes each module 0.556 m wide in the world-metre shell. The cold continuous marble
+remains in the foyer, cellar and master bath, where it is already authored. Receiver UV2,
+daylight/fixture atlases, static geometry, portals, collision and the stock-XNA effect contract
+are unchanged; the canonical material census becomes 206, with `L0_SUNROOM` still 21 chunks /
+20 used materials. This is a surface/material correction, not a claim that the room's daylight
+depth or the near-black night garden is finished.
+
 `HOUSE-00930` (2026-09-16) isolates each weather-facing `D_ENTRY` leaf from ordinary hardwood
 joinery so the exterior hierarchy can retain it when its owning interior room is portal-culled.
 `HOUSE-00932` gives that generated leaf four-panel millwork on both faces, paired bronze

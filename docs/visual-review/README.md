@@ -3758,3 +3758,44 @@ are clean. Heavy work stays on CPU 0-5 / at most six workers.
 `VISUAL-GATE-1` still **FAILS**. Normal gameplay uses production materials, not the optional
 debug blockout view. The next review should address the largest physical night-depth/nearby
 garden defect or a better rear elevation, guided by these unchanged cameras—not by task numbers.
+
+## Round 85 — measured warm tile in the sunroom
+
+Commit: `HOUSE-00950` checkpoint (`2026-09-19`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 84's 26-camera [clear-day](captures/house-00949-slider-day-r1) and
+[normal-night](captures/house-00949-slider-night-r1) sets. After: fixed, matched 26-camera
+[clear-day](captures/house-00950-limestone-day-r1) and
+[normal-night](captures/house-00950-limestone-night-r1) sets. Both contact sheets and direct
+`sunroom-breakfast` / `sunroom-wet-bar` day/night pairs were opened at full resolution.
+
+Ranked visible defects remaining:
+
+1. The garden beyond the terrace wall lanterns is still nearly black at 22:00, with bright
+   detached foliage and no convincing pool on the actual lawn. The 16 m Basic-terrain chunks
+   select nearby fixtures by whole-chunk centre; merely scattering existing 3 m bollards would
+   not correct the ground. Treat the receiver/light-assignment boundary deliberately.
+2. The sunroom's broad sage window-side wall and ceiling are too dark even at clear 10:30; the
+   new tile reveals the mismatch with the bright exterior. Daylight/receiver depth is the next
+   high-value indoor correction, not another global exposure increase.
+3. The upper rear elevation and balcony rail are still simple, and the fence/lawn read as flat
+   planes through the newly clear glass. Formal living contact and secondary-room density remain.
+
+Fixed: only `L0_SUNROOM` exchanges the cold continuous marble finish for a provenanced CC0
+Tiles139 warm limestone-look ceramic. Its own DualTexture role maps four source tiles per
+repeat at 0.45 repeats/world metre: 0.556 m modules with visible joints beneath the breakfast
+group and wet bar. The foyer, cellar and master bath keep marble; the atlas, weather, lamps,
+geometry, portals, collision and night garden are unchanged. The exact day `sunroom-breakfast`
+and `sunroom-wet-bar` pairs change 0.002364 / 0.002881 normalized RGB MAE; at night they change
+0.001333 / 0.001397. The reciprocal terrace camera is effectively unchanged (day MAE
+0.000000014). This is a clearly visible material/scale improvement, not a lighting solution.
+
+Three strict references with the floor in view were each inspected as old/actual/amplified
+difference and intentionally advanced: `blockout-l0-kitchen` (debug material-id hue, 5,827
+pixels), `fp-l0-hall` (the small distant floor strip, 2,695) and `fp-l0-kitchen` (the nearby
+floor, 12,517). No other golden was moved. The verified test census and precise culling bound
+are recorded in `plan.md` and the latest handoff.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay uses only production materials; the debug
+blockout remains explicit. The next work must make a meaningful daylight or physically grounded
+night improvement rather than hiding the remaining defect behind global exposure.

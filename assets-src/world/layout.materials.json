@@ -813,6 +813,23 @@
       "audioAbsorption": 0.04,
       "effectTierS": "DualTexture", "effectTierE": "RoomLit"
     },
+    // Sunroom-only 560 mm limestone-look ceramic modules, with a muted honed finish. The
+    // approved Tiles139 source contains four tiles per repeat; UV0 is in world metres, so
+    // 0.45 repeats/metre makes each tile 1/(4*0.45) = 0.556 m across. Keep the original marble
+    // in the foyer/cellar/bath rather than changing a house-wide finish to fix one room.
+    {
+      "id": "MAT_SUNROOM_LIMESTONE_TILE", "class": "tile",
+      "albedo": "Textures/Materials/tile_grey_square_albedo",
+      "normal": "Textures/Materials/tile_grey_square_normal", "lightmapChannel": 1,
+      "tint": [1.0, 0.98, 0.94], "specularColor": [0.04, 0.04, 0.04],
+      "specularPower": 24.0, "alphaMode": "opaque",
+      "alpha": 1.0, "alphaCutoff": null,
+      "twoSided": false, "uvScale": [0.45, 0.45],
+      "wetResponse": {"albedoDarken": 0.22, "specularBoost": 2.1, "powerBoost": 2.5},
+      "snowResponse": {"coverable": false, "slopeLimitDeg": 0.0},
+      "footstepSurface": "tile", "audioAbsorption": 0.06,
+      "effectTierS": "DualTexture", "effectTierE": "RoomLit"
+    },
     {
       "id": "MAT_FLOOR_VINYL", "class": "tile",
       "albedo": "Textures/Materials/wood_light_floor_albedo",

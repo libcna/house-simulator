@@ -1,3 +1,53 @@
+# Visual-sprint handoff — 2026-09-19 (`HOUSE-00950` checkpoint)
+
+Branch `develop`. Task-start HEAD `cab5b805d330fd3e832065128bbf4cfb8c449404`
+(`HOUSE-00949`). This file belongs to the single `HOUSE-00950` commit; use that commit as ending
+HEAD. **VISUAL-GATE-1 still FAILS.** Normal gameplay uses real production materials; debug
+blockout is an explicit view only. The owner's six-CPU ceiling was respected with affinity
+0–5 and no more than six workers. The worktree should be clean at this checkpoint.
+
+Round 84's matching [clear-day](visual-review/captures/house-00949-slider-day-r1) and
+[normal-night](visual-review/captures/house-00949-slider-night-r1) are the before controls. The
+26-camera [day](visual-review/captures/house-00950-limestone-day-r1) and
+[night](visual-review/captures/house-00950-limestone-night-r1) sets are the inspected after
+controls; each has a contact sheet. Open `sunroom-breakfast.png` and `sunroom-wet-bar.png` in each
+set. The continuous cold grey marble under the breakfast and wet bar is now jointed warm tile at
+0.556 m/module. The exact daylight pairs differ by 0.002364 / 0.002881 normalized MAE; night
+0.001333 / 0.001397. The reciprocal terrace view looking away from the floor is effectively
+unchanged. This is visible and better but does not resolve the dark sunroom wall/daylight or
+the nearly black rear lawn at night.
+
+The canonical `L0_SUNROOM` floor palette alone selects `MAT_SUNROOM_LIMESTONE_TILE`, reusing
+provenanced CC0 ambientCG Tiles139's existing albedo and normal. The floor remains a stock-XNA
+DualTexture UV2 receiver; the project's 4 × 4 source repeat at 0.45 repeats/world metre makes
+0.556 m tiles. Foyer/cellar/master-bath marble remains untouched. The source shell manifest
+changes only the sunroom file; selected unwrap holds 206 receiver faces, with 21 chunks / 20
+used materials. Total: 206 material rows, 3,009 stable ids, 918 source-manifest rows, 722
+chunks, 116 props, 286 exterior instances, 59.850882 MB. All 31 content stages are fresh after
+the world rebuild. Collision/nav/portals/lightmap receiver topology and time/weather/exposure
+have not changed. The nav generator completed in 6 seconds; do not resurrect the old 19-hour
+process as a reason to leave it running.
+
+Exactly three strict goldens were advanced after inspecting old/actual/amplified differences:
+`blockout-l0-kitchen` (new debug hash colour on the visible floor), `fp-l0-hall` (small distant
+floor strip) and `fp-l0-kitchen` (direct floor view). The full 1,409 unit, 135 integration and
+48 active software-render tests pass; eight capture-only generators remain disabled. All 18
+culled/unculled pairs remain under 0.2%, worst 0.0558% (`l0-sunroom`). The unculled diagnostic
+retains 675 opaque + 47 cutout submissions and adds one material bind (113 total). The first
+static-gate run found only local clang-format and world-id-golden drift; both were corrected.
+The complete rerun is green, including all 323 strict-XNA translation units, material,
+licence/provenance, manifest, source-only budget and world-id checks. The previous checkpoint's
+unrelated compiled-budget `audio-core` 30.05/30 MB issue was
+not re-tested here; source-only budget remained green.
+
+Next visible work: room-side daylight depth/receiver correction for the sage sunroom wall and
+ceiling, or an architecturally sound local rear-lawn night solution. Do not add 3 m bollards
+naively: the 16 m outdoor Basic-terrain chunks rank fixtures at whole-chunk centres and would
+still leave the grass black while separately drawn foliage glows. The flat rear balcony/upper
+elevation and fence remain another high-value day defect. Follow fixed views, not task numbers.
+
+---
+
 # Visual-sprint handoff — 2026-09-19 (`HOUSE-00949` checkpoint)
 
 Branch `develop`. Task-start HEAD `455795957d34451c61c5b019c3a105a69e3beb49`
