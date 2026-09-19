@@ -1,3 +1,34 @@
+# Visual-sprint handoff — 2026-09-19 (`HOUSE-00044` checkpoint)
+
+Branch `develop`, task-start HEAD `aebfc7e47312b034a4e940b85b31daa1191ef8fa`
+(rewritten `HOUSE-00043` after the owner-authorized local capture-history filter). This
+section belongs to the `HOUSE-00044` audit commit. A fresh `git fetch origin` showed no
+`docs/visual-review/captures/` path anywhere reachable from `origin/develop` or `origin/main`.
+Their immutable baseline hashes are respectively `adbe0328e80ba406111642dc630d358fd3653f09`
+and `63ad3d0eb4ca2bd0ed8a2b52615c459ebfc80bb5`; local `main` is the latter too.
+Filtering only `origin/develop..develop` rewrote 95 unpushed commits, preserving all 95 subject
+lines and HOUSE IDs byte-for-byte. The remote URL remained
+`git@github-libcna:libcna/house-simulator` because this partial filter did not remove it.
+No force push was attempted or authorized. `develop` remains fast-forward over the fetched
+`origin/develop`.
+
+After `git reflog expire --expire=now --all` and `git gc --prune=now`, `.git` measured **222 MiB**
+versus **2.8 GiB** beforehand. `git rev-list --objects --all` contains zero review capture
+paths, `git fsck --no-reflogs --unreachable --no-progress` reports no issue, and the worktree
+was clean before this audit. All 2,570 local files (2.7 GiB) remain in the ignored capture
+directory; a sampled final kitchen PNG retained SHA-256
+`061fbf5e6f61f8fb4c6e7f449747e97a12c3419829627ac33c74597b83647458`.
+The visual ledger and 48 strict render references remain tracked. Fresh clones will have the
+text review log and goldens, not the local human-review image archive.
+
+**VISUAL-GATE-1 still FAILS.** The next checkpoint must return to the owner's breadth-first L0
+priority: compare the complete fixed day/night route set, walk the actual road→gate→foyer→hall→
+living→family→kitchen→dining path at eye height, then fix the largest room-scale unfinished
+area rather than more exterior or single-object polish. The `HOUSE-01293` section below lists
+the current minimum-baseline status of each room and the canonical local capture paths.
+
+---
+
 # Visual-sprint handoff — 2026-09-19 (`HOUSE-00043` checkpoint)
 
 Branch `develop`, task-start HEAD `781cb4c47c26509585ec7745b1a73d865d63c5ff`

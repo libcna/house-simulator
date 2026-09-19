@@ -577,6 +577,28 @@ acceptance criterion; it is not marked complete on the strength of the code havi
             `tools/ci/run_checks.sh` is green, including 323 strict-XNA translation units;
             staged and unstaged whitespace checks are clean. Commit verification is part of
             this checkpoint.
+- [x] HOUSE-00044 — Remove local review captures from unpushed history without losing evidence
+      dep: HOUSE-00043 · sys: repository, visual tooling · plat: ALL · pri: MUST
+      note: (2026-09-19) The owner explicitly authorized rewriting only the local
+            `origin/develop..develop` range after a fresh fetch proved the remote histories
+            capture-free. This is repository-size maintenance, not a change to render goldens
+            or permission to discard the local human-review archive.
+      accept: fetch `origin`; prove both `origin/develop` and `origin/main` have no reachable
+            capture paths. Filter only the unpushed `develop` range; preserve both remote
+            hashes, `main`, every commit subject/HOUSE id, the fast-forward relationship,
+            clean worktree, all local capture files and the strict render references. Prove
+            `git rev-list --objects --all` has no capture path; expire reflogs and prune,
+            measure `.git`, run `git fsck`, document the result, and never force-push.
+      verified: Fresh `git fetch origin` retained `origin/develop` at
+            `adbe0328e80ba406111642dc630d358fd3653f09` and `origin/main`/`main` at
+            `63ad3d0eb4ca2bd0ed8a2b52615c459ebfc80bb5`; neither remote history
+            contained a capture path. `git filter-repo --force --invert-paths --path
+            docs/visual-review/captures/ --refs origin/develop..develop` rewrote only the
+            95 local commits; all 95 subject lines compare byte-for-byte equal. The origin
+            URL stayed `git@github-libcna:libcna/house-simulator`; `develop` remains
+            fast-forward, the tree is clean, all 2,570 local captures and 48 strict goldens
+            remain, and reachable capture paths total zero. Reflog expiry and `git gc
+            --prune=now` reduced `.git` from 2.8 GiB to 222 MiB; `git fsck` is clean.
 
 ---
 
@@ -20356,6 +20378,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-19 | `HOUSE-00044` | **New task, next free phase-0 id.** Record the owner-authorized unpushed-history cleanup as its own audited checkpoint after `HOUSE-00043`. | Rewriting 95 local commit hashes is a materially different operation from untracking files in the current tree. Fresh remote-history checks, evidence preservation, subject comparison, fast-forward and `fsck` proofs deserve an explicit durable ledger entry. |
 | 2026-09-19 | `HOUSE-00043` | **New task, next free phase-0 id.** Keep human visual-review captures as ignored local evidence, separate from versioned strict render references; defer the explicitly authorized unpushed-history rewrite until after this commit and fresh remote verification. | The reviewed 2,570 compressed images occupy 2.7 GiB on disk and have no CI/test dependency on Git tracking, while the text ledger and 48 strict goldens do. Untracking preserves the working files and provides a safe, verifiable checkpoint before changing history. |
 | 2026-09-19 | `HOUSE-01293` | **New task, next free phase-16 id.** Reuse the approved physical ceiling practical for the four existing kitchen main points and locally rebake the one connected room. | Round 86 makes the sunroom readable and reveals the dark kitchen through its open wet-bar threshold. The four default-on kitchen main spots still have `fixtureProp: null`, and their atlas mean 0.02838 under-represents their 4,000 lm installed circuit. A physical linked fixture plus selected calibration is a dependency-valid, bounded visible correction; keeping the island/sink/under-cab group's existing 100 conversion avoids turning one room improvement into three regressions. |
 | 2026-09-19 | `HOUSE-01292` | **New task, next free phase-16 id.** Locally recalibrate the six approved sunroom practicals and promote only their receiver's selected daylight/artificial products. | Round 85's same-pose ON/OFF control shows that switching on all installed sunroom lumens collapses the camera target exposure to 1 while the actual main atlas averages 0.02946: the player sees a darker occupied room with more lights. Its existing four ceiling fixtures and two bar task lights already provide the physical sources. A local offline irradiance correction has bounded visual value and preserves the runtime adaptation contract while wider exposure/atlas reconciliation is investigated separately. |
