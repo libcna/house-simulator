@@ -3918,3 +3918,40 @@ bounded checkpoint is not the full `HOUSE-00989` room task. The stronger whole-r
 lie in living-room readability, family-room furnishing density, kitchen recess completion and
 the real gate/door interaction prerequisite for a continuous first-person walk. No further
 driveway, gutter or single-hero-object polish outranks those. **VISUAL-GATE-1 still fails.**
+
+## Round 89 — formal-living room-scale light, not another hero prop
+
+Commit: `HOUSE-01294` checkpoint (`2026-09-19`). Before: Round 88's 27-camera
+[day](captures/house-01069-dining-day-final-r6) and
+[night](captures/house-01069-dining-night-final-r6) sets. After: the built game's same 27-camera
+[day](captures/house-01294-living-day-r2) and
+[night](captures/house-01294-living-night-r2) sets, each with the same eight-view
+`l0-route-contact.png`. The retained `r1` sets are a rejected 40 lm/radiant-watt intermediate,
+not the accepted 25-calibrated result. Both final contact sheets plus the full-size living,
+foyer-door and dining-adjacent views were opened.
+
+Ranked visible defects before this checkpoint:
+
+1. The living room had sofa, rug, fireplace, piano and four real default-on ceiling lights,
+   yet walls and floor were nearly black in both fixed day and night views. This made the
+   connected hall-to-living transition visibly less finished than the hall.
+2. Family remains sparse on its window-facing side, the kitchen far recess and dining's close
+   side wall are dark, and broad foyer/hall bays still need purposeful furnishing.
+3. The road-to-door route still cannot be walked through the closed pedestrian gate: the
+   input is recorded but phase-14 interaction dispatch is unfinished.
+
+Fixed: only the four existing 4 × 1,200 lm/3,000 K living-main sources change their offline
+conversion from 100 to 25 lm/radiant-watt. The selected 256-sample main atlas mean/peak rises
+0.03229/0.19948 → 0.12914/0.79792, with no new fixture, changed switch state, global
+exposure or other receiver-cell promotion. Same-pose 22:00 wall/floor grayscale crops rise
+0.5350/0.5316 → 0.6026/0.5626; the fireplace/seating composition now has readable warm
+surface and floor depth without a clipped ceiling. Foyer's closed-door face and the hall stay
+visually stable; dining gains only the expected view of a brighter adjacent living room.
+The normalized PNG atlas itself stayed byte-identical; its physically applied scale and
+provenance report changed. All active strict render references still pass unchanged.
+
+Remaining: living's natural daylight still contributes little at this 10:30 winter/spring
+camera, and the piano's dark body remains less legible than the room envelope. Do not respond
+with another piano-only polish while family, kitchen recess, dining side wall and arrival bays
+need broader coverage. The gate/door interaction prerequisite remains a separate gameplay
+route blocker. **VISUAL-GATE-1 still fails.**

@@ -16690,6 +16690,49 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             culled/unculled pairs are below 0.2%, worst 0.0558% (`l0-sunroom`). All 31
             content stages, project static/manifest/provenance gates and 323 strict-XNA
             translation units pass. The measured unculled list guard was updated 722 → 724.
+- [x] HOUSE-01294 — Calibrate the formal-living main practicals for room-scale readability
+      dep: HOUSE-01058, HOUSE-01256, HOUSE-01266, HOUSE-01286, HOUSE-01293 · sys: world, content, lighting · plat: ALL · pri: MUST
+      note: Round 88's full L0 day/night review shows the furnished formal-living piano wall
+            almost black in both conditions despite four installed, default-on 1,200 lm
+            physical main fixtures. Its existing selected main atlas mean/peak is
+            0.03229/0.19948. Adjust only those four sources' offline conversion, rebake and
+            promote only `L0_LIVING`, and compare full fixed-route views; do not brighten
+            the global renderer, change the foyer/hall, or claim full `HOUSE-00988` furnishing.
+      accept: the four main sources remain physically linked, independently controlled from
+              fire and piano groups, and at their existing 4 × 1,200 lm/3,000 K positions.
+              Selected 256-sample daylight/artificial products and provenance agree with
+              the authored rows. Same-camera day and night views show a legible living-room
+              floor, walls, fireplace and seating without ceiling clipping, false upstairs
+              halo or adjacent-room regression. Inspected strict references, content,
+              culling, unit, integration, render and strict-XNA gates pass at most six CPUs.
+      done: (2026-09-19) Only the four established physical `LG_L0_LIVING_MAIN` sources change
+            their offline bake conversion 100 → 25 lm/radiant-watt; all four still emit
+            1,200 lm at 3,000 K, stay at their linked fixture optics and start on. Selected
+            256-sample `L0_LIVING` artificial/daylight products alone were rebaked and
+            promoted. The main atlas mean/peak rises 0.03229/0.19948 →
+            0.12914/0.79792. The normalized PNG bytes do not move; the applied cell scale,
+            bake report and the deterministic fixture validator's exact expected calibration
+            advance together. No other light group, receiver, renderer exposure, runtime code,
+            collision, asset licence or strict golden changes.
+      review: Round 89's final built-game 27-camera day/night sets and both eight-view L0
+            sheets were opened against Round 88. The wall/floor and fireplace/seating
+            composition now have broader warm depth at 10:30 and 22:00 without clipped
+            ceiling; same night wall/floor grayscale crops change 0.5350/0.5316 →
+            0.6026/0.5626. The foyer door face and hall remain stable, while dining sees only
+            the appropriate adjacent-room light. An intermediate 40 conversion was rejected
+            as insufficient; living daylight alone and the piano body remain weak, and family,
+            kitchen recess, dining side wall and arrival bays are the next breadth priorities.
+            VISUAL-GATE-1 still fails.
+      verified: Both selected bakes, the 31-stage content graph, the complete six-core build,
+            exact physical-fixture regeneration/check and all project asset/content gates
+            pass. Unit 1,410/1,410, integration 137/137 plus content-current and active
+            software render 48/48 plus content-current pass; eight capture-only generators
+            remain disabled. All 18 culled/unculled pose pairs and every unchanged strict
+            reference pass. An initial headless run without offscreen SDL could not capture
+            any frame and an initial default-profile SaveStore run could not write inside the
+            sandbox; correctly configured offscreen and isolated-XDG reruns were green.
+            `tools/ci/run_checks.sh` is fully green, including 323 strict-XNA translation
+            units; `CNA_CNAEXT=OFF`, project-isolated FNA3D and at most six CPUs are retained.
 - [x] HOUSE-01261 — Implement the per-object three-directional-light assignment (key/fill/bounce) for dynamic objects
       dep: HOUSE-01251, HOUSE-00892 · sys: lighting · plat: ALL · pri: MUST
       accept: `BasicEffect` and `SkinnedEffect` receive the same stable key/fill/bounce slot
@@ -20421,6 +20464,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-19 | `HOUSE-01294` | **New task, next free phase-16 id.** Recalibrate only the existing physical formal-living main circuit and its selected receiver atlas. | Round 88's 27-camera day/night route review shows the room has its primary furniture and four real default-on ceiling fixtures, but its wall/floor remain much darker than the connected hall. The physical source-to-atlas energy, not another hero prop or exterior detail, is the current room-scale visual defect. A local rebake can test and correct it without a renderer or global-exposure change. |
 | 2026-09-19 | `HOUSE-01069` | **New task, next free phase-13 id.** Add a bounded dining service-wall furnishing and linked-practical checkpoint without claiming the dependency-blocked full `HOUSE-00989` room task. | Round 87's complete L0 sheets show a furnished dining table under a physical chandelier but a dark, nearly empty side wall. A measured cabinet and real table lamps can use the existing deterministic asset, stock-XNA prop/light and selected lightmap pipeline now, improving room-scale coverage before more exterior or hero-object detail. |
 | 2026-09-19 | `HOUSE-00044` | **New task, next free phase-0 id.** Record the owner-authorized unpushed-history cleanup as its own audited checkpoint after `HOUSE-00043`. | Rewriting 95 local commit hashes is a materially different operation from untracking files in the current tree. Fresh remote-history checks, evidence preservation, subject comparison, fast-forward and `fsck` proofs deserve an explicit durable ledger entry. |
 | 2026-09-19 | `HOUSE-00043` | **New task, next free phase-0 id.** Keep human visual-review captures as ignored local evidence, separate from versioned strict render references; defer the explicitly authorized unpushed-history rewrite until after this commit and fresh remote verification. | The reviewed 2,570 compressed images occupy 2.7 GiB on disk and have no CI/test dependency on Git tracking, while the text ledger and 48 strict goldens do. Untracking preserves the working files and provides a safe, verifiable checkpoint before changing history. |

@@ -298,7 +298,7 @@
       },
       "groups": [],
       "lumensPerRadiantWatt": 683.0,
-      "shellHash": "sha256:2cd7985a1aeadd40378bed97441aa7aba595892a9429cac46ee2627d07f89dad"
+      "shellHash": "sha256:91b73c011ff6528a90fc72c8b09714d37c4d487e7afab29caa79da63221a750b"
     },
     {
       "cell": "L0_MUDROOM",
@@ -813,7 +813,7 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_DINING"
+    "L0_LIVING"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 5111808,

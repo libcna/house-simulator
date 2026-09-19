@@ -718,7 +718,7 @@
       "daylight": { "orientation": "NW", "exposure": 0.46 },
       "lightGroups": ["LG_L0_LIVING_MAIN", "LG_L0_LIVING_FIRE", "LG_L0_LIVING_PIANO"],
       "lightmaps": {
-        "shellHash": "sha256:2cd7985a1aeadd40378bed97441aa7aba595892a9429cac46ee2627d07f89dad",
+        "shellHash": "sha256:91b73c011ff6528a90fc72c8b09714d37c4d487e7afab29caa79da63221a750b",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_LIVING_LM_DAY",
           "scale": 1.000000238418579
@@ -732,7 +732,7 @@
           {
             "group": "LG_L0_LIVING_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_LIVING_LM_LG_L0_LIVING_MAIN",
-            "scale": 0.19947990775108337
+            "scale": 0.7979196310043335
           },
           {
             "group": "LG_L0_LIVING_PIANO",

@@ -1,3 +1,62 @@
+# Visual-sprint handoff — 2026-09-19 (`HOUSE-01294` checkpoint)
+
+Branch `develop`, task-start HEAD `1f07770` (`HOUSE-01069`). This section belongs to one
+`HOUSE-01294` commit; use its committed hash as ending HEAD. The owner-requested capture-history
+cleanup is already complete in `HOUSE-00043`/`HOUSE-00044`: local captures remain ignored on
+disk, strict render goldens remain versioned, and there is no pending rewrite or push.
+
+**VISUAL-GATE-1 still FAILS.** Ordinary play uses production materials, while coloured blockout
+is an explicit debug view. The next breadth checkpoint fixes the furnished formal-living room's
+near-black wall/floor transition from the much more readable hall, without moving another hero
+prop or polishing the exterior. Four already physical, linked 1,200 lm/3,000 K ceiling lights
+retain their stable positions and default-on group; only their source-local offline conversion
+changes 100 → 25 lm/radiant-watt. The selected 256-sample `L0_LIVING` artificial/daylight pair
+was rebaked and promoted. Main atlas mean/peak 0.03229/0.19948 → 0.12914/0.79792; all other
+light groups, cells, global exposure, fixtures, switch ownership and runtime code stay intact.
+The normalized atlas PNG bytes are unchanged; the applied scale/bake metadata change.
+
+Before: Round 88 [day](visual-review/captures/house-01069-dining-day-final-r6) and
+[night](visual-review/captures/house-01069-dining-night-final-r6). Current after: Round 89
+[day](visual-review/captures/house-01294-living-day-r2) and
+[night](visual-review/captures/house-01294-living-night-r2), each 27 fixed built-game views
+and an eight-view `l0-route-contact.png`. The `r1` candidates at conversion 40 were inspected
+and rejected as still too dark, not promoted as final evidence. Full-size `living-room`,
+`living-composition`, `living-piano-detail`, `foyer-living-doors` and `dining-room` show broader
+warm surface/floor depth without a false nearby or upper-floor bloom. Same night wall/floor
+grayscale crops rise 0.5350/0.5316 → 0.6026/0.5626. The piano body remains dark, but the
+room envelope now reads. Daylight alone still contributes little at the fixed 10:30 winter/
+spring pose; do not claim a final daylight solution.
+
+The 31-stage content graph passed twice; navigation finished in about 7 s each run. Full build,
+1,410/1,410 unit, 137/137 integration plus its content-current prerequisite, and 48/48 active
+software-render cases passed; eight capture-only generators remain disabled. The initial
+headless render run lacked SDL offscreen settings and failed every capture, so it is not a
+pixel regression; the correctly configured rerun passed with **no golden updates**. Initial
+SaveStore integration failures used an unwritable default test profile; one focused control
+and then the complete suite passed with an isolated `/tmp` XDG test profile, leaving user saves
+untouched. Full compilation needed elevated write access only to the prescribed shared ccache
+`/rv/cnaccache`; CPUs 0–5 and at most six workers were used. The game remains configured with
+`CNA_CNAEXT=OFF` and project-isolated `build/isolated-deps/FNA3D`; neither CNA nor shared
+`~/deps/FNA3D/MojoShader` sources were edited.
+
+The first full static gate correctly caught one stale exact-value assertion in the deterministic
+family/foyer/living ceiling-fixture validator. Its living-specific expected calibration now
+matches 25; the focused generator check and rerun of the complete gate pass, including all
+323 strict-XNA translation units. No fixture model or source bytes were rewritten.
+
+Room baseline across the whole reviewed L0 route: foyer/hall have real finishes, furniture and
+lighting but broad bare bays; living is furnished and now materially more readable, though
+still warm/dark; family has seating/media but a sparse window-facing wall; kitchen has a fitted
+work zone but weak far recess; dining has table/chairs/chandelier/sideboard/practicals but a
+dark close side wall. Exterior approach remains coherent enough for this phase. A real route
+walk remains blocked at the pedestrian gate: `E` input is captured, but the phase-14
+interaction dispatcher does not yet actuate it, so do not claim road→dining traversal. Next
+highest visible value is family window-facing furnishing, then kitchen recess/arrival-bay
+coverage; the gate/door interaction prerequisite must also be closed for an actual walkthrough.
+Avoid another driveway, gutter, piano or single-wall micro-polish while those remain.
+
+---
+
 # Visual-sprint handoff — 2026-09-19 (`HOUSE-01069` checkpoint)
 
 Branch `develop`; this visual task began at `96e15f7` (`HOUSE-00044`), and an independent
