@@ -1190,6 +1190,19 @@
       "interactable": null
     },
     {
+      "id": "PROP_L0_SUNROOM_LOUNGE",
+      "asset": "MODEL_SUNROOM_LOUNGE_GROUP",
+      "cell": "L0_SUNROOM",
+      "position": [1.40, 0.60, -29.80],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
       "id": "PROP_L0_SUNROOM_WET_BAR",
       "asset": "MODEL_SUNROOM_WET_BAR",
       "cell": "L0_SUNROOM",

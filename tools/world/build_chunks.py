@@ -297,7 +297,9 @@ CHUNK_BUDGET_EXCEPTIONS["L0_SUNROOM"] = (
         "switched diffuser remain visually distinct. One exact Reach-cap split preserves the "
         "woven four-chair group rather than flattening its material sub-ranges; HOUSE-00949 "
         "finally draws the authored aluminium slider frame as one additional close architectural "
-        "finish while its panes share the established exterior-glass chunk")
+        "finish while its panes share the established exterior-glass chunk. HOUSE-01074's "
+        "two-chair reading group reuses four existing sunroom finishes and keeps the measured "
+        "cell at 21 chunks")
 
 _master_limit, _master_reason = CHUNK_BUDGET_EXCEPTIONS["L1_MASTER_BED"]
 CHUNK_BUDGET_EXCEPTIONS["L1_MASTER_BED"] = (

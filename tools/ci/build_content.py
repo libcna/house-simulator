@@ -207,7 +207,8 @@ def default_stages() -> list[Stage]:
               description="strip the comments, deploy as plain JSON, and hash what was written"),
         Stage("collision", "world",
               ["python3", "tools/world/build_collision.py"],
-              inputs=["assets-src/world/*.json", "assets-src/assets.manifest.json"],
+              inputs=["assets-src/world/*.json", "assets-src/assets.manifest.json",
+                      "assets-src/Models/**/*.glb"],
               outputs=["content/world/collision.bin"], needs=["world-rules"],
               description="rooms become walls; the layout and the _COL proxies"),
         Stage("nav", "world", ["python3", "tools/world/build_nav.py"],
@@ -903,6 +904,9 @@ def selftest() -> int:
         for stage in default_stages():
             require(bool(stage.description),
                     f"stage {stage.name!r} says what it does, for HOUSE-00217's documentation")
+        collision = next(stage for stage in default_stages() if stage.name == "collision")
+        require("assets-src/Models/**/*.glb" in collision.inputs,
+                "collision must rebuild when an authored _COL proxy changes")
 
         # 13b. `HOUSE-00227`: the generated exterior tree is IN the pipeline. Four generators wrote
         #      the `.glb` that `build_chunks.py` reads and no stage ran any of them, which is how

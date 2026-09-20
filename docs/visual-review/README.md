@@ -4329,3 +4329,37 @@ room/object-light balance and dark primary furniture; (3) the main stair foot
 is still very dark. A hairline diagonal seam above the garage is visible only
 when magnified; it is not the former open gable wedge. Continue L0 breadth,
 not another long exterior micro-polish sequence. **VISUAL-GATE-1 is open.**
+
+## Round 100 — occupy the sunroom's east reading bay
+
+Commit: `HOUSE-01074` checkpoint (`2026-09-20`). Before: the
+[previous breakfast-side view](captures/house-00702-exterior-day-r2/sunroom-breakfast.png)
+shows a broad empty floor beyond the occupied table and bar. After: the same
+[32-view day](captures/house-01074-sunroom-day-r3) and
+[32-view night](captures/house-01074-sunroom-night-r3) route sets, including a
+new reciprocal [day](captures/house-01074-sunroom-day-r3/sunroom-lounge.png)
+and [night](captures/house-01074-sunroom-night-r3/sunroom-lounge.png) camera.
+The fixed hall, living, family, kitchen and dining views were also inspected;
+the furniture addition is local, not a claimed route-wide lighting fix.
+
+Ranked before: (1) the connected sunroom's east bay has no human-scale purpose;
+(2) static furniture is much darker than nearby baked floor and walls across
+L0; (3) the living piano and stair foot remain under-readable. Fixed: two
+measured woven-cane reading chairs, cushions and a shared tea table now occupy
+the bay without obstructing the slider-side lane. A three-box `_COL` proxy
+avoids one solid collision slab across the whole group; two nearby pet nodes
+were moved into the clear aisle. A content-graph omission that left
+`collision.bin` fresh when a source `.glb` changed was corrected and guarded.
+An attempted jute runner looked almost black against the lit tile and was
+rejected; it is absent from the source and final captures. No strict golden
+image was advanced for this furnishing-only change. The complete content graph,
+1,412 unit tests, 140 integration entries and 49 active render tests pass;
+all 18 paired culling poses pass, worst 0.0558%. The sunroom remains exactly
+21 chunks because the new group reuses four established finishes.
+
+Remaining, ranked across the *whole* L0 route: (1) reconcile Basic-lit static
+objects with baked receivers, especially living piano, sunroom chairs and
+kitchen/dining furniture; (2) improve the dark stair foot and room-to-room
+day/night balance; (3) only then add more secondary dressing. The sunroom is
+more recognizably occupied but not fully visually finished. **VISUAL-GATE-1
+remains open.**

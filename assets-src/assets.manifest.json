@@ -3081,6 +3081,41 @@
       ]
     },
     {
+      "id": "MODEL_SUNROOM_LOUNGE_GROUP",
+      "category": "sunroom-lounge-group",
+      "sourceFile": "assets-src/Models/Furniture/Sunroom/lounge_group.glb",
+      "sourceSha256": "f82dcce1b2ef4c96e830fb633fd45d8bacc8c526e0bfa8f8f88f0ed5bf733dbd",
+      "contentName": "Models/Furniture/Sunroom/lounge_group",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Two-chair woven-cane sunroom reading group",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored measured cane reading chairs, cushions and shared tea table generated deterministically by tools/blender/sunroom_suite.py for HOUSE-01074. A three-box collision proxy preserves the gaps beside the seating group. Existing approved sunroom finishes are reused; no third-party mesh or texture is copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [1.474238, 1.006, 2.16],
+        "triangles": {"LOD0": 3220},
+        "collision": "sunroom_lounge_001_lounge_1_seat_frame_COL"
+      },
+      "materialMap": {
+        "SUNROOM_CERAMIC": "MAT_FOYER_CERAMIC",
+        "SUNROOM_CUSHION": "MAT_SUNROOM_CUSHION",
+        "SUNROOM_OAK": "MAT_FURNITURE_PIANO_WOOD",
+        "SUNROOM_RATTAN": "MAT_SUNROOM_RATTAN"
+      },
+      "usedIn": ["L0_SUNROOM"]
+    },
+    {
       "id": "MODEL_SUNROOM_WET_BAR",
       "category": "wet-bar",
       "sourceFile": "assets-src/Models/Furniture/Sunroom/wet_bar.glb",

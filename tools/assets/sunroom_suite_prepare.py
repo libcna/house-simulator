@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate and validate HOUSE-01068's project-authored sunroom suite."""
+"""Regenerate and validate the project-authored sunroom suite."""
 
 from __future__ import annotations
 
@@ -28,11 +28,15 @@ MANIFEST = REPO / "assets-src" / "assets.manifest.json"
 ASSETS = {
     "breakfast": ("MODEL_SUNROOM_BREAKFAST_GROUP", "breakfast_group.glb",
                   "breakfast-dining-group"),
+    "lounge": ("MODEL_SUNROOM_LOUNGE_GROUP", "lounge_group.glb",
+               "sunroom-lounge-group"),
     "bar": ("MODEL_SUNROOM_WET_BAR", "wet_bar.glb", "wet-bar"),
 }
 EXPECTED_MATERIALS = {
     "breakfast": {"SUNROOM_OAK", "SUNROOM_RATTAN", "SUNROOM_CUSHION",
                   "SUNROOM_CERAMIC", "SUNROOM_FRUIT"},
+    "lounge": {"SUNROOM_OAK", "SUNROOM_RATTAN", "SUNROOM_CUSHION",
+               "SUNROOM_CERAMIC"},
     "bar": {"SUNROOM_CABINET", "SUNROOM_OAK", "SUNROOM_STONE",
             "SUNROOM_METAL", "SUNROOM_CERAMIC"},
 }
@@ -49,6 +53,8 @@ MATERIAL_MAP = {
 REQUIRED_COMPONENTS = {
     "breakfast": ("table_top", "table_pedestal", "chair_1_cushion", "chair_4_crest",
                   "chair_2_cane_v_", "fruit_bowl", "mug_handle", "plate_"),
+    "lounge": ("lounge_1_seat_cushion", "lounge_2_crest", "lounge_1_cane_v_",
+               "lounge_2_lumbar", "tea_table_top", "tea_table_leg_", "tea_cup_handle"),
     "bar": ("base_carcass", "left_door_panel", "stone_counter", "sink_basin",
             "faucet_spout", "open_shelf_2", "tumbler_", "bottle_", "bowl_"),
 }
@@ -74,7 +80,9 @@ def generate(folder: Path, name: str) -> Path:
     if command is None:
         raise RuntimeError("Blender unavailable; cannot regenerate the authored sunroom suite")
     checked_run(command, sentinel="sunroom_suite: EXIT 0")
-    checked_run([sys.executable, str(COLLISION), str(raw), str(final), "--mode", "box"])
+    collision_mode = "boxes" if name == "lounge" else "box"
+    checked_run([sys.executable, str(COLLISION), str(raw), str(final),
+                 "--mode", collision_mode])
     if not final.is_file():
         raise RuntimeError(f"generation produced no {final.name}")
     return final
@@ -141,18 +149,32 @@ def validate_world() -> None:
     props = layout_io.by_id(layout_io.rows(layout, "props"), "prop")
     expected = {
         "PROP_L0_SUNROOM_BREAKFAST":
-            ("MODEL_SUNROOM_BREAKFAST_GROUP", [-5.00, 0.60, -29.10], 0),
+            ("MODEL_SUNROOM_BREAKFAST_GROUP", [-5.00, 0.60, -29.10], 0, "proxy"),
         "PROP_L0_SUNROOM_WET_BAR":
-            ("MODEL_SUNROOM_WET_BAR", [1.15, 0.60, -27.44], 0),
+            ("MODEL_SUNROOM_WET_BAR", [1.15, 0.60, -27.44], 0, "proxy"),
+        "PROP_L0_SUNROOM_LOUNGE":
+            ("MODEL_SUNROOM_LOUNGE_GROUP", [1.40, 0.60, -29.80], 0, "proxy"),
     }
-    for identifier, (asset, position, yaw) in expected.items():
+    for identifier, (asset, position, yaw, collision) in expected.items():
         prop = props[identifier]
         if prop["asset"] != asset or prop["cell"] != "L0_SUNROOM" or \
                 prop["position"] != position or prop["yawDeg"] != yaw or \
                 prop["scale"] != 1 or not prop["static"] or \
-                prop["collision"] != "proxy" or prop["material"] is not None or \
+                prop["collision"] != collision or prop["material"] is not None or \
                 prop["interactable"] is not None:
             raise RuntimeError(f"{identifier}: canonical sunroom placement changed")
+    rows = {row["id"]: row for row in json.loads(MANIFEST.read_text())["assets"]}
+    lounge = props["PROP_L0_SUNROOM_LOUNGE"]
+    lounge_width = rows[lounge["asset"]]["geometry"]["boundsMetres"][0]
+    lounge_left = lounge["position"][0] - lounge_width * 0.5
+    if lounge_left - (-0.80) < 1.0:
+        raise RuntimeError("sunroom lounge intrudes into the terrace slider's east-side lane")
+    nav_nodes = layout_io.by_id(layout["nav"].get("nodes", []), "node")
+    for identifier, z in (("NAV_L0_SUNROOM_04", -30.43),
+                          ("NAV_L0_SUNROOM_08", -28.77)):
+        position = nav_nodes[identifier]["position"]
+        if position != [0.0, 0.60, z] or lounge_left - position[0] < 0.60:
+            raise RuntimeError(f"{identifier}: east aisle node collides with reading group")
     perch = layout_io.by_id(layout["nav"].get("perches", []), "perch")[
         "PERCH_L0_SUNROOM_WICKER"]
     if perch["position"] != [-3.88, 1.05, -29.10]:

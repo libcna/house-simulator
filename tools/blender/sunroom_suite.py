@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Deterministically author the sunroom breakfast group and fitted wet bar.
+"""Deterministically author the sunroom breakfast, lounge and fitted wet bar.
 
 The breakfast asset is a measured four-place oak/rattan composition with real chair frames,
 woven backs, cushions and restrained table dressing.  The bar is fitted joinery rather than a
@@ -7,7 +7,7 @@ blockout box: shaker fronts, stone worktop, sink/faucet, tiled upstand and dress
 Coordinates use the repository's Y-up, -Z-forward glTF convention and both assets are grounded.
 
 Run with: blender --background --python tools/blender/sunroom_suite.py --
-          --asset breakfast|bar --out PATH
+          --asset breakfast|lounge|bar --out PATH
 """
 
 from __future__ import annotations
@@ -228,6 +228,65 @@ def author_breakfast():
         cylinder(f"plate_{index}", (x, 0.765, z), 0.018, 0.145, "SUNROOM_CERAMIC", 28)
 
 
+def lounge_chair(index: int, centre: tuple[float, float]):
+    """Broader cane reading chair, facing west toward the terrace route."""
+    yaw = 270.0
+    transformed_box(f"lounge_{index}_seat_frame", centre, (0.0, 0.405, 0.0),
+                    (0.72, 0.085, 0.65), yaw, finish="SUNROOM_RATTAN", bevel=0.026)
+    transformed_box(f"lounge_{index}_seat_cushion", centre, (0.0, 0.485, -0.025),
+                    (0.65, 0.105, 0.58), yaw, finish="SUNROOM_CUSHION", bevel=0.046)
+    for side in (-1, 1):
+        transformed_rod(f"lounge_{index}_front_leg_{side}", centre,
+                        (side * 0.295, 0.025, -0.25), (side * 0.295, 0.41, -0.25),
+                        yaw, radius=0.033)
+        transformed_rod(f"lounge_{index}_rear_post_{side}", centre,
+                        (side * 0.305, 0.025, 0.27), (side * 0.32, 0.97, 0.37),
+                        yaw, radius=0.034)
+        transformed_rod(f"lounge_{index}_arm_{side}", centre,
+                        (side * 0.32, 0.675, -0.255), (side * 0.32, 0.79, 0.35),
+                        yaw, radius=0.028)
+    transformed_rod(f"lounge_{index}_crest", centre, (-0.32, 0.97, 0.37),
+                    (0.32, 0.97, 0.37), yaw, radius=0.036)
+    transformed_rod(f"lounge_{index}_back_rail", centre, (-0.30, 0.55, 0.315),
+                    (0.30, 0.55, 0.315), yaw, radius=0.024)
+    for strand in range(7):
+        x = -0.24 + strand * 0.08
+        transformed_rod(f"lounge_{index}_cane_v_{strand}", centre,
+                        (x, 0.565, 0.32), (x, 0.945, 0.365), yaw,
+                        radius=0.007, vertices=8)
+    for strand in range(5):
+        y = 0.60 + strand * 0.075
+        transformed_rod(f"lounge_{index}_cane_h_{strand}", centre,
+                        (-0.275, y, 0.32), (0.275, y, 0.36), yaw,
+                        radius=0.006, vertices=8)
+    transformed_box(f"lounge_{index}_lumbar", centre, (0.0, 0.625, 0.22),
+                    (0.48, 0.17, 0.09), yaw, finish="SUNROOM_CUSHION", bevel=0.035)
+    for side in (-1, 1):
+        for end in (-1, 1):
+            transformed_box(f"lounge_{index}_foot_{side}_{end}", centre,
+                            (side * 0.295, 0.015, end * 0.25),
+                            (0.072, 0.030, 0.072), yaw,
+                            finish="SUNROOM_OAK", bevel=0.004)
+
+
+def author_lounge():
+    """Two cane reading chairs and one shared tea table on the slider's east side."""
+    lounge_chair(1, (0.0, -0.72))
+    lounge_chair(2, (0.0, 0.72))
+    cylinder("tea_table_top", (-0.77, 0.535, 0.0), 0.055, 0.29,
+             "SUNROOM_OAK", 28)
+    cylinder("tea_table_lip", (-0.77, 0.505, 0.0), 0.038, 0.30,
+             "SUNROOM_RATTAN", 28)
+    for index, (x, z) in enumerate(((-0.96, -0.16), (-0.58, -0.16),
+                                    (-0.77, 0.22)), 1):
+        rod(f"tea_table_leg_{index}", (x, 0.035, z), (x, 0.51, z),
+            0.022, "SUNROOM_OAK", 12)
+    cylinder("tea_cup", (-0.76, 0.63, -0.06), 0.13, 0.055,
+             "SUNROOM_CERAMIC", 20)
+    rod("tea_cup_handle", (-0.71, 0.61, -0.06), (-0.67, 0.66, -0.06),
+        0.011, "SUNROOM_CERAMIC", 10)
+
+
 def shaker_front(label: str, x: float, y: float, width: float, height: float):
     box(f"{label}_panel", (x, y, -0.307), (width - 0.065, height - 0.065, 0.025),
         finish="SUNROOM_CABINET", bevel=0.008)
@@ -301,18 +360,31 @@ def centre_depth():
         vertex.co.y -= centre
 
 
+def centre_width():
+    """Give the asymmetrical chair-and-table group a true placement centre."""
+    vertices = [vertex for obj in bpy.context.scene.objects if obj.type == "MESH"
+                for vertex in obj.data.vertices]
+    centre = (min(vertex.co.x for vertex in vertices) +
+              max(vertex.co.x for vertex in vertices)) * 0.5
+    for vertex in vertices:
+        vertex.co.x -= centre
+
+
 def main():
     global PREFIX
     arguments = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--asset", choices=("breakfast", "bar"), required=True)
+    parser.add_argument("--asset", choices=("breakfast", "lounge", "bar"), required=True)
     parser.add_argument("--out", type=Path, required=True)
     options = parser.parse_args(arguments)
 
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.object.delete(use_global=False)
     PREFIX = f"sunroom_{options.asset}"
-    {"breakfast": author_breakfast, "bar": author_bar}[options.asset]()
+    {"breakfast": author_breakfast, "lounge": author_lounge,
+     "bar": author_bar}[options.asset]()
+    if options.asset == "lounge":
+        centre_width()
     if options.asset == "bar":
         centre_depth()
     options.out.parent.mkdir(parents=True, exist_ok=True)

@@ -91,6 +91,9 @@ POSES = (
     # to the slider; the reciprocal view proves fitted bar depth, shelf dressing and floor contact.
     ("sunroom-breakfast", "-2.00,0.60,-27.35,340.0,0.0"),
     ("sunroom-wet-bar", "-2.00,0.60,-31.45,180.0,0.0"),
+    # HOUSE-01074: the route/breakfast/bar cameras mostly look along the glazing and miss the
+    # east-side reading bay. Review the whole group and its slider clearance at eye height.
+    ("sunroom-lounge", "-1.50,0.60,-29.80,90.0,0.0"),
 )
 SCENARIOS = {
     "clear-day": (10.5, "W_CLEAR"),

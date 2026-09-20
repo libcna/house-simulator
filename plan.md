@@ -16033,6 +16033,40 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
                 cases pass, including all 18 culled/unculled pairs. Full static
                 gates pass after formatting, including 323 strict-XNA TUs;
                 six-core build and isolated FNA3D/MojoShader remain intact.
+- [x] HOUSE-01074 — Furnish the sunroom's empty east-side reading bay
+      dep: HOUSE-01068, HOUSE-00907, HOUSE-00215, HOUSE-00220 · sys: world/content · plat: TOOL · pri: MUST
+      note: Round 99's whole-route view reaches a large bare sunroom floor beyond the kitchen.
+            The breakfast and wet-bar composition occupies only two sides; this is a connected
+            L0 coverage defect, not a reason to polish another exterior detail. Full
+            `HOUSE-00993` remains dependent on the broader acquisition chain.
+      accept: author a distinct, physically measured two-chair reading group using approved
+              project material/provenance; leave at least 1 m clear beside the slider route and
+              preserve kitchen, terrace and cat-perch access. Make regeneration, UV scale, support origin and
+              collision/asset ids deterministic; measure any precise sunroom chunk exception.
+              Inspect the same L0 day/night captures plus a fixed reciprocal lounge camera;
+              pass the complete content, unit, integration, render/culling, licensing, budget,
+              stable-id and strict-XNA gates at at most six build CPUs. Advance strict references
+              only if an individually inspected intended difference requires it.
+      done: (2026-09-20) Added two distinct project-authored woven-cane lounge chairs with
+            cushions and a shared tea table to `L0_SUNROOM`'s empty east bay. The 1.474 ×
+            1.006 × 2.160 m, 3,220-visible-triangle group reuses four approved finishes and
+            has a three-box, 36-triangle `_COL` proxy rather than a false whole-group solid.
+            The slider-side lane stays 1.46 m wide from its east edge, and the two eastern pet
+            waypoints move to x=0.00 with 0.66 m model clearance. All eight sunroom floor nodes,
+            the kitchen link and wicker perch remain compiled; the pet terrace edge was already
+            pruned before this task and is not claimed as repaired. The authored slider/portal
+            and cat-perch placement stay unchanged. `L0_SUNROOM` remains at its measured 21
+            chunks; the complete world remains 743 chunks. The collision content stage now
+            fingerprints model `.glb` files so editing `_COL` cannot reuse a stale binary. A
+            black-looking jute-runner probe was rejected rather than shipped. The full-room
+            `HOUSE-00993` and VISUAL-GATE-1 remain open.
+      verified: Deterministic Blender regeneration, provenance/licence, scale/origin, budget,
+                3,033 stable IDs, full content graph and six-core build pass. Thirty-two fixed
+                day and 32 night views were captured; the new reciprocal lounge view shows the
+                group grounded and the established route views retain their prior composition.
+                Unit 1,412/1,412, integration 140/140 and render 49/49 active tests pass; all
+                18 paired culling views pass (worst 0.0558%). No strict golden changed. Static
+                gates pass, including 323 strict-XNA translation units.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -20817,6 +20851,8 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-20 | `HOUSE-01074` | Add `assets-src/Models/**/*.glb` to the `collision` content stage's inputs and guard it in the graph selftest; regenerate the documented stage table. | Switching the new lounge from one coarse box to a three-box `_COL` proxy left `collision.bin` incorrectly fresh, and the 20-minute seeded walk wedged with the stale geometry. The generator consumes source GLBs directly, so they must invalidate that stage. After a real rebuild the walk and full unit suite pass. |
+| 2026-09-20 | `HOUSE-01074` | **New task, next free phase-13 id.** Occupy the sunroom's east-side reading bay without claiming the dependency-blocked whole-room `HOUSE-00993`. | The complete L0 review shows the existing breakfast/bar vignettes leave the east side empty. A project-authored lounge can fill this connected space now. A jute runner tested in the same round appeared nearly black against the baked floor and was rejected, so the next task should address the cross-room Basic-prop/receiver lighting mismatch instead of shipping it. |
 | 2026-09-19 | `HOUSE-00570` | **New task, next free phase-7 id.** Carry the existing Shift edge across the variable frame-to-physics boundary exactly once. | The original `HOUSE-00556` unit test proved edge creation and per-step toggling, but the real game reuses a frame's input over 0–4 fixed steps. An even-step frame cancels one key press, which reproduces the owner's report without changing the approved two-speed design. |
 | 2026-09-19 | `HOUSE-00701` | **New task, next free phase-9 id.** Separate render-camera cell selection from §16.4's intentionally sticky gameplay cell. | A headless northbound hall→kitchen walk reproduced the owner's brief doorway sky leak exactly: in the first 5 cm past the portal, the body remains in `L0_HALL`, the eye is in `L0_KITCHEN`, and the old visibility root omits the room ahead. The original behavior is correct for collision stability but not for rendering. |
 | 2026-09-19 | `HOUSE-01073` | **New task, next free phase-13 id.** Give the occupied dining room a measured surface-scale composition and local furniture finish; do not claim the dependency-blocked full `HOUSE-00989` task. | Round 95's matched day/night route shows the shell now readable but a bare, visually dark table dominates the dining camera. A material-only probe barely changes its human-scale appearance, while an eight-place linen/ceramic composition makes the room's purpose immediate. This is a room-scale coverage defect, not another narrow exterior or hero-prop polish round. |
