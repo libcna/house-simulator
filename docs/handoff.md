@@ -1,3 +1,65 @@
+# Gameplay/visual handoff — 2026-09-20 (`HOUSE-00702` checkpoint)
+
+Read this section first, then targeted `plan.md` and architecture sections.
+Branch `develop`; this task started at `6ca0a3f` (`HOUSE-00489`). The player's
+two current gameplay complaints are now addressed: the foyer-to-L1 stair is
+reachable in `HOUSE-00489`, and `HOUSE-00702` closes the major exterior sky
+openings at front glass and the garage-side main-house gable. Shift toggle and
+the transient interior doorway sky flash were already fixed by `HOUSE-00570`
+and `HOUSE-00701`. No owner question is waiting for an answer.
+
+`HOUSE-00702` starts with the ordinary portal walk, then directly seeds only
+projected glass apertures attached to *already visible* outdoor cells, at
+depth one. It does not change F5's intentionally frozen visibility or seed
+rafter-bounded rooms whose roof receiver protrudes through a tiny dormer cone.
+The general shell generator now extends outer weather skins to their exposed
+perpendicular corners, splitting at partial-height cover from the lower
+garage. Regenerated shell/UV2, selected 256-sample day/artificial lightmaps,
+manifest, world and budget report travel together. The strict XNA rule and
+`CNA_CNAEXT=OFF` remain unchanged; no CNA or shared dependency checkout was
+modified.
+
+Visual evidence: the previous
+[front view](visual-review/captures/house-00489-stair-day-r1/exterior-front.png)
+had pale sky behind front windows. The first
+[garage view](visual-review/captures/house-00702-exterior-day-r1/garage-approach.png)
+exposed a large blue gable wedge. The final
+[31-view day set](visual-review/captures/house-00702-exterior-day-r2)
+shows interiors behind the road-facing glass, closed vertical facade slots
+and a continuous gable above the garage; inspect its exterior-front,
+garage-approach, entrance-foyer, central-hall, living-room, family-room,
+kitchen and dining-room frames together. The capture PNGs are intentionally
+local/Git-ignored. A hairline diagonal seam above the garage remains visible
+only when magnified; outdoor no-cull still draws extra roof-receiver edges,
+so compare the approved 18 paired culling poses rather than claiming perfect
+road/no-cull pixel identity. Round 99 of the tracked visual-review ledger
+records the before/after decision.
+
+Verification: 1,412/1,412 unit, 139/139 integration and 48/48 active render
+tests pass; all 18 culled/unculled pairs stay under the unchanged 0.2% bound
+(worst 0.0558%). Twenty-seven strict references changed only after inspecting
+their individual difference masks. Full content graph and six-worker build,
+`world-content-current`, shell-generator selftest and verifier selftest pass.
+The shell report itself still reports only the known nested-fridge aperture
+exception from earlier work. The final `tools/ci/run_checks.sh` must remain
+green before any subsequent commit; it uses six CPUs with
+`PYTHON_CPU_COUNT=6`, `CCACHE_DIR=/rv/cnaccache` and `CCACHE_BASEDIR=/rv`.
+Use only the project-isolated `build/isolated-deps/FNA3D`; never rewrite
+shared `~/deps/FNA3D/MojoShader`.
+
+L0 breadth status: foyer and central hall provisionally meet the minimum
+furnished/material baseline. Living, family, kitchen and dining contain their
+primary furniture and production finishes but do **not** yet meet the
+believable-lighting/readability baseline in every view. The formal living
+piano is almost black; family→kitchen→dining has dark primary objects and
+weak room-scale balance; the stair foot is also too dark. **VISUAL-GATE-1
+remains open.** The next high-value work is a dependency-valid L0-wide
+day/evening lighting and object-readability pass, checked from the entire
+road→gate→foyer→hall→living/family→kitchen→dining route. Do not return to
+driveway/roof/gutter micro-polish or begin L1 just to show task progress.
+
+---
+
 # Gameplay/visual handoff — 2026-09-20 (`HOUSE-00489` checkpoint)
 
 Read this section first. Branch `develop`; the task-start HEAD was `018fc75`.

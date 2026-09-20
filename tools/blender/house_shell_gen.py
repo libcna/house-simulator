@@ -336,6 +336,64 @@ def outer_span(cell: dict, extent: tuple[float, float], level: dict, levels: dic
     return (extent[0], min(above) if above else extent[1])
 
 
+def exterior_corner_side(side: str, box: tuple, cell: dict, neighbours: list,
+                         high_end: bool):
+    """The perpendicular wall and its vertical cover intervals at one run endpoint.
+
+    A same-cell footprint continuing round this corner is not an exterior corner at all. Other
+    cells can cover only PART of its height (the one-storey garage below the upper gable), so the
+    cover intervals are carried to the caller rather than flattened to a boolean.
+    """
+    x0, x1, _y0, _y1, z0, z1 = box
+    perpendicular = ("+X" if high_end else "-X") if side in ("-Z", "+Z") else (
+        "+Z" if high_end else "-Z")
+    corner = (z1 if side == "+Z" else z0) if side in ("-Z", "+Z") else (
+        x1 if side == "+X" else x0)
+    probe = corner - 1e-5 if side in ("+X", "+Z") else corner + 1e-5
+    opposite = {"-X": "+X", "+X": "-X", "-Z": "+Z", "+Z": "-Z"}
+    plane, _lo, _hi = side_span(perpendicular, box)
+    for other, other_box in neighbours:
+        if other["id"] != cell["id"] or other_box == box:
+            continue
+        across, start, end = side_span(opposite[perpendicular], other_box)
+        if (abs(across - plane) < 1e-6 and start <= probe <= end
+                and other_box[2] < box[3] and other_box[3] > box[2]):
+            return None
+    for start, end, wall, covers in side_intervals(perpendicular, box, cell, neighbours):
+        if start <= probe <= end:
+            return wall, covers
+    return None
+
+
+def exterior_corner_reach(side: str, box: tuple, cell: dict, neighbours: list,
+                          construction: dict, low_y: float, high_y: float,
+                          high_end: bool) -> float:
+    """Half the perpendicular outer wall at an exposed corner, otherwise zero."""
+    context = exterior_corner_side(side, box, cell, neighbours, high_end)
+    if context is None:
+        return 0.0
+    wall, covers = context
+    if any(y0 < high_y and y1 > low_y for y0, y1 in covers):
+        return 0.0
+    return float(construction.get(wall, 0.0)) / 2.0
+
+
+def exterior_corner_breaks(side: str, box: tuple, cell: dict, neighbours: list,
+                           low_y: float, high_y: float) -> list[float]:
+    """Split an outer panel wherever either endpoint changes from room-covered to weather."""
+    breaks = {low_y, high_y}
+    for high_end in (False, True):
+        context = exterior_corner_side(side, box, cell, neighbours, high_end)
+        if context is None:
+            continue
+        for cover_low, cover_high in context[1]:
+            if low_y < cover_low < high_y:
+                breaks.add(cover_low)
+            if low_y < cover_high < high_y:
+                breaks.add(cover_high)
+    return sorted(breaks)
+
+
 def enclosed_by_parent(cell: dict, box: tuple, cells_by_id: dict, levels: dict) -> bool:
     """A child wholly inside its parent has no weather-facing outer wall.
 
@@ -2169,6 +2227,7 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
             side_holes = holes_in(side, box, cell, list(portals))
             for lo, hi, wall, covers in ([] if open_cell
                                          else side_intervals(side, box, cell, neighbours)):
+                outer_lo, outer_hi = lo, hi
                 half = float(construction.get(wall, 0.0)) / 2.0
                 plane = {"-X": x0 + half, "+X": x1 - half,
                          "-Z": z0 + half, "+Z": z1 - half}[side]
@@ -2227,13 +2286,28 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                         cuts.append((y1, oy1))
                     outer_lines = roof_lines(roof, side, outer_plane)
                     for vy0, vy1 in minus(oy0, oy1, cuts):
-                        for pu0, pu1, pv0, pv1 in panel(lo, hi, vy0, vy1, holes):
-                            for pu, pv in under_roof(pu0, pu1, pv0, pv1, outer_lines):
-                                if side in ("-X", "+X"):
-                                    outer = [(outer_plane, v, u) for u, v in zip(pu, pv)]
-                                else:
-                                    outer = [(u, v, outer_plane) for u, v in zip(pu, pv)]
-                                add(outer, tuple(-value for value in inward), "exterior")
+                        breaks = exterior_corner_breaks(
+                            side, box, cell, neighbours, vy0, vy1)
+                        for band_lo, band_hi in zip(breaks, breaks[1:]):
+                            # The inner face stops at the next inner face; the weather skin spans
+                            # the full centre-line run and meets the perpendicular outer skin.
+                            # Splitting at a partial-height neighbour keeps that junction shut
+                            # ABOVE the garage roof without putting siding inside its wall.
+                            reach_lo = exterior_corner_reach(
+                                side, box, cell, neighbours, construction, band_lo, band_hi, False)
+                            reach_hi = exterior_corner_reach(
+                                side, box, cell, neighbours, construction, band_lo, band_hi, True)
+                            skin_lo, skin_hi = outer_lo - reach_lo, outer_hi + reach_hi
+                            outer_holes = [hole for hole in side_holes
+                                           if min(hole[1], skin_hi) - max(hole[0], skin_lo) > 1e-6]
+                            for pu0, pu1, pv0, pv1 in panel(skin_lo, skin_hi, band_lo, band_hi,
+                                                             outer_holes):
+                                for pu, pv in under_roof(pu0, pu1, pv0, pv1, outer_lines):
+                                    if side in ("-X", "+X"):
+                                        outer = [(outer_plane, v, u) for u, v in zip(pu, pv)]
+                                    else:
+                                        outer = [(u, v, outer_plane) for u, v in zip(pu, pv)]
+                                    add(outer, tuple(-value for value in inward), "exterior")
 
                 # The reveal runs from this room's inner face to the outer face of an exterior
                 # wall, or to the CENTRE LINE of a partition -- the room on the other side carries
@@ -3458,10 +3532,11 @@ def selftest(output: Path) -> int:
             # the other side of the centre line. And it rises past this storey's 3.30 ceiling to
             # `L1`'s 3.65 floor, because the outer skin carries the band at the joists.
             outer_z = box[4] - float(construction_now["wallExterior"]) / 2.0
-            # On the three partitioned sides the mesh reaches the CENTRE LINE, because a
-            # partition's reveal runs to it -- that is what "each room carries its half of the
-            # opening" means, and the room on the other side carries the other half.
-            want_min = [box[0], inner[2], outer_z]
+            # A weather-facing corner of the kitchen's mixed north side reaches half a
+            # partition thickness past its west centre line; the inner wall still stops at the
+            # normal inset. Without that narrow return, the two outer faces leave a sky slot.
+            outer_x = box[0] - float(construction_now["wallPartition"]) / 2.0
+            want_min = [outer_x, inner[2], outer_z]
             want_max = [box[1], float(levels["L1"]["ffl"]), box[5]]
             # The selected pantry leaf now has a real lever projecting a few centimetres past the
             # partition centre line.  Architectural surfaces must still reach the exact faces;
@@ -3582,6 +3657,40 @@ def selftest(output: Path) -> int:
     require({wall_across(side, garage_box, garage, neighbours, construction)
              for side in ("-X", "+X", "-Z", "+Z")} == {"wallGarage"},
             "and every wall of the garage is a garage wall, from either side")
+    # HOUSE-00702: the garage-side main-house gable showed a strip of sky. Its adjacent outer
+    # faces ended at the INNER clamps, 0.30 m apart. Check the actual exported-side geometry,
+    # not merely the calculation that decided these corners were outside.
+    attic_stair = cells["L2_STAIR_ATTIC"]
+    attic_stair_extent = extent_of(attic_stair, levels["L2"])[0]
+    reset_scene()
+    attic_stair_mesh = build_cell(
+        attic_stair, attic_stair_extent, neighbours=neighbours, construction=construction,
+        level=levels["L2"], levels=levels, portals=all_portals,
+        openings=openings_by_portal, cells_by_id=cells)
+    skin_faces = [polygon for polygon in attic_stair_mesh.data.polygons
+                  if polygon.material_index == SURFACE_ORDER.index("exterior")]
+    skin_points = [[attic_stair_mesh.data.vertices[index].co for index in polygon.vertices]
+                   for polygon in skin_faces]
+    require(any(all(abs(point.y - 14.15) < 1e-4 for point in points)
+                and max(point.x for point in points) >= 8.849 for points in skin_points),
+            "the gable-front weather skin reaches the east outer plane, not the inner clamp")
+    require(any(all(abs(point.x - 8.85) < 1e-4 for point in points)
+                and min(point.y for point in points) <= 14.151 for points in skin_points),
+            "the east weather skin reaches the front outer plane, closing the sky slot")
+    guest = cells["L1_BED5"]
+    guest_extent = extent_of(guest, levels["L1"])[0]
+    reset_scene()
+    guest_mesh = build_cell(
+        guest, guest_extent, neighbours=neighbours, construction=construction,
+        level=levels["L1"], levels=levels, portals=all_portals,
+        openings=openings_by_portal, cells_by_id=cells)
+    guest_skin = [[guest_mesh.data.vertices[index].co for index in polygon.vertices]
+                  for polygon in guest_mesh.data.polygons
+                  if polygon.material_index == SURFACE_ORDER.index("exterior")]
+    require(any(all(abs(point.y - 14.15) < 1e-4 for point in points)
+                and min(point.z for point in points) >= 4.30 - 1e-4
+                and max(point.x for point in points) >= 8.824 for points in guest_skin),
+            "the upper gable skin reaches its exposed garage-side corner above the garage roof")
 
     inset = inset_box(kitchen_box, subject, neighbours, construction)
     half = float(construction["wallPartition"]) / 2.0
@@ -3617,10 +3726,13 @@ def selftest(output: Path) -> int:
     # `HOUSE-00485`: a second face where the WEATHER is on the other side, which is not the same
     # question as "the wall is not a partition" -- a garage boundary is neither.
     outside_runs = [run for _side, run in all_runs if not run[3]]
-    require(len(polygons) == len(all_runs) + len(outside_runs) + 2,
-            f"one face per run, a second for each run that has weather on the other side, plus a "
-            f"floor and a ceiling ({len(polygons)} for {len(all_runs)} runs of which "
-            f"{len(outside_runs)} are outside walls)")
+    # The kitchen's one outside run divides at a partial-height adjoining wall, so it has TWO
+    # outward panels with different corner reach. This keeps its lower half from entering the
+    # neighbour while its upper half closes the exposed weather corner.
+    expected_outer_faces = 2
+    require(len(outside_runs) == 1 and len(polygons) == len(all_runs) + expected_outer_faces + 2,
+            f"one inner face per run, two split weather panels, a floor and a ceiling "
+            f"({len(polygons)} for {len(all_runs)} runs and {len(outside_runs)} outside run)")
     require(sum(1 for face in polygons if face.normal.z > 0.99) == 1
             and sum(1 for face in polygons if face.normal.z < -0.99) == 1,
             "with the trim off, exactly one face looks up and one looks down: the floor and the "
@@ -3638,9 +3750,9 @@ def selftest(output: Path) -> int:
     require(len(inward) == len(all_runs) + 2,
             f"every inner face and both slabs look into the room ({len(inward)} of "
             f"{len(all_runs) + 2})")
-    require(len(polygons) - len(inward) == len(outside_runs),
+    require(len(polygons) - len(inward) == expected_outer_faces,
             f"and every outer face looks away from it, at the weather "
-            f"({len(polygons) - len(inward)} of {len(outside_runs)})")
+            f"({len(polygons) - len(inward)} of {expected_outer_faces})")
 
     # Below grade the same run is a foundation wall. Read from the level's `ffl`, so a house with
     # a second basement gets the same answer without this tool learning its name.

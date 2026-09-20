@@ -82,81 +82,64 @@ namespace cnahouse::visibility
         static_cast<void>(queue_.Push(Work{
             input.cameraCell, input.cameraFrustum, whole, ClippedPolygon{}, 0, kNoLimit, ConeFlags::None}));
 
-        while (!queue_.Empty())
+        const auto seedExteriorGlazing = [&]()
         {
-            const Work work = queue_.Pop();
-            VisibleCell& cell = Reach(work.cell, work.depth, work.allowance, work.flags);
-            stats_.maxDepth = std::max(stats_.maxDepth, work.depth);
-
-            // §25.2's containment skip, at the point the frustum is about to be USED: this cone
-            // is inside one this cell has already been expanded with, so everything it could
-            // reach has been reached.
-            bool covered = false;
-            for (std::size_t i = 0; i < cell.frustumCount; ++i)
+            if (input.side != CameraSide::Exterior)
             {
-                covered = covered || cell.rects[i].Contains(work.rect);
+                return;
             }
-            if (covered)
+            // Outdoor cells divide movement and simulation, but do not occlude one another.
+            // From the road a front window can be on a yard cell that the narrow gate portal
+            // never put in the walk. The outdoor root already gives §25.6 the camera's whole
+            // cone; use the actual glazed aperture to seed its ONE room
+            // directly, without making the yard cell or every room behind it visible.
+            const std::span<const Xna::Plane> planes = input.cameraFrustum.Planes();
+            const std::span<const world::Portal> portals = input.world->Portals();
+            for (std::size_t index = 0; index < portals.size() && index < input.portals.size(); ++index)
             {
-                ++stats_.skippedContained;
-                continue;
-            }
-
-            if (cell.frustumCount < kMaxFrustaPerCell)
-            {
-                cell.frusta[cell.frustumCount] = work.frustum;
-                cell.rects[cell.frustumCount] = work.rect;
-                cell.apertures[cell.frustumCount] = work.aperture;
-                ++cell.frustumCount;
-            }
-            else
-            {
-                // The cell stays visible; what is lost is a fifth cone to test its contents
-                // against, and the four kept are wider than the fifth would have narrowed to.
-                ++cell.frustaDropped;
-                ++stats_.frustaDropped;
-                continue;
-            }
-
-            // The cone's own planes, read where they already are: `ClipRectToFrustum` wants a
-            // span and `ClipFrustum` holds a contiguous array, so the copy this used to make --
-            // ten planes into a vector, once per visible cell -- was work for nothing.
-            const std::span<const Xna::Plane> planes = work.frustum.Planes();
-
-            for (const std::uint32_t index : input.world->PortalsOf(work.cell))
-            {
-                if (index >= input.portals.size())
+                const world::Portal& portal = portals[index];
+                const world::Cell* a = input.world->FindCell(portal.cellA);
+                const world::Cell* b = input.world->FindCell(portal.cellB);
+                const bool aOutside = a != nullptr && a->kind == world::CellKind::Exterior;
+                const bool bOutside = b != nullptr && b->kind == world::CellKind::Exterior;
+                if (aOutside == bOutside || (portal.kind != world::PortalKind::Window &&
+                                             portal.opacity != world::PortalOpacity::Glass &&
+                                             portal.opacity != world::PortalOpacity::Translucent))
                 {
                     continue;
                 }
-                const world::Portal& portal = input.world->Portals()[index];
-                const PortalRuntime& runtime = input.portals[index];
                 ++stats_.portalsTested;
-
-                // §25.3: a closed opaque door stops vision; a closed GLASS one does not.
+                const PortalRuntime& runtime = input.portals[index];
                 if (!runtime.PassesLight())
                 {
                     ++stats_.skippedClosed;
                     continue;
                 }
-                if (PlaneFacesAway(portal, *input.world, work.cell, input.eye))
+                const util::Id outside = aOutside ? portal.cellA : portal.cellB;
+                const util::Id inside = aOutside ? portal.cellB : portal.cellA;
+                const world::Cell* room = aOutside ? b : a;
+                const world::Level* level = room == nullptr ? nullptr : input.world->FindLevel(room->level);
+                if (level != nullptr && !level->ceiling.has_value())
+                {
+                    // A rafter-bounded room's roof receiver spans far outside a tiny dormer
+                    // aperture. Chunk-level frusta cannot clip its triangles at that aperture;
+                    // direct seeding makes the receiver's edges appear above the roof against
+                    // the sky. Keep these cells on the ordinary portal path until their roof
+                    // geometry has an aperture-sized exterior draw role.
+                    continue;
+                }
+                if (Find(outside) == nullptr)
+                {
+                    // An exterior cell not reached by the ordinary outdoor walk can be on the
+                    // far side of the house. Its projected window alone does not prove an
+                    // unobstructed sightline through the building from this camera.
+                    continue;
+                }
+                if (PlaneFacesAway(portal, *input.world, outside, input.eye))
                 {
                     ++stats_.skippedFacing;
                     continue;
                 }
-                // §25.2's cap belongs to the CHAIN and not to this one portal (`HOUSE-00680`).
-                // *"Standing in the garden you should see one room through a window, not that room
-                // plus everything behind its open door"* -- and a per-portal cap gives exactly
-                // that: the window admits the chain at depth 1, and the room's own door, whose cap
-                // is 2, then carries it on. Taking the minimum of every cap the chain has crossed
-                // is what makes the window's 1 mean what §25.2 says it means.
-                const int allowance = std::min(work.allowance, MaxDepthFor(portal, *input.world, input.side));
-                if (work.depth >= allowance)
-                {
-                    ++stats_.skippedDepth;
-                    continue;
-                }
-
                 const ClippedPolygon clipped = ClipRectToFrustum(runtime.WorldRect(), planes);
                 if (clipped.Empty())
                 {
@@ -168,42 +151,156 @@ namespace cnahouse::visibility
                     ++stats_.skippedArea;
                     continue;
                 }
-
-                const util::Id other = portal.cellA == work.cell ? portal.cellB : portal.cellA;
                 const NdcRect rect = NdcBounds(clipped.Points(), input.viewProjection);
-                // §25.2's skip again, at the push: a cone inside one the target has already been
-                // expanded with reaches nothing new, and testing it here saves queueing it.
-                if (const VisibleCell* already = Find(other); already != nullptr)
-                {
-                    bool contained = false;
-                    for (std::size_t i = 0; i < already->frustumCount; ++i)
-                    {
-                        contained = contained || already->rects[i].Contains(rect);
-                    }
-                    if (contained)
-                    {
-                        ++stats_.skippedContained;
-                        continue;
-                    }
-                }
-
                 const ReducedFrustum next =
                     ReduceFrustum(input.eye, clipped.Points(), input.nearPlane, input.farPlane);
-                // §25.2: *"if p.opacity == translucent: next.flags |= DIFFUSE"*. The `|=` is the
-                // point -- a cone that came through frosted glass stays diffuse however many
-                // clear doorways it crosses afterwards, because the glass is still between the
-                // camera and everything down that chain.
                 const ConeFlags flags = portal.opacity == world::PortalOpacity::Translucent
-                                            ? work.flags | ConeFlags::Diffuse
-                                            : work.flags;
-                // Counted on the PUSH and not before it: a cone the ring had no room for was
-                // not crossed, whatever the walk decided, and `queueDropped` is where it went.
-                if (queue_.Push(Work{other, next.frustum, rect, clipped, work.depth + 1, allowance, flags}))
+                                            ? ConeFlags::Diffuse
+                                            : ConeFlags::None;
+                if (queue_.Push(Work{inside,
+                                     next.frustum,
+                                     rect,
+                                     clipped,
+                                     1,
+                                     MaxDepthFor(portal, *input.world, input.side),
+                                     flags}))
                 {
                     ++stats_.portalsCrossed;
                 }
             }
-        }
+        };
+
+        const auto expandQueue = [&]()
+        {
+            while (!queue_.Empty())
+            {
+                const Work work = queue_.Pop();
+                VisibleCell& cell = Reach(work.cell, work.depth, work.allowance, work.flags);
+                stats_.maxDepth = std::max(stats_.maxDepth, work.depth);
+
+                // §25.2's containment skip, at the point the frustum is about to be USED: this cone
+                // is inside one this cell has already been expanded with, so everything it could
+                // reach has been reached.
+                bool covered = false;
+                for (std::size_t i = 0; i < cell.frustumCount; ++i)
+                {
+                    covered = covered || cell.rects[i].Contains(work.rect);
+                }
+                if (covered)
+                {
+                    ++stats_.skippedContained;
+                    continue;
+                }
+
+                if (cell.frustumCount < kMaxFrustaPerCell)
+                {
+                    cell.frusta[cell.frustumCount] = work.frustum;
+                    cell.rects[cell.frustumCount] = work.rect;
+                    cell.apertures[cell.frustumCount] = work.aperture;
+                    ++cell.frustumCount;
+                }
+                else
+                {
+                    // The cell stays visible; what is lost is a fifth cone to test its contents
+                    // against, and the four kept are wider than the fifth would have narrowed to.
+                    ++cell.frustaDropped;
+                    ++stats_.frustaDropped;
+                    continue;
+                }
+
+                // The cone's own planes, read where they already are: `ClipRectToFrustum` wants a
+                // span and `ClipFrustum` holds a contiguous array, so the copy this used to make --
+                // ten planes into a vector, once per visible cell -- was work for nothing.
+                const std::span<const Xna::Plane> planes = work.frustum.Planes();
+
+                for (const std::uint32_t index : input.world->PortalsOf(work.cell))
+                {
+                    if (index >= input.portals.size())
+                    {
+                        continue;
+                    }
+                    const world::Portal& portal = input.world->Portals()[index];
+                    const PortalRuntime& runtime = input.portals[index];
+                    ++stats_.portalsTested;
+
+                    // §25.3: a closed opaque door stops vision; a closed GLASS one does not.
+                    if (!runtime.PassesLight())
+                    {
+                        ++stats_.skippedClosed;
+                        continue;
+                    }
+                    if (PlaneFacesAway(portal, *input.world, work.cell, input.eye))
+                    {
+                        ++stats_.skippedFacing;
+                        continue;
+                    }
+                    // §25.2's cap belongs to the CHAIN and not to this one portal (`HOUSE-00680`).
+                    // *"Standing in the garden you should see one room through a window, not that room
+                    // plus everything behind its open door"* -- and a per-portal cap gives exactly
+                    // that: the window admits the chain at depth 1, and the room's own door, whose cap
+                    // is 2, then carries it on. Taking the minimum of every cap the chain has crossed
+                    // is what makes the window's 1 mean what §25.2 says it means.
+                    const int allowance =
+                        std::min(work.allowance, MaxDepthFor(portal, *input.world, input.side));
+                    if (work.depth >= allowance)
+                    {
+                        ++stats_.skippedDepth;
+                        continue;
+                    }
+
+                    const ClippedPolygon clipped = ClipRectToFrustum(runtime.WorldRect(), planes);
+                    if (clipped.Empty())
+                    {
+                        ++stats_.skippedClipped;
+                        continue;
+                    }
+                    if (!PortalContributes(clipped.Points(), input.viewProjection))
+                    {
+                        ++stats_.skippedArea;
+                        continue;
+                    }
+
+                    const util::Id other = portal.cellA == work.cell ? portal.cellB : portal.cellA;
+                    const NdcRect rect = NdcBounds(clipped.Points(), input.viewProjection);
+                    // §25.2's skip again, at the push: a cone inside one the target has already been
+                    // expanded with reaches nothing new, and testing it here saves queueing it.
+                    if (const VisibleCell* already = Find(other); already != nullptr)
+                    {
+                        bool contained = false;
+                        for (std::size_t i = 0; i < already->frustumCount; ++i)
+                        {
+                            contained = contained || already->rects[i].Contains(rect);
+                        }
+                        if (contained)
+                        {
+                            ++stats_.skippedContained;
+                            continue;
+                        }
+                    }
+
+                    const ReducedFrustum next =
+                        ReduceFrustum(input.eye, clipped.Points(), input.nearPlane, input.farPlane);
+                    // §25.2: *"if p.opacity == translucent: next.flags |= DIFFUSE"*. The `|=` is the
+                    // point -- a cone that came through frosted glass stays diffuse however many
+                    // clear doorways it crosses afterwards, because the glass is still between the
+                    // camera and everything down that chain.
+                    const ConeFlags flags = portal.opacity == world::PortalOpacity::Translucent
+                                                ? work.flags | ConeFlags::Diffuse
+                                                : work.flags;
+                    // Counted on the PUSH and not before it: a cone the ring had no room for was
+                    // not crossed, whatever the walk decided, and `queueDropped` is where it went.
+                    if (queue_.Push(
+                            Work{other, next.frustum, rect, clipped, work.depth + 1, allowance, flags}))
+                    {
+                        ++stats_.portalsCrossed;
+                    }
+                }
+            }
+        };
+
+        expandQueue();
+        seedExteriorGlazing();
+        expandQueue();
 
         stats_.queuePeak = static_cast<int>(queue_.Peak());
         stats_.queueDropped = static_cast<int>(queue_.Dropped());

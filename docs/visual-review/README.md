@@ -4295,3 +4295,37 @@ view reads as a solid dark mass; (3) the L1 exit lacks visual dressing. The
 foyer, hall, living, family, kitchen and dining route views remain coherent,
 but **VISUAL-GATE-1 remains open**. Do not spend another round on stair trim
 before solving the reported exterior under-rendering and L0 breadth.
+
+## Round 99 — exterior glazing and weather-skin closure
+
+Commit: `HOUSE-00702` checkpoint (`2026-09-20`). Before:
+[road/front](captures/house-00489-stair-day-r1/exterior-front.png) and
+[garage approach](captures/house-00702-exterior-day-r1/garage-approach.png).
+After: the same [31-view clear-day set](captures/house-00702-exterior-day-r2),
+including [front](captures/house-00702-exterior-day-r2/exterior-front.png),
+[garage](captures/house-00702-exterior-day-r2/garage-approach.png) and the
+foyer→hall→living→family→kitchen→dining route. Captures remain local and
+Git-ignored; the text review and strict references are tracked.
+
+Ranked before: (1) pale sky behind front glazing from the road; (2) a large
+blue wedge in the main-house gable over the garage and thin front facade sky
+slots; (3) uneven room-scale lighting along the connected L0 route.
+
+Fixed: the ordinary outdoor portal walk now seeds only projected glazed
+apertures of already visible exterior cells, at depth one. Weather skins meet
+at exposed corners; partial-height garage cover no longer suppresses the
+upper wall's return. The road view now contains the rooms behind its front
+windows, while the garage wedge and front facade slots are gone. Both shell
+selftests, the 24-pose exact visible sets and all 18 paired culling images
+pass. Twenty-seven strict references were advanced individually after
+reviewing each difference mask: exterior/debug changes sit on the corrected
+slots, first-person differences follow rebaked UV2 receivers, and seasonal
+changes show the newly visible front rooms. No reference suite was blindly
+regenerated.
+
+Remaining, ranked across L0: (1) the formal living piano stays almost black
+at ordinary eye height; (2) the family→kitchen→dining stretch has insufficient
+room/object-light balance and dark primary furniture; (3) the main stair foot
+is still very dark. A hairline diagonal seam above the garage is visible only
+when magnified; it is not the former open gable wedge. Continue L0 breadth,
+not another long exterior micro-polish sequence. **VISUAL-GATE-1 is open.**

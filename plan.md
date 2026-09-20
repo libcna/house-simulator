@@ -11744,6 +11744,46 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
                 138 integration tests and all 18 culled/unculled comparisons pass; the latter's
                 worst pose is 0.0558% against the unchanged 0.2% limit. `run_checks.sh` is green,
                 including 323 strict-XNA translation units. No golden changed.
+- [x] HOUSE-00702 — Close exterior sky gaps at glazed openings and weather-skin corners in normal outdoor rendering
+      dep: HOUSE-00670, HOUSE-00688, HOUSE-00701 · sys: visibility · plat: ALL · pri: MUST
+      note: (2026-09-20) **New task, next free phase-9 id.** From the road, real front windows
+            project into the camera even when their exterior owner is a garden movement cell whose
+            narrow portal does not pass that window's cone. The shell/glass draws, but the room
+            behind it is absent and the sky shows through. After the ordinary portal walk, seed
+            only glazed apertures attached to already reached exterior cells, with the opening's
+            reduced frustum and depth-one allowance. Rafter-bounded roof receivers cannot be
+            clipped at tiny dormer apertures at chunk granularity, so do not direct-seed those
+            cells until their exterior draw role is aperture-sized. The garage-side gable has a
+            second, independent sky gap: the shell generator incorrectly reused the INNER-face
+            clamp for weather skin. Outer faces must cover the full centre-line run and meet the
+            perpendicular outer face at a genuinely exposed corner. A lower garage can cover
+            only part of the upper wall's height, so split that weather skin at the cover boundary
+            before extending its exposed corner. Rebuild affected UV2 and
+            day/artificial lightmaps; do not change F5's intentional frozen-visibility inspection
+            mode or widen the 0.2% culling tolerance.
+      verify: a normal road-eye test must fail before and see the front rooms after, while staying
+              at glass depth one; the Blender shell selftest checks the actual garage-side outer
+              corner closure. Exact outdoor poses, full render/culling tests and deterministic
+              exterior plus L0 route review images must remain sound.
+      measured: The road eye now reaches the four tested rooms behind front glazing at depth one;
+                the fixed road view shows interiors rather than pale sky, and the garage view
+                loses its large blue gable wedge. The front facade's former vertical sky slots
+                are closed by the continuous outer skins. A one-pixel diagonal roof/skin seam is
+                still visible on magnification above the garage, but no major opening remains
+                at ordinary eye height. The 31-camera clear-day route review is
+                `docs/visual-review/captures/house-00702-exterior-day-r2/`; the previous set is
+                `house-00489-stair-day-r1/`. VISUAL-GATE-1 remains open for room-scale lighting
+                and dressing, not for this exterior geometry correction.
+      verified: Both shell selftests, selected 256-sample day/artificial rebakes, the complete
+                content graph and six-worker build pass; `world-content-current` is green. All
+                1,412 unit, 139 integration and 48 active software render tests pass. All 18
+                culled/unculled pairs remain below the unchanged 0.2% limit (worst 0.0558%).
+                Twenty-seven individually inspected strict references advance for removed
+                sky slots, newly visible glazed interiors or revised receiver UV2; no full-suite
+                golden regeneration was used. The shell report retains only its pre-existing
+                nested-fridge aperture exception; its regression selftest finds no new problem.
+                The full static/XNA CI gates pass after regenerating the deterministic budget
+                report for the changed lightmap and shell source sizes.
 
 ---
 

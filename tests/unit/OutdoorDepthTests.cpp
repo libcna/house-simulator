@@ -144,6 +144,53 @@ namespace
 
 } // namespace
 
+TEST(OutdoorDepthTests, RoadEyeSeesRoomsBehindFrontGlazing)
+{
+    // HOUSE-00702: outdoor cells are movement partitions, not a wall across the eye. The camera
+    // sees these four front windows from the road even when the portal walk does not first enter
+    // the narrow yard cell that owns each one's exterior side. Without those rooms their glazed
+    // openings show the sky/background instead of a wall and furnished interior.
+    IdRegistry::ResetForTesting();
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no deployed world; run tools/ci/build_content.py --only world";
+    }
+    const world::WorldData data = LoadWorld();
+    VisibilitySystem system(data);
+
+    PlayerState state;
+    state.position = Vector3(0.0F, state.Rise(), 5.20F);
+    state.yaw = 0.0F;
+    FirstPersonCamera camera;
+    camera.SetAspect(16.0F / 9.0F);
+    camera.Update(state, kPlayerEyeHeight, 0.0F);
+    CameraView view;
+    view.cell = cnahouse::util::Intern("EXT_ROAD");
+    view.eye = camera.Pose().eye;
+    view.viewProjection = camera.View() * camera.Projection();
+    view.frustum = ClipFrustum(camera.Frustum());
+    view.nearPlane = camera.Frustum().getNearProperty();
+    view.farPlane = camera.Frustum().getFarProperty();
+    system.SetCamera(view);
+    system.Update(Frame(1));
+
+    std::set<std::string> visible;
+    for (const VisibleCell& cell : system.Visible())
+    {
+        visible.insert(std::string(IdRegistry::NameOf(cell.cell)));
+        if (cell.cell != view.cell && !IsExterior(data, cell.cell))
+        {
+            EXPECT_EQ(cell.depth, 1) << IdRegistry::NameOf(cell.cell)
+                                     << " is deeper than the exterior glazing allowance";
+        }
+    }
+    for (const std::string_view room : {"L0_LIVING", "L0_STAIR_MAIN", "L1_STAIR_MAIN", "L2_STAIR_MAIN"})
+    {
+        EXPECT_TRUE(visible.contains(std::string(room))) << room << " is missing behind its front window";
+    }
+    EXPECT_LE(system.Visible().size(), cnahouse::visibility::kMaxVisibleCells);
+}
+
 TEST(OutdoorDepthTests, TheCapBelongsToTheChainAndNotToOnePortal)
 {
     // The rule itself, over every exterior pose: a cell is never reached deeper than the allowance

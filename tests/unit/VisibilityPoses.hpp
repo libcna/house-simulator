@@ -256,7 +256,8 @@ namespace cnahouse::testsupport
          45.0f,
          false,
          {"EXT_BACKYARD", "EXT_NORTHSTRIP", "EXT_ORCHARD", "EXT_SIDEYARD_E", "L0_SUNROOM"}},
-        // the sectional door open: the garage and nothing behind its fire door
+        // the sectional door open: the garage, plus three rooms glimpsed through real glazing
+        // around the garage's edge. The fire door still stops the chain at the garage.
         {"ext-driveway",
          "EXT_DRIVEWAY",
          13.20f,
@@ -264,7 +265,7 @@ namespace cnahouse::testsupport
          -6.65f,
          0.0f,
          true,
-         {"EXT_DRIVEWAY", "EXT_SIDEYARD_E", "L0_GARAGE"}},
+         {"EXT_DRIVEWAY", "EXT_SIDEYARD_E", "L0_FAMILY", "L0_GARAGE", "L1_BED2", "L2_SITTING"}},
     }};
 
 } // namespace cnahouse::testsupport
