@@ -40,6 +40,10 @@ POSES = (
     # panels, the centre meeting stile and the matched passage/dummy hardware reviewable.
     ("foyer-living-doors", "0.40,0.60,-16.30,270.0,0.0"),
     ("foyer-facing-front", "0.00,0.60,-16.70,180.0,0.0"),
+    # HOUSE-00489: the foyer sees only the side of the U flight. Keep its actual foot and the
+    # first-floor exit in the same fixed review set so a passable stair is not judged by one angle.
+    ("main-stair-foot", "4.10,0.60,-14.70,0.0,0.0"),
+    ("main-stair-l1-exit", "2.95,3.65,-14.65,270.0,0.0"),
     ("central-hall", "0.00,0.60,-20.65,0.0,0.0"),
     # HOUSE-01065: the route view looks north through the hall and therefore only catches these
     # side-wall gallery clusters obliquely. Paired cross-hall views keep all nine frame positions,

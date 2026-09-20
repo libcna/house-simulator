@@ -66,7 +66,7 @@ namespace
     /// still runs from these sides -- it can only add -- but the OPEN control cannot pass there,
     /// so it would otherwise look like a leaf stopping a body that nothing was stopping.
     ///
-    /// A seventh has to be added here, in a commit, with a reason. That is the difference between
+    /// A new exemption has to be added here, in a commit, with a reason. That is the difference between
     /// a guarantee and a test that has been quietly taught to expect its own failures.
     const std::vector<std::string>& ApproachExemptions()
     {
@@ -74,37 +74,18 @@ namespace
             // Sorted, because the diff below is a `set_difference` and because a failure then
             // reads as one.
             //
-            // The spot 0.75 m from the door, at the doorway's own sill height, is INSIDE the
-            // flight: the body starts among the treads and the depenetration walks it out
-            // sideways rather than through the door. `P_L1_STAIR__L1_BED5` came and went twice
-            // while the stairs were being fixed: `HOUSE-00615` taught a body resting on a surface
-            // to walk along one, which let it shuffle out of the flight and reach the door, and
-            // `HOUSE-00567`'s balustrade then stood between the two.
-            //
-            // `HOUSE-00568` added the three that name `HOUSE-00489`. Collision used to be asked
-            // of ONE cell, so a body walking at a door met nothing that stood on the other side
-            // of it until §16.4's lookup changed its mind; each of these three doorways has a
-            // stair flight or a balcony rail within 0.40 m of its plane, and the body now meets
-            // it. Two of them are a house defect and `HOUSE-00489` owns it; the third is what a
-            // Juliet balcony is.
-            "P_B1_STAIR__B1_HALL from B1_HALL",
-            "P_B1_STAIR__B1_HALL from B1_STAIR",
+            // `HOUSE-00489` restored the basement and guest-room approaches, removing their
+            // old exemptions. Only designed non-passable openings remain here.
             // An appliance. §70.5's capsule does not fit through a refrigerator door, and
             // `PortalClearanceTests` exempts the same portal for the same reason.
             "P_FRIDGE_INTERIOR from CELL_FRIDGE_INTERIOR",
             "P_FRIDGE_INTERIOR from L0_KITCHEN",
-            // §12.3's balustrade round the L1 well stands 0.14 m west of this bedroom door, so
-            // the body meets the rail before the leaf. The rail is right; what it is protecting
-            // the body from is a doorway that opens onto a 0.20 m ledge over the well.
-            "P_L1_STAIR__L1_BED5 from L1_BED5",
             // A Juliet balcony is a doorway with a railing and NO floor beyond it. There is
             // nowhere to stand outside one, which is what makes it a Juliet balcony.
-            "P_L1_STAIR__L1_BED5 from L1_STAIR_MAIN",
             "P_L2_LANDING__L2_BALCONY_JULIET from L2_BALCONY_JULIET",
             // The rail across a Juliet's opening is 0.06 m past the plane and in the BALCONY's
             // list. A body on the landing meets it before the leaf, which is the balcony working.
             "P_L2_LANDING__L2_BALCONY_JULIET from L2_LANDING",
-            "P_L2_STAIR__L2_STAIR_ATTIC from L2_STAIR_ATTIC",
         };
         return kExempt;
     }
@@ -112,21 +93,13 @@ namespace
     /// The doors with no side to push from at all, and therefore no open control anywhere.
     ///
     /// A door in this list is NOT proved shut by this test, so each one has to say why it cannot
-    /// be and what would put it back. Three of the four arrived with `HOUSE-00568`, which stopped
-    /// a cell's collision ending at its own boundary: what is 0.20 m past a doorway is now met by
-    /// a body walking at it, and at these three that is a staircase or a railing rather than the
-    /// leaf. §49.5's twenty-minute bot is what found the first of them, from the other side.
+    /// be and what would put it back. `HOUSE-00489` removed the two stair defects; the
+    /// refrigerator and Juliet balcony remain intentionally impassable.
     const std::vector<std::string>& NoApproachAtAll()
     {
         static const std::vector<std::string> kNone{
             // An appliance: §70.5's capsule does not fit through a refrigerator door.
             "P_FRIDGE_INTERIOR",
-            // `HOUSE-00489`: the basement flight's flank is 0.20 m east of this doorway, so the
-            // door into the basement cannot be walked at from the hall OR from the stair.
-            "P_B1_STAIR__B1_HALL",
-            // `HOUSE-00489`: this bedroom door opens onto a 0.20 m ledge over the L1 stair well,
-            // with §12.3's balustrade 0.14 m in front of it.
-            "P_L1_STAIR__L1_BED5",
             // A Juliet balcony is a doorway with a rail across it and no floor beyond: there is
             // nowhere to stand on one side and nothing but the rail on the other. By design, and
             // not a defect.

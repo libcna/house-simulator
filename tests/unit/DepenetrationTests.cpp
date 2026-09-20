@@ -14,6 +14,7 @@
 // Half the cases are constructed, where the depth can be written down to the millimetre. The other
 // half is the real house, because a body that ends a frame inside static geometry is what §49.5
 // promises never happens and a corner of a real corridor is where it would.
+#include <algorithm>
 #include <cmath>
 #include <memory>
 #include <string>
@@ -539,7 +540,7 @@ TEST(DepenetrationTests, TheRealHouseIsClearWhereABodyStandsAndRecoversWhereItIs
     BroadPhase broad;
     std::size_t stood = 0;
     std::size_t crowded = 0;
-    std::vector<std::pair<float, float>> crowdedPositions;
+    std::vector<std::string> crowdedCells;
     std::size_t nudged = 0;
     std::size_t unresolved = 0;
     std::size_t sloped = 0;
@@ -581,7 +582,7 @@ TEST(DepenetrationTests, TheRealHouseIsClearWhereABodyStandsAndRecoversWhereItIs
             // left, and the count is asserted small so it cannot quietly become "most of the
             // house".
             ++crowded;
-            crowdedPositions.emplace_back(midX, midZ);
+            crowdedCells.push_back(cell.id);
             continue;
         }
         ++stood;
@@ -633,22 +634,29 @@ TEST(DepenetrationTests, TheRealHouseIsClearWhereABodyStandsAndRecoversWhereItIs
         }
     }
     ASSERT_GT(stood, 40u) << "only " << stood << " cells had room to stand in";
-    // Five since `HOUSE-00782`: `B1_STAIR`, `L1_STAIR_MAIN` and `CELL_FREEZER_INTERIOR` are the
-    // stairs and the appliance this has always counted, `L2_STOR2` is a cupboard, and
-    // `EXT_BACKYARD` joined them when the yards stopped having floor slabs -- its nine boxes make
-    // an L round the house and the middle of their bounding grid is inside the house, which is
-    // what a body stood "in the middle of the cell" then finds.
-    if (crowded > 5u)
+    // The midpoint probe is deliberately harsh: it need not be a walkable floor position.
+    // HOUSE-00489's L2 return and cross landing make that stair cell's arithmetic midpoint
+    // overlap a flight too. Name the permitted cases so another crowded room cannot hide behind
+    // the count. L0_KITCHEN is the fitted appliance, L2_STOR2 a cupboard, and EXT_BACKYARD's
+    // L-shaped boxes put their bounding midpoint inside the house.
+    const std::vector<std::string> expectedCrowded{
+        "B1_STAIR", "EXT_BACKYARD", "L0_KITCHEN", "L1_STAIR_MAIN", "L2_STAIR_MAIN", "L2_STOR2"};
+    for (const std::string& id : crowdedCells)
     {
-        for (const auto& [x, z] : crowdedPositions)
+        EXPECT_NE(std::find(expectedCrowded.begin(), expectedCrowded.end(), id), expectedCrowded.end())
+            << id << " is a newly crowded cell midpoint";
+    }
+    if (crowded > expectedCrowded.size())
+    {
+        for (const std::string& id : crowdedCells)
         {
-            std::printf(
-                "  crowded cell midpoint: x=%.2f z=%.2f\n", static_cast<double>(x), static_cast<double>(z));
+            std::printf("  crowded cell midpoint: %s\n", id.c_str());
         }
     }
-    EXPECT_LE(crowded, 5u) << crowded
-                           << " cells put a body inside something just by standing it on their "
-                              "floor; a stair or two is expected, a house is not";
+    EXPECT_LE(crowded, expectedCrowded.size())
+        << crowded
+        << " cells put a body inside something just by standing it on their "
+           "floor; a stair or two is expected, a house is not";
     ASSERT_GT(nudged, 80u) << "only " << nudged << " burials were arranged";
     EXPECT_LE(sloped, 12u) << sloped
                            << " burials were into a lid rather than a wall; the attic's "

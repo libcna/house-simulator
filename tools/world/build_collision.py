@@ -440,6 +440,10 @@ def _step_off_rects(layout, cells, levels, portals, cell_id: str, plane_y: float
             out.append((x0, z1, x1, z1 + reach) if last["up"] > 0 else (x0, z0 - reach, x1, z0))
         else:
             out.append((x1, z0, x1 + reach, z1) if last["up"] > 0 else (x0 - reach, z0, x0, z1))
+        for entry in stair_geometry.flight_runs(flight, base, portals) or ():
+            if entry["kind"] == "cross_landing":
+                bx0, bx1, bz0, bz1 = entry["box"]
+                out.append((bx0, bz0, bx1, bz1))
     return out
 
 
@@ -986,6 +990,10 @@ def build_stairs(layout, shapes: Shapes, per_cell: dict[str, list[int]], stats: 
 
         if flight.get("collisionRamp", True):
             for entry in walk:
+                if entry["kind"] in ("exit_landing", "cross_landing"):
+                    # `_step_off_rects` already restores this level strip in the upper
+                    # cell's slab; a second OBB here would be coplanar collision.
+                    continue
                 if entry["kind"] == "run":
                     vertices, triangles = _wedge(entry["box"], entry["y0"],
                                                  entry["y1"] - entry["y0"],
@@ -2819,21 +2827,20 @@ def selftest() -> int:
                     f"the house has holes with something behind them "
                     f"({house['stats']['openingShared']} shape(s) shared)")
 
-            # The regression itself, named. `STAIR_MAIN_L0_L1`'s first run is a wedge whose west
-            # face is at x = +2.40, and `P_L0_FOYER__L0_STAIR` is the cased opening at x = +2.20:
-            # 0.20 m, which is less than a 0.30 m body's radius. `HOUSE-00618`'s bot walked east
-            # out of the foyer and was 0.151 m inside the staircase before anything stopped it.
+            # `HOUSE-00489` puts the first run in the east lane, clear of the foyer's approach.
+            # Its east face is now 0.20 m behind the mudroom opening, so the same shared-shape
+            # invariant belongs to that doorway.
             first_run = [index for index in range(len(house_shapes.meshes))
-                         if abs(mesh_aabb(house_shapes.meshes[index])[0] - 2.40) < 1e-6
+                         if abs(mesh_aabb(house_shapes.meshes[index])[0] - 3.60) < 1e-6
                          and abs(mesh_aabb(house_shapes.meshes[index])[1] - 0.60) < 1e-6
                          and house_shapes.meshes[index]["kind"] == KIND_STAIR]
             require(len(first_run) == 1,
-                    f"the main stair's first run is one wedge starting at x +2.40, y +0.60 "
+                    f"the main stair's first run is one wedge starting at x +3.60, y +0.60 "
                     f"({len(first_run)})")
             if first_run:
                 run_index = offset + first_run[0]
-                require(run_index in references["L0_STAIR_MAIN"] and run_index in references["L0_FOYER"],
-                        "and it is in L0_FOYER's list as well as L0_STAIR_MAIN's: the opening is "
+                require(run_index in references["L0_STAIR_MAIN"] and run_index in references["L0_MUDROOM"],
+                        "and it is in L0_MUDROOM's list as well as L0_STAIR_MAIN's: the opening is "
                         "0.20 m from it and a body in the opening is standing in the staircase")
 
             # The fridge, which is where the vertical band had to be the BODY's and not the hole's:

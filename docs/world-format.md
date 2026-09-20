@@ -344,6 +344,12 @@ segments, leaf envelope, portal, animation contract and collision; all three fie
 }
 ```
 
+A U flight may set `firstRunAt: "cross_hi"` to put its ascending first run on the high side
+of the stairwell cross-axis (the default is `cross_lo`). `topLandingToFoot: true` supplies a
+level exit strip beside the first run from the upper tread to the footprint's foot edge;
+`topCrossLandingDepth` optionally makes the final part of that strip a full-width cross
+landing. These are authored geometry, shared by the visible shell and collision builder.
+
 The validator checks `risers × rise` equals the level difference to within 1 mm, and that
 `2·rise + going` lands in the comfortable range — the realism rule that catches a stair nobody
 could climb. Exterior steps may exceed the upper bound and the porch does, at 680 mm: shallower

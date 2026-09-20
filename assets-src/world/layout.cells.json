@@ -40,16 +40,16 @@
       "thermal": { "heated": true, "ductBranch": null },
       "lightGroups": ["LG_B1_STAIR_MAIN"],
       "lightmaps": {
-        "shellHash": "sha256:8bd7ef4de663282f05bb87f15c72cb7dcf69763295203e5fdd8ae651e786931c",
+        "shellHash": "sha256:1411bb05f78ea23c25e81cafd52474210b70beee61a5505a26c8d7d4fec564d6",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/B1_STAIR_LM_DAY",
-          "scale": 1.0000001192092896
+          "scale": 1.000000238418579
         },
         "artificial": [
           {
             "group": "LG_B1_STAIR_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/B1_STAIR_LM_LG_B1_STAIR_MAIN",
-            "scale": 0.08837300539016724
+            "scale": 17.13358497619629
           }
         ]
       },
@@ -105,7 +105,7 @@
       "daylight": { "orientation": "E", "exposure": 0.10 },
       "lightGroups": ["LG_B1_MECHANICAL_MAIN"],
       "lightmaps": {
-        "shellHash": "sha256:1f4ccb7e19216e7581bd0db43c53411c5cdbadbcef285ba7dde9af7d8a9bc8a4",
+        "shellHash": "sha256:f159898ee6c486665619775b9cf1775f8644ae9a8b92233c560c4c021c2d1f89",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/B1_MECHANICAL_LM_DAY",
           "scale": 1.0004640817642212
@@ -114,7 +114,7 @@
           {
             "group": "LG_B1_MECHANICAL_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/B1_MECHANICAL_LM_LG_B1_MECHANICAL_MAIN",
-            "scale": 11.607935905456543
+            "scale": 11.608384132385254
           }
         ]
       },
@@ -562,7 +562,7 @@
       "daylight": { "orientation": "E", "exposure": 0.28 },
       "lightGroups": ["LG_L0_STAIR_MAIN_MAIN", "LG_L0_STAIR_MAIN_STEP"],
       "lightmaps": {
-        "shellHash": "sha256:da34267722f9ab496ba430a3ee667781d683eabe9da2b2c696d4c531406180db",
+        "shellHash": "sha256:d835b3c22a473feab1da6cb14aabdb32b72c87314383bc465012346b406d1378",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_STAIR_MAIN_LM_DAY",
           "scale": 1.000000238418579
@@ -571,17 +571,17 @@
           {
             "group": "LG_L0_PORCH_LANTERN",
             "contentName": "Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_PORCH_LANTERN",
-            "scale": 0.1749000996351242
+            "scale": 0.17531609535217285
           },
           {
             "group": "LG_L0_STAIR_MAIN_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_MAIN",
-            "scale": 0.07684403657913208
+            "scale": 0.06573864817619324
           },
           {
             "group": "LG_L0_STAIR_MAIN_STEP",
             "contentName": "Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_STEP",
-            "scale": 0.00444997102022171
+            "scale": 0.01982676237821579
           }
         ]
       },
@@ -599,7 +599,7 @@
       "daylight": { "orientation": "E", "exposure": 0.22 },
       "lightGroups": ["LG_L0_MUDROOM_MAIN"],
       "lightmaps": {
-        "shellHash": "sha256:494373c797ed6938900b23c07f126d59341f25b8cdae83258aebaab93300d1c7",
+        "shellHash": "sha256:3847b68ed599c7e214162e3ecc752bce9d734779e390526a8576aea10bdc1cf0",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_MUDROOM_LM_DAY",
           "scale": 1.000000238418579
@@ -608,7 +608,7 @@
           {
             "group": "LG_L0_MUDROOM_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_MUDROOM_LM_LG_L0_MUDROOM_MAIN",
-            "scale": 3.0727241039276123
+            "scale": 3.0729527473449707
           }
         ]
       },
@@ -1147,7 +1147,7 @@
       "daylight": { "orientation": "N", "exposure": 0.42 },
       "lightGroups": ["LG_L1_LANDING_MAIN", "LG_L1_LANDING_SEAT"],
       "lightmaps": {
-        "shellHash": "sha256:89eefe3b1a3759717eeb68660473d69891e7e2224746040cd7cc98c3cfee3a75",
+        "shellHash": "sha256:d4548768e72e4c378694d33d03610a269d9dbedb06e2c8c565db10a1aef8e402",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L1_LANDING_LM_DAY",
           "scale": 1.0000001192092896
@@ -1161,12 +1161,12 @@
           {
             "group": "LG_L1_LANDING_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L1_LANDING_LM_LG_L1_LANDING_MAIN",
-            "scale": 12.700443267822266
+            "scale": 12.70180606842041
           },
           {
             "group": "LG_L1_LANDING_SEAT",
             "contentName": "Textures/Lightmaps/Artificial/L1_LANDING_LM_LG_L1_LANDING_SEAT",
-            "scale": 0.025635143741965294
+            "scale": 0.026344142854213715
           }
         ]
       },
@@ -1185,21 +1185,21 @@
       "daylight": { "orientation": "E", "exposure": 0.26 },
       "lightGroups": ["LG_L1_STAIR_MAIN_MAIN"],
       "lightmaps": {
-        "shellHash": "sha256:f4f8c3ecc76f97d2e30609cf853028514e43a601cb5223c55f3eff96fd2cec14",
+        "shellHash": "sha256:7b19dc18389865e54b97f5ee2cf45bbed760c8997a22d754ed486adbaeafb9be",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L1_STAIR_MAIN_LM_DAY",
-          "scale": 1.000000238418579
+          "scale": 1.0000001192092896
         },
         "artificial": [
           {
             "group": "LG_EXT_FACADE_UPLIGHT",
             "contentName": "Textures/Lightmaps/Artificial/L1_STAIR_MAIN_LM_LG_EXT_FACADE_UPLIGHT",
-            "scale": 0.34381288290023804
+            "scale": 0.3339402675628662
           },
           {
             "group": "LG_L1_STAIR_MAIN_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L1_STAIR_MAIN_LM_LG_L1_STAIR_MAIN_MAIN",
-            "scale": 0.06498487293720245
+            "scale": 0.0841679722070694
           }
         ]
       },
@@ -1656,7 +1656,7 @@
       "daylight": { "orientation": "NE", "exposure": 0.34 },
       "lightGroups": ["LG_L1_BED5_MAIN", "LG_L1_BED5_BEDSIDE"],
       "lightmaps": {
-        "shellHash": "sha256:c6c76c41ee169b09ef225debe0b09268c631ec0d17b711db78550b097fae9c28",
+        "shellHash": "sha256:d236ef468e11d904b0b843b8b08aa9149f3837d1c762ce2c864a46e62e91335f",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L1_BED5_LM_DAY",
           "scale": 1.0000001192092896
@@ -1670,12 +1670,12 @@
           {
             "group": "LG_L1_BED5_BEDSIDE",
             "contentName": "Textures/Lightmaps/Artificial/L1_BED5_LM_LG_L1_BED5_BEDSIDE",
-            "scale": 0.030726978555321693
+            "scale": 0.030697904527187347
           },
           {
             "group": "LG_L1_BED5_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L1_BED5_LM_LG_L1_BED5_MAIN",
-            "scale": 3.086650848388672
+            "scale": 3.0833961963653564
           }
         ]
       },
@@ -1822,21 +1822,21 @@
       "daylight": { "orientation": "E", "exposure": 0.24 },
       "lightGroups": ["LG_L2_STAIR_MAIN_MAIN"],
       "lightmaps": {
-        "shellHash": "sha256:019e97d3137072976d000a291a7db1ee2f8184c5369ed4e6a170cfb17bcf8e14",
+        "shellHash": "sha256:cac6fbfc3dbc33ee68e578c4eee11dfb1ef041fa5e3e309a510acf621f00db07",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L2_STAIR_MAIN_LM_DAY",
-          "scale": 1.0000001192092896
+          "scale": 1.000000238418579
         },
         "artificial": [
           {
             "group": "LG_EXT_FACADE_UPLIGHT",
             "contentName": "Textures/Lightmaps/Artificial/L2_STAIR_MAIN_LM_LG_EXT_FACADE_UPLIGHT",
-            "scale": 0.15619806945323944
+            "scale": 0.1695944368839264
           },
           {
             "group": "LG_L2_STAIR_MAIN_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L2_STAIR_MAIN_LM_LG_L2_STAIR_MAIN_MAIN",
-            "scale": 0.0681879073381424
+            "scale": 0.06860106438398361
           }
         ]
       },
@@ -1856,7 +1856,7 @@
       "thermal": { "heated": true, "ductBranch": null },
       "lightGroups": ["LG_L2_STAIR_ATTIC_MAIN"],
       "lightmaps": {
-        "shellHash": "sha256:7dc78787a5f91c583e559429279443ac46e0d7d2f0f026bd36cd29dd1baeb090",
+        "shellHash": "sha256:2a8c554b108c6b729ffa424e0bd989aa280f2419d6732671d40976454963d953",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L2_STAIR_ATTIC_LM_DAY",
           "scale": 1.000000238418579
@@ -1865,12 +1865,12 @@
           {
             "group": "LG_EXT_FACADE_UPLIGHT",
             "contentName": "Textures/Lightmaps/Artificial/L2_STAIR_ATTIC_LM_LG_EXT_FACADE_UPLIGHT",
-            "scale": 0.06539493799209595
+            "scale": 0.06539490073919296
           },
           {
             "group": "LG_L2_STAIR_ATTIC_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L2_STAIR_ATTIC_LM_LG_L2_STAIR_ATTIC_MAIN",
-            "scale": 0.015156349167227745
+            "scale": 0.015190734528005123
           }
         ]
       },

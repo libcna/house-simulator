@@ -182,17 +182,17 @@ namespace cnahouse::testsupport
         // picture of the underside of a tread.
         {"l0-stair-main",
          "L0_STAIR_MAIN",
-         3.55f,
+         4.10f,
          0.60f,
-         -14.60f,
+         -14.70f,
          0.0f,
          false,
-         {"B1_STAIR", "L0_FOYER", "L0_HALL", "L0_MUDROOM", "L0_STAIR_MAIN", "L1_LANDING", "L1_STAIR_MAIN"},
+         {"B1_STAIR", "L0_FOYER", "L0_HALL", "L0_STAIR_MAIN", "L1_STAIR_MAIN"},
          true},
         // the fire door to the mudroom and the sectional door are both shut
         {"l0-garage", "L0_GARAGE", 12.90f, 0.60f, -17.50f, 270.0f, false, {"L0_GARAGE"}},
-        // the balcony through two glazed windows; the cased openings to the hall and the stair are behind the
-        // camera
+        // The balcony through two glazed windows. HOUSE-00489 moved the stair opening north,
+        // bringing its near edge into this camera's cone.
         {"l1-landing",
          "L1_LANDING",
          0.00f,
@@ -200,7 +200,7 @@ namespace cnahouse::testsupport
          -16.30f,
          180.0f,
          false,
-         {"L1_BALCONY_FRONT", "L1_LANDING"},
+         {"L1_BALCONY_FRONT", "L1_LANDING", "L1_STAIR_MAIN"},
          true},
         // north into the master bedroom and out through its slider, with every door open
         {"l1-hall",

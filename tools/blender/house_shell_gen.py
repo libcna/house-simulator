@@ -1274,6 +1274,9 @@ def build_flight(flight: dict, solid, bottom: float, *, add=None, construction=N
     for entry in placed:
         if entry["kind"] == "landing":
             emit(entry["box"], bottom, entry["y0"])
+        elif entry["kind"] in ("exit_landing", "cross_landing"):
+            # A bridge at the ARRIVAL level, not a solid column from the lower floor.
+            emit(entry["box"], entry["y0"] - rise, entry["y0"])
 
 
 def rail_along(add, axis_x: bool, a0: float, a1: float, y0: float, y1: float,
@@ -1310,13 +1313,18 @@ def flight_going(flights, cell) -> float:
                 if row.get("toCell") == cell["id"]] or [0.0])
 
 
-def top_tread_box(flight: dict, bottom: float, portals=()):
-    """The world box of a flight's top step, or None. Where you step off it onto the floor above."""
+def arrival_boxes(flight: dict, bottom: float, portals=()):
+    """The top-level surfaces meeting a floor well's guard rail."""
+    placed = stair_geometry.flight_runs(flight, bottom, portals)
+    landings = [entry for entry in placed or () if entry["kind"] in ("exit_landing", "cross_landing")]
+    if landings:
+        return [(entry["box"][0], entry["box"][1], entry["box"][2], entry["box"][3], entry["y1"])
+                for entry in landings]
     treads = stair_geometry.flight_steps(flight, bottom, portals)
     if not treads:
-        return None
+        return []
     box, top = treads[-1]["box"], treads[-1]["y1"]
-    return (box[0], box[1], box[2], box[3], top)
+    return [(box[0], box[1], box[2], box[3], top)]
 
 
 #: The roof's overhang, its eaves height and its four planes are `tools/world/roof_geometry.py`'s,
@@ -2593,15 +2601,13 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
             # railing across the top of the flight would be a railing you have to climb.
             if level_y != y0 or not construction:
                 continue
-            arrivals = [top_tread_box(row, float(row.get("fromY") or 0.0), list(portals))
-                        for row in flights or () if row.get("toCell") == cell["id"]]
+            arrivals = [box for row in flights or () if row.get("toCell") == cell["id"]
+                        for box in arrival_boxes(row, float(row.get("fromY") or 0.0), list(portals))]
             for hx0, hx1, hz0, hz1, _identifier in wells:
                 for axis_x, fixed, span in ((True, hz0, (hx0, hx1)), (True, hz1, (hx0, hx1)),
                                             (False, hx0, (hz0, hz1)), (False, hx1, (hz0, hz1))):
                     cuts = []
                     for tread in arrivals:
-                        if tread is None:
-                            continue
                         tx0, tx1, tz0, tz1, _top = tread
                         near = (min(abs(tz0 - fixed), abs(tz1 - fixed)) if axis_x
                                 else min(abs(tx0 - fixed), abs(tx1 - fixed)))
@@ -4084,8 +4090,8 @@ def selftest(output: Path) -> int:
     require(boxes and inside,
             f"every one of the {len(boxes)} boxes of the main stair is inside its footprint, but "
             f"for the bottom nosing's {NOSING_PROJECT * 1000:.0f} mm overhang")
-    require(len(boxes) == 2 * int(main["risers"]) + 1,
-            f"a step, a nosing over each, and the landing ({len(boxes)})")
+    require(len(boxes) == 2 * int(main["risers"]) + 2,
+            f"a step, a nosing over each, the turn and the exit bridge ({len(boxes)})")
     require(min(by0 for _a, _b, by0, _c, _d, _e in boxes) >= 0.60 - 1e-6
             and abs(max(by1 for _a, _b, _c, by1, _d, _e in boxes)
                     - float(levels["L1"]["ffl"])) < 1e-6,
@@ -4149,14 +4155,11 @@ def selftest(output: Path) -> int:
                             levels=levels, portals=list(portal_rows.values()),
                             openings=openings_by_portal, cells_by_id=cells,
                             flights=list(flight_rows.values()))
-    # 35 boxes of stair, a handrail up the open side of each of the U's two runs with a newel at
-    # each end (2 + 4), and one more railing piece round the hole in this cell's OWN floor: the
-    # basement stair arrives through it, and telling the builder about the flights turns the one
-    # rail along that edge into two with a gap between them. A railing across the top of a flight
-    # is a railing you have to climb.
-    require(len(with_stair.data.polygons) == without_faces + 6 * (len(boxes) + 2 + 4 + 1),
+    # The narrowed basement well leaves two separate rail pieces at the exit bridge; the
+    # flight itself has two open-side rails, four newels and 36 solid pieces.
+    require(len(with_stair.data.polygons) == without_faces + 6 * (len(boxes) + 2 + 4 + 2),
             f"{main['fromCell']} gains the flight's {len(boxes)} boxes, two handrails, four "
-            f"newels, and a gap in the railing where the basement stair comes up "
+            f"newels, and two railing pieces beside the narrowed basement well "
             f"({without_faces} -> {len(with_stair.data.polygons)})")
     top = max(vertex.co.z for vertex in with_stair.data.vertices)
     handrail = float(levels["L1"]["ffl"]) + float(construction["balustrade"]) \

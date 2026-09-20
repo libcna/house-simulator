@@ -87,6 +87,12 @@
           "collisionRamp": {
             "type": "boolean"
           },
+          "firstRunAt": {
+            "enum": [
+              "cross_lo",
+              "cross_hi"
+            ]
+          },
           "footprint": {
             "$ref": "#/$defs/box"
           },
@@ -160,6 +166,13 @@
           },
           "toY": {
             "type": "number"
+          },
+          "topCrossLandingDepth": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "topLandingToFoot": {
+            "type": "boolean"
           },
           "width": {
             "exclusiveMinimum": 0,

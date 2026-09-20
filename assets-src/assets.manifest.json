@@ -274,6 +274,92 @@
       }
     },
     {
+      "id": "MODEL_BUTLERS_SERVICE_RUN",
+      "category": "kitchen-service-run",
+      "sourceFile": "assets-src/Models/Furniture/Kitchen/butlers_run.glb",
+      "sourceSha256": "43c2bbb373915f64020f646ffc1999ec58ddf851f90416db8b90819a09208a3b",
+      "contentName": "Models/Furniture/Kitchen/butlers_run",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "L0 butler-pantry under-window service run",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored measured joinery from tools/blender/butlers_service_run.py for HOUSE-01072: compact fitted sink, wine cooler and drawer run below the west window. Approved house material roles are reused; no third-party model is copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.62,
+          1.0355,
+          0.676182
+        ],
+        "counterHeightMetres": 0.893,
+        "triangles": {
+          "LOD0": 5364
+        },
+        "collision": "butlers_run_001_service_toe_COL"
+      },
+      "materialMap": {
+        "CAB_OAK": "MAT_DOOR_HARDWOOD",
+        "CAB_PAINT": "MAT_DOOR_PAINTED",
+        "CAB_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "CAB_WINE_GLASS": "MAT_KITCHEN_OVEN_GLASS",
+        "CAB_STONE": "MAT_KITCHEN_COUNTER_STONE"
+      },
+      "usedIn": [
+        "L0_BUTLERS"
+      ]
+    },
+    {
+      "id": "MODEL_DINING_TABLE_SETTING",
+      "category": "table-setting",
+      "sourceFile": "assets-src/Models/Furniture/Dining/table_setting.glb",
+      "sourceSha256": "305e8aa53f27d52cc7d8f0034097a81ab324c76c3776d65893ba16da9f2a4ecf",
+      "contentName": "Models/Furniture/Dining/table_setting",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Measured eight-place dining table setting",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored linen runner, eight ceramic settings, folded napkins and low centre vessel generated deterministically by tools/blender/dining_table_setting.py for HOUSE-01073. Approved source textures are reused; no third-party geometry is copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          2.204,
+          0.0885,
+          0.834
+        ],
+        "triangles": {
+          "LOD0": 3436
+        }
+      },
+      "materialMap": {
+        "DINING_LINEN": "MAT_FURNITURE_DINING_LINEN",
+        "DINING_PORCELAIN": "MAT_FURNITURE_DINING_PORCELAIN",
+        "DINING_FABRIC": "MAT_FURNITURE_DINING_UPHOLSTERY"
+      },
+      "usedIn": [
+        "L0_DINING"
+      ]
+    },
+    {
       "id": "MODEL_FALLBACK_BOX",
       "category": "fallback",
       "sourceFile": "assets-src/Models/Fallback/box.glb",
@@ -1111,15 +1197,23 @@
       "geometry": {
         "unitScale": 1,
         "upAxis": "Y",
-        "boundsMetres": [2.12, 0.0275, 2.5],
-        "triangles": {"LOD0": 1776}
+        "boundsMetres": [
+          2.12,
+          0.0275,
+          2.5
+        ],
+        "triangles": {
+          "LOD0": 1776
+        }
       },
       "materialMap": {
         "ARRIVAL_RUNNER_BASE": "MAT_HALL_RUNNER_WOOL",
         "ARRIVAL_RUNNER_BORDER": "MAT_HALL_RUNNER_BORDER_WOOL",
         "ARRIVAL_ENTRY_LIGHT": "MAT_LIVING_RUG_WOOL"
       },
-      "usedIn": ["L0_FOYER"]
+      "usedIn": [
+        "L0_FOYER"
+      ]
     },
     {
       "id": "MODEL_FURNITURE_COFFEE_TABLE",
@@ -1291,39 +1385,6 @@
       "usedIn": [
         "L0_DINING"
       ]
-    },
-    {
-      "id": "MODEL_DINING_TABLE_SETTING",
-      "category": "table-setting",
-      "sourceFile": "assets-src/Models/Furniture/Dining/table_setting.glb",
-      "sourceSha256": "305e8aa53f27d52cc7d8f0034097a81ab324c76c3776d65893ba16da9f2a4ecf",
-      "contentName": "Models/Furniture/Dining/table_setting",
-      "kind": "model",
-      "residencyPack": "house-l0",
-      "origin": {
-        "kind": "authored",
-        "name": "Measured eight-place dining table setting",
-        "licence": "Ms-PL",
-        "licenceFile": "LICENSE",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "Project-authored linen runner, eight ceramic settings, folded napkins and low centre vessel generated deterministically by tools/blender/dining_table_setting.py for HOUSE-01073. Approved source textures are reused; no third-party geometry is copied."
-      },
-      "geometry": {
-        "unitScale": 1,
-        "upAxis": "Y",
-        "boundsMetres": [2.204, 0.0885, 0.834],
-        "triangles": {"LOD0": 3436}
-      },
-      "materialMap": {
-        "DINING_LINEN": "MAT_FURNITURE_DINING_LINEN",
-        "DINING_PORCELAIN": "MAT_FURNITURE_DINING_PORCELAIN",
-        "DINING_FABRIC": "MAT_FURNITURE_DINING_UPHOLSTERY"
-      },
-      "usedIn": ["L0_DINING"]
     },
     {
       "id": "MODEL_FURNITURE_FLOOR_LAMP",
@@ -2492,43 +2553,6 @@
       "usedIn": [
         "L0_KITCHEN"
       ]
-    },
-    {
-      "id": "MODEL_BUTLERS_SERVICE_RUN",
-      "category": "kitchen-service-run",
-      "sourceFile": "assets-src/Models/Furniture/Kitchen/butlers_run.glb",
-      "sourceSha256": "43c2bbb373915f64020f646ffc1999ec58ddf851f90416db8b90819a09208a3b",
-      "contentName": "Models/Furniture/Kitchen/butlers_run",
-      "kind": "model",
-      "residencyPack": "house-l0",
-      "origin": {
-        "kind": "authored",
-        "name": "L0 butler-pantry under-window service run",
-        "licence": "Ms-PL",
-        "licenceFile": "LICENSE",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "Project-authored measured joinery from tools/blender/butlers_service_run.py for HOUSE-01072: compact fitted sink, wine cooler and drawer run below the west window. Approved house material roles are reused; no third-party model is copied."
-      },
-      "geometry": {
-        "unitScale": 1,
-        "upAxis": "Y",
-        "boundsMetres": [1.62, 1.0355, 0.676182],
-        "counterHeightMetres": 0.893,
-        "triangles": {"LOD0": 5364},
-        "collision": "butlers_run_001_service_toe_COL"
-      },
-      "materialMap": {
-        "CAB_OAK": "MAT_DOOR_HARDWOOD",
-        "CAB_PAINT": "MAT_DOOR_PAINTED",
-        "CAB_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
-        "CAB_WINE_GLASS": "MAT_KITCHEN_OVEN_GLASS",
-        "CAB_STONE": "MAT_KITCHEN_COUNTER_STONE"
-      },
-      "usedIn": ["L0_BUTLERS"]
     },
     {
       "id": "MODEL_KITCHEN_NORTH_BASE_RUN",
@@ -20189,7 +20213,7 @@
       "id": "TEXTURE_B1_MECHANICAL_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_MECHANICAL_LM_DAY.png",
-      "sourceSha256": "494b4fe449b2776d8761a51b9b6b97c174496471b642f37de0aab4d4b445ca18",
+      "sourceSha256": "1a986812df34fd4b25cfa1e4281c8448b3b5ac5009f34ddf3c225706c3648fb3",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20216,7 +20240,7 @@
       "id": "TEXTURE_B1_MECHANICAL_LM_LG_B1_MECHANICAL_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_MECHANICAL_LM_LG_B1_MECHANICAL_MAIN.png",
-      "sourceSha256": "d405bf614fc3c5f7f1461cbeade25b617b0776cca677fa38efbc4b7e58483b55",
+      "sourceSha256": "4ea6b794f3317994a2ead6912aa0789725b4d7bc38255e5a1c637485a1695990",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20243,7 +20267,7 @@
       "id": "TEXTURE_B1_STAIR_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_STAIR_LM_DAY.png",
-      "sourceSha256": "d0b98bd9e564b94f5ebd480a012c0682ad39f3dd49406b9948cac200e01d648a",
+      "sourceSha256": "1ef4a9433773c526106e6fd2780d76fc8eaa8b6e0dbf3ac05b5738e9fef9bb1a",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20270,7 +20294,7 @@
       "id": "TEXTURE_B1_STAIR_LM_LG_B1_STAIR_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_STAIR_LM_LG_B1_STAIR_MAIN.png",
-      "sourceSha256": "57cad0d0ccf1507f5af74667d806f44cb3c45cf7c9e720d4866888f2971b4062",
+      "sourceSha256": "4cc5da1f55a93fd9d0280a69ad5ae1c8564af80c6463be229c704a0a17537ff2",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22016,7 +22040,7 @@
       "id": "TEXTURE_L0_MUDROOM_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_MUDROOM_LM_DAY.png",
-      "sourceSha256": "8899af36d48dc2b001878c6cd43702d6d8522bbe0cfccb36e94cb8bb9d5c891a",
+      "sourceSha256": "fa5d1a2df351482746415122d061fd95e0a42ebfa78c9dddc008ff5bef1fe16e",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22043,7 +22067,7 @@
       "id": "TEXTURE_L0_MUDROOM_LM_LG_L0_MUDROOM_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_MUDROOM_LM_LG_L0_MUDROOM_MAIN.png",
-      "sourceSha256": "e3797a599373210c57b3389cfbe8c5bcc1291d657007e3e28b6dfb5fb9f17082",
+      "sourceSha256": "c7634939dd3fcb93ea5e05cff04616434e28fafff1f0b32a790cb6821fba5e00",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22205,7 +22229,7 @@
       "id": "TEXTURE_L0_STAIR_MAIN_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_STAIR_MAIN_LM_DAY.png",
-      "sourceSha256": "09a123fdf1259f8bb3ba636eda606390895ba8638887428b624e2e3a17bb2c59",
+      "sourceSha256": "57eeaf6dc95f297f0dfda266f8fe494a299b47063fb12f7437c48f64205ea779",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22232,7 +22256,7 @@
       "id": "TEXTURE_L0_STAIR_MAIN_LM_LG_L0_PORCH_LANTERN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_PORCH_LANTERN.png",
-      "sourceSha256": "0efe0f5ee53e7e237b575550d3aebec3591ebb7cc4c329dcae3adf89254df433",
+      "sourceSha256": "20699283c71c3bfb0ed3005f284c221f4b840f29586c910b2f572abfcc7db4e2",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22259,7 +22283,7 @@
       "id": "TEXTURE_L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_MAIN.png",
-      "sourceSha256": "535360364cb44d475276e297da033a0b43401276c809ed5f29cc30a560cd670a",
+      "sourceSha256": "6a99142a0fab0d4bfd8009860dcbbb3a09e1de8e512820cbae97b3ae8ff1abec",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22286,7 +22310,7 @@
       "id": "TEXTURE_L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_STEP",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_STEP.png",
-      "sourceSha256": "9b765e2092ebce33a04ca528c2d74a5759b7bbdb038636d2621a319cbed8f274",
+      "sourceSha256": "1d66334e376d98fd1a15f7b1e777daf1b2e1f9c745d02e2f7cface53409a66ee",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23042,7 +23066,7 @@
       "id": "TEXTURE_L1_BED5_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_BED5_LM_DAY.png",
-      "sourceSha256": "6be5c842a42b7d0b61170f4a8d3d392baaf05aba18aaf90a3de2b45d22762dd2",
+      "sourceSha256": "28dff82e3a98e30d7c7023e48d80198247d4d4b0664b85b6c77ed1e216ea33b9",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23069,7 +23093,7 @@
       "id": "TEXTURE_L1_BED5_LM_LG_EXT_FACADE_UPLIGHT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED5_LM_LG_EXT_FACADE_UPLIGHT.png",
-      "sourceSha256": "71b9e69aa3301b4b7a09f7c9586028c32f2a75ce141bda7e7115aba9e71d855e",
+      "sourceSha256": "755c0506655f97f35bffc84ef34101a2e86a3f5cd0595b89bd83160d6e4dae7d",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23096,7 +23120,7 @@
       "id": "TEXTURE_L1_BED5_LM_LG_L1_BED5_BEDSIDE",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED5_LM_LG_L1_BED5_BEDSIDE.png",
-      "sourceSha256": "077d836cee2dcf52737da199b22da3cbc0624970d70b982db09c970b37b927a8",
+      "sourceSha256": "ae6ac436f79efee612ecc261ff1fefd46af346681b2a9ae6bdf24ef2eb32a9dc",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23123,7 +23147,7 @@
       "id": "TEXTURE_L1_BED5_LM_LG_L1_BED5_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED5_LM_LG_L1_BED5_MAIN.png",
-      "sourceSha256": "cda466c6d1572bd88fca2b7ade7f5919690424f59edd5e952b5d3dd6c6d4caa9",
+      "sourceSha256": "9d35109f56bc4b465fe22ccbb7a029581b689d01757690397afef2b5f1342913",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23420,7 +23444,7 @@
       "id": "TEXTURE_L1_LANDING_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_LANDING_LM_DAY.png",
-      "sourceSha256": "d0c6ae890c7d476e84aba4350ab3ac1cc92780546c8295a8204aaba56dec3d43",
+      "sourceSha256": "c8c9c1b4f5130d6fb576133d8d296429d1da278cbd9bc821c8b9375c19f95239",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23474,7 +23498,7 @@
       "id": "TEXTURE_L1_LANDING_LM_LG_L1_LANDING_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_LANDING_LM_LG_L1_LANDING_MAIN.png",
-      "sourceSha256": "d89f77d242a6b4f658f41f448bcb9c8744c23cceaab70ee8f67447e9b0cd21eb",
+      "sourceSha256": "2bbcb28f2fedc38da0e9568ed4f5d1bfd28f7232ffe5811adabafa6aaaae9826",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23501,7 +23525,7 @@
       "id": "TEXTURE_L1_LANDING_LM_LG_L1_LANDING_SEAT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_LANDING_LM_LG_L1_LANDING_SEAT.png",
-      "sourceSha256": "98b2935f0ca1c202848357a9d17e0ffb702546372fddcce9bc34bf9c70cdccef",
+      "sourceSha256": "33e02c406cd23f47adddf28f137d58f1522cd9d494e665a9e91d2d48607446a9",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23906,7 +23930,7 @@
       "id": "TEXTURE_L1_STAIR_MAIN_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_STAIR_MAIN_LM_DAY.png",
-      "sourceSha256": "493b2d0aa1b3d421fa5c37cbdfcbb64f7fe6f7e29f38af8f5830a3febe513225",
+      "sourceSha256": "408cac48f92d15829625e239ec8f51cd120d96c2f6e87d303668620b30ef226d",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23933,7 +23957,7 @@
       "id": "TEXTURE_L1_STAIR_MAIN_LM_LG_EXT_FACADE_UPLIGHT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_STAIR_MAIN_LM_LG_EXT_FACADE_UPLIGHT.png",
-      "sourceSha256": "a98f6c8683a1dba4637b4dff651558276ee408be6c205be93c56d2073da9a4de",
+      "sourceSha256": "b8de4b0aa7908a5fd7d75dce2968f160341e253438158239da09a8143064a960",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23960,7 +23984,7 @@
       "id": "TEXTURE_L1_STAIR_MAIN_LM_LG_L1_STAIR_MAIN_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_STAIR_MAIN_LM_LG_L1_STAIR_MAIN_MAIN.png",
-      "sourceSha256": "3a009d42ad7d4d6042596bfae4585888f865ca04123371b815f5d256164144bd",
+      "sourceSha256": "a82bc2e5699df7ba2b77632aa09b2a9683bff3facf61786d5aab82441a6d6893",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25175,7 +25199,7 @@
       "id": "TEXTURE_L2_STAIR_ATTIC_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_STAIR_ATTIC_LM_DAY.png",
-      "sourceSha256": "426cad356ea072ad95f63c7ebda94ffdd92372ddb92680310644b3987fda0195",
+      "sourceSha256": "dac20990cee5a64fbb5bf7f85ecee4b94333369987f6c3b5bf9d7f51b0bcedd1",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25202,7 +25226,7 @@
       "id": "TEXTURE_L2_STAIR_ATTIC_LM_LG_EXT_FACADE_UPLIGHT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_STAIR_ATTIC_LM_LG_EXT_FACADE_UPLIGHT.png",
-      "sourceSha256": "343d657ae5b0345978df7e3657e7445a3b10899745b6a2355975bab747c7c3a8",
+      "sourceSha256": "a662813d72d5d44eb840a49e067aae009cac6aff0a8f62221fd48ff9fe7f535d",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25229,7 +25253,7 @@
       "id": "TEXTURE_L2_STAIR_ATTIC_LM_LG_L2_STAIR_ATTIC_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_STAIR_ATTIC_LM_LG_L2_STAIR_ATTIC_MAIN.png",
-      "sourceSha256": "d42e96862c6f4251a5e4ff98c66c7368c71cfbbebe91539dcb7583ce426472a3",
+      "sourceSha256": "0a826bb08bef90932a146ca218e9351e2b2a37c3034f5a99620cbfa0943ea441",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25256,7 +25280,7 @@
       "id": "TEXTURE_L2_STAIR_MAIN_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_STAIR_MAIN_LM_DAY.png",
-      "sourceSha256": "573b88e54ab0f143412bf34fd1b1eaaafc10e9584110cf59b22e62614779c207",
+      "sourceSha256": "97b8a686dddb6cf9e1ac05ab914313b4363563673316ba190e54193f86e52824",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25283,7 +25307,7 @@
       "id": "TEXTURE_L2_STAIR_MAIN_LM_LG_EXT_FACADE_UPLIGHT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_STAIR_MAIN_LM_LG_EXT_FACADE_UPLIGHT.png",
-      "sourceSha256": "ff4f4d3b90b660a48292f9ec84b52ffd2a72b1dff40f677c31424f0e173c6eb9",
+      "sourceSha256": "eaf37e3ecccc316b42ebae10f05bf27bddeed391eb9247881a13a505f1115cb8",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25310,7 +25334,7 @@
       "id": "TEXTURE_L2_STAIR_MAIN_LM_LG_L2_STAIR_MAIN_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_STAIR_MAIN_LM_LG_L2_STAIR_MAIN_MAIN.png",
-      "sourceSha256": "82038090cf8059d4f9e2fc7b03c7258af8028ed3a1c40740df79d6427624904c",
+      "sourceSha256": "e0385efd2ca4725e9c7707c966911ba7a83b8d74fcbcbb735ce12fd80d828e82",
       "texture": {
         "width": 128,
         "height": 128,

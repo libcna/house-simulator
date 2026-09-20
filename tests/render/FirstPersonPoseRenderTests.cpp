@@ -85,11 +85,9 @@ namespace
         // The main stair from the foyer it is open to (§12.2), which is where a person looks at a
         // staircase from. Standing ON a flight is a frame of the underside of the flight above.
         //
-        // The black at the right of this one is NOT the stairwell: it is the 1.30 m hole
-        // `HOUSE-00620` recorded in the DRAWN front elevation, which `build_collision.py` was
-        // fixed for and `house_shell_gen.py` has not been. Accepted deliberately, because a
-        // reference that hides a known defect is worse than one that shows it -- and when the
-        // generator is fixed this frame changes, which is the reference doing its job.
+        // HOUSE-00489 moved the rising run to the far side of the well and reopened the foyer's
+        // west-side approach. This oblique view now sees the run's dark flank; the separate
+        // main-stair-foot visual-review camera checks whether its actual ascent reads clearly.
         {"l0-foyer-stair", {1.20f, 0.60f, -16.30f, 90.0f, 5.0f}, 0.85},
         {"l0-garage", {12.90f, 0.60f, -17.50f, 270.0f, 0.0f}},
         {"l1-hall-w", {-5.95f, 3.65f, -19.45f, 270.0f, 0.0f}},

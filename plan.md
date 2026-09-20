@@ -8082,7 +8082,7 @@ the chunk builder produces ≤ 6 chunks per cell.
             outer skin**, which named `L1_LANDING` and `L2_LANDING` when the old rule was injected
             back. 1 008 unit, 92 integration, 30 render (twelve first-person references
             regenerated: the refrigerator is in the kitchen again).
-- [ ] HOUSE-00489 — Three doorways open into the side of a flight, and the main stair cannot be reached
+- [x] HOUSE-00489 — Three doorways open into the side of a flight, and the main stair cannot be reached
       dep: HOUSE-00568 · sys: world · plat: TOOL · pri: MUST
       finding: (2026-09-09, found by `HOUSE-00568`) **the openings into the three main-stair cells
             are in the middle of a 5.9 m hall, which is where the flights are.** Until
@@ -8136,6 +8136,24 @@ the chunk builder produces ≤ 6 chunks per cell.
             (`P_B1_STAIR__B1_HALL`) is the same three cells' arrangement repeated -- the stair
             halls share one footprint through the house -- so whatever is decided for L0 decides
             those two.
+      resolved: (2026-09-20) Kept the 2.70 × 5.90 m hall and used the narrow-well/mirrored-U
+            combination: the basement hole now occupies its actual east flight rather than the
+            full stair width, both main flights rise first on the east and return west, and thin
+            arrival strips plus the L2 cross landing join the upper treads to their doorways.
+            The foyer has a continuous west-side floor approach; the mudroom, L1 landing/guest
+            room, basement hall/mechanical room and L2 attic openings were moved to clear floor
+            or landing edges. Shell, collision, rail gaps, lightmaps, authored navigation nodes,
+            four floor plans and the reviewed render references follow the same data.
+      verified: A real `PlayerStep` walk starts in `L0_FOYER`, enters the stair, climbs its ramp,
+            crosses the L1 exit and reaches `L1_LANDING` without a hard fall. All eight flights
+            still climb and descend in the existing traversal test; the two former closed-door
+            exemptions are removed, and all 107 opening poses agree with collision. The 18
+            culled/unculled render poses remain under 0.2% (worst 0.0558%). Thirteen individual
+            goldens changed after before/after inspection: two first-person, four explicit debug
+            blockout, three property facades and four seasonal sun/facade views. No whole suite
+            was regenerated. The 31-view clear-day review set includes new foot and L1-exit
+            cameras. The remaining very dark stair presentation is visual lighting work, not an
+            inaccessible flight.
 - [x] HOUSE-00487 — ~~Bring `L0_GARAGE` and the three attic stores back inside §17.4's six chunks a cell~~ **§17.4's six-chunk target gains an explicit per-cell exception model**
       dep: HOUSE-00473 · sys: content · plat: TOOL · pri: SHOULD
       verify: `tools/world/build_chunks.py --selftest`, `tools/world/build_chunks.py --report`

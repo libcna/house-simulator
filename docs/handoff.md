@@ -1,3 +1,61 @@
+# Gameplay/visual handoff — 2026-09-20 (`HOUSE-00489` checkpoint)
+
+Read this section first. Branch `develop`; the task-start HEAD was `018fc75`.
+The owner's current request is to finish **two** reported gameplay defects:
+(1) exterior viewpoints still sometimes show sky/under-rendered house parts;
+(2) the main stair to L1 was implausible and inaccessible. The brief sky flash
+while crossing an interior doorway was fixed earlier by `HOUSE-00701`, and the
+Shift speed-mode toggle by `HOUSE-00570`. There is no question waiting for the
+owner to answer.
+
+`HOUSE-00489` resolves **(2)** in the commit containing this handoff. The old
+2.30 m basement hole consumed most of the foyer's stair approach. It is now
+an east-lane well; both U flights start rising on that side and return west,
+with thin upper bridges and a full L2 cross landing. The affected doorways,
+railings, collision, authored navigation nodes, floor plans, shell manifests
+and nine receiver cells' day/artificial lightmaps were updated together. A
+new real player-controller test walks from `L0_FOYER` all the way to
+`L1_LANDING`; the old basement-hall and L1 guest-room closed-door exemptions
+are gone. All eight flights still walk both ways. The deterministic
+[31-view day set](visual-review/captures/house-00489-stair-day-r1) was inspected;
+new [stair-foot](visual-review/captures/house-00489-stair-day-r1/main-stair-foot.png)
+and [L1-exit](visual-review/captures/house-00489-stair-day-r1/main-stair-l1-exit.png)
+views expose a remaining **very dark stair** and sparse upper transition. The
+[old foyer/stair image](visual-review/captures/house-00489-stair-before/fp-l0-foyer-stair.png)
+is local ignored before-evidence; the new strict reference is
+`tests/render/reference/fp-l0-foyer-stair.png`. These review captures are not
+tracked by Git. Thirteen specific strict references changed after before/after
+inspection; no golden suite was regenerated wholesale. The foyer/hall/living/
+family/kitchen/dining route images otherwise remain materially coherent.
+
+Verification: full content graph and six floor-plan checks; 1,411/1,411 unit,
+139/139 integration (isolated `XDG_DATA_HOME` and offscreen SDL), 48/48 render
+tests under software GL. All 18 culled/unculled comparisons pass; worst
+0.0558% against 0.2%. `verify_shell.py --report` still names only the
+pre-existing nested fridge aperture exception explicitly recorded in its
+selftest. The required full `tools/ci/run_checks.sh` is run before this task's
+commit. Build with `CNA_CNAEXT=OFF`, the project-isolated
+`build/isolated-deps/FNA3D`, one shared ccache (`CCACHE_DIR=/rv/cnaccache`,
+`CCACHE_BASEDIR=/rv`) and at most six CPU workers. Do not modify CNA,
+sharp-runtime or shared `~/deps/FNA3D/MojoShader`.
+
+**Next: finish (1), not stair micro-polish.** An exterior-window seeding
+experiment was deliberately reverted: it made road/driveway culled-versus-
+unculled pairs worse despite making more rooms visible. Compare exact outdoor
+camera captures with culling on/off, identify whether a missing facade/roof
+piece or room behind glazing owns the sky opening, and fix it without widening
+the 0.2% regression threshold. The existing 18-pose culling test passes but
+does not include those road/driveway views. After the reported exterior
+defect, resume breadth across the connected L0 visual slice; the stair's dark
+lighting can be addressed in a later room-scale lighting pass.
+
+**VISUAL-GATE-1 remains open.** The older sections below are historical
+checkpoints; where they call the stair or Shift toggle open, this section
+supersedes them. No capture-history rewrite is needed; that cleanup already
+finished. No owner input is currently required.
+
+---
+
 # Gameplay/visual handoff — 2026-09-19 (`HOUSE-00570` checkpoint)
 
 The owner reopened work after the older stop instruction below. Branch `develop`; the

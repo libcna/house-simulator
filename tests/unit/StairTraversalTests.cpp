@@ -298,3 +298,67 @@ TEST(StairTraversalTests, EveryFlightIsWalkableUpAndDownAndEveryLandingIsStoodOn
         << hardLandings.size() << " flight(s) dropped the body hard enough for §47.2's heavy landing; "
         << "first: " << (hardLandings.empty() ? std::string() : hardLandings.front());
 }
+
+TEST(StairTraversalTests, FoyerApproachReachesTheFirstFloorHall)
+{
+    // `HOUSE-00489`: starting a body ON the ramp never proved that a person in the foyer
+    // could reach it, nor that the upper door was reachable after the climb.
+    IdRegistry::ResetForTesting();
+    const std::string directory = "content/world";
+    const std::string collisionPath = directory + "/collision.bin";
+    if (!std::filesystem::exists(directory + "/layout.stairs.json") ||
+        !std::filesystem::exists(collisionPath))
+    {
+        GTEST_SKIP() << "no deployed world; run tools/ci/build_content.py --only world";
+    }
+
+    world::WorldData::Contents contents;
+    ASSERT_TRUE(world::WorldLoader::LoadLevels(directory, contents));
+    ASSERT_TRUE(world::WorldLoader::LoadCells(directory, contents));
+    ASSERT_TRUE(world::WorldLoader::LoadStairs(directory, contents));
+    auto built = world::WorldData::Create(std::move(contents));
+    ASSERT_TRUE(built) << built.Error().ToString();
+    const world::WorldData& data = built.Value();
+
+    const std::unique_ptr<System::IO::FileStream> stream(
+        new System::IO::FileStream(collisionPath, System::IO::FileMode::Open, System::IO::FileAccess::Read));
+    const auto loaded = CollisionLoader::Read(*stream, collisionPath);
+    ASSERT_TRUE(loaded) << loaded.Error().Message();
+    const CollisionWorld& statics = loaded.Value();
+    const CollisionCell* foyer = statics.Cell("L0_FOYER");
+    const CollisionCell* lower = statics.Cell("L0_STAIR_MAIN");
+    const CollisionCell* upper = statics.Cell("L1_STAIR_MAIN");
+    const CollisionCell* landing = statics.Cell("L1_LANDING");
+    ASSERT_NE(foyer, nullptr);
+    ASSERT_NE(lower, nullptr);
+    ASSERT_NE(upper, nullptr);
+    ASSERT_NE(landing, nullptr);
+
+    const auto flight =
+        std::find_if(data.Stairs().begin(),
+                     data.Stairs().end(),
+                     [](const world::StairFlight& one) { return Name(one.id) == "STAIR_MAIN_L0_L1"; });
+    ASSERT_NE(flight, data.Stairs().end());
+    const std::vector<StairSegment> segments = SegmentsOf(statics, *lower, 0.60F, 3.65F);
+    ASSERT_FALSE(segments.empty());
+
+    PlayerState state;
+    state.position = Vector3(1.55F, 0.60F + kRise + 0.05F, -16.0F);
+    int steps = 0;
+    bool fellHard = false;
+    const auto leg = [&](const CollisionCell& cell, const std::vector<Vector3>& points)
+    {
+        const std::size_t reached = Walk(statics, cell, state, points, steps, fellHard);
+        EXPECT_EQ(reached, points.size()) << "stuck at (" << state.position.X << ", " << state.position.Y
+                                          << ", " << state.position.Z << ")";
+        EXPECT_FALSE(fellHard);
+    };
+    leg(*foyer, {Vector3(2.85F, 0.60F, -16.0F)});
+    leg(*lower, {Vector3(3.0F, 0.60F, -14.7F), Vector3(4.10F, 0.60F, -14.7F)});
+    leg(*lower, PathUp(segments));
+    EXPECT_GT(state.position.Y - state.Rise(), 3.25F) << "the body never reached the first floor";
+    leg(*upper, {Vector3(2.95F, 3.65F, -14.45F), Vector3(1.90F, 3.65F, -14.85F)});
+    leg(*landing, {Vector3(1.30F, 3.65F, -14.85F)});
+    EXPECT_LT(state.position.X, 2.20F) << "the L1 hallway is still behind a stair or a rail";
+    EXPECT_NEAR(state.position.Y - state.Rise(), 3.65F, 0.12F);
+}

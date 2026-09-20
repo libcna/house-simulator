@@ -82,6 +82,16 @@ def segments(flight: dict, bottom: float):
             if doubles_back:
                 direction = -direction
                 lane = 1 - lane
+    if doubles_back and flight.get("topLandingToFoot"):
+        # The upper run ends short of the south wall. A level strip beside the incoming
+        # run joins its top tread to the landing/doorway at that wall, without filling the
+        # full stairwell or blocking headroom over the other run.
+        cross_depth = float(flight.get("topCrossLandingDepth") or 0.0)
+        walk.append({"kind": "exit_landing", "along0": along, "along1": cross_depth,
+                     "y0": y, "y1": y, "lane": lane, "risers": 0})
+        if cross_depth > 0.0:
+            walk.append({"kind": "cross_landing", "along0": cross_depth, "along1": 0.0,
+                         "y0": y, "y1": y, "lane": -1, "risers": 0})
     return walk
 
 
@@ -95,8 +105,9 @@ def well_cross(flight: dict, portals=()):
     the hole it comes up. So the lanes are placed in the intersection of the two, which is authored
     data rather than a wall thickness guessed at from `construction`.
 
-    A flight the layout narrows nothing for -- the porch and terrace steps, which are outdoors and
-    pass through no floor -- keeps its whole footprint.
+    Only the horizontal portal joining this flight's own from/to cells constrains it. A lower
+    flight's hole must not squeeze a different flight above it. A flight with no such portal --
+    the porch and terrace steps -- keeps its whole footprint.
     """
     fields = _fields_of(flight)
     if fields is None:
@@ -110,6 +121,11 @@ def well_cross(flight: dict, portals=()):
         plane = portal.get("plane") or {}
         rect = portal.get("rect") or {}
         if plane.get("axis") != "y" or not rect:
+            continue
+        # Only the slab between THIS flight's two cells can constrain its lanes. The main
+        # stair and the basement stair share a plan footprint but pierce different slabs;
+        # intersecting both holes would force the U flight into the basement's narrow lane.
+        if {portal.get("cellA"), portal.get("cellB")} != {flight.get("fromCell"), flight.get("toCell")}:
             continue
         # `u` is x and `v` is z for a horizontal plane, which is what `world-format.md` says and
         # what `slab_holes` reads.
@@ -147,10 +163,10 @@ def frame(flight: dict, portals=()):
     """`(axis, sign, start, cross_lo, cross_hi, width)`, or None when nothing is authored.
 
     `axis` is the world axis the flight travels along, `sign` the direction of travel, `start` the
-    edge of the footprint the foot of the flight stands on. Lane 0 is the `cross_lo` side and lane
-    1 the `cross_hi` side, always -- a fixed convention, so that the shell and the collision put
-    the same run on the same side of the well. The cross range is `well_cross`'s where a stairwell
-    narrows it and the footprint's otherwise.
+    edge of the footprint the foot of the flight stands on. Lane 0 is `cross_lo` by default;
+    `firstRunAt: cross_hi` mirrors a U flight so the foyer approach can occupy the low side.
+    Both shell and collision use this frame. The cross range is `well_cross`'s where the flight's
+    own stairwell narrows it and the footprint's otherwise.
     """
     fields = _fields_of(flight)
     if fields is None:
@@ -175,7 +191,7 @@ def place(flight: dict, along0: float, along1: float, lane: int, portals=()):
     low, high = sorted((start + sign * along0, start + sign * along1))
     if lane < 0:
         cross = (cross_lo, cross_hi)
-    elif lane == 0:
+    elif (lane == 0) != (flight.get("firstRunAt") == "cross_hi"):
         cross = (cross_lo, cross_lo + width)
     else:
         cross = (cross_hi - width, cross_hi)
@@ -264,10 +280,11 @@ def selftest() -> int:
         require(False, "the authored stairs are there")
         return 1
 
-    layout = layout_io.load_layout(source, kinds=["levels", "cells", "stairs"])
+    layout = layout_io.load_layout(source, kinds=["levels", "cells", "stairs", "portals"])
     levels = {row["id"]: row for row in layout_io.rows(layout, "levels")}
     cells = {row["id"]: row for row in layout_io.rows(layout, "cells")}
     flights = {row["id"]: row for row in layout_io.rows(layout, "stairs")}
+    portals = layout_io.rows(layout, "portals")
 
     main = flights["STAIR_MAIN_L0_L1"]
     foot = foot_of(main, cells, levels)
@@ -275,12 +292,26 @@ def selftest() -> int:
 
     walk = flight_runs(main, foot)
     kinds = [entry["kind"] for entry in walk]
-    require(kinds == ["run", "landing", "run"],
-            f"a `u` is a run, a landing and a run ({kinds})")
+    require(kinds == ["run", "landing", "run", "exit_landing"],
+            f"the main U stair has two runs, a turn and an exit bridge ({kinds})")
     require([e["risers"] for e in walk if e["kind"] == "run"] == [9, int(main["risers"]) - 9],
             "nine risers to the half-landing and the rest after it")
     require(walk[0]["lane"] == 0 and walk[2]["lane"] == 1,
             "and the second run is on the other side of the well")
+    actual = flight_runs(main, foot, portals)
+    require(all(abs(a - b) < 1e-6 for a, b in zip(actual[0]["box"], (3.6, 4.7, -16.82, -14.3)))
+            and all(abs(a - b) < 1e-6 for a, b in zip(actual[2]["box"], (2.4, 3.5, -17.92, -15.68))),
+            f"the foyer has the west floor lane and the first run is east ({actual[0]['box']}, "
+            f"{actual[2]['box']})")
+    basement = flights["STAIR_BASEMENT_L0_B1"]
+    basement_walk = flight_runs(basement, foot_of(basement, cells, levels), portals)
+    require(basement_walk[0]["box"][0:2] == (3.6, 4.6),
+            f"the basement stair fits its own east-lane well ({basement_walk[0]['box']})")
+    upper = flights["STAIR_MAIN_L1_L2"]
+    upper_walk = flight_runs(upper, foot_of(upper, cells, levels), portals)
+    require(upper_walk[-1]["kind"] == "cross_landing"
+            and upper_walk[-1]["box"] == (2.4, 4.7, -15.4, -14.3),
+            f"the L2 east door meets a full-width cross landing ({upper_walk[-1]['box']})")
     require(walk[0]["up"] == -walk[2]["up"],
             f"the two runs of a `u` climb in OPPOSITE directions "
             f"({walk[0]['up']}, {walk[2]['up']})")
@@ -336,7 +367,7 @@ def selftest() -> int:
 
     lane0 = [e for e in flight_runs(main, foot) if e["lane"] == 0][0]["box"]
     lane1 = [e for e in flight_runs(main, foot) if e["lane"] == 1][0]["box"]
-    require(lane0[1] <= lane1[0] + 1e-9,
+    require(lane0[1] <= lane1[0] + 1e-9 or lane1[1] <= lane0[0] + 1e-9,
             f"the main stair's two lanes are side by side, not through each other "
             f"({lane0[0]:.2f}..{lane0[1]:.2f}, {lane1[0]:.2f}..{lane1[1]:.2f})")
 

@@ -21,7 +21,7 @@
       "fromCell": "L0_STAIR_MAIN", "toCell": "L1_STAIR_MAIN",
       "risers": 17, "rise": 0.1794118, "going": 0.280, "width": 1.10,
       "footprint": { "x": [2.20, 4.90], "z": [-20.20, -14.30] },
-      "run": "-Z", "shape": "u",
+      "run": "-Z", "shape": "u", "firstRunAt": "cross_hi", "topLandingToFoot": true,
       "landings": [{ "at": 9, "depth": 1.10 }],
       "collisionRamp": true, "surface": "stair_wood"
     },
@@ -31,7 +31,8 @@
       "fromCell": "L1_STAIR_MAIN", "toCell": "L2_STAIR_MAIN",
       "risers": 16, "rise": 0.1812500, "going": 0.280, "width": 1.10,
       "footprint": { "x": [2.20, 4.90], "z": [-20.20, -14.30] },
-      "run": "-Z", "shape": "u",
+      "run": "-Z", "shape": "u", "firstRunAt": "cross_hi", "topLandingToFoot": true,
+      "topCrossLandingDepth": 1.10,
       "landings": [{ "at": 12, "depth": 1.10 }],
       "collisionRamp": true, "surface": "stair_wood"
     },

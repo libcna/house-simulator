@@ -1121,6 +1121,13 @@ Every flight satisfies `2·rise + going ∈ [600, 650] mm` and a consistent rise
 | `STEPS_TERRACE` | terrace +0.45 → sunroom +0.60 | 0.150 m | 1 × 150 mm | 350 mm | 3.60 m | single step | Z −32.40 |
 | `STEPS_GARAGE` | garage +0.15 → mudroom +0.60 | 0.450 m | 3 × 150 mm | **300 mm** | 1.10 m | straight | inside the garage at the house wall |
 
+`HOUSE-00489` corrects the main-stair circulation within this unchanged footprint: both U
+flights ascend first in the east lane and return in the west. The basement flight uses an east
+1.10 m well instead of a 2.30 m hole, leaving a real west-side approach from the foyer. Thin
+upper-level exit strips connect the returning treads to the hall openings; L2 also has a
+full-width south cross landing for its attic-stair door. The shell, collision and railing gaps
+derive from the same flight placement, rather than moving a decorative stair mesh alone.
+
 `2·179.4 + 280 = 638.8` ✔ · `2·181.3 + 280 = 642.6` ✔ · `2·183.3 + 265 = 631.6` ✔ ·
 `2·181.3 + 275 = 637.6` ✔ · `2·150 + 350 = 650` ✔ (both terrace flights) ·
 `2·150 + 300 = 600` ✔ (garage) · `2·190 + 300 = 680` (exterior, permitted) ✔
@@ -1807,7 +1814,7 @@ Validation runs in CI and as a pre-build step. A failure fails the build.
 | `P_STAIR_L0_L1` | `L0_STAIR_MAIN` | `L1_STAIR_MAIN` | stair well |
 | `P_STAIR_L1_L2` | `L1_STAIR_MAIN` | `L2_STAIR_MAIN` | stair well |
 | `P_STAIR_L2_L3` | `L2_STAIR_ATTIC` | `L3_STAIR_HEAD` | stair well, with a **door at the foot** (`DOOR_L2_ATTIC`) |
-| `P_L0_STAIR__B1_STAIR` | `L0_STAIR_MAIN` | `B1_STAIR` | door |
+| `P_L0_STAIR__B1_STAIR` | `L0_STAIR_MAIN` | `B1_STAIR` | stair well; basement door is `P_B1_STAIR__B1_HALL` |
 | `P_L1_STAIR__L1_LANDING` | `L1_STAIR_MAIN` | `L1_LANDING` | open |
 | `P_L2_STAIR__L2_LANDING` | `L2_STAIR_MAIN` | `L2_LANDING` | open |
 
@@ -5291,8 +5298,9 @@ because the height field runs under the house as well as over the lawn.
 two rooms, because the wall is in both lists and stops a body before it can reach anything behind
 one. At a hole they are not: §16.4's lookup keeps answering with the cell a body came from until it
 is 0.05 m past the boundary, so a body standing in a doorway is 0.35 m into a room nothing has
-looked at, and the main stair's first run begins 0.20 m past `L0_FOYER`'s cased opening. So each
-side of every hole carries the other side's shapes within **0.40 m** of the plane — the 0.30 m
+looked at. Before `HOUSE-00489` the main stair's first run was also 0.20 m past `L0_FOYER`'s
+cased opening; its corrected east-lane position leaves a west-side floor approach. Each side of
+every hole still carries the other side's shapes within **0.40 m** of the plane — the 0.30 m
 capsule plus that hysteresis plus 50 mm — over the hole's width and the body's own height, indexed
 by the part of them within reach so a borrowed slab does not size the borrower's grid.
 `docs/collision-format.md` §4.1 is normative and `OpeningReachTests` is the guarantee.

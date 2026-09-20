@@ -69,7 +69,9 @@ namespace
         {"l0-kitchen", {-1.10f, 2.20f, -25.05f, -7.30f, 2.05f, -25.05f}},
         {"l0-living", {-7.30f, 2.20f, -17.25f, -2.60f, 2.05f, -17.25f}},
         {"l0-hall", {0.00f, 2.20f, -22.10f, 0.00f, 2.05f, -18.70f}},
-        {"l0-stair-main", {3.55f, 2.20f, -19.30f, 3.55f, 2.05f, -14.70f}},
+        // HOUSE-00489: the former floating eye is inside the mirrored U's return. Look up the
+        // first run from its actual east-side foot, matching the playable review camera.
+        {"l0-stair-main", {4.10f, 2.20f, -14.70f, 4.10f, 2.05f, -18.50f}},
         {"l0-garage", {9.60f, 1.75f, -17.50f, 16.70f, 1.60f, -17.50f}},
         {"l1-master-bed", {-6.10f, 5.25f, -24.55f, 1.80f, 5.10f, -24.55f}},
         {"l1-master-bath", {-11.05f, 5.25f, -26.20f, -11.05f, 5.10f, -22.40f}},

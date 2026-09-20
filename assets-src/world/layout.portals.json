@@ -53,7 +53,7 @@
     {
       "id": "P_L0_STAIR__L0_MUDROOM", "cellA": "L0_STAIR_MAIN", "cellB": "L0_MUDROOM",
       "plane": { "axis": "x", "value": 4.9 },
-      "rect": { "u": [-16.85, -15.75], "v": [0.6, 2.8] },
+      "rect": { "u": [-15.25, -14.35], "v": [0.6, 2.8] },
       "kind": "cased_opening", "aperture": null, "opacity": "open",
       "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
@@ -116,7 +116,7 @@
     {
       "id": "P_L1_STAIR__L1_LANDING", "cellA": "L1_STAIR_MAIN", "cellB": "L1_LANDING",
       "plane": { "axis": "x", "value": 2.2 },
-      "rect": { "u": [-17.1, -15.5], "v": [3.65, 5.85] },
+      "rect": { "u": [-15.4, -14.35], "v": [3.65, 5.85] },
       "kind": "cased_opening", "aperture": null, "opacity": "open",
       "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
@@ -403,7 +403,7 @@
     {
       "id": "P_B1_STAIR__B1_MECHANICAL", "cellA": "B1_STAIR", "cellB": "B1_MECHANICAL",
       "plane": { "axis": "x", "value": 4.9 },
-      "rect": { "u": [-16.75, -15.85], "v": [-2.3, -0.2] },
+      "rect": { "u": [-15.25, -14.35], "v": [-2.3, -0.2] },
       "kind": "door", "aperture": "DOOR_B1_STAIR__B1_MECHANICAL", "opacity": "opaque_when_closed",
       "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
@@ -648,7 +648,7 @@
     {
       "id": "P_L1_STAIR__L1_BED5", "cellA": "L1_STAIR_MAIN", "cellB": "L1_BED5",
       "plane": { "axis": "x", "value": 4.9 },
-      "rect": { "u": [-16.75, -15.85], "v": [3.65, 5.75] },
+      "rect": { "u": [-15.25, -14.35], "v": [3.65, 5.75] },
       "kind": "door", "aperture": "DOOR_L1_STAIR__L1_BED5", "opacity": "opaque_when_closed",
       "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
@@ -662,7 +662,7 @@
     {
       "id": "P_L2_STAIR__L2_STAIR_ATTIC", "cellA": "L2_STAIR_MAIN", "cellB": "L2_STAIR_ATTIC",
       "plane": { "axis": "x", "value": 4.9 },
-      "rect": { "u": [-16.75, -15.85], "v": [6.55, 8.65] },
+      "rect": { "u": [-15.25, -14.35], "v": [6.55, 8.65] },
       "kind": "door", "aperture": "DOOR_L2_STAIR__L2_STAIR_ATTIC", "opacity": "opaque_when_closed",
       "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
@@ -831,11 +831,13 @@
     // And `v` reached only -16.40 for a flight that runs to -18.70, so `STAIR_BASEMENT_L0_B1` had
     // 1.45 m over its eighth tread. The treads needing the hole span z -18.425 to -15.400
     // (measured, `verify_shell.py`); -15.30 clears the last of them by 0.10 m, and
-    // `L0_STAIR_MAIN` runs to -14.30 with nothing in the way.
+    // `L0_STAIR_MAIN` runs to -14.30 with nothing in the way. `HOUSE-00489` narrows this from
+    // 2.30 m to the 1.10 m east lane actually needed by the basement flight, restoring the west
+    // ground-floor circulation strip from the foyer to the foot of the main U stair.
     {
       "id": "P_L0_STAIR__B1_STAIR", "cellA": "B1_STAIR", "cellB": "L0_STAIR_MAIN",
       "plane": { "axis": "y", "value": 0.6 },
-      "rect": { "u": [2.4, 4.7], "v": [-19.7, -15.3] },
+      "rect": { "u": [3.6, 4.7], "v": [-19.7, -15.3] },
       "kind": "stair_well", "aperture": null, "opacity": "open",
       "soundLoss": { "open": 0.000, "closed": 0.000 }
     },

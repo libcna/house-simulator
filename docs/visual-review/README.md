@@ -4264,3 +4264,34 @@ broad overdraw workaround.
 Remaining: solve the exterior glazing/envelope ownership with a bounded
 render comparison, then fix the real stair approach and Shift toggle. The
 complete L0 route and **VISUAL-GATE-1 remain open.**
+
+## Round 98 — reachable main stair, full-route review
+
+Commit: `HOUSE-00489` checkpoint (`2026-09-20`). Before: the old first-person
+[foyer/stair reference](captures/house-00489-stair-before/fp-l0-foyer-stair.png)
+showed a flight blocking the foyer-side approach. After: the fixed
+[31-view clear-day set](captures/house-00489-stair-day-r1) includes the same L0
+route plus new [stair-foot](captures/house-00489-stair-day-r1/main-stair-foot.png)
+and [L1-exit](captures/house-00489-stair-day-r1/main-stair-l1-exit.png) views.
+The ignored capture files are local review evidence, not Git-tracked goldens.
+
+Ranked defects before: (1) foyer-to-L1 stair physically inaccessible; (2)
+exterior glazing/roof still sometimes under-renders from outdoors; (3) some
+connected L0 transitions still need more believable lighting and dressing.
+
+Fixed: the narrow basement opening returns real floor to the west approach;
+mirrored U flights, short upper bridges and moved doorways agree in shell and
+collision. A real player-controller walk reaches the L1 hall. Thirteen strict
+references were advanced individually after inspecting before/after pairs:
+two first-person (foyer stair and the small kitchen sightline), four explicit
+debug blockout (kitchen, hall, stair and L2 landing), three property facade,
+and four seasonal sun/facade views. Their changes follow the stair shell,
+altered openings or re-baked receivers; no suite was regenerated blindly.
+All 18 culled/unculled comparisons pass, worst 0.0558%.
+
+Remaining, ranked across the route: (1) exterior front glazing/roof visibility
+defect; (2) the stair foot is very dark even at 10:30, and its side-on foyer
+view reads as a solid dark mass; (3) the L1 exit lacks visual dressing. The
+foyer, hall, living, family, kitchen and dining route views remain coherent,
+but **VISUAL-GATE-1 remains open**. Do not spend another round on stair trim
+before solving the reported exterior under-rendering and L0 breadth.
