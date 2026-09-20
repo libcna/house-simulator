@@ -1,3 +1,82 @@
+# Gameplay/visual handoff — 2026-09-20 (`HOUSE-01076` checkpoint)
+
+Read this section first. Branch `develop`; the implementation is committed and
+pushed as `7ba8a1f` (`HOUSE-01076`), from `e089e3e8` (`HOUSE-01075`). The owner
+asked the current agent to make this separate English handoff commit/push and
+then stop; a future agent should resume the Visual Convergence Sprint, not
+infer that the project is done. `HOUSE-01076` corrects a repeated L0 visual mismatch:
+Basic-lit fixed furniture/trim/cabinet detail was markedly darker than the
+baked architectural receiver beside it. The sun remains the daylit stock-
+effect key, while two spare slots can receive active, range-bounded fixtures
+authored for that cell. A bounded, partly neutral practical bounce is applied
+to indoor fixed detail only; outdoor/weather-facing props keep the prior
+calibration. A new unit test switches a living-room group and verifies no
+leak into an L1 bedroom. No CNA, shared dependency, world architecture or
+asset provenance changed. The task does not close whole-room lighting.
+
+Canonical before: [day](visual-review/captures/house-01075-butlers-day-r1)
+and [night](visual-review/captures/house-01075-butlers-night-r1); after:
+[day](visual-review/captures/house-01076-fixture-day-r2) and
+[night](visual-review/captures/house-01076-fixture-night-r2). Each set has the
+same 32 fixed views. Inspect `living-composition`, `kitchen-facing-west`,
+`foyer-entry-floor`, `central-hall`, `family-composition`, `dining-room`,
+`main-stair-foot` and `exterior-front` together. Round 102 in the tracked
+visual-review ledger ranks the defects. Five individually inspected strict
+first-person L0 references changed for lighter indoor detail; no blanket
+golden refresh. These captures are local/Git-ignored and must not be deleted.
+
+The content-current check, 1,413 unit, 140 integration and 49 active render
+tests pass; all 18 culled/unculled pairs remain within their existing bound.
+The integration suite needs `SDL_VIDEODRIVER=offscreen`,
+`SDL_AUDIODRIVER=dummy`, `LIBGL_ALWAYS_SOFTWARE=1` and a sandbox-writable
+`XDG_DATA_HOME`, e.g. `/tmp/cnahouse-ctest-data`, for its real save-store
+tests. At `-j6` one weather/headless timing test failed once then passed
+alone; the complete suite passed at `-j3`. Static/strict-XNA checks also
+pass. Keep no more than six build CPUs, `CCACHE_DIR=/rv/cnaccache`,
+`CCACHE_BASEDIR=/rv`, `CNA_CNAEXT=OFF` and the project-isolated
+`build/isolated-deps/FNA3D`; never modify shared `~/deps`.
+
+L0 breadth: foyer and hall provisionally meet material/furnishing baseline.
+Living, family, kitchen, dining, sunroom and the kitchen service transition
+have primary furniture and production finishes, but the connected route is
+not yet consistently lit. The living piano remains nearly black, some
+primary furniture is too dark/warm against baked walls, and the main stair
+foot and service room at night lack depth. **VISUAL-GATE-1 remains open.**
+Next highest-value work is a room-wide, physically constrained object/bake
+lighting correction across multiple L0 views, with the piano and stair as
+concrete checks; do not return to narrow roof/driveway or one-hero-prop
+micro-polish. The previous capture-history cleanup is complete. No owner
+question is pending.
+
+To resume safely: inspect `git status`, this top section, `plan.md`'s Visual
+Convergence priority and `HOUSE-01076`, then compare the canonical L0 route
+day/night images in Round 102. If local captures are absent in a fresh clone,
+regenerate with `python3 tools/visual/capture_review.py <label>` and the same
+command plus `--scenario clear-night`; captures are intentionally not in Git.
+Choose the largest visible defect across **road → gate → entrance → foyer →
+hall → living/family → kitchen → dining**, not the next numeric HOUSE id.
+Do not claim the broad furnishing tasks `HOUSE-00986`–`HOUSE-00993` or
+VISUAL-GATE-1 complete merely because primary pieces now exist. In particular,
+inspect `living-piano-detail`, `main-stair-foot`, `butlers-from-kitchen` and
+the connected kitchen/dining views before choosing another light constant.
+The rejected stair runner/sconces produced black treads and giant wall
+hotspots; the rejected high-gain global fill turned pale objects orange.
+
+The existing `build/` is configured with `CNA_CNAEXT=OFF` and the isolated
+FNA3D/MojoShader dependency. Keep the six-core cap on builds and checks, for
+example `CCACHE_DIR=/rv/cnaccache CCACHE_BASEDIR=/rv PYTHON_CPU_COUNT=6
+taskset -c 0-5 tools/ci/run_checks.sh`. Unit tests use `ctest --test-dir build
+-L unit -j6 --output-on-failure`; render tests need the SDL/software-GL
+environment above and `-L render -j6`; integration uses the same environment
+plus the writable `XDG_DATA_HOME` and `-L integration -j3`. The full source
+tree and content are already built; do not reconfigure or touch shared
+`~/deps` merely to continue. Commit one coherent HOUSE task at a time with
+its plan checkbox and visual-review record; refresh strict goldens only after
+inspecting each changed image. Review captures and prior screenshot evidence
+are local and must be preserved, not re-added to Git or deleted.
+
+---
+
 # Gameplay/visual handoff — 2026-09-20 (`HOUSE-01075` checkpoint)
 
 Read this section first; older checkpoints below are historical evidence.
