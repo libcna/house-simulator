@@ -16067,6 +16067,36 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
                 Unit 1,412/1,412, integration 140/140 and render 49/49 active tests pass; all
                 18 paired culling views pass (worst 0.0558%). No strict golden changed. Static
                 gates pass, including 323 strict-XNA translation units.
+- [x] HOUSE-01075 — Stock the bare side walls of the kitchen's open butler-pantry transition
+      dep: HOUSE-01072, HOUSE-01297, HOUSE-00907, HOUSE-00215 · sys: world/content · plat: TOOL · pri: MUST
+      note: Round 100's whole-route view shows a fitted sink and useful ceiling light in
+            `L0_BUTLERS`, but both long side walls remain empty. This is an immediately
+            connected kitchen sightline and a larger L0 coverage defect than another
+            furniture highlight or exterior micro-detail. The full `HOUSE-00991` remains
+            dependent on the broader acquisition chain and is not claimed here.
+      accept: author two distinct, stocked and physically shallow storage shelves with
+              approved material/provenance, deterministic geometry, metre UVs and simple
+              enclosing collision. Keep both side-door swings, the service-run clearance,
+              at least 1.60 m centre aisle and navigation links. Inspect matched day/night
+              full-route captures; change strict references only for proven intended pixels.
+              Pass content, licence, budget, stable-ID, unit, integration, render/culling
+              and strict-XNA gates with no more than six build CPUs.
+      done: Two distinct project-authored stocked shelves now occupy the north and south
+            side walls of `L0_BUTLERS`, framing the existing service run without blocking
+            either side door. Their grounded 1.055 × 2.24 × 0.322 m bodies leave a
+            measured 1.718 m centre aisle; each has a 12-triangle collision proxy.
+            Deterministic Blender regeneration, material-role, UV, scale and world-placement
+            checks are enforced by `butlers_pantry_shelf_prepare.py --check`. Approved
+            Ms-PL provenance and the exact 14→17 room-chunk exception are recorded.
+            `HOUSE-00991` and VISUAL-GATE-1 remain open.
+      verified: Round 101 matched 32-view day/night captures show a furnished service
+                threshold without disrupting adjacent route views. The only changed strict
+                reference is `blockout-l0-kitchen.png`: its 776 differing pixels were
+                inspected and confined to the newly visible shelf sliver. The world content
+                graph, six-CPU build, budget, licence ledger and 3,037 stable IDs pass;
+                unit 1,412/1,412, integration 140/140 and active render 49/49 pass,
+                including all 18 paired culled/unculled views. Full static/strict-XNA
+                gates pass.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)

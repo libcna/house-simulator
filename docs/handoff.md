@@ -1,3 +1,52 @@
+# Gameplay/visual handoff — 2026-09-20 (`HOUSE-01075` checkpoint)
+
+Read this section first; older checkpoints below are historical evidence.
+Branch `develop`; the task started at `a168b94`. `HOUSE-01075` adds two
+distinct, stocked, project-authored shallow pantry shelves on the north and
+south long walls of `L0_BUTLERS`. This directly connected kitchen service
+transition had a fitted sink run but bare side walls. The new dry-goods and
+crockery models use approved existing material roles and Ms-PL provenance,
+regenerate byte-for-byte under
+`tools/assets/butlers_pantry_shelf_prepare.py --check`, and have simple
+12-triangle collision proxies. Measured centre aisle is 1.718 m; side doors
+and the service-run approach remain clear. The exact room chunk exception
+is now 17, from 14, because of three new visible material batches.
+
+Canonical before/after review: before
+[day](visual-review/captures/house-01074-sunroom-day-r3/butlers-from-kitchen.png)
+and [night](visual-review/captures/house-01074-sunroom-night-r3/butlers-from-kitchen.png);
+after [day](visual-review/captures/house-01075-butlers-day-r1/butlers-from-kitchen.png)
+and [night](visual-review/captures/house-01075-butlers-night-r1/butlers-from-kitchen.png).
+The full 32-view day/night route sets are in those same capture directories,
+local and Git-ignored. Round 101 in `docs/visual-review/README.md` records
+the ranked defects. One inspected strict golden changed:
+`tests/render/reference/blockout-l0-kitchen.png`, with only a 776-pixel
+sliver of the new shelf visible through the service opening. No other
+reference was refreshed.
+
+The complete content graph and six-CPU build pass. The budget is under cap,
+licence/provenance ledger and 3,037 stable IDs agree; 1,412 unit, 140
+integration and 49 active render tests pass, including all 18 culled versus
+unculled pairs. Static gates, including 323 strict-XNA translation units,
+pass. `CNA_CNAEXT=OFF` and project-isolated
+`build/isolated-deps/FNA3D` remain in use; shared `~/deps` is untouched.
+
+L0 breadth: foyer and hall provisionally meet the material/furnishing
+baseline. Living, family, kitchen, dining, sunroom and now the butler's
+service transition have recognizable primary furniture and production
+materials, but the complete route does **not** meet the lighting/readability
+baseline. The largest visible defect is dark Basic-lit furniture against
+brighter baked receivers, especially the living piano, sunroom chairs and
+kitchen/dining objects; the stair foot and night service room are also dark.
+Three small renderer-lighting probes during this task were rejected after
+matched captures and reverted; do not assume a global ambient increase is
+the solution. **VISUAL-GATE-1 remains open.** Next highest-value work is a
+cross-L0 object/receiver lighting correction proven on the whole fixed route,
+then remaining secondary dressing. Keep ≤6 build CPUs. The earlier
+capture-history cleanup is complete. No owner question is pending.
+
+---
+
 # Gameplay/visual handoff — 2026-09-20 (`HOUSE-01074` checkpoint)
 
 Read this section first; older checkpoints below retain evidence, not current

@@ -137,6 +137,9 @@ run_gate "kitchen-builtins" python3 tools/assets/kitchen_builtins_prepare.py --c
 # HOUSE-01072: the open service-pantry sightline uses a genuinely fitted, measured
 # under-window sink/wine-cooler run, not a hidden primitive or unvalidated GLB.
 run_gate "butlers-service" python3 tools/assets/butlers_service_prepare.py --check
+# HOUSE-01075: both stocked side-wall shelves retain deterministic authored geometry,
+# approved material roles, measured doorway clearance and enclosing collision.
+run_gate "butlers-shelves" python3 tools/assets/butlers_pantry_shelf_prepare.py --check
 # HOUSE-01049: the measured counter stools and three restrained worktop groupings remain
 # reproducible from their authored Blender source, with exact material slots and placement.
 run_gate "kitchen-dressing" python3 tools/assets/kitchen_dressing_prepare.py --check

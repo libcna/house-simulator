@@ -140,6 +140,20 @@
       "material": null, "interactable": null
     },
     {
+      "id": "PROP_L0_BUTLERS_DRY_SHELF",
+      "asset": "MODEL_BUTLERS_DRY_SHELF", "cell": "L0_BUTLERS",
+      "position": [-11.55, 0.60, -22.78], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "proxy",
+      "material": null, "interactable": null
+    },
+    {
+      "id": "PROP_L0_BUTLERS_CROCKERY_SHELF",
+      "asset": "MODEL_BUTLERS_CROCKERY_SHELF", "cell": "L0_BUTLERS",
+      "position": [-11.55, 0.60, -24.82], "yawDeg": 180, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "proxy",
+      "material": null, "interactable": null
+    },
+    {
       "id": "PROP_L0_KITCHEN_NORTH_BASE_RUN",
       "asset": "MODEL_KITCHEN_NORTH_BASE_RUN",
       "cell": "L0_KITCHEN",

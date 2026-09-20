@@ -202,6 +202,7 @@ UNSIZED_CATEGORIES = {
     "media-console": "§70.5 states no media-furniture band; manifest bounds and room review own it",
     "occasional-table": "§70.5 states no coffee/side-table band; manifest bounds and room review own it",
     "bookcase": "§70.5 states no bookcase band; manifest bounds and room review own it",
+    "pantry-shelf": "§70.5 states no pantry-shelf band; measured room clearance and manifest bounds own it",
     "pet-bed": "§70.5 states no pet-bed band; manifest bounds and linked nav bed own it",
     "picture": "§70.5 states no wall-art band; manifest bounds and wall-plane origin own it",
     "rug": "§70.5 states no rug-size band; manifest bounds and room review own it",

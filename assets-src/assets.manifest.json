@@ -319,6 +319,60 @@
       ]
     },
     {
+      "id": "MODEL_BUTLERS_DRY_SHELF",
+      "category": "pantry-shelf",
+      "sourceFile": "assets-src/Models/Furniture/Kitchen/butlers_dry_shelf.glb",
+      "sourceSha256": "149511e117260acd8f5958ef5278349bb896099f55185e66b6dd210ba0b7487a",
+      "contentName": "Models/Furniture/Kitchen/butlers_dry_shelf",
+      "kind": "model", "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored", "name": "Butler pantry dry-goods shelving",
+        "licence": "Ms-PL", "licenceFile": "LICENSE", "attribution": "",
+        "redistributeSource": true, "redistributeDerived": true,
+        "commercialUse": true, "modification": true,
+        "note": "Project-authored measured cabinet, tins, baskets and provisions from tools/blender/butlers_pantry_shelf.py for HOUSE-01075; existing approved material textures are reused."
+      },
+      "geometry": {
+        "unitScale": 1, "upAxis": "Y", "boundsMetres": [1.055, 2.24, 0.322],
+        "triangles": {"LOD0": 2824},
+        "collision": "butlers_dry_shelf_001_back_COL"
+      },
+      "materialMap": {
+        "CAB_OAK": "MAT_DOOR_HARDWOOD", "CAB_PAINT": "MAT_DOOR_PAINTED",
+        "CAB_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "PANTRY_CERAMIC": "MAT_FOYER_CERAMIC",
+        "PANTRY_LINEN": "MAT_FURNITURE_DINING_LINEN",
+        "PANTRY_PAPER": "MAT_LIVING_ART_PAPER"
+      },
+      "usedIn": ["L0_BUTLERS"]
+    },
+    {
+      "id": "MODEL_BUTLERS_CROCKERY_SHELF",
+      "category": "pantry-shelf",
+      "sourceFile": "assets-src/Models/Furniture/Kitchen/butlers_crockery_shelf.glb",
+      "sourceSha256": "f3c01dde03ee0a4fae1ccce41dca32b7bc289bedf882045234444f67ac20c8f4",
+      "contentName": "Models/Furniture/Kitchen/butlers_crockery_shelf",
+      "kind": "model", "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored", "name": "Butler pantry crockery shelving",
+        "licence": "Ms-PL", "licenceFile": "LICENSE", "attribution": "",
+        "redistributeSource": true, "redistributeDerived": true,
+        "commercialUse": true, "modification": true,
+        "note": "Project-authored measured cabinet, stacked plates, mugs and jars from tools/blender/butlers_pantry_shelf.py for HOUSE-01075; existing approved material textures are reused."
+      },
+      "geometry": {
+        "unitScale": 1, "upAxis": "Y", "boundsMetres": [1.055, 2.24, 0.322],
+        "triangles": {"LOD0": 2928},
+        "collision": "butlers_crockery_shelf_001_back_COL"
+      },
+      "materialMap": {
+        "CAB_OAK": "MAT_DOOR_HARDWOOD", "CAB_PAINT": "MAT_DOOR_PAINTED",
+        "CAB_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "PANTRY_CERAMIC": "MAT_FOYER_CERAMIC"
+      },
+      "usedIn": ["L0_BUTLERS"]
+    },
+    {
       "id": "MODEL_DINING_TABLE_SETTING",
       "category": "table-setting",
       "sourceFile": "assets-src/Models/Furniture/Dining/table_setting.glb",

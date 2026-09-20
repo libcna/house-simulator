@@ -4363,3 +4363,43 @@ kitchen/dining furniture; (2) improve the dark stair foot and room-to-room
 day/night balance; (3) only then add more secondary dressing. The sunroom is
 more recognizably occupied but not fully visually finished. **VISUAL-GATE-1
 remains open.**
+
+## Round 101 — give the open kitchen service room a storage purpose
+
+Commit: `HOUSE-01075` checkpoint (`2026-09-20`). Before: the
+[day](captures/house-01074-sunroom-day-r3/butlers-from-kitchen.png) and
+[night](captures/house-01074-sunroom-night-r3/butlers-from-kitchen.png)
+service-room threshold views show a finished sink run between two completely bare
+long walls. After: the same fixed [32-view day](captures/house-01075-butlers-day-r1)
+and [32-view night](captures/house-01075-butlers-night-r1) sets; inspect the
+`butlers-from-kitchen` and `kitchen-facing-west` frames alongside foyer, hall,
+living, family, kitchen and dining. Captures are local/Git-ignored.
+
+Ranked before: (1) the kitchen's directly visible service room has no storage
+purpose; (2) Basic-lit furniture remains dark relative to baked receivers across
+L0; (3) the stair foot and living piano remain under-readable. Fixed: two
+different, stocked shallow shelves now frame the under-window sink without
+covering either side door. The measured centre aisle remains 1.718 m wide;
+the 12-triangle proxies enclose the 2.24 m grounded cabinets. Their six reused
+finish roles add only ceramic, linen and paper material chunks, bringing the
+exact `L0_BUTLERS` exception from 14 to 17 and whole-world chunks 743 to 746.
+At a 2% pixel threshold, the matched day service-room view changes 134,016 of
+1,440,000 pixels, while the kitchen west glance changes 2,951 and other tested
+route views stay under 900. The room reads as inhabited storage from its
+threshold; its night exposure is still too dark for final quality.
+
+Three renderer probes were rejected before this content change: halving the
+multi-fixture denominator improved only night crops by ~4–10%; restoring
+BasicEffect's unused specular input changed very few visible pixels; stronger
+directional keys left the main dark masses intact. None is in source or a
+strict golden. Remaining across L0: (1) reconcile furniture/receiver light
+balance without flattening room contrast; (2) improve the dark stair foot and
+living piano; (3) then add secondary dressing where the full route needs it.
+`HOUSE-00991` and **VISUAL-GATE-1 remain open**.
+
+The one strict reference update is `blockout-l0-kitchen.png`: the old versus
+actual difference was inspected at original resolution, and its 776 changed
+pixels are confined to the sliver of new shelf visible through the kitchen
+service opening. No production-material or other blockout reference was
+regenerated. Unit 1,412/1,412, integration 140/140 and active render 49/49
+pass, including all 18 culled/unculled pairs.

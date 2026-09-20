@@ -286,9 +286,10 @@ for window_cell in (
            "ordinary room trim and borrowed-light glass stay portal-owned")
 
 CHUNK_BUDGET_EXCEPTIONS["L0_BUTLERS"] = (
-    14, "seven established shell/window chunks plus HOUSE-01297's three physical "
+    17, "seven established shell/window chunks plus HOUSE-01297's three physical "
         "ceiling-fixture roles and HOUSE-01072's four measured service-run finish "
-        "batches; one fitted role reuses the existing room finish and no Reach split")
+        "batches; HOUSE-01075's two stocked open shelves reuse cabinet wood/paint/steel "
+        "and add only three distinct ceramic, linen and paper batches. No Reach split")
 
 CHUNK_BUDGET_EXCEPTIONS["L0_SUNROOM"] = (
     21, "HOUSE-01068's measured breakfast room: seven established shell/window roles plus five "
