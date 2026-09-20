@@ -101,6 +101,7 @@ namespace cnahouse::rendering
         // without altering any artificial-lightmapped architectural receiver.
         constexpr float kBasicSkyBounce = 0.18F;
         constexpr float kBasicFixtureAmbient = 0.20F;
+        constexpr float kBasicInteriorFixtureBounce = 0.38F;
         constexpr float kBasicFixtureKey = 0.22F;
 
         /// FNV-1a over the name. A fixed, stated algorithm rather than `std::hash`, whose value is
@@ -654,26 +655,48 @@ namespace cnahouse::rendering
                     const bool skyOpen =
                         weatherFacingDetail || (cell->kind == world::CellKind::Exterior &&
                                                 cell->visibilityHint == world::VisibilityHint::Open);
-                    const float artificial =
-                        weatherFacingDetail ? 0.0F : room->artificial * kBasicFixtureAmbient;
                     const Vector3& sky = skyOpen ? lighting_->SkyAmbientColor() : room->skyAmbientColor;
                     const float skyScale = skyOpen ? 1.0F : kBasicSkyBounce;
-                    draw.ambientLight =
-                        Vector3(exposure * std::min(1.0F,
-                                                    lighting::kAmbientFloor + skyScale * sky.X +
-                                                        artificial * room->artificialColor.X),
-                                exposure * std::min(1.0F,
-                                                    lighting::kAmbientFloor + skyScale * sky.Y +
-                                                        artificial * room->artificialColor.Y),
-                                exposure * std::min(1.0F,
-                                                    lighting::kAmbientFloor + skyScale * sky.Z +
-                                                        artificial * room->artificialColor.Z));
+                    // Broad indoor bounce takes on some lamp warmth, but white walls and trim
+                    // return a substantial neutral component. Using the bulb's saturated colour
+                    // for all indirect fill made pale furniture look orange next to the bake.
+                    // Keep outdoor props on the previously calibrated scale and colour: an
+                    // indoor adjustment must not brighten a road, fence or facade at night.
+                    const bool indoorBounce = !skyOpen && cell->kind != world::CellKind::Exterior &&
+                                              !exteriorDoor && !exteriorWindow;
+                    const float artificial =
+                        weatherFacingDetail ? 0.0F
+                                            : room->artificial * (indoorBounce ? kBasicInteriorFixtureBounce
+                                                                               : kBasicFixtureAmbient);
+                    const Vector3 bounceTint = indoorBounce ? Vector3(0.5F + 0.5F * room->artificialColor.X,
+                                                                      0.5F + 0.5F * room->artificialColor.Y,
+                                                                      0.5F + 0.5F * room->artificialColor.Z)
+                                                            : room->artificialColor;
+                    draw.ambientLight = Vector3(
+                        exposure *
+                            std::min(1.0F,
+                                     lighting::kAmbientFloor + skyScale * sky.X + artificial * bounceTint.X),
+                        exposure *
+                            std::min(1.0F,
+                                     lighting::kAmbientFloor + skyScale * sky.Y + artificial * bounceTint.Y),
+                        exposure *
+                            std::min(1.0F,
+                                     lighting::kAmbientFloor + skyScale * sky.Z + artificial * bounceTint.Z));
                     const bool celestial = lighting_->CelestialKeyForCell(cell->id) != nullptr;
                     const Vector3 objectCentre = (runMin + runMax) * 0.5F;
                     lighting::ObjectLightAssignment objectLights =
                         exteriorDoor && !celestial
                             ? lighting_->CrossCellReceiverLightsForObject(cell->id, objectCentre)
                             : lighting_->StaticDetailLightsForObject(cell->id, objectCentre);
+                    // A sunlit room may still have active table, ceiling or picture lights.
+                    // The sun occupies BasicEffect slot zero; keep its two other slots for the
+                    // local fixed-detail fixtures instead of dimming those fixtures with the
+                    // daylight key's deliberately small indoor scale. This only samples the
+                    // cell's authored bake/spill set, so a neighbour cannot light this prop.
+                    const lighting::ObjectLightAssignment fixtureFill =
+                        celestial && !skyOpen && !exteriorWindow && !exteriorDoor
+                            ? lighting_->StaticFixtureLightsForObject(cell->id, objectCentre)
+                            : lighting::ObjectLightAssignment{};
                     // A weather-facing leaf may be paired either with a baked facade source
                     // (`bakeCells`, the front entry) or with an explicitly unbaked practical
                     // (`spillCells`, the outward-aimed garage flood). Prefer the matching baked
@@ -727,16 +750,21 @@ namespace cnahouse::rendering
                                   : exposure * kBasicFixtureKey;
                     for (std::size_t slot = 0; slot < objectLights.slots.size(); ++slot)
                     {
-                        if (!objectLights.slots[slot].has_value() || (exteriorWindow && !celestial))
+                        const bool useFixture =
+                            celestial && slot > 0 && fixtureFill.slots[slot - 1].has_value();
+                        const std::optional<lighting::ObjectDirectionalLight>& selected =
+                            useFixture ? fixtureFill.slots[slot - 1] : objectLights.slots[slot];
+                        if (!selected.has_value() || (exteriorWindow && !celestial))
                         {
                             continue;
                         }
-                        const lighting::ObjectDirectionalLight& light = *objectLights.slots[slot];
+                        const lighting::ObjectDirectionalLight& light = *selected;
+                        const float slotScale = useFixture ? exposure * kBasicFixtureKey : directionalScale;
                         draw.directionalLights[slot] =
                             StockDirectionalLight{light.direction,
-                                                  Vector3(directionalScale * light.diffuseColor.X,
-                                                          directionalScale * light.diffuseColor.Y,
-                                                          directionalScale * light.diffuseColor.Z),
+                                                  Vector3(slotScale * light.diffuseColor.X,
+                                                          slotScale * light.diffuseColor.Y,
+                                                          slotScale * light.diffuseColor.Z),
                                                   Vector3(0.0F, 0.0F, 0.0F)};
                     }
                 }

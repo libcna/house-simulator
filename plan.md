@@ -16097,6 +16097,30 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
                 unit 1,412/1,412, integration 140/140 and active render 49/49 pass,
                 including all 18 paired culled/unculled views. Full static/strict-XNA
                 gates pass.
+- [x] HOUSE-01076 — Rebalance fixed-detail lighting across the connected daylit L0 route
+      dep: HOUSE-01256, HOUSE-01264, HOUSE-01266, HOUSE-00215 · sys: rendering/lighting · plat: XNA · pri: MUST
+      note: Round 101's matched route images show Basic-lit furniture, trim and cabinets much
+            darker than their baked architectural receivers. The defect affects multiple
+            connected rooms and outranks another isolated furnishing or exterior polish pass.
+      accept: retain the sun as the daylight key while allowing active, authored cell-local
+              fixtures into the remaining stock-effect slots for fixed detail; improve indoor
+              bounced fixture fill without brightening outdoor props, weather-facing doors or
+              a neighbouring unlit room. Inspect complete fixed day/night L0 captures and
+              each intentionally changed strict reference. Pass unit, integration, render/
+              culling, content and strict-XNA gates with at most six build CPUs. Keep the
+              whole-route lighting gate open if major dark areas remain.
+      done: Sunlit fixed detail can receive two range-bounded switched fixture keys while the
+            celestial slot stays in place. Neutralized indoor-only practical bounce lifts
+            Basic-lit furniture and trim; the prior calibrated exterior/spill path is
+            unchanged. A unit test checks switch response and no L1 bedroom leakage.
+            Five inspected L0 first-person goldens were updated, not blanket-regenerated.
+            The living piano and stair foot still need better source/bake balance, so
+            VISUAL-GATE-1 remains open.
+      verified: Round 102 matched 32-view day/night captures compare foyer, hall, living,
+                family, kitchen, dining and their thresholds against HOUSE-01075; the final
+                outdoor views retain the prior exposure. Unit 1,413/1,413, integration
+                140/140 and render 49/49 active tests pass, including all 18 culling pairs.
+                Full static/strict-XNA gates pass.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -20881,6 +20905,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-20 | `HOUSE-01076` | **New task, next free phase-13 id.** Reconcile stock-effect fixed-detail lighting with baked receivers across the connected L0 route without broadening outdoor or neighbouring spill. | Round 101's full-route day/night set shows a repeated object/receiver mismatch in the living, family, kitchen and dining spaces. Rejected global/fixture-scaling probes demonstrate that a local indoor bounce and correct daylit stock-effect slot assignment are the smallest useful correction; this does not complete whole-room lighting or VISUAL-GATE-1. |
 | 2026-09-20 | `HOUSE-01074` | Add `assets-src/Models/**/*.glb` to the `collision` content stage's inputs and guard it in the graph selftest; regenerate the documented stage table. | Switching the new lounge from one coarse box to a three-box `_COL` proxy left `collision.bin` incorrectly fresh, and the 20-minute seeded walk wedged with the stale geometry. The generator consumes source GLBs directly, so they must invalidate that stage. After a real rebuild the walk and full unit suite pass. |
 | 2026-09-20 | `HOUSE-01074` | **New task, next free phase-13 id.** Occupy the sunroom's east-side reading bay without claiming the dependency-blocked whole-room `HOUSE-00993`. | The complete L0 review shows the existing breakfast/bar vignettes leave the east side empty. A project-authored lounge can fill this connected space now. A jute runner tested in the same round appeared nearly black against the baked floor and was rejected, so the next task should address the cross-room Basic-prop/receiver lighting mismatch instead of shipping it. |
 | 2026-09-19 | `HOUSE-00570` | **New task, next free phase-7 id.** Carry the existing Shift edge across the variable frame-to-physics boundary exactly once. | The original `HOUSE-00556` unit test proved edge creation and per-step toggling, but the real game reuses a frame's input over 0–4 fixed steps. An even-step frame cancels one key press, which reproduces the owner's report without changing the approved two-speed design. |

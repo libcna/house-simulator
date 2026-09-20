@@ -298,6 +298,15 @@ namespace cnahouse::lighting
         StaticDetailLightsForObject(util::Id cell,
                                     const Microsoft::Xna::Framework::Vector3& objectCentre) const noexcept;
 
+        /// @brief Active, range-bounded fixture keys for fixed detail even when the sun is key.
+        ///
+        /// Daylit rooms still contain switched lamps. The ordinary assignment above gives the
+        /// stock effect its sun key; this separate assignment lets a fixed prop use the two
+        /// remaining directional slots for those same local, baked fixture groups.
+        [[nodiscard]] ObjectLightAssignment
+        StaticFixtureLightsForObject(util::Id cell,
+                                     const Microsoft::Xna::Framework::Vector3& objectCentre) const noexcept;
+
         /// @brief Fixture approximation for detail on an explicitly baked foreign receiver.
         ///
         /// Only foreign groups already bound in the canonical cell lightmap data participate;

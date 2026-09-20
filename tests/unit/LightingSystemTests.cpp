@@ -577,6 +577,45 @@ TEST(LightingSystemTests, LivingPianoAccentAndPhysicalMainPracticalsDefaultOn)
     EXPECT_TRUE(main->on) << "the broad physical practicals make the formal room readable";
 }
 
+TEST(LightingSystemTests, DaylitFixedDetailCanReceiveItsOwnSwitchedFixturesWithoutNeighbourLeak)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    HouseLighting house;
+    cnahouse::environment::CivilTime noon;
+    noon.year = 2031;
+    noon.month = 6;
+    noon.day = 21;
+    noon.hour = 12;
+    house.clock.SetStandard(noon);
+    for (const SwitchGroupState& group : house.lighting.Groups())
+    {
+        ASSERT_TRUE(house.lighting.SetGroupOn(group.group, false));
+    }
+    const Id living = Id::Of("L0_LIVING");
+    const Id bedroom = Id::Of("L1_BED2");
+    const Microsoft::Xna::Framework::Vector3 centre(-5.20F, 1.40F, -17.25F);
+    house.lighting.Update(Frame(20));
+    ASSERT_NE(house.lighting.SunKeyForCell(living), nullptr)
+        << "this probes a room where the ordinary stock-effect slots choose the sun";
+    EXPECT_FALSE(house.lighting.StaticFixtureLightsForObject(living, centre).slots[0].has_value());
+
+    ASSERT_TRUE(house.lighting.SetGroupOn(Id::Of("LG_L0_LIVING_MAIN"), true));
+    house.lighting.Update(Frame(21));
+    const ObjectLightAssignment local = house.lighting.StaticFixtureLightsForObject(living, centre);
+    ASSERT_TRUE(local.slots[0].has_value())
+        << "sunlight must not erase an active, authored practical from fixed-detail lighting";
+    EXPECT_GT(local.slots[0]->diffuseColor.X, 0.0F);
+    EXPECT_FALSE(
+        house.lighting
+            .StaticFixtureLightsForObject(bedroom, Microsoft::Xna::Framework::Vector3(4.0F, 4.3F, -23.0F))
+            .slots[0]
+            .has_value())
+        << "the living light is not a general neighbouring-room fill";
+}
+
 TEST(LightingSystemTests, TurningOnEveryGroupInARoomLightsItExactlyFully)
 {
     if (!ContentIsBuilt())

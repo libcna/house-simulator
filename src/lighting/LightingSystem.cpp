@@ -871,14 +871,20 @@ namespace cnahouse::lighting
     ObjectLightAssignment
     LightingSystem::StaticDetailLightsForObject(util::Id cell, const Vector3& objectCentre) const noexcept
     {
+        if (CelestialKeyForCell(cell) != nullptr)
+        {
+            return DirectionalLightsForObject(cell, objectCentre);
+        }
+        return StaticFixtureLightsForObject(cell, objectCentre);
+    }
+
+    ObjectLightAssignment
+    LightingSystem::StaticFixtureLightsForObject(util::Id cell, const Vector3& objectCentre) const noexcept
+    {
         const auto found = cellIndex_.find(cell.Value());
         if (found == cellIndex_.end())
         {
             return {};
-        }
-        if (CelestialKeyForCell(cell) != nullptr)
-        {
-            return DirectionalLightsForObject(cell, objectCentre);
         }
         const std::size_t cellIndex = found->second;
         ObjectLightAssignment assignment = WithReceiverBounce(

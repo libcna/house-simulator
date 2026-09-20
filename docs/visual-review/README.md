@@ -4403,3 +4403,41 @@ pixels are confined to the sliver of new shelf visible through the kitchen
 service opening. No production-material or other blockout reference was
 regenerated. Unit 1,412/1,412, integration 140/140 and active render 49/49
 pass, including all 18 culled/unculled pairs.
+
+## Round 102 — reconcile fixed-detail lighting across the daylit L0 route
+
+Commit: `HOUSE-01076` checkpoint (`2026-09-20`). Before: the matched
+[32-view day](captures/house-01075-butlers-day-r1) and
+[32-view night](captures/house-01075-butlers-night-r1) sets. After: the same
+[32-view day](captures/house-01076-fixture-day-r2) and
+[32-view night](captures/house-01076-fixture-night-r2) cameras. Compare
+`living-composition`, `kitchen-facing-west`, `entrance-foyer`, `central-hall`,
+`family-composition`, `dining-room` and `exterior-front` in both conditions.
+Captures remain local/Git-ignored.
+
+Ranked before: (1) Basic-lit furniture, trim and cabinets are much darker than
+their baked receiver walls and floors across several connected rooms; (2) the
+living piano and stair foot are especially under-readable; (3) night and
+transition lighting are uneven. Fixed: in sunlit indoor cells, the sun keeps
+stock-effect key slot zero and the two available slots can receive active,
+range-bounded local fixtures. An indoor-only, partly neutral bounced practical
+fill makes the sofa, coffee table, kitchen cabinet doors and trim more legible
+without flattening the architecture's baked gradients. A brighter all-room
+probe looked orange, and a stair-runner/sconce probe made black treads and
+large wall hotspots; both were rejected. The final outdoor detail path uses
+its prior scale, and the exterior road/facade is not broadly lifted.
+
+Only five first-person references changed: `fp-l0-hall`, `fp-l0-front-door`,
+`fp-l0-kitchen`, `fp-l0-hall-corner` and `fp-l0-foyer-stair`. Each old/actual
+image was inspected at full size; the changes are brighter indoor doors,
+joinery, cabinets and stair-adjacent trim. They were individually replaced,
+not regenerated as a suite. The remaining strict references and 18 paired
+culling views still pass. Unit 1,413/1,413, integration 140/140 and active
+render 49/49 pass.
+
+Remaining, ranked across L0: (1) formal-living piano and some dark primary
+furniture still fail normal-eye-height readability; (2) the main stair foot
+and service-room night depth are poor; (3) the warm/flat object-versus-bake
+balance needs a more physical solution before fine dressing. This is an
+incremental cross-room correction, not the final room-lighting milestone.
+**VISUAL-GATE-1 remains open.**
