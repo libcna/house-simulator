@@ -177,15 +177,22 @@
               "bolted"
             ]
           },
+          "openFraction": {
+            "$ref": "#/$defs/unit"
+          },
           "opening": {
             "$ref": "#/$defs/box"
+          },
+          "staticClosedReason": {
+            "type": "string"
           }
         },
         "required": [
           "id",
           "fence",
           "kind",
-          "opening"
+          "opening",
+          "openFraction"
         ],
         "type": "object"
       },

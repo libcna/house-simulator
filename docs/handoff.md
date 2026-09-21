@@ -1,3 +1,38 @@
+# World handoff — 2026-09-21 (`HOUSE-03221` static leaf poses)
+
+`HOUSE-03221` is complete. All 63 walkthrough doors, the sectional garage door and three gates
+author `openFraction` at their geometry rows. Accessible routes rest at 0.90 or 1.0 and clear at
+least 0.70 m. The only closed exceptions are the facade-only Juliet door and the rear gate into
+`EXT_NORTHSTRIP`; both carry `staticClosedReason`. The refrigerator and two horizontal hatches
+remain outside this walkthrough-door contract.
+
+Validator rule 14 uses `docs/zones.json`'s complete accessibility classification, the portal and
+cell geometry, and asset-manifest model envelopes. It rejects missing poses, a closed accessible
+route, insufficient clearance, wall intersections and placed-prop intersections. Dedicated
+selftests cover every requested rejection. That evidence found the hall-family leaf colliding with
+hall art in its former swing direction and with the family dog bed after reversal; the authored
+swing now enters the family room and the bed moved from `[3.17, 0.60, -23.02]` to
+`[3.20, 0.60, -24.00]`, clearing the measured arc without redesigning the room. Its retained
+navigation marker moved with the physical prop, and the existing deterministic family-asset gate
+now protects the shared position.
+
+Rule that chose this task: M1 dependency order plus R1/G1 — traversal must reach C1 in every zone
+before architectural C2 work. No zone level changed. Next is `HOUSE-03222`, which draws each leaf
+at these poses; then `HOUSE-03223` and `HOUSE-03224` make collision and aperture state agree.
+The normal build completed with `CNA_CNAEXT=OFF`; world schema generation/checks, all fourteen
+world rules and their rejection selftests, deterministic family-asset validation and deployed-world
+comparison pass. The complete static gate run reports only the pre-existing ignored `.claude`
+stray-root entry; all other gates pass, including 323 strict-XNA translation units. The unrestricted
+CTest inventory is not usable in this sandbox: SDL/GPU tests have no video device and save-store
+tests cannot use their normal user-data location, while the relevant `world-content-current` test
+passed before a concurrent, unrelated dirty edit in the sibling CNA checkout changed its CMake
+test-discovery files. That external in-progress edit now makes automatic CMake regeneration fail
+inside `cna_apply_test_display_policy_to`; it was not modified or worked around here. Compilation
+and tests remained limited to four CPU cores. The pre-existing staged
+`docs/visual-review/README.md` edit is unrelated and must remain outside this task's commit.
+
+---
+
 # Review handoff — 2026-09-21 (`HOUSE-03203` whole-property baseline)
 
 `HOUSE-03203` is complete. Visual-review Round 103 records the first formal all-zone day/night

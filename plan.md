@@ -443,12 +443,13 @@ navigation. No interaction framework is built for doors (ADR-0014). The grand to
 (`HOUSE-03226`) is the most valuable completion proof in this plan: from here on every task keeps it
 green.
 
-- [ ] HOUSE-03221 — Author a static pose for every door leaf, gate and the garage door
+- [x] HOUSE-03221 — Author a static pose for every door leaf, gate and the garage door
       dep: HOUSE-03201 · sys: world · plat: TOOL · pri: MUST · zone: all · adv: D2, G1 · est: 3
       files: assets-src/world/*.json (the chosen home), tools/world/world_schema.py, tools/world/validate_world.py, docs/world-format.md
       accept: (1) every leafed portal (63 doors, 3 gates, the garage door) has an authored static open fraction; (2) interior doors default to resting open (≥ 0.85) on their swing side, and a door stays closed only where no intended-accessible space lies behind it, each such case listed; (3) every door on an accessible route leaves ≥ 0.70 m clear width; (4) the validator rejects a missing pose, a closed door on an accessible route, and a swing arc that intersects walls or placed props; (5) the schema home is recorded in `docs/world-format.md`. Reusing `openFraction` from the existing door rows and `initialstate.json` is allowed; no behaviour code is added
       verify: `validate_world.py` (new rule); `--selftest` cases for each rejection
       note: today every leaf is drawn closed while nothing collides with it and culling treats it as closed. This is the data half of the fix.
+      note: (2026-09-21) all 63 walkthrough doors, the garage door and three gates now have static poses; only the facade-only Juliet door and rear non-traversal gate are closed and record why. Rule 14 proves route clearance and wall/prop arc clearance. Its measured arc moved the hall-family swing into the family room and the low dog bed 0.98 m north, the smallest correction that clears both sides' existing dressing
 
 - [ ] HOUSE-03222 — Draw every leaf at its static pose
       dep: HOUSE-03221 · sys: content · plat: TOOL · pri: MUST · zone: all · adv: D2, G1 · est: 3

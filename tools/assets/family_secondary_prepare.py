@@ -126,7 +126,7 @@ def validate_world() -> None:
     layout = layout_io.load_layout(REPO / "assets-src" / "world", ["props", "nav"])
     props = layout_io.by_id(layout_io.rows(layout, "props"), "prop")
     expected = {
-        "PROP_FAMILY_DOG_BED": ("MODEL_FAMILY_DOG_BED", [3.17, 0.6, -23.02], 0, "none"),
+        "PROP_FAMILY_DOG_BED": ("MODEL_FAMILY_DOG_BED", [3.20, 0.6, -24.00], 0, "none"),
         "PROP_FAMILY_BOOKCASE": ("MODEL_FAMILY_BOOKCASE", [7.95, 0.6, -22.20], 0, "none"),
         "PROP_FAMILY_SIDE_TABLE": ("MODEL_FAMILY_SIDE_TABLE", [7.72, 0.6, -26.00], 0,
                                    "proxy"),
@@ -143,7 +143,7 @@ def validate_world() -> None:
         raise RuntimeError("PROP_FAMILY_PLANT is no longer dressed on the bookcase")
     beds = layout_io.by_id(layout["nav"].get("beds", []), "bed")
     dog_bed = beds["BED_DOG_FAMILY"]
-    if dog_bed["prop"] != "PROP_FAMILY_DOG_BED" or dog_bed["position"] != [3.17, 0.66, -23.02]:
+    if dog_bed["prop"] != "PROP_FAMILY_DOG_BED" or dog_bed["position"] != [3.20, 0.66, -24.00]:
         raise RuntimeError("BED_DOG_FAMILY is no longer linked to its physical prop")
 
 

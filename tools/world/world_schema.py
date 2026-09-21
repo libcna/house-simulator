@@ -257,6 +257,12 @@ def build() -> dict[str, dict]:
          "hinge": {"enum": ["left", "right", None]},
          "swing": {"anyOf": [STR, {"type": "null"}]},
          "maxAngleDeg": NUM,
+         # `HOUSE-03221`: walkthrough doors are static presentation, not interactions.  The
+         # fraction lives with the leaf geometry it poses: 0 is closed and 1 is maxAngleDeg (or
+         # the full travel for a slider/sectional door).  A deliberately closed non-route leaf
+         # records why so an inaccessible facade detail cannot silently become a blocked route.
+         "openFraction": UNIT,
+         "staticClosedReason": STR,
          "frame": obj([], {"asset": ID_OR_NULL, "casing": NUM}),
          # Exterior joinery is authored per opening rather than inferred from a cell id or world
          # coordinate. `six_over_six` means two columns by three rows in each sash; the material
@@ -429,11 +435,12 @@ def build() -> dict[str, dict]:
             # without it is hung at the low end of its own opening, which is a default and not a
             # fact, so the one §11.2 states is authored.
             "gates": {"type": "array", "items": obj(
-                ["id", "fence", "kind", "opening"],
+                ["id", "fence", "kind", "opening", "openFraction"],
                 {"id": ID, "fence": ID, "kind": {"enum": ["hinged", "sliding", "bolted"]},
                  "opening": BOX, "height": NUM, "asset": ID_OR_NULL,
                  "hinge": {"enum": ["north", "south", "east", "west"]},
-                 "interactable": ID_OR_NULL})},
+                 "interactable": ID_OR_NULL, "openFraction": UNIT,
+                 "staticClosedReason": STR})},
             "kerbs": {"type": "array", "items": obj(
                 ["id", "path"],
                 {"id": ID, "path": {"type": "array", "items": VEC3, "minItems": 2},

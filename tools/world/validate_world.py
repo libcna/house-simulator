@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""validate_world.py -- the thirteen rules of `cna-house.md` §15.7, over a whole world directory.
+"""validate_world.py -- the fourteen world-integrity rules, over a whole world directory.
 
 `HOUSE-00358`. `world_schema.py` (`HOUSE-00341`) checks that each of the sixteen files has the
 right *shape*. This checks that the sixteen agree with each other and with the house: that a
@@ -16,7 +16,7 @@ pre-build step. `cna-house.md` §15.7: a failure fails the build.
 
 ## Every failure, not the first
 
-Each rule collects **all** its failures and the run reports all thirteen rules' worth, because
+Each rule collects **all** its failures and the run reports all fourteen rules' worth, because
 fixing forty authoring mistakes one build at a time is intolerable (`conventions.md` §5.1). Each
 message names the file, the JSON path and what was expected against what was found -- a message
 that says "portal misaligned" and stops has told the author to go and search.
@@ -68,6 +68,7 @@ Offline tooling: not runtime code, not subject to the XNA-only rule.
 from __future__ import annotations
 
 import argparse
+import json
 import math
 import sys
 from pathlib import Path
@@ -150,6 +151,13 @@ IMPASSABLE_PORTAL_KINDS = {"window"}
 #: Where the walk starts. §15.7 names it.
 ROOT_CELL = "L0_FOYER"
 
+#: `HOUSE-03221`: static walkthrough leaves are presentation poses rather than gameplay.  A
+#: resting pose at or beyond 85% leaves the authored 0.86 m leaf almost normal to its opening and
+#: therefore at least 0.70 m clear in the standard 0.90 m portal.
+STATIC_OPEN_FRACTION = 0.85
+STATIC_CLEAR_WIDTH = 0.70
+STATIC_POSE_KINDS = {"door", "double_door", "exterior_door", "slider", "garage_door"}
+
 RULE_TITLES = {
     1: "ids are unique and well formed",
     2: "cell boxes are non-degenerate and inside their level",
@@ -164,6 +172,7 @@ RULE_TITLES = {
     11: "every interactable is reachable from the floor",
     12: "nothing outdoors stands in something else",
     13: "every downspout is at a roof corner, on the ground under it",
+    14: "every walkthrough leaf has a clear, collision-free static pose",
 }
 
 
@@ -255,7 +264,7 @@ def segment_inside(x0: float, z0: float, x1: float, z1: float,
 
 
 class World:
-    """The layout, indexed the way the rules need it. Built once, read by all thirteen."""
+    """The layout, indexed the way the rules need it. Built once, read by all fourteen."""
 
     def __init__(self, layout: dict[str, dict], directory: Path | None = None) -> None:
         self.layout = layout
@@ -279,10 +288,27 @@ class World:
         self.nav_nodes = layout_io.rows(layout, "nav") if "nav" in layout else []
         self.audio_zones = layout_io.rows(layout, "audio") if "audio" in layout else []
         self.assets = layout_io.rows(layout, "assets") if "assets" in layout else []
+        self.gates = (layout.get("exterior") or {}).get("gates", [])
 
         self.level_by_id = {row.get("id"): row for row in self.levels}
         self.cell_by_id = {row.get("id"): row for row in self.cells}
         self.portal_by_id = {row.get("id"): row for row in self.portals}
+
+        # `HOUSE-03204` already records the intended-accessible set in the complete zone ledger;
+        # `HOUSE-03225` will add standing points to that same contract.  Use it only when it is a
+        # complete match for this world.  The selftest's small independent fixture therefore
+        # defaults to accessible rather than accidentally inheriting the real house's ids.
+        self.accessible_by_cell = {str(row.get("id")): True for row in self.cells}
+        try:
+            zones = json.loads((REPO / "docs" / "zones.json").read_text(encoding="utf-8"))
+            authored = {str(row["id"]): bool(row["accessible"])
+                        for zone in zones.get("zones", []) for row in zone.get("cells", [])}
+            authored.update({str(row["id"]): bool(row["accessible"])
+                             for row in zones.get("none", [])})
+            if set(authored) == set(self.accessible_by_cell):
+                self.accessible_by_cell = authored
+        except (OSError, KeyError, TypeError, ValueError):
+            pass
 
     @property
     def thickest_wall(self) -> float:
@@ -2428,11 +2454,306 @@ def rule_13_downspouts(world: World) -> list[Problem]:
     return problems
 
 
+# ======================================================================= static leaf poses ===
+
+
+def _rotate_plan(vector: tuple[float, float], angle: float) -> tuple[float, float]:
+    cosine, sine = math.cos(angle), math.sin(angle)
+    return (vector[0] * cosine - vector[1] * sine,
+            vector[0] * sine + vector[1] * cosine)
+
+
+def _swing_side(world: World, portal: dict, cell: dict) -> tuple[tuple[float, float], float] | None:
+    """The plan normal from a portal into @p cell, and that cell's wall face.
+
+    The portal plane is at the middle of the wall while a cell ends at its inner face.  Keeping
+    both values is what lets the arc occupy the reveal while closed without calling that reveal a
+    wall intersection.
+    """
+    plane = portal.get("plane") or {}
+    rect = portal.get("rect") or {}
+    axis, value = plane.get("axis"), plane.get("value")
+    try:
+        value = float(value)
+        u0, u1 = (float(v) for v in rect["u"])
+    except (KeyError, TypeError, ValueError):
+        return None
+    if axis not in ("x", "z"):
+        return None
+
+    candidates = []
+    for x0, x1, z0, z1 in boxes_of(cell):
+        along = (z0, z1) if axis == "x" else (x0, x1)
+        if overlap(along, (u0, u1)) <= 1e-9:
+            continue
+        low, high = (x0, x1) if axis == "x" else (z0, z1)
+        if high <= value + PLANE_TOLERANCE:
+            candidates.append((abs(value - high), -1.0, high))
+        if low >= value - PLANE_TOLERANCE:
+            candidates.append((abs(low - value), 1.0, low))
+    if not candidates:
+        return None
+    _distance, sign, face = min(candidates)
+    return ((sign, 0.0) if axis == "x" else (0.0, sign), face)
+
+
+def _leaf_segments(world: World, opening: dict, portal: dict,
+                   fraction: float) -> tuple[list[tuple[tuple[float, float],
+                                                           tuple[float, float], float]],
+                                              tuple[float, float], float] | None:
+    """Hinge, closed leaf vector and signed posed angle for each hinged leaf."""
+    swing = world.cell_by_id.get(opening.get("swing"))
+    side = _swing_side(world, portal, swing) if swing is not None else None
+    if side is None:
+        return None
+    normal, face = side
+    plane = portal["plane"]
+    rect = portal["rect"]
+    axis, value = str(plane["axis"]), float(plane["value"])
+    u0, u1 = (float(v) for v in rect["u"])
+    width = float((opening.get("leaf") or {}).get("width", u1 - u0))
+
+    if portal.get("kind") == "double_door":
+        leaves = ((u0, width), (u1, -width))
+    else:
+        tangent = (0.0, 1.0) if axis == "x" else (1.0, 0.0)
+        # Looking into the swing cell, camera-right is view x world-up.  If it follows increasing
+        # U, the left jamb is the low endpoint; otherwise it is the high endpoint.
+        right = (-normal[1], normal[0])
+        left = u0 if right[0] * tangent[0] + right[1] * tangent[1] > 0.0 else u1
+        hinge = left if opening.get("hinge") == "left" else (u1 if left == u0 else u0)
+        leaves = ((hinge, width if hinge == u0 else -width),)
+
+    out = []
+    maximum = math.radians(float(opening.get("maxAngleDeg", 0.0))) * fraction
+    for hinge_u, delta in leaves:
+        hinge = (value, hinge_u) if axis == "x" else (hinge_u, value)
+        closed = (0.0, delta) if axis == "x" else (delta, 0.0)
+        cross = closed[0] * normal[1] - closed[1] * normal[0]
+        out.append((hinge, closed, maximum if cross > 0.0 else -maximum))
+    return out, normal, face
+
+
+def _segment_hits_box(a: tuple[float, float], b: tuple[float, float],
+                      box: tuple[float, float, float, float], padding: float = 0.0) -> bool:
+    """Liang-Barsky segment/axis-aligned-box test, with an optional leaf-thickness pad."""
+    x0, x1, z0, z1 = box
+    x0, x1, z0, z1 = x0 - padding, x1 + padding, z0 - padding, z1 + padding
+    dx, dz = b[0] - a[0], b[1] - a[1]
+    low, high = 0.0, 1.0
+    for p, q in ((-dx, a[0] - x0), (dx, x1 - a[0]),
+                 (-dz, a[1] - z0), (dz, z1 - a[1])):
+        if abs(p) < 1e-12:
+            if q < 0.0:
+                return False
+            continue
+        t = q / p
+        if p < 0.0:
+            low = max(low, t)
+        else:
+            high = min(high, t)
+        if low > high:
+            return False
+    return True
+
+
+def _asset_dimensions() -> dict[str, tuple[float, float, float]]:
+    """Measured model envelopes used to reject a leaf swept through visual dressing."""
+    try:
+        document = json.loads((REPO / "assets-src" / "assets.manifest.json").read_text(
+            encoding="utf-8"))
+    except (OSError, TypeError, ValueError):
+        return {}
+    out = {}
+    for row in document.get("assets", []):
+        bounds = (row.get("geometry") or {}).get("boundsMetres")
+        if isinstance(bounds, list) and len(bounds) == 3 \
+                and all(isinstance(value, (int, float)) for value in bounds):
+            out[str(row.get("id"))] = tuple(float(value) for value in bounds)
+    return out
+
+
+def _arc_wall_hit(world: World, opening: dict, portal: dict,
+                  geometry: tuple[list, tuple[float, float], float]) -> bool:
+    segments, normal, face = geometry
+    cell = world.cell_by_id.get(opening.get("swing"))
+    if cell is None:
+        return False
+    axis = portal["plane"]["axis"]
+    plane = float(portal["plane"]["value"])
+    u0, u1 = (float(value) for value in portal["rect"]["u"])
+    reveal = abs(face - plane)
+    cell_boxes = boxes_of(cell)
+    for hinge, closed, angle in segments:
+        for turn in range(1, 33):
+            rotated = _rotate_plan(closed, angle * turn / 32.0)
+            for along in range(1, 17):
+                ratio = along / 16.0
+                x = hinge[0] + rotated[0] * ratio
+                z = hinge[1] + rotated[1] * ratio
+                normal_distance = (x - plane) * normal[0] + (z - plane) * normal[1]
+                u = z if axis == "x" else x
+                in_reveal = (-1e-9 <= normal_distance <= reveal + 1e-9
+                             and u0 - 1e-9 <= u <= u1 + 1e-9)
+                if not in_reveal and not point_in_boxes(x, z, cell_boxes, margin=1e-9):
+                    return True
+    return False
+
+
+def _arc_prop_hit(world: World, opening: dict, portal: dict,
+                  geometry: tuple[list, tuple[float, float], float],
+                  dimensions: dict[str, tuple[float, float, float]]) -> str | None:
+    segments, _normal, _face = geometry
+    leaf = opening.get("leaf") or {}
+    leaf_bottom = float(portal["rect"]["v"][0])
+    leaf_top = leaf_bottom + float(leaf.get("height", 0.0))
+    padding = float(leaf.get("thickness", 0.04)) / 2.0
+    for prop in world.props:
+        if prop.get("cell") != opening.get("swing"):
+            continue
+        position = prop.get("position") or []
+        if len(position) != 3:
+            continue
+        scale = float(prop.get("scale", 1.0))
+        size = dimensions.get(str(prop.get("asset")))
+        # A fixture without manifest geometry still has a position, so it remains a small point
+        # obstacle instead of vanishing from a test fixture or from partially authored data.
+        width, height, depth = ((value * scale for value in size)
+                                if size is not None else (0.10, 1.0, 0.10))
+        px, py, pz = (float(value) for value in position)
+        if py > leaf_top + 1e-9 or py + height < leaf_bottom - 1e-9:
+            continue
+        yaw = math.radians(float(prop.get("yawDeg", 0.0)))
+        box = (-width / 2.0, width / 2.0, -depth / 2.0, depth / 2.0)
+        for hinge, closed, angle in segments:
+            for turn in range(33):
+                vector = _rotate_plan(closed, angle * turn / 32.0)
+                end = (hinge[0] + vector[0], hinge[1] + vector[1])
+                local_a = _rotate_plan((hinge[0] - px, hinge[1] - pz), -yaw)
+                local_b = _rotate_plan((end[0] - px, end[1] - pz), -yaw)
+                if _segment_hits_box(local_a, local_b, box, padding):
+                    return str(prop.get("id"))
+    return None
+
+
+def rule_14_static_leaf_poses(world: World) -> list[Problem]:
+    """Every walkthrough leaf has one honest, clear static resting pose (`HOUSE-03221`)."""
+    problems = []
+    dimensions = _asset_dimensions()
+    for index, opening in enumerate(world.openings):
+        portal = world.portal_by_id.get(opening.get("portal"))
+        if (opening.get("kind") != "door" or opening.get("type") == "D_APPLIANCE"
+                or portal is None or portal.get("kind") not in STATIC_POSE_KINDS):
+            continue
+        where = f"openings/{index}"
+        fraction = opening.get("openFraction")
+        if not isinstance(fraction, (int, float)):
+            problems.append(Problem(
+                14, FILE_OF["openings"], f"{where}/openFraction",
+                f"leaf {opening.get('id')} has no authored static open fraction"))
+            continue
+        fraction = float(fraction)
+        reason = opening.get("staticClosedReason")
+        cells = (portal.get("cellA"), portal.get("cellB"))
+        accessible_route = all(world.accessible_by_cell.get(str(cell), True) for cell in cells)
+        if accessible_route and fraction < STATIC_OPEN_FRACTION - 1e-9:
+            problems.append(Problem(
+                14, FILE_OF["openings"], f"{where}/openFraction",
+                f"leaf {opening.get('id')} is on intended-accessible route {cells[0]} to "
+                f"{cells[1]} but rests at {fraction:.2f}; it must be at least "
+                f"{STATIC_OPEN_FRACTION:.2f}"))
+        if fraction < STATIC_OPEN_FRACTION - 1e-9 and not reason:
+            problems.append(Problem(
+                14, FILE_OF["openings"], f"{where}/staticClosedReason",
+                f"leaf {opening.get('id')} rests closed without listing the inaccessible space "
+                f"behind it"))
+        if reason and fraction >= STATIC_OPEN_FRACTION - 1e-9:
+            problems.append(Problem(
+                14, FILE_OF["openings"], f"{where}/staticClosedReason",
+                f"leaf {opening.get('id')} is open, so its closed-leaf exception is stale"))
+        if not accessible_route:
+            continue
+
+        span = float(portal["rect"]["u"][1]) - float(portal["rect"]["u"][0])
+        kind = portal.get("kind")
+        if kind == "slider":
+            clear = span * 0.5 * fraction
+        elif kind == "garage_door":
+            clear = span * fraction
+        else:
+            projected = float((opening.get("leaf") or {}).get("width", span)) * abs(
+                math.cos(math.radians(float(opening.get("maxAngleDeg", 0.0))) * fraction))
+            clear = span - projected * (2.0 if kind == "double_door" else 1.0)
+        if clear < STATIC_CLEAR_WIDTH - 1e-9:
+            problems.append(Problem(
+                14, FILE_OF["openings"], f"{where}/openFraction",
+                f"leaf {opening.get('id')} leaves {clear:.3f} m clear at its static pose; an "
+                f"accessible route requires at least {STATIC_CLEAR_WIDTH:.2f} m"))
+
+        if kind in ("slider", "garage_door"):
+            continue
+        geometry = _leaf_segments(world, opening, portal, fraction)
+        if geometry is None:
+            # A complete hinge contract with no side means rule 4 already owns a portal that is
+            # not in its wall; do not turn that one geometric typo into two rules' findings.
+            if (opening.get("hinge") not in ("left", "right")
+                    or not isinstance(opening.get("swing"), str)
+                    or not isinstance(opening.get("maxAngleDeg"), (int, float))):
+                problems.append(Problem(
+                    14, FILE_OF["openings"], where,
+                    f"hinged leaf {opening.get('id')} has no complete hinge, swing cell and "
+                    f"maximum angle, so its static arc cannot be proved clear"))
+            continue
+        if _arc_wall_hit(world, opening, portal, geometry):
+            problems.append(Problem(
+                14, FILE_OF["openings"], f"{where}/openFraction",
+                f"leaf {opening.get('id')}'s swing arc leaves {opening.get('swing')}'s footprint "
+                f"and intersects a wall"))
+        prop = _arc_prop_hit(world, opening, portal, geometry, dimensions)
+        if prop is not None:
+            problems.append(Problem(
+                14, FILE_OF["openings"], f"{where}/openFraction",
+                f"leaf {opening.get('id')}'s swing arc intersects placed prop {prop}"))
+
+    for index, gate in enumerate(world.gates):
+        where = f"gates/{index}"
+        fraction = gate.get("openFraction")
+        if not isinstance(fraction, (int, float)):
+            problems.append(Problem(
+                14, FILE_OF["exterior"], f"{where}/openFraction",
+                f"gate {gate.get('id')} has no authored static open fraction"))
+            continue
+        fraction = float(fraction)
+        reason = gate.get("staticClosedReason")
+        if fraction < STATIC_OPEN_FRACTION - 1e-9 and not reason:
+            problems.append(Problem(
+                14, FILE_OF["exterior"], f"{where}/staticClosedReason",
+                f"gate {gate.get('id')} rests closed without listing the non-traversal space "
+                f"behind it"))
+        if reason and fraction >= STATIC_OPEN_FRACTION - 1e-9:
+            problems.append(Problem(
+                14, FILE_OF["exterior"], f"{where}/staticClosedReason",
+                f"gate {gate.get('id')} is open, so its closed-gate exception is stale"))
+        if reason:
+            continue
+        opening = gate.get("opening") or {}
+        width = max(float(opening["x"][1]) - float(opening["x"][0]),
+                    float(opening["z"][1]) - float(opening["z"][0]))
+        clear = (width * fraction if gate.get("kind") == "sliding" else
+                 width - width * abs(math.cos(math.radians(90.0 * fraction))))
+        if clear < STATIC_CLEAR_WIDTH - 1e-9:
+            problems.append(Problem(
+                14, FILE_OF["exterior"], f"{where}/openFraction",
+                f"gate {gate.get('id')} leaves {clear:.3f} m clear; the walkthrough requires at "
+                f"least {STATIC_CLEAR_WIDTH:.2f} m"))
+    return problems
+
+
 RULES = {
     1: rule_1_ids, 2: rule_2_boxes, 3: rule_3_overlap, 4: rule_4_portal_planes,
     5: rule_5_connected, 6: rule_6_references, 7: rule_7_openings, 8: rule_8_stairs,
     9: rule_9_plumbing, 10: rule_10_realism, 11: rule_11_reachable, 12: rule_12_outdoors,
-    13: rule_13_downspouts,
+    13: rule_13_downspouts, 14: rule_14_static_leaf_poses,
 }
 
 
@@ -2461,7 +2782,7 @@ def validate(directory: Path, wanted: list[int] | None = None,
 def report(directory: Path, wanted: list[int] | None = None, stream=sys.stdout) -> int:
     shape, problems = validate(directory, wanted)
     if shape:
-        print(f"validate_world: {len(shape)} shape problem(s); the thirteen rules did not run, "
+        print(f"validate_world: {len(shape)} shape problem(s); the fourteen rules did not run, "
               f"because a rule cannot read a field that is not the type it says it is.",
               file=stream)
         for line in shape:
@@ -2495,7 +2816,7 @@ def report(directory: Path, wanted: list[int] | None = None, stream=sys.stdout) 
 
 
 def fixture() -> dict[str, dict]:
-    """A small house that satisfies all thirteen rules, and exercises each of them at least once.
+    """A small house that satisfies all fourteen rules, and exercises each at least once.
 
     Small enough to hold in the head and real enough to be worth passing: two storeys, a foyer that
     everything is reachable from, a WC stacked over a WC on the drain the plumbing rule wants, a
@@ -2591,11 +2912,14 @@ def fixture() -> dict[str, dict]:
          "leaf": {"width": 0.86, "height": 2.02, "thickness": 0.040},
          # `swing` names the cell the leaf opens into -- a reference, checked by rule 6, and not
          # `docs/world-format.md`'s original `"into_L0_WC1"`, which nothing could resolve.
-         "swing": "L0_WC1", "hinge": "left",
+         "swing": "L0_WC1", "hinge": "left", "maxAngleDeg": 95.0,
+         "openFraction": 0.90,
          "asset": "MODEL_DOOR_LEAF", "material": "MAT_PAINT"},
         {"id": "DOOR_WC4", "kind": "door", "type": "D_INT_SOLID",
          "portal": "P_L1HALL__WC4",
          "leaf": {"width": 0.86, "height": 2.02, "thickness": 0.040},
+         "swing": "L1_WC4", "hinge": "left", "maxAngleDeg": 95.0,
+         "openFraction": 0.90,
          "asset": "MODEL_DOOR_LEAF", "material": "MAT_PAINT"},
         # 1.50 m up, over a 0.60 m floor, is a 0.90 m sill -- §12.6's own number for a `W_DH_STD`
         # and the middle of §70.5's 0.50-1.10 band.
@@ -2609,6 +2933,8 @@ def fixture() -> dict[str, dict]:
         {"id": "DOOR_TERRACE", "kind": "door", "type": "D_ENTRY",
          "portal": "P_FOYER__TERRACE",
          "leaf": {"width": 0.92, "height": 2.15, "thickness": 0.055},
+         "swing": "L0_FOYER", "hinge": "left", "maxAngleDeg": 95.0,
+         "openFraction": 0.90,
          "asset": "MODEL_DOOR_LEAF", "material": "MAT_PAINT"},
     ]}
 
@@ -2769,7 +3095,7 @@ def fixture() -> dict[str, dict]:
                             "gate": None}],
                 "gates": [{"id": "GATE_PED", "fence": "FENCE_FRONT", "kind": "hinged",
                            "opening": {"x": [-0.6, 0.6], "z": [-6.05, -5.95]}, "height": 1.35,
-                           "asset": None, "interactable": None}],
+                           "asset": None, "interactable": None, "openFraction": 0.90}],
                 "structures": [{"id": "STRUCT_SHED", "cell": "L0_TERRACE",
                                 "footprint": {"x": [-2.2, 2.2], "z": [-4.5, 0.2]},
                                 "asset": None, "eavesY": 2.35, "ridgeY": 2.85}]}
@@ -2843,7 +3169,7 @@ def selftest() -> int:
         shape, problems = validate(world_dir)
         require(not shape, f"the fixture matches every schema ({shape[:2]})")
         require(not problems,
-                f"and passes all thirteen rules ({[str(p) for p in problems[:3]]})")
+                f"and passes all fourteen rules ({[str(p) for p in problems[:3]]})")
 
         # 2. Every rule is actually exercised by the fixture -- a rule with nothing to look at
         #    passes for the wrong reason. Counted as: the rule reads at least one row.
@@ -3596,6 +3922,10 @@ def selftest() -> int:
                 {"id": "DS_MAIN_NW", "roof": "ROOF_MAIN", "position": [0.0, 5.0, 0.0],
                  "splash": [0.0, 0.0, 0.0], "material": None}]
 
+        @mutation(14, "a walkthrough door with no authored static pose")
+        def _(docs):
+            row(docs, "openings", "DOOR_WC1").pop("openFraction")
+
         # ...and rule 13's other three conditions need a world with a ROOF and a height field,
         # which the fixture has neither of. The property has both, so they are driven against it
         # directly (`HOUSE-00776`). The first version of this rule read `world.directory` on a
@@ -3631,8 +3961,37 @@ def selftest() -> int:
             require(any("corner is at" in message for message in rule13(moved)),
                     f"and a pipe half a metre off its roof's corner is caught ({rule13(moved)})")
 
-        require(sorted({rule for rule, _, _ in mutations}) == list(range(1, 14)),
-                "there is a mutation for each of the thirteen rules")
+        # Rule 14's other acceptance failures: closed route, wall arc and placed-prop arc.  These
+        # are separate from the one-mutation-per-rule table because all four belong to one rule.
+        closed = copy.deepcopy(base)
+        row(closed, "openings", "DOOR_WC1")["openFraction"] = 0.0
+        closed_dir = workspace / "static-pose-closed-route"
+        write_fixture(closed_dir, closed)
+        _, problems = validate(closed_dir, wanted=[14])
+        require(any("intended-accessible route" in problem.message for problem in problems),
+                f"a closed leaf on an accessible route is rejected "
+                f"({[str(problem) for problem in problems]})")
+
+        walled = copy.deepcopy(base)
+        row(walled, "cells", "L0_WC1")["boxes"] = [{"x": [2.0, 4.0], "z": [4.0, 4.75]}]
+        walled_dir = workspace / "static-pose-wall-arc"
+        write_fixture(walled_dir, walled)
+        _, problems = validate(walled_dir, wanted=[14])
+        require(any("intersects a wall" in problem.message for problem in problems),
+                f"a swing arc through a wall is rejected "
+                f"({[str(problem) for problem in problems]})")
+
+        obstructed = copy.deepcopy(base)
+        row(obstructed, "props", "PROP_WC1_PAN")["position"] = [2.85, 0.60, 4.67]
+        obstructed_dir = workspace / "static-pose-prop-arc"
+        write_fixture(obstructed_dir, obstructed)
+        _, problems = validate(obstructed_dir, wanted=[14])
+        require(any("intersects placed prop" in problem.message for problem in problems),
+                f"a swing arc through a placed prop is rejected "
+                f"({[str(problem) for problem in problems]})")
+
+        require(sorted({rule for rule, _, _ in mutations}) == list(range(1, 15)),
+                "there is a mutation for each of the fourteen rules")
 
         for rule, description, mutate in mutations:
             docs = copy.deepcopy(base)
@@ -3675,7 +4034,7 @@ def selftest() -> int:
         stream = io.StringIO()
         code = report(broken, stream=stream)
         require(code == 1 and "did not run" in stream.getvalue(),
-                "and the report says the rules did not run, instead of printing thirteen oks")
+                "and the report says the rules did not run, instead of printing fourteen oks")
 
         # 7. --rules runs what it is asked for and nothing else.
         docs = copy.deepcopy(base)

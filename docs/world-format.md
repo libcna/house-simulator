@@ -285,7 +285,10 @@ cells' boundary planes within 1 cm and its `v` range to lie inside both cells' v
 
 Doors and windows as geometry plus entity: leaf size, hinge side, swing direction, frame. Each row
 pairs with exactly one portal in `layout.portals.json` (validator rule 7), and with one
-interactable. A double-hung window may additionally opt into the generated exterior treatment with
+interactable. The interaction reference is retained as legacy data, but the architectural
+walkthrough does not operate door leaves: every walkthrough door instead authors one static
+`openFraction` on this row. A double-hung window may additionally opt into the generated exterior
+treatment with
 `"muntinPattern": "six_over_six"` and a `shutterMaterial` material id. The two fields are authored
 together: `six_over_six` means two columns by three rows in each sash, while `shutterMaterial`
 selects the finish for its paired louvered shutters. Windows without both fields remain plain.
@@ -308,7 +311,8 @@ segments, leaf envelope, portal, animation contract and collision; all three fie
       "id": "DOOR_L0_WC1", "kind": "door",
       "portal": "P_L0_HALL__L0_WC1",
       "leaf": { "width": 0.86, "height": 2.04, "thickness": 0.040 },
-      "hinge": "left", "swing": "into_L0_WC1", "maxAngleDeg": 95.0,
+      "hinge": "left", "swing": "L0_WC1", "maxAngleDeg": 95.0,
+      "openFraction": 0.90,
       "frame": { "asset": "MODEL_DOOR_FRAME_INT_01", "casing": 0.070 },
       "asset": "MODEL_DOOR_LEAF_PANEL_01",
       "material": "MAT_PAINT_TRIM_WHITE",
@@ -318,6 +322,20 @@ segments, leaf envelope, portal, animation contract and collision; all three fie
   ]
 }
 ```
+
+`openFraction` is a unit interval. For a hinged leaf, 0 is closed in the portal plane and 1 is
+`maxAngleDeg`; for a slider or sectional garage door, 1 is its full authored travel. Hinge
+`left`/`right` is read while looking from the other portal cell **into** `swing`; a double door is
+hung on both outer jambs and the row's leaf width applies to each leaf. This convention is shared
+by validator rule 14 and the shell generator, so a pose cannot be validated one way and drawn the
+other.
+
+Walkthrough-route doors rest at `openFraction >= 0.85` and must leave at least 0.70 m clear. The
+only closed door is `DOOR_L2_LANDING__L2_BALCONY_JULIET`: the cell behind it is facade-only, not an
+intended standing area. It carries `staticClosedReason` on the row. The refrigerator and the two
+horizontal hatches are not walkthrough doors and do not gain a static presentation pose here.
+Rule 14 checks every required pose, route clearance and the swept hinged-leaf arc against the
+swing cell's walls and measured envelopes of placed props.
 
 ## `layout.stairs.json`
 
@@ -604,6 +622,12 @@ and the garden path) and `structures` (the shed). Rule 6 checks that a gate hang
 fence and that a structure's `cell` exists; rule 10 checks that an enterable structure's footprint
 **contains** that cell's, because a shell that does not hold its own interior is a building drawn
 beside its inside.
+
+Each gate also authors `openFraction` with the same 0..1 meaning: full swing for hinged/bolted
+leaves and full travel for a slider. The pedestrian and driveway gates rest open for the Grand
+Tour. `EXT_GATE_REAR` alone rests closed and carries `staticClosedReason`, because it leads only to
+`EXT_NORTHSTRIP`, outside the intended traversal area. Rule 14 requires at least 0.70 m clear at
+every traversed gate.
 
 `HOUSE-00937` adds `groundCovers` for a finish such as foundation mulch that follows the generated
 terrain instead of flattening it. Each stable row owns one or more X/Z boxes and one canonical
@@ -942,7 +966,7 @@ the `schema` header rule are one definition rather than sixteen that can quietly
 `world_schema.py --check` is a CI gate; regenerate with `--emit` after changing a shape here.
 
 The schemas check **shape**: presence, type, range, and that an id looks like an id, each problem
-reported against the field that carries it. They deliberately do **not** check the thirteen rules
+reported against the field that carries it. They deliberately do **not** check the fourteen rules
 below. Rules 4, 5, 6, 7, 9 and 11 span two files or the whole layout, and JSON Schema cannot see
 across a file boundary; rules 2, 3, 8 and 10 compare two numbers to each other, which it also
 cannot do. A schema that attempted them would be a second, weaker validator — so a portal naming a

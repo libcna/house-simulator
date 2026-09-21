@@ -160,6 +160,9 @@
               "six_over_six"
             ]
           },
+          "openFraction": {
+            "$ref": "#/$defs/unit"
+          },
           "panelMaterial": {
             "$ref": "#/$defs/id"
           },
@@ -176,6 +179,9 @@
           },
           "solid": {
             "type": "boolean"
+          },
+          "staticClosedReason": {
+            "type": "string"
           },
           "surroundMaterial": {
             "$ref": "#/$defs/id"
