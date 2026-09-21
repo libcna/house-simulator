@@ -18,8 +18,9 @@ it and both are updated to point at each other.
 | [0007](ADR-0007-kinematic-collision.md) | Project-owned kinematic collision, not a physics engine | Accepted | `HOUSE-00013` |
 | [0008](ADR-0008-save-format.md) | Delta save format, versioning and migration policy | Accepted; superseded in part by 0014 | `HOUSE-00014` |
 | [0009](ADR-0009-day-length.md) | A 24-minute simulated day | Accepted | `HOUSE-00015` |
-| [0010](ADR-0010-room-aware-audio.md) | Room-aware audio over the portal graph, not `Apply3D` | Accepted; superseded in part by 0014 | `HOUSE-00016` |
+| [0010](ADR-0010-room-aware-audio.md) | Room-aware audio over the portal graph, not `Apply3D` | Accepted; superseded in part by 0014 and 0015 | `HOUSE-00016` |
 | [0011](ADR-0011-no-runtime-dependencies.md) | No third-party runtime dependencies | Accepted | `HOUSE-00017` |
 | [0012](ADR-0012-asset-licensing.md) | Asset licensing policy, and the "no row, no build" rule | Accepted | `HOUSE-00018` |
 | [0013](ADR-0013-neighbourhood-asset-variants.md) | The neighbourhood's variety is generated asset variants, not per-instance material overrides | Accepted | `HOUSE-00843` |
-| [0014](ADR-0014-showcase-scope.md) | An architectural showcase, not a life simulator: scope reduction, breadth-first completion | Accepted; supersedes 0008 and 0010 in part | `HOUSE-03201` |
+| [0014](ADR-0014-showcase-scope.md) | An architectural showcase, not a life simulator: scope reduction, breadth-first completion | Accepted; supersedes 0008 and 0010 in part; superseded in part by 0015 | `HOUSE-03201` |
+| [0015](ADR-0015-quality-tiers-and-compact-scope.md) | Quality tiers, a reusable kit and a compact feature set: second scope reduction | Accepted; supersedes 0014 in part | `HOUSE-03205` |

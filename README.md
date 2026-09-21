@@ -8,15 +8,18 @@ life simulation: the point is a complete, convincing environment running on CNA'
 Linux desktop, in a browser and on Android.
 
 * **Architecture and design:** [`cna-house.md`](cna-house.md), the design baseline, read together
-  with its 2026-09-21 scope amendment ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md)).
+  with its two 2026-09-21 scope amendments ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md),
+  [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md)).
 * **Plan:** [`plan.md`](plan.md) is the execution ledger for the remaining work: 17 milestones, a
-  Definition of DONE, and breadth-first scheduling rules. The original 53-phase ledger is archived
-  in [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md).
+  Definition of DONE, explicit non-goals, quality tiers (a baseline in every room, presentation-ready
+  main rooms, seven showcase hero areas) and breadth-first scheduling rules. The original 53-phase
+  ledger is archived in [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md).
 * **Status (2026-09-21):** 674 tasks complete. The whole five-level house, its property and the
   neighbourhood are walkable in first person with production materials, baked lighting, a real
   sky, sun, moon and stars, and a weather simulation. The ground-floor principal rooms are
   furnished; the basement, the upper floors, the attic and the garage are not yet. The plan's
-  zone scoreboard tracks exactly where each area stands.
+  zone scoreboard tracks exactly where each area stands; about 335 agent-hours of planned work
+  remain to DONE on Linux, the Web and Android.
 
 ---
 

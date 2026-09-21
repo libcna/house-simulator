@@ -88,16 +88,23 @@ concurrent agents — is in `../AGENTS.md`; do not re-derive it, just comply.
 ## 3. Project rules on top of those
 
 **This is an architectural showcase, not a life simulator** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md),
-2026-09-21). The player walks and looks. Animals, a visible avatar, character animation,
-interaction gameplay, appliance, plumbing, toilet and television behaviour, and household-state
-persistence are out of scope. Do not add code for them. Objects are static dressing.
+[ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md), 2026-09-21). The player
+walks and looks. Animals, a visible avatar, character animation, interaction gameplay, appliance,
+plumbing, toilet and television behaviour, and household-state persistence are out of scope. Do not
+add code for them. Objects are static dressing. **Cut depth, preserve breadth:** nothing on
+`plan.md`'s *Non-goals* list is required for DONE or may be written into a task (R9), and an `OPT`
+task is never scheduled while a MUST task is open (R13).
 
-**Breadth before depth. Pick work by `plan.md`'s scheduling rules (R1–R11)**, not by task number
-and not by the largest defect in one area. No zone is worked more than one completion level ahead
-of the least-complete zone (R1). Until gate G4, **no task targets the ground-floor principal
-route** (R4). At most 3 consecutive tasks go to one zone (R3) and at most 2 review rounds (R6).
-Every new task states `adv:` and `est:` (R7). Before starting, read the zone scoreboard in
-`plan.md`; before finishing, record in `docs/handoff.md` which rule chose your task.
+**Breadth before depth. Pick work by `plan.md`'s scheduling rules (R1–R13)**, not by task number
+and not by the largest defect in one area. Quality is **tiered**: every accessible room reaches C3,
+main rooms C4, and only the seven hero areas C5 (*Quality tiers*). Up to C3 no zone is worked more
+than one level ahead of the least-complete zone; C4 work waits for gate G3 and C5 work for G4 (R1).
+**The ground floor goes last:** nothing targets it before G3 except S1 fixes and `HOUSE-03407`, and
+its C4 and C5 tasks wait for every other zone's (R4). At most 3 consecutive tasks go to one zone
+(R3) and at most 2 review rounds (R6); polish outside the hero areas happens only in M11's bounded
+pass (R12). Furniture comes from the reusable kit and may be reused freely (R8). Every task states
+`adv:` and `est:` (R7). Before starting, read the zone scoreboard in `plan.md`; before finishing,
+record in `docs/handoff.md` which rule chose your task.
 
 **One task, one commit.** The commit message names the `HOUSE-00000` id, and `plan.md`'s checkbox
 is ticked in the same commit. Definition of done: [`docs/workflow.md`](docs/workflow.md).

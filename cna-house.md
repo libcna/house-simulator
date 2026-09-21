@@ -3,7 +3,7 @@
 **Project:** `cna-house`
 **Repository:** `/rv/data/development/github.com/openeggbert/cna-house`
 **Document status:** design baseline for the planning pass completed 2026-09-06.
-**Implementation status:** IN PROGRESS since 2026-09-06. **Scope reduced 2026-09-21** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md)). See `plan.md` for
+**Implementation status:** IN PROGRESS since 2026-09-06. **Scope reduced 2026-09-21** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md)), **and again the same day** ([ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md)). See `plan.md` for
 the ledger.
 
 > Implementation was approved by the project owner on 2026-09-06. This document remains the
@@ -29,6 +29,29 @@ the ledger.
 > interaction, pet and save tests of §70, the animation and pet budgets of §71), that mention is
 > void. The goal, the Definition of DONE, the scheduling rules and the milestones are in
 > [`plan.md`](plan.md).
+
+> **Second scope amendment — 2026-09-21 (`HOUSE-03205`, [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md)).** *Cut depth,
+> preserve breadth.* Every floor, the basement, the attic, the garage, the garden, the exterior, Web
+> and Android stay. What this document designs beyond the following is **not required for DONE**; it
+> remains design for work that is optional after DONE (`plan.md`, *Optional after DONE*).
+> **Quality:** tiers, not a showcase level everywhere: every accessible room reaches a dressed and
+> lit baseline, the main rooms a presentation level, and seven hero areas a showcase level
+> (`plan.md`, *Quality tiers*). **Furnishing:** a reusable modular kit, reused freely and varied by
+> tint, scale and arrangement; the density bands and the anti-repetition limits of §59.1–§59.2 do
+> not apply, and §59.3's signs of habitation are required in hero areas only. **Environment:** time
+> of day, day and night, the sun, moon and stars, clear, overcast and rain (with the roof mask of
+> §37.2 and the wet surfaces of §37.4), fog, and falling snow without accumulation. Snow cover and
+> melt (§38), the storm's lightning and thunder (§39), hail (§40), vegetation sway (§41), the glare
+> and lens flare of §32.4, puddles and splashes (§37.3–§37.4) and seasonal vegetation (§36.3.1) are
+> optional; the storm and hail weather states still exist and render as heavy rain. **Audio:**
+> footsteps on six broad surface categories, one interior tone, exterior day and night beds, rain
+> and wind (§62); no positional loops, clocks, creaks, appliance hums or seasonal beds, and of §64
+> only the weather beds' sky-exposure gain. **Shell:** one settings screen (§68 reduced to graphics,
+> audio, controls and environment), no key remapping, and the existing debug tools of §69 as they
+> are. **Tests and budgets:** the gates and suites of §70 that exist, plus representative sets; not
+> the full matrices of §70.2–§70.4 and §70.6. The budgets of §71 are targets on representative
+> scenarios, with no headroom margin. **Platforms:** Web in Chrome and Firefox; Android on one
+> representative device. Where a section below requires more than this, `plan.md` governs.
 
 ---
 
@@ -205,7 +228,9 @@ an optional session file holding the player pose, the clock and the weather.
 
 **G6 — A living sky.** An accelerated but astronomically-derived day/night cycle with a moving
 sun, real sunrise/sunset colouring, stars, a moon whose phase advances over simulated days, and a
-continuous weather system with rain, snow, hail, storms and wind.
+continuous weather system with rain, snow, hail, storms and wind. *(Amended 2026-09-21, ADR-0015:
+the weather model keeps all of these states, but DONE shows clear, overcast, rain and falling snow;
+storm and hail render as heavy rain, and snow cover, lightning and hail particles are optional.)*
 
 **G7 — Portability without compromise today.** Linux desktop is the only target being built, but
 no decision may be taken that gratuitously blocks WebGL 2 or OpenGL ES 3.0. *(2026-09-21: Web and
@@ -4070,6 +4095,8 @@ it; this makes both endpoints continuous without inventing a second atmospheric 
 
 ### 32.4 Glare, and the sun-clock overlay
 
+> **Optional after DONE since 2026-09-21: occlusion-query glare and the lens flare are not required; the sun disc of §32.3 is** ([ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md))
+
 **Visibility measurement.** A 3 × 3 grid of sample points spanning 1.2° around the sun's screen
 position. Each frame, for each point that is on screen:
 
@@ -4619,6 +4646,8 @@ game.
 
 ## 38. Snow
 
+> **Reduced 2026-09-21: DONE needs falling snow only. Accumulation, the snow shells, melt and snow footsteps are optional after DONE; `snowDepth` is still integrated but not drawn** ([ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md))
+
 Same particle machinery, different parameters, plus accumulation.
 
 | Parameter | Value |
@@ -4652,6 +4681,8 @@ ambience becomes markedly quieter (snow absorbs), and the exterior reverb hint c
 
 ## 39. Storm
 
+> **Optional after DONE since 2026-09-21: the thunderstorm weather state renders as heavy rain under dark cloud, with no lightning or thunder** ([ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md))
+
 `thunderIntensity` drives a Poisson lightning process:
 `rate = 0.02 + 0.30 · thunderIntensity` strikes per second.
 
@@ -4680,6 +4711,8 @@ Per strike:
 
 ## 40. Hail
 
+> **Optional after DONE since 2026-09-21: the hail weather state renders as heavy rain** ([ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md))
+
 | Parameter | Value |
 |---|---|
 | Count | `kHailMax(500) · intensity^0.9` |
@@ -4695,6 +4728,8 @@ hail happens.
 ---
 
 ## 41. Wind
+
+> **Reduced 2026-09-21: DONE uses the weather state's wind for the slant of rain and snow and for the wind audio layer. The gust model and vegetation sway are optional after DONE** ([ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md))
 
 Wind is a first-class quantity, not a rain modifier.
 
@@ -5866,6 +5901,8 @@ where it was, which is a small detail that reads as "the house remembers".
 
 > **Retained and raised in priority 2026-09-21. Everything here is static dressing; any mention of interactable, openable or usable furniture is void.** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
 
+> **Reduced 2026-09-21 (second amendment): furnishing follows `plan.md`'s tiered room recipes and its reusable kit. The density bands of §59.1 and the anti-repetition limits of §59.2 do not apply; reuse is allowed. §59.3's signs of habitation are required in hero areas only.** ([ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md))
+
 ### 59.1 Density targets
 
 | Cell class | Static props | Interactables | Dressing props |
@@ -6120,6 +6157,8 @@ pipeline by `HOUSE-02094`. No downloaded animal model is used as a base.
 
 > **Partly superseded 2026-09-21. Footsteps, room tone, exterior ambience, weather and a few static positional loops are retained. Interaction, appliance, plumbing, pet and television sounds are removed.** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
 
+> **Reduced again 2026-09-21: footsteps on six broad surface categories (not the 20 of §62.4), one interior tone, exterior day and night beds, rain and wind. The static positional loops and the house's own sounds of §62.6 are cut.** ([ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md))
+
 ### 62.1 Architecture
 
 ```
@@ -6345,6 +6384,8 @@ after conversion to 16-bit at the source rate — comfortably inside the audio b
 ## 64. Room-aware spatial audio
 
 > **Superseded in part 2026-09-21: there is no portal-path solver. Positional loops are gated by cell and one open-portal hop (`HOUSE-03541`), and weather beds follow sky exposure (`HOUSE-02000`).** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
+
+> **Reduced again 2026-09-21: the positional loops (`HOUSE-03541`) are cut too. Only §64.6's ambience routing remains, as the weather beds' sky-exposure gain (`HOUSE-02000`).** ([ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md))
 
 ### 64.1 The problem
 

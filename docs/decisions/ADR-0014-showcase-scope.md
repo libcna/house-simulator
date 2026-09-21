@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Accepted |
+| **Status** | Accepted; **superseded in part** by [ADR-0015](ADR-0015-quality-tiers-and-compact-scope.md) (2026-09-21): decision 6's "retained in full" weather and audio lists are reduced to a compact set (clear, overcast, rain and simple snowfall; footsteps and a few loops), and decision 7's showcase baseline applies to seven hero areas, not to every zone |
 | **Date** | 2026-09-21 |
 | **Task** | `HOUSE-03201` |
 | **Depends on** | [ADR-0001](ADR-0001-xna-only.md), [ADR-0004](ADR-0004-portal-visibility.md), [ADR-0005](ADR-0005-data-driven-world.md) |

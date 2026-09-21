@@ -1,3 +1,51 @@
+# Planning handoff — 2026-09-21 (`HOUSE-03205` second scope reduction)
+
+**Read this section first; it refines the `HOUSE-03201` section below.** The same day, the project
+owner asked for a second reduction to about 275–415 agent-hours to DONE, without cutting any floor,
+the basement, the attic, the garage, the garden, the exterior, Web or Android
+([ADR-0015](decisions/ADR-0015-quality-tiers-and-compact-scope.md)). **Cut depth, preserve
+breadth.** Documentation only: no code, data or asset changed, and the build and test state is still
+`HOUSE-01076`'s.
+
+What `HOUSE-03205` changed in [`plan.md`](../plan.md):
+
+* **Quality tiers replace "C5 everywhere".** Every accessible cell is classified hero, main,
+  secondary or utility. Every room reaches **C3**, which now means dressed *and* lit to a baseline;
+  19 main cells reach **C4**; seven hero areas reach **C5** (front approach and porch, entry and
+  living room, kitchen, master bedroom, library, basement cinema, attic room). C6 is retired.
+* **Gates renumbered to match:** `HOUSE-03380` is now the *dressing checkpoint*, `HOUSE-03420` is
+  **G3** (baseline complete), the new `HOUSE-03452` is **G4** (main rooms) and `HOUSE-03480` is
+  **G5** (hero areas). Everything written before this section, including the `HOUSE-03201` section
+  below and the review ledger's 2026-09-21 header, uses the old numbering: read its "G3" as the
+  dressing checkpoint and its "G4" as the new G3.
+* **A reusable kit, reused freely** (rule R8); no uniqueness or density quota; bespoke authoring only
+  in hero areas.
+* **A compact environment** (clear, overcast, rain, day and night, simple snowfall), **audio
+  essentials** from NOX (the Freesound blocker no longer matters), **one settings screen**,
+  **representative tests**, **measurement-only optimisation** with no headroom margin, and a
+  **bounded final defect pass**. Web and Android keep their DONE standing with limited validation
+  breadth.
+* New sections: **Non-goals** (not postponed prerequisites) and **Optional after DONE** (never
+  scheduled while a MUST task is open, never in the estimate). New rules R12 (bounded polish) and
+  R13 (optional stays optional); R1, R2, R4, R6, R8 and R10 were tightened.
+* 212 open tasks (from 424): 208 kept, 4 new, 146 cancelled with reasons, 70 made optional. Every
+  open task now has `est:`; the estimate is ≈ 272 / 336 / 411 agent-hours (optimistic / expected /
+  conservative) for all three platforms.
+* `cna-house.md` has a second scope-amendment block and banners on §32.4, §38–§41, §59, §62 and
+  §64. ADR-0014 and ADR-0010 point at ADR-0015.
+
+**Resume here, unchanged in order:** `HOUSE-03204` (`docs/zones.json` now also records each cell's
+tier) → `HOUSE-03202` (fixed views, fewer per zone) → `HOUSE-03203` (baseline review of all zones;
+it may correct the tiers) → M1 from `HOUSE-03221` to gate G1. M3's kit tooling may interleave. The
+ground floor stays frozen until G3 except for S1 fixes and `HOUSE-03407` (rule R4).
+
+The review ledger (`docs/visual-review/README.md`) had uncommitted edits from another session when
+this pass ran, so it was not touched; `plan.md`'s review protocol governs where they differ.
+
+Rule that chose this task: the owner's direct request.
+
+---
+
 # Planning handoff — 2026-09-21 (`HOUSE-03201` scope reduction)
 
 **Read this section first. It supersedes the "resume the Visual Convergence Sprint" instruction in
