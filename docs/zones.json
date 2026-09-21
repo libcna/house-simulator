@@ -20,7 +20,12 @@
         {"id": "B1_LAUNDRY2", "accessible": true, "tier": "U"},
         {"id": "B1_UNDERSTAIR", "accessible": true, "tier": "U"}
       ],
-      "reviewPoses": []
+      "reviewPoses": [
+        "basement-hall",
+        "basement-cinema",
+        "basement-workshop",
+        "basement-gym"
+      ]
     },
     {
       "id": "Z-L0M",
@@ -75,7 +80,7 @@
         {"id": "L0_STOR", "accessible": true, "tier": "U"},
         {"id": "L0_PANTRY", "accessible": true, "tier": "S"}
       ],
-      "reviewPoses": []
+      "reviewPoses": ["ground-office", "ground-mudroom"]
     },
     {
       "id": "Z-GAR",
@@ -84,7 +89,7 @@
         {"id": "L0_GARAGE", "accessible": true, "tier": "M"},
         {"id": "L0_GARAGE_LOFT", "accessible": true, "tier": "U"}
       ],
-      "reviewPoses": []
+      "reviewPoses": ["garage-interior"]
     },
     {
       "id": "Z-L1",
@@ -111,7 +116,14 @@
         {"id": "L1_BALCONY_REAR", "accessible": true, "tier": "S"},
         {"id": "L1_BALCONY_FRONT", "accessible": true, "tier": "S"}
       ],
-      "reviewPoses": ["front-balcony-light"]
+      "reviewPoses": [
+        "front-balcony-light",
+        "first-landing",
+        "first-hall",
+        "master-bedroom",
+        "master-bath",
+        "bedroom-2"
+      ]
     },
     {
       "id": "Z-L2",
@@ -139,7 +151,14 @@
           "reason": "A Juliet balcony is facade architecture, not a standing area."
         }
       ],
-      "reviewPoses": []
+      "reviewPoses": [
+        "second-landing",
+        "second-hall",
+        "library",
+        "games-room",
+        "sitting-room",
+        "bedroom-6"
+      ]
     },
     {
       "id": "Z-L3",
@@ -151,7 +170,7 @@
         {"id": "L3_STORE_N", "accessible": true, "tier": "U"},
         {"id": "L3_STORE_S", "accessible": true, "tier": "U"}
       ],
-      "reviewPoses": []
+      "reviewPoses": ["attic-room", "attic-store-west"]
     },
     {
       "id": "Z-STAIR",
@@ -164,7 +183,12 @@
         {"id": "L2_STAIR_ATTIC", "accessible": true, "tier": "S"},
         {"id": "L3_STAIR_HEAD", "accessible": true, "tier": "S"}
       ],
-      "reviewPoses": ["main-stair-foot", "main-stair-l1-exit"]
+      "reviewPoses": [
+        "main-stair-foot",
+        "main-stair-l1-exit",
+        "main-stair-l2-exit",
+        "basement-stair"
+      ]
     },
     {
       "id": "Z-EXF",
@@ -195,7 +219,7 @@
         {"id": "EXT_SIDEYARD_W", "accessible": true, "tier": "U"},
         {"id": "EXT_SIDEYARD_E", "accessible": true, "tier": "U"}
       ],
-      "reviewPoses": ["rear-terrace", "backyard-to-house"]
+      "reviewPoses": ["rear-terrace", "backyard-to-house", "garden"]
     },
     {
       "id": "Z-STR",
@@ -214,7 +238,7 @@
           "reason": "Neighbourhood scenery outside the intended traversal area."
         }
       ],
-      "reviewPoses": []
+      "reviewPoses": ["neighbourhood-street"]
     }
   ],
   "none": [

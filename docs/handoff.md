@@ -1,3 +1,33 @@
+# Tooling handoff — 2026-09-21 (`HOUSE-03202` fixed review views)
+
+`HOUSE-03202` is complete. `tools/visual/capture_review.py` retains the original 32 camera names
+and coordinates unchanged, adds 24 fixed eye-height views, and assigns all 56 views to the eleven
+planning zones in [`zones.json`](zones.json). The executable coverage check enforces the reduced
+contract: every main room and hero area has a view, H1 has two, every zone that contains secondary
+cells has a secondary-cell view, and utility cells do not receive direct views. `--zone` and
+`--all-zones` select the capture breadth; every run writes labelled per-zone sheets plus a combined
+sheet. `clear-overcast` (and the retained legacy `overcast-day` spelling) deliberately select only
+the eight H1–H7 representative views.
+
+The 56-view `clear-day` and `clear-night` sets and the eight-view hero `clear-overcast` set were
+captured successfully at 1600×900. Every per-zone contact sheet was inspected. Three initially bad
+new compositions were corrected before completion: the street camera faced away from the property,
+the L2 stair camera faced a wall, and the master-bath view was too flat. The remaining darkness and
+empty-room evidence is the subject of `HOUSE-03203`, not a camera failure. Mutation checks prove a
+missing manifest assignment and a utility-room pose are rejected. The generated captures remain
+Git-ignored.
+
+Next is `HOUSE-03203`, the baseline day/night review and severity ledger for all eleven zones;
+after that M1 starts at `HOUSE-03221`. Rule that chose this task: M0 dependency order plus R10's
+requirement for objective evidence before zone work. The pre-existing staged edit to
+`docs/visual-review/README.md` was preserved and not included; therefore this task records its
+handoff here instead of overwriting that concurrent ledger edit. Compilation remains limited to
+four CPU cores. The full `run_checks.sh` pass, including 323 strict-XNA translation units and the
+new review-pose gate, is clean except for the pre-existing ignored `.claude/settings.local.json`
+stray-root-entry finding already recorded by `HOUSE-03204`.
+
+---
+
 # Tooling handoff — 2026-09-21 (`HOUSE-03204` zone scoreboard)
 
 `HOUSE-03204` is complete. [`zones.json`](zones.json) now assigns all 96 authored cells exactly

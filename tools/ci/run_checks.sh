@@ -251,6 +251,9 @@ run_gate "world-rules-selftest" python3 tools/world/validate_world.py --selftest
 # planning zone with one quality tier.  A missing or duplicate assignment makes the scoreboard lie
 # precisely where it is meant to prevent another ground-floor-only convergence loop.
 run_gate "zone-scoreboard" python3 tools/world/zone_scoreboard.py --check
+# `HOUSE-03202`.  Every quality-tier target needs a deterministic human-review camera before the
+# baseline round can level it; keep the zone assignments and reduced coverage contract executable.
+run_gate "review-poses" python3 tools/visual/capture_review.py --check
 # `HOUSE-00421`. The deployed copy is what the game reads: `content/world/` is the authored JSONC
 # with its comments stripped, plus the `world.manifest.json` that hashes those bytes
 # (`HOUSE-00364`). A stale deploy is a house that does not match the one in the repository, and

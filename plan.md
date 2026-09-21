@@ -262,7 +262,7 @@ non-accessible appliance interiors.
 
 ## Zone scoreboard
 
-**As of 2026-09-21 (`HOUSE-03205`).** The levels are `HOUSE-03201`'s, re-expressed in the new ladder;
+**As of 2026-09-21 (`HOUSE-03202`).** The levels are `HOUSE-03201`'s, re-expressed in the new ladder;
 nothing has been measured since. Update per rule R10. The levels of never-reviewed zones are
 provisional until `HOUSE-03203` captures them.
 
@@ -271,19 +271,19 @@ yet nothing collides with it (`DynamicObstacles` is never filled) and `PortalRun
 leafed portal closed. The player therefore walks through closed doors and gates. M1 fixes this for
 every zone at once.
 
-| Zone | C3 floor | Main at C4 | Hero cells at C5 | Props (133 total) | Review views (32 total) | Evidence | Largest gaps |
+| Zone | C3 floor | Main at C4 | Hero cells at C5 | Props (133 total) | Review views (56 total) | Evidence | Largest gaps |
 |---|---|---|---|---|---|---|---|
-| `Z-B1` | **C1\*** | 0 / 2 | 0 / 1 | **0** in 14 cells | **0** | Flights walk both ways (`HOUSE-00615`). Every cell reachable (world rule 5). Materials and both bakes assigned (`HOUSE-00907`–`00910`) | Empty. Never reviewed. Generic slab doors. No services or structure dressing |
+| `Z-B1` | **C1\*** | 0 / 2 | 0 / 1 | **0** in 14 cells | 4 | Flights walk both ways (`HOUSE-00615`). Every cell reachable (world rule 5). Materials and both bakes assigned (`HOUSE-00907`–`00910`) | Empty. Never reviewed. Generic slab doors. No services or structure dressing |
 | `Z-L0M` | **C2** (dressing of C3 done; lighting S2 open) | 0 / 3 | 0 / 5 | 106 | 23 | 102 review rounds. Primary furniture in all 9 cells (`HOUSE-01037`–`01076`) | S2: Basic-lit furniture much darker than the baked receivers (piano, sofas); service-room night depth. **Goes last by R4** |
-| `Z-L0S` | **C1\*** | 0 / 1 | — | **0** in 8 cells | **0** | Shell, materials, bakes | Empty. Never reviewed |
-| `Z-GAR` | **C1\*** | 0 / 1 | — | **0** in 2 cells | **0** (the approach view counts for `Z-EXF`) | Finished sectional door outside (`HOUSE-00935`, `00947`, `00948`) | 70.6 m² empty garage. The loft had no furnish task (now `HOUSE-03341`) |
-| `Z-L1` | **C1\*** | 0 / 3 | 0 / 1 | **1** (front-balcony lantern) in 20 cells | 1 (balcony) | Reached on foot (`HOUSE-00489`) | 5 bedrooms, the master suite and 4 baths/WCs empty. Never reviewed |
-| `Z-L2` | **C1\*** | 0 / 4 | 0 / 1 | **0** in 15 cells | **0** | Flights walkable | Library, games room, sitting room, 2 bedrooms and 4 baths/WCs empty. Never reviewed |
-| `Z-L3` | **C1\*** | — | 0 / 1 | **0** in 5 cells | **0** | Automatic attic crouch (`HOUSE-00558`) | ≈ 258 m² of attic never seen. No structure dressing |
-| `Z-STAIR` | **C1\*** | 0 / 3 | — | 0 | 2 | 8 flights walk up and down. Balustrade geometry and collision exist | S2: the main stair foot is very dark (Rounds 98, 102). Upper flights never reviewed |
+| `Z-L0S` | **C1\*** | 0 / 1 | — | **0** in 8 cells | 2 | Shell, materials, bakes | Empty. Never reviewed |
+| `Z-GAR` | **C1\*** | 0 / 1 | — | **0** in 2 cells | 1 | Finished sectional door outside (`HOUSE-00935`, `00947`, `00948`) | 70.6 m² empty garage. The loft had no furnish task (now `HOUSE-03341`) |
+| `Z-L1` | **C1\*** | 0 / 3 | 0 / 1 | **1** (front-balcony lantern) in 20 cells | 6 | Reached on foot (`HOUSE-00489`) | 5 bedrooms, the master suite and 4 baths/WCs empty. Never reviewed |
+| `Z-L2` | **C1\*** | 0 / 4 | 0 / 1 | **0** in 15 cells | 6 | Flights walkable | Library, games room, sitting room, 2 bedrooms and 4 baths/WCs empty. Never reviewed |
+| `Z-L3` | **C1\*** | — | 0 / 1 | **0** in 5 cells | 2 | Automatic attic crouch (`HOUSE-00558`) | ≈ 258 m² of attic never seen. No structure dressing |
+| `Z-STAIR` | **C1\*** | 0 / 3 | — | 0 | 4 | 8 flights walk up and down. Balustrade geometry and collision exist | S2: the main stair foot is very dark (Rounds 98, 102). Upper flights never reviewed |
 | `Z-EXF` | **C3\*** (C4-level content in place) | — | 0 / 4 | 11 | 4 | ≈ 25 facade, roof, entry and approach tasks. Property bot walk (`HOUSE-00782`) | Mailbox, bins and meters (`HOUSE-00770`). Gate leaves not solid (the `*`) |
-| `Z-EXR` | **C2\*** (C3 partial) | 0 / 2 | — | 15 | 2 (+1 from inside the family room) | Terrace group, loungers, fire pit, swing bench, lanterns (`HOUSE-00771`, `01291`). Shed shell (`HOUSE-00768`). Beds and trellis (`HOUSE-00769`) | Shed interior, side yards, orchard and vegetable garden bare. Rear and side elevations less finished than the front |
-| `Z-STR` | **C2** (C3 partial) | — | — | — | 0 dedicated | N1–N60 generated at LOD0–2 plus impostor cards, street furniture, barriers (`HOUSE-00841`–`00849`, `00856`, `00857`) | Parked cars (`HOUSE-00847`). Impostor rendering and neighbour porch lights are optional |
+| `Z-EXR` | **C2\*** (C3 partial) | 0 / 2 | — | 15 | 3 | Terrace group, loungers, fire pit, swing bench, lanterns (`HOUSE-00771`, `01291`). Shed shell (`HOUSE-00768`). Beds and trellis (`HOUSE-00769`) | Shed interior, side yards, orchard and vegetable garden bare. Rear and side elevations less finished than the front |
+| `Z-STR` | **C2** (C3 partial) | — | — | — | 1 | N1–N60 generated at LOD0–2 plus impostor cards, street furniture, barriers (`HOUSE-00841`–`00849`, `00856`, `00857`) | Parked cars (`HOUSE-00847`). Impostor rendering and neighbour porch lights are optional |
 
 `HOUSE-03204` adds the following objective inputs, generated by
 `python3 tools/world/zone_scoreboard.py`. `Lit accessible` counts cells with at least one authored
@@ -292,17 +292,17 @@ target counts from the approved tier classification, not completion claims.
 
 | Zone | Cells | Accessible | Props | Props/access. | Zero-prop accessible | Lit accessible | Review poses | C4 main targets | C5 hero targets |
 |---|---:|---:|---:|---:|---|---|---:|---|---|
-| `Z-B1` | 14 | 14 | 0 | 0.00 | 14 | 14 / 14 | 0 | 2 | 1 |
+| `Z-B1` | 14 | 14 | 0 | 0.00 | 14 | 14 / 14 | 4 | 2 | 1 |
 | `Z-L0M` | 9 | 9 | 106 | 11.78 | 0 | 9 / 9 | 23 | 3 | 5 |
-| `Z-L0S` | 8 | 8 | 0 | 0.00 | 8 | 8 / 8 | 0 | 1 | 0 |
-| `Z-GAR` | 2 | 2 | 0 | 0.00 | 2 | 2 / 2 | 0 | 1 | 0 |
-| `Z-L1` | 20 | 20 | 1 | 0.05 | 19 | 20 / 20 | 1 | 3 | 1 |
-| `Z-L2` | 16 | 15 | 0 | 0.00 | 15 | 15 / 15 | 0 | 4 | 1 |
-| `Z-L3` | 5 | 5 | 0 | 0.00 | 5 | 5 / 5 | 0 | 0 | 1 |
-| `Z-STAIR` | 6 | 6 | 0 | 0.00 | 6 | 6 / 6 | 2 | 3 | 0 |
+| `Z-L0S` | 8 | 8 | 0 | 0.00 | 8 | 8 / 8 | 2 | 1 | 0 |
+| `Z-GAR` | 2 | 2 | 0 | 0.00 | 2 | 2 / 2 | 1 | 1 | 0 |
+| `Z-L1` | 20 | 20 | 1 | 0.05 | 19 | 20 / 20 | 6 | 3 | 1 |
+| `Z-L2` | 16 | 15 | 0 | 0.00 | 15 | 15 / 15 | 6 | 4 | 1 |
+| `Z-L3` | 5 | 5 | 0 | 0.00 | 5 | 5 / 5 | 2 | 0 | 1 |
+| `Z-STAIR` | 6 | 6 | 0 | 0.00 | 6 | 6 / 6 | 4 | 3 | 0 |
 | `Z-EXF` | 5 | 5 | 11 | 2.20 | 1 | 5 / 5 | 4 | 0 | 4 |
-| `Z-EXR` | 7 | 7 | 15 | 2.14 | 4 | 3 / 7 | 2 | 2 | 0 |
-| `Z-STR` | 2 | 0 | 0 | — | 0 | 0 / 0 | 0 | 0 | 0 |
+| `Z-EXR` | 7 | 7 | 15 | 2.14 | 4 | 3 / 7 | 3 | 2 | 0 |
+| `Z-STR` | 2 | 0 | 0 | — | 0 | 0 / 0 | 1 | 0 | 0 |
 
 **Minimum level today: C1\*** (seven zones). By rule R1, the only permitted zone-raising work is
 M1 (to C1) and then M2 (to C2). M3 tooling may run alongside.
@@ -413,7 +413,7 @@ after G1 as Track B.
       accept: (1) every task open at `5927073` is kept, merged, cancelled with its reason, or moved to Optional after DONE, exactly once; (2) "C5 everywhere" is replaced by quality tiers (C3 for every accessible room, C4 for main rooms, C5 for seven hero areas) with every cell classified; (3) the Definition of DONE, the non-goals and the scheduling rules state the reduced scope; (4) every open task carries `est:`, and the estimate is recomputed from them; (5) no runtime code, data or asset changed
       verify: the builder's audit (every id open at `5927073` accounted for once; no open task depends on an optional one); `tools/ci/run_checks.sh`; `git diff --stat` shows documentation only
 
-- [ ] HOUSE-03202 — Give every zone a fixed review view set and a whole-property contact sheet
+- [x] HOUSE-03202 — Give every zone a fixed review view set and a whole-property contact sheet
       dep: HOUSE-03201 · sys: tools · plat: TOOL · pri: MUST · zone: all · adv: G1–G5 · est: 2.5
       files: tools/visual/capture_review.py, docs/visual-review/README.md
       accept: (1) each of the 11 zones has ≥ 4 fixed eye-height poses (at least one per room type present in the zone; `Z-STAIR` has one per flight group), framed on the room, not a wall; (2) `--zone <Z-…>` captures one zone and `--all-zones` captures them all, in `clear-day` and `clear-night`; (3) one labelled contact sheet per zone is written beside the captures; (4) the 32 existing poses are kept unchanged and assigned to their zones
