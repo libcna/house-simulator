@@ -191,12 +191,6 @@ That script runs, and fails on, exactly what CI runs:
 | `tools/ci/check_xna_only.py` | Any forbidden CNA, CNAEXT or native-graphics symbol in runtime source; a `.fx` outside `assets-src/Effects/`; GLSL/SPIR-V anywhere; an `isRaining`-style boolean; `std::filesystem` outside `SaveStore`; `CNA_CNAEXT=ON` in a CMake cache |
 | `clang-format --dry-run -Werror` | Any deviation from [`.clang-format`](.clang-format) |
 
-To have git run them for you:
-
-```bash
-git config core.hooksPath .githooks
-```
-
 ---
 
 ## Contributing
