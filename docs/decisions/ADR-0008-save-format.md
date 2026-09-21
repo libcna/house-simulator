@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Accepted |
+| **Status** | Accepted; **superseded in part** by [ADR-0014](ADR-0014-showcase-scope.md) (2026-09-21): the household delta save is not built. The versioning, migration and atomic-write policy still governs `settings.json` and the session file |
 | **Date** | 2026-09-06 |
 | **Task** | `HOUSE-00014` |
 | **Depends on** | [ADR-0005](ADR-0005-data-driven-world.md) |

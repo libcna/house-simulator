@@ -1,3 +1,45 @@
+# Planning handoff — 2026-09-21 (`HOUSE-03201` scope reduction)
+
+**Read this section first. It supersedes the "resume the Visual Convergence Sprint" instruction in
+every checkpoint below.** On 2026-09-21 the project owner re-scoped the project
+([ADR-0014](decisions/ADR-0014-showcase-scope.md)). `cna-house` is now a polished, multiplatform
+**architectural showcase for CNA**: the player walks and looks. Animals, the avatar, character
+animation, interaction gameplay, appliance, plumbing, toilet and television behaviour, and
+household persistence are out of scope. **Web and Android stay.**
+
+What `HOUSE-03201` changed (documentation only; no code, data or asset changed, and the build and
+test state is exactly `HOUSE-01076`'s):
+
+* [`plan.md`](../plan.md) was rewritten. It now holds the goal, the **Definition of DONE (D1–D13)**,
+  the **scheduling rules R1–R11**, eleven **zones** with completion levels C0–C6 and a
+  **scoreboard**, gates **G1–G5**, and milestones **M0–M16**. 424 open tasks: 373 carried with
+  their ids (amended where the scope changed), 51 new.
+* The old ledger moved verbatim to
+  [`history/plan-legacy-2026-09-21.md`](history/plan-legacy-2026-09-21.md). 385 open tasks were
+  cancelled there, struck through with reasons, and 6 were deferred until after DONE.
+* `cna-house.md` has a scope-amendment block and banners on the removed sections. `README.md`,
+  `CLAUDE.md`/`AGENTS.md`, `docs/workflow.md` and the review ledger point at the new rules.
+
+**Where the property stands** (details in the scoreboard): the ground-floor principal route is at
+C3 (106 props, 102 review rounds). The front exterior is at C4\*. The basement, the ground-floor
+service rooms, the garage, both upper floors, the attic and the stairs are at C1\*: reachable, but
+**empty and never reviewed**. The `*` marks a house-wide defect: every door and gate leaf is drawn
+closed, yet nothing collides with it, so the player walks through closed doors.
+
+**Resume here, in this order:** `HOUSE-03204` (`docs/zones.json` and the scoreboard script) →
+`HOUSE-03202` (fixed review views for every zone) → `HOUSE-03203` (baseline review of all zones)
+→ M1 from `HOUSE-03221` (static door poses) to gate G1. M3 tooling (`HOUSE-03301`–`03303`, the kit)
+may interleave. **Do not** continue the ground-floor lighting work proposed at the end of
+`HOUSE-01076` (the piano, the stair foot, the object-versus-bake balance). Rule R4 freezes that zone
+until G4. The object-versus-bake problem becomes the house-wide `HOUSE-03402` after G3, and the
+stair foot becomes `HOUSE-03403`.
+
+Rule that chose this task: the owner's direct request. From the next task on, record here which
+rule (R1–R11) chose each task (rule R10). The build and test environment notes in the
+`HOUSE-01076` section below remain valid.
+
+---
+
 # Gameplay/visual handoff — 2026-09-20 (`HOUSE-01076` checkpoint)
 
 Read this section first. Branch `develop`; the implementation is committed and

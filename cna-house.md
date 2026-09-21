@@ -3,11 +3,32 @@
 **Project:** `cna-house`
 **Repository:** `/rv/data/development/github.com/openeggbert/cna-house`
 **Document status:** design baseline for the planning pass completed 2026-09-06.
-**Implementation status:** IN PROGRESS since 2026-09-06 — phase 0. See `plan.md` for the ledger.
+**Implementation status:** IN PROGRESS since 2026-09-06. **Scope reduced 2026-09-21** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md)). See `plan.md` for
+the ledger.
 
 > Implementation was approved by the project owner on 2026-09-06. This document remains the
 > architecture baseline: it is corrected when implementation establishes a durable fact that
 > differs from it, and is not rewritten after every source change.
+
+> **Scope amendment — 2026-09-21 (`HOUSE-03201`, [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md)).** `cna-house` is now a
+> polished, atmospheric, multiplatform **architectural and graphics showcase for CNA**, not a life
+> simulator. The player explores the whole house (basement to attic), the garage, the garden, the
+> street and the neighbourhood in first person, and looks at them. **Removed from scope:** the dog
+> and the cat (§60, §61); the visible avatar, third person, customisation and character animation
+> (§45–§47, the animation parts of §48); the interaction framework and every interactive household
+> system (§50, §54–§58), including door, window and switch gameplay (§51–§53); household-state
+> persistence and Reset House (§65, §66); and the portal-path audio solver (§64). Objects are
+> **static dressing**. Doors and gates have **static poses**, so everything stays reachable.
+> Lights follow an **automatic schedule**. Persistence is `settings.json` plus an optional small
+> session file. **Retained:** architecture, collision, the first-person controller, portal
+> visibility, materials and lighting, sky, sun, moon, stars, time, seasons, weather and their
+> visuals, lightweight atmospheric audio, LOD and optimisation, tests, and **Linux, Web and
+> Android**. Sections describing removed systems carry a banner and remain as design history.
+> They are not requirements. Where any other section mentions a removed feature (the interact
+> button and camera toggle of §9.3, the prompts of §67, the pets and save slots of §68, the
+> interaction, pet and save tests of §70, the animation and pet budgets of §71), that mention is
+> void. The goal, the Definition of DONE, the scheduling rules and the milestones are in
+> [`plan.md`](plan.md).
 
 ---
 
@@ -102,12 +123,13 @@
 
 ## 1. Executive summary
 
-`cna-house` is a first-person (and optionally third-person) interactive simulation of a very
-large American-style detached house, its garage, its fenced property, and a believable
-surrounding neighbourhood. There is no win condition. The activity is *inhabiting* the place:
-walking through it, opening and closing things, switching lights, watching the weather change
-through the windows, watching the sun cross the sky and the moon change phase, listening to the
-house, and finding it exactly as you left it the next time you start the program.
+`cna-house` is a first-person architectural showcase of a very large American-style detached
+house, its garage, its fenced property, and a believable surrounding neighbourhood. There is no
+win condition. The activity is *exploring* the place: walking through all five levels and the
+grounds, watching the weather change through the windows, watching the sun cross the sky and the
+moon change phase, and listening to the house and the street. *(Amended 2026-09-21, ADR-0014. The
+original text described an interactive simulation with third person, opening and closing things,
+switching lights, and a house "exactly as you left it".)*
 
 It is built **exclusively on the XNA 4.0 API surface that CNA implements**. That is the point of
 the project: to demonstrate that a modern-feeling, large, atmospheric 3D simulation can be
@@ -149,7 +171,7 @@ Headline numbers:
 | Named interior cells | 78 |
 | Named exterior cells | 17 |
 | Portals (doors, openings, windows, stair wells) | ~186 |
-| Interactable objects (target) | ~640 |
+| Interactable objects (target) | ~~~640~~, removed 2026-09-21 (ADR-0014); objects are static dressing |
 | Lot | 45.0 m × 48.0 m = 2 160 m² |
 | Ridge height above grade | 14.30 m |
 | Simulated day length (default) | **24 real minutes** — 1 real second = 1 simulated minute |
@@ -165,9 +187,10 @@ ground-floor ceilings, 0.86 m interior door leaves, 179 mm stair risers with 280
 0.92 m kitchen counters, a real plumbing stack diagram. A visitor with building experience should
 not find anything absurd.
 
-**G2 — A genuinely inhabited place.** Not an architectural visualisation. Objects are used, worn,
-placed the way people place them; there are dishes in the drainer, boxes in the attic, a dog bed
-in the family room, a car in the garage and coats in the mudroom.
+**G2 — A genuinely inhabited-looking place.** Objects are worn and placed the way people place
+them: there are dishes in the drainer, boxes in the attic, a dog bed in the family room, a car in
+the garage and coats in the mudroom. *(Amended 2026-09-21, ADR-0014: this is achieved by static
+dressing throughout the whole house. Objects are not used.)*
 
 **G3 — A strict XNA 4.0 demonstration.** Every graphics, audio, input and content call the game
 makes is an XNA 4.0 call CNA implements. Deviations are enumerated, justified and small
@@ -177,15 +200,20 @@ makes is an XNA 4.0 call CNA implements. Deviations are enumerated, justified an
 cells, draw calls and portal traversals every frame, and automated tests assert culling
 correctness and budgets.
 
-**G5 — Persist the whole house.** The house remembers its state: doors, windows, lights,
-drawers, the fridge, the taps, the toilets, the television, the pets, the clock and the weather.
+**G5 — ~~Persist the whole house.~~** *Removed 2026-09-21 (ADR-0014).* Only settings persist, plus
+an optional session file holding the player pose, the clock and the weather.
 
 **G6 — A living sky.** An accelerated but astronomically-derived day/night cycle with a moving
 sun, real sunrise/sunset colouring, stars, a moon whose phase advances over simulated days, and a
 continuous weather system with rain, snow, hail, storms and wind.
 
 **G7 — Portability without compromise today.** Linux desktop is the only target being built, but
-no decision may be taken that gratuitously blocks WebGL 2 or OpenGL ES 3.0.
+no decision may be taken that gratuitously blocks WebGL 2 or OpenGL ES 3.0. *(2026-09-21: Web and
+Android remain target platforms and are part of `plan.md`'s Definition of DONE.)*
+
+**G8 — Breadth before depth** *(added 2026-09-21, ADR-0014).* The whole property reaches a common
+showcase baseline before any area is polished further. `plan.md` enforces this with zones,
+completion levels and gates.
 
 ---
 
@@ -206,6 +234,10 @@ no decision may be taken that gratuitously blocks WebGL 2 or OpenGL ES 3.0.
 | Explicit anatomy or sexualised content in the toilet system | Deliberately matter-of-fact (§57) |
 | Identifiable real people in photographs or artwork | §59.4 |
 | An Android or Web build during the initial phases | Planned, phased, and explicitly later |
+| Animals (dog, cat) | *Added 2026-09-21*: removed from scope (ADR-0014) |
+| A visible player avatar, third person, customisation, character animation | *Added 2026-09-21*: first person only (ADR-0014) |
+| Interaction gameplay: pick-up, carry, containers, seats, appliances, plumbing, toilets, television, switches, openable doors and windows | *Added 2026-09-21*: objects are static dressing; doors have static poses (ADR-0014) |
+| Persisting household state; Reset House | *Added 2026-09-21*: settings plus an optional session file only (ADR-0014) |
 
 ---
 
@@ -4888,6 +4920,8 @@ doorway does not thrash.
 
 ## 45. Third-person camera
 
+> **Removed from scope 2026-09-21. Design history, not a requirement: the game is first person only.** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
+
 * A spring arm from a pivot at `playerPosition + (0, 1.55, 0)`.
 * Desired distance 3.2 m; desired pitch follows the look input; yaw follows the look input and the
   avatar turns to face the movement direction with a 0.18 s turn blend.
@@ -4910,6 +4944,8 @@ doorway does not thrash.
 ---
 
 ## 46. Character customisation
+
+> **Removed from scope 2026-09-21. Design history, not a requirement: there is no visible avatar.** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
 
 ### 46.1 Modular, not bespoke
 
@@ -4959,6 +4995,8 @@ Deterministic, so tests and screenshots are stable.
 ---
 
 ## 47. Character animation
+
+> **Removed from scope 2026-09-21. Design history, not a requirement: nothing is animated by skeleton. `src/animation/` is a cleanup candidate.** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
 
 ### 47.0 Project-owned animation data
 
@@ -5387,6 +5425,8 @@ geometry.
 
 ## 50. Interaction architecture
 
+> **Removed from scope 2026-09-21. Design history, not a requirement: objects are static dressing, with no targeting, prompts or behaviours.** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
+
 ### 50.1 Targeting
 
 ```
@@ -5473,6 +5513,8 @@ Deliberately minimal, to avoid the "accidental survival RPG" the brief warns aga
 
 ## 51. Doors
 
+> **Superseded 2026-09-21. Every door, gate and the garage door has an authored static pose (`plan.md` M1, `HOUSE-03221`–`HOUSE-03224`); its collision and portal state follow the pose. Nothing opens at runtime.** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
+
 | Property | Value |
 |---|---|
 | Types | interior hinged (46), interior double (6), exterior hinged (5), slider (3), garage sectional (1), gate hinged (2), gate sliding (1) |
@@ -5494,6 +5536,8 @@ architectural truth and it also gives the visibility system its permanent throug
 
 ## 52. Windows
 
+> **Superseded 2026-09-21. Windows stay closed: glass portals pass vision and never the player.** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
+
 | Property | Value |
 |---|---|
 | Openable | 62 of 81 |
@@ -5513,6 +5557,8 @@ decal. That is the right scope.
 ---
 
 ## 53. Lights and switches
+
+> **Partly superseded 2026-09-21. Light groups, fixtures and the illumination model stand. Switch plates and player switching are removed; lights follow the automatic schedule (`HOUSE-03401`) and the console.** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
 
 * **128 switch groups** control **220 fixtures** inside the house; **138 groups and 254 fixtures**
   counting the exterior. A group is what a real wall switch controls — the four kitchen
@@ -5562,6 +5608,8 @@ decal. That is the right scope.
 
 ## 54. Cabinets, drawers and closets
 
+> **Removed from scope 2026-09-21. Design history, not a requirement: cupboards, drawers and wardrobes are static and stay closed.** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
+
 **Policy** — stated once so it is consistent, because "which drawers open?" is exactly the kind of
 question that produces inconsistency:
 
@@ -5591,6 +5639,8 @@ mudroom, 28 garage/workshop, 20 living/dining/office, 14 basement/attic.
 ---
 
 ## 55. Kitchen and refrigerator
+
+> **Removed from scope 2026-09-21. Design history, not a requirement: the kitchen and its appliances are static dressing.** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
 
 ### 55.1 The kitchen
 
@@ -5629,6 +5679,8 @@ is the whole model, and it is deliberate.
 ---
 
 ## 56. Water and plumbing
+
+> **Removed from scope 2026-09-21. Design history, not a requirement: fixtures are static.** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
 
 ### 56.1 Fixtures
 
@@ -5678,6 +5730,8 @@ half full is half full.
 ---
 
 ## 57. Toilets and waste-state simulation
+
+> **Removed from scope 2026-09-21. Design history, not a requirement: toilets are static fixtures.** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
 
 Matter-of-fact, small, and proportionate. 12 toilets — seven WC-only rooms and the five
 bathrooms, counted from §13's own room schedule (`HOUSE-00413`).
@@ -5729,6 +5783,8 @@ the weather system, which is the correct balance.
 ---
 
 ## 58. Television and video
+
+> **Removed from scope 2026-09-21. Design history, not a requirement: screens are static.** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
 
 ### 58.1 Placement
 
@@ -5807,6 +5863,8 @@ where it was, which is a small detail that reads as "the house remembers".
 ---
 
 ## 59. Furniture and decoration
+
+> **Retained and raised in priority 2026-09-21. Everything here is static dressing; any mention of interactable, openable or usable furniture is void.** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
 
 ### 59.1 Density targets
 
@@ -5963,6 +6021,8 @@ support planes and all canonical placements.
 
 ## 60. Dog
 
+> **Removed from scope 2026-09-21. Design history, not a requirement.** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
+
 ### 60.1 The asset
 
 A medium-sized, realistically proportioned dog — a Labrador-retriever type, 0.60 m at the withers,
@@ -6031,6 +6091,8 @@ beginning, which is imperceptible.
 
 ## 61. Cat
 
+> **Removed from scope 2026-09-21. Design history, not a requirement.** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
+
 The same machinery, different parameters and clips, plus one addition.
 
 `HOUSE-00292` exhausted R-02's three named sources. Sketchfab and Blend Swap did not provide a
@@ -6055,6 +6117,8 @@ pipeline by `HOUSE-02094`. No downloaded animal model is used as a base.
 ---
 
 ## 62. Audio
+
+> **Partly superseded 2026-09-21. Footsteps, room tone, exterior ambience, weather and a few static positional loops are retained. Interaction, appliance, plumbing, pet and television sounds are removed.** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
 
 ### 62.1 Architecture
 
@@ -6280,6 +6344,8 @@ after conversion to 16-bit at the source rate — comfortably inside the audio b
 
 ## 64. Room-aware spatial audio
 
+> **Superseded in part 2026-09-21: there is no portal-path solver. Positional loops are gated by cell and one open-portal hop (`HOUSE-03541`), and weather beds follow sky exposure (`HOUSE-02000`).** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
+
 ### 64.1 The problem
 
 `Apply3D` gives distance attenuation and stereo pan in free space. In a house, a sound 4 m away
@@ -6391,6 +6457,8 @@ house — where the interesting rooms are small — it is convincing.
 ---
 
 ## 65. Persistence and save format
+
+> **Superseded in part 2026-09-21. Only `settings.json` and an optional session file (player pose, clock, weather; `HOUSE-03571`) persist. The atomic-write, versioning and migration policy still applies to them.** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
 
 ### 65.1 Principles
 
@@ -6541,6 +6609,8 @@ Deterministic, so every test and screenshot starts identically.
 ---
 
 ## 66. Reset-house semantics
+
+> **Removed from scope 2026-09-21. There is no household state to reset; *Start on the street* begins fresh.** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
 
 ### 66.1 The command
 
@@ -7167,6 +7237,8 @@ logged once with a count).
 
 ## 74. Development phases
 
+> **Superseded 2026-09-21. The 53-phase list below is archived with the legacy ledger (`docs/history/plan-legacy-2026-09-21.md`). `plan.md`'s milestones M0–M16 govern.** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
+
 The full phase list with task IDs is `plan.md`. Summarised:
 
 | # | Phase | Outcome |
@@ -7316,6 +7388,8 @@ placeholder for work not yet thought about.
 
 ## 78. First playable milestone
 
+> **Superseded 2026-09-21 by `plan.md`'s gates G1–G5. Kept as history.** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
+
 **Definition.** A build in which a player can start on the road, open their gate, walk to the
 front door, enter the house, walk through every level including the basement and the attic, open
 and close doors, switch lights on and off, and watch the sun move — with correct culling, correct
@@ -7346,6 +7420,8 @@ Estimated position in the plan: end of **phase 16**.
 ---
 
 ## 79. Feature-complete desktop version
+
+> **Superseded 2026-09-21 by `plan.md`'s Definition of DONE. The checklist below is history.** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
 
 Every requirement in the brief, on Linux, at the quality bar this document sets.
 
@@ -7426,6 +7502,8 @@ constraints no desktop run exercises. Phase 47's Emscripten spike is what actual
 ---
 
 ## 81. Requirements traceability
+
+> **Amended 2026-09-21. Rows for removed requirement areas (interaction, appliances, plumbing, toilets, television, pets, avatar, animation, household persistence, reset) are void. `plan.md`'s Definition of DONE is the completion reference.** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md))
 
 Every numbered requirement area of the brief, mapped to this document and to `plan.md`.
 

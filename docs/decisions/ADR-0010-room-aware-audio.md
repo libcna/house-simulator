@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Accepted |
+| **Status** | Accepted; **superseded in part** by [ADR-0014](ADR-0014-showcase-scope.md) (2026-09-21): the portal-path solver is not built. Positional loops are gated by cell and one open-portal hop, and weather beds follow sky exposure |
 | **Date** | 2026-09-06 |
 | **Task** | `HOUSE-00016` |
 | **Depends on** | [ADR-0001](ADR-0001-xna-only.md), [ADR-0004](ADR-0004-portal-visibility.md) |

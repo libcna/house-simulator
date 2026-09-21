@@ -14,7 +14,8 @@ specific to this project.
 | Document | Authority |
 |---|---|
 | [`cna-house.md`](cna-house.md) | The architecture. Do not casually redesign it. |
-| [`plan.md`](plan.md) | The task list and the execution ledger. Task ids are permanent. |
+| [`plan.md`](plan.md) | The remaining work: goal, Definition of DONE, scheduling rules, zone scoreboard, milestones. The execution ledger. Task ids are permanent. |
+| [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md) | The frozen legacy ledger: the record of every task completed or cancelled before 2026-09-21. Never tick boxes there. |
 
 If implementation reveals a genuine contradiction or impossibility in either, investigate it, make
 the **smallest** technically justified correction, record why, and never deviate silently.
@@ -86,11 +87,24 @@ concurrent agents — is in `../AGENTS.md`; do not re-derive it, just comply.
 
 ## 3. Project rules on top of those
 
+**This is an architectural showcase, not a life simulator** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md),
+2026-09-21). The player walks and looks. Animals, a visible avatar, character animation,
+interaction gameplay, appliance, plumbing, toilet and television behaviour, and household-state
+persistence are out of scope. Do not add code for them. Objects are static dressing.
+
+**Breadth before depth. Pick work by `plan.md`'s scheduling rules (R1–R11)**, not by task number
+and not by the largest defect in one area. No zone is worked more than one completion level ahead
+of the least-complete zone (R1). Until gate G4, **no task targets the ground-floor principal
+route** (R4). At most 3 consecutive tasks go to one zone (R3) and at most 2 review rounds (R6).
+Every new task states `adv:` and `est:` (R7). Before starting, read the zone scoreboard in
+`plan.md`; before finishing, record in `docs/handoff.md` which rule chose your task.
+
 **One task, one commit.** The commit message names the `HOUSE-00000` id, and `plan.md`'s checkbox
 is ticked in the same commit. Definition of done: [`docs/workflow.md`](docs/workflow.md).
 
 **Task ids are permanent.** Never renumber, never delete a historical task, never strike one
-without recording why. New work takes the next free id **in its phase's reserved range**.
+without recording why. New work takes the next free id **in its milestone's reserved range**
+(`plan.md`'s milestone index).
 
 **Never mark a task complete while its acceptance criteria are knowingly unsatisfied.** If a task
 is genuinely blocked, record the evidence in `plan.md` and move to independent work.

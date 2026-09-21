@@ -1,5 +1,16 @@
 # Visual review ledger
 
+> **2026-09-21: protocol change (`HOUSE-03201`, [ADR-0014](../decisions/ADR-0014-showcase-scope.md)).**
+> The Visual Convergence Sprint and `VISUAL-GATE-1` are retired. Rounds 0–102 below all reviewed
+> the ground-floor route and the front approach. No round has ever captured the basement, the
+> ground-floor service rooms, the garage interior, the upper-floor rooms or the attic. From Round
+> 103 on, a round follows [`plan.md`](../../plan.md): it captures per-zone fixed view sets
+> (`HOUSE-03202`); it classifies every defect by **severity S1–S4** and by **zone**; it updates the
+> zone scoreboard; and it names the next task together with the **scheduling rule (R1–R11)** that
+> chose it. Round 102's open ground-floor list is **frozen by rule R4 until gate G4**; after G3
+> it is taken up by the house-wide `HOUSE-03402` and by `HOUSE-03407`. Log S3/S4 findings under a
+> zone's heading as backlog; do not schedule them.
+
 These captures answer “does the playable house look good?”, not “did a pixel change?”. Run
 `python3 tools/visual/capture_review.py <short-head>-<round>` from the repository root. The tool
 still writes `docs/visual-review/captures/`, but since `HOUSE-00043` those large human-review

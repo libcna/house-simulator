@@ -1,16 +1,22 @@
 # CNA House
 
-A first-person interactive simulation of a very large American-style detached house, its garage,
-its fenced property and the neighbourhood around it. There is no win condition. The activity is
-*inhabiting* the place: walking through it, opening and closing things, switching lights, watching
-the weather change through the windows, watching the sun cross the sky and the moon change phase,
-listening to the house, and finding it exactly as you left it the next time you start the program.
+A polished, atmospheric **architectural and graphics showcase for CNA**. In first person you explore
+a very large American-style detached house (basement, ground floor, two upper floors and attic),
+its garage, its fenced garden, the street and the neighbourhood around it. Weather changes outside
+the windows, the sun crosses the sky and the moon changes phase. There is no win condition and no
+life simulation: the point is a complete, convincing environment running on CNA's XNA 4.0 API on
+Linux desktop, in a browser and on Android.
 
-* **Architecture and design:** [`cna-house.md`](cna-house.md) — the authoritative design baseline.
-* **Master task list:** [`plan.md`](plan.md) — 1 297 tasks in 53 phases; the execution ledger.
-* **Status:** implementation started 2026-09-06. Phase 0 (repository, conventions, decisions) is in
-  progress. `cna-house` builds and runs today: it opens a window, clears to a known colour and
-  draws its version string and frame time. There is no house in it yet — see the plan.
+* **Architecture and design:** [`cna-house.md`](cna-house.md), the design baseline, read together
+  with its 2026-09-21 scope amendment ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md)).
+* **Plan:** [`plan.md`](plan.md) is the execution ledger for the remaining work: 17 milestones, a
+  Definition of DONE, and breadth-first scheduling rules. The original 53-phase ledger is archived
+  in [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md).
+* **Status (2026-09-21):** 674 tasks complete. The whole five-level house, its property and the
+  neighbourhood are walkable in first person with production materials, baked lighting, a real
+  sky, sun, moon and stars, and a weather simulation. The ground-floor principal rooms are
+  furnished; the basement, the upper floors, the attic and the garage are not yet. The plan's
+  zone scoreboard tracks exactly where each area stands.
 
 ---
 
@@ -69,7 +75,7 @@ submodule and no fetch — clone them next to this repository:
 | C++ compiler | g++ 14.2 (C++23) |
 | CMake / Ninja | 3.31.6 / 1.12.1 |
 | SDL3 development packages | as required by CNA's `CNA_PLATFORM=SDL3` |
-| FFmpeg development packages | optional; enables the television (`CNA_ENABLE_VIDEO=AUTO`) |
+| FFmpeg development packages | optional; CNA's video backend (`CNA_ENABLE_VIDEO=AUTO`). The showcase itself plays no video |
 | ccache | required by the openeggbert build rules — see [`AGENTS.md`](AGENTS.md) |
 | Python | 3.11+, for the CI gates and the offline tooling |
 
@@ -152,9 +158,8 @@ paths and `fxc` reads a leading `/` as an option. The preset already points at i
 | `--screenshot=<path>` | Write one PNG and exit |
 | `--log=<categories>` | Comma-separated log categories, e.g. `world,content` |
 | `--help` | Every option |
-| `--reset-house` | Start from the canonical initial state, ignoring the save *(phase 40)* |
 
-Saves live in `${XDG_DATA_HOME:-~/.local/share}/**game/CnaHouse**/`. The `game` component is
+Settings (and, later, the optional session file) live in `${XDG_DATA_HOME:-~/.local/share}/**game/CnaHouse**/`. The `game` component is
 literal and is not a mistake: `StorageDevice` uses it unless `SetAppNameEXT` is called, and that
 call is `CNAEXT`, which this project forbids. The *container* name is what identifies `cna-house`,
 and it is plain XNA.

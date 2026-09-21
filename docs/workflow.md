@@ -4,8 +4,11 @@
 
 `plan.md` is the execution ledger. Work is picked from it, not invented beside it.
 
-1. **Pick the next unfinished task whose dependencies are all complete.** Dependency order is
-   real: a task's `dep:` line names what must exist first.
+1. **Pick the next unfinished task whose dependencies are all complete, by `plan.md`'s scheduling
+   rules (R1–R11).** Dependency order is real: a task's `dep:` line names what must exist first.
+   Among eligible tasks, the rules decide: breadth before depth, the least-complete zone first,
+   the ground-floor freeze until gate G4, and at most three consecutive tasks per zone. Not the
+   lowest id, and not the largest defect in the area you worked on last.
 2. **Do the whole task**, including its `verify:` step.
 3. **Tick the checkbox** `- [ ]` → `- [x]` in `plan.md`, in the same commit as the work.
 4. **Commit once**, with the id in the message.
@@ -46,7 +49,7 @@ A task is done when **all** of these are true. Not most.
       "documentation was written"; *the documents that were made wrong by this change are right
       again.*
 - [ ] **`plan.md` is updated** — the checkbox, plus any dependency, blocker or corrected criterion
-      the work revealed.
+      the work revealed, and the zone scoreboard when the task changed a zone's level (rule R10).
 - [ ] **The diff is clean.** `git diff --check` passes; no build products, no probe binaries, no
       stray files; no sibling repository touched.
 
@@ -59,7 +62,7 @@ A task that cannot be completed is not quietly skipped and not fraudulently tick
 2. **Record it** in `plan.md` under the task as a `blocked:` line naming the evidence, and, if it
    is a CNA limitation, add or update a row in `cna-house.md` §6.
 3. **Leave the checkbox unticked.**
-4. **Move to independent work** in the same phase. One blocked task does not stop a session.
+4. **Move to independent work** in the same milestone. One blocked task does not stop a session.
 
 Never invent a workaround that violates the XNA-only rule to close a task. That is the one thing
 this project cannot trade away.
@@ -75,7 +78,9 @@ When it does:
 * never deviate silently, and never redesign an accepted decision without evidence that it fails.
 
 Task ids are permanent: never renumbered, never reused, never deleted. A cancelled task is struck
-through and keeps its id. New work takes the next free id **in its phase's reserved range**.
+through and keeps its id. New work takes the next free id **in its milestone's reserved range**
+(`plan.md`'s milestone index). Tasks completed or cancelled before 2026-09-21 are recorded in the
+frozen legacy ledger, [`history/plan-legacy-2026-09-21.md`](history/plan-legacy-2026-09-21.md).
 
 An architectural change additionally needs an ADR — a new one superseding the old, never an edit
 that makes an accepted record say something different ([`decisions/`](decisions/)).

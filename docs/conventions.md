@@ -290,5 +290,5 @@ threw, and the only symptom was one wrong word in a log line.
 ## 6. Task ids and commits
 
 Task ids are `HOUSE-` plus five digits, permanent, never renumbered, and each belongs to its
-phase's reserved range (`plan.md`). One task is one commit; the message names the id; the checkbox
+phase's (legacy) or milestone's (since 2026-09-21) reserved range (`plan.md`). One task is one commit; the message names the id; the checkbox
 moves in the same commit. See [`workflow.md`](workflow.md).

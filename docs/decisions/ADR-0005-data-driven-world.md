@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Accepted |
+| **Status** | Accepted. Since [ADR-0014](ADR-0014-showcase-scope.md) (2026-09-21) the closed interaction-expression vocabulary is frozen: it is not extended |
 | **Date** | 2026-09-06 |
 | **Task** | `HOUSE-00011` |
 | **Depends on** | [ADR-0001](ADR-0001-xna-only.md) |

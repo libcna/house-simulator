@@ -9,8 +9,8 @@ MAJOR.MINOR.PATCH+gHASH
 
 | Component | Meaning |
 |---|---|
-| `MAJOR` | `0` until the feature-complete desktop version (`cna-house.md` §79). It becomes `1` there and thereafter increments only on a change that invalidates saves beyond what a migration can repair, or that drops a platform. |
-| `MINOR` | A phase of `plan.md` reaching its exit criterion. Features arrive here. |
+| `MAJOR` | `0` until the desktop release that meets `plan.md`'s Definition of DONE (`HOUSE-02797`; this replaced `cna-house.md` §79 on 2026-09-21). It becomes `1` there and thereafter increments only on a change that invalidates the settings or session file beyond what a migration can repair, or that drops a platform. |
+| `MINOR` | A milestone of `plan.md` reaching its gate or exit criterion. Features arrive here. |
 | `PATCH` | Fixes and content updates that add no feature. |
 | `+gHASH` | Build metadata: the short git hash of the commit built. Appended automatically, never authored. A dirty working tree appends `.dirty`. |
 
