@@ -262,9 +262,8 @@ non-accessible appliance interiors.
 
 ## Zone scoreboard
 
-**As of 2026-09-21 (`HOUSE-03202`).** The levels are `HOUSE-03201`'s, re-expressed in the new ladder;
-nothing has been measured since. Update per rule R10. The levels of never-reviewed zones are
-provisional until `HOUSE-03203` captures them.
+**As of 2026-09-21 (`HOUSE-03203`).** Round 103's whole-property day/night review confirms the
+levels below and the H/M/S/U classification without change. Update per rule R10.
 
 `*` means reachable, but pending the **house-wide door/gate defect**: every leaf is drawn *closed*,
 yet nothing collides with it (`DynamicObstacles` is never filled) and `PortalRuntime` starts every
@@ -273,17 +272,17 @@ every zone at once.
 
 | Zone | C3 floor | Main at C4 | Hero cells at C5 | Props (133 total) | Review views (56 total) | Evidence | Largest gaps |
 |---|---|---|---|---|---|---|---|
-| `Z-B1` | **C1\*** | 0 / 2 | 0 / 1 | **0** in 14 cells | 4 | Flights walk both ways (`HOUSE-00615`). Every cell reachable (world rule 5). Materials and both bakes assigned (`HOUSE-00907`–`00910`) | Empty. Never reviewed. Generic slab doors. No services or structure dressing |
-| `Z-L0M` | **C2** (dressing of C3 done; lighting S2 open) | 0 / 3 | 0 / 5 | 106 | 23 | 102 review rounds. Primary furniture in all 9 cells (`HOUSE-01037`–`01076`) | S2: Basic-lit furniture much darker than the baked receivers (piano, sofas); service-room night depth. **Goes last by R4** |
-| `Z-L0S` | **C1\*** | 0 / 1 | — | **0** in 8 cells | 2 | Shell, materials, bakes | Empty. Never reviewed |
-| `Z-GAR` | **C1\*** | 0 / 1 | — | **0** in 2 cells | 1 | Finished sectional door outside (`HOUSE-00935`, `00947`, `00948`) | 70.6 m² empty garage. The loft had no furnish task (now `HOUSE-03341`) |
-| `Z-L1` | **C1\*** | 0 / 3 | 0 / 1 | **1** (front-balcony lantern) in 20 cells | 6 | Reached on foot (`HOUSE-00489`) | 5 bedrooms, the master suite and 4 baths/WCs empty. Never reviewed |
-| `Z-L2` | **C1\*** | 0 / 4 | 0 / 1 | **0** in 15 cells | 6 | Flights walkable | Library, games room, sitting room, 2 bedrooms and 4 baths/WCs empty. Never reviewed |
-| `Z-L3` | **C1\*** | — | 0 / 1 | **0** in 5 cells | 2 | Automatic attic crouch (`HOUSE-00558`) | ≈ 258 m² of attic never seen. No structure dressing |
-| `Z-STAIR` | **C1\*** | 0 / 3 | — | 0 | 4 | 8 flights walk up and down. Balustrade geometry and collision exist | S2: the main stair foot is very dark (Rounds 98, 102). Upper flights never reviewed |
-| `Z-EXF` | **C3\*** (C4-level content in place) | — | 0 / 4 | 11 | 4 | ≈ 25 facade, roof, entry and approach tasks. Property bot walk (`HOUSE-00782`) | Mailbox, bins and meters (`HOUSE-00770`). Gate leaves not solid (the `*`) |
-| `Z-EXR` | **C2\*** (C3 partial) | 0 / 2 | — | 15 | 3 | Terrace group, loungers, fire pit, swing bench, lanterns (`HOUSE-00771`, `01291`). Shed shell (`HOUSE-00768`). Beds and trellis (`HOUSE-00769`) | Shed interior, side yards, orchard and vegetable garden bare. Rear and side elevations less finished than the front |
-| `Z-STR` | **C2** (C3 partial) | — | — | — | 1 | N1–N60 generated at LOD0–2 plus impostor cards, street furniture, barriers (`HOUSE-00841`–`00849`, `00856`, `00857`) | Parked cars (`HOUSE-00847`). Impostor rendering and neighbour porch lights are optional |
+| `Z-B1` | **C1\*** | 0 / 2 | 0 / 1 | **0** in 14 cells | 4 | Round 103 day/night. Flights walk both ways (`HOUSE-00615`). Every cell reachable (world rule 5) | S2: nearly black; empty; generic slab doors; no services or structure dressing |
+| `Z-L0M` | **C2** (dressing of C3 done; lighting S2 open) | 0 / 3 | 0 / 5 | 106 | 23 | Round 103 day/night plus 102 prior rounds. Primary furniture in all 9 cells (`HOUSE-01037`–`01076`) | S2: Basic-lit furniture much darker than the baked receivers (piano, sofas); service-room night depth. **Goes last by R4** |
+| `Z-L0S` | **C1\*** | 0 / 1 | — | **0** in 8 cells | 2 | Round 103 day/night; shell, materials, bakes | S2: empty; office/mudroom lack readable night depth |
+| `Z-GAR` | **C1\*** | 0 / 1 | — | **0** in 2 cells | 1 | Round 103 day/night; finished sectional door outside (`HOUSE-00935`, `00947`, `00948`) | S2: 70.6 m² empty dark volume; loft access/guard and interior finish do not read |
+| `Z-L1` | **C1\*** | 0 / 3 | 0 / 1 | **1** (front-balcony lantern) in 20 cells | 6 | Round 103 day/night; reached on foot (`HOUSE-00489`) | S2: empty; dark after sunset; room-specific joinery/finishes absent |
+| `Z-L2` | **C1\*** | 0 / 4 | 0 / 1 | **0** in 15 cells | 6 | Round 103 day/night; flights walkable | S2: empty; dark after sunset; room-specific joinery/finishes absent |
+| `Z-L3` | **C1\*** | — | 0 / 1 | **0** in 5 cells | 2 | Round 103 day/night; automatic attic crouch (`HOUSE-00558`) | S2: empty; no structure/finished-room contrast |
+| `Z-STAIR` | **C1\*** | 0 / 3 | — | 0 | 4 | Round 103 day/night; 8 flights walk up and down | S2: main foot under-readable; basement flight almost black |
+| `Z-EXF` | **C3\*** (C4-level content in place) | — | 0 / 4 | 11 | 4 | Round 103 day/night/overcast; ≈ 25 facade, roof, entry and approach tasks; property bot walk (`HOUSE-00782`) | No zone-specific S2; gate leaves retain the house-wide fixed-leaf defect (`*`) |
+| `Z-EXR` | **C2\*** (C3 partial) | 0 / 2 | — | 15 | 3 | Round 103 day/night; terrace, shed shell, beds and trellis (`HOUSE-00768`, `00769`, `00771`, `01291`) | S2: sparse working areas; rear/side architectural finish below the front standard |
+| `Z-STR` | **C2** (C3 partial) | — | — | — | 1 | Round 103 day/night; N1–N60, street furniture, barriers (`HOUSE-00841`–`00849`, `00856`, `00857`) | S3: plain road foreground and repeated vegetation band; defer to M11 |
 
 `HOUSE-03204` adds the following objective inputs, generated by
 `python3 tools/world/zone_scoreboard.py`. `Lit accessible` counts cells with at least one authored
@@ -420,11 +419,12 @@ after G1 as Track B.
       verify: run `--all-zones` in both scenarios; inspect every contact sheet
       amended: (2026-09-21, `HOUSE-03205`) accept (1) is reduced: every hero area and every main room has one fixed pose (two for the front approach), and each zone has at least one pose in a secondary room; utility rooms have no pose of their own and are judged from the zone walk at G3; `clear-overcast` is captured only for hero areas (rule R6)
 
-- [ ] HOUSE-03203 — Baseline review of the whole property: level every zone with evidence and seed the defect lists
+- [x] HOUSE-03203 — Baseline review of the whole property: level every zone with evidence and seed the defect lists
       dep: HOUSE-03202, HOUSE-03204 · sys: — · plat: LNX · pri: MUST · zone: all · adv: R10 · est: 2.5
       accept: (1) one ledger round covers all 11 zones, day and night; (2) every observed defect is classified S1–S4 and filed under its zone; (3) the scoreboard levels are confirmed or corrected with the round and `zone_scoreboard.py` evidence, and "provisional" is removed; (4) each M2 zone task gets its concrete S1/S2 list as a `note:`
       verify: the ledger round; the updated scoreboard
       amended: (2026-09-21, `HOUSE-03205`) adds (5): confirm or correct the room tiers of [Quality tiers](#quality-tiers-and-room-classification) from what the round sees, and record any change here
+      note: (2026-09-21) Round 103 confirms every existing zone level and every H/M/S/U classification without change; S1 none; the house-wide fixed-leaf/pass-through mismatch is S2 and belongs to M1
 
 - [x] HOUSE-03204 — `tools/world/zone_scoreboard.py` and `docs/zones.json`: objective per-zone completeness numbers
       dep: HOUSE-03201 · sys: tools · plat: TOOL · pri: MUST · zone: all · adv: R10 · est: 2
@@ -506,36 +506,43 @@ the lever set of the finished joinery (`HOUSE-00932`, `00940`, `00942`); `HOUSE-
       dep: HOUSE-03240, HOUSE-03203 · sys: content · plat: TOOL · pri: MUST · zone: Z-B1 · adv: G2, D1 · est: 3
       accept: C2 for all 14 `Z-B1` cells: finished rooms (cinema, gym, hobby, WC, laundry) and unfinished rooms (mechanical, electrical, utility, workshop, storage, cellar) read as such through their finishes; exposed structure (joists, columns, a slab edge) where unfinished, from the shell generator or `prop_kit_gen.py`, whichever is cheaper; door leaves have casing and hardware; basement windows or light wells as designed; the zone's S1/S2 architecture findings closed
       verify: `Z-B1` zone capture, day and night; `verify_shell.py`; grand tour
+      note: Round 103 S2 architecture list: generic slab doors/casings; finished and unfinished room types do not read distinctly; the zone is nearly black even by day
 
 - [ ] HOUSE-03262 — Bring the ground-floor service rooms and the garage to C2
       dep: HOUSE-03240, HOUSE-03203 · sys: content · plat: TOOL · pri: MUST · zone: Z-L0S, Z-GAR · adv: G2, D1 · est: 2.5
       accept: C2 for `Z-L0S` and `Z-GAR`: the garage interior's slab, walls, ceiling and the inside face of the sectional door read as finished garage construction; the loft has a real means of access as designed and a guard; mudroom, laundry, WCs, pantry, office and closets have finished trim and door hardware
       verify: `Z-L0S` and `Z-GAR` captures; grand tour
+      note: Round 103 S2 architecture list: office/mudroom night depth is unreadable; garage interior finish and inside door face do not read; loft access and guard are absent
 
 - [ ] HOUSE-03263 — Bring the first upper floor's architecture to C2
       dep: HOUSE-03240, HOUSE-03203 · sys: content · plat: TOOL · pri: MUST · zone: Z-L1 · adv: G2, D1 · est: 2.5
       accept: C2 for all 20 `Z-L1` cells: bedroom, bathroom, closet and corridor finishes match their palette; window reveals, sills and interior trim finished; door joinery at least at the `HOUSE-00942` standard on landing- and hall-facing doors; balconies' guards and finishes consistent with the front balcony
       verify: `Z-L1` capture; grand tour
+      note: Round 103 S2 architecture list: generic dark door openings and insufficient room-specific joinery/finish distinction across the empty floor
 
 - [ ] HOUSE-03264 — Bring the second upper floor's architecture to C2
       dep: HOUSE-03240, HOUSE-03203 · sys: content · plat: TOOL · pri: MUST · zone: Z-L2 · adv: G2, D1 · est: 2
       accept: as `HOUSE-03263`, for the 15 accessible `Z-L2` cells; the library's shelving walls are left to M4 unless the shell carries them
       verify: `Z-L2` capture; grand tour
+      note: Round 103 S2 architecture list: as L1, with the library/games/sitting identities not yet supported by their architectural finish
 
 - [ ] HOUSE-03265 — Bring the attic's architecture to C2
       dep: HOUSE-03240, HOUSE-03203 · sys: content · plat: TOOL · pri: MUST · zone: Z-L3 · adv: G2, D1 · est: 3
       accept: C2 for the 5 `Z-L3` cells: visible roof structure in the stores (rafters, ridge, collar ties or purlins), insulation between joists where unfinished, a boarded walkway through the stores, dormer reveals, knee walls and a finished ceiling in `L3_ROOM`; the crouch zones read as low headroom rather than as a collision surprise
       verify: `Z-L3` capture; grand tour (crouch)
+      note: Round 103 S2 architecture list: stores lack readable roof structure/unfinished construction and `L3_ROOM` lacks a clearly finished envelope
 
 - [ ] HOUSE-03266 — Bring the vertical circulation to C2
       dep: HOUSE-03240, HOUSE-03203 · sys: content · plat: TOOL · pri: MUST · zone: Z-STAIR · adv: G2, D1 · est: 2
       accept: all 8 flights have handrails, balusters, newels, nosings, stringers and landing trim consistent with their stair's character (the main stair finished; the basement and attic stairs plainer); no flight reads as a ramp or a solid mass from its foot or its head
       verify: `Z-STAIR` capture from every foot and head; stair traversal tests
+      note: Round 103 S2 architecture list: main stair foot is under-readable and the basement flight is almost black; verify every flight's trim/silhouette from both ends
 
 - [ ] HOUSE-03267 — Bring the rear and side elevations up to the front elevation's architectural standard
       dep: HOUSE-03240, HOUSE-03203 · sys: content · plat: TOOL · pri: MUST · zone: Z-EXR · adv: G2, D1 · est: 2
       accept: from anywhere accessible in the garden and side yards: window grilles and shutters (or their deliberate absence) are consistent with `HOUSE-00933`; sills, trim, corner boards, roof edges and rainwater goods match `HOUSE-00934`/`00944`; rear doors are finished joinery; the shed's exterior reads as finished
       verify: `Z-EXR` capture, day and night
+      note: Round 103 S2 architecture list: rear and side elevation trim/rainwater/joinery treatment reads materially less finished than the front
 
 - [ ] HOUSE-03280 — **Gate G2 review: every zone at C2**
       dep: HOUSE-03261, HOUSE-03262, HOUSE-03263, HOUSE-03264, HOUSE-03265, HOUSE-03266, HOUSE-03267 · sys: — · plat: ALL · pri: MUST · zone: all · adv: G2 · est: 1

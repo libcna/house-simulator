@@ -1,3 +1,19 @@
+# Review handoff — 2026-09-21 (`HOUSE-03203` whole-property baseline)
+
+`HOUSE-03203` is complete. Visual-review Round 103 records the first formal all-zone day/night
+baseline from `HOUSE-03202`'s fixed views. No S1 was visible. The scoreboard's eleven existing
+levels and all H/M/S/U assignments were confirmed without change; provisional language is removed.
+The round files S2 findings by zone, copies the architecture subset onto every M2 zone task, and
+keeps the only street S3 deferred to M11. The house-wide fixed-leaf/pass-through mismatch remains
+the M1 S2, not an excuse for zone polish.
+
+Next is M1 at `HOUSE-03221` (static door and gate poses), chosen by dependency order and R1: every
+zone must lose its `*` before M2. No ground-floor polish is permitted. The 56-view day/night and
+eight-view overcast captures remain local and Git-ignored. The pre-existing README link-cleanup
+edit was preserved as a separate staged change; Round 103 was committed independently from it.
+
+---
+
 # Tooling handoff — 2026-09-21 (`HOUSE-03202` fixed review views)
 
 `HOUSE-03202` is complete. `tools/visual/capture_review.py` retains the original 32 camera names

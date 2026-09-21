@@ -4452,3 +4452,41 @@ and service-room night depth are poor; (3) the warm/flat object-versus-bake
 balance needs a more physical solution before fine dressing. This is an
 incremental cross-room correction, not the final room-lighting milestone.
 **VISUAL-GATE-1 remains open.**
+
+## Round 103 — reduced-plan whole-property baseline
+
+Commit: `HOUSE-03203` working tree (`2026-09-21`). The fixed 56-view
+[`clear-day`](captures/house-03202-all-day) and
+[`clear-night`](captures/house-03202-all-night) sets cover all eleven planning zones; the eight
+H1–H7 representatives also have a
+[`clear-overcast`](captures/house-03202-heroes-overcast) set. Captures are local and Git-ignored.
+Every per-zone contact sheet was inspected at its labelled fixed poses. This is the first formal
+review of the basement, service rooms, garage, both upper floors, attic and upper circulation; it
+establishes breadth evidence, not a request to polish the already mature ground floor.
+
+**S1:** none visible in the fixed captures. The known house-wide traversal defect is **S2**: door
+and gate leaves are visibly closed while the runtime lets the player pass through them. M1 owns it.
+
+**S2 by zone:** `Z-B1` is nearly black by day and night and its empty, generic rooms do not yet
+distinguish cinema/gym/workshop/service purposes; `Z-L0M` retains the under-readable living piano,
+main-stair foot and uneven object-versus-bake balance; `Z-L0S` is empty and the office/mudroom lack
+readable night depth; `Z-GAR` is an empty dark volume whose loft access/guard and interior finish
+do not read; `Z-L1` and `Z-L2` are empty, dark after sunset and lack convincing room-specific
+joinery/finishes; `Z-L3` is empty and lacks the structure/finished-room contrast needed to read as
+an attic; `Z-STAIR` has an under-readable main foot and an almost black basement flight; `Z-EXR`
+has sparse working areas and rear/side architectural finish below the front elevation's standard.
+`Z-EXF` has no additional zone-specific S2 beyond the house-wide fixed-leaf problem. `Z-STR` has
+no S1/S2 in this round.
+
+**S3/S4:** `Z-STR`'s road foreground and repeated vegetation band are plain but remain believable
+at walkthrough distance (**S3**, defer to the bounded M11 pass unless a cheap shared-kit change
+solves them). No S4 item is scheduled. The day/night sets otherwise show intact major geometry,
+materials and exterior weather presentation; darkness and emptiness are content deficiencies, not
+camera failures.
+
+The scoreboard's existing completion levels are confirmed without change and are no longer
+provisional. The H/M/S/U classification is also confirmed: all 19 main targets and seven hero
+areas merit their planned depth, while the service/storage cells remain utility or secondary
+rather than hidden hero work. The concrete architecture subset of each S2 list is copied onto the
+corresponding M2 task in `plan.md`. Next: `HOUSE-03221` by M1 dependency order and R1, not another
+ground-floor polish round.
