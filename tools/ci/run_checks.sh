@@ -247,6 +247,10 @@ run_gate "world-rules" check_world
 # rules. A schema change once made that fixture invalid, silently preventing every mutation from
 # reaching the rules; running it here keeps the test of the gate as current as the gate itself.
 run_gate "world-rules-selftest" python3 tools/world/validate_world.py --selftest
+# `HOUSE-03204`.  The breadth-first plan depends on every authored cell belonging to exactly one
+# planning zone with one quality tier.  A missing or duplicate assignment makes the scoreboard lie
+# precisely where it is meant to prevent another ground-floor-only convergence loop.
+run_gate "zone-scoreboard" python3 tools/world/zone_scoreboard.py --check
 # `HOUSE-00421`. The deployed copy is what the game reads: `content/world/` is the authored JSONC
 # with its comments stripped, plus the `world.manifest.json` that hashes those bytes
 # (`HOUSE-00364`). A stale deploy is a house that does not match the one in the repository, and

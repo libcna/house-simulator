@@ -1,3 +1,24 @@
+# Tooling handoff — 2026-09-21 (`HOUSE-03204` zone scoreboard)
+
+`HOUSE-03204` is complete. [`zones.json`](zones.json) now assigns all 96 authored cells exactly
+once across the eleven planning zones or the explicit `none` group, records intended accessibility,
+the H/M/S/U tier and H1–H7 hero-area membership, and assigns the existing 32 review poses to their
+current zones. `tools/world/zone_scoreboard.py` joins that manifest to the authored world and prints
+the objective C3 inputs plus C4/C5 target counts; `--check` rejects missing, duplicate and unknown
+members and invalid tier/hero metadata. The gate is part of `tools/ci/run_checks.sh`, and its current
+table is pasted into [`plan.md`](../plan.md)'s scoreboard.
+
+Next remains `HOUSE-03202` (fixed review views for every zone), then `HOUSE-03203` (the first
+whole-property review), then M1 at `HOUSE-03221`. Rule that chose this task: M0 dependency order and
+R10's requirement for objective breadth evidence before review; it was also the explicit first item
+in the reduced-plan handoff. The build (limited to four CPU cores), all 1,413 unit tests, the new
+gate's missing/duplicate mutation checks, and every static/strict-XNA gate pass. The combined check
+command reports only the pre-existing ignored `.claude/settings.local.json` as a stray root entry;
+a direct scan confirms it is the sole layout finding. The pre-existing staged edit to
+`docs/visual-review/README.md` was not modified or included.
+
+---
+
 # Planning handoff — 2026-09-21 (`HOUSE-03205` second scope reduction)
 
 **Read this section first; it refines the `HOUSE-03201` section below.** The same day, the project
