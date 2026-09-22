@@ -1214,10 +1214,18 @@ TEST(LightingSystemTests, KitchenLightSpillsIntoTheHallAndItsDoorBrightensThePan
     EXPECT_GT(kitchenState->artificial, 0.0F);
     EXPECT_FLOAT_EQ(hallState->artificial, 0.0F);
     EXPECT_GT(hallState->borrowed, 0.0F) << "the permanent kitchen-to-hall cased opening passed no light";
+
+    // HOUSE-03224 starts the pantry door at its authored 0.90 walkthrough pose, so shut it first
+    // to measure the dark side, then open it fully.
+    const Id pantryDoor = Id::Of("P_L0_KITCHEN__L0_PANTRY");
+    ASSERT_TRUE(house.visibility.SetAperture(pantryDoor, 0.0F));
+    house.lighting.Update(Frame(22));
+    pantryState = house.lighting.FindCell(pantry);
+    ASSERT_NE(pantryState, nullptr);
     const float pantryClosed = pantryState->borrowed;
 
-    ASSERT_TRUE(house.visibility.SetAperture(Id::Of("P_L0_KITCHEN__L0_PANTRY"), 1.0F));
-    house.lighting.Update(Frame(22));
+    ASSERT_TRUE(house.visibility.SetAperture(pantryDoor, 1.0F));
+    house.lighting.Update(Frame(23));
     pantryState = house.lighting.FindCell(pantry);
     ASSERT_NE(pantryState, nullptr);
     EXPECT_GT(pantryState->borrowed, pantryClosed)

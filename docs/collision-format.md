@@ -344,8 +344,12 @@ What is built instead comes from `layout.exterior.json`:
 | `vegetation` whose asset is a tree | one OBB per instance, sized as a **trunk** — a body walks under a maple, not into it | 17 |
 | `neighbourhood` whose asset is a parked car | one OBB per car, carrying the row's yaw | 2 |
 
-A gate is a hole and not a piece: §65 makes all three interactable, so the leaf is a dynamic
-obstacle (§49.4) exactly as a door is, and what the static file carries is the opening.
+A gate remains a hole in its fence run, then `HOUSE-03223` adds one separately named OBB at the
+authored fixed pose. Doors are static for the walkthrough too: hinged and sliding leaves are OBBs,
+while the pitched overhead garage leaf is a triangle-mesh box because the format's OBB rotation is
+yaw-only. Each proxy's surface name is `door_leaf:<opening>:<leaf>` or
+`gate_leaf:<gate>:<leaf>` so the production test can account for every leaf across the binary
+writer/reader boundary. No runtime door interaction or per-frame obstacle update is involved.
 
 Each piece is put in **every** open cell within `OPENING_REACH` of it, for §4.1's reason one step
 further out: two yards abut with no wall AND no portal, so §16.4 hands a body from one to the other

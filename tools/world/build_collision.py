@@ -1315,8 +1315,8 @@ def build_exterior(layout, shapes: Shapes, per_cell: dict[str, list[int]], stats
         stats[counter] += 1
 
     # §11.2's fences, in pieces short enough to follow the ground, with the gate openings left out
-    # of them: a gate is a leaf that opens (§65), so the hole is what the static file carries and
-    # `DynamicObstacles` carries the leaf.
+    # of the RUNS. `build_posed_leaves` puts one separate static proxy at each authored fixed gate
+    # pose; the fence must still stop at the jamb rather than filling the closed-position hole.
     openings = [(float(gate["opening"]["x"][0]), float(gate["opening"]["x"][1]),
                  float(gate["opening"]["z"][0]), float(gate["opening"]["z"][1]))
                 for gate in exterior.get("gates", []) if gate.get("opening")]
@@ -1773,6 +1773,229 @@ def build_props(layout, shapes: Shapes, per_cell, asset_paths, stats) -> None:
                 stats["propMeshes"] += 1
 
 
+# =========================================================================== fixed door leaves
+
+
+DOUBLE_DOOR_CENTER_GAP = 0.008
+SLIDER_FRAME_SECTION = 0.055
+SLIDER_MEETING_OVERLAP = 0.045
+GATE_GAP = 0.04
+GATE_THICKNESS = 0.045
+
+
+def _wall_side(cell: dict, axis: str, value: float) -> str | None:
+    """The side of @p cell carrying an axis-aligned portal plane."""
+    choices = []
+    for x0, x1, z0, z1 in layout_io.cell_boxes(cell):
+        if axis == "x":
+            choices.extend(((abs(value - x0), "-X"), (abs(value - x1), "+X")))
+        else:
+            choices.extend(((abs(value - z0), "-Z"), (abs(value - z1), "+Z")))
+    return min(choices)[1] if choices else None
+
+
+def _leaf_owner(opening: dict, portal: dict, cells: dict[str, dict]) -> str:
+    """The shell's one-leaf ownership rule, repeated offline for collision."""
+    sides = (portal.get("cellA"), portal.get("cellB"))
+    if opening.get("swing") in sides:
+        return str(opening["swing"])
+    interior = sorted(cell_id for cell_id in sides
+                      if cell_id in cells and cells[cell_id].get("kind") != "exterior")
+    return interior[0] if interior else str(next(cell_id for cell_id in sides if cell_id))
+
+
+def _box_mesh(low, high, transform):
+    """A transformed closed box, for a leaf whose pose cannot be expressed by yaw alone."""
+    x0, y0, z0 = low
+    x1, y1, z1 = high
+    vertices = [transform(x, y, z) for x, y, z in (
+        (x0, y0, z0), (x1, y0, z0), (x1, y1, z0), (x0, y1, z0),
+        (x0, y0, z1), (x1, y0, z1), (x1, y1, z1), (x0, y1, z1))]
+    triangles = [(0, 2, 1), (0, 3, 2), (4, 5, 6), (4, 6, 7),
+                 (0, 1, 5), (0, 5, 4), (3, 7, 6), (3, 6, 2),
+                 (0, 4, 7), (0, 7, 3), (1, 2, 6), (1, 6, 5)]
+    return vertices, triangles
+
+
+def build_posed_leaves(layout, shapes: Shapes, per_cell: dict[str, list[int]], stats: dict,
+                        world_dir: Path) -> None:
+    """Static collision at the exact authored walkthrough pose (`HOUSE-03223`).
+
+    The walkthrough has no door behaviour: these are ordinary static shapes, just like a wall or
+    a chair. Hinged and sliding leaves are yaw-only OBBs. The sectional garage leaf pitches onto
+    its overhead track and therefore uses the format's existing triangle-mesh path.
+    """
+    cells = layout_io.by_id(layout_io.rows(layout, "cells"), "cell")
+    portals = layout_io.by_id(layout_io.rows(layout, "portals"), "portal")
+
+    def own(index: int, portal: dict, mesh: bool = False) -> None:
+        for cell_id in (portal.get("cellA"), portal.get("cellB")):
+            if cell_id not in per_cell:
+                continue
+            (_add_mesh if mesh else _add)(per_cell, cell_id, index)
+
+    for opening in sorted(layout_io.rows(layout, "openings"), key=lambda row: row["id"]):
+        opening_type = str(opening.get("type") or "")
+        if opening.get("kind") != "door" or not opening_type.startswith("D_") \
+                or opening_type == "D_APPLIANCE":
+            continue
+        portal = portals.get(opening.get("portal"))
+        if portal is None:
+            raise LayoutError(f"posed door {opening['id']!r} has no portal")
+        plane = portal.get("plane") or {}
+        axis = plane.get("axis")
+        if axis not in ("x", "z"):
+            raise LayoutError(f"posed door {opening['id']!r} is not in a vertical plane")
+        value = float(plane["value"])
+        rect = portal["rect"]
+        hu0, hu1 = (float(component) for component in rect["u"])
+        v0, v1 = (float(component) for component in rect["v"])
+        leaf = opening.get("leaf") or {}
+        width = min(float(leaf.get("width") or hu1 - hu0), hu1 - hu0)
+        height = min(float(leaf.get("height") or v1 - v0), v1 - v0)
+        thickness = float(leaf.get("thickness") or 0.04)
+        lu0 = (hu0 + hu1 - width) / 2.0
+        lu1 = lu0 + width
+        owner_id = _leaf_owner(opening, portal, cells)
+        side = _wall_side(cells[owner_id], axis, value)
+        if side is None:
+            raise LayoutError(f"posed door {opening['id']!r} has no owning wall side")
+        fraction = max(0.0, min(1.0, float(opening.get("openFraction") or 0.0)))
+
+        def surface(leaf_index: int) -> str:
+            return f"door_leaf:{opening['id']}:{leaf_index}"
+
+        def add_obb(leaf_index: int, low_u: float, high_u: float, angle: float,
+                    depth_offset: float = 0.0) -> None:
+            centre_u = (low_u + high_u) / 2.0
+            centre_depth = value + depth_offset
+            long_half = (high_u - low_u) / 2.0
+            if axis == "x":
+                centre = (centre_depth, v0 + height / 2.0, centre_u)
+                half = (thickness / 2.0, height / 2.0, long_half)
+                yaw = angle
+            else:
+                centre = (centre_u, v0 + height / 2.0, centre_depth)
+                half = (long_half, height / 2.0, thickness / 2.0)
+                yaw = -angle
+            index = shapes.obb(centre, half, yaw, surface(leaf_index), KIND_WALL)
+            own(index, portal)
+            stats["doorLeafObbs"] += 1
+
+        if opening_type == "D_GARAGE":
+            angle = math.pi / 2.0 * fraction
+            cosine, sine = math.cos(angle), math.sin(angle)
+            into_sign = 1.0 if side in ("-X", "-Z") else -1.0
+
+            def transform(u, vertical, depth):
+                relative_v = vertical - v1
+                inward = (depth - value) * into_sign
+                posed_v = v1 + relative_v * cosine + inward * sine
+                posed_inward = -relative_v * sine + inward * cosine
+                posed_depth = value + posed_inward * into_sign
+                return ((posed_depth, posed_v, u) if axis == "x"
+                        else (u, posed_v, posed_depth))
+
+            low = (lu0, v0, value - thickness / 2.0)
+            high = (lu1, v0 + height, value + thickness / 2.0)
+            vertices, triangles = _box_mesh(low, high, transform)
+            index = shapes.mesh(vertices, triangles, surface(0), KIND_WALL)
+            own(index, portal, mesh=True)
+            stats["doorLeafMeshes"] += 1
+            continue
+
+        if opening_type == "D_SLIDER":
+            frame = min(SLIDER_FRAME_SECTION, width * 0.04, height * 0.04)
+            inner0, inner1 = lu0 + frame, lu1 - frame
+            centre = (inner0 + inner1) / 2.0
+            overlap = min(SLIDER_MEETING_OVERLAP, (inner1 - inner0) * 0.08)
+            travel = (inner1 - inner0) / 2.0 * fraction
+            add_obb(0, inner0, centre + overlap / 2.0, 0.0, -thickness * 0.20)
+            add_obb(1, centre - overlap / 2.0 - travel, inner1 - travel, 0.0,
+                    thickness * 0.20)
+            continue
+
+        maximum = math.radians(float(opening.get("maxAngleDeg") or 0.0))
+        angle = maximum * fraction
+        normal_sign = 1.0 if side in ("-X", "-Z") else -1.0
+        if opening_type == "D_DOUBLE":
+            paired = min(width, ((hu1 - hu0) - DOUBLE_DOOR_CENTER_GAP) / 2.0)
+            span = paired * 2.0 + DOUBLE_DOOR_CENTER_GAP
+            pair_lo = (hu0 + hu1 - span) / 2.0
+            pair_hi = pair_lo + span
+            poses = ((pair_lo, pair_lo + paired, normal_sign * angle),
+                     (pair_hi, pair_hi - paired, -normal_sign * angle))
+        else:
+            left = lu0 if side in ("-X", "+Z") else lu1
+            hinge = left if opening.get("hinge") == "left" else (lu1 if left == lu0 else lu0)
+            free = lu1 if hinge == lu0 else lu0
+            delta_sign = 1.0 if hinge == lu0 else -1.0
+            poses = ((hinge, free, normal_sign * delta_sign * angle),)
+        for leaf_index, (hinge, free, signed_angle) in enumerate(poses):
+            delta = free - hinge
+            centre_u = hinge + delta * math.cos(signed_angle) / 2.0
+            centre_depth = delta * math.sin(signed_angle) / 2.0
+            low_u, high_u = centre_u - abs(delta) / 2.0, centre_u + abs(delta) / 2.0
+            add_obb(leaf_index, low_u, high_u, signed_angle, centre_depth)
+
+    exterior = layout.get("exterior") or {}
+    interiors = [box for cell in cells.values() if cell.get("kind") != "exterior"
+                 for box in layout_io.cell_boxes(cell)]
+    property_centre = (sum((box[0] + box[1]) / 2.0 for box in interiors) / len(interiors),
+                       sum((box[2] + box[3]) / 2.0 for box in interiors) / len(interiors))
+    terrain = terrain_gen.decode(world_dir)[2] if (world_dir / "terrain.png").is_file() else None
+
+    def ground(x: float, z: float) -> float:
+        if terrain is None:
+            return 0.0
+        ix = min(max(int(round((x - terrain_gen.ORIGIN_X) / terrain_gen.STEP)), 0),
+                 terrain_gen.WIDTH - 1)
+        iz = min(max(int(round((z - terrain_gen.ORIGIN_Z) / terrain_gen.STEP)), 0),
+                 terrain_gen.HEIGHT - 1)
+        return terrain[iz * terrain_gen.WIDTH + ix]
+
+    outdoor_cells = _exterior_cells(layout)
+    for gate in sorted(exterior.get("gates", []), key=lambda row: row["id"]):
+        opening = gate["opening"]
+        x0, x1 = float(opening["x"][0]), float(opening["x"][1])
+        z0, z1 = float(opening["z"][0]), float(opening["z"][1])
+        low_x, high_x = x0 + GATE_GAP, x1 - GATE_GAP
+        plane = (z0 + z1) / 2.0
+        base = ground((x0 + x1) / 2.0, plane)
+        height = float(gate.get("height") or 1.35)
+        fraction = max(0.0, min(1.0, float(gate.get("openFraction") or 0.0)))
+        angle = 0.0
+        if gate.get("kind") == "sliding":
+            travel = -(x1 - x0) * fraction
+            low_x += travel
+            high_x += travel
+        elif fraction > 0.0:
+            hinge = high_x if gate.get("hinge") in ("east", "north") else low_x
+            free = low_x if hinge == high_x else high_x
+            magnitude = math.radians(90.0 * fraction)
+            candidates = (magnitude, -magnitude)
+
+            def distance(candidate):
+                delta = free - hinge
+                centre_x = hinge + delta * math.cos(candidate) / 2.0
+                centre_z = plane + delta * math.sin(candidate) / 2.0
+                return math.dist((centre_x, centre_z), property_centre)
+
+            angle = min(candidates, key=distance)
+            delta = free - hinge
+            centre_x = hinge + delta * math.cos(angle) / 2.0
+            centre_z = plane + delta * math.sin(angle) / 2.0
+            width = abs(delta)
+            low_x, high_x, plane = centre_x - width / 2.0, centre_x + width / 2.0, centre_z
+        centre = ((low_x + high_x) / 2.0, base + 0.05 + (height - 0.05) / 2.0, plane)
+        half = ((high_x - low_x) / 2.0, (height - 0.05) / 2.0, GATE_THICKNESS / 2.0)
+        index = shapes.obb(centre, half, -angle, f"gate_leaf:{gate['id']}:0", KIND_EXTERIOR)
+        aabb = obb_aabb(shapes.obbs[index])
+        for cell_id in _outdoor_owners(aabb, outdoor_cells, on_the_ground=True):
+            _add(per_cell, cell_id, index)
+        stats["gateLeafObbs"] += 1
+
+
 def _place(point, px, py, pz, yaw, scale):
     """Local point -> world: scale, then yaw about Y, then translate."""
     x, y, z = (c * scale for c in point)
@@ -1852,7 +2075,8 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
              "openingShared": 0, "openBoundaries": 0, "clippedToRoof": 0, "clippedAway": 0,
              "fencePieces": 0, "kerbPieces": 0,
              "structureObbs": 0, "trunks": 0, "vehicles": 0, "hedges": 0, "furniture": 0,
-             "propObbs": 0, "propMeshes": 0, "propsSkipped": 0}
+             "propObbs": 0, "propMeshes": 0, "propsSkipped": 0,
+             "doorLeafObbs": 0, "doorLeafMeshes": 0, "gateLeafObbs": 0}
     shapes = Shapes()
     per_cell = build_shell(layout, shapes, stats, (world_dir / "terrain.png").is_file())
     build_stairs(layout, shapes, per_cell, stats)
@@ -1860,6 +2084,7 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
     build_rafters(layout, shapes, per_cell, stats)
     build_mezzanine_guards(layout, shapes, per_cell, stats)
     build_props(layout, shapes, per_cell, asset_paths, stats)
+    build_posed_leaves(layout, shapes, per_cell, stats, world_dir)
     build_exterior(layout, shapes, per_cell, stats, world_dir)
 
     obb_count = len(shapes.obbs)
@@ -2154,6 +2379,8 @@ def report(world: dict) -> str:
         f"for want of an authored footprint",
         f"  props: {stats['propObbs']} OBBs, {stats['propMeshes']} meshes, "
         f"{stats['propsSkipped']} without collision",
+        f"  posed leaves: {stats['doorLeafObbs']} door OBBs, "
+        f"{stats['doorLeafMeshes']} overhead garage mesh, {stats['gateLeafObbs']} gate OBBs",
         f"  openings: {stats['openingShared']} shape(s) shared across a hole, each carried "
         f"{OPENING_REACH:.2f} m past the plane -- a body in a doorway is in both rooms",
         f"  outdoors: {stats['fencePieces']} fence piece(s), {stats['kerbPieces']} kerb, "
@@ -2964,8 +3191,13 @@ def selftest() -> int:
                                 and z0 - 0.2 < house_shapes.obbs[index][0][2] < z1 + 0.2
                                 for x0, x1, z0, z1 in gates)]
             require(not in_a_gate,
-                    f"and NOTHING static stands in a gate's opening: a gate is a leaf that opens, "
-                    f"so the hole is what the file carries ({in_a_gate[:3]})")
+                    f"and no FENCE piece stands in a gate's opening; its separately posed leaf is "
+                    f"the only static shape allowed there ({in_a_gate[:3]})")
+            gate_leaves = [obb for obb in house_shapes.obbs
+                           if house_shapes.surfaces[obb[3]].startswith("gate_leaf:")]
+            require(len(gate_leaves) == 3 and house["stats"]["gateLeafObbs"] == 3,
+                    f"all three gate openings have a separately traceable fixed-pose proxy "
+                    f"({len(gate_leaves)})")
 
             # A gate is a HOLE in the fence, and the house cannot show it: §11.2 authors three
             # runs that stop either side of each gate, so the rule that leaves an opening out has

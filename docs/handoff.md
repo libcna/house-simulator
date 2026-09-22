@@ -1,3 +1,48 @@
+# Physics handoff — 2026-09-22 (`HOUSE-03223` static leaf collision)
+
+`HOUSE-03223` is complete. The collision builder now derives fixed-pose proxies directly from the
+authored opening and exterior-gate data: 69 yaw-only door OBBs, one pitched triangle-mesh box for
+the overhead sectional garage leaf, and three gate OBBs. Stable per-leaf surface names make all 73
+proxies independently accountable after the Python writer/C++ reader boundary. Every proxy is
+shared with every adjacent cell that can approach it; no runtime door state, interaction framework
+or per-frame dynamic-obstacle path was introduced.
+
+The first real stair traversal found the L2 attic-stair leaf lying across the flight. Reversing its
+hinge while retaining its swing cell and 0.90 fraction is the smallest authored correction; world
+rule 14 accepts the new wall/prop clearance, the regenerated shell verifies the pose, and the
+flight is now walkable both ways. The fixed leaves also make four deliberately teleported pockets
+non-depenetrable: behind the open basement-WC leaf, and on three sides of the intentionally
+inaccessible closed Juliet balcony. `InsideGeometryTests` records those physical exclusions while
+its actual 312-leg walk remains clean.
+
+Rule that chose this task: M1 dependency order and R1/G1. It closes the collision half of the
+house-wide drawn-solid/pass-through S2 before accessibility points and the Grand Tour. Next is
+`HOUSE-03225`, then `HOUSE-03226`; no ground-floor polish is scheduled.
+
+Validation: the collision builder selftest and all fourteen world rules pass; 43 representative
+collision/traversal tests pass, including `PosedLeafCollisionTests`, `PortalClearanceTests`,
+`InsideGeometryTests`, both stair tests, the whole-lot walk and the 20-minute seeded random walk.
+The shell manifest/material gates pass, shell verification has only its long-standing allowlisted
+fridge-interior cut, and the regenerated world remains 740 chunks over 96 cells. Compilation was
+limited to four CPU cores. The pre-existing staged `docs/visual-review/README.md` remains outside
+this task's commit.
+
+The full unit suite (1418 tests) then found two stale expectations, both fixed in this commit.
+`DepenetrationTests`' deliberately harsh midpoint probe now lands inside the open leaf of six small
+rooms (`B1_LAUNDRY2`, `L0_PANTRY`, `L0_WC2`, `L1_CLOSET_2`, `L1_MASTER_CLOSET`, `L2_CLOSET_4`); they
+are named separately and must be crowded by a `door_leaf:` surface, never a wall or prop.
+`LightingSystemTests`' kitchen-spill test assumed the pantry door starts shut, which `HOUSE-03224`
+ended; it now shuts it explicitly before measuring. All 1418 unit tests pass.
+
+Two failures outside the unit suite are **not** caused by this task and remain open:
+`WorldLoadTests.ValidatingTheHouseCostsLessThanReadingIt` never loads props, so the validator
+rejects every light `fixtureProp` (since `HOUSE-01259`); and
+`HeadlessRunTests.PressingF3ShowsTheWalkTheFrameActuallyDid` draws 115 calls from the road against
+its `< 110` bound, from the posed-leaf render geometry of `HOUSE-03222`/`HOUSE-03224` (collision
+does not draw). Both need a small follow-up task.
+
+---
+
 # Content handoff — 2026-09-22 (`HOUSE-03222` static leaf geometry)
 
 `HOUSE-03222` is complete. The shell generator now rotates every hinged leaf and all of its

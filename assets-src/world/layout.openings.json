@@ -206,7 +206,7 @@
       "id": "DOOR_L2_STAIR__L2_STAIR_ATTIC", "kind": "door", "type": "D_INT_PASSAGE",
       "portal": "P_L2_STAIR__L2_STAIR_ATTIC",
       "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
-      "hinge": "left", "swing": "L2_STAIR_ATTIC", "maxAngleDeg": 95.0, "openFraction": 0.90,
+      "hinge": "right", "swing": "L2_STAIR_ATTIC", "maxAngleDeg": 95.0, "openFraction": 0.90,
       "frame": { "asset": null, "casing": 0.070 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
       "solid": false, "lockable": false

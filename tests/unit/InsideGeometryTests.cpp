@@ -72,6 +72,11 @@ namespace
     const std::vector<std::string>& NoWayOut()
     {
         static const std::vector<std::string> kDeadEnds{
+            // Fixed open leaves create pockets between themselves and the wall behind them. A
+            // walking capsule cannot enter one from the free side; only this test's deliberate
+            // boundary teleport can put it there. The room/portal tour above remains the proof
+            // that the accessible side of each leaf has a way out.
+            "B1_WC7 north",
             // A chest freezer, 1.4 x 0.7 m inside -- smaller than §70.5's 0.62 m capsule, so a
             // body in it is inside the box on every side at once.
             "CELL_FREEZER_INTERIOR east",
@@ -97,6 +102,12 @@ namespace
             // into their overlap at the room midpoint has no free side, though the circulation
             // path never enters either solid from outside.
             "L0_KITCHEN west",
+            // The Juliet balcony is intentionally excluded from traversal and its paired facade
+            // leaves remain shut. Between those leaves, the guard and the three boundary walls
+            // there is no capsule-sized interior to push a teleported body into.
+            "L2_BALCONY_JULIET north",
+            "L2_BALCONY_JULIET south",
+            "L2_BALCONY_JULIET west",
             // `EXT_GARDEN north` was here until `HOUSE-00774`: the corner of two exterior shapes
             // at the bottom of the garden, 0.24 m deep and a fixed point. Both shapes were cell
             // BOUNDARY walls between one open yard and another -- 86 pieces of invisible wall over

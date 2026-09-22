@@ -541,6 +541,7 @@ TEST(DepenetrationTests, TheRealHouseIsClearWhereABodyStandsAndRecoversWhereItIs
     std::size_t stood = 0;
     std::size_t crowded = 0;
     std::vector<std::string> crowdedCells;
+    std::vector<std::string> crowdedSurfaces;
     std::size_t nudged = 0;
     std::size_t unresolved = 0;
     std::size_t sloped = 0;
@@ -583,6 +584,11 @@ TEST(DepenetrationTests, TheRealHouseIsClearWhereABodyStandsAndRecoversWhereItIs
             // house".
             ++crowded;
             crowdedCells.push_back(cell.id);
+            const std::uint32_t shape = standing.shape;
+            const std::uint16_t surface = shape < world->obbs.size()
+                                              ? world->obbs[shape].surface
+                                              : world->meshes[shape - world->obbs.size()].surface;
+            crowdedSurfaces.emplace_back(world->SurfaceName(surface));
             continue;
         }
         ++stood;
@@ -639,24 +645,39 @@ TEST(DepenetrationTests, TheRealHouseIsClearWhereABodyStandsAndRecoversWhereItIs
     // overlap a flight too. Name the permitted cases so another crowded room cannot hide behind
     // the count. L0_KITCHEN is the fitted appliance, L2_STOR2 a cupboard, and EXT_BACKYARD's
     // L-shaped boxes put their bounding midpoint inside the house.
+    // HOUSE-03223 made the fixed-pose leaves solid. In the six small rooms below, the 0.86 m leaf
+    // swung open into the room reaches its arithmetic midpoint; the room/portal tour in
+    // `InsideGeometryTests` is what proves each one is still entered and left. They are named
+    // separately and must be crowded by the leaf itself, so a wall or prop cannot hide here.
+    const std::vector<std::string> expectedLeafCrowded{
+        "B1_LAUNDRY2", "L0_PANTRY", "L0_WC2", "L1_CLOSET_2", "L1_MASTER_CLOSET", "L2_CLOSET_4"};
     const std::vector<std::string> expectedCrowded{
         "B1_STAIR", "EXT_BACKYARD", "L0_KITCHEN", "L1_STAIR_MAIN", "L2_STAIR_MAIN", "L2_STOR2"};
-    for (const std::string& id : crowdedCells)
+    for (std::size_t i = 0; i < crowdedCells.size(); ++i)
     {
+        const std::string& id = crowdedCells[i];
+        if (std::find(expectedLeafCrowded.begin(), expectedLeafCrowded.end(), id) !=
+            expectedLeafCrowded.end())
+        {
+            EXPECT_EQ(crowdedSurfaces[i].rfind("door_leaf:", 0), 0u)
+                << id << " was expected to be crowded by its posed door leaf, not by " << crowdedSurfaces[i];
+            continue;
+        }
         EXPECT_NE(std::find(expectedCrowded.begin(), expectedCrowded.end(), id), expectedCrowded.end())
             << id << " is a newly crowded cell midpoint";
     }
-    if (crowded > expectedCrowded.size())
+    const std::size_t permittedCrowded = expectedCrowded.size() + expectedLeafCrowded.size();
+    if (crowded > permittedCrowded)
     {
-        for (const std::string& id : crowdedCells)
+        for (std::size_t i = 0; i < crowdedCells.size(); ++i)
         {
-            std::printf("  crowded cell midpoint: %s\n", id.c_str());
+            std::printf(
+                "  crowded cell midpoint: %s (%s)\n", crowdedCells[i].c_str(), crowdedSurfaces[i].c_str());
         }
     }
-    EXPECT_LE(crowded, expectedCrowded.size())
-        << crowded
-        << " cells put a body inside something just by standing it on their "
-           "floor; a stair or two is expected, a house is not";
+    EXPECT_LE(crowded, permittedCrowded) << crowded
+                                         << " cells put a body inside something just by standing it on their "
+                                            "floor; a stair or two is expected, a house is not";
     ASSERT_GT(nudged, 80u) << "only " << nudged << " burials were arranged";
     EXPECT_LE(sloped, 12u) << sloped
                            << " burials were into a lid rather than a wall; the attic's "
