@@ -6,7 +6,7 @@
 | **Date** | 2026-09-22 |
 | **Task** | `HOUSE-03206` |
 | **Depends on** | [ADR-0014](ADR-0014-showcase-scope.md), [ADR-0015](ADR-0015-quality-tiers-and-compact-scope.md) |
-| **Supersedes in part** | [ADR-0015](ADR-0015-quality-tiers-and-compact-scope.md): decision 1's seven hero areas and 19 main cells, decision 3's "simple falling snow" as a DONE requirement, and decision 7's polish budget |
+| **Supersedes in part** | [ADR-0015](ADR-0015-quality-tiers-and-compact-scope.md): decision 1's seven hero areas and 19 main cells, decision 3's "simple falling snow" as a DONE requirement, decision 7's polish budget, and decision 8's reference to an upstream-blocker provision for Android |
 | **Owns** | `plan.md` (Definition of DONE D1–D14, rules R14–R17, the kit caps, the optional and conditional backlog); `cna-house.md`'s third scope amendment |
 
 ## Context
@@ -52,7 +52,12 @@ The audit found:
 6. **A budget ceiling** (rule R14). Realistic 226 h, pessimistic 273 h; the hard ceiling is 280 h,
    measured as hours spent since 2026-09-22 plus the remaining pessimistic estimate. An overrun is
    resolved by cutting depth, never by raising the ceiling or re-estimating without cutting.
-7. **Maintenance mode after DONE** (rule R17). Once the release is tagged, feature development
+7. **Android is required, and an upstream blocker does not satisfy it.** Earlier plans let a
+   re-verified BL-13 record stand in for the Android device path (D10). That contradicted Android
+   being a first-class DONE target. Now only a working device path (`HOUSE-03038`) satisfies D10c.
+   `HOUSE-02951` may establish that CNA blocks it; the device tasks then stay open, and House
+   Simulator is not DONE until CNA lands its fix.
+8. **Maintenance mode after DONE** (rule R17). Once the release is tagged, feature development
    stops. CNA defects are recorded and worked around where reasonable, never turned into a CNA
    roadmap inside this project.
 

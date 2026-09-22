@@ -62,7 +62,9 @@ the ledger.
 > **Environment:** falling snow (§38) is optional too; a snow weather state shows its overcast sky and
 > fog. **Audio:** no special zone loops and no offline-derived footstep sets. **Web:** one preload
 > with a progress screen, no progressive pack streaming. The remaining work is bounded by a 280-hour
-> ceiling, and after the release the project is in maintenance mode. **`plan.md`'s active task text
+> ceiling, and after the release the project is in maintenance mode. **Android is required for
+> DONE:** an upstream BL-13 blocker does not satisfy it, so the "complete and shippable without it"
+> of R-12 and the Android ordering of D-30 no longer make DONE possible without Android. **`plan.md`'s active task text
 > is the requirement;** where any section of this document, or an earlier amendment, asks for more,
 > `plan.md` governs.
 

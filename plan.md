@@ -118,7 +118,7 @@ the [optional backlog](#optional-and-conditional-backlog) is required.
 | **D9** | Performance | The representative scenarios meet the documented target on the reference desktop; the Web and Android presets meet their targets in their representative scenes; no major memory or performance defect remains | `HOUSE-02404`, `HOUSE-02898`, `HOUSE-03037`, `HOUSE-03071` |
 | **D10a** | Linux | A packaged Release build runs on a clean profile, with and without an audio device | `HOUSE-02790` |
 | **D10b** | Web | It builds and loads; its controls work; the representative traversal completes in Chrome and Firefox without major rendering corruption and with acceptable performance; a headless smoke test runs in CI | `HOUSE-02900`, `HOUSE-02901` |
-| **D10c** | Android | It builds, installs and runs on one representative device (or the best available emulator, recorded as such); touch controls suffice for the walk; the representative traversal completes without major corruption and with acceptable performance. If CNA's Android graphics path is still blocked upstream (BL-13) when everything else is done, the blocker is re-verified with evidence, every desktop-side Android task passes, and the device tasks stay open until CNA lands the fix | `HOUSE-03038`, or `HOUSE-02951` recording BL-13 |
+| **D10c** | Android | It builds, installs and runs on one representative device (or the best available emulator, recorded as such); touch controls suffice for the walk; the representative traversal completes without major corruption and with acceptable performance. **Only a working device path satisfies D10c.** If CNA's Android graphics path is still blocked upstream (BL-13) when everything else is done, the blocker is re-verified with evidence, every desktop-side Android task passes, and the device tasks stay open until CNA lands the fix: House Simulator is then **not DONE**, it waits | `HOUSE-03038`. `HOUSE-02951` may establish an upstream blocker, but **a blocker does not satisfy D10c**, and House Simulator does not reach DONE until the Android device path succeeds |
 | **D11** | Testing | The existing gates and suites pass; the grand tour passes; the representative render sets pass; the XNA-only and strict-XNA gates pass; ASAN and UBSAN are clean once; the 20-minute stability run and the one final 2-hour run pass; the Web smoke test and the Android checklist pass | `HOUSE-02783`, `HOUSE-02784`, `HOUSE-03076` |
 | **D12** | Documentation | `plan.md`, `cna-house.md`, `README.md` and `docs/*` describe the shipped scope; every asset is manifested and licensed | `HOUSE-02788`, `HOUSE-03075` |
 | **D13** | Defects | No known S1 or S2 defect; every open issue is S3/S4 | `HOUSE-03631`, `HOUSE-03078` |
@@ -402,7 +402,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 2 | `HOUSE-02598` | D11 | 3.5 |
 | [M13](#m13--linux-desktop-release) — Linux desktop release | after M11 | 03701–03720 | 8 | `HOUSE-02797` | D9–D13 | 10.25 |
 | [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 12 | `HOUSE-02904` | D10b | 19.5 |
-| [M15](#m15--android) — Android | readiness: B · device: after M13 | 03751–03780 | 14 | `HOUSE-03041` or the BL-13 record | D10c | 23.75 |
+| [M15](#m15--android) — Android | readiness: B · device: after M13 | 03751–03780 | 14 | `HOUSE-03041` (a BL-13 record does not close it) | D10c | 23.75 |
 | [M16](#m16--final-release) — Final release | last | 03781–03800 | 6 | **DONE** · `HOUSE-03078` | D9–D14 | 6.5 |
 
 Legacy ids 03121–03200 are unallocated and stay unused. The budgets are the sums of the tasks'
@@ -1403,7 +1403,7 @@ emulator, not a compatibility lab. Cosmetic platform luxuries are cut.
 
 - [ ] HOUSE-02951 — **Gate: CNA can build and draw on Android** (BL-13)
       dep: — · sys: — · plat: AND · pri: MUST · zone: all · adv: D10c · est: 1.5
-      accept: re-verified whenever this task is picked (the last recorded state is *blocked*, 2026-09-06): (1) CNA's Android cross-compile succeeds for `arm64-v8a` (the two `sharp-runtime` NDK-portability bugs fixed upstream, CNA Task 920); (2) `CNA_GRAPHICS_RENDERER=OPENGLES3` is selectable and buildable for Android; (3) a CNA graphics sample runs on a device or emulator. If any step fails, the evidence is recorded here and in `cna-house.md` §6, the device path stops, and the task stays open; the desktop-side readiness tasks do not wait for it
+      accept: re-verified whenever this task is picked (the last recorded state is *blocked*, 2026-09-06): (1) CNA's Android cross-compile succeeds for `arm64-v8a` (the two `sharp-runtime` NDK-portability bugs fixed upstream, CNA Task 920); (2) `CNA_GRAPHICS_RENDERER=OPENGLES3` is selectable and buildable for Android; (3) a CNA graphics sample runs on a device or emulator. If any step fails, the evidence is recorded here and in `cna-house.md` §6, the device path stops, and the task stays open; the desktop-side readiness tasks do not wait for it. A recorded blocker never closes this task, M15 or D10c
       trace: absorbs `HOUSE-02952` and `HOUSE-02953` (the second and third gates)
 
 - [ ] HOUSE-03031 — The Gradle/NDK project producing a shared library plus `SDLActivity`, following CNA's own devices-demo precedent
@@ -1451,7 +1451,7 @@ maintenance mode.
 
 - [ ] HOUSE-03071 — Final measurement on all three platforms; fix only target misses and platform-specific catastrophic regressions
       dep: HOUSE-02797, HOUSE-02904, HOUSE-03041 · sys: — · plat: ALL · pri: MUST · zone: all · adv: D9 · est: 2
-      accept: (1) the representative scenarios of `HOUSE-02402` on Linux, the Web and Android presets' scenes in the browser and on the device; (2) only misses of a platform's documented target and catastrophic regressions are fixed; no headroom work; (3) if BL-13 is still blocked upstream when every other milestone is done, `HOUSE-03041` is satisfied by the recorded blocker per D10c
+      accept: (1) the representative scenarios of `HOUSE-02402` on Linux, the Web and Android presets' scenes in the browser and on the device; (2) only misses of a platform's documented target and catastrophic regressions are fixed; no headroom work; (3) the Android measurement needs the device path: while BL-13 blocks it, this task stays open (a recorded blocker satisfies neither `HOUSE-03041` nor D10c), and the Linux and Web halves may be done and recorded meanwhile
       verify: `docs/performance-log.md`
       trace: absorbs `HOUSE-03072` (*work the optimisation list until every platform meets its budget with 15 % headroom*; the headroom requirement is removed)
 
@@ -1467,7 +1467,7 @@ maintenance mode.
 
 - [ ] HOUSE-03076 — Final test and content pass
       dep: HOUSE-03075 · sys: ci · plat: CI · pri: MUST · zone: all · adv: D11, D12 · est: 1.25
-      accept: the suites and gates green; the Web smoke (`HOUSE-02901`) and the Android checklist's smoke where the device path is open; every asset used, no orphans, every licence recorded and `THIRD-PARTY-ASSETS.md` regenerated. No Web soak and no second long run
+      accept: the suites and gates green; the Web smoke (`HOUSE-02901`) and the Android checklist's smoke (`HOUSE-03038`); every asset used, no orphans, every licence recorded and `THIRD-PARTY-ASSETS.md` regenerated. No Web soak and no second long run
       trace: absorbs `HOUSE-03073` (the final content audit)
 
 - [ ] HOUSE-03077 — The final release notes, the known-limitations list and the credits
@@ -1894,8 +1894,10 @@ under R5.
 **What could still explode** (watch these at every R10 reassessment):
 
 1. **Android after BL-13** (`HOUSE-02951`, `03031`, `03032`, `03036`, `03037`). No CNA graphics has
-   ever run on Android; the reserve is 8 h. If it is blocked upstream, D10c's recorded-blocker
-   provision applies; if it opens and costs more, R15 cuts depth elsewhere, never the platform.
+   ever run on Android; the reserve is 8 h. While it is blocked upstream, House Simulator
+   is **not DONE**: the desktop-side Android work and everything else finishes, and the release
+   waits for CNA's fix (rule R17: the fix happens in CNA, not here). If the path opens and costs
+   more, R15 cuts depth elsewhere, never the platform.
 2. **The full Emscripten build** (`HOUSE-02892`, 5 h) and Web memory (`HOUSE-02898`, `02850`).
 3. **Props versus the bake** (`HOUSE-03402`, 4 h) and the furnished re-bake (`HOUSE-01030`, 4 h):
    a second iteration of either is the likeliest lighting overrun.
@@ -1938,6 +1940,11 @@ legacy ledger; the two of 2026-09-21 (`HOUSE-03201`, `HOUSE-03205`) are in
   Android stay.
 * **Preserved:** completed work stays, and nothing in the repository was deleted. The retired hero
   ids and every merged id stay reserved.
+* **Android correction (same day, owner review):** D10 used to accept "`HOUSE-02951` recording
+  BL-13" as proof, so an upstream blocker could be read as satisfying Android. That contradicted
+  Android being a first-class DONE target. D10c, the M15 exit, `HOUSE-02951`, `HOUSE-03071`,
+  `HOUSE-03076` and the risk list now say it plainly: only a working device path (`HOUSE-03038`)
+  satisfies D10c; a blocker keeps the device tasks open and House Simulator not DONE.
 * **This is the final proactive scope reduction.** Later changes are targeted corrections under R15.
 
 ---
