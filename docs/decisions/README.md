@@ -23,4 +23,5 @@ it and both are updated to point at each other.
 | [0012](ADR-0012-asset-licensing.md) | Asset licensing policy, and the "no row, no build" rule | Accepted | `HOUSE-00018` |
 | [0013](ADR-0013-neighbourhood-asset-variants.md) | The neighbourhood's variety is generated asset variants, not per-instance material overrides | Accepted | `HOUSE-00843` |
 | [0014](ADR-0014-showcase-scope.md) | An architectural showcase, not a life simulator: scope reduction, breadth-first completion | Accepted; supersedes 0008 and 0010 in part; superseded in part by 0015 | `HOUSE-03201` |
-| [0015](ADR-0015-quality-tiers-and-compact-scope.md) | Quality tiers, a reusable kit and a compact feature set: second scope reduction | Accepted; supersedes 0014 in part | `HOUSE-03205` |
+| [0015](ADR-0015-quality-tiers-and-compact-scope.md) | Quality tiers, a reusable kit and a compact feature set: second scope reduction | Accepted; supersedes 0014 in part; superseded in part by 0016 | `HOUSE-03205` |
+| [0016](ADR-0016-final-scope-reduction.md) | The final scope reduction: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE | Accepted; supersedes 0015 in part | `HOUSE-03206` |

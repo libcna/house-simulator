@@ -5,12 +5,15 @@
 `plan.md` is the execution ledger. Work is picked from it, not invented beside it.
 
 1. **Pick the next unfinished task whose dependencies are all complete, by `plan.md`'s scheduling
-   rules (R1–R13).** Dependency order is real: a task's `dep:` line names what must exist first.
+   rules (R1–R17).** Dependency order is real: a task's `dep:` line names what must exist first.
    Among eligible tasks, the rules decide: breadth before depth, the least-complete zone first,
    no cell above its quality tier's target, the ground floor last at every stage, at most three
    consecutive tasks per zone, and never an `OPT` task while a MUST task is open. Not the lowest
    id, and not the largest defect in the area you worked on last. Nothing on the plan's
-   *Non-goals* list belongs in a task.
+   *Non-goals* list belongs in a task. **The task's own title and `accept:` are the requirement;**
+   its `trace:` line, older notes and older documents are history. The scope is final (ADR-0016):
+   no new system unless a DONE item needs it (R9), no replanning pass (R15), and the 280-hour
+   ceiling is never raised (R14).
 2. **Do the whole task**, including its `verify:` step.
 3. **Tick the checkbox** `- [ ]` → `- [x]` in `plan.md`, in the same commit as the work.
 4. **Commit once**, with the id in the message.

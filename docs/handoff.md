@@ -1,3 +1,37 @@
+# Planning handoff — 2026-09-22 (`HOUSE-03206` final scope reduction)
+
+`HOUSE-03206` is complete. It is the **third and final proactive scope reduction**
+([ADR-0016](decisions/ADR-0016-final-scope-reduction.md)); no further replanning pass is scheduled
+(rule R15). No runtime code, content or asset changed.
+
+* **Before:** 205 open MUST tasks, 318.75 realistic agent-hours (≈ 393 pessimistic).
+* **After:** 152 open tasks, ≈ 192 / 226 / 273 h (optimistic / realistic / pessimistic), under a
+  **280 h hard ceiling** (rule R14). 51 ids merged into the task that now carries their purpose,
+  `HOUSE-03445` cancelled, falling snow (`HOUSE-01791`, `01792`) moved to the optional backlog,
+  `HOUSE-03228` added.
+* **Canonical tasks.** Every active task's title and `accept:` now state the current work; the
+  `amended:` chains are gone. A `trace:` line is history, never a requirement. The earlier text is
+  `plan.md` at `174f2ba`; the first two reductions' cancellation lists, legacy-phase map, estimates
+  and corrections moved verbatim to `docs/history/scope-reductions-2026-09-21.md`.
+* **Tiers.** Five hero areas (H1 front approach and porch, H2 entry and living, H3 kitchen, H5
+  library, H6 basement cinema); H4 and H7 are retired, and the master bedroom and attic room are main
+  cells. Twelve main cells. `docs/zones.json`, `tools/world/zone_scoreboard.py` and
+  `tools/visual/capture_review.py` were updated to match; both `--check` gates pass.
+* **Kit.** At most 32 acquired models plus one wall-art set (was 62); storage furniture is
+  generated; four fill kits.
+* **New rules:** R14 (budget ceiling), R15 (final scope, targeted corrections only), R16 (validation
+  lives in the task), R17 (maintenance mode after DONE; CNA stays CNA). DONE gains D14 (bounded
+  polish complete) and splits D10 into Linux, Web and Android.
+* **Two integration failures** recorded below by `HOUSE-03223` now have a task, `HOUSE-03228`, and
+  gate G1 depends on it.
+
+Rule that chose this task: an explicit owner request for the final scope reduction (M0). Next is
+M1 by dependency order and R1: `HOUSE-03225` (accessibility manifest) and `HOUSE-03228`, then the
+grand tour `HOUSE-03226`. The pre-existing staged `docs/visual-review/README.md` remains outside
+this task's commit.
+
+---
+
 # Physics handoff — 2026-09-22 (`HOUSE-03223` static leaf collision)
 
 `HOUSE-03223` is complete. The collision builder now derives fixed-pose proxies directly from the

@@ -14,8 +14,9 @@ specific to this project.
 | Document | Authority |
 |---|---|
 | [`cna-house.md`](cna-house.md) | The architecture. Do not casually redesign it. |
-| [`plan.md`](plan.md) | The remaining work: goal, Definition of DONE, scheduling rules, zone scoreboard, milestones. The execution ledger. Task ids are permanent. |
+| [`plan.md`](plan.md) | The remaining work: goal, Definition of DONE, scheduling rules, zone scoreboard, milestones. The execution ledger and the only current source of truth for requirements. Task ids are permanent. |
 | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md) | The frozen legacy ledger: the record of every task completed or cancelled before 2026-09-21. Never tick boxes there. |
+| [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md) | Frozen record of what the first two scope reductions cancelled and why. History, never requirements. |
 
 If implementation reveals a genuine contradiction or impossibility in either, investigate it, make
 the **smallest** technically justified correction, record why, and never deviate silently.
@@ -88,16 +89,24 @@ concurrent agents — is in `../AGENTS.md`; do not re-derive it, just comply.
 ## 3. Project rules on top of those
 
 **This is an architectural showcase, not a life simulator** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md),
-[ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md), 2026-09-21). The player
+[ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md),
+[ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md)). The player
 walks and looks. Animals, a visible avatar, character animation, interaction gameplay, appliance,
 plumbing, toilet and television behaviour, and household-state persistence are out of scope. Do not
 add code for them. Objects are static dressing. **Cut depth, preserve breadth:** nothing on
 `plan.md`'s *Non-goals* list is required for DONE or may be written into a task (R9), and an `OPT`
 task is never scheduled while a MUST task is open (R13).
 
-**Breadth before depth. Pick work by `plan.md`'s scheduling rules (R1–R13)**, not by task number
+**The scope is final** (ADR-0016, 2026-09-22). `plan.md`'s active task text is the requirement:
+a task's `trace:` line and any older wording (notes, commits, `cna-house.md`, the history files)
+are never requirements. Do not start another replanning pass; scope changes are the targeted
+corrections of rule R15 only, and the 280-hour ceiling of R14 is never raised. No new system
+unless a DONE item cannot be met without it (R9). After DONE the project is in maintenance mode
+(R17).
+
+**Breadth before depth. Pick work by `plan.md`'s scheduling rules (R1–R17)**, not by task number
 and not by the largest defect in one area. Quality is **tiered**: every accessible room reaches C3,
-main rooms C4, and only the seven hero areas C5 (*Quality tiers*). Up to C3 no zone is worked more
+the twelve main cells C4, and only the five hero areas C5 (*Quality tiers*). Up to C3 no zone is worked more
 than one level ahead of the least-complete zone; C4 work waits for gate G3 and C5 work for G4 (R1).
 **The ground floor goes last:** nothing targets it before G3 except S1 fixes and `HOUSE-03407`, and
 its C4 and C5 tasks wait for every other zone's (R4). At most 3 consecutive tasks go to one zone

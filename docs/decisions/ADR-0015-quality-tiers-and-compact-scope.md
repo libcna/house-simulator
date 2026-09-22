@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Accepted |
+| **Status** | Accepted; superseded in part by [ADR-0016](ADR-0016-final-scope-reduction.md) (five hero areas instead of seven, twelve main cells, falling snow optional, the polish budget) |
 | **Date** | 2026-09-21 |
 | **Task** | `HOUSE-03205` |
 | **Depends on** | [ADR-0014](ADR-0014-showcase-scope.md) |

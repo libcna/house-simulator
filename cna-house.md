@@ -3,7 +3,7 @@
 **Project:** `cna-house`
 **Repository:** `/rv/data/development/github.com/openeggbert/cna-house`
 **Document status:** design baseline for the planning pass completed 2026-09-06.
-**Implementation status:** IN PROGRESS since 2026-09-06. **Scope reduced 2026-09-21** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md)), **and again the same day** ([ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md)). See `plan.md` for
+**Implementation status:** IN PROGRESS since 2026-09-06. **Scope reduced 2026-09-21** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md)), **again the same day** ([ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md)), **and finally on 2026-09-22** ([ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md)). See `plan.md` for
 the ledger.
 
 > Implementation was approved by the project owner on 2026-09-06. This document remains the
@@ -52,6 +52,19 @@ the ledger.
 > the full matrices of §70.2–§70.4 and §70.6. The budgets of §71 are targets on representative
 > scenarios, with no headroom margin. **Platforms:** Web in Chrome and Firefox; Android on one
 > representative device. Where a section below requires more than this, `plan.md` governs.
+
+> **Third and final scope amendment — 2026-09-22 (`HOUSE-03206`, [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md)).**
+> Breadth is fixed: the basement, every floor, the attic, the garage, the exterior, Linux, Web and
+> Android all remain required. Depth is reduced further. **Quality:** five hero areas (the front
+> approach and porch, the entry and living room, the kitchen, the library and the basement cinema);
+> the master bedroom and the attic room are main rooms. **Furnishing:** at most 32 acquired kit models
+> plus one wall-art set; storage furniture is generated; §59's catalogue sizes do not apply.
+> **Environment:** falling snow (§38) is optional too; a snow weather state shows its overcast sky and
+> fog. **Audio:** no special zone loops and no offline-derived footstep sets. **Web:** one preload
+> with a progress screen, no progressive pack streaming. The remaining work is bounded by a 280-hour
+> ceiling, and after the release the project is in maintenance mode. **`plan.md`'s active task text
+> is the requirement;** where any section of this document, or an earlier amendment, asks for more,
+> `plan.md` governs.
 
 ---
 

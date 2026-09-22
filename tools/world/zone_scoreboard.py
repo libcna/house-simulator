@@ -31,7 +31,10 @@ REPO = Path(__file__).resolve().parents[2]
 SOURCE = REPO / "assets-src" / "world"
 ZONES = REPO / "docs" / "zones.json"
 TIERS = {"H", "M", "S", "U"}
-HERO_AREAS = {f"H{number}" for number in range(1, 8)}
+# HOUSE-03206 retired H4 (master bedroom) and H7 (attic room); hero ids are permanent, never reused.
+HERO_AREAS = {"H1", "H2", "H3", "H5", "H6"}
+HERO_CELLS = 11
+MAIN_CELLS = 12
 ZONE_ID = re.compile(r"^Z-[A-Z0-9]+$")
 
 
@@ -122,7 +125,8 @@ def problems(document: dict, source_cells: set[str]) -> list[str]:
             if tier == "H":
                 hero_cells += 1
                 if hero not in HERO_AREAS:
-                    found.append(f"{zone_id}/{cell_id}: tier H needs heroArea H1-H7")
+                    found.append(f"{zone_id}/{cell_id}: tier H needs a heroArea in "
+                                 f"{', '.join(sorted(HERO_AREAS))}")
             elif hero is not None:
                 found.append(f"{zone_id}/{cell_id}: only tier H may name a heroArea")
             if tier == "M":
@@ -167,17 +171,17 @@ def problems(document: dict, source_cells: set[str]) -> list[str]:
     for pose, owners in sorted(poses.items()):
         if len(owners) > 1:
             found.append(f"review pose {pose!r} is assigned more than once: {', '.join(owners)}")
-    if hero_cells != 13:
-        found.append(f"manifest has {hero_cells} tier-H cells; the approved plan defines 13")
-    if main_cells != 19:
-        found.append(f"manifest has {main_cells} tier-M cells; the approved plan defines 19")
+    if hero_cells != HERO_CELLS:
+        found.append(f"manifest has {hero_cells} tier-H cells; the approved plan defines {HERO_CELLS}")
+    if main_cells != MAIN_CELLS:
+        found.append(f"manifest has {main_cells} tier-M cells; the approved plan defines {MAIN_CELLS}")
     used_heroes = {
         row.get("heroArea")
         for zone in zones if isinstance(zone, dict)
         for row in zone.get("cells", []) if isinstance(row, dict) and row.get("tier") == "H"
     }
     if used_heroes != HERO_AREAS:
-        found.append("heroArea coverage must be exactly H1-H7")
+        found.append(f"heroArea coverage must be exactly {', '.join(sorted(HERO_AREAS))}")
     return found
 
 

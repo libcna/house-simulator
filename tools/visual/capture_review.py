@@ -170,7 +170,7 @@ POSE_DETAILS = {
     "garage-interior": ("Z-GAR", "L0_GARAGE", None),
     "first-landing": ("Z-L1", "L1_LANDING", None),
     "first-hall": ("Z-L1", "L1_HALL", None),
-    "master-bedroom": ("Z-L1", "L1_MASTER_BED", "H4"),
+    "master-bedroom": ("Z-L1", "L1_MASTER_BED", None),
     "master-bath": ("Z-L1", "L1_MASTER_BATH", None),
     "bedroom-2": ("Z-L1", "L1_BED2", None),
     "second-landing": ("Z-L2", "L2_LANDING", None),
@@ -179,7 +179,7 @@ POSE_DETAILS = {
     "games-room": ("Z-L2", "L2_GAMES", None),
     "sitting-room": ("Z-L2", "L2_SITTING", None),
     "bedroom-6": ("Z-L2", "L2_BED6", None),
-    "attic-room": ("Z-L3", "L3_ROOM", "H7"),
+    "attic-room": ("Z-L3", "L3_ROOM", None),
     "attic-store-west": ("Z-L3", "L3_STORE_W", None),
     "main-stair-l2-exit": ("Z-STAIR", "L2_STAIR_MAIN", None),
     "basement-stair": ("Z-STAIR", "B1_STAIR", None),
@@ -250,7 +250,8 @@ def coverage_problems(document: dict) -> list[str]:
                      if isinstance(row, dict) and row.get("tier") == "S"}
         if secondary and not (secondary & covered_cells):
             found.append(f"{zone_id}: no fixed pose stands in a secondary cell")
-    hero_counts = {hero: 0 for hero in (f"H{number}" for number in range(1, 8))}
+    # HOUSE-03206 retired H4 and H7; the five remaining hero ids keep their numbers.
+    hero_counts = {hero: 0 for hero in ("H1", "H2", "H3", "H5", "H6")}
     for _, _, hero in POSE_DETAILS.values():
         if hero in hero_counts:
             hero_counts[hero] += 1
@@ -323,8 +324,8 @@ def main() -> int:
             print(f"capture_review: {problem}", file=sys.stderr)
         return 1
     if args.check:
-        print(f"capture_review: {len(POSES)} fixed poses cover 11 zones, 19 main cells and "
-              "7 hero areas")
+        print(f"capture_review: {len(POSES)} fixed poses cover 11 zones, 12 main cells and "
+              "5 hero areas")
         return 0
     if args.label is None:
         parser.error("label is required unless --check is used")
