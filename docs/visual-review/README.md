@@ -1,5 +1,7 @@
 # Visual review ledger
 
+> **Note (2026-09-21):** `captures/` is git-ignored and pruned. Older iteration captures (all `house-00*`, superseded `rN`, probes, candidates) were deleted; links marked *(removed)* point to captures that no longer exist. This ledger text is the record; regenerate captures with the tools if needed.
+
 > **2026-09-21: protocol change (`HOUSE-03201`, [ADR-0014](../decisions/ADR-0014-showcase-scope.md)).**
 > The Visual Convergence Sprint and `VISUAL-GATE-1` are retired. Rounds 0–102 below all reviewed
 > the ground-floor route and the front approach. No round has ever captured the basement, the
@@ -69,7 +71,7 @@ Remaining: all five defects. `VISUAL-GATE-1` has not passed.
 
 Commit: `HOUSE-00912` working tree (`2026-09-14`)
 
-Capture: [`captures/house-00912-production-r2`](captures/house-00912-production-r2)
+Capture: `captures/house-00912-production-r2` *(removed)*
 
 Ranked defects:
 
@@ -159,7 +161,7 @@ not passed.
 
 Commit: `HOUSE-00921` working tree (`2026-09-14`)
 
-Capture: [`captures/house-00921-facade-r1`](captures/house-00921-facade-r1)
+Capture: `captures/house-00921-facade-r1` *(removed)*
 
 Ranked defects:
 
@@ -187,7 +189,7 @@ scale/contrast before moving to primary furnishings. `VISUAL-GATE-1` has not pas
 
 Commit: `HOUSE-00922` working tree (`2026-09-14`)
 
-Capture: [`captures/house-00922-outdoor-sky-r1`](captures/house-00922-outdoor-sky-r1)
+Capture: `captures/house-00922-outdoor-sky-r1` *(removed)*
 
 Ranked defects:
 
@@ -217,9 +219,9 @@ views. `VISUAL-GATE-1` has not passed.
 
 Commit: `HOUSE-01037` working tree (`2026-09-15`)
 
-Before: [Round 5 six-view route](captures/house-00922-outdoor-sky-r1).
-After: [eight-view furnished route](captures/house-01037-furniture-r6).
-Intermediate defect proof: [Round 6 pre-FFL composition](captures/house-01037-furniture-r5).
+Before: Round 5 six-view route *(capture removed)*.
+After: eight-view furnished route *(capture removed)*.
+Intermediate defect proof: Round 6 pre-FFL composition *(capture removed)*.
 
 Ranked visible defects after the fix:
 
@@ -258,7 +260,7 @@ judging the sofa's final colour or adding more small clutter.
 
 Commit: `HOUSE-01037` working tree (`2026-09-15`)
 
-Before: [initial furnished composition](captures/house-01037-furniture-r6).
+Before: initial furnished composition *(capture removed)*.
 After: [final eight-view capture](captures/house-01037-furniture-r7).
 
 Ranked visible defects after the correction:
@@ -336,7 +338,7 @@ not passed.
 Commit: `HOUSE-00923` checkpoint (`2026-09-15`)
 
 Before: [Round 8 eight fixed gameplay views](captures/house-01280-detail-r2).
-After: [same eight gameplay views with the outdoor surfaces restored](captures/house-00923-outdoor-r1).
+After: same eight gameplay views with the outdoor surfaces restored *(capture removed)*.
 
 Ranked visible defects after the correction:
 
@@ -373,8 +375,8 @@ and meaningful day/night fixture lighting. `VISUAL-GATE-1` has **not passed**.
 
 Commit: `HOUSE-00924` checkpoint (`2026-09-15`).
 
-Before: [Round 9 fixed gameplay views](captures/house-00923-outdoor-r1).
-After: [same eight views with glass composition corrected](captures/house-00924-glass-r1).
+Before: Round 9 fixed gameplay views *(capture removed)*.
+After: same eight views with glass composition corrected *(capture removed)*.
 
 Ranked visible defects after the correction:
 
@@ -409,8 +411,8 @@ entrance/hall/kitchen route. `VISUAL-GATE-1` has **not passed**.
 
 Commit: `HOUSE-00925` checkpoint (`2026-09-15`).
 
-Before: [Round 10 fixed gameplay views](captures/house-00924-glass-r1).
-After: [same eight views with receiver-domain exposure corrected](captures/house-00925-exterior-exposure-r1).
+Before: Round 10 fixed gameplay views *(capture removed)*.
+After: same eight views with receiver-domain exposure corrected *(capture removed)*.
 
 Ranked visible defects after the correction:
 
@@ -446,8 +448,8 @@ collapses to one screen colour. `VISUAL-GATE-1` has **not passed**.
 
 Commit: `HOUSE-00926` checkpoint (`2026-09-15`; exact HEAD in `docs/handoff.md`).
 
-Before: [Round 11 fixed gameplay views](captures/house-00925-exterior-exposure-r1).
-After: [same eight views with exterior-window roles](captures/house-00926-windows-r1).
+Before: Round 11 fixed gameplay views *(capture removed)*.
+After: same eight views with exterior-window roles *(capture removed)*.
 
 Ranked visible defects after inspecting all eight new images:
 
@@ -491,10 +493,10 @@ furnish and light the empty connected L0 route. `VISUAL-GATE-1` has **not passed
 
 Commit: `HOUSE-00927` checkpoint (`2026-09-15`; exact HEAD in `docs/handoff.md`).
 
-Before: [Round 12's eight fixed gameplay views](captures/house-00926-windows-r1).
-After: [the same eight views](captures/house-00927-siding-r1), plus an identical
-[close approach before](captures/house-00927-siding-r1/exterior-approach-close-before.png) /
-[after](captures/house-00927-siding-r1/exterior-approach-close-after.png) pair.
+Before: Round 12's eight fixed gameplay views *(capture removed)*.
+After: the same eight views *(capture removed)*, plus an identical
+close approach before *(capture removed)* /
+after *(capture removed)* pair.
 
 Ranked visible defects after inspecting all eight new views:
 
@@ -543,12 +545,12 @@ the empty connected L0 route. `VISUAL-GATE-1` has **not passed**.
 
 Commit: `HOUSE-00928` checkpoint (`2026-09-15`; exact HEAD in `docs/handoff.md`).
 
-Before: [Round 13's eight fixed gameplay views](captures/house-00927-siding-r1) and its
-[exact close front](captures/house-00927-siding-r1/exterior-approach-close-after.png).
-After: [the same eight views](captures/house-00928-entry-r1) and the
-[same close front](captures/house-00928-entry-r1/exterior-approach-close.png). The close approach
-was also inspected [overcast](captures/house-00928-entry-r1/exterior-approach-overcast.png) and
-[at 22:00](captures/house-00928-entry-r1/exterior-approach-night.png).
+Before: Round 13's eight fixed gameplay views *(capture removed)* and its
+exact close front *(capture removed)*.
+After: the same eight views *(capture removed)* and the
+same close front *(capture removed)*. The close approach
+was also inspected overcast *(capture removed)* and
+at 22:00 *(capture removed)*.
 
 Ranked visible defects after inspecting all eight new gameplay views:
 
@@ -599,7 +601,7 @@ passed**.
 
 Commit: `HOUSE-01038` checkpoint (`2026-09-15`; exact HEAD in `docs/handoff.md`).
 
-Before: [Round 14's eight fixed normal-game views](captures/house-00928-entry-r1).
+Before: Round 14's eight fixed normal-game views *(capture removed)*.
 After: [nine fixed clear-day views](captures/house-01038-clear-day-r5), including the new
 [reverse entrance](captures/house-01038-clear-day-r5/foyer-facing-front.png); the same nine
 views were inspected at [noon](captures/house-01038-noon-r5),
@@ -796,8 +798,8 @@ and [22:00](captures/house-01041-night-r1). After: matching eleven-view
 [overcast](captures/house-01042-overcast-r2) and
 [22:00](captures/house-01042-night-r2) normal-game sets; no camera or simulated
 condition was moved. The affected hall/kitchen, unchanged front/night and family
-frames were actually inspected. The first [steel-front hall](captures/house-01042-rejected-r1/central-hall.png)
-and [kitchen](captures/house-01042-rejected-r1/kitchen.png) looked nearly as black as
+frames were actually inspected. The first steel-front hall *(capture removed)*
+and kitchen *(capture removed)* looked nearly as black as
 the undressed portal; two representative rejected frames are kept, not the entire
 transient eleven-frame set.
 
@@ -941,19 +943,19 @@ Before: Round 21's eleven-view [clear](captures/house-01044-clear-day-r1),
 [noon](captures/house-01044-noon-r1),
 [overcast](captures/house-01044-overcast-r1) and
 [22:00](captures/house-01044-night-r1) normal-game sets. After: the same eleven
-poses and fixed conditions in [clear](captures/house-00772-clear-day-r2),
-[noon](captures/house-00772-noon-r2),
-[overcast](captures/house-00772-overcast-r2) and
-[22:00](captures/house-00772-night-r2). The first
-[clear iteration](captures/house-00772-clear-day-r1) is retained as rejected
+poses and fixed conditions in clear *(capture removed)*,
+noon *(capture removed)*,
+overcast *(capture removed)* and
+22:00 *(capture removed)*. The first
+clear iteration *(capture removed)* is retained as rejected
 evidence: oversized property trees hid the central entrance rather than framing it.
 
 Ranked visible defects remaining:
 
-1. The [night first view](captures/house-00772-night-r2/exterior-front.png) is
+1. The night first view *(capture removed)* is
    still almost black while cutout foliage catches too much residual sky light.
    The porch lanterns and entrance hierarchy do not yet read as a destination.
-2. The [clear front](captures/house-00772-clear-day-r2/exterior-front.png) is now
+2. The clear front *(capture removed)* is now
    recognizably landscaped, but its thin roof edges, open balcony/porch frame and
    broad flat timber façade still read as an engineering shell.
 3. The east-front `tree_small_02` crown is visibly sparse at the fixed road camera;
@@ -982,11 +984,11 @@ only; explicit debug blockout remains separate.
 
 Commit: `HOUSE-01269` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
 
-Before: Round 22's eleven-view fixed [22:00 set](captures/house-00772-night-r2).
+Before: Round 22's eleven-view fixed 22:00 set *(capture removed)*.
 After: the same eleven cameras, time, weather, exposure and Tier-S/High settings in
 [the dusk-sensor set](captures/house-01269-night-r2). The day sets are intentionally
 unchanged because the automatic groups are exactly off in daylight. The
-[front before](captures/house-00772-night-r2/exterior-front.png) and
+front before *(capture removed)* and
 [front after](captures/house-01269-night-r2/exterior-front.png) were opened at original
 resolution rather than accepted from a pixel count alone.
 
@@ -1201,9 +1203,9 @@ Commit: `HOUSE-00929` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`)
 
 Before: Round 28's exact [day approach](captures/house-01262-point-light-r1/exterior-approach-day-check.png)
 and [close night entrance](captures/house-01262-point-light-r1/exterior-approach-close.png). After:
-the matching [day](captures/house-00929-porch-r1/exterior-approach-day.png) and
-[night](captures/house-00929-porch-r1/exterior-approach-night.png), plus the complete thirteen-frame
-[Round 29 set](captures/house-00929-porch-r1). All were opened at original resolution.
+the matching day *(capture removed)* and
+night *(capture removed)*, plus the complete thirteen-frame
+Round 29 set *(capture removed)*. All were opened at original resolution.
 
 Ranked visible defects remaining:
 
@@ -1236,13 +1238,13 @@ another invisible subsystem.
 
 Commit: `HOUSE-00930` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
 
-Before: Round 29's matching [day](captures/house-00929-porch-r1/exterior-approach-day.png) and
-[night](captures/house-00929-porch-r1/exterior-approach-night.png) approaches showed the front
+Before: Round 29's matching day *(capture removed)* and
+night *(capture removed)* approaches showed the front
 walk, grass and foyer through the nominally closed entrance. After: the identical
-[day](captures/house-00930-entry-door-r1/exterior-approach-day.png) and
-[night](captures/house-00930-entry-door-r1/exterior-approach-night.png) cameras show an opaque
+day *(capture removed)* and
+night *(capture removed)* cameras show an opaque
 textured hardwood leaf, while the fixed
-[reverse foyer view](captures/house-00930-entry-door-r1/foyer-facing-front.png) retains its lit
+reverse foyer view *(capture removed)* retains its lit
 interior face. The directory also contains the unchanged eleven-camera clear-day review set.
 
 Ranked visible defects remaining:
@@ -1272,11 +1274,11 @@ silhouette, followed by entry-panel/hardware depth and the already identified ni
 
 Commit: `HOUSE-00931` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
 
-Before: Round 30's matching [day](captures/house-00930-entry-door-r1/exterior-approach-day.png)
-and [night](captures/house-00930-entry-door-r1/exterior-approach-night.png) approaches put one broad
+Before: Round 30's matching day *(capture removed)*
+and night *(capture removed)* approaches put one broad
 painted block across the landing windows. After: the identical
-[day](captures/house-00931-balustrade-r1/exterior-approach-day.png) and
-[night](captures/house-00931-balustrade-r1/exterior-approach-night.png) cameras expose the facade,
+day *(capture removed)* and
+night *(capture removed)* cameras expose the facade,
 windows and upper door through a complete open guard. The directory contains the unchanged eleven
 route/composition cameras plus this exact pair; all thirteen frames were opened and inspected.
 
@@ -1314,14 +1316,14 @@ the night defect with global exposure or turn the door into an exterior-only bil
 
 Commit: `HOUSE-00932` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
 
-Before: Round 31's matching [day](captures/house-00931-balustrade-r1/exterior-approach-day.png) and
-[night](captures/house-00931-balustrade-r1/exterior-approach-night.png) approaches showed a dark,
-flat timber rectangle. After: the identical [day](captures/house-00932-entry-detail-r1/exterior-approach-day.png)
-and [night](captures/house-00932-entry-detail-r1/exterior-approach-night.png) cameras show a four-panel
-entry with a lock stile. The new [close day](captures/house-00932-entry-detail-r1/entry-door-close-day.png),
-[close night](captures/house-00932-entry-detail-r1/entry-door-close-night.png) and
-[foyer-side](captures/house-00932-entry-detail-r1/foyer-facing-front.png) frames verify both faces;
-the [complete Round 32 set](captures/house-00932-entry-detail-r1) contains all eleven fixed clear-day
+Before: Round 31's matching day *(capture removed)* and
+night *(capture removed)* approaches showed a dark,
+flat timber rectangle. After: the identical day *(capture removed)*
+and night *(capture removed)* cameras show a four-panel
+entry with a lock stile. The new close day *(capture removed)*,
+close night *(capture removed)* and
+foyer-side *(capture removed)* frames verify both faces;
+the complete Round 32 set *(capture removed)* contains all eleven fixed clear-day
 cameras plus the two approach and two close views. Every frame was opened at original resolution.
 
 Ranked visible defects remaining:
@@ -1359,7 +1361,7 @@ room furnishing gaps. Do not raise global exposure or enlarge the lantern billbo
 
 Commit: `HOUSE-01282` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
 
-Before: Round 32's fixed [night approach](captures/house-00932-entry-detail-r1/exterior-approach-night.png)
+Before: Round 32's fixed night approach *(capture removed)*
 left the 72-triangle front stair almost black beneath two visibly live porch lanterns. After: the
 identical [night approach](captures/house-01282-step-spill-r1/exterior-approach-night.png) makes its
 treads, risers and bluestone texture readable. The matching
@@ -1395,13 +1397,13 @@ lighting ownership boundary; do not turn this into neighbour-by-proximity lighti
 
 Commit: `HOUSE-00933` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
 
-Before: Round 32's clear-day [front](captures/house-00932-entry-detail-r1/exterior-front.png) used
+Before: Round 32's clear-day front *(capture removed)* used
 plain blue-grey rectangles around the completed entrance. After: the identical
-[front camera](captures/house-00933-front-windows-r1/exterior-front.png) shows a repeated white
+front camera *(capture removed)* shows a repeated white
 6-over-6 grille rhythm and paired black shutters across the canonical front elevation. The
-[foyer-side view](captures/house-00933-front-windows-r1/foyer-facing-front.png) confirms that the
+foyer-side view *(capture removed)* confirms that the
 new outside detail does not intrude through the entrance or expose closed-room trim. The complete
-[Round 34 set](captures/house-00933-front-windows-r1) contains all eleven fixed clear-day route and
+Round 34 set *(capture removed)* contains all eleven fixed clear-day route and
 composition cameras; every frame was opened and inspected.
 
 Ranked visible defects remaining:
@@ -1437,12 +1439,12 @@ them.
 
 Commit: `HOUSE-00934` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
 
-Before: Round 34's [front](captures/house-00933-front-windows-r1/exterior-front.png) ended both the
+Before: Round 34's front *(capture removed)* ended both the
 main and garage siding planes at a thin dark roof edge, and its five wall dormers read as grey
-shingle boxes. After: the identical [front camera](captures/house-00934-roofline-r1/exterior-front.png)
+shingle boxes. After: the identical front camera *(capture removed)*
 shows a continuous 280 mm white frieze and projecting 100 mm crown, with sided dormer fronts and
 painted corner/header/rake outlines. The complete
-[Round 35 set](captures/house-00934-roofline-r1) contains all eleven fixed clear-day route and
+Round 35 set *(capture removed)* contains all eleven fixed clear-day route and
 composition cameras; every frame was opened and inspected.
 
 Ranked visible defects remaining:
@@ -1477,13 +1479,13 @@ largest improvement in the fixed captures rather than adding more invisible infr
 
 Commit: `HOUSE-00935` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
 
-Before: Round 35's [front](captures/house-00934-roofline-r1/exterior-front.png) looks through the
+Before: Round 35's front *(capture removed)* looks through the
 entire 4.90 × 2.40 m garage aperture because its closed room-owned leaf used ordinary indoor steel
 and correctly vanished with `L0_GARAGE`. After: the identical
-[front camera](captures/house-00935-garage-door-r1/exterior-front.png) shows a closed warm-charcoal
-sectional door, and the new fixed [driveway camera](captures/house-00935-garage-door-r1/garage-approach.png)
+front camera *(capture removed)* shows a closed warm-charcoal
+sectional door, and the new fixed driveway camera *(capture removed)*
 makes its five rows of four raised panels directly reviewable. The complete
-[Round 36 set](captures/house-00935-garage-door-r1) contains twelve fixed clear-day route,
+Round 36 set *(capture removed)* contains twelve fixed clear-day route,
 composition and facade cameras; every frame was opened and inspected.
 
 Ranked visible defects remaining:
@@ -1518,7 +1520,7 @@ undo the room ownership boundary or broaden the exterior-door prefix to ordinary
 
 Commit: `HOUSE-01045` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
 
-Before: Round 36's fixed [straight living-room view](captures/house-00935-garage-door-r1/living-room.png)
+Before: Round 36's fixed straight living-room view *(capture removed)*
 looked across the seating foreground to an almost completely blank east wall. After: the identical
 [clear-day view](captures/house-01045-piano-r2/living-room.png) has a full-size walnut upright as a
 focal object, with its inset case, 88-key keyboard, music desk, legs and pedals readable rather
@@ -1643,7 +1645,7 @@ for the remaining dark facade.
 
 Commit: `HOUSE-01048` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
 
-Before: the fixed [clear-day dining view](captures/house-01048-dining-before-r1/dining-room.png)
+Before: the fixed clear-day dining view *(capture removed)*
 looks through a completely empty, almost black 6.0 × 2.8 m room between the finished kitchen and
 living room. After: the identical [clear-day camera](captures/house-01048-dining-day-final/dining-room.png)
 shows a measured walnut table for eight, eight upholstered chairs, an anchoring rug and a physical
@@ -1810,7 +1812,7 @@ stop at 2.40 m and link their exact `PuckDiffuser` slots. The selected 256-sampl
 0.2341 rather than the malformed ceiling distribution's 8.6039. The manual group retains its
 original default-off state and total 1600 lm weight: the fixed final west-day frame differs from
 Round 42 by mean RGB only (0.0125, 0.0126, 0.0126)/255, confined to the new geometry. A rejected
-[always-on clear-day set](captures/house-01284-range-task-day-r1) visibly darkened the whole room
+always-on clear-day set *(capture removed)* visibly darkened the whole room
 through correct exposure adaptation, so it was not promoted merely to make the new lights obvious.
 
 The world is 618 chunks / 49 props. Puck steel reuses the existing kitchen-hardware finish; only
@@ -1830,7 +1832,7 @@ path; otherwise move directly to the visibly sparse family-room composition.
 
 Commit: `HOUSE-01050` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
 
-Before: the new fixed [front-on family-media view](captures/house-01050-family-media-before/family-media.png)
+Before: the new fixed front-on family-media view *(capture removed)*
 shows the existing television as a cream blank rectangle because its sole imported palette slot
 was mapped to upholstery. The media unit source's explicitly named `BlackMarble` mesh was flattened
 into the same role. After: the identical [final view](captures/house-01050-family-media-day-final/family-media.png)
@@ -1923,7 +1925,7 @@ Commit: `HOUSE-01285` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`)
 Before: Round 45's complete unchanged
 [clear-day set](captures/house-01051-family-secondary-day-final) shows a furnished but flat family
 room under a blank ceiling. The new complete
-[explicit-reading 22:00 baseline](captures/house-01285-family-fixtures-night-before) also proves
+explicit-reading 22:00 baseline *(capture removed)* also proves
 that the visible floor-lamp shade stays dark while its nominal point lights the room from 3.15 m
 away. After: all fourteen matching cameras were recaptured for
 [normal clear day](captures/house-01285-family-fixtures-day-final) and
@@ -2381,7 +2383,7 @@ Commit: `HOUSE-00936` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`)
 Before: Round 54's [front](captures/house-01059-window-balance-day-final/exterior-front.png) and
 [garage](captures/house-01059-window-balance-day-final/garage-approach.png) views are dominated by
 a large saturated lime-green lawn. After: the identical cameras in the complete fourteen-view
-[clear-day set](captures/house-00936-lawn-material-day-final) show a restrained olive/earth-balanced
+clear-day set *(capture removed)* show a restrained olive/earth-balanced
 lawn while preserving the approved source texture. All fourteen frames plus targeted fixed
 overcast and 22:00 exterior captures were inspected at full resolution.
 
@@ -2423,11 +2425,11 @@ especially around the otherwise empty garage frontage.
 
 Commit: `HOUSE-00937` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
 
-Before: Round 55's [front](captures/house-00936-lawn-material-day-final/exterior-front.png) and
-[garage](captures/house-00936-lawn-material-day-final/garage-approach.png) frames show the approved
+Before: Round 55's front *(capture removed)* and
+garage *(capture removed)* frames show the approved
 plants as a thin continuous line, including vegetation below the raised porch and one shrub in the
 driveway, with lawn running directly to the foundation. After: the complete fifteen-view
-[clear-day set](captures/house-00937-foundation-planting-day-final) adds two readable mulched beds
+clear-day set *(capture removed)* adds two readable mulched beds
 on the facade flanks and a fixed path-height review boundary. All fifteen frames and targeted fixed
 overcast/22:00 front-path captures were opened at full resolution.
 
@@ -2471,11 +2473,11 @@ remain the strongest visible opportunities.
 Commit: `HOUSE-00938` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
 
 Before: the complete fixed 22:00
-[night set](captures/house-00938-porch-layer-night-before) shows only the two hot door lanterns;
+night set *(capture removed)* shows only the two hot door lanterns;
 the outer porch bays, soffit and facade flanks collapse almost completely into black. After: the
-matched fifteen-camera [night set](captures/house-00938-porch-layer-night-final) adds two physical
+matched fifteen-camera night set *(capture removed)* adds two physical
 warm semi-flush fixtures and broad overlapping pools, while the complete
-[clear-day set](captures/house-00938-porch-layer-day-final) proves that their off-state opal bowls
+clear-day set *(capture removed)* proves that their off-state opal bowls
 remain readable instead of becoming black emissive discs. All 45 frames were opened, including the
 four family-room views affected by the refined shared fixture.
 
@@ -2520,12 +2522,12 @@ a controlled facade/step lighting layer, not a global night-exposure increase.
 
 Commit: `HOUSE-00939` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
 
-Before: Round 57's [clear-day driveway](captures/house-00938-porch-layer-day-final/garage-approach.png)
+Before: Round 57's clear-day driveway *(capture removed)*
 has a broad garage wall with only one small central utility pack, while the matching
-[normal 22:00 view](captures/house-00938-porch-layer-night-final/garage-approach.png) is almost
+normal 22:00 view *(capture removed)* is almost
 entirely black because that 4,000 K work light is deliberately manual. After: the complete matched
-fifteen-camera [day](captures/house-00939-garage-lantern-day-final) and
-[night](captures/house-00939-garage-lantern-night-final) sets add two physical carriage lanterns
+fifteen-camera day *(capture removed)* and
+night *(capture removed)* sets add two physical carriage lanterns
 at the sectional-door jambs. All thirty final frames were opened; the fixed manual-flood-on
 driveway control was opened separately.
 
@@ -2568,12 +2570,12 @@ strongest opportunities.
 
 Commit: `HOUSE-00940` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
 
-Before: Round 58's [living-room view](captures/house-00939-garage-lantern-day-final/living-room.png)
+Before: Round 58's living-room view *(capture removed)*
 ends at a broad timber rectangle because the shell centred one declared 860 mm leaf inside each
 1.80 m pair opening. After: the complete matched sixteen-camera
-[day](captures/house-00940-double-doors-day-final) and
-[night](captures/house-00940-double-doors-night-final) sets show real paired joinery. The added
-[focused view](captures/house-00940-double-doors-day-final/foyer-living-doors.png) makes the
+day *(capture removed)* and
+night *(capture removed)* sets show real paired joinery. The added
+focused view *(capture removed)* makes the
 opaque panel geometry directly reviewable. All 32 final frames and all six strict-reference
 comparisons were opened.
 
@@ -2613,8 +2615,8 @@ light and contact grounding without lifting global exposure or inventing a new r
 
 Commit: `HOUSE-01286` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
 
-Before: Round 59's [day living view](captures/house-00940-double-doors-day-final/living-room.png)
-and [night living view](captures/house-00940-double-doors-night-final/living-room.png) leave the
+Before: Round 59's day living view *(capture removed)*
+and night living view *(capture removed)* leave the
 piano, paired doors, broad walls and most of the floor nearly black around one small picture-light
 pool. Merely forcing the old main group on produced four ceiling hot spots because its bare points
 sat 20 mm below the ceiling. After: the complete matched sixteen-camera
@@ -3172,8 +3174,8 @@ Commit: `HOUSE-00941` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`)
 Before: Round 71's [front exterior](captures/house-01066-piano-refinement-day-final/exterior-front.png)
 maps the generic orange `Wood095` bare-board grain across every principal siding field, producing
 broad furniture-like bands on the largest architectural surface in the view. After: the complete
-twenty-one-camera [clear-day](captures/house-00941-clapboard-day-r1) and
-[normal-night](captures/house-00941-clapboard-night-r1) sets show pale painted horizontal
+twenty-one-camera clear-day *(capture removed)* and
+normal-night *(capture removed)* sets show pale painted horizontal
 clapboard at six 167 mm courses per world metre. All 42 frames were inspected as complete contact
 sheets, and the front, path and garage approaches were also opened directly.
 
@@ -3217,12 +3219,12 @@ an unrelated subsystem or a global exposure lift.
 
 Commit: `HOUSE-00942` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`).
 
-Before: Round 72's [central hall](captures/house-00941-clapboard-day-r1/central-hall.png),
-[family media wall](captures/house-00941-clapboard-day-r1/family-media.png) and
-[kitchen](captures/house-00941-clapboard-day-r1/kitchen.png) show the close single-leaf doors as
+Before: Round 72's central hall *(capture removed)*,
+family media wall *(capture removed)* and
+kitchen *(capture removed)* show the close single-leaf doors as
 featureless painted slabs without hardware. After: the complete twenty-one-camera
-[clear-day](captures/house-00942-single-door-joinery-day-r1) and
-[normal-night](captures/house-00942-single-door-joinery-night-r1) sets show restrained four-panel
+clear-day *(capture removed)* and
+normal-night *(capture removed)* sets show restrained four-panel
 relief and physical lock-side steel levers. All 42 frames were inspected as complete contact
 sheets; the three changed views and both strict first-person pairs were also opened directly.
 
@@ -3264,11 +3266,11 @@ unrelated subsystem or global exposure lift.
 
 Commit: `HOUSE-00943` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`).
 
-Before: Round 73's [garage approach](captures/house-00942-single-door-joinery-day-r1/garage-approach.png)
-and [front exterior](captures/house-00942-single-door-joinery-day-r1/exterior-front.png) show the
+Before: Round 73's garage approach *(capture removed)*
+and front exterior *(capture removed)* show the
 acknowledged ambientCG `Tiles140` square ceramic floor map stretched across every roof. After: the
-complete twenty-one-camera [clear-day](captures/house-00943-asphalt-shingle-day-r1) and
-[normal-night](captures/house-00943-asphalt-shingle-night-r1) sets use a project-authored charcoal
+complete twenty-one-camera clear-day *(capture removed)* and
+normal-night *(capture removed)* sets use a project-authored charcoal
 asphalt pair at seven exposed courses per true sloping metre. All 42 frames were inspected as
 complete contact sheets; both exterior views and enlarged garage-roof crops were opened directly.
 
@@ -3310,12 +3312,12 @@ garage/side yard—not a global exposure lift or an unrelated subsystem.
 
 Commit: `HOUSE-00944` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`).
 
-Before: Round 74's [front exterior](captures/house-00943-asphalt-shingle-day-r1/exterior-front.png)
-and [garage approach](captures/house-00943-asphalt-shingle-day-r1/garage-approach.png) have the
+Before: Round 74's front exterior *(capture removed)*
+and garage approach *(capture removed)* have the
 correct shingle surface but uncapped hip/dormer seams, a black metal ridge-vent bar and gutters
 whose generated boxes omit the outward longitudinal face. After: the complete twenty-one-camera
-[clear-day](captures/house-00944-roof-edge-day-r1) and
-[normal-night](captures/house-00944-roof-edge-night-r1) sets add physical finish derived from the
+clear-day *(capture removed)* and
+normal-night *(capture removed)* sets add physical finish derived from the
 same authoritative planes and drainage coordinates. Both 21-frame contact sheets, four full-size
 exteriors and enlarged before/after roof crops were opened.
 
@@ -3355,12 +3357,12 @@ empty plane—not unrelated systems or a global exposure change.
 
 Commit: `HOUSE-00945` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`).
 
-Before: Round 75's [garage approach](captures/house-00944-roof-edge-day-r1/garage-approach.png)
+Before: Round 75's garage approach *(capture removed)*
 ends the asphalt directly in a broad empty grass/fence strip, while its matching
-[22:00 view](captures/house-00944-roof-edge-night-r1/garage-approach.png) loses the complete east
+22:00 view *(capture removed)* loses the complete east
 edge outside the two carriage-lantern pools. After: the complete twenty-one-camera
-[clear-day](captures/house-00945-driveway-border-day-r1) and
-[normal-night](captures/house-00945-driveway-border-night-r1) sets add a measured planted edge and
+clear-day *(capture removed)* and
+normal-night *(capture removed)* sets add a measured planted edge and
 physical wayfinding layer. Both 21-frame contact sheets and the direct day/night garage images
 were opened at full size.
 
@@ -3402,11 +3404,11 @@ if no such source is dependency-valid—not a global exposure lift or unrelated 
 
 Commit: `HOUSE-00946` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`).
 
-Before: Round 76's [day garage approach](captures/house-00945-driveway-border-day-r1/garage-approach.png)
+Before: Round 76's day garage approach *(capture removed)*
 has a planted/lit edge but the two-car concrete surface is still one broad uninterrupted grey
 plane. After: the complete twenty-one-camera
-[clear-day](captures/house-00946-driveway-joints-day-r2) and
-[normal-night](captures/house-00946-driveway-joints-night-r2) sets add measured construction
+clear-day *(capture removed)* and
+normal-night *(capture removed)* sets add measured construction
 scale. Both contact sheets and the direct garage day/night pairs were opened at full size.
 
 Ranked visible defects remaining:
@@ -3443,12 +3445,12 @@ a dependency-valid physical roof/dormer source—not global exposure or an unrel
 
 Commit: `HOUSE-00947` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`).
 
-Before: Round 77's [day garage approach](captures/house-00946-driveway-joints-day-r2/garage-approach.png)
-and matching [22:00 view](captures/house-00946-driveway-joints-night-r2/garage-approach.png) show a
+Before: Round 77's day garage approach *(capture removed)*
+and matching 22:00 view *(capture removed)* show a
 materially coherent arrival whose largest facade object is still one dark, monotonous sectional
 leaf. After: the complete twenty-one-camera
-[clear-day](captures/house-00947-garage-lites-day-r2) and
-[normal-night](captures/house-00947-garage-lites-night-r2) sets add four framed top lites and a
+clear-day *(capture removed)* and
+normal-night *(capture removed)* sets add four framed top lites and a
 physical centre pull. Both 21-frame contact sheets and the direct garage pairs were inspected at
 full size.
 
@@ -3486,11 +3488,11 @@ neighbour context—not a global exposure lift or unrelated subsystem.
 
 Commit: `HOUSE-00948` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`).
 
-Before: Round 78's [day garage approach](captures/house-00947-garage-lites-day-r2/garage-approach.png)
-and matching [22:00 view](captures/house-00947-garage-lites-night-r2/garage-approach.png) show a
+Before: Round 78's day garage approach *(capture removed)*
+and matching 22:00 view *(capture removed)* show a
 finished leaf still cut directly into a broad flat siding plane. After: the complete twenty-one-
-camera [clear-day](captures/house-00948-garage-surround-day-r1) and
-[normal-night](captures/house-00948-garage-surround-night-r1) sets add a layered painted opening
+camera clear-day *(capture removed)* and
+normal-night *(capture removed)* sets add a layered painted opening
 surround. Both contact sheets, both direct garage images and all changed strict references were
 inspected at full size.
 
@@ -3531,8 +3533,8 @@ unrelated subsystem.
 
 Commit: `HOUSE-01067` checkpoint (`2026-09-19`; exact HEAD in `docs/handoff.md`).
 
-Before: Round 79's [day family composition](captures/house-00948-garage-surround-day-r1/family-composition.png)
-and matching [22:00 view](captures/house-00948-garage-surround-night-r1/family-composition.png)
+Before: Round 79's day family composition *(capture removed)*
+and matching 22:00 view *(capture removed)*
 show an otherwise furnished and physically lit family room whose two dominant 2.40 x 1.60 m
 picture windows remain bare framed apertures. After: the complete twenty-one-camera
 [clear-day](captures/house-01067-family-curtains-day-final) and
@@ -3576,10 +3578,10 @@ global exposure or an unrelated subsystem.
 
 Commit: `HOUSE-00771` checkpoint (`2026-09-19`; exact HEAD in `docs/handoff.md`).
 
-Before: the four retained [selected baseline views](captures/house-00771-garden-furniture-before-selected)
+Before: the four retained selected baseline views *(capture removed)*
 show the rear terrace and lawn as empty grass/paving between shrubs. After: the complete
-twenty-four-camera [clear-day](captures/house-00771-garden-furniture-day-final) and
-[normal-night](captures/house-00771-garden-furniture-night-final) sets add one coherent garden
+twenty-four-camera clear-day *(capture removed)* and
+normal-night *(capture removed)* sets add one coherent garden
 suite and three fixed reciprocal review cameras. Both contact sheets and the direct rear-terrace,
 backyard-to-house and family-garden pairs were opened at full size.
 
@@ -3620,8 +3622,8 @@ reaching the terrace—not lift global exposure or leave the vertical slice for 
 
 Commit: `HOUSE-01291` checkpoint (`2026-09-19`; exact HEAD in `docs/handoff.md`).
 
-Before: Round 81's complete [clear-day](captures/house-00771-garden-furniture-day-final) and
-[normal-night](captures/house-00771-garden-furniture-night-final) sets show an inhabited rear
+Before: Round 81's complete clear-day *(capture removed)* and
+normal-night *(capture removed)* sets show an inhabited rear
 terrace whose furniture and paving disappear at 22:00. After: the complete twenty-four-camera
 [clear-day](captures/house-01291-terrace-lanterns-day-final) and
 [normal-night](captures/house-01291-terrace-lanterns-night-final) sets add two physical wall
@@ -3732,8 +3734,8 @@ Commit: `HOUSE-00949` checkpoint (`2026-09-19`; exact HEAD in `docs/handoff.md`)
 Before: Round 83's complete 26-camera [clear-day](captures/house-01068-sunroom-day-r1) and
 [normal-night](captures/house-01068-sunroom-night-r1) sets show the sunroom rear opening as a
 broad opaque pale/brown slab. After: matched 26-camera
-[clear-day](captures/house-00949-slider-day-r1) and
-[normal-night](captures/house-00949-slider-night-r1) sets. Both contact sheets and direct
+clear-day *(capture removed)* and
+normal-night *(capture removed)* sets. Both contact sheets and direct
 `sunroom-breakfast`, `backyard-to-house` and `rear-terrace` pairs were opened at full size.
 
 Ranked visible defects remaining:
@@ -3781,10 +3783,10 @@ garden defect or a better rear elevation, guided by these unchanged cameras—no
 
 Commit: `HOUSE-00950` checkpoint (`2026-09-19`; exact HEAD in `docs/handoff.md`).
 
-Before: Round 84's 26-camera [clear-day](captures/house-00949-slider-day-r1) and
-[normal-night](captures/house-00949-slider-night-r1) sets. After: fixed, matched 26-camera
-[clear-day](captures/house-00950-limestone-day-r1) and
-[normal-night](captures/house-00950-limestone-night-r1) sets. Both contact sheets and direct
+Before: Round 84's 26-camera clear-day *(capture removed)* and
+normal-night *(capture removed)* sets. After: fixed, matched 26-camera
+clear-day *(capture removed)* and
+normal-night *(capture removed)* sets. Both contact sheets and direct
 `sunroom-breakfast` / `sunroom-wet-bar` day/night pairs were opened at full resolution.
 
 Ranked visible defects remaining:
@@ -3822,8 +3824,8 @@ night improvement rather than hiding the remaining defect behind global exposure
 
 Commit: `HOUSE-01292` checkpoint (`2026-09-19`; exact HEAD in `docs/handoff.md`).
 
-Before: Round 85's complete [clear-day](captures/house-00950-limestone-day-r1) and
-[normal-night](captures/house-00950-limestone-night-r1) controls. After: matched 26-camera
+Before: Round 85's complete clear-day *(capture removed)* and
+normal-night *(capture removed)* controls. After: matched 26-camera
 [clear-day](captures/house-01292-sunroom-day-r1) and
 [normal-night](captures/house-01292-sunroom-night-r1) sets. Both contact sheets and the full-size
 `sunroom-breakfast` and `sunroom-wet-bar` pairs were opened. An additional clear-day
@@ -3859,7 +3861,7 @@ cross-room contrast and rear exterior remain the highest-value next work.
 Commit: `HOUSE-01293` checkpoint (`2026-09-19`; exact HEAD in `docs/handoff.md`). Before:
 Round 86's matched [day](captures/house-01292-sunroom-day-r1) and
 [night](captures/house-01292-sunroom-night-r1) sets. The first candidate
-[day](captures/house-01293-kitchen-day-r1) / [night](captures/house-01293-kitchen-night-r1)
+day *(capture removed)* / night *(capture removed)*
 sets exposed a wrong halo in the bedroom above. Final compiled-game 26-camera
 [day](captures/house-01293-kitchen-day-final) and
 [night](captures/house-01293-kitchen-night-final) sets each have a contact sheet. The whole
@@ -4085,8 +4087,8 @@ defect, not a problem claimed fixed by this foyer checkpoint. **VISUAL-GATE-1 fa
 Commit: `HOUSE-01296` checkpoint (`2026-09-19`). Before: Round 92's 28-camera
 [day](captures/house-01071-foyer-arrival-day-r1) and
 [night](captures/house-01071-foyer-arrival-night-r1) sets. After: matched 28-camera
-[day](captures/house-01296-dining-cal100-day-probe) and
-[night](captures/house-01296-dining-cal100-night-probe) built-game sets. Full-size
+day *(capture removed)* and
+night *(capture removed)* built-game sets. Full-size
 dining long-axis and sideboard, kitchen reciprocal, central hall, living, family,
 foyer and exterior views were opened; the matched fixed time/weather/exposure and
 camera poses are unchanged.
@@ -4127,8 +4129,8 @@ flat view beyond family glazing. **VISUAL-GATE-1 still fails.**
 ## Round 94 — light the open kitchen service transition
 
 Commit: `HOUSE-01297` checkpoint (`2026-09-19`). Before: Round 93's 28-camera
-[day](captures/house-01296-dining-cal100-day-probe) and
-[night](captures/house-01296-dining-cal100-night-probe) sets, plus a close diagnostic
+day *(capture removed)* and
+night *(capture removed)* sets, plus a close diagnostic
 at the service threshold. After: 29 fixed built-game
 [day](captures/house-01297-butlers-day-r1) and
 [night](captures/house-01297-butlers-night-r1) views, including the new
@@ -4279,11 +4281,11 @@ complete L0 route and **VISUAL-GATE-1 remain open.**
 ## Round 98 — reachable main stair, full-route review
 
 Commit: `HOUSE-00489` checkpoint (`2026-09-20`). Before: the old first-person
-[foyer/stair reference](captures/house-00489-stair-before/fp-l0-foyer-stair.png)
+foyer/stair reference *(capture removed)*
 showed a flight blocking the foyer-side approach. After: the fixed
-[31-view clear-day set](captures/house-00489-stair-day-r1) includes the same L0
-route plus new [stair-foot](captures/house-00489-stair-day-r1/main-stair-foot.png)
-and [L1-exit](captures/house-00489-stair-day-r1/main-stair-l1-exit.png) views.
+31-view clear-day set *(capture removed)* includes the same L0
+route plus new stair-foot *(capture removed)*
+and L1-exit *(capture removed)* views.
 The ignored capture files are local review evidence, not Git-tracked goldens.
 
 Ranked defects before: (1) foyer-to-L1 stair physically inaccessible; (2)
@@ -4310,11 +4312,11 @@ before solving the reported exterior under-rendering and L0 breadth.
 ## Round 99 — exterior glazing and weather-skin closure
 
 Commit: `HOUSE-00702` checkpoint (`2026-09-20`). Before:
-[road/front](captures/house-00489-stair-day-r1/exterior-front.png) and
-[garage approach](captures/house-00702-exterior-day-r1/garage-approach.png).
-After: the same [31-view clear-day set](captures/house-00702-exterior-day-r2),
-including [front](captures/house-00702-exterior-day-r2/exterior-front.png),
-[garage](captures/house-00702-exterior-day-r2/garage-approach.png) and the
+road/front *(capture removed)* and
+garage approach *(capture removed)*.
+After: the same 31-view clear-day set *(capture removed)*,
+including front *(capture removed)*,
+garage *(capture removed)* and the
 foyer→hall→living→family→kitchen→dining route. Captures remain local and
 Git-ignored; the text review and strict references are tracked.
 
@@ -4344,7 +4346,7 @@ not another long exterior micro-polish sequence. **VISUAL-GATE-1 is open.**
 ## Round 100 — occupy the sunroom's east reading bay
 
 Commit: `HOUSE-01074` checkpoint (`2026-09-20`). Before: the
-[previous breakfast-side view](captures/house-00702-exterior-day-r2/sunroom-breakfast.png)
+previous breakfast-side view *(capture removed)*
 shows a broad empty floor beyond the occupied table and bar. After: the same
 [32-view day](captures/house-01074-sunroom-day-r3) and
 [32-view night](captures/house-01074-sunroom-night-r3) route sets, including a
