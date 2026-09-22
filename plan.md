@@ -451,11 +451,12 @@ green.
       note: today every leaf is drawn closed while nothing collides with it and culling treats it as closed. This is the data half of the fix.
       note: (2026-09-21) all 63 walkthrough doors, the garage door and three gates now have static poses; only the facade-only Juliet door and rear non-traversal gate are closed and record why. Rule 14 proves route clearance and wall/prop arc clearance. Its measured arc moved the hall-family swing into the family room and the low dog bed 0.98 m north, the smallest correction that clears both sides' existing dressing
 
-- [ ] HOUSE-03222 — Draw every leaf at its static pose
+- [x] HOUSE-03222 — Draw every leaf at its static pose
       dep: HOUSE-03221 · sys: content · plat: TOOL · pri: MUST · zone: all · adv: D2, G1 · est: 3
       files: tools/blender/house_shell_gen.py, tools/world/build_chunks.py, tools/world/verify_shell.py
       accept: (1) the shell builds each hinged leaf rotated about its hinge, and each sliding leaf translated, to the authored pose; (2) `HOUSE-00486`'s "a leaf on both sides" rule is replaced by one leaf owned by the cell it swings into, plus whatever the other cell needs so culling never shows a hole; (3) `verify_shell.py` asserts pose, hinge side and no wall intersection; (4) the finished joinery of `HOUSE-00932`, `00940` and `00942` keeps its detail at the new pose; (5) chunk budgets hold, or their exceptions are re-measured and recorded
       verify: `verify_shell.py`; zone captures show doors resting open on every floor
+      note: (2026-09-22) the shell rigidly poses each hinged body and its joinery around the authored hinge, translates slider sashes, and places the sectional garage leaf overhead; gates and the shed leaf use the same authored fractions in `fence_gen.py`. Each of the 63 wall doors now has one swing-cell owner while both cells retain casing/reveal/threshold detail. Independent verification finds 63/63 at the expected pose, none duplicated and none intersecting the neighbouring wall; the entry/double/garage detail roles remain present. The rebuilt world stays at 740 chunks with every existing ceiling holding and no new exception. The 56-view `house-03222-static-leaves-final` clear-day capture covers all eleven zones and shows open leaves on B1/L0/L1/L2/L3, the garage and exterior without a leaf-caused S1/S2 or clear-colour hole. The known dark, empty C1 rooms remain later breadth work, not hidden C3 work in this task
 
 - [ ] HOUSE-03223 — Make every posed leaf solid
       dep: HOUSE-03222 · sys: physics · plat: ALL · pri: MUST · zone: all · adv: D2, G1 · est: 2

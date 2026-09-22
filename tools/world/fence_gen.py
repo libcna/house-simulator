@@ -230,6 +230,12 @@ TRACK_SECTION = (0.06, 0.04)
 ROLLER = (0.09, 0.09)
 
 
+def _transform_faces(faces: list, point_transform, normal_transform) -> list:
+    """Apply one rigid static-pose transform to face points and normals."""
+    return [([point_transform(*point) for point in corners], normal_transform(*normal))
+            for corners, normal in faces]
+
+
 def gates(directory: Path) -> list[dict]:
     """§11.2's three gates as `{id, kind, leaf, fixed, pivot, travel, bounds}`.
 
@@ -251,6 +257,14 @@ def gates(directory: Path) -> list[dict]:
         return heights[iz * terrain_gen.WIDTH + ix]
 
     styles = {row["id"]: row.get("asset") for row in exterior.get("fences", [])}
+    # Pick the hinged direction that opens toward the house/property rather than the public side
+    # of its fence. This is derived from the interior architecture, not from a gate id.
+    interiors = [box for cell in layout_io.rows(layout, "cells")
+                 if cell.get("kind") != "exterior" for box in layout_io.cell_boxes(cell)]
+    property_centre = (
+        sum((box[0] + box[1]) / 2.0 for box in interiors) / len(interiors),
+        sum((box[2] + box[3]) / 2.0 for box in interiors) / len(interiors),
+    )
     out = []
     for row in exterior.get("gates", []):
         opening = row["opening"]
@@ -344,6 +358,43 @@ def gates(directory: Path) -> list[dict]:
             pivot = ((leaf_x0 + leaf_x1) / 2.0, base, plane)
             travel = (-width, 0.0, 0.0)
 
+        closed_leaf = leaf
+        closed_points = [point for corners, _n in closed_leaf for point in corners]
+        closed_bounds = (min(p[0] for p in closed_points), min(p[1] for p in closed_points),
+                         min(p[2] for p in closed_points), max(p[0] for p in closed_points),
+                         max(p[1] for p in closed_points), max(p[2] for p in closed_points))
+        fraction = max(0.0, min(1.0, float(row.get("openFraction") or 0.0)))
+        if travel is not None:
+            offset = tuple(component * fraction for component in travel)
+            leaf = _transform_faces(
+                leaf,
+                lambda x, y, z: (x + offset[0], y + offset[1], z + offset[2]),
+                lambda x, y, z: (x, y, z))
+        elif fraction > 0.0:
+            magnitude = math.radians(90.0 * fraction)
+            leaf_centre = ((closed_bounds[0] + closed_bounds[3]) / 2.0,
+                           (closed_bounds[2] + closed_bounds[5]) / 2.0)
+
+            def rotated_centre(angle):
+                dx, dz = leaf_centre[0] - pivot[0], leaf_centre[1] - pivot[2]
+                return (pivot[0] + dx * math.cos(angle) - dz * math.sin(angle),
+                        pivot[2] + dx * math.sin(angle) + dz * math.cos(angle))
+
+            candidates = (magnitude, -magnitude)
+            angle = min(candidates, key=lambda candidate: math.dist(
+                rotated_centre(candidate), property_centre))
+            cosine, sine = math.cos(angle), math.sin(angle)
+
+            def rotate_point(x, y, z):
+                dx, dz = x - pivot[0], z - pivot[2]
+                return (pivot[0] + dx * cosine - dz * sine, y,
+                        pivot[2] + dx * sine + dz * cosine)
+
+            def rotate_normal(x, y, z):
+                return (x * cosine - z * sine, y, x * sine + z * cosine)
+
+            leaf = _transform_faces(leaf, rotate_point, rotate_normal)
+
         points = [point for corners, _n in leaf + fixed for point in corners]
         only_leaf = [point for corners, _n in leaf for point in corners]
         out.append({
@@ -352,6 +403,7 @@ def gates(directory: Path) -> list[dict]:
             "leafBounds": (min(p[0] for p in only_leaf), min(p[1] for p in only_leaf),
                            min(p[2] for p in only_leaf), max(p[0] for p in only_leaf),
                            max(p[1] for p in only_leaf), max(p[2] for p in only_leaf)),
+            "closedLeafBounds": closed_bounds,
             "style": style,
             "leaf": leaf,
             "fixed": fixed,
@@ -362,6 +414,7 @@ def gates(directory: Path) -> list[dict]:
             "travel": travel,
             "interactable": row.get("interactable"),
             "hinge": row.get("hinge"),
+            "openFraction": fraction,
             "bounds": (min(p[0] for p in points), min(p[1] for p in points),
                        min(p[2] for p in points), max(p[0] for p in points),
                        max(p[1] for p in points), max(p[2] for p in points)),
@@ -429,6 +482,8 @@ def shed(directory: Path) -> dict | None:
     # §16's own openings, in the wall each one is in. A shed with a door drawn where the portal is
     # not is a shed you cannot walk into.
     holes: dict[tuple[str, float], list[tuple[float, float, float, float]]] = {}
+    openings_by_id = layout_io.by_id(layout_io.rows(layout, "openings"), "opening")
+    shed_door = None
     for portal in layout_io.rows(layout, "portals"):
         if cell["id"] not in (portal.get("cellA"), portal.get("cellB")):
             continue
@@ -438,6 +493,9 @@ def shed(directory: Path) -> dict | None:
         key = (plane["axis"], round(float(plane["value"]), 4))
         holes.setdefault(key, []).append((float(rect["u"][0]), float(rect["u"][1]),
                                           floor + float(rect["v"][0]), floor + float(rect["v"][1])))
+        aperture = openings_by_id.get(portal.get("aperture"))
+        if aperture and aperture.get("kind") == "door":
+            shed_door = (portal, aperture)
 
     parts: list[tuple[str, list]] = []
     walls: list[dict] = []
@@ -450,6 +508,51 @@ def shed(directory: Path) -> dict | None:
             high = (max(plane, outer), v1, u1) if axis == "x" else (u1, v1, max(plane, outer))
             walls += _box(low, high)
     parts.append(("STRUCT_SHED_WALLS", walls))
+
+    door_pose = None
+    if shed_door is not None:
+        portal, opening = shed_door
+        plane_data, rect = portal["plane"], portal["rect"]
+        if plane_data["axis"] != "x":
+            raise layout_io.LayoutError("shed door must be in one of the two gable-end X walls")
+        plane = float(plane_data["value"])
+        outer = ox0 if abs(plane - ix0) < abs(plane - ix1) else ox1
+        middle = (plane + outer) / 2.0
+        hu0, hu1 = (float(value) for value in rect["u"])
+        hv0, hv1 = (floor + float(value) for value in rect["v"])
+        leaf_data = opening.get("leaf") or {}
+        width = min(float(leaf_data.get("width") or hu1 - hu0), hu1 - hu0)
+        height = min(float(leaf_data.get("height") or hv1 - hv0), hv1 - hv0)
+        thickness = float(leaf_data.get("thickness") or 0.05)
+        lu0 = (hu0 + hu1 - width) / 2.0
+        lu1 = lu0 + width
+        # Looking into EXT_SHED through its east wall, authored left is the high-Z jamb. The
+        # positive local rotation carries the free edge west, into the shed.
+        owner_on_low_x = abs(plane - ix0) < abs(plane - ix1)
+        left = lu0 if owner_on_low_x else lu1
+        hinge = left if opening.get("hinge") == "left" else (lu1 if left == lu0 else lu0)
+        angle = math.radians(float(opening.get("maxAngleDeg") or 0.0)) \
+            * max(0.0, min(1.0, float(opening.get("openFraction") or 0.0)))
+        normal_sign = 1.0 if owner_on_low_x else -1.0
+        delta_sign = 1.0 if hinge == lu0 else -1.0
+        signed_angle = normal_sign * delta_sign * angle
+        cosine, sine = math.cos(signed_angle), math.sin(signed_angle)
+
+        def pose_point(x, y, z):
+            across, normal = z - hinge, x - middle
+            return (middle + across * sine + normal * cosine, y,
+                    hinge + across * cosine - normal * sine)
+
+        def pose_normal(x, y, z):
+            return (z * sine + x * cosine, y, z * cosine - x * sine)
+
+        closed = _box((middle - thickness / 2.0, hv0, lu0),
+                      (middle + thickness / 2.0, hv0 + height, lu1))
+        posed = _transform_faces(closed, pose_point, pose_normal)
+        parts.append(("STRUCT_SHED_DOOR", posed))
+        end = pose_point(middle, hv0, lu0 if hinge == lu1 else lu1)
+        door_pose = {"id": opening["id"], "hinge": (middle, hv0, hinge),
+                     "freeEdge": end, "openFraction": float(opening["openFraction"])}
 
     slab = _box((ox0, floor - 0.10, oz0), (ox1, floor, oz1))
     parts.append(("STRUCT_SHED_FLOOR", slab))
@@ -484,6 +587,7 @@ def shed(directory: Path) -> dict | None:
         "interior": (ix1 - ix0) * (iz1 - iz0),
         "eaves": eaves,
         "ridge": ridge,
+        "doorPose": door_pose,
         "bounds": (min(p[0] for p in points), min(p[1] for p in points), min(p[2] for p in points),
                    max(p[0] for p in points), max(p[1] for p in points), max(p[2] for p in points)),
     }
@@ -802,7 +906,9 @@ def _gate_document(gate: dict) -> tuple[dict, bytes]:
     moving = {"pivot": [round(value, 4) for value in gate["pivot"]],
               "gateKind": gate["kind"],
               "interactable": gate["interactable"],
-              "width": round(gate["width"], 4)}
+              "width": round(gate["width"], 4),
+              "openFraction": gate["openFraction"],
+              "staticPose": True}
     if gate["travel"] is not None:
         moving["travel"] = [round(value, 4) for value in gate["travel"]]
     else:
@@ -1023,17 +1129,17 @@ def selftest() -> int:
     fits = []
     for gate, row in zip(hung, rows):
         opening = row["opening"]
-        if (gate["leafBounds"][0] < float(opening["x"][0]) - 1e-6
-                or gate["leafBounds"][3] > float(opening["x"][1]) + 1e-6):
-            fits.append((gate["id"], round(gate["leafBounds"][0], 3),
-                         round(gate["leafBounds"][3], 3)))
+        if (gate["closedLeafBounds"][0] < float(opening["x"][0]) - 1e-6
+                or gate["closedLeafBounds"][3] > float(opening["x"][1]) + 1e-6):
+            fits.append((gate["id"], round(gate["closedLeafBounds"][0], 3),
+                         round(gate["closedLeafBounds"][3], 3)))
     require(not fits,
             f"and each LEAF fills its own opening and no more, so it cannot foul the fence it "
             f"hangs in. The bounds of the whole gate are wider on purpose: a hinge strap is "
             f"screwed to the post outside the opening, and the sliding gate's track has to reach "
             f"as far as the leaf travels ({fits})")
     gaps = [round(float(row["opening"]["x"][1]) - float(row["opening"]["x"][0])
-                  - (gate["leafBounds"][3] - gate["leafBounds"][0]), 4)
+                  - (gate["closedLeafBounds"][3] - gate["closedLeafBounds"][0]), 4)
             for gate, row in zip(hung, rows)]
     require(all(gap >= 2 * GATE_GAP - 1e-6 for gap in gaps),
             f"with a {GATE_GAP * 1000:.0f} mm gap at each side, which is what lets it swing "
@@ -1043,8 +1149,8 @@ def selftest() -> int:
     sliding = [gate for gate in hung if gate["travel"] is not None]
     require(len(swinging) == 2 and len(sliding) == 1,
             "two swing and one slides, which is §11.2's own arrangement")
-    hinged_at = [(gate["id"], min(abs(gate["pivot"][0] - gate["leafBounds"][0]),
-                                  abs(gate["pivot"][0] - gate["leafBounds"][3])),
+    hinged_at = [(gate["id"], min(abs(gate["pivot"][0] - gate["closedLeafBounds"][0]),
+                                  abs(gate["pivot"][0] - gate["closedLeafBounds"][3])),
                   gate["hinge"]) for gate in swinging]
     require(all(offset < 0.05 for _id, offset, _side in hinged_at),
             f"a swinging leaf's pivot is at ONE of its two stiles and not at its middle "
@@ -1053,7 +1159,7 @@ def selftest() -> int:
     wrong_side = [(gate_id, gate["hinge"], round(gate["pivot"][0], 2))
                   for gate_id, gate in authored.items()
                   if (gate["hinge"] in ("east", "north"))
-                  != (abs(gate["pivot"][0] - gate["leafBounds"][3]) < 1e-6)]
+                  != (abs(gate["pivot"][0] - gate["closedLeafBounds"][3]) < 1e-6)]
     described = ", ".join(f"{gate_id} on its {gate['hinge']} stile"
                           for gate_id, gate in authored.items())
     require(authored and not wrong_side,
@@ -1061,6 +1167,16 @@ def selftest() -> int:
     require(all(abs(abs(gate["travel"][0]) - gate["width"]) < 1e-6 for gate in sliding),
             f"and the sliding gate travels its own width -- {sliding[0]['width']:.1f} m of "
             f"opening, {abs(sliding[0]['travel'][0]):.1f} m of travel")
+    by_kind = {gate["kind"]: gate for gate in hung}
+    require(by_kind["hinged"]["leafBounds"][2] < -0.70
+            and by_kind["hinged"]["leafBounds"][3]
+            - by_kind["hinged"]["leafBounds"][0] < 0.35,
+            "the pedestrian leaf is rotated about its east hinge and rests open into the property")
+    drive_opening = next(row["opening"] for row in rows if row["kind"] == "sliding")
+    require(by_kind["sliding"]["leafBounds"][3] <= float(drive_opening["x"][0]) + 1e-6,
+            "and the driveway leaf is translated fully clear of its opening")
+    require(by_kind["bolted"]["leafBounds"] == by_kind["bolted"]["closedLeafBounds"],
+            "while the non-traversal rear gate remains at its authored closed pose")
 
     document, _blob = _gate_document(hung[0])
     gate_slot = document["materials"][0]
@@ -1097,6 +1213,11 @@ def selftest() -> int:
         structure = ((layout.get("exterior") or {}).get("structures") or [])[0]
         cell = next(one for one in layout_io.rows(layout, "cells") if one["id"] == built["cell"])
         box = cell["boxes"][0]
+        pose = built["doorPose"]
+        require(pose is not None and pose["openFraction"] >= 0.85
+                and pose["freeEdge"][0] < pose["hinge"][0] - 0.70,
+                "and its door rotates about the authored hinge into the shed, leaving the route "
+                "visibly open")
         interior = (float(box["x"][1]) - float(box["x"][0])) * (float(box["z"][1]) - float(box["z"][0]))
         require(abs(built["interior"] - interior) < 1e-6 and built["cell"] == structure["cell"],
                 f"and it is built from the CELL a body stands in ({interior:.2f} m² of floor) "

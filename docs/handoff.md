@@ -1,3 +1,39 @@
+# Content handoff — 2026-09-22 (`HOUSE-03222` static leaf geometry)
+
+`HOUSE-03222` is complete. The shell generator now rotates every hinged leaf and all of its
+selected panel/hardware detail rigidly about the authored hinge, translates sliding sashes, and
+places the fully open sectional garage leaf under the garage head. `fence_gen.py` applies the same
+static fractions to the pedestrian gate, sliding drive gate, closed rear exception and shed door.
+No interaction framework or runtime door behaviour was added.
+
+The old two-cell closed-leaf duplication is gone. Each of the 63 wall doors has exactly one leaf,
+owned by the cell it swings into; both adjacent cells retain casing, threshold and reveal lining.
+`verify_shell.py` independently reconstructs expected hinge/translation geometry and reports 63/63
+correct, no duplicates and no neighbouring-wall intersection. The detailed entry, double-door and
+garage joinery/material roles survive their transforms. The one non-wall door is the garden shed,
+verified by the fence generator. The shell provenance manifest was regenerated.
+
+The rebuilt runtime world has 740 chunks over 96 cells. Every existing chunk ceiling holds and no
+exception changed. The final `house-03222-static-leaves-final` clear-day set captured 56 fixed
+views across all eleven zones. Inspection confirms posed leaves on B1, L0, L1, L2 and L3, open
+garage and exterior routes, and no leaf-caused S1/S2 or clear-colour hole. Dark and empty rooms in
+the basement and upper floors are the already-recorded C1 breadth backlog from `HOUSE-03203`, not
+a defect to hide with premature furnishing or lighting here.
+
+Rule that chose this task: M1 dependency order and R1/G1. It advances the house-wide traversal
+defect shared by every zone. Verification temporarily required the independent `HOUSE-03224`
+aperture task first after the initial captures proved that drawn-open leaves with runtime-shut
+portals expose culling holes; that task is commit `173cfe8`. Next is `HOUSE-03223`, posed-leaf
+collision, then `HOUSE-03225` and the Grand Tour path.
+
+Validation: shell/fence generator selftests pass; lightmap unwrap succeeds; shell verification
+passes its allowlisted production suite (the long-standing fridge-interior cut remains its sole
+reported exception); chunk selftests and full budget report pass; all-zone capture completes.
+Compilation remained limited to four CPU cores. The pre-existing staged
+`docs/visual-review/README.md` remains outside this task's commit.
+
+---
+
 # Visibility handoff — 2026-09-22 (`HOUSE-03224` static portal apertures)
 
 `HOUSE-03224` is complete. `WorldLoader` reads the authored static `openFraction`, rejects values

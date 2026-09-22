@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -55,6 +56,13 @@ EPS = 1e-4
 #: `HOUSE-00930`. `HOUSE-00949` measures a glazed slider separately from its panes and meeting
 #: stile, so an empty opening cannot pass just because it has a casing.
 DOOR_LEAF_SURFACE_CLASSES = ("trim", "exterior_door")
+# Kept independent of the generator on purpose: this verifier is the second implementation that
+# catches a bad transform rather than accepting the generator's own answer.  They are ordinary
+# joinery dimensions documented beside the matching generator constants.
+DOUBLE_DOOR_CENTER_GAP = 0.008
+SLIDER_FRAME_SECTION = 0.055
+SLIDER_SASH_SECTION = 0.045
+SLIDER_MEETING_OVERLAP = 0.045
 
 
 def load_shell(directory: Path) -> dict:
@@ -355,35 +363,146 @@ def headroom_rows(shell: dict, layout: dict) -> list[dict]:
     return rows
 
 
-def slider_glazing_present(surfaces: dict, axis: int, cross: int, value: float,
-                           u0: float, u1: float, v0: float, v1: float) -> bool:
-    """A slider has both full-height glass panels and a physical meeting stile.
+def _door_owner(opening: dict, portal: dict, cells: dict) -> str | None:
+    """Independently derive the one chunk that must own a static leaf."""
+    sides = (portal.get("cellA"), portal.get("cellB"))
+    if opening.get("swing") in sides:
+        return opening["swing"]
+    interior = sorted(cell_id for cell_id in sides
+                      if cell_id and (cells.get(cell_id) or {}).get("kind") != "exterior")
+    return interior[0] if interior else next((cell_id for cell_id in sides if cell_id), None)
 
-    Door casings, thresholds and a lonely narrow lite do not satisfy this closed-leaf claim.
-    This examines the projected triangle dimensions and two interior samples, not the opening's
-    type string alone; removing either pane or the centre sash breaks the shell gate.
-    """
-    def covers(klass: str, sample_u: float, min_width: float, max_width: float) -> bool:
+
+def _wall_side(cell: dict, axis: int, value: float) -> str | None:
+    """The closest authored cell boundary to an opening plane."""
+    choices = []
+    for box in layout_io.cell_boxes(cell):
+        if axis == 0:
+            choices.extend(((abs(value - box[0]), "-X"), (abs(value - box[1]), "+X")))
+        else:
+            choices.extend(((abs(value - box[2]), "-Z"), (abs(value - box[3]), "+Z")))
+    return min(choices)[1] if choices else None
+
+
+def _segment_present(surfaces: dict, classes, axis: int, cross: int,
+                     start: tuple[float, float], end: tuple[float, float],
+                     v0: float, v1: float) -> bool:
+    """Does a tall, broad drawn face follow the expected leaf centre line?"""
+    du, dd = end[0] - start[0], end[1] - start[1]
+    length = math.hypot(du, dd)
+    if length < 1e-6:
+        return False
+    for klass in classes:
         mesh = surfaces.get(klass)
         if mesh is None:
-            return False
-        sample_v = v0 + (v1 - v0) * 2.0 / 3.0
-        for a, b, c in mesh["triangles"]:
-            points = [mesh["positions"][i] for i in (a, b, c)]
-            if min(abs(p[axis] - value) for p in points) > 0.35:
+            continue
+        for triangle in mesh["triangles"]:
+            points = [mesh["positions"][index] for index in triangle]
+            if max(point[1] for point in points) - min(point[1] for point in points) \
+                    < max(0.35, (v1 - v0) * 0.22):
                 continue
-            lo_u, hi_u = min(p[cross] for p in points), max(p[cross] for p in points)
-            lo_v, hi_v = min(p[1] for p in points), max(p[1] for p in points)
-            if (lo_u < sample_u < hi_u and lo_v < sample_v < hi_v
-                    and min_width < hi_u - lo_u < max_width
-                    and hi_v - lo_v > 1.2):
+            projections = []
+            distances = []
+            for point in points:
+                u, depth = point[cross], point[axis]
+                projections.append(((u - start[0]) * du + (depth - start[1]) * dd)
+                                   / (length * length))
+                distances.append(abs((u - start[0]) * dd - (depth - start[1]) * du)
+                                 / length)
+            if (min(projections) <= 0.18 and max(projections) >= 0.82
+                    and max(distances) <= 0.12):
                 return True
-        return False
+    return False
 
-    width = u1 - u0
-    return (covers("window_glass", u0 + width * 0.25, 0.5, width)
-            and covers("window_glass", u0 + width * 0.75, 0.5, width)
-            and covers("slider_frame", (u0 + u1) / 2.0, 0.001, 0.12))
+
+def _hinged_segments(opening: dict, portal: dict, owner: dict,
+                     axis: int) -> list[tuple[tuple[float, float], tuple[float, float]]]:
+    """Expected plan-view centre lines as ``((hinge_u, depth), (free_u, depth))``."""
+    rect = portal["rect"]
+    hu0, hu1 = (float(value) for value in rect["u"])
+    plane = float(portal["plane"]["value"])
+    leaf = opening.get("leaf") or {}
+    width = min(float(leaf.get("width") or hu1 - hu0), hu1 - hu0)
+    side = _wall_side(owner, axis, plane)
+    if side is None:
+        return []
+    angle = math.radians(float(opening.get("maxAngleDeg") or 0.0)) \
+        * float(opening.get("openFraction") or 0.0)
+    normal_sign = 1.0 if side in ("-X", "-Z") else -1.0
+    if opening.get("type") == "D_DOUBLE":
+        width = min(width, ((hu1 - hu0) - DOUBLE_DOOR_CENTER_GAP) / 2.0)
+        span = 2.0 * width + DOUBLE_DOOR_CENTER_GAP
+        pair_lo = (hu0 + hu1 - span) / 2.0
+        pair_hi = pair_lo + span
+        poses = ((pair_lo, pair_lo + width, normal_sign * angle),
+                 (pair_hi, pair_hi - width, -normal_sign * angle))
+    else:
+        lu0 = (hu0 + hu1) / 2.0 - width / 2.0
+        lu1 = lu0 + width
+        left = lu0 if side in ("-X", "+Z") else lu1
+        hinge = left if opening.get("hinge") == "left" else (lu1 if left == lu0 else lu0)
+        free = lu1 if hinge == lu0 else lu0
+        delta_sign = 1.0 if hinge == lu0 else -1.0
+        poses = ((hinge, free, normal_sign * delta_sign * angle),)
+    return [((hinge, plane),
+             (hinge + (free - hinge) * math.cos(signed_angle),
+              plane + (free - hinge) * math.sin(signed_angle)))
+            for hinge, free, signed_angle in poses]
+
+
+def _slider_segments(opening: dict, portal: dict) -> list[tuple[tuple[float, float],
+                                                                  tuple[float, float]]]:
+    """Expected fixed and translated glass widths, independently of the generator."""
+    rect = portal["rect"]
+    hu0, hu1 = (float(value) for value in rect["u"])
+    v0, v1 = (float(value) for value in rect["v"])
+    plane = float(portal["plane"]["value"])
+    width, height = hu1 - hu0, v1 - v0
+    frame = min(SLIDER_FRAME_SECTION, width * 0.04, height * 0.04)
+    sash = min(SLIDER_SASH_SECTION, width * 0.035, height * 0.035)
+    inner_u0, inner_u1 = hu0 + frame, hu1 - frame
+    centre = (inner_u0 + inner_u1) / 2.0
+    overlap = min(SLIDER_MEETING_OVERLAP, (inner_u1 - inner_u0) * 0.08)
+    travel = (inner_u1 - inner_u0) / 2.0 \
+        * max(0.0, min(1.0, float(opening.get("openFraction") or 0.0)))
+    return [((inner_u0 + sash, plane), (centre + overlap - sash, plane)),
+            ((centre - overlap + sash - travel, plane),
+             (inner_u1 - sash - travel, plane))]
+
+
+def _garage_pose_present(surfaces: dict, axis: int, cross: int, portal: dict) -> bool:
+    """A fully open sectional leaf is broad in U and deep under its header."""
+    mesh = surfaces.get("exterior_door")
+    if mesh is None:
+        return False
+    rect = portal["rect"]
+    u0, u1 = (float(value) for value in rect["u"])
+    v0, v1 = (float(value) for value in rect["v"])
+    width, height = u1 - u0, v1 - v0
+    for triangle in mesh["triangles"]:
+        points = [mesh["positions"][index] for index in triangle]
+        if (max(point[cross] for point in points) - min(point[cross] for point in points)
+                >= width * 0.70
+                and max(point[axis] for point in points) - min(point[axis] for point in points)
+                >= height * 0.70
+                and max(abs(point[1] - v1) for point in points) <= 0.12):
+            return True
+    return False
+
+
+def _inside_owner(segments, owner: dict, axis: int) -> bool:
+    """The swept-to static centre line stays in its swing cell after leaving the jamb."""
+    boxes = layout_io.cell_boxes(owner)
+    for start, end in segments:
+        for index in range(1, 11):
+            fraction = index / 10.0
+            u = start[0] + (end[0] - start[0]) * fraction
+            depth = start[1] + (end[1] - start[1]) * fraction
+            x, z = (depth, u) if axis == 0 else (u, depth)
+            if not any(box[0] - 0.02 <= x <= box[1] + 0.02
+                       and box[2] - 0.02 <= z <= box[3] + 0.02 for box in boxes):
+                return False
+    return True
 
 
 def opening_rows(shell: dict, layout: dict) -> list[dict]:
@@ -394,6 +513,7 @@ def opening_rows(shell: dict, layout: dict) -> list[dict]:
     the middle, which is why the corners are checked too and reported separately.
     """
     portals = layout_io.by_id(layout_io.rows(layout, "portals"), "portal")
+    cells = layout_io.by_id(layout_io.rows(layout, "cells"), "cell")
     rows = []
     for opening in sorted(layout_io.rows(layout, "openings"), key=lambda o: o["id"]):
         portal = portals.get(opening.get("portal"))
@@ -428,41 +548,26 @@ def opening_rows(shell: dict, layout: dict) -> list[dict]:
                     if lo_u < mid_u < hi_u and lo_v < mid_v < hi_v:
                         blocked.append((cell_id, name))
                         break
-        # `HOUSE-00486`: and the LEAF, which is the opposite question. `blocked` asks whether the
-        # wall was cut; this asks whether what was cut was then filled with a door. A leaf is
-        # An opaque interior leaf is `trim`; a weather-facing one has `exterior_door`. A slider
-        # is a different closed form: two broad panes and a meeting stile. Its empty centre
-        # between panels must not be mistaken for a missing opaque slab.
-        leafed = []
-        for cell_id in (portal.get("cellA"), portal.get("cellB")):
-            surfaces = shell.get(cell_id) or {}
-            if opening.get("type") == "D_SLIDER":
-                if slider_glazing_present(surfaces, axis, cross, value, u0, u1, v0, v1):
-                    leafed.append(cell_id)
-                continue
-            found_leaf = False
-            for name in DOOR_LEAF_SURFACE_CLASSES:
-                mesh = surfaces.get(name)
-                if mesh is None:
-                    continue
-                for a, b, c in mesh["triangles"]:
-                    points = [mesh["positions"][a], mesh["positions"][b], mesh["positions"][c]]
-                    if min(abs(p[axis] - value) for p in points) > 0.35:
-                        continue
-                    lo_u = min(p[cross] for p in points)
-                    hi_u = max(p[cross] for p in points)
-                    lo_v = min(p[1] for p in points)
-                    hi_v = max(p[1] for p in points)
-                    mid_u = (u0 + u1) / 2
-                    # Two thirds up the opening: clear of the threshold under it and of the head
-                    # above, so only a face that crosses the doorway itself can be here.
-                    mid_v = v0 + (v1 - v0) * 2.0 / 3.0
-                    if lo_u < mid_u < hi_u and lo_v < mid_v < hi_v:
-                        leafed.append(cell_id)
-                        found_leaf = True
-                        break
-                if found_leaf:
-                    break
+        owner = _door_owner(opening, portal, cells) if opening.get("kind") == "door" else None
+        segments = []
+        if owner and opening.get("type") == "D_SLIDER":
+            segments = _slider_segments(opening, portal)
+        elif owner and opening.get("type") != "D_GARAGE":
+            segments = _hinged_segments(opening, portal, cells.get(owner) or {}, axis)
+        posed = []
+        if owner:
+            for cell_id in (portal.get("cellA"), portal.get("cellB")):
+                surfaces = shell.get(cell_id) or {}
+                if opening.get("type") == "D_GARAGE":
+                    present = _garage_pose_present(surfaces, axis, cross, portal)
+                else:
+                    classes = (("window_glass",) if opening.get("type") == "D_SLIDER"
+                               else DOOR_LEAF_SURFACE_CLASSES + ("glass",))
+                    present = bool(segments) and all(
+                        _segment_present(surfaces, classes, axis, cross, start, end, v0, v1)
+                        for start, end in segments)
+                if present:
+                    posed.append(cell_id)
         # Which of the two cells could POSSIBLY build a leaf: one that draws walls. A landing
         # open on every side has a floor and a ceiling and nothing else, and an opening in a
         # boundary neither cell walls is an opening nobody can fill.
@@ -498,7 +603,13 @@ def opening_rows(shell: dict, layout: dict) -> list[dict]:
                      "joinery": sorted(cell_id for cell_id in (portal.get("cellA"),
                                                                portal.get("cellB"))
                                        if (shell.get(cell_id) or {}).get("trim")),
-                     "leafed": sorted(set(leafed))})
+                     "owner": owner,
+                     "posed": sorted(set(posed)),
+                     "wallClear": (None if not owner or opening.get("type") == "D_GARAGE"
+                                   else _inside_owner(segments, cells.get(owner) or {}, axis)),
+                     # Compatibility for report consumers: a leaf is now one whose authored pose
+                     # was measured, not merely a face across the closed opening.
+                     "leafed": sorted(set(posed))})
     return rows
 
 
@@ -664,6 +775,13 @@ def problems(heights, stairs, headroom, openings) -> list[str]:
         if row["blocked"]:
             out.append(f"{row['opening']}: not cut in "
                        f"{', '.join(f'{c}.{n}' for c, n in row['blocked'])}")
+        if row.get("kind") != "door" or not row.get("walled"):
+            continue
+        if row.get("posed") != [row.get("owner")]:
+            out.append(f"{row['opening']}: static leaf belongs to {row.get('posed')}, expected "
+                       f"only {row.get('owner')}")
+        if row.get("wallClear") is False:
+            out.append(f"{row['opening']}: static leaf intersects or leaves its swing room")
     return out
 
 
@@ -695,9 +813,9 @@ def report(result: dict) -> str:
     cut = [row for row in result["openings"] if not row["blocked"]]
     lines.append(f"  {len(cut)} of {len(result['openings'])} authored opening(s) are cut")
     doors = [row for row in result["openings"] if row["kind"] == "door" and not row["blocked"]]
-    two_sided = [row for row in doors if len(row["leafed"]) >= 2]
-    lines.append(f"  {len([row for row in doors if row['leafed']])} of {len(doors)} cut door "
-                 f"opening(s) have a leaf, {len(two_sided)} of them from both sides")
+    owned = [row for row in doors if row.get("posed") == [row.get("owner")]]
+    lines.append(f"  {len(owned)} of {len(doors)} cut door opening(s) have exactly one leaf in "
+                 f"their authored static pose")
     triangles = result.get("triangles") or []
     if triangles:
         by_level: dict[str, int] = {}
@@ -857,8 +975,11 @@ def selftest() -> int:
         for name, count in row["byClass"].items():
             classes[name] = classes.get(name, 0) + count
     biggest = max(classes.items(), key=lambda pair: pair[1])
-    require(biggest[0] == "trim" and biggest[1] * 2 > total,
-            f"and MORE THAN HALF of it is `{biggest[0]}` -- {biggest[1]} of {total} triangles, "
+    # One posed leaf rather than two closed copies deliberately removed about 3,000 trim
+    # triangles in HOUSE-03222. Joinery must remain the dominant detail class, but being one
+    # triangle either side of 50% is no longer a meaningful quality boundary.
+    require(biggest[0] == "trim" and biggest[1] * 100 >= total * 45,
+            f"and at least 45% of it is `{biggest[0]}` -- {biggest[1]} of {total} triangles, "
             f"the skirtings, cornices, architraves, nosings and handrails §18.3 decided not to "
             f"lightmap ({sorted(classes.items(), key=lambda pair: -pair[1])[:3]})")
     require(all(row["triangles"] >= 0 for row in triangles)
@@ -884,18 +1005,23 @@ def selftest() -> int:
     require(len(cut) >= len(result["openings"]) - 1,
             f"{len(cut)} of the {len(result['openings'])} authored openings are holes in the shell")
 
-    # `HOUSE-00486`. A window is filled with glass and a doorway was filled with nothing, which was
-    # invisible until §25's culling stopped drawing the room behind a shut door (`HOUSE-00684`) and
-    # left the hole on screen. Both rooms build a leaf, in their own half of the reveal: one built
-    # once belongs to one cell's chunk, and that cell is exactly the one culling removes.
+    # `HOUSE-03222`: every shell door has exactly one leaf, in its authored static pose, owned by
+    # the room it swings into. This replaces `HOUSE-00486`'s duplicated closed slabs: they avoided
+    # culling holes but z-fought as soon as the doors became fixed open scenery.
     doors = [row for row in result["openings"] if row["kind"] == "door" and not row["blocked"]]
     require(doors, "there are door openings to check")
     # A leaf can only go in a wall, so the claim is about the doors whose boundary HAS one.
     fillable = [row for row in doors if row["walled"]]
-    leafless = [row["opening"] for row in fillable if not row["leafed"]]
-    require(not leafless,
-            f"every one of the {len(fillable)} door openings in a wall has a leaf in it "
-            f"({leafless[:4] if leafless else 'none missing'})")
+    wrong_pose = [row["opening"] for row in fillable
+                  if row.get("posed") != [row.get("owner")]]
+    require(not wrong_pose,
+            f"every one of the {len(fillable)} door openings in a wall has exactly one leaf, "
+            f"owned by its swing room and measured at its authored pose "
+            f"({wrong_pose[:4] if wrong_pose else 'none wrong'})")
+    wall_hits = [row["opening"] for row in fillable if row.get("wallClear") is False]
+    require(not wall_hits,
+            f"and every hinged/slider leaf stays inside its swing room rather than intersecting "
+            f"the neighbouring wall ({wall_hits[:4] if wall_hits else 'none intersect'})")
     exterior_leaf_cells = sorted(cell_id for cell_id, surfaces in shell.items()
                                  if "exterior_door" in surfaces)
     require(exterior_leaf_cells == ["L0_FOYER", "L0_GARAGE", "L1_LANDING"],
@@ -907,21 +1033,10 @@ def selftest() -> int:
             f"in. It was three until `HOUSE-00488`: the two balcony doors are in a landing, and a "
             f"landing that is `visibilityHint: open` used to draw no walls either "
             f"({[row['opening'] for row in doors if not row['walled']]})")
-    # Both sides, wherever both sides can have one: a leaf built once belongs to one cell's chunk,
-    # and §25 culls the room behind a shut door -- so the room in FRONT of it would be left looking
-    # at the hole, which is the bug this replaced.
-    both = [row for row in fillable
-            if len(row["walled"]) == 2 and len(set(row["walled"]) & set(row["joinery"])) == 2]
-    missing = [row["opening"] for row in both if len(row["leafed"]) != 2]
-    require(both and not missing,
-            f"and every one of the {len(both)} doors between two rooms that draw joinery has a "
-            f"leaf on BOTH sides ({missing[:3] if missing else 'none missing'})")
-    stairs_only = [row["opening"] for row in fillable
-                   if len(row["walled"]) == 2 and len(set(row["walled"]) & set(row["joinery"])) < 2]
-    require(not stairs_only,
-            f"and NONE has a leaf on one side only. Two did until `HOUSE-00488` -- the stair hall's,"
-            f" which drew no trim of any kind because an open cell drew no walls to hang it on "
-            f"({stairs_only})")
+    one_sided = [row for row in fillable if len(row.get("posed") or []) == 1]
+    require(len(one_sided) == len(fillable),
+            f"and none of those {len(fillable)} physical leaves is duplicated into the other "
+            f"cell's chunk ({len(one_sided)} are one-sided)")
 
     # THE SHELL IS NOT PERFECT, and this is where that is written down. `HOUSE-00480` is the task
     # that fixes what `HOUSE-00477`/`78`/`79` find; until it does, the list below is the exact set
@@ -967,35 +1082,26 @@ def selftest() -> int:
     require(not one("headroom", dict(flight="F", headroom=None, worst=None)),
             "nor a flight with nothing over it at all, which is not the same as no head-room")
 
-    require(one("openings", dict(opening="O", kind="door", width=0.9, height=2.0,
-                                 blocked=[("C", "wall")])),
+    base_opening = dict(opening="O", kind="window", width=0.9, height=2.0, walled=[])
+    require(one("openings", dict(base_opening, blocked=[("C", "wall")])),
             "an opening that was never cut is reported")
-    require(not one("openings", dict(opening="O", kind="door", width=0.9, height=2.0, blocked=[])),
+    require(not one("openings", dict(base_opening, blocked=[])),
             "...and one that was is not")
 
-    # `HOUSE-00949`: the slider is closed by two glazed panels, not by an opaque slab. A frame
-    # alone or a single remaining pane must not turn the old leaf-presence gate green.
+    # The pose detector needs a broad vertical face running from the hinge to the free edge. A
+    # casing at the hinge or a header across the opening cannot masquerade as that leaf.
     def quad(lo_u: float, hi_u: float, lo_v: float, hi_v: float) -> dict:
         return {"positions": [(lo_u, lo_v, 0.0), (hi_u, lo_v, 0.0),
                               (hi_u, hi_v, 0.0), (lo_u, hi_v, 0.0)],
                 "triangles": [(0, 1, 2), (0, 2, 3)]}
 
-    left = quad(0.10, 1.17, 0.10, 2.05)
-    right = quad(1.22, 2.30, 0.10, 2.05)
-    glazing = {"positions": left["positions"] + right["positions"],
-               "triangles": left["triangles"] +
-               [tuple(i + 4 for i in tri) for tri in right["triangles"]]}
-    meeting = quad(1.1775, 1.2225, 0.10, 2.05)
-    slider_surfaces = {"window_glass": glazing, "slider_frame": meeting}
-    def filled(surfaces: dict) -> bool:
-        return slider_glazing_present(surfaces, 2, 0, 0.0, 0.0, 2.4, 0.0, 2.15)
-
-    require(filled(slider_surfaces),
-            "two broad panes and a full-height meeting stile close a glazed slider")
-    require(not filled({"window_glass": left, "slider_frame": meeting}),
-            "but one missing pane cannot satisfy both halves of that opening")
-    require(not filled({"window_glass": glazing}),
-            "and two panes without their centre sash do not silently pass")
+    leaf = quad(0.0, 0.86, 0.0, 2.05)
+    casing = quad(0.0, 0.08, 0.0, 2.10)
+    expected = ((0.0, 0.0), (0.86, 0.0))
+    require(_segment_present({"trim": leaf}, ("trim",), 2, 0, *expected, 0.0, 2.10),
+            "a full-height leaf following its expected centre line is measured")
+    require(not _segment_present({"trim": casing}, ("trim",), 2, 0, *expected, 0.0, 2.10),
+            "but a jamb casing at its hinge cannot silently pass as the leaf")
 
     # And the measurement itself, where the injections found it silent.
     slabs = [(name, surfaces[name]) for surfaces in shell.values()

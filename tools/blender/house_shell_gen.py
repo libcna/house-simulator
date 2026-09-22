@@ -631,6 +631,43 @@ def window_owner(sides, cells_by_id: dict, fallback: str) -> str:
     return interior[0] if interior else fallback
 
 
+def door_owner(opening: dict, sides, cells_by_id: dict, fallback: str) -> str:
+    """The one cell whose shell owns a static door leaf.
+
+    Hinged rows author the room they swing into, which is also the only cell whose chunk may own
+    the posed slab.  Sliders and the sectional garage door have no swing room; those belong to the
+    first non-exterior side so an open patio unit never becomes lawn-resident.  The fallback keeps
+    small fixtures useful without silently producing two leaves.
+    """
+    swing = opening.get("swing")
+    if swing in (sides or ()):
+        return str(swing)
+    interior = sorted(identifier for identifier in sides or ()
+                      if identifier and (cells_by_id.get(identifier) or {}).get("kind")
+                      not in (None, "exterior"))
+    return interior[0] if interior else fallback
+
+
+def hinged_leaf_poses(side: str, hu0: float, hu1: float,
+                      opening: dict) -> list[tuple[float, float]]:
+    """``(hinge_u, signed_angle)`` for each leaf in a wall-local ``(u, depth)`` plane.
+
+    Positive depth runs in world +X/+Z.  The angle sign is derived from the current swing-cell
+    face, so the same authored ``left`` hinge opens into the named room on every wall orientation.
+    A double door is the one schedule entry whose two leaves are hinged at both outer jambs.
+    """
+    maximum = math.radians(float(opening.get("maxAngleDeg") or 0.0))
+    angle = maximum * float(opening.get("openFraction") or 0.0)
+    normal_sign = 1.0 if side in ("-X", "-Z") else -1.0
+    if opening.get("type") == "D_DOUBLE":
+        return [(hu0, normal_sign * angle), (hu1, -normal_sign * angle)]
+    left_is_low = side in ("-X", "+Z")
+    left = hu0 if left_is_low else hu1
+    hinge = left if opening.get("hinge") == "left" else (hu1 if left == hu0 else hu0)
+    delta_sign = 1.0 if hinge == hu0 else -1.0
+    return [(hinge, normal_sign * delta_sign * angle)]
+
+
 def minus(lo: float, hi: float, cuts) -> list[tuple[float, float]]:
     """`[lo, hi]` with @p cuts taken out of it, as the runs that are left."""
     out = []
@@ -873,13 +910,13 @@ def entry_door_detail_boxes(lu0: float, lu1: float, lv0: float, lv1: float,
 def double_door_boxes(hu0: float, hu1: float, lv0: float, lv1: float,
                       depth_lo: float, depth_hi: float, leaf_width: float,
                       translucent: bool):
-    """The two closed leaves, their millwork and hardware for one ``D_DOUBLE`` portal.
+    """Two leaves plus their millwork and hardware for one ``D_DOUBLE`` portal.
 
-    The returned tuples are ``(u0, u1, v0, v1, d0, d1, surface_class, part)``.  A translucent
-    portal receives framed glass rather than an opaque timber body; the portal already owns that
-    semantic distinction, so the generator does not infer glazing from a room name or duplicate
-    it in a new data flag.  Both faces carry relief/hardware because each adjacent cell owns its
-    own closed-shell representation until the phase-15 animated leaves replace it.
+    The returned tuples are ``(u0, u1, v0, v1, d0, d1, surface_class, part, leaf_index)``. A
+    translucent portal receives framed glass rather than an opaque timber body; the portal already
+    owns that semantic distinction, so the generator does not infer glazing from a room name or
+    duplicate it in a new data flag. Both faces carry relief/hardware because the posed leaves are
+    valid from either adjacent viewpoint.
     """
     opening_width = hu1 - hu0
     height = lv1 - lv0
@@ -894,28 +931,30 @@ def double_door_boxes(hu0: float, hu1: float, lv0: float, lv1: float,
               (pair_lo + width + DOUBLE_DOOR_CENTER_GAP, pair_lo + pair_width))
     boxes = []
 
-    def box(u0, u1, v0, v1, d0, d1, klass, part):
+    def box(u0, u1, v0, v1, d0, d1, klass, part, leaf_index):
         if u1 - u0 > 1e-9 and v1 - v0 > 1e-9 and d1 - d0 > 1e-9:
-            boxes.append((u0, u1, v0, v1, d0, d1, klass, part))
+            boxes.append((u0, u1, v0, v1, d0, d1, klass, part, leaf_index))
 
-    def both_faces(u0, u1, v0, v1, klass, part, projection):
-        box(u0, u1, v0, v1, depth_lo - projection, depth_lo, klass, part)
-        box(u0, u1, v0, v1, depth_hi, depth_hi + projection, klass, part)
+    def both_faces(u0, u1, v0, v1, klass, part, projection, leaf_index):
+        box(u0, u1, v0, v1, depth_lo - projection, depth_lo, klass, part, leaf_index)
+        box(u0, u1, v0, v1, depth_hi, depth_hi + projection, klass, part, leaf_index)
 
     for leaf_index, (u0, u1) in enumerate(leaves):
         if translucent:
             rail = min(DOUBLE_DOOR_GLAZED_RAIL, width * 0.12, height * 0.05)
             middle = lv0 + height * 0.43
-            box(u0, u0 + rail, lv0, lv1, depth_lo, depth_hi, "trim", "glazed_stile")
-            box(u1 - rail, u1, lv0, lv1, depth_lo, depth_hi, "trim", "glazed_stile")
+            box(u0, u0 + rail, lv0, lv1, depth_lo, depth_hi,
+                "trim", "glazed_stile", leaf_index)
+            box(u1 - rail, u1, lv0, lv1, depth_lo, depth_hi,
+                "trim", "glazed_stile", leaf_index)
             box(u0 + rail, u1 - rail, lv0, lv0 + rail,
-                depth_lo, depth_hi, "trim", "glazed_rail")
+                depth_lo, depth_hi, "trim", "glazed_rail", leaf_index)
             box(u0 + rail, u1 - rail, lv1 - rail, lv1,
-                depth_lo, depth_hi, "trim", "glazed_rail")
+                depth_lo, depth_hi, "trim", "glazed_rail", leaf_index)
             box(u0 + rail, u1 - rail,
                 middle - DOUBLE_DOOR_GLAZED_MID_RAIL / 2.0,
                 middle + DOUBLE_DOOR_GLAZED_MID_RAIL / 2.0,
-                depth_lo, depth_hi, "trim", "glazed_mid_rail")
+                depth_lo, depth_hi, "trim", "glazed_mid_rail", leaf_index)
             glass_depth = (depth_lo + depth_hi) / 2.0
             for pane_v0, pane_v1 in (
                     (lv0 + rail, middle - DOUBLE_DOOR_GLAZED_MID_RAIL / 2.0),
@@ -923,9 +962,9 @@ def double_door_boxes(hu0: float, hu1: float, lv0: float, lv1: float,
                 box(u0 + rail, u1 - rail, pane_v0, pane_v1,
                     glass_depth - DOUBLE_DOOR_GLASS_THICK / 2.0,
                     glass_depth + DOUBLE_DOOR_GLASS_THICK / 2.0,
-                    "glass", "glazed_pane")
+                    "glass", "glazed_pane", leaf_index)
         else:
-            box(u0, u1, lv0, lv1, depth_lo, depth_hi, "trim", "leaf")
+            box(u0, u1, lv0, lv1, depth_lo, depth_hi, "trim", "leaf", leaf_index)
             moulding = min(DOUBLE_DOOR_PANEL_MOULDING, width * 0.07, height * 0.030)
             panel_u0, panel_u1 = u0 + width * 0.13, u1 - width * 0.13
             for panel_v0, panel_v1 in (
@@ -933,16 +972,16 @@ def double_door_boxes(hu0: float, hu1: float, lv0: float, lv1: float,
                     (lv0 + height * 0.44, lv0 + height * 0.91)):
                 both_faces(panel_u0, panel_u1, panel_v0, panel_v0 + moulding,
                            "interior_door_panel", "panel_moulding",
-                           DOUBLE_DOOR_PANEL_RELIEF)
+                           DOUBLE_DOOR_PANEL_RELIEF, leaf_index)
                 both_faces(panel_u0, panel_u1, panel_v1 - moulding, panel_v1,
                            "interior_door_panel", "panel_moulding",
-                           DOUBLE_DOOR_PANEL_RELIEF)
+                           DOUBLE_DOOR_PANEL_RELIEF, leaf_index)
                 both_faces(panel_u0, panel_u0 + moulding, panel_v0 + moulding,
                            panel_v1 - moulding, "interior_door_panel", "panel_moulding",
-                           DOUBLE_DOOR_PANEL_RELIEF)
+                           DOUBLE_DOOR_PANEL_RELIEF, leaf_index)
                 both_faces(panel_u1 - moulding, panel_u1, panel_v0 + moulding,
                            panel_v1 - moulding, "interior_door_panel", "panel_moulding",
-                           DOUBLE_DOOR_PANEL_RELIEF)
+                           DOUBLE_DOOR_PANEL_RELIEF, leaf_index)
 
         # The active leaf has working passage hardware and the inactive leaf has the matching
         # dummy set common on formal paired doors.  Besides being honest joinery, the two meeting-
@@ -954,7 +993,7 @@ def double_door_boxes(hu0: float, hu1: float, lv0: float, lv1: float,
                    handle_u + DOUBLE_DOOR_BACKPLATE_WIDTH / 2.0,
                    handle_v - DOUBLE_DOOR_BACKPLATE_HEIGHT / 2.0,
                    handle_v + DOUBLE_DOOR_BACKPLATE_HEIGHT / 2.0,
-                   "metal", "backplate", DOUBLE_DOOR_PANEL_RELIEF + 0.007)
+                   "metal", "backplate", DOUBLE_DOOR_PANEL_RELIEF + 0.007, leaf_index)
         lever_u0 = (handle_u - DOUBLE_DOOR_LEVER_LENGTH + 0.015
                     if leaf_index == 0 else handle_u - 0.015)
         lever_u1 = (handle_u + 0.015
@@ -962,25 +1001,25 @@ def double_door_boxes(hu0: float, hu1: float, lv0: float, lv1: float,
         both_faces(lever_u0, lever_u1,
                    handle_v - DOUBLE_DOOR_LEVER_HEIGHT / 2.0,
                    handle_v + DOUBLE_DOOR_LEVER_HEIGHT / 2.0,
-                   "metal", "lever", DOUBLE_DOOR_HARDWARE_PROJECTION)
+                   "metal", "lever", DOUBLE_DOOR_HARDWARE_PROJECTION, leaf_index)
 
     # The inactive leaf carries a slim astragal over the centre clearance.  It is shallow and
     # timber-finished, so the two actual leaves still read separately without a view-through slit.
     centre = (hu0 + hu1) / 2.0
     both_faces(centre - DOUBLE_DOOR_ASTRAGAL / 2.0,
                centre + DOUBLE_DOOR_ASTRAGAL / 2.0,
-               lv0, lv1, "trim", "astragal", DOUBLE_DOOR_PANEL_RELIEF * 0.5)
+               lv0, lv1, "trim", "astragal", DOUBLE_DOOR_PANEL_RELIEF * 0.5, 1)
     return boxes
 
 
 def sliding_door_boxes(lu0: float, lu1: float, lv0: float, lv1: float,
-                       depth_lo: float, depth_hi: float):
-    """A closed two-panel aluminium slider with real glass and a two-sided pull.
+                       depth_lo: float, depth_hi: float, open_fraction: float = 0.0):
+    """A two-panel aluminium slider with its moving sash translated to the static pose.
 
     Tuples are ``(u0, u1, v0, v1, d0, d1, surface_class, part)``. The fixed and moving panels
     overlap at the meeting stile and occupy two shallow tracks, which makes their construction
-    readable from either side without changing the authored aperture, leaf envelope or future
-    phase-15 animation contract.
+    readable from either side. ``open_fraction`` moves the high-U sash over the fixed low-U sash;
+    the perimeter and track remain in the opening.
     """
     width = lu1 - lu0
     height = lv1 - lv0
@@ -1013,8 +1052,9 @@ def sliding_door_boxes(lu0: float, lu1: float, lv0: float, lv1: float,
 
     centre = (inner_u0 + inner_u1) / 2.0
     overlap = min(SLIDER_MEETING_OVERLAP, (inner_u1 - inner_u0) * 0.08)
+    travel = (inner_u1 - inner_u0) / 2.0 * max(0.0, min(1.0, open_fraction))
     panels = ((inner_u0, centre + overlap / 2.0, -1.0, "fixed"),
-              (centre - overlap / 2.0, inner_u1, 1.0, "moving"))
+              (centre - overlap / 2.0 - travel, inner_u1 - travel, 1.0, "moving"))
     depth_centre = (depth_lo + depth_hi) / 2.0
     sash_depth = min(SLIDER_SASH_DEPTH, depth * 0.40)
     track_offset = min(SLIDER_TRACK_OFFSET, max(0.0, (depth - sash_depth) / 2.0))
@@ -1038,7 +1078,7 @@ def sliding_door_boxes(lu0: float, lu1: float, lv0: float, lv1: float,
 
     # A recognisable vertical pull belongs to the moving panel's meeting stile. Both faces are
     # present because the terrace and room are equally valid close-range viewpoints.
-    pull_u = centre - overlap / 2.0 + sash * 0.5
+    pull_u = centre - overlap / 2.0 + sash * 0.5 - travel
     pull_v = lv0 + min(1.02, height * 0.49)
     for d0, d1 in ((depth_lo - SLIDER_PULL_PROJECTION, depth_lo),
                    (depth_hi, depth_hi + SLIDER_PULL_PROJECTION)):
@@ -2193,6 +2233,27 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
             add([(bx0, by0, value), (bx1, by0, value), (bx1, by1, value), (bx0, by1, value)],
                 outward, klass)
 
+    def transformed_solid(u0, u1, v0, v1, d0, d1, klass,
+                          point_transform, direction_transform) -> None:
+        """A closed local ``(u, vertical, depth)`` box after an arbitrary rigid transform."""
+        if u1 - u0 <= 1e-9 or v1 - v0 <= 1e-9 or d1 - d0 <= 1e-9:
+            return
+        for value, outward in ((u0, (-1.0, 0.0, 0.0)), (u1, (1.0, 0.0, 0.0))):
+            points = [(value, v0, d0), (value, v1, d0),
+                      (value, v1, d1), (value, v0, d1)]
+            add([point_transform(*point) for point in points],
+                direction_transform(*outward), klass)
+        for value, outward in ((v0, (0.0, -1.0, 0.0)), (v1, (0.0, 1.0, 0.0))):
+            points = [(u0, value, d0), (u1, value, d0),
+                      (u1, value, d1), (u0, value, d1)]
+            add([point_transform(*point) for point in points],
+                direction_transform(*outward), klass)
+        for value, outward in ((d0, (0.0, 0.0, -1.0)), (d1, (0.0, 0.0, 1.0))):
+            points = [(u0, v0, value), (u1, v0, value),
+                      (u1, v1, value), (u0, v1, value)]
+            add([point_transform(*point) for point in points],
+                direction_transform(*outward), klass)
+
     for box in cell_boxes(cell, extent):
         x0, x1, y0, y1, z0, z1 = box
         ix0, ix1, _, _, iz0, iz1 = inset_box(box, cell, neighbours, construction)
@@ -2516,20 +2577,12 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                     band(hu0 - casing, hu1 + casing, hv0 - SILL_PROJECT, hv0,
                          min(plane, proud), max(plane, proud))
 
-                # `HOUSE-00486`: the door LEAF, and the lining that closes the gap round it.
-                #
-                # The shell filled a window with glass and a doorway with nothing until §25's
-                # culling was turned on (`HOUSE-00684`) and every shut door became a hole to the
-                # clear colour. §65.6 starts them all shut, so a shut leaf is what the house looks
-                # like; §15's animated door replaces this in phase 15 and this class disappears
-                # with it.
-                #
-                # Built by BOTH rooms, in each one's own half of the reveal -- like the
-                # architrave and the threshold above, and unlike a window's frame. A window is one
-                # object and its owner builds it; a leaf built once is a leaf that belongs to ONE
-                # cell's chunk, and §25 culls the room behind a shut door -- so the room in front
-                # of it would be left looking at the hole again, which is the whole bug this task
-                # is fixing. Two half-wall-deep slabs never meet, so there is nothing to z-fight.
+                # `HOUSE-03222`: one static leaf, owned by the cell it swings into. The old closed
+                # representation built a slab in BOTH adjacent chunks so closed-portal culling
+                # could never expose a clear-colour hole. Static walkthrough doors are open: two
+                # coincident posed leaves would z-fight, so only the swing cell owns the physical
+                # slab. Both sides retain their casing, threshold and reveal lining; `HOUSE-03224`
+                # makes the portal aperture agree with this authored open pose.
                 for hole in holes:
                     opening = openings.get(hole[4])
                     if opening is None or opening.get("kind") != "door":
@@ -2549,22 +2602,68 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                     reveal_lo, reveal_hi = min(plane, far), max(plane, far)
                     middle = (reveal_lo + reveal_hi) / 2.0
 
-                    def leaf_box(u0, u1, v0, v1, d0, d1, klass):
-                        if side in ("-X", "+X"):
-                            solid(d0, d1, v0, v1, u0, u1, klass)
-                        else:
-                            solid(u0, u1, v0, v1, d0, d1, klass)
+                    def wall_point(u, v, depth):
+                        return ((depth, v, u) if side in ("-X", "+X")
+                                else (u, v, depth))
+
+                    def wall_direction(u, v, depth):
+                        return ((depth, v, u) if side in ("-X", "+X")
+                                else (u, v, depth))
+
+                    def fixed_box(u0, u1, v0, v1, d0, d1, klass):
+                        transformed_solid(u0, u1, v0, v1, d0, d1, klass,
+                                          wall_point, wall_direction)
+
+                    def hinged_transforms(hinge_u, angle):
+                        cosine, sine = math.cos(angle), math.sin(angle)
+
+                        def point(u, v, depth):
+                            across, normal = u - hinge_u, depth - middle
+                            return wall_point(hinge_u + across * cosine - normal * sine, v,
+                                              middle + across * sine + normal * cosine)
+
+                        def direction(u, v, depth):
+                            return wall_direction(u * cosine - depth * sine, v,
+                                                  u * sine + depth * cosine)
+                        return point, direction
+
+                    def garage_transforms(fraction):
+                        # A sectional leaf follows its upper track into the garage. At 1.0 it is
+                        # horizontal under the head rather than translated into the wall above.
+                        angle = math.pi / 2.0 * max(0.0, min(1.0, fraction))
+                        cosine, sine = math.cos(angle), math.sin(angle)
+                        into_sign = 1.0 if side in ("-X", "-Z") else -1.0
+
+                        def point(u, v, depth):
+                            vertical = v - hv1
+                            inward = (depth - middle) * into_sign
+                            posed_v = hv1 + vertical * cosine + inward * sine
+                            posed_inward = -vertical * sine + inward * cosine
+                            return wall_point(u, posed_v, middle + posed_inward * into_sign)
+
+                        def direction(u, v, depth):
+                            inward = depth * into_sign
+                            posed_v = v * cosine + inward * sine
+                            posed_inward = -v * sine + inward * cosine
+                            return wall_direction(u, posed_v, posed_inward * into_sign)
+                        return point, direction
+
+                    owner = door_owner(opening, portal_cells.get(hole[4]),
+                                       cells_by_id, cell["id"])
+                    owns_leaf = owner == cell["id"]
 
                     if opening.get("type") == "D_SLIDER":
-                        for detail in sliding_door_boxes(
-                                lu0, lu1, lv0, lv1,
-                                middle - thickness / 2.0, middle + thickness / 2.0):
-                            leaf_box(*detail[:6], detail[6])
+                        if owns_leaf:
+                            for detail in sliding_door_boxes(
+                                    lu0, lu1, lv0, lv1,
+                                    middle - thickness / 2.0, middle + thickness / 2.0,
+                                    float(opening.get("openFraction") or 0.0)):
+                                fixed_box(*detail[:6], detail[6])
                         # Only the authored clearance above/beside the unit is lining. The broad
                         # leaf itself is glass and aluminium, never an opaque fallback body.
-                        leaf_box(hu0, lu0, hv0, hv1, reveal_lo, reveal_hi, "slider_frame")
-                        leaf_box(lu1, hu1, hv0, hv1, reveal_lo, reveal_hi, "slider_frame")
-                        leaf_box(lu0, lu1, lv1, hv1, reveal_lo, reveal_hi, "slider_frame")
+                        fixed_box(hu0, lu0, hv0, hv1, reveal_lo, reveal_hi, "slider_frame")
+                        fixed_box(lu1, hu1, hv0, hv1, reveal_lo, reveal_hi, "slider_frame")
+                        fixed_box(lu0, lu1, lv1, hv1, reveal_lo, reveal_hi, "slider_frame")
                     elif opening.get("type") == "D_DOUBLE":
                         # The schedule stores ONE 860 mm leaf while the 1.80 m portal carries the
                         # pair.  Build both, and let the portal's existing translucency decide
@@ -2572,18 +2671,21 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                         portal = portals_by_id.get(hole[4], {})
                         depth_lo = middle - thickness / 2.0
                         depth_hi = middle + thickness / 2.0
-                        details = double_door_boxes(
-                            hu0, hu1, lv0, lv1, depth_lo, depth_hi, width,
-                            portal.get("opacity") == "translucent")
-                        for detail in details:
-                            leaf_box(*detail[:6], detail[6])
                         paired_width = min(width, ((hu1 - hu0) - DOUBLE_DOOR_CENTER_GAP) / 2.0)
                         pair_span = paired_width * 2.0 + DOUBLE_DOOR_CENTER_GAP
                         pair_lo = (hu0 + hu1 - pair_span) / 2.0
                         pair_hi = pair_lo + pair_span
-                        leaf_box(hu0, pair_lo, hv0, hv1, reveal_lo, reveal_hi, "trim")
-                        leaf_box(pair_hi, hu1, hv0, hv1, reveal_lo, reveal_hi, "trim")
-                        leaf_box(pair_lo, pair_hi, lv1, hv1, reveal_lo, reveal_hi, "trim")
+                        if owns_leaf:
+                            poses = hinged_leaf_poses(side, pair_lo, pair_hi, opening)
+                            details = double_door_boxes(
+                                hu0, hu1, lv0, lv1, depth_lo, depth_hi, width,
+                                portal.get("opacity") == "translucent")
+                            for detail in details:
+                                point, direction = hinged_transforms(*poses[detail[8]])
+                                transformed_solid(*detail[:6], detail[6], point, direction)
+                        fixed_box(hu0, pair_lo, hv0, hv1, reveal_lo, reveal_hi, "trim")
+                        fixed_box(pair_hi, hu1, hv0, hv1, reveal_lo, reveal_hi, "trim")
+                        fixed_box(pair_lo, pair_hi, lv1, hv1, reveal_lo, reveal_hi, "trim")
                     else:
                         # `trim`, and NOT a class of its own. A leaf in its own colour would be
                         # easier to pick out, and it would be an eleventh blockout material --
@@ -2600,35 +2702,46 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                                       if weather_facing
                                       and is_exterior_door_material(opening.get("material"))
                                       else "trim")
-                        leaf_box(lu0, lu1, lv0, lv1,
-                                 middle - thickness / 2.0, middle + thickness / 2.0, leaf_class)
-                        if leaf_class == "trim" and opening.get("joineryStyle"):
-                            for detail in single_door_detail_boxes(
-                                    lu0, lu1, lv0, lv1, middle - thickness / 2.0,
-                                    middle + thickness / 2.0, opening.get("hinge"),
-                                    opening.get("joineryStyle")):
-                                leaf_box(*detail[:6], detail[6])
-                        if leaf_class == "exterior_door" and opening.get("type") == "D_ENTRY":
-                            for detail in entry_door_detail_boxes(
-                                    lu0, lu1, lv0, lv1, middle - thickness / 2.0,
-                                    middle + thickness / 2.0, opening.get("hinge")):
-                                leaf_box(*detail[:6], detail[6])
-                            # A thin bronze cap finishes the existing full-depth timber threshold.
-                            # It begins exactly at that board's top, so it neither changes the clear
-                            # opening nor introduces coincident faces.
-                            leaf_box(hu0 + 0.010, hu1 - 0.010, hv0 + THRESHOLD_THICK,
-                                     hv0 + THRESHOLD_THICK + ENTRY_THRESHOLD_CAP,
-                                     reveal_lo, reveal_hi, "exterior_door_hardware")
-                        if leaf_class == "exterior_door" and opening.get("type") == "D_GARAGE":
-                            for detail in garage_door_detail_boxes(
-                                    lu0, lu1, lv0, lv1, middle - thickness / 2.0,
-                                    middle + thickness / 2.0,
-                                    opening.get("sectionalStyle")):
-                                leaf_box(*detail[:6], detail[6])
+                        if owns_leaf:
+                            if opening.get("type") == "D_GARAGE":
+                                point, direction = garage_transforms(
+                                    float(opening.get("openFraction") or 0.0))
+                            else:
+                                pose = hinged_leaf_poses(side, lu0, lu1, opening)[0]
+                                point, direction = hinged_transforms(*pose)
+                            transformed_solid(
+                                lu0, lu1, lv0, lv1, middle - thickness / 2.0,
+                                middle + thickness / 2.0, leaf_class, point, direction)
+                            if leaf_class == "trim" and opening.get("joineryStyle"):
+                                for detail in single_door_detail_boxes(
+                                        lu0, lu1, lv0, lv1, middle - thickness / 2.0,
+                                        middle + thickness / 2.0, opening.get("hinge"),
+                                        opening.get("joineryStyle")):
+                                    transformed_solid(
+                                        *detail[:6], detail[6], point, direction)
+                            if leaf_class == "exterior_door" and opening.get("type") == "D_ENTRY":
+                                for detail in entry_door_detail_boxes(
+                                        lu0, lu1, lv0, lv1, middle - thickness / 2.0,
+                                        middle + thickness / 2.0, opening.get("hinge")):
+                                    transformed_solid(
+                                        *detail[:6], detail[6], point, direction)
+                                # A thin bronze cap finishes the existing full-depth timber
+                                # threshold. It remains fixed while the leaf rotates.
+                                fixed_box(hu0 + 0.010, hu1 - 0.010,
+                                          hv0 + THRESHOLD_THICK,
+                                          hv0 + THRESHOLD_THICK + ENTRY_THRESHOLD_CAP,
+                                          reveal_lo, reveal_hi, "exterior_door_hardware")
+                            if leaf_class == "exterior_door" and opening.get("type") == "D_GARAGE":
+                                for detail in garage_door_detail_boxes(
+                                        lu0, lu1, lv0, lv1, middle - thickness / 2.0,
+                                        middle + thickness / 2.0,
+                                        opening.get("sectionalStyle")):
+                                    transformed_solid(
+                                        *detail[:6], detail[6], point, direction)
                         # The lining: the reveal's full depth, filling what the leaf does not.
-                        leaf_box(hu0, lu0, hv0, hv1, reveal_lo, reveal_hi, "trim")
-                        leaf_box(lu1, hu1, hv0, hv1, reveal_lo, reveal_hi, "trim")
-                        leaf_box(lu0, lu1, lv1, hv1, reveal_lo, reveal_hi, "trim")
+                        fixed_box(hu0, lu0, hv0, hv1, reveal_lo, reveal_hi, "trim")
+                        fixed_box(lu1, hu1, hv0, hv1, reveal_lo, reveal_hi, "trim")
+                        fixed_box(lu0, lu1, lv1, hv1, reveal_lo, reveal_hi, "trim")
 
                 for hu0, hu1, hv0, hv1, _portal_id in holes:
                     for corner_lo, corner_hi, along, look in (
@@ -3959,12 +4072,8 @@ def selftest(output: Path) -> int:
     window_holes = [hole for hole in kitchen_holes
                     if (openings_by_portal.get(hole[4]) or {}).get("kind") == "window"]
     boxes_expected = 4 * doors_here
-    # `HOUSE-00486`: and EVERY door adds its leaf plus the lining that closes the gap round it --
-    # one box per side that has a gap, so a leaf exactly as wide as its hole adds only the leaf.
-    # Both rooms build one, in their own half of the reveal, because a leaf built once belongs to
-    # one cell's chunk and §25 culls the room behind a shut door. Counted from the leaf's own
-    # dimensions rather than assumed to be four, because §12's doors are 0.86 x 2.05 in a
-    # 0.90 x 2.10 hole and a later one might not be.
+    # `HOUSE-03222`: every side keeps the reveal lining, while only the authored swing cell owns
+    # the posed leaf and its detail. Count from the data rather than assuming which side owns it.
     for hole in kitchen_holes:
         row = openings_by_portal.get(hole[4]) or {}
         if row.get("kind") != "door":
@@ -3972,12 +4081,15 @@ def selftest(output: Path) -> int:
         leaf = row.get("leaf") or {}
         width = min(float(leaf.get("width") or (hole[1] - hole[0])), hole[1] - hole[0])
         height = min(float(leaf.get("height") or (hole[3] - hole[2])), hole[3] - hole[2])
-        boxes_expected += 1
+        owns_leaf = door_owner(row, portal_cell_sides.get(hole[4]), cells,
+                               subject["id"]) == subject["id"]
+        boxes_expected += 1 if owns_leaf else 0
         boxes_expected += 2 if (hole[1] - hole[0]) - width > 2e-9 else 0
         boxes_expected += 1 if (hole[3] - hole[2]) - height > 1e-9 else 0
-        boxes_expected += len(single_door_detail_boxes(
-            0.0, width, 0.0, height, -0.02, 0.02, row.get("hinge"),
-            row.get("joineryStyle")))
+        if owns_leaf:
+            boxes_expected += len(single_door_detail_boxes(
+                0.0, width, 0.0, height, -0.02, 0.02, row.get("hinge"),
+                row.get("joineryStyle")))
     for hole in window_holes:
         row = openings_by_portal[hole[4]]
         boxes_expected += 1                                   # the sill board, in every room
@@ -4070,6 +4182,17 @@ def selftest(output: Path) -> int:
     require(glazed_classes.count("trim") == 12 and glazed_classes.count("metal") == 8,
             f"and its stiles, rails, astragal and matched two-sided levers remain physical joinery "
             f"({glazed_classes.count('trim')} timber, {glazed_classes.count('metal')} metal boxes)")
+    pose_probe = {"hinge": "left", "maxAngleDeg": 90.0, "openFraction": 1.0}
+    pose_signs = {
+        side: hinged_leaf_poses(side, 0.0, 0.86, pose_probe)[0]
+        for side in ("-X", "+X", "-Z", "+Z")
+    }
+    require(pose_signs == {"-X": (0.0, math.pi / 2.0),
+                           "+X": (0.86, math.pi / 2.0),
+                           "-Z": (0.86, -math.pi / 2.0),
+                           "+Z": (0.0, -math.pi / 2.0)},
+            f"a left hinge is interpreted looking into the swing room on all four wall sides "
+            f"({pose_signs})")
 
     # `HOUSE-00949`: prove the slider grammar independently of the two canonical rows. A broad
     # opaque `leaf` is precisely the visual defect this unit exists to prevent.
@@ -4099,6 +4222,14 @@ def selftest(output: Path) -> int:
     require(all(moving_meeting_stile[0] <= row[0] < row[1] <= moving_meeting_stile[1]
                 for row in slider if row[7] == "pull"),
             "and both pulls sit on the moving meeting stile, never float on the glass")
+    open_slider = sliding_door_boxes(0.0, 2.36, 0.60, 2.70, -0.0225, 0.0225, 0.90)
+    closed_moving = next(row for row in slider if row[7] == "moving_glass")
+    open_moving = next(row for row in open_slider if row[7] == "moving_glass")
+    slider_travel = (2.36 - 2.0 * SLIDER_FRAME_SECTION) / 2.0 * 0.90
+    require(abs((closed_moving[0] - open_moving[0]) - slider_travel) < 1e-9
+            and abs((closed_moving[1] - open_moving[1]) - slider_travel) < 1e-9,
+            f"the moving sash translates by its authored static fraction while the fixed sash "
+            f"stays put ({slider_travel:.3f} m)")
 
     # `HOUSE-00942`: the single-leaf grammar is independent of today's five selected rows.  This
     # catches a nominal `four_panel` style that emits a flat slab, one-sided detail or a handle on
@@ -4343,13 +4474,13 @@ def selftest(output: Path) -> int:
                        portals=all_portals, openings=openings_by_portal, cells_by_id=cells)
     entry_classes = [SURFACE_ORDER[polygon.material_index] for polygon in entry.data.polygons]
     require(entry_classes.count("metal") == 48,
-            f"the foyer's real D_DOUBLE path emits eight closed hardware boxes "
+            f"the foyer's posed D_DOUBLE path retains eight hardware boxes "
             f"({entry_classes.count('metal')} faces)")
     require(entry_classes.count("interior_door_panel") == 192,
             f"and its four raised panel outlines per leaf retain a readable hardwood role "
             f"({entry_classes.count('interior_door_panel')} faces)")
     require(entry_classes.count("exterior_door") == 6,
-            "the weather-facing D_ENTRY leaf retains one closed six-face body")
+            "the weather-facing posed D_ENTRY leaf retains one six-face body")
     require(entry_classes.count("exterior_door_panel") == 192,
             f"the weather-facing D_ENTRY leaf has 32 two-faced panel moulding boxes "
             f"({entry_classes.count('exterior_door_panel')} faces)")
@@ -4375,9 +4506,9 @@ def selftest(output: Path) -> int:
         openings=openings_by_portal, cells_by_id=cells)
     family_classes = [
         SURFACE_ORDER[polygon.material_index] for polygon in family_mesh.data.polygons]
-    require(family_classes.count("interior_door_hardware") == 48,
-            f"the builder reads both selected family-room leaves and emits four closed hardware "
-            f"boxes per leaf ({family_classes.count('interior_door_hardware')} faces)")
+    require(family_classes.count("interior_door_hardware") == 24,
+            f"the family room owns only the hall leaf that swings into it; the laundry leaf is "
+            f"owned by the laundry chunk ({family_classes.count('interior_door_hardware')} faces)")
     family_materials = cell_surface_materials(
         family, openings_by_portal.values(), all_portals, cells_by_id=cells)
     require(family_materials["interior_door_hardware"]
@@ -4962,12 +5093,11 @@ def selftest(output: Path) -> int:
             f"while the living room keeps both its inner wall and its outer skin ({sorted(outer_used)})")
     outer_classes = [SURFACE_ORDER[polygon.material_index]
                      for polygon in outer_built.data.polygons]
-    require(outer_classes.count("metal") == 96,
-            f"and both of its D_DOUBLE portals take the paired path: two eight-box hardware sets "
-            f"({outer_classes.count('metal')} faces)")
-    require(outer_classes.count("interior_door_panel") == 192,
-            f"while only its solid pair carries raised hardwood panel moulding "
-            f"({outer_classes.count('interior_door_panel')} faces)")
+    require(outer_classes.count("metal") == 0
+            and outer_classes.count("interior_door_panel") == 0,
+            f"and neither D_DOUBLE is duplicated in the living-room chunk: they swing into the "
+            f"foyer and office ({outer_classes.count('metal')} metal, "
+            f"{outer_classes.count('interior_door_panel')} panel faces)")
     require(slab_here(porch, porch_extent, True) and not slab_here(porch, porch_extent, False),
             "the porch is a deck, so it has a floor and no ordinary exterior ceiling slab; "
             "its derived covered-deck soffit is separate")
@@ -5025,7 +5155,25 @@ def selftest(output: Path) -> int:
     expected_lite_frame_faces = GARAGE_PANEL_COLUMNS * 4 * 2 * 6
     expected_garage_panel_faces = expected_solid_panel_faces + expected_lite_frame_faces
     require(garage_classes.count("exterior_door") == 6,
-            "the closed garage frontage retains one six-face leaf body")
+            "the open garage frontage retains one six-face overhead leaf body")
+    garage_leaf_points = []
+    for polygon in garage_shell.data.polygons:
+        if SURFACE_ORDER[polygon.material_index] != "exterior_door":
+            continue
+        for vertex_index in polygon.vertices:
+            point = garage_shell.data.vertices[vertex_index].co
+            garage_leaf_points.append((float(point.x), float(point.z), -float(point.y)))
+    garage_portal = portal_rows[sectional["portal"]]
+    garage_head = float(garage_portal["rect"]["v"][1])
+    require(garage_leaf_points
+            and max(point[1] for point in garage_leaf_points)
+            - min(point[1] for point in garage_leaf_points) <= 0.051
+            and max(point[2] for point in garage_leaf_points)
+            - min(point[2] for point in garage_leaf_points) > 2.30
+            and abs(sum(point[1] for point in garage_leaf_points)
+                    / len(garage_leaf_points) - garage_head) < 0.03,
+            f"and its fully open sectional leaf lies under the head and extends into the garage, "
+            f"rather than hiding in the wall above it")
     require(garage_classes.count("exterior_door_panel") == expected_garage_panel_faces,
             f"and has four raised-panel rows plus four framed top lites on both faces "
             f"({garage_classes.count('exterior_door_panel')} faces)")
