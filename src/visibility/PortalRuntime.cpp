@@ -5,7 +5,7 @@ namespace cnahouse::visibility
 {
     using Microsoft::Xna::Framework::Vector3;
 
-    PortalRuntime::PortalRuntime(const world::Portal& portal) noexcept
+    PortalRuntime::PortalRuntime(const world::Portal& portal, float aperture) noexcept
     {
         // `u` and `v` mean different axes on a horizontal plane than on a vertical one
         // (`world::Portal`), and getting that wrong puts a doorway on its side.
@@ -34,10 +34,14 @@ namespace cnahouse::visibility
 
         opacity_ = portal.opacity;
         // A portal with no aperture has no leaf to open: it is a hole and it is always open. One
-        // WITH a leaf starts shut, which is the state §65.6 begins the house in.
+        // WITH a leaf starts at the same authored fixed pose as the generated shell.
         hasLeaf_ = portal.aperture.IsValid();
         aperture_ = hasLeaf_ ? 0.0F : 1.0F;
         open_ = !hasLeaf_;
+        if (hasLeaf_)
+        {
+            SetAperture(aperture);
+        }
     }
 
     bool PortalRuntime::SetAperture(float fraction) noexcept

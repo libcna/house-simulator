@@ -12,7 +12,8 @@ namespace cnahouse::visibility
         runtimes_.reserve(world.Portals().size());
         for (const world::Portal& portal : world.Portals())
         {
-            runtimes_.emplace_back(portal);
+            const world::Opening* opening = world.FindOpening(portal.aperture);
+            runtimes_.emplace_back(portal, opening == nullptr ? 0.0F : opening->openFraction);
         }
     }
 

@@ -360,6 +360,7 @@ namespace
                   "portal": "P_HALL__WC1",
                   "leaf": { "width": 0.86, "height": 2.04, "thickness": 0.040 },
                   "hinge": "left", "swing": "L0_WC1", "maxAngleDeg": 95.0,
+                  "openFraction": 0.9,
                   "frame": { "asset": "MODEL_DOOR_FRAME_INT_01", "casing": 0.070 },
                   "asset": "MODEL_DOOR_LEAF_PANEL_01", "material": "MAT_PAINT_TRIM_WHITE",
                   "solid": false, "lockable": false
@@ -1812,6 +1813,7 @@ namespace
         // reference that rule 6 resolves.
         EXPECT_EQ(door.swing, Intern("L0_WC1"));
         EXPECT_FLOAT_EQ(door.maxAngleDeg, 95.0F);
+        EXPECT_FLOAT_EQ(door.openFraction, 0.9F);
         EXPECT_EQ(door.frameAsset, Intern("MODEL_DOOR_FRAME_INT_01"));
         EXPECT_FLOAT_EQ(door.casing, 0.070F);
         EXPECT_EQ(door.asset, Intern("MODEL_DOOR_LEAF_PANEL_01"));
@@ -1884,6 +1886,25 @@ namespace
         const auto openings = world::WorldLoader::LoadOpenings(directory_, contents);
         ASSERT_FALSE(openings);
         EXPECT_EQ(openings.Error().Code(), ErrorCode::OutOfRange);
+    }
+
+    TEST_F(WorldLoaderTest, AStaticLeafPoseOutsideTheUnitIntervalIsRefused)
+    {
+        for (const char* fraction : {"-0.01", "1.01"})
+        {
+            Write("layout.openings.json",
+                  R"({"schema": "cna-house/openings/1",
+                  "openings": [{"id": "D", "kind": "door", "portal": "P",
+                                "leaf": {"width": 0.86, "height": 2.04},
+                                "openFraction": )" +
+                      std::string(fraction) + "}]}");
+            world::WorldData::Contents contents;
+            const auto openings = world::WorldLoader::LoadOpenings(directory_, contents);
+            ASSERT_FALSE(openings) << "accepted " << fraction;
+            EXPECT_EQ(openings.Error().Code(), ErrorCode::OutOfRange);
+            EXPECT_NE(openings.Error().Context().find("openFraction"), std::string::npos)
+                << openings.Error().ToString();
+        }
     }
 
     TEST_F(WorldLoaderTest, TheOpeningToPortalBijectionIsNotTheLoadersToCheck)

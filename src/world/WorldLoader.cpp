@@ -2115,6 +2115,20 @@ namespace cnahouse::world
             }
             opening.maxAngleDeg = angle.Value();
 
+            const Result<float> openFraction = row.OptionalFloat("openFraction", 0.0F);
+            if (!openFraction)
+            {
+                return openFraction.Error().WithContext("layout.openings.json");
+            }
+            if (openFraction.Value() < 0.0F || openFraction.Value() > 1.0F)
+            {
+                return Err(ErrorCode::OutOfRange,
+                           "a static leaf pose is a 0..1 fraction; this is " +
+                               std::to_string(openFraction.Value()),
+                           "layout.openings.json/" + row.Path() + "/openFraction");
+            }
+            opening.openFraction = openFraction.Value();
+
             if (row.Has("frame") && !row.IsNull("frame"))
             {
                 const Result<JsonValue> frame = row.RequireObject("frame");

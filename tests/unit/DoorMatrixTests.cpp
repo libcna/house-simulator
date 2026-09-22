@@ -79,6 +79,47 @@ namespace
 
 } // namespace
 
+TEST(DoorMatrixTests, EveryLeafedPortalStartsAtItsAuthoredStaticPose)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no deployed world; run tools/ci/build_content.py --only world";
+    }
+    IdRegistry::ResetForTesting();
+    const world::WorldData data = LoadWorld();
+    const VisibilitySystem system(data);
+
+    int doors = 0;
+    int restingOpen = 0;
+    int restingClosed = 0;
+    for (const world::Portal& portal : data.Portals())
+    {
+        if (!portal.aperture.IsValid())
+        {
+            continue;
+        }
+        const world::Opening* opening = data.FindOpening(portal.aperture);
+        if (opening == nullptr || opening->kind != world::OpeningKind::Door)
+        {
+            continue;
+        }
+        ++doors;
+        EXPECT_FLOAT_EQ(system.Aperture(portal.id), opening->openFraction) << IdRegistry::NameOf(portal.id);
+        if (opening->openFraction > cnahouse::visibility::PortalRuntime::kOpenAbove)
+        {
+            ++restingOpen;
+        }
+        else
+        {
+            ++restingClosed;
+        }
+    }
+
+    EXPECT_GT(doors, 60) << "the production door matrix became too small to prove house-wide wiring";
+    EXPECT_GT(restingOpen, 55) << "the fixed walkthrough pose did not reach most door portals";
+    EXPECT_GT(restingClosed, 0) << "the facade-only closed exception is no longer exercised";
+}
+
 TEST(DoorMatrixTests, EveryLeafedDoorLetsItsOwnRoomInWhenItOpensAndOutWhenItShuts)
 {
     if (!ContentIsBuilt())

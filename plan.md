@@ -463,12 +463,13 @@ green.
       accept: (1) every posed door leaf, gate leaf and the garage door has a collision proxy at its pose; (2) a closed leaf blocks the capsule; (3) `PortalClearanceTests`, `InsideGeometryTests` and the stair traversal tests pass with the leaves present
       verify: unit PosedLeafCollisionTests.*, PortalClearanceTests.*, InsideGeometryTests.*
 
-- [ ] HOUSE-03224 — Drive portal apertures from the static poses
+- [x] HOUSE-03224 — Drive portal apertures from the static poses
       dep: HOUSE-03221 · sys: visibility · plat: ALL · pri: MUST · zone: all · adv: D2, G1 · est: 2
       files: src/visibility/PortalRuntime.cpp|hpp, src/visibility/VisibilitySystem.cpp, tests
       accept: (1) at load each leafed portal's aperture equals its authored pose (open or closed per `HOUSE-00665`'s hysteresis), so culling matches what is drawn; (2) the door-state matrix test (`HOUSE-00687`) is re-expressed over the posed states and still proves both directions; (3) the 18 culled/unculled render pairs stay within their bound
       verify: integration door-state matrix; render culling pairs
       amended: (2026-09-21, `HOUSE-03205`) absorbs `HOUSE-02583`: the door-state matrix is the integration proof that every leafed portal's visibility and collision agree with its pose, from both sides
+      note: (2026-09-22) `WorldLoader` carries each authored `openFraction` into `VisibilitySystem`; the production matrix proves all 63+ leafed portals start at that pose and retains the shut/open both-side checks. Static-open entrance doors exposed an obsolete exterior depth-2 assumption, so opaque doors now retain the depth-6 sightline from either side while exterior glazing remains capped at 1 and the garage at 2. All 18 culled/unculled pairs pass (worst 0.0531% at `l1-landing`, bound 0.2%). This independent task was completed before checking off `HOUSE-03222` because its zone captures proved the drawn-open/runtime-shut mismatch could otherwise show clear-colour holes
 
 - [ ] HOUSE-03225 — Accessibility manifest: the intended-accessible cells and a standing point in each
       dep: HOUSE-03204 · sys: world · plat: TOOL · pri: MUST · zone: all · adv: D2, G1 · est: 2

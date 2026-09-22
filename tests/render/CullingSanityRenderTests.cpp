@@ -91,7 +91,7 @@ namespace
 
 /// ENABLED since `HOUSE-00488` and, since `HOUSE-00786`, with NO pose pinned: all eighteen match.
 ///
-/// It was disabled because it failed on eight of the eighteen poses §65.6's door state lets it
+/// It was disabled because it failed on eight of the eighteen closed-fixture poses it can
 /// compare, for two reasons that were both real and neither of them the culling: 38 431 pixels
 /// changing SURFACE (`HOUSE-00485`'s coplanar pairs, since fixed) and 8 450 pixels becoming the
 /// CLEAR COLOUR (`HOUSE-00488`, geometry a cell looks at but does not own).
@@ -115,7 +115,7 @@ namespace
 /// culled frame was right. `HOUSE-00786` excavated the ground and the pose closed with it.
 ///
 /// **Nothing is pinned now**, which is the state this test was written to reach: every pose the
-/// door state lets it compare PASSES, and the worst of the eighteen is `l0-sunroom`.
+/// fixed-pose runtime lets it compare PASSES, and the worst of the eighteen is `l0-sunroom`.
 ///
 /// **"Passes" is a threshold, not pixel equality, and the difference matters.** What the eighteen
 /// satisfy is `kDifferingFractionLimit`: fewer than 0.2 % of the frame's pixels differ by more
@@ -140,9 +140,9 @@ TEST(CullingSanityRenderTests, EveryPoseLooksTheSameCulledAndUnculled)
     std::string worstDetail = "nothing compared";
     for (const VisibilityPose& pose : kVisibilityPoses)
     {
-        // §65.6's door state is what the walk scene starts in and the only one the command line
-        // can ask for, so the poses that want every door open are left to `HOUSE-00686`, which
-        // asserts their sets directly.
+        // The walk scene uses the authored static poses. The six `doorsOpen` entries belong to
+        // the legacy all-open unit-test fixture, which the command line cannot request; the other
+        // eighteen still provide the required culled/unculled production render pairs.
         if (pose.doorsOpen)
         {
             continue;

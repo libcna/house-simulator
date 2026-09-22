@@ -62,7 +62,8 @@ namespace
         const world::Portal door =
             Between("ROOM", "HALL", world::PortalKind::Door, world::PortalOpacity::OpaqueWhenClosed);
         EXPECT_EQ(MaxDepthFor(door, house, CameraSide::Interior), 6);
-        EXPECT_EQ(MaxDepthFor(door, house, CameraSide::Exterior), 2);
+        EXPECT_EQ(MaxDepthFor(door, house, CameraSide::Exterior), 6)
+            << "an authored-open entrance must not truncate the sightline visible through it";
 
         const world::Portal opening =
             Between("ROOM", "HALL", world::PortalKind::CasedOpening, world::PortalOpacity::Open);

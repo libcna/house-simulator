@@ -3245,13 +3245,16 @@ one edge of the clipped polygon, keeping the original near and far planes. Imple
 
 | Portal kind | Max depth from an interior camera | From an exterior camera |
 |---|---|---|
-| cased opening, door, stair well | 6 | 2 |
+| cased opening, door, stair well | 6 | **6** |
 | window / glass (interior → `EXT_WORLD`) | 3 | — |
 | window / glass (`EXT_WORLD` → interior) | — | **1** |
 | garage door | 4 | 2 |
 
-The asymmetry matters: standing in the garden you should see *one* room through a window, not
-that room plus everything behind its open door. Depth 1 from outside delivers exactly that.
+The glazing asymmetry matters: standing in the garden you should see *one* room through a window,
+not that room plus everything behind its open door. Depth 1 from outside delivers exactly that.
+An authored-open entrance door can expose a long sightline through the house, so doors use six
+from either camera side; the former exterior limit of two assumed the superseded all-doors-shut
+start and over-culled the porch view once `HOUSE-03221` gave the entrance its static-open pose.
 
 **`kMinPortalNdcArea = 1.2e-5`** — about 2 × 2 pixels at 1280 × 720. Below that the target cell
 contributes nothing and the chain stops. This single cutoff is what keeps a corridor of eight open

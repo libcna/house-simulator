@@ -37,6 +37,7 @@ namespace cnahouse::testsupport
         EXPECT_TRUE(world::WorldLoader::LoadLevels("content/world", contents).HasValue());
         EXPECT_TRUE(world::WorldLoader::LoadCells("content/world", contents).HasValue());
         EXPECT_TRUE(world::WorldLoader::LoadPortals("content/world", contents).HasValue());
+        EXPECT_TRUE(world::WorldLoader::LoadOpenings("content/world", contents).HasValue());
         auto built = world::WorldData::Create(std::move(contents));
         EXPECT_TRUE(built) << built.Error().ToString();
         return std::move(built.Value());

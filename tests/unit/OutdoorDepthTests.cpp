@@ -231,9 +231,9 @@ TEST(OutdoorDepthTests, TheCapBelongsToTheChainAndNotToOnePortal)
         }
     }
     EXPECT_EQ(poses, 32);
-    // §25.2's exterior column: two for a door or a garage door, one for glazing. Nothing outdoors
-    // may reach further than the deepest row of it.
-    EXPECT_LE(deepest, 2) << "an exterior camera reached deeper than §25.2's table allows";
+    // §25.2's exterior column: six for an entrance door, two for a garage door and one for
+    // glazing. Nothing outdoors may reach further than the deepest row of it.
+    EXPECT_LE(deepest, 6) << "an exterior camera reached deeper than §25.2's table allows";
     std::printf("  32 garden poses with every door open: deepest chain %d, widest visible set %zu, "
                 "%d room(s) seen in all (§71.2 budgets 9 typical, 22 worst, 30 hard)\n",
                 deepest,
@@ -269,10 +269,10 @@ TEST(OutdoorDepthTests, ARoomSeenThroughAWindowStopsAtThatRoom)
             system.SetCamera(view);
             system.Update(Frame(2));
 
-            // What §25.2's table allows at depth 2 from outside is a chain of doors, so every cell
-            // the walk reached at depth 2 must be two door-hops away. A cell that is only
-            // reachable through glazing has no business being there.
-            const std::set<std::uint32_t> withoutGlass = ReachableWithoutGlazing(data, view.cell, 2);
+            // What §25.2's table allows beyond depth 1 from outside is only a chain of doors, so
+            // every deeper cell must be reachable without glazing. A cell that is only reachable
+            // through glazing has no business being there.
+            const std::set<std::uint32_t> withoutGlass = ReachableWithoutGlazing(data, view.cell, 6);
             for (const VisibleCell& cell : system.Visible())
             {
                 if (cell.depth < 2)
@@ -298,7 +298,7 @@ TEST(OutdoorDepthTests, ARoomSeenThroughAWindowStopsAtThatRoom)
 TEST(OutdoorDepthTests, TheWindowsOwnCapIsWhatStopsIt)
 {
     // The arithmetic, stated: a glazed portal onto the outdoors caps an exterior camera at 1 and an
-    // interior one at 3, and a door at 2 and 6. Read from the table rather than from the walk, so
+    // interior one at 3, and a door at 6 from either side. Read from the table rather than from the walk, so
     // that a change to either is a failure here and not a silent change of behaviour.
     IdRegistry::ResetForTesting();
     if (!ContentIsBuilt())
@@ -320,7 +320,7 @@ TEST(OutdoorDepthTests, TheWindowsOwnCapIsWhatStopsIt)
         else if (portal.kind != world::PortalKind::GarageDoor)
         {
             ++doors;
-            EXPECT_EQ(MaxDepthFor(portal, data, CameraSide::Exterior), 2);
+            EXPECT_EQ(MaxDepthFor(portal, data, CameraSide::Exterior), 6);
             EXPECT_EQ(MaxDepthFor(portal, data, CameraSide::Interior), 6);
         }
     }
@@ -362,18 +362,23 @@ TEST(OutdoorDepthTests, TheAllowanceIsTheBestOfTwoWaysIn)
                     continue;
                 }
                 // Is there a NON-glazed portal straight from the camera's cell to this one?
-                bool byDoor = false;
+                int doorAllowance = 0;
                 for (const std::uint32_t index : data.PortalsOf(view.cell))
                 {
                     const world::Portal& portal = data.Portals()[index];
                     const Id other = portal.cellA == view.cell ? portal.cellB : portal.cellA;
-                    byDoor = byDoor || (other == cell.cell && !IsGlazedToOutside(data, portal));
+                    if (other == cell.cell && !IsGlazedToOutside(data, portal))
+                    {
+                        doorAllowance =
+                            std::max(doorAllowance, portal.kind == world::PortalKind::GarageDoor ? 2 : 6);
+                    }
                 }
-                if (byDoor)
+                if (doorAllowance != 0)
                 {
                     sawBoth = true;
-                    EXPECT_EQ(cell.allowance, 2) << IdRegistry::NameOf(cell.cell)
-                                                 << " is reachable by a door but kept a window's allowance";
+                    EXPECT_EQ(cell.allowance, doorAllowance)
+                        << IdRegistry::NameOf(cell.cell)
+                        << " is reachable by a door but kept a window's allowance";
                 }
                 else
                 {

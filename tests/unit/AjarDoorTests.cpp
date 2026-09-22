@@ -217,6 +217,10 @@ TEST(AjarDoorTests, TheHysteresisBandDoesNotFlickerTheRoomBehindTheDoor)
     const Case& sample = cases.front();
     const std::string other = std::string(IdRegistry::NameOf(sample.beyond));
 
+    // The production system now starts from each leaf's authored static pose. Establish the
+    // closed side explicitly before exercising the latch; this test is about history through the
+    // band, not which static pose this particular production door happens to use.
+    EXPECT_FALSE(SeenWith(data, system, sample.stand, sample.side, sample.portal->id, 0.04F).contains(other));
     // Opening: 0.06 is inside the band and the door has not latched open yet.
     EXPECT_FALSE(SeenWith(data, system, sample.stand, sample.side, sample.portal->id, 0.06F).contains(other))
         << "a door creeping open latched at 0.06, under §25.3's 0.08";

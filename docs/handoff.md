@@ -1,3 +1,36 @@
+# Visibility handoff — 2026-09-22 (`HOUSE-03224` static portal apertures)
+
+`HOUSE-03224` is complete. `WorldLoader` reads the authored static `openFraction`, rejects values
+outside `[0, 1]`, and `VisibilitySystem` initializes every leafed `PortalRuntime` from the matching
+opening. The production door matrix proves all 63+ leafed portals start at their authored state;
+the existing derived both-side matrix still proves every opaque leaf in the shut and open states.
+The hysteresis tests now explicitly establish their starting side, so they test latch history rather
+than accidentally depending on one production door's fixed pose.
+
+The first 18-pair culling run found one real regression: from `L0_PORCH`, an authored-open entrance
+exposed a sightline deeper than the old exterior door cap of two. That cap depended on the
+superseded all-doors-shut start. Opaque doors now use depth 6 from either camera side; exterior
+glazing remains capped at 1 and the garage at 2. The all-open exterior sweep reaches at most 13
+cells against the hard budget of 30. All 18 culled/unculled render pairs then pass, with
+`l1-landing` worst at 0.0531% against the 0.2% bound.
+
+Rule that chose this task: M1 dependency order and R1/G1. Although `HOUSE-03222` precedes it in the
+printed sequence, its mandatory zone captures showed that drawn-open leaves plus runtime-shut
+portals create clear-colour holes. Completing the already-independent `HOUSE-03224` was therefore
+the smallest technically correct prerequisite to verifying `HOUSE-03222`; no interaction system
+or optional behaviour was introduced. Next is to finish and commit `HOUSE-03222`, then
+`HOUSE-03223`.
+
+Validation: 33 focused visibility/door/depth tests pass; loader pose/read/range tests pass; the
+18-pair software-render culling test passes; compilation used at most four CPU cores. The normal
+CMake regeneration remains externally blocked by unrelated in-progress edits in sibling CNA's
+test-display CMake files (`cna_apply_test_display_policy_to` receives incorrect arguments), so the
+existing configured build's exact compile/archive/link commands were used instead. CNA was not
+modified here. The pre-existing staged `docs/visual-review/README.md` and the uncommitted
+`HOUSE-03222` generator work remain outside this task's commit.
+
+---
+
 # World handoff — 2026-09-21 (`HOUSE-03221` static leaf poses)
 
 `HOUSE-03221` is complete. All 63 walkthrough doors, the sectional garage door and three gates

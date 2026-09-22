@@ -534,6 +534,8 @@ namespace cnahouse::world
         //! `"into_L0_WC1"` until `HOUSE-00378`, which nothing could resolve.
         util::Id swing;
         float maxAngleDeg = 0.0F;
+        /// @brief Authored fixed walkthrough pose, 0 closed through 1 at `maxAngleDeg`/full travel.
+        float openFraction = 0.0F;
         util::Id frameAsset;
         float casing = 0.0F;
         util::Id asset;

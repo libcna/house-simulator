@@ -7,7 +7,9 @@ namespace cnahouse::visibility
     {
         /// §25.2's four rows, named so the table below reads like the table above.
         constexpr int kDoorFromInside = 6;
-        constexpr int kDoorFromOutside = 2;
+        // Static-open entrance doors can expose the same long interior sightline from a porch as
+        // from the foyer. The old value of two only matched the former all-doors-shut start.
+        constexpr int kDoorFromOutside = 6;
         constexpr int kGlazedFromInside = 3;
         constexpr int kGlazedFromOutside = 1;
         constexpr int kGarageFromInside = 4;

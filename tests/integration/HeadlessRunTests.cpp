@@ -433,7 +433,7 @@ namespace
         EXPECT_EQ(snapshot.cell, snapshot.visible.front().cell);
         EXPECT_GT(snapshot.traversal.portalsTested, 0);
         EXPECT_EQ(snapshot.cellsInWorld, 96) << "§16's house has 96 cells";
-        // §71.2's hard fail is 30 visible cells; §65.6's doors start shut, so this is far under it.
+        // §71.2's hard fail is 30 visible cells; the authored static door poses stay under it.
         EXPECT_LE(snapshot.visible.size(), 30U);
         EXPECT_EQ(snapshot.traversal.cellsDropped, 0);
         // §25.1's step 3 ran over the walk's answer, and drew less than the whole house.

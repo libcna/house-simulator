@@ -42,11 +42,12 @@ namespace cnahouse::visibility
 
         PortalRuntime() = default;
 
-        /// @brief Caches @p portal's world rectangle and takes its opacity.
+        /// @brief Caches @p portal's world rectangle, opacity and authored static aperture.
         ///
-        /// An always-open portal -- a cased opening, a stair well -- starts open; anything with a
-        /// leaf starts closed, which is the state §65.6 says the house begins in.
-        explicit PortalRuntime(const world::Portal& portal) noexcept;
+        /// An always-open portal -- a cased opening, a stair well -- starts open. A leaf starts at
+        /// the same fixed pose as its generated geometry; callers that omit @p aperture retain the
+        /// closed fixture default used by focused portal tests.
+        explicit PortalRuntime(const world::Portal& portal, float aperture = 0.0F) noexcept;
 
         /// @brief The four corners of the doorway, in world space, in a stable order.
         [[nodiscard]] const std::array<Microsoft::Xna::Framework::Vector3, 4>& WorldRect() const noexcept
