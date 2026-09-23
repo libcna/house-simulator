@@ -435,6 +435,22 @@ CHUNK_BUDGET_EXCEPTIONS["L1_BED2"] = (
     _bed2_limit + 1,
     _bed2_reason + "; HOUSE-02681 adds one tintable static-blind material role")
 
+# `HOUSE-00999`: the first upper-floor circulation recipe deliberately reuses the established
+# runner, framed-art and piano-bench assets without flattening their physically distinct finishes.
+# These are the exact post-build counts: the two halls each add the runner's two wool roles and
+# the art's frame, mat and image to their five shell groups; the landing adds the bench's timber,
+# metal and cushion roles to its existing eleven-group architectural exception.
+_landing_limit, _landing_reason = CHUNK_BUDGET_EXCEPTIONS["L1_LANDING"]
+CHUNK_BUDGET_EXCEPTIONS["L1_LANDING"] = (
+    _landing_limit + 3,
+    _landing_reason + "; HOUSE-00999 adds the reused bench's three measured finish groups")
+CHUNK_BUDGET_EXCEPTIONS["L1_HALL"] = (
+    10, "five measured shell finish chunks plus HOUSE-00999's two runner-wool roles and three "
+        "framed-art roles; no vertex or Reach-cap split")
+CHUNK_BUDGET_EXCEPTIONS["L1_HALL_W"] = (
+    10, "five measured shell finish chunks plus HOUSE-00999's two runner-wool roles and three "
+        "framed-art roles; no vertex or Reach-cap split")
+
 # HOUSE-01069 is a measured room-wide furnishing/lighting step, not a generic budget increase.
 # The new walnut/brass cabinet shares both established dining roles. Its ceramic serving set is
 # one new finish, and the two sideboard lamps' exact independently switched shade group needs

@@ -1,3 +1,36 @@
+# L1 circulation dressing handoff — 2026-09-23 (`HOUSE-00999`)
+
+M4 dressing has begun breadth-first in `Z-L1`. `L1_LANDING` now reuses the upholstered piano bench
+as its slim seat; `L1_HALL` and `L1_HALL_W` each reuse a scaled hall runner and the acquired
+portrait art. These are five ordinary static prop rows. Existing bench/art proxies remain active,
+the thin runners remain non-colliding, and exact door-sweep plus 0.70 m route validation passes.
+Measured chunk totals are 14/14 for the landing and 10/10 for each hall, with no index split.
+
+Actual renders exposed two latent HOUSE-00982 preparation defects at first use: the three
+non-square art textures violated Reach's clamp requirement under the shared wrap sampler, and the
+image quad's winding left its texture back-face culled. The bounded offline preparation now encodes
+all four images as 512 × 512 power-of-two textures while their physical planes retain the intended
+aspect, and generates the image quad with its visible face toward the room. The same four assets
+were regenerated and hash-pinned; no runtime path, new asset family or bespoke room model was
+introduced. Forced-light detail renders show both images, both runners and the landing bench
+grounded and clear of portals. The production clear-day zone set was also inspected; final
+day/night readability remains M5 work.
+
+`validate_world.py`, `validate_props.py`, the decoration gate, the zone scoreboard, the chunk
+self-test, `world-content-current` and the focused all-cell grand tour pass. The known
+`InsideGeometryTests.NoStepOfTheTourEndsInsideAnything` failure in `L1_MASTER_CLOSET` belongs to
+the earlier generated wardrobe example, not these five props; `HOUSE-01001` owns that cell and is
+the natural bounded point to replace or reposition it. Do not weaken the test or claim it passed.
+
+The remaining forecast is 180.5 realistic / 219.4 pessimistic hours. With 45.75 task-hours spent
+since the final reduction, the R14 projection is 265.2 h, 14.8 h below the hard limit. Rule R2 and
+M4's explicit tied-zone order keep work in `Z-L1`; this is the first of the three consecutive tasks
+R3 permits there. The exact next unblocked MUST task is `HOUSE-01000`, furnishing
+`L1_MASTER_BED` with its main-tier set. All compilation must use at most four workers and be pinned
+to at most four CPUs; the strict-XNA gate additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Clutter acquisition handoff — 2026-09-23 (`HOUSE-00984`)
 
 M3's reusable furnishing kit is complete. Its final group contains exactly the five clutter shapes

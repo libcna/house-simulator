@@ -32,6 +32,7 @@ MANIFEST = REPO / "assets-src" / "assets.manifest.json"
 KIT = REPO / "docs" / "furnishing-kit.md"
 MODEL_OUTPUT = REPO / "assets-src" / "Models" / "Furniture" / "Decoration"
 TEXTURE_OUTPUT = REPO / "assets-src" / "Textures" / "Furniture" / "Decoration"
+RUNTIME_TEXTURE_PIXELS = (512, 512)
 
 
 @dataclass(frozen=True)
@@ -137,22 +138,22 @@ SOURCES = (
 ART = (
     Art("13", "3019297b5ea067c205f4879111ad1c2b929bbafe26aa86067e81ddc1b803c7f2",
         "landscape", (512, 341), (0.84, 0.56), "dark", (0.994, 0.714, 0.05),
-        "9ff92d588282c46a3e4ce30c8ef988d1c0693eaa2d6d716cfabef4f926d15df4",
-        "a39930f14b9694689e238aa3278fc47f2dd33cecb155b670c61f0d45addca2b5",
+        "b432f197d4e1951392c30541dbdcaafa569b89f0c5d215b2ab9b2e53a14a7148",
+        "b47d5679f0759b02a24cf8c492d41744c64077a77c493e7ecc555e1c01f5893c",
         ("L1_SITTING", "L2_LIBRARY")),
     Art("14", "2c985e7a036016c5774a2568f57093afe7a36c3947a7e605f134de182633c59c",
         "landscape", (512, 340), (0.95, 0.63), "brass", (1.084, 0.764, 0.05),
-        "ef4583c1d14aa185096bf6d7b986378fea07e544231ee4ca57194b236a87b92d",
-        "f9aac064f11d86310d2d591eab250e0c1af3cad51566da0aecc45ce8020d5b82",
+        "2b28cfbbfcd615d5845a51093003c0dcf02d3b9c57bc5af476c751600f612623",
+        "62787bb46c4845dc5e8cba353d99148c76042c29483bbb43ab08bc24cb523b48",
         ("L1_MASTER_BED", "L2_BED5")),
     Art("15", "130869082f07dd2a4b5dc1e147ce92293c31f231c8ab111fe751caee74a64ce1",
         "portrait", (360, 512), (0.48, 0.68), "matted", (0.694, 0.894, 0.05),
-        "b953e0deae321b5d7e1505bbf74e7b82331057e97a5cce4e8c3a4b81118cfb36",
-        "fdf0bc01149b9b259e5cf6bf786808fc28d498bee16dd0f7e5f73e72970ba7c3",
-        ("B1_CINEMA", "L1_HALL")),
+        "71f71f8f38a417b4c9af595f19f6f5d2265b707b826060c11e0d9661b7fecbe7",
+        "05f04ee31942ae18359e7229759280d127cc32296e2836c7d32f8f5a925db929",
+        ("B1_CINEMA", "L1_HALL", "L1_HALL_W")),
     Art("16", "b28967e69522ad9daf6c95c4e9c40000a83eda32fa9fd4a58d8657e4cf82c002",
         "square", (512, 512), (0.62, 0.62), "dark", (0.774, 0.774, 0.05),
-        "a82e917fa452fa6ea350d5e2b61ad4da29a0b29ce4f25ac60e725f01974f59a1",
+        "f811da0b993c67242155da7c9d277253a7a9610fe8ab14e8ce4053c6c8b16d96",
         "2831bff24b2292861d4933d9fcb59e3c71350bf2f8e4e01f5d47fbdc22fb4889",
         ("B1_HOBBY", "L3_ROOM")),
 )
@@ -210,6 +211,12 @@ def prepare_texture(art: Art, source: Path, output: Path) -> None:
             image.thumbnail(art.pixels, Image.Resampling.LANCZOS)
             if image.size != art.pixels:
                 image = image.resize(art.pixels, Image.Resampling.LANCZOS)
+        # The shared stock-XNA material path intentionally uses the same wrapping sampler as the
+        # house's tiled materials. Reach therefore requires both texture axes to be power-of-two.
+        # Encode the already-cropped aspect into a square texture; the matching physical picture
+        # plane restores that aspect when it maps the full 0..1 UV range.
+        if image.size != RUNTIME_TEXTURE_PIXELS:
+            image = image.resize(RUNTIME_TEXTURE_PIXELS, Image.Resampling.LANCZOS)
         output.parent.mkdir(parents=True, exist_ok=True)
         image.save(output, format="PNG", compress_level=9)
 
@@ -370,8 +377,8 @@ def main() -> int:
                 if model_row.get("sourceSha256") != art.model_sha256 or \
                         texture_row.get("sourceSha256") != art.texture_sha256:
                     raise RuntimeError(f"art {art.number}: manifest output hash changed")
-                if texture_row.get("texture", {}).get("width") != art.pixels[0] or \
-                        texture_row.get("texture", {}).get("height") != art.pixels[1]:
+                if texture_row.get("texture", {}).get("width") != RUNTIME_TEXTURE_PIXELS[0] or \
+                        texture_row.get("texture", {}).get("height") != RUNTIME_TEXTURE_PIXELS[1]:
                     raise RuntimeError(f"art {art.number}: texture dimensions changed")
                 if texture_row.get("origin", {}).get("licence") != "CC0-1.0" or \
                         art.source_sha256 not in texture_row.get("origin", {}).get("note", ""):

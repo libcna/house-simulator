@@ -1785,6 +1785,71 @@
       "tint": [0.64, 0.74, 0.9],
       "static": true, "lodGroup": null, "collision": "none",
       "material": null, "interactable": null
+    },
+    {
+      "id": "PROP_L1_LANDING_BENCH",
+      "asset": "MODEL_FURNITURE_PIANO_BENCH",
+      "cell": "L1_LANDING",
+      "position": [-1.98, 3.65, -16.3],
+      "yawDeg": 90,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_HALL_RUNNER",
+      "asset": "MODEL_HALL_RUNNER",
+      "cell": "L1_HALL",
+      "position": [0.0, 3.652, -19.65],
+      "yawDeg": 0,
+      "scale": 0.6,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_HALL_ART",
+      "asset": "MODEL_DECOR_WALL_ART_15",
+      "cell": "L1_HALL",
+      "position": [2.10, 4.45, -19.35],
+      "yawDeg": 90,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_HALL_W_RUNNER",
+      "asset": "MODEL_HALL_RUNNER",
+      "cell": "L1_HALL_W",
+      "position": [-7.05, 3.652, -19.45],
+      "yawDeg": 90,
+      "scale": 0.4,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_HALL_W_ART",
+      "asset": "MODEL_DECOR_WALL_ART_15",
+      "cell": "L1_HALL_W",
+      "position": [-7.05, 4.45, -18.42],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
     }
   ]
 }

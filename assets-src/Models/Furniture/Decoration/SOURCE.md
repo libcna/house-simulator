@@ -16,6 +16,7 @@ adds only the four forms still named by `docs/furnishing-kit.md`, within the six
 official CDN bytes, bakes static geometry and hierarchy, adds UV0 and one enclosing collision box,
 and validates scale and support/wall origins. The plant's unused WebP preview nodes are removed
 because its named source slots bind the canonical project materials. The four `wall_art_*.glb`
-files are deterministic
-frame variants for the four-image CC0 set documented beside its textures. Existing generated entry
+files are deterministic frame variants for the four-image CC0 set documented beside its textures.
+Their image quad has an explicit front-facing wall orientation so stock XNA back-face culling does
+not hide the acquired image behind the mat. Existing generated entry
 and hall rug planes reuse ambientCG's CC0 Fabric061 weave; no new rug model or texture is needed.

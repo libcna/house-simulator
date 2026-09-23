@@ -4705,3 +4705,27 @@ M4 work; neither is recast as architecture scope at this gate.
 explicit exclusions, and the plan scoreboard records every zone at least C2. G2 passes. Next:
 `HOUSE-03301`, selected by the house-wide support exception and dependency order to begin the kit
 path that unlocks broad furnishing.
+
+## Round 113 — first-floor circulation dressing
+
+Commit: `HOUSE-00999` working tree (`2026-09-23`). The local, Git-ignored
+[`clear-day`](captures/house-00999-l1-circulation-day) set covers all six fixed `Z-L1` views. Its
+contact sheet and the full-size landing/hall frames were inspected. Supplemental forced-light
+detail views in [`circulation-detail`](captures/house-00999-l1-circulation-detail) directly inspect
+the landing bench, both scaled runners and both framed images; they are evidence for prop geometry,
+not a claim that M5's normal day/night balance is complete.
+
+The three circulation cells reuse only established kit pieces: the upholstered piano bench,
+hall-runner plane and portrait member of the acquired four-image art set. Initial rendered review
+found the art buried in the wall finish, then found that its image was hidden behind the mat. The
+final wall offsets are measured inside the shell, and the shared art generator now emits a
+front-facing picture quad. Its runtime images are 512-square power-of-two resources, avoiding the
+Reach wrap-sampler failure revealed by the first placed instance while the physical plane retains
+the portrait aspect. Both final detail views show the multicolour image inside its mat and frame.
+
+The landing bench is grounded beneath the window, both runners remain flat without z-fighting, and
+all doorways and the landing route remain clear. There is no visible clipping, floating object,
+portal obstruction or other S1/S2 defect in these cells. The production fixed hall frames remain
+deliberately dark; final baseline readability is the existing M5 requirement. Next:
+`HOUSE-01000`, selected by R2's tied-zone order and permitted as the second consecutive `Z-L1`
+task under R3.

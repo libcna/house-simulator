@@ -75,7 +75,7 @@ def image_plane(width: float, height: float, bottom: float, z: float, image_path
         blender_xyz((-width * 0.5, bottom + height, z)),
     ]
     mesh = bpy.data.meshes.new("art_image_mesh")
-    mesh.from_pydata(vertices, [], [(0, 1, 2, 3)])
+    mesh.from_pydata(vertices, [], [(0, 3, 2, 1)])
     mesh.update()
     obj = bpy.data.objects.new("art_image", mesh)
     bpy.context.collection.objects.link(obj)
