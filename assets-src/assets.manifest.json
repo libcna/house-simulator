@@ -416,6 +416,217 @@
       ]
     },
     {
+      "id": "MODEL_BATHROOM_BATH",
+      "category": "bath",
+      "sourceFile": "assets-src/Models/Furniture/Bathroom/bath.glb",
+      "sourceSha256": "664fd827de2b2705dafd4f79ac8924a94fdfa7f542f626a9ef8577c695cfeb8e",
+      "contentName": "Models/Furniture/Bathroom/bath",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Single ended bath 1700 from Fitted Kitchen and Bathroom Builder",
+        "url": "https://cdn.3dassets.dev/assets/17865/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00976 selected one of exactly four required models from the 3D Assets Fitted Kitchen and Bathroom Builder pack (AI-generated with Claude Fable 5.1 and published under CC0 1.0). tools/assets/bathroom_fixtures_prepare.py pins upstream SHA-256 a484dfdeb90903177f2d93d5c8c8aa4b901d7e42a7fad60f874d36b83e566a6d, bakes the closed static rest pose, adds UV0 and appends one twelve-triangle enclosing collision box."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.7,
+          0.549995,
+          0.700037
+        ],
+        "triangles": {
+          "LOD0": 680
+        },
+        "collision": "Bath_COL"
+      },
+      "materialMap": {
+        "ceramic": "MAT_FURNITURE_DINING_PORCELAIN",
+        "metal": "MAT_KITCHEN_HARDWARE_STEEL"
+      },
+      "usedIn": [
+        "L1_MASTER_BATH",
+        "L1_BATH2",
+        "L1_BATH3",
+        "L2_BATH4",
+        "L2_BATH5"
+      ]
+    },
+    {
+      "id": "MODEL_BATHROOM_SHOWER",
+      "category": "shower-enclosure",
+      "sourceFile": "assets-src/Models/Furniture/Bathroom/shower_enclosure.glb",
+      "sourceSha256": "e8e0fb7add7b83b7dfdf804a39f2d471385b8664849d1f9746a6834dda08a375",
+      "contentName": "Models/Furniture/Bathroom/shower_enclosure",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Square shower enclosure 900 from Fitted Kitchen and Bathroom Builder",
+        "url": "https://cdn.3dassets.dev/assets/17894/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00976 selected one of exactly four required models from the 3D Assets Fitted Kitchen and Bathroom Builder pack (AI-generated with Claude Fable 5.1 and published under CC0 1.0). tools/assets/bathroom_fixtures_prepare.py pins upstream SHA-256 87042eed1c27b5a5ef5bb848052e9b225502b237e88c73acbe6827a1af72db1e, bakes the closed static rest pose, removes the rigid door clips, adds UV0 and appends one twelve-triangle enclosing collision box."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.9,
+          1.961407,
+          0.9
+        ],
+        "triangles": {
+          "LOD0": 940
+        },
+        "collision": "ShowerEnclosure_COL"
+      },
+      "materialMap": {
+        "ceramic": "MAT_FURNITURE_DINING_PORCELAIN",
+        "glass": "MAT_GLASS_CLEAR",
+        "metal": "MAT_KITCHEN_HARDWARE_STEEL"
+      },
+      "usedIn": [
+        "L1_MASTER_BATH",
+        "L1_BATH2",
+        "L1_BATH3",
+        "L2_BATH4",
+        "L2_BATH5"
+      ]
+    },
+    {
+      "id": "MODEL_BATHROOM_TOILET",
+      "category": "wc",
+      "sourceFile": "assets-src/Models/Furniture/Bathroom/toilet.glb",
+      "sourceSha256": "807e342fa7f8fd417e580f0f96525bc25618436cce3de80947c8cf96da427be4",
+      "contentName": "Models/Furniture/Bathroom/toilet",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Close coupled WC from Fitted Kitchen and Bathroom Builder",
+        "url": "https://cdn.3dassets.dev/assets/17870/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00976 selected one of exactly four required models from the 3D Assets Fitted Kitchen and Bathroom Builder pack (AI-generated with Claude Fable 5.1 and published under CC0 1.0). tools/assets/bathroom_fixtures_prepare.py pins upstream SHA-256 175f19f79e3f9f97041c571cd1adf462fa8f43f45bea4cbcc4f043db11422c89, bakes the closed static rest pose, removes the rigid seat/lid clips, adds UV0 and appends one twelve-triangle enclosing collision box."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.43,
+          0.824012,
+          0.61499
+        ],
+        "triangles": {
+          "LOD0": 1920
+        },
+        "collision": "Toilet_COL",
+        "seatHeightMetres": 0.4
+      },
+      "materialMap": {
+        "ceramic": "MAT_FURNITURE_DINING_PORCELAIN",
+        "metal": "MAT_KITCHEN_HARDWARE_STEEL"
+      },
+      "usedIn": [
+        "L1_MASTER_BATH",
+        "L1_BATH2",
+        "L1_BATH3",
+        "L2_BATH4",
+        "L2_BATH5",
+        "B1_WC7",
+        "L0_WC1",
+        "L0_WC2",
+        "L1_WC3",
+        "L1_WC4",
+        "L2_WC5",
+        "L2_WC6"
+      ]
+    },
+    {
+      "id": "MODEL_BATHROOM_VANITY",
+      "category": "basin",
+      "sourceFile": "assets-src/Models/Furniture/Bathroom/vanity_basin.glb",
+      "sourceSha256": "513f25187db1bac7a91d0d756288aa13db809842ca8120b42e418d21d5a987c2",
+      "contentName": "Models/Furniture/Bathroom/vanity_basin",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Bathroom vanity unit 600 from Fitted Kitchen and Bathroom Builder",
+        "url": "https://cdn.3dassets.dev/assets/17883/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00976 selected one of exactly four required models from the 3D Assets Fitted Kitchen and Bathroom Builder pack (AI-generated with Claude Fable 5.1 and published under CC0 1.0). tools/assets/bathroom_fixtures_prepare.py pins upstream SHA-256 b3c7e9ce121ff86b52e6d27389a085607c9cc646b6eaf76b09d833e4bef7b263, bakes the closed static rest pose, removes the rigid drawer clips, adds UV0 and appends one twelve-triangle enclosing collision box."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.62,
+          0.827966,
+          0.530489
+        ],
+        "triangles": {
+          "LOD0": 1516
+        },
+        "collision": "VanityBasin_COL"
+      },
+      "materialMap": {
+        "carcass": "MAT_DOOR_PAINTED",
+        "ceramic": "MAT_FURNITURE_DINING_PORCELAIN",
+        "dark": "MAT_KITCHEN_OVEN_GLASS",
+        "front": "MAT_WINDOW_BLIND_BLUE_MUTED",
+        "metal": "MAT_KITCHEN_HARDWARE_STEEL"
+      },
+      "usedIn": [
+        "L1_MASTER_BATH",
+        "L1_BATH2",
+        "L1_BATH3",
+        "L2_BATH4",
+        "L2_BATH5",
+        "B1_WC7",
+        "L0_WC1",
+        "L0_WC2",
+        "L1_WC3",
+        "L1_WC4",
+        "L2_WC5",
+        "L2_WC6"
+      ]
+    },
+    {
       "id": "MODEL_BUTLERS_CROCKERY_SHELF",
       "category": "pantry-shelf",
       "sourceFile": "assets-src/Models/Furniture/Kitchen/butlers_crockery_shelf.glb",

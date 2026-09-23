@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **131 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 161 / 189 / 229 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G2 passed.** Next: acquire the bounded bathroom fixture group in `HOUSE-00976` |
+| Active plan | **130 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 160 / 188 / 227 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G2 passed.** Next: acquire the bounded seating and table group in `HOUSE-00977` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -682,11 +682,12 @@ second reduction capped them at 62 and 6.
       trace: was *the 24 kitchen appliance and fixture models*, then cap 4 (`HOUSE-03206`)
       note: (2026-09-23) The capped group contains exactly three CC0 static derivatives: one 600 mm front-load laundry body reused by the washer/dryer recipes, one 1.1 m chest freezer and one wall-hung combi boiler. Their official 3D Assets pack/CDN provenance and upstream SHA-256 values are pinned; the source pack declares the models AI-generated with Claude Fable 5.1 under CC0 1.0. The bounded preparation tool bakes the closed rest pose, removes every rigid open/close clip and hierarchy, adds UV0 and appends one enclosing 12-triangle collision box per asset. The shared five-role material bridge reuses existing canonical paint, steel, dark glass, cabinet glass and brass; no appliance behavior or runtime system was added. The group/licence/scale/origin/manifest gates pass, and CNA compiled the 6,254 visible triangles to three CNBs totalling 957,496 bytes. A 1200 × 700 headless review render with collision hidden confirmed recognizable closed silhouettes, grounded feet and clean lids/fronts/pipes without clipping, floating parts or z-fighting
 
-- [ ] HOUSE-00976 — Acquire the bathroom fixtures (cap 4)
+- [x] HOUSE-00976 — Acquire the bathroom fixtures (cap 4)
       dep: HOUSE-00296, HOUSE-03302 · sys: content · plat: TOOL · pri: MUST · zone: all · adv: D3 · est: 1.25
       accept: the kit table's *Bathroom fixtures* row, within the cap, reused across every bathroom and WC, as static props with collision proxies and manifest and licence rows
       verify: the group gate; the licence gate
       trace: was *the 16 bathroom fixture models*, then cap 6 (`HOUSE-03206`)
+      note: (2026-09-23) The capped family contains exactly four matching CC0 static derivatives from one source pack: a close-coupled WC, 600 mm vanity with inset basin, 1700 mm bath, and 900 mm shower whose one model includes both tray and glazed enclosure. The official 3D Assets pack/CDN provenance and upstream SHA-256 values are pinned; the pack declares the models AI-generated with Claude Fable 5.1 under CC0 1.0. The closed-static preparation path from `HOUSE-00975` bakes transforms, strips the WC seat/lid, vanity drawer and shower-door clips and hierarchy, adds UV0 and appends one enclosing 12-triangle collision box per asset. Canonical porcelain, steel, clear glass, paint and dark accent roles are reused; no plumbing or interaction behavior was introduced. The group/licence/scale/origin/manifest gates pass, CNA compiled the 5,056 visible triangles to four CNBs totalling 778,304 bytes, and a 1300 × 720 headless review render confirmed recognizable grounded fixtures with closed parts and clean silhouettes without clipping, floating parts or z-fighting
 
 - [ ] HOUSE-00977 — Acquire the seating and tables (cap 7)
       dep: HOUSE-00296, HOUSE-03302 · sys: content · plat: TOOL · pri: MUST · zone: all · adv: D3 · est: 2
@@ -1848,7 +1849,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 |---|---|---|---|---|---|---|---|
 | M1 Whole-property traversal | 4 | 9 | **0** | 0 | **0** | 0 | — |
 | M2 Architectural completion | 8 | 18 | **0** | 0 | **0** | 0 | — |
-| M3 The reusable furnishing kit | 16 | 33 | **6** | 6.6 | **7.75** | 8.5 | — |
+| M3 The reusable furnishing kit | 16 | 33 | **5** | 5.5 | **6.5** | 7.15 | — |
 | M4 Dressing everywhere | 40 | 48.75 | **31** | 26.25 | **31** | 37 | R-D +3 |
 | M5 Baseline lighting everywhere | 12 | 24.5 | **10** | 16.75 | **19.75** | 21.75 | — |
 | M6 Main cells and hero areas | 20 | 32.5 | **15** | 16.75 | **19.75** | 21.75 | — |
@@ -1862,12 +1863,12 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **131** | **160.7** | **189** | **228.8** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **130** | **159.6** | **187.75** | **227.4** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-51.2 h. Adding the 37.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-266.1 h, 13.9 h under the limit. That margin is
+52.6 h. Adding the 38.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+265.9 h, 14.1 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |

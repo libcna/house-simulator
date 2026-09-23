@@ -1,3 +1,30 @@
+# Bathroom-fixture acquisition handoff — 2026-09-23 (`HOUSE-00976`)
+
+The bathroom acquisition group is complete at its exact four-model cap: one close-coupled WC, one
+600 mm floor vanity with inset basin, one 1700 mm bath, and one 900 mm shower model containing its
+tray and glazed enclosure. All are closed static dressing and are intended for reuse across every
+`R-BATH` and `R-WC` recipe; plumbing and object-use behavior remain out of scope.
+
+All four come from the official CC0 Fitted Kitchen and Bathroom Builder pack. Its manifest and the
+four CDN bytes are source-hash pinned, and its declaration that the models were AI-generated with
+Claude Fable 5.1 is recorded in both the asset manifest and `SOURCE.md`. The preparation group
+reuses HOUSE-00975's bounded closed-static Blender conversion: rest transforms are baked, rigid
+seat/lid, drawer and shower-door clips and hierarchy are removed, UV0 is added and one enclosing
+12-triangle proxy is appended per fixture. Existing canonical porcelain, steel, clear glass,
+paint and dark-accent materials cover every source role.
+
+The four derivatives total 5,056 visible triangles. The group, manifest, licence, scale and origin
+gates pass, and CNA compiled them to 105,736-byte, 145,944-byte, 292,808-byte and 233,816-byte
+CNBs (778,304 bytes total). A 1300 × 720 headless review render with collision hidden showed the
+four grounded closed fixtures with clear silhouettes and no clipping, floating parts or
+z-fighting. The remaining forecast is 187.75 realistic / 227.4 pessimistic hours. With 38.5
+task-hours spent since the final reduction, the R14 projection is 265.9 h, 14.1 h below the hard
+limit. Rule that chooses the next task: R1's house-wide support exception, R8's kit-first rule and
+M3 dependency order select the next capped acquisition group. The exact next unblocked MUST task
+is `HOUSE-00977`.
+
+---
+
 # Utility-appliance acquisition handoff — 2026-09-23 (`HOUSE-00975`)
 
 The kitchen/utility acquisition group is complete at its exact three-model cap: a 600 mm

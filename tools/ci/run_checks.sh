@@ -146,6 +146,9 @@ run_gate "fill-kits" python3 tools/assets/fill_kit_prepare.py --check
 # HOUSE-00975: the utility-appliance acquisition remains capped at three closed static models,
 # with pinned CC0 provenance, canonical materials, UV0 and one enclosing proxy apiece.
 run_gate "utility-appliances" python3 tools/assets/utility_appliances_prepare.py --check
+# HOUSE-00976: one coherent bathroom family remains capped at four closed static fixtures with
+# pinned CC0 provenance, canonical materials, UV0 and one enclosing proxy apiece.
+run_gate "bathroom-fixtures" python3 tools/assets/bathroom_fixtures_prepare.py --check
 # HOUSE-01049: the measured counter stools and three restrained worktop groupings remain
 # reproducible from their authored Blender source, with exact material slots and placement.
 run_gate "kitchen-dressing" python3 tools/assets/kitchen_dressing_prepare.py --check

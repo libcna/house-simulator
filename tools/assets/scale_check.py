@@ -97,9 +97,16 @@ CATEGORIES: dict[str, list[tuple[str, float, float, str]]] = {
                       ("z", 0.38, 0.58, "counter stool depth")],
     "sofa": [("y", 0.38, 0.45, "sofa seat")],
     "bed": [("y", 0.48, 0.62, "bed mattress top")],
-    "wc": [("y", 0.38, 0.45, "WC seat")],
+    "wc": [("x", 0.35, 0.55, "domestic WC width"),
+           ("y", 0.38, 0.45, "WC seat"),
+           ("z", 0.52, 0.80, "domestic WC depth")],
     "basin": [("y", 0.80, 0.90, "basin rim")],
-    "bath": [("y", 0.50, 0.60, "bath rim")],
+    "bath": [("x", 1.50, 1.90, "domestic bath length"),
+             ("y", 0.50, 0.60, "bath rim"),
+             ("z", 0.65, 0.95, "domestic bath width")],
+    "shower-enclosure": [("x", 0.80, 1.25, "shower tray width"),
+                         ("y", 1.80, 2.15, "shower enclosure height"),
+                         ("z", 0.75, 1.10, "shower tray depth")],
     "handrail": [("y", 0.85, 0.95, "handrail height")],
     "avatar": [("y", 1.55, 1.90, "human avatar height")],
     "dog": [("y", 0.50, 0.70, "dog withers height")],
@@ -299,7 +306,7 @@ def check(path: Path, category: str, geometry: dict | None = None) -> list[str]:
         # compared the whole Y bound and would reject every correctly proportioned armchair around
         # 0.84 m tall. Seat height cannot be recovered from an AABB, so it is an explicit measured
         # asset property in the same manifest geometry block that records the overall bounds.
-        if category in {"chair", "stool-counter", "sofa"} and axis == "y":
+        if category in {"chair", "stool-counter", "sofa", "wc"} and axis == "y":
             seat = (geometry or {}).get("seatHeightMetres")
             if not isinstance(seat, (int, float)):
                 problems.append(
