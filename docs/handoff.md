@@ -1,3 +1,34 @@
+# L2 circulation dressing handoff — 2026-09-24 (`HOUSE-01009`)
+
+The secondary-tier circulation composition is complete in `L2_LANDING`, `L2_HALL` and
+`L2_HALL_W`. The landing reuses the upholstered piano bench on the west-wall south segment, away
+from the library portal. Each hall reuses a scaled runner and one member of the acquired framed-art
+family. The five ordinary static rows introduce no asset, material family, subsystem or optional
+dressing. Existing bench and art proxies remain active; the thin runners remain intentionally
+non-colliding.
+
+All 167 production prop rows pass exact placement, door-sweep and 0.70 m route validation. The
+90-cell grand tour passes. The measured cells are 14 chunks/materials in the landing, 10 in the
+east hall and 9 in the west hall, exactly matching their evidence-backed ceilings without a Reach
+split. The wider inside-geometry probe reports no L2 regression; its only failure is the older
+`L1_LANDING west` start beside `HOUSE-00999`'s bench, which this task does not hide or weaken.
+
+The clear-day and forced-light `Z-L2` fixed sets plus direct landing and hall detail views were
+inspected. The bench is grounded, both runners are flat, both images face the occupied space, and
+the door/cased-opening/stair routes remain clear. No clipping, floating geometry, z-fighting or
+new S1/S2 furnishing defect is visible. The dark normal hall views remain the already-scheduled M5
+baseline-lighting scope; forced light was used only to inspect placement.
+
+The remaining forecast is 177.75 realistic / 216.5 pessimistic hours. With 48.5 task-hours spent
+since the final reduction, the R14 projection remains 265.0 h, 15.0 h below the hard limit. Rule
+R2 now ties `Z-B1` and `Z-L1` at fourteen accessible cells still below target and selects the
+least-recently worked `Z-B1`; `Z-L2` has twelve. The exact next unblocked MUST task is
+`HOUSE-01020`, dressing `B1_HALL`, `B1_STAIR` and `B1_UNDERSTAIR`. All compilation must use at
+most four workers and be pinned to CPUs 4,5,7,9; strict-XNA additionally requires
+`HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # L1 master wet/storage dressing handoff — 2026-09-23 (`HOUSE-01001`)
 
 The secondary-tier `R-BATH` and `R-CLOSET` compositions are complete. `L1_MASTER_BATH` reuses the

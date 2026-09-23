@@ -2722,7 +2722,8 @@
       },
       "usedIn": [
         "L0_LIVING",
-        "L1_LANDING"
+        "L1_LANDING",
+        "L2_LANDING"
       ]
     },
     {
@@ -3455,7 +3456,9 @@
       "usedIn": [
         "L0_HALL",
         "L1_HALL",
-        "L1_HALL_W"
+        "L1_HALL_W",
+        "L2_HALL",
+        "L2_HALL_W"
       ]
     },
     {
@@ -31783,7 +31786,7 @@
       },
       "geometry": {"unitScale": 1, "upAxis": "Y", "boundsMetres": [0.694, 0.894, 0.05], "triangles": {"LOD0": 446}, "collision": "WallArt_COL"},
       "materialMap": {"ART_FRAME_DARK": "MAT_FURNITURE_PIANO_WOOD", "ART_MAT": "MAT_LIVING_ART_PAPER", "ART_IMAGE_15": "MAT_DECOR_WALL_ART_15"},
-      "usedIn": ["B1_CINEMA", "L1_HALL", "L1_HALL_W"]
+      "usedIn": ["B1_CINEMA", "L1_HALL", "L1_HALL_W", "L2_HALL", "L2_HALL_W"]
     },
     {
       "id": "MODEL_DECOR_WALL_ART_16",

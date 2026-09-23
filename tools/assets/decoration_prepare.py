@@ -150,7 +150,7 @@ ART = (
         "portrait", (360, 512), (0.48, 0.68), "matted", (0.694, 0.894, 0.05),
         "71f71f8f38a417b4c9af595f19f6f5d2265b707b826060c11e0d9661b7fecbe7",
         "05f04ee31942ae18359e7229759280d127cc32296e2836c7d32f8f5a925db929",
-        ("B1_CINEMA", "L1_HALL", "L1_HALL_W")),
+        ("B1_CINEMA", "L1_HALL", "L1_HALL_W", "L2_HALL", "L2_HALL_W")),
     Art("16", "b28967e69522ad9daf6c95c4e9c40000a83eda32fa9fd4a58d8657e4cf82c002",
         "square", (512, 512), (0.62, 0.62), "dark", (0.774, 0.774, 0.05),
         "f811da0b993c67242155da7c9d277253a7a9610fe8ab14e8ce4053c6c8b16d96",

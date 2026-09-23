@@ -471,6 +471,20 @@ CHUNK_BUDGET_EXCEPTIONS["L1_HALL_W"] = (
     10, "five measured shell finish chunks plus HOUSE-00999's two runner-wool roles and three "
         "framed-art roles; no vertex or Reach-cap split")
 
+# `HOUSE-01009` reuses the same bounded circulation composition on L2. The landing's bench adds
+# the same three established finish groups; each hall adds the runner's two wool roles and the
+# framed art's frame, mat and image roles to its own measured shell baseline.
+_l2_landing_limit, _l2_landing_reason = CHUNK_BUDGET_EXCEPTIONS["L2_LANDING"]
+CHUNK_BUDGET_EXCEPTIONS["L2_LANDING"] = (
+    _l2_landing_limit + 3,
+    _l2_landing_reason + "; HOUSE-01009 adds the reused bench's three measured finish groups")
+CHUNK_BUDGET_EXCEPTIONS["L2_HALL"] = (
+    10, "five measured shell finish chunks plus HOUSE-01009's two runner-wool roles and three "
+        "framed-art roles; no vertex or Reach-cap split")
+CHUNK_BUDGET_EXCEPTIONS["L2_HALL_W"] = (
+    9, "four measured shell finish chunks plus HOUSE-01009's two runner-wool roles and three "
+       "framed-art roles; no vertex or Reach-cap split")
+
 # HOUSE-01069 is a measured room-wide furnishing/lighting step, not a generic budget increase.
 # The new walnut/brass cabinet shares both established dining roles. Its ceramic serving set is
 # one new finish, and the two sideboard lamps' exact independently switched shade group needs

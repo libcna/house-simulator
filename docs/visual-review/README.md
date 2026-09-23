@@ -4774,3 +4774,24 @@ dresser, and no clipping, floating object, z-fighting, impossible intersection o
 is visible. Normal 10:30 bathroom surfaces are still very dark; that known house-wide readability
 gap belongs to M5. R3 now requires a zone move after three consecutive `Z-L1` tasks, and R2 selects
 `HOUSE-01009` in `Z-L2` next.
+
+## Round 116 — second-upper-floor circulation dressing
+
+Commit: `HOUSE-01009` working tree (`2026-09-24`). The local, Git-ignored
+[`clear-day`](captures/house-01009-l2-circulation-day) and
+[`forced-light`](captures/house-01009-l2-circulation-lit) sets cover all six fixed `Z-L2` views.
+Supplemental forced-light [`detail`](captures/house-01009-l2-circulation-detail) views inspect the
+landing bench and both framed images directly; these are placement evidence, not a claim that M5's
+normal day/night balance is complete.
+
+The three secondary circulation cells reuse only established kit pieces: the upholstered piano
+bench, hall-runner plane and portrait member of the acquired four-image art set. The landing bench
+is grounded on a short west-wall segment clear of the library portal, both runners remain flat,
+and both frames sit on and face away from their supporting walls. The door, cased-opening and stair
+routes remain visibly unobstructed. No clipping, floating object, z-fighting or other S1/S2
+furnishing defect is visible. The normal fixed hall frames remain deliberately dark; final
+baseline readability is the existing M5 requirement.
+
+R2 now ties `Z-B1` and `Z-L1` at fourteen accessible cells still below target and selects the
+least-recently worked `Z-B1`; `Z-L2` has twelve. Next: `HOUSE-01020`, dressing `B1_HALL`,
+`B1_STAIR` and `B1_UNDERSTAIR`.
