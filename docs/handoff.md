@@ -1,3 +1,36 @@
+# Attic C2 handoff — 2026-09-23 (`HOUSE-03265`)
+
+`Z-L3` is C2 across all five cells. The existing rafter-bounded shell already supplied clipped roof
+planes, 400 mm long-slope rafters, purlins, dormer reveals and one rough boarded walkway through
+each unfinished store; `L3_ROOM` already retained its authored flat collar-tie ceiling. This task
+kept those mechanisms and completed the visible construction contrast: recessed insulation-finish
+faces now represent insulation between long-slope rafters in the unfinished stores, and one
+same-section transverse purlin under each hip makes both end stores read as framed roof space. No
+collision, crouch, room data or runtime system changed.
+
+Round 110 inspected four fixed `Z-L3` views in clear day and with the existing attic groups forced:
+the finished room, west hip end, low west eaves and the insulated north-bay view from the west
+store. Utility cells remain zone-walk evidence under the review protocol rather than becoming
+fixed-camera targets. The lit set clearly distinguishes the finished plaster/collar envelope from
+rough walkway boards, timber framing and regular insulated bays. The two inherited controls
+changed only 194 / 365 pixels because most acceptance geometry already existed; the two new views
+directly expose the previously unreviewable low-eaves and insulation work.
+
+All 15 world rules, the shell generator selftest and manifest/material checks, shell unwrap, chunk
+selftest/report, camera route, inside-geometry route, focused stair traversal, both automatic-
+crouch regressions and the all-cell grand tour pass. The result is 776 chunks over 96 cells and
+2,224,361 vertices. `L3_STORE_N` is measured at 8/8 chunks and `L3_STORE_W` at 7/7 for their
+insulation finish; the other stores are at or below six. Generated shell geometry is 83,039 triangles,
+worst 3,004/3,500 in `L2_LANDING`. `verify_shell.py --report` reports only the established
+`FRIDGE_L0_KITCHEN` nested-container cut limitation, unrelated to L3.
+
+The remaining forecast is 203.75 realistic / 245 pessimistic hours. With 22.5 task-hours completed
+since the final reduction, the R14 ceiling projection is 267.5 h, 12.5 h below the hard limit.
+Rule that chooses the next task: R2 selects the sole remaining M2 zone task now that every zone is
+at least C2. The exact next unblocked MUST is `HOUSE-03267`; `Z-L0M` remains frozen by R4.
+
+---
+
 # Vertical-circulation C2 handoff — 2026-09-23 (`HOUSE-03266`)
 
 `Z-STAIR` is C2 across all eight authored flights. The existing shell flight grammar now gives

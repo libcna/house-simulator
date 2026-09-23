@@ -1521,6 +1521,7 @@ DORMER_TRIM_PROJECTION = 0.030
 SURFACE_COLOURS = {
     "floor":     (0.62, 0.51, 0.38, 1.0),
     "ceiling":   (0.92, 0.92, 0.90, 1.0),
+    "insulation": (0.94, 0.90, 0.78, 1.0),
     "wall":      (0.80, 0.78, 0.74, 1.0),
     "exterior":  (0.72, 0.70, 0.64, 1.0),
     "dormer_siding": (0.72, 0.70, 0.64, 1.0),
@@ -1547,6 +1548,7 @@ SURFACE_ORDER = list(SURFACE_COLOURS)
 SHELL_MATERIALS = {
     "floor": "MAT_CONCRETE_BROOM",
     "ceiling": "MAT_SOFFIT_WHITE",
+    "insulation": "MAT_BASE_FABRIC_COARSE",
     "wall": "MAT_SIDING_WARM_WHITE",
     "exterior": "MAT_SIDING_WARM_WHITE",
     "dormer_siding": "MAT_SIDING_WARM_WHITE",
@@ -1981,6 +1983,11 @@ RAFTER_DEPTH = 0.20
 PURLIN_SECTION = 0.15
 WALKWAY_WIDTH = 0.60
 WALKWAY_THICK = 0.030
+#: HOUSE-03265 leaves the existing roof frame authoritative and closes only its visible unfinished
+#: construction gap. Slightly recessed faces between neighbouring rafters read as insulation batts
+#: without becoming collision or hiding the timber edges.
+ATTIC_BATT_EDGE_GAP = 0.012
+ATTIC_BATT_RECESS = 0.025
 
 #: Exposed basement framing (`HOUSE-03261`). The unfinished utility/storage palette already
 #: authors `MAT_HATCH_PLY` as its trim finish, so it is also the data-driven selector for structure
@@ -3088,6 +3095,18 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                     continue
                 add([tuple(point) for point in piece], rafter_outward, "structure")
 
+        # HOUSE-03265: unfinished stores expose insulation between the already-authored rafters.
+        # The finished attic room deliberately gets none: its collar-tie ceiling and warm-white
+        # envelope are the visible distinction. These thin finish faces sit behind the timber,
+        # so they neither alter the rafter envelope nor participate in collision.
+        if (level or {}).get("ceiling") is None and cell.get("kind") == "closet":
+            for batt_corners in insulation_batt_faces(rafters_here or ()):
+                for bx0, bx1, bz0, bz1 in layout_io.cell_boxes(cell):
+                    piece = roof_geometry.clip_face(batt_corners, (bx0, bx1, bz0, bz1))
+                    if len(piece) < 3:
+                        continue
+                    add([tuple(point) for point in piece], (0.0, -1.0, 0.0), "insulation")
+
     surface["class"] = "metal"
     build_balcony_edge(cell, extent, list(neighbours), construction, solid, add)
     build_mezzanine_guard(cell, extent, cells_by_id, levels or {}, construction, solid)
@@ -3392,7 +3411,7 @@ def rafter_faces(outer: tuple, eaves_y: float, pitch: float):
                           (mid, top - RAFTER_DEPTH, at + RAFTER_WIDTH / 2.0),
                           (mid, top - RAFTER_DEPTH, at - RAFTER_WIDTH / 2.0)]
             faces.append((rafter, (0.0, -1.0, 0.0)))
-    # A purlin under each slope, halfway up it.
+    # A purlin under each long slope, halfway up it.
     for side in (-1.0, 1.0):
         near = (z0 if side < 0 else z1) if dx >= dz else (x0 if side < 0 else x1)
         mid = ((z0 + z1) / 2.0) if dx >= dz else ((x0 + x1) / 2.0)
@@ -3408,7 +3427,86 @@ def rafter_faces(outer: tuple, eaves_y: float, pitch: float):
                            (at - PURLIN_SECTION / 2.0, level - PURLIN_SECTION, along1),
                            (at - PURLIN_SECTION / 2.0, level, along1),
                            (at - PURLIN_SECTION / 2.0, level, along0)], (-1.0, 0.0, 0.0)))
+
+    # HOUSE-03265: one transverse purlin under each hip makes the end stores read as framed roof
+    # space too. Full jack-rafter repetition would add cost without improving their secondary-room
+    # tier; these two members reuse the same measured section and roof derivation as the long-side
+    # purlins.
+    for side in (-1.0, 1.0):
+        level = (eaves_y + top) / 2.0 - RAFTER_DEPTH
+        if dx >= dz:
+            at = x0 + half / 2.0 if side < 0 else x1 - half / 2.0
+            lo, hi = z0 + half / 2.0, z1 - half / 2.0
+            faces.append(([(at, level - PURLIN_SECTION, lo),
+                           (at, level - PURLIN_SECTION, hi),
+                           (at, level, hi), (at, level, lo)], (side, 0.0, 0.0)))
+        else:
+            at = z0 + half / 2.0 if side < 0 else z1 - half / 2.0
+            lo, hi = x0 + half / 2.0, x1 - half / 2.0
+            faces.append(([(lo, level - PURLIN_SECTION, at),
+                           (hi, level - PURLIN_SECTION, at),
+                           (hi, level, at), (lo, level, at)], (0.0, 0.0, side)))
     return faces
+
+
+def insulation_batt_faces(rafters):
+    """Return recessed insulation faces between adjacent long-slope rafters.
+
+    `rafter_faces` emits one narrow quad per rafter, alternating the two long slopes, followed by
+    four purlins. Grouping by the narrow spacing axis and slope midpoint keeps this derivation
+    independent of whether the roof ridge runs along X or Z.
+    """
+    groups = {}
+    for corners, outward in rafters:
+        if outward != (0.0, -1.0, 0.0) or len(corners) != 4:
+            continue
+        x_span = max(point[0] for point in corners) - min(point[0] for point in corners)
+        z_span = max(point[2] for point in corners) - min(point[2] for point in corners)
+        if x_span <= RAFTER_WIDTH + 1e-6:
+            key = ("x", round(sum(point[2] for point in corners) / 4.0, 4))
+            at = sum(point[0] for point in corners) / 4.0
+        elif z_span <= RAFTER_WIDTH + 1e-6:
+            key = ("z", round(sum(point[0] for point in corners) / 4.0, 4))
+            at = sum(point[2] for point in corners) / 4.0
+        else:
+            continue
+        groups.setdefault(key, []).append((at, corners))
+
+    result = []
+    for (axis, _side), rows in groups.items():
+        rows.sort(key=lambda row: row[0])
+        for (_previous_at, previous), (_current_at, current) in zip(rows, rows[1:]):
+            if axis == "x":
+                near_lo, near_hi = previous[1], current[0]
+                high_lo, high_hi = previous[2], current[3]
+                if near_hi[0] - near_lo[0] <= 2.0 * ATTIC_BATT_EDGE_GAP:
+                    continue
+                result.append([
+                    (near_lo[0] + ATTIC_BATT_EDGE_GAP,
+                     near_lo[1] - ATTIC_BATT_RECESS, near_lo[2]),
+                    (near_hi[0] - ATTIC_BATT_EDGE_GAP,
+                     near_hi[1] - ATTIC_BATT_RECESS, near_hi[2]),
+                    (high_hi[0] - ATTIC_BATT_EDGE_GAP,
+                     high_hi[1] - ATTIC_BATT_RECESS, high_hi[2]),
+                    (high_lo[0] + ATTIC_BATT_EDGE_GAP,
+                     high_lo[1] - ATTIC_BATT_RECESS, high_lo[2]),
+                ])
+            else:
+                near_lo, near_hi = previous[1], current[0]
+                high_lo, high_hi = previous[2], current[3]
+                if near_hi[2] - near_lo[2] <= 2.0 * ATTIC_BATT_EDGE_GAP:
+                    continue
+                result.append([
+                    (near_lo[0], near_lo[1] - ATTIC_BATT_RECESS,
+                     near_lo[2] + ATTIC_BATT_EDGE_GAP),
+                    (near_hi[0], near_hi[1] - ATTIC_BATT_RECESS,
+                     near_hi[2] - ATTIC_BATT_EDGE_GAP),
+                    (high_hi[0], high_hi[1] - ATTIC_BATT_RECESS,
+                     high_hi[2] - ATTIC_BATT_EDGE_GAP),
+                    (high_lo[0], high_lo[1] - ATTIC_BATT_RECESS,
+                     high_lo[2] + ATTIC_BATT_EDGE_GAP),
+                ])
+    return result
 
 
 def eave_finish_boxes(outer: tuple, eaves_y: float) -> list[tuple]:
@@ -5195,9 +5293,10 @@ def selftest(output: Path) -> int:
     # eight corners are under the other roof, and a roof built without that list has none.
     bare = plain_roof_faces - (4 + 4 + 4 + 4 * len(gutter_probe) + len(hip_caps) + 6
                                + len(eave_boxes) * 6)
-    require(bare == expected_rafters + 2,
+    require(bare == expected_rafters + 4,
             f"a rafter every {RAFTER_SPACING * 1000:.0f} mm over the ridge's {ridge_run:.2f} m, "
-            f"both slopes, and a purlin under each ({bare} against {expected_rafters + 2})")
+            f"both slopes, and a purlin under each long slope and hip "
+            f"({bare} against {expected_rafters + 4})")
 
     store = cells["L3_STORE_W"]
     require(store.get("kind") == "closet" and levels["L3"].get("ceiling") is None,
@@ -5279,6 +5378,32 @@ def selftest(output: Path) -> int:
     require(boards >= 4 and boarded_faces == plain_store_faces + 6,
             f"the store gets a walkway board along it, six faces of it ({boards} faces near the "
             f"floor, {plain_store_faces} -> {boarded_faces})")
+
+    attic_rafters = rafters_for(levels["L3"], layout, construction)
+    attic_roof_faces = roof_faces_for(levels["L3"], layout, construction)
+    batts = insulation_batt_faces(attic_rafters)
+    require(len(batts) == expected_rafters - 2,
+            f"and insulation fills every bay between the long-slope rafters "
+            f"({len(batts)} batt faces)")
+    reset_scene()
+    insulated = build_cell(store, extent_of(store, levels["L3"])[0], neighbours=neighbours,
+                           construction=construction, level=levels["L3"], levels=levels,
+                           cells_by_id=cells, roof=attic_roof,
+                           roof_planes_here=attic_roof_faces,
+                           rafters_here=attic_rafters)
+    store_insulation = sum(SURFACE_ORDER[face.material_index] == "insulation"
+                           for face in insulated.data.polygons)
+    reset_scene()
+    finished_shell = build_cell(finished, extent_of(finished, levels["L3"])[0],
+                                neighbours=neighbours, construction=construction,
+                                level=levels["L3"], levels=levels, cells_by_id=cells,
+                                roof=attic_roof, roof_planes_here=attic_roof_faces,
+                                rafters_here=attic_rafters)
+    room_insulation = sum(SURFACE_ORDER[face.material_index] == "insulation"
+                          for face in finished_shell.data.polygons)
+    require(store_insulation > 0 and room_insulation == 0,
+            f"unfinished stores receive roof-bay insulation while the finished room retains only "
+            f"its authored collar ceiling ({store_insulation} vs {room_insulation} batt faces)")
 
     # ---- `HOUSE-00464`: the porch ---------------------------------------------------------------
     porch = cells["L0_PORCH"]

@@ -119,6 +119,11 @@ NEW_POSES = (
     ("bedroom-6", "-11.90,6.55,-16.30,90.0,0.0"),
     ("attic-room", "-5.00,9.30,-20.50,90.0,0.0"),
     ("attic-store-west", "-11.90,9.30,-20.50,90.0,0.0"),
+    # HOUSE-03265: the inherited store view could not show both the hip end and the insulated long
+    # slope. These positions stay in the representative secondary west store (utility cells remain
+    # zone-walk evidence) while exposing the deliberately low eaves and the view into the north bay.
+    ("attic-store-west-eaves", "-8.20,9.30,-20.70,270.0,20.0"),
+    ("attic-store-west-to-north", "-6.20,9.30,-25.55,90.0,8.0"),
     ("main-stair-l2-exit", "3.55,6.55,-15.50,0.0,0.0"),
     ("basement-stair", "4.30,-2.30,-19.50,180.0,0.0"),
     # HOUSE-03266: the inherited stair views miss several end-on silhouettes. These paired
@@ -191,6 +196,8 @@ POSE_DETAILS = {
     "bedroom-6": ("Z-L2", "L2_BED6", None),
     "attic-room": ("Z-L3", "L3_ROOM", None),
     "attic-store-west": ("Z-L3", "L3_STORE_W", None),
+    "attic-store-west-eaves": ("Z-L3", "L3_STORE_W", None),
+    "attic-store-west-to-north": ("Z-L3", "L3_STORE_W", None),
     "main-stair-l2-exit": ("Z-STAIR", "L2_STAIR_MAIN", None),
     "basement-stair": ("Z-STAIR", "B1_STAIR", None),
     "main-stair-l1-transition": ("Z-STAIR", "L1_STAIR_MAIN", None),

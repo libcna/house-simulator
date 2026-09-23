@@ -401,6 +401,17 @@ for concrete_stair_cell in ("B1_STAIR", "L0_GARAGE"):
         previous_limit + 1,
         previous_reason + "; HOUSE-03266 adds one measured metal stair-detail role")
 
+# `HOUSE-03265`: the north store already owns a weather-facing dormer-frame role, while the west
+# store starts at the six-chunk room target. Their shared roof-bay insulation finish raises each
+# by exactly one; the south store reaches six and the east store remains below the target.
+_attic_north_limit, _attic_north_reason = CHUNK_BUDGET_EXCEPTIONS["L3_STORE_N"]
+CHUNK_BUDGET_EXCEPTIONS["L3_STORE_N"] = (
+    _attic_north_limit + 1,
+    _attic_north_reason + "; HOUSE-03265 adds the measured roof-bay insulation detail role")
+CHUNK_BUDGET_EXCEPTIONS["L3_STORE_W"] = (
+    7, "six measured unfinished-attic shell finish chunks plus HOUSE-03265's roof-bay "
+       "insulation detail role")
+
 # HOUSE-01069 is a measured room-wide furnishing/lighting step, not a generic budget increase.
 # The new walnut/brass cabinet shares both established dining roles. Its ceramic serving set is
 # one new finish, and the two sideboard lamps' exact independently switched shade group needs

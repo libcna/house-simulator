@@ -175,7 +175,12 @@
         {"id": "L3_STORE_N", "accessible": true, "standingPoint": [-0.55, 9.3, -25.55], "tier": "U"},
         {"id": "L3_STORE_S", "accessible": true, "standingPoint": [0.0, 9.3, -15.65], "tier": "U"}
       ],
-      "reviewPoses": ["attic-room", "attic-store-west"]
+      "reviewPoses": [
+        "attic-room",
+        "attic-store-west",
+        "attic-store-west-eaves",
+        "attic-store-west-to-north"
+      ]
     },
     {
       "id": "Z-STAIR",

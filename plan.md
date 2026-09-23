@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **142 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 175 / 206 / 247 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G2, not passed.** Next: attic architecture `HOUSE-03265` by R1/R2 |
+| Active plan | **141 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 173 / 204 / 245 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G2, not passed.** Next: rear/side-elevation architecture `HOUSE-03267` by R2 |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -289,7 +289,7 @@ proved all 90 intended-accessible cells and the tight-space traversal. G1 clears
 | `Z-GAR` | **C2** | 0 / 1 | — | Round 108; finished envelope/sectional, fixed loft ladder and complete timber guard (`HOUSE-03262`) | Furnishing and night readability belong to M4/M5 |
 | `Z-L1` | **C2** | 0 / 1 | — | Round 105; all 20 cells have palette finishes, complete trim/window joinery and guarded finished balconies (`HOUSE-03263`) | Furnishing and night readability belong to M4/M5 |
 | `Z-L2` | **C2** | — | 0 / 1 | Round 106; all 15 accessible cells have palette finishes, complete trim/window joinery and finished circulation doors (`HOUSE-03264`) | Furnishing and night readability belong to M4/M5 |
-| `Z-L3` | **C1** | 0 / 1 | — | Round 103; automatic attic crouch (`HOUSE-00558`) | S2: empty; no structure/finished-room contrast |
+| `Z-L3` | **C2** | 0 / 1 | — | Round 110; finished room, framed/insulated stores and boarded walks (`HOUSE-03265`) | Furnishing and night readability belong to M4/M5 |
 | `Z-STAIR` | **C2** | 0 / 3 | — | Round 109; all 8 flights have complete tiered stair joinery (`HOUSE-03266`) | Furnishing and night readability belong to M4/M5 |
 | `Z-EXF` | **C3** (C4-level content in place) | — | 0 / 4 | Round 103 day/night/overcast; ≈ 25 facade, roof, entry and approach tasks; property bot walk (`HOUSE-00782`) | No zone-specific S2 |
 | `Z-EXR` | **C2** (C3 partial) | 0 / 2 | — | Round 103; terrace, shed shell, beds and trellis (`HOUSE-00768`, `00769`, `00771`, `01291`) | S2: sparse working areas; rear/side architectural finish below the front standard |
@@ -307,14 +307,15 @@ visually complete. C4 and C5 are target counts from the tier classification, not
 | `Z-GAR` | 2 | 1 | 0 | 0.00 | 1 | 1 / 1 | 2 | 1 | 0 |
 | `Z-L1` | 20 | 20 | 1 | 0.05 | 19 | 20 / 20 | 6 | 1 | 0 |
 | `Z-L2` | 16 | 15 | 0 | 0.00 | 15 | 15 / 15 | 6 | 0 | 1 |
-| `Z-L3` | 5 | 5 | 0 | 0.00 | 5 | 5 / 5 | 2 | 1 | 0 |
+| `Z-L3` | 5 | 5 | 0 | 0.00 | 5 | 5 / 5 | 4 | 1 | 0 |
 | `Z-STAIR` | 6 | 6 | 0 | 0.00 | 6 | 6 / 6 | 9 | 3 | 0 |
 | `Z-EXF` | 5 | 5 | 11 | 2.20 | 1 | 5 / 5 | 4 | 0 | 4 |
 | `Z-EXR` | 7 | 7 | 15 | 2.14 | 4 | 3 / 7 | 3 | 2 | 0 |
 | `Z-STR` | 2 | 0 | 0 | — | 0 | 0 / 0 | 1 | 0 | 0 |
 
-**Minimum level today: C1** (one zone). By rules R1 and R2, M2 raises the least-complete zone to
-C2; `Z-L3` is next. M3 tooling may run alongside.
+**Minimum level today: C2.** Every zone has reached the architectural floor, but G2 remains open
+until `HOUSE-03267` closes the rear/side-elevation S2 and `HOUSE-03280` reviews the result. M3
+tooling may run alongside.
 
 ---
 
@@ -388,7 +389,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 |---|---|---|---|---|---|---|
 | [M0](#m0--scope-reset-and-breadth-instruments) — Scope reset and breadth instruments | A (support) | 03201–03220 | 0 | done | R10, G1–G5 | 0 |
 | [M1](#m1--whole-property-traversal-c1-everywhere--gate-g1) — Whole-property traversal | A | 03221–03260 | 0 | **G1 passed** · `HOUSE-03240` | D2 | 0 |
-| [M2](#m2--architectural-completion-c2-everywhere--gate-g2) — Architectural completion | A | 03261–03300 | 3 | **G2** · `HOUSE-03280` | D1 | 4.5 |
+| [M2](#m2--architectural-completion-c2-everywhere--gate-g2) — Architectural completion | A | 03261–03300 | 2 | **G2** · `HOUSE-03280` | D1 | 2.5 |
 | [M3](#m3--the-reusable-furnishing-kit) — The reusable furnishing kit | A (support) | 03301–03340 | 14 | kit ready for M4 | D3 | 20 |
 | [M4](#m4--dressing-everywhere-the-furnishing-half-of-c3--checkpoint) — Dressing everywhere | A | 03341–03400 | 31 | checkpoint · `HOUSE-03380` | D3 | 31 |
 | [M5](#m5--baseline-lighting-everywhere-the-lighting-half-of-c3--gate-g3) — Baseline lighting everywhere | A | 03401–03440 | 10 | **G3** · `HOUSE-03420` | D3, D6 | 19.75 |
@@ -563,11 +564,12 @@ green.
       note: Round 103 S2 architecture list: as L1, with the library/games/sitting identities not yet supported by their architectural finish
       note: (2026-09-23) Round 106 confirms all 15 accessible cells' authored room palettes and the shared reveal/sill/trim grammar. The seven single leaves facing `L2_LANDING`, `L2_HALL` and `L2_HALL_W` now explicitly reuse the four-panel, two-sided steel-lever joinery; the landing's already-finished Juliet pair remains unchanged. Clear-day and lights-forced zone sets were inspected, and the grand tour plus both inside-geometry route tests pass. Library shelving stays correctly assigned to M4; furnishing and night readability remain M4/M5 work
 
-- [ ] HOUSE-03265 — Bring the attic's architecture to C2
+- [x] HOUSE-03265 — Bring the attic's architecture to C2
       dep: HOUSE-03240, HOUSE-03203 · sys: content · plat: TOOL · pri: MUST · zone: Z-L3 · adv: G2, D1 · est: 2
       accept: C2 for the 5 `Z-L3` cells: visible roof structure in the stores (rafters, ridge, collar ties or purlins), insulation between joists where unfinished, a boarded walkway through the stores, dormer reveals, knee walls and a finished ceiling in `L3_ROOM`; the crouch zones read as low headroom rather than as a collision surprise
       verify: `Z-L3` capture; grand tour (crouch)
       note: Round 103 S2 architecture list: stores lack readable roof structure/unfinished construction and `L3_ROOM` lacks a clearly finished envelope
+      note: (2026-09-23) Round 110 confirms C2 across all five attic cells. The existing rafter-bounded shell, dormer reveals, store walkways and `L3_ROOM` collar ceiling remain authoritative. Unfinished long-slope bays now expose recessed insulation between the existing 400 mm rafters, and one existing-section transverse purlin under each hip makes the end stores read as framed roof space without a full jack-rafter expansion. Four fixed views inspect the finished room, hip end, low eaves and insulated north bay; utility cells remain covered by the grand-tour zone walk as required by the review protocol. The all-cell grand tour and both automatic-crouch regressions pass. Furnishing and final night readability remain assigned to M4/M5
 
 - [x] HOUSE-03266 — Bring the vertical circulation to C2
       dep: HOUSE-03240, HOUSE-03203 · sys: content · plat: TOOL · pri: MUST · zone: Z-STAIR · adv: G2, D1 · est: 2
@@ -1834,7 +1836,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | Milestone | Tasks before | Hours before | **Tasks now** | Optimistic | **Realistic** | Pessimistic | Reserve |
 |---|---|---|---|---|---|---|---|
 | M1 Whole-property traversal | 4 | 9 | **0** | 0 | **0** | 0 | — |
-| M2 Architectural completion | 8 | 18 | **3** | 3.83 | **4.5** | 4.95 | — |
+| M2 Architectural completion | 8 | 18 | **2** | 2.13 | **2.5** | 2.75 | — |
 | M3 The reusable furnishing kit | 16 | 33 | **14** | 17 | **20** | 22 | — |
 | M4 Dressing everywhere | 40 | 48.75 | **31** | 26.25 | **31** | 37 | R-D +3 |
 | M5 Baseline lighting everywhere | 12 | 24.5 | **10** | 16.75 | **19.75** | 21.75 | — |
@@ -1849,12 +1851,12 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **142** | **174.83** | **205.75** | **247.2** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **141** | **173.13** | **203.75** | **245** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-about 33 h. Adding the 20.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-267.7 h, about 12.3 h under the limit. That margin is
+35 h. Adding the 22.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+267.5 h, 12.5 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |
@@ -1866,7 +1868,7 @@ small on purpose: the ceiling is a limit, not a budget to fill.
 | R-E | M1 | 0 (retired at G1) | the grand tour and sweep stayed within M1's budget plus gate review |
 
 **By area,** against the owner's sanity reference for this pass: traversal 0 h (complete); architecture
-8.5 h (≈ 18); furnishing kit 20 h (18–22); whole-house furnishing 31 h (30–38); lighting 19.75 h
+6.5 h (≈ 18); furnishing kit 20 h (18–22); whole-house furnishing 31 h (30–38); lighting 19.75 h
 (18–22); C4/C5 polish 19.75 h (18–24); environment 13.25 h (10–15); audio 9 h (8–10); shell 8.5 h
 (8–10); performance 9.5 h (≈ 10); final polish 7 h (6–8); tests 3.5 h (≈ 5); Linux 10.25 h
 (11–13); Web 19.5 h (18–22); Android 23.75 h (23–27); release 6.5 h (6–8).

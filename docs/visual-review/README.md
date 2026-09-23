@@ -4636,3 +4636,27 @@ show guards aligned with the established facade treatment. Both focused traversa
 the visual treads and rails did not change the authoritative walkable collision. No S1/S2
 architecture issue remains in `Z-STAIR`; final night readability and furnishing remain assigned to
 M5/M4. Next: `HOUSE-03265`, selected by R1/R2 because `Z-L3` is the only zone still below C2.
+
+## Round 110 — attic at C2
+
+Commit: `HOUSE-03265` working tree (`2026-09-23`). Before: the two inherited fixed production views
+in local, Git-ignored [`clear-day`](captures/house-03265-before-day) and
+[`lights-forced`](captures/house-03265-before-lit) sets. After: four-view matching-condition
+[`clear-day`](captures/house-03265-after-day) and
+[`lights-forced`](captures/house-03265-after-lit) sets. Both final contact sheets and every frame
+were inspected. Utility cells remain covered by the zone walk rather than violating the review
+protocol's rule against fixed poses in U-tier cells.
+
+The existing rafter-bounded shell already clipped each cell under the roof, provided long-slope
+rafters and purlins, cut dormer reveals, laid rough store walkways, and retained `L3_ROOM`'s flat
+collar ceiling. Recessed insulation-finish faces now fill the unfinished long-slope bays between the
+400 mm rafters, and one same-section transverse purlin under each hip gives the end stores visible
+roof framing without a costly jack-rafter expansion. The two added west-store poses expose the low
+hip eaves and look through to the insulated north bay. The inherited room/store controls change
+194 / 365 pixels; direct new views carry the broader acceptance evidence.
+
+The lit sheet clearly separates the finished plaster/collar envelope from exposed timber,
+insulation and walkway boards. The all-cell grand tour reaches all five cells, while both automatic
+crouch regressions pass and preserve the feet/eye transition under low rafters. No S1/S2
+architecture issue remains in `Z-L3`; furnishing and final night readability remain M4/M5 work.
+Next: `HOUSE-03267`, the sole remaining M2 zone task, selected by R2.
