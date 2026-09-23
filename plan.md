@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **127 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 156 / 184 / 223 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G2 passed.** Next: acquire the bounded decoration group in `HOUSE-00982` |
+| Active plan | **126 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 155 / 183 / 222 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G2 passed.** Next: acquire the bounded clutter group in `HOUSE-00984` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -391,7 +391,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M0](#m0--scope-reset-and-breadth-instruments) — Scope reset and breadth instruments | A (support) | 03201–03220 | 0 | done | R10, G1–G5 | 0 |
 | [M1](#m1--whole-property-traversal-c1-everywhere--gate-g1) — Whole-property traversal | A | 03221–03260 | 0 | **G1 passed** · `HOUSE-03240` | D2 | 0 |
 | [M2](#m2--architectural-completion-c2-everywhere--gate-g2) — Architectural completion | A | 03261–03300 | 0 | **G2 passed** · `HOUSE-03280` | D1 | 0 |
-| [M3](#m3--the-reusable-furnishing-kit) — The reusable furnishing kit | A (support) | 03301–03340 | 7 | kit ready for M4 | D3 | 8.5 |
+| [M3](#m3--the-reusable-furnishing-kit) — The reusable furnishing kit | A (support) | 03301–03340 | 1 | kit ready for M4 | D3 | 1.25 |
 | [M4](#m4--dressing-everywhere-the-furnishing-half-of-c3--checkpoint) — Dressing everywhere | A | 03341–03400 | 31 | checkpoint · `HOUSE-03380` | D3 | 31 |
 | [M5](#m5--baseline-lighting-everywhere-the-lighting-half-of-c3--gate-g3) — Baseline lighting everywhere | A | 03401–03440 | 10 | **G3** · `HOUSE-03420` | D3, D6 | 19.75 |
 | [M6](#m6--main-cells-and-hero-areas-c4-c5--gates-g4-and-g5) — Main cells and hero areas | A | 03441–03500 | 15 | **G4** · `HOUSE-03452`, **G5** · `HOUSE-03480` | D4 | 19.75 |
@@ -710,11 +710,12 @@ second reduction capped them at 62 and 6.
       trace: was *the 26 small-appliance and lamp models*, then cap 6 (`HOUSE-03206`)
       note: (2026-09-23) R8 reuse retained six existing table, floor, ceiling, pendant and task-puck fixture families; only the two shapes still named by the kit were acquired within cap four. The 0.60 m articulated desk lamp comes from the official CC0 3D Assets Bedroom and Living Room Furniture pack (Muse Spark via T3 Code), and the unadorned 2.4 m twin-tube utility fitting from its Woodworking Workshop and Joinery pack (Claude Opus 5). Both official CDN bytes and upstream hashes are pinned. The shared bounded static preparation path bakes their hierarchy, adds UV0 and one enclosing 12-triangle proxy apiece; the desk lamp retains a support-plane origin while the utility fitting retains its ceiling fixing plane. Existing warm and neutral switched-emissive roles mark the physical diffuser meshes for M5 without any new runtime lighting system. The group/licence/scale/origin/manifest gates pass, CNA compiled the 944 visible triangles to two CNBs totalling 132,784 bytes, and a 1400 × 720 headless review showed both support contacts, recognizable silhouettes and no clipping, floating parts or z-fighting
 
-- [ ] HOUSE-00982 — Acquire the decoration set (cap 6 plus one wall-art set)
+- [x] HOUSE-00982 — Acquire the decoration set (cap 6 plus one wall-art set)
       dep: HOUSE-00296, HOUSE-03302 · sys: content · plat: TOOL · pri: MUST · zone: all · adv: D3 · est: 1.25
       accept: the kit table's *Decoration* row, within the cap, including one CC0 wall-art set of at most 8 images with frame variants; rugs are generated planes with CC0 textures; static props with collision proxies and manifest and licence rows
       verify: the group gate; the licence gate
       trace: absorbs `HOUSE-02688`; was *the 55 decoration models*, then cap 15 (`HOUSE-03206`)
+      note: (2026-09-23) Rule R8 retained the existing ground-floor plant, frame and rug families, so only four CC0 models were acquired within cap six: a grouped second plant form, standing mirror, wall clock and narrow vase. Official 3D Assets CDN bytes and generator declarations are provenance/hash pinned. The shared bounded static path bakes their hierarchy, UV0 and one 12-triangle proxy apiece; the plant's unused required-WebP preview nodes are stripped because its named slots bind existing canonical materials, avoiding an unsupported CNA source extension without changing visible roles. The one wall-art set contains four selected CC0 OpenGameArt abstracts (two landscape, one centred portrait and one square crop) in three deterministic wall-plane frame variants, below the eight-image ceiling. Existing generated entry/hall rug planes continue to use ambientCG's recorded CC0 Fabric061 weave. One group gate pins the four acquisitions, four textures, four reproducible frames, manifests, licences, bounds, origins, materials and rug reuse. The group totals 6,994 visible and 96 collision triangles; CNA compiled the eight models to 758,912 bytes and the four art textures to 3,182,144 bytes. Individual headless frame renders and a decoration composition review found grounded support/fixing planes, distinct readable images and no clipping, floating parts or z-fighting
 
 - [ ] HOUSE-00984 — Acquire the clutter set (cap 6)
       dep: HOUSE-00296, HOUSE-03302 · sys: content · plat: TOOL · pri: MUST · zone: all · adv: D3 · est: 1.25
@@ -1852,7 +1853,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 |---|---|---|---|---|---|---|---|
 | M1 Whole-property traversal | 4 | 9 | **0** | 0 | **0** | 0 | — |
 | M2 Architectural completion | 8 | 18 | **0** | 0 | **0** | 0 | — |
-| M3 The reusable furnishing kit | 16 | 33 | **2** | 2.1 | **2.5** | 2.75 | — |
+| M3 The reusable furnishing kit | 16 | 33 | **1** | 1.1 | **1.25** | 1.4 | — |
 | M4 Dressing everywhere | 40 | 48.75 | **31** | 26.25 | **31** | 37 | R-D +3 |
 | M5 Baseline lighting everywhere | 12 | 24.5 | **10** | 16.75 | **19.75** | 21.75 | — |
 | M6 Main cells and hero areas | 20 | 32.5 | **15** | 16.75 | **19.75** | 21.75 | — |
@@ -1866,12 +1867,12 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **127** | **156.1** | **183.75** | **223** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **126** | **155.1** | **182.5** | **221.6** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-57 h. Adding the 42.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-265.5 h, 14.5 h under the limit. That margin is
+58.4 h. Adding the 43.75 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+265.4 h, 14.6 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |

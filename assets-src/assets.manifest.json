@@ -31555,6 +31555,286 @@
       }
     },
     {
+      "id": "MODEL_DECOR_FLOOR_MIRROR",
+      "category": "floor-mirror",
+      "sourceFile": "assets-src/Models/Furniture/Decoration/floor_mirror.glb",
+      "sourceSha256": "0e70a79a2ad3e9e33b39825b933b3904c99dabb6f0c3bdc6d21ec69513284bea",
+      "contentName": "Models/Furniture/Decoration/floor_mirror",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Dressing Mirror Round from Bedroom and Living Room Furniture",
+        "url": "https://cdn.3dassets.dev/assets/38808/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00982 selected one of only four decoration acquisitions after reusing the existing plant and frame families. The official 3D Assets pack declares Muse Spark via T3 Code as its AI generator and publishes this model under CC0 1.0. tools/assets/decoration_prepare.py pins upstream SHA-256 3a8d064c228cde84ff16e17c86bdd7352a1d596fc7ad658ea979017b649ce2a9, bakes static geometry, adds UV0 and appends one twelve-triangle enclosing collision box."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [0.82, 1.792, 0.43992],
+        "triangles": {"LOD0": 1104},
+        "collision": "Mirror_COL"
+      },
+      "materialMap": {
+        "walnut": "MAT_FURNITURE_PIANO_WOOD",
+        "metal": "MAT_KITCHEN_HARDWARE_STEEL",
+        "glass": "MAT_GLASS_CLEAR"
+      },
+      "usedIn": ["L1_MASTER_CLOSET", "L1_BED2", "L2_BED5", "L2_BED6"]
+    },
+    {
+      "id": "MODEL_DECOR_WALL_CLOCK",
+      "category": "wall-clock",
+      "sourceFile": "assets-src/Models/Furniture/Decoration/wall_clock.glb",
+      "sourceSha256": "af6da4c0176aa56920505267fe1b5e0f1b2c0a51ed8bbb44aaae1b4bfb169117",
+      "contentName": "Models/Furniture/Decoration/wall_clock",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Wall clock from Laundromat and Cleaning Services",
+        "url": "https://cdn.3dassets.dev/assets/25552/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00982 selected one of only four decoration acquisitions. The official 3D Assets pack declares Claude Fable 5.1 as its AI generator and publishes this model under CC0 1.0. tools/assets/decoration_prepare.py pins upstream SHA-256 2ba3406ef891bf9ea941e52f4c9dd2295301c0ea167ef4012de43f191a9549da, bakes static geometry, moves the back fixing plane to the wall origin, adds UV0 and appends one twelve-triangle enclosing collision box."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [0.34, 0.34, 0.122999],
+        "triangles": {"LOD0": 988},
+        "collision": "WallClock_COL"
+      },
+      "materialMap": {
+        "dark": "MAT_FIXTURE_DARK_BRONZE",
+        "carcass": "MAT_DOOR_PAINTED",
+        "accent": "MAT_PAINT_PALE_ROSE",
+        "metal": "MAT_KITCHEN_HARDWARE_STEEL",
+        "glass": "MAT_GLASS_CLEAR"
+      },
+      "usedIn": ["B1_WORKSHOP", "L0_LAUNDRY", "L1_HALL", "L2_HALL"]
+    },
+    {
+      "id": "MODEL_DECOR_PLANT_GROUP",
+      "category": "houseplant",
+      "sourceFile": "assets-src/Models/Furniture/Decoration/plant_group.glb",
+      "sourceSha256": "fb5286a463a0e40bb1bdf094db85ea2517649cda968e2a8e13d0b26565f9e7ca",
+      "contentName": "Models/Furniture/Decoration/plant_group",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Potted Plant Group from Indian Bazaar Street and Temple",
+        "url": "https://cdn.3dassets.dev/assets/36579/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00982 selected this second plant form after retaining the existing ground-floor plant. The official 3D Assets pack declares Claude Opus 5 as its AI generator and publishes this model under CC0 1.0. tools/assets/decoration_prepare.py pins upstream SHA-256 2336e6733dc6d3c825da78a04b4bd6122e823e66075158af4c65a6b1448a58fa, bakes static geometry, removes the unused WebP preview nodes because the source slots bind canonical project materials, adds UV0 and appends one twelve-triangle enclosing collision box."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [1.0782, 0.821747, 0.974054],
+        "triangles": {"LOD0": 1326},
+        "collision": "PlantGroup_COL"
+      },
+      "materialMap": {
+        "terracotta": "MAT_FOYER_CERAMIC",
+        "timber": "MAT_FURNITURE_PIANO_WOOD",
+        "leaf": "MAT_FURNITURE_PLANT_LEAF",
+        "teal": "MAT_PAINT_MUTED_TEAL"
+      },
+      "usedIn": ["B1_GYM", "L1_SITTING", "L2_LIBRARY", "L3_ROOM"]
+    },
+    {
+      "id": "MODEL_DECOR_NARROW_VASE",
+      "category": "vase",
+      "sourceFile": "assets-src/Models/Furniture/Decoration/narrow_vase.glb",
+      "sourceSha256": "d29d644e60201b6b3e7590bbc25d1d76dbdd2d0917682b8b807e385ad42ee27b",
+      "contentName": "Models/Furniture/Decoration/narrow_vase",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Narrow Neck Vase from Ceramics Pottery Studio",
+        "url": "https://cdn.3dassets.dev/assets/29517/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00982 selected one of only four decoration acquisitions. The official 3D Assets pack declares GPT-6 as its AI generator and publishes this model under CC0 1.0. tools/assets/decoration_prepare.py pins upstream SHA-256 99d4497e6995aa92c5293c7d437a12c190edf0b7489c965d8df9aae86e653239, bakes static geometry, adds UV0 and appends one twelve-triangle enclosing collision box."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [0.29998, 0.48, 0.29998],
+        "triangles": {"LOD0": 1792},
+        "collision": "Vase_COL"
+      },
+      "materialMap": {"sage": "MAT_FOYER_CERAMIC"},
+      "usedIn": ["B1_WINE", "L1_SITTING", "L2_LIBRARY", "L3_ROOM"]
+    },
+    {
+      "id": "MODEL_DECOR_WALL_ART_13",
+      "category": "picture",
+      "sourceFile": "assets-src/Models/Furniture/Decoration/wall_art_13.glb",
+      "sourceSha256": "9ff92d588282c46a3e4ce30c8ef988d1c0693eaa2d6d716cfabef4f926d15df4",
+      "contentName": "Models/Furniture/Decoration/wall_art_13",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Dark-frame variant for PuzzleAndy abstract 13",
+        "url": "https://opengameart.org/sites/default/files/abstract_13.jpg",
+        "author": "PuzzleAndy / frame geometry by cna-house",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00982 wall-art set member. The source page publishes the abstract image under CC0; tools/assets/decoration_prepare.py pins original JPEG SHA-256 3019297b5ea067c205f4879111ad1c2b929bbafe26aa86067e81ddc1b803c7f2 and tools/blender/wall_art_set.py deterministically authors this wall-plane frame and twelve-triangle proxy."
+      },
+      "geometry": {"unitScale": 1, "upAxis": "Y", "boundsMetres": [0.994, 0.714, 0.05], "triangles": {"LOD0": 446}, "collision": "WallArt_COL"},
+      "materialMap": {"ART_FRAME_DARK": "MAT_FURNITURE_PIANO_WOOD", "ART_MAT": "MAT_LIVING_ART_PAPER", "ART_IMAGE_13": "MAT_DECOR_WALL_ART_13"},
+      "usedIn": ["L1_SITTING", "L2_LIBRARY"]
+    },
+    {
+      "id": "MODEL_DECOR_WALL_ART_14",
+      "category": "picture",
+      "sourceFile": "assets-src/Models/Furniture/Decoration/wall_art_14.glb",
+      "sourceSha256": "ef4583c1d14aa185096bf6d7b986378fea07e544231ee4ca57194b236a87b92d",
+      "contentName": "Models/Furniture/Decoration/wall_art_14",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Brass-frame variant for PuzzleAndy abstract 14",
+        "url": "https://opengameart.org/sites/default/files/abstract_14.jpg",
+        "author": "PuzzleAndy / frame geometry by cna-house",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0", "licenceFile": "licenses/cc0-1.0/LICENCE.txt", "attribution": "",
+        "redistributeSource": true, "redistributeDerived": true, "commercialUse": true, "modification": true,
+        "note": "HOUSE-00982 wall-art set member. The source page publishes the abstract image under CC0; tools/assets/decoration_prepare.py pins original JPEG SHA-256 2c985e7a036016c5774a2568f57093afe7a36c3947a7e605f134de182633c59c and tools/blender/wall_art_set.py deterministically authors this wall-plane frame and twelve-triangle proxy."
+      },
+      "geometry": {"unitScale": 1, "upAxis": "Y", "boundsMetres": [1.084, 0.764, 0.05], "triangles": {"LOD0": 446}, "collision": "WallArt_COL"},
+      "materialMap": {"ART_FRAME_BRASS": "MAT_FURNITURE_PIANO_BRASS", "ART_MAT": "MAT_LIVING_ART_PAPER", "ART_IMAGE_14": "MAT_DECOR_WALL_ART_14"},
+      "usedIn": ["L1_MASTER_BED", "L2_BED5"]
+    },
+    {
+      "id": "MODEL_DECOR_WALL_ART_15",
+      "category": "picture",
+      "sourceFile": "assets-src/Models/Furniture/Decoration/wall_art_15.glb",
+      "sourceSha256": "b953e0deae321b5d7e1505bbf74e7b82331057e97a5cce4e8c3a4b81118cfb36",
+      "contentName": "Models/Furniture/Decoration/wall_art_15",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Portrait wide-mat variant for PuzzleAndy abstract 15",
+        "url": "https://opengameart.org/sites/default/files/abstract_15.jpg",
+        "author": "PuzzleAndy / frame geometry by cna-house",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0", "licenceFile": "licenses/cc0-1.0/LICENCE.txt", "attribution": "",
+        "redistributeSource": true, "redistributeDerived": true, "commercialUse": true, "modification": true,
+        "note": "HOUSE-00982 wall-art set member. The source page publishes the abstract image under CC0; tools/assets/decoration_prepare.py pins original JPEG SHA-256 130869082f07dd2a4b5dc1e147ce92293c31f231c8ab111fe751caee74a64ce1 and tools/blender/wall_art_set.py deterministically authors this wall-plane frame and twelve-triangle proxy."
+      },
+      "geometry": {"unitScale": 1, "upAxis": "Y", "boundsMetres": [0.694, 0.894, 0.05], "triangles": {"LOD0": 446}, "collision": "WallArt_COL"},
+      "materialMap": {"ART_FRAME_DARK": "MAT_FURNITURE_PIANO_WOOD", "ART_MAT": "MAT_LIVING_ART_PAPER", "ART_IMAGE_15": "MAT_DECOR_WALL_ART_15"},
+      "usedIn": ["B1_CINEMA", "L1_HALL"]
+    },
+    {
+      "id": "MODEL_DECOR_WALL_ART_16",
+      "category": "picture",
+      "sourceFile": "assets-src/Models/Furniture/Decoration/wall_art_16.glb",
+      "sourceSha256": "a82e917fa452fa6ea350d5e2b61ad4da29a0b29ce4f25ac60e725f01974f59a1",
+      "contentName": "Models/Furniture/Decoration/wall_art_16",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Square dark-frame variant for PuzzleAndy abstract 16",
+        "url": "https://opengameart.org/sites/default/files/abstract_16.jpg",
+        "author": "PuzzleAndy / frame geometry by cna-house",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0", "licenceFile": "licenses/cc0-1.0/LICENCE.txt", "attribution": "",
+        "redistributeSource": true, "redistributeDerived": true, "commercialUse": true, "modification": true,
+        "note": "HOUSE-00982 wall-art set member. The source page publishes the abstract image under CC0; tools/assets/decoration_prepare.py pins original JPEG SHA-256 b28967e69522ad9daf6c95c4e9c40000a83eda32fa9fd4a58d8657e4cf82c002 and tools/blender/wall_art_set.py deterministically authors this wall-plane frame and twelve-triangle proxy."
+      },
+      "geometry": {"unitScale": 1, "upAxis": "Y", "boundsMetres": [0.774, 0.774, 0.05], "triangles": {"LOD0": 446}, "collision": "WallArt_COL"},
+      "materialMap": {"ART_FRAME_DARK": "MAT_FURNITURE_PIANO_WOOD", "ART_MAT": "MAT_LIVING_ART_PAPER", "ART_IMAGE_16": "MAT_DECOR_WALL_ART_16"},
+      "usedIn": ["B1_HOBBY", "L3_ROOM"]
+    },
+    {
+      "id": "TEXTURE_DECOR_WALL_ART_13",
+      "category": "wall-art-albedo",
+      "sourceFile": "assets-src/Textures/Furniture/Decoration/abstract_13.png",
+      "sourceSha256": "a39930f14b9694689e238aa3278fc47f2dd33cecb155b670c61f0d45addca2b5",
+      "texture": {"width": 512, "height": 341, "colourSpace": "sRGB", "channelLayout": "RGB"},
+      "contentName": "Textures/Furniture/Decoration/abstract_13",
+      "kind": "texture", "residencyPack": "core",
+      "origin": {"kind": "derived", "name": "PuzzleAndy CC0 Abstract Texture 13", "url": "https://opengameart.org/sites/default/files/abstract_13.jpg", "author": "PuzzleAndy", "retrieved": "2026-09-23", "licence": "CC0-1.0", "licenceFile": "licenses/cc0-1.0/LICENCE.txt", "attribution": "", "redistributeSource": true, "redistributeDerived": true, "commercialUse": true, "modification": true, "note": "HOUSE-00982 selected this from OpenGameArt's CC0 Abstract Textures set. tools/assets/decoration_prepare.py pins original JPEG SHA-256 3019297b5ea067c205f4879111ad1c2b929bbafe26aa86067e81ddc1b803c7f2 and produces this 512-pixel sRGB PNG."}
+    },
+    {
+      "id": "TEXTURE_DECOR_WALL_ART_14",
+      "category": "wall-art-albedo",
+      "sourceFile": "assets-src/Textures/Furniture/Decoration/abstract_14.png",
+      "sourceSha256": "f9aac064f11d86310d2d591eab250e0c1af3cad51566da0aecc45ce8020d5b82",
+      "texture": {"width": 512, "height": 340, "colourSpace": "sRGB", "channelLayout": "RGB"},
+      "contentName": "Textures/Furniture/Decoration/abstract_14",
+      "kind": "texture", "residencyPack": "core",
+      "origin": {"kind": "derived", "name": "PuzzleAndy CC0 Abstract Texture 14", "url": "https://opengameart.org/sites/default/files/abstract_14.jpg", "author": "PuzzleAndy", "retrieved": "2026-09-23", "licence": "CC0-1.0", "licenceFile": "licenses/cc0-1.0/LICENCE.txt", "attribution": "", "redistributeSource": true, "redistributeDerived": true, "commercialUse": true, "modification": true, "note": "HOUSE-00982 selected this from OpenGameArt's CC0 Abstract Textures set. tools/assets/decoration_prepare.py pins original JPEG SHA-256 2c985e7a036016c5774a2568f57093afe7a36c3947a7e605f134de182633c59c and produces this 512-pixel sRGB PNG."}
+    },
+    {
+      "id": "TEXTURE_DECOR_WALL_ART_15",
+      "category": "wall-art-albedo",
+      "sourceFile": "assets-src/Textures/Furniture/Decoration/abstract_15.png",
+      "sourceSha256": "fdf0bc01149b9b259e5cf6bf786808fc28d498bee16dd0f7e5f73e72970ba7c3",
+      "texture": {"width": 360, "height": 512, "colourSpace": "sRGB", "channelLayout": "RGB"},
+      "contentName": "Textures/Furniture/Decoration/abstract_15",
+      "kind": "texture", "residencyPack": "core",
+      "origin": {"kind": "derived", "name": "PuzzleAndy CC0 Abstract Texture 15 portrait crop", "url": "https://opengameart.org/sites/default/files/abstract_15.jpg", "author": "PuzzleAndy", "retrieved": "2026-09-23", "licence": "CC0-1.0", "licenceFile": "licenses/cc0-1.0/LICENCE.txt", "attribution": "", "redistributeSource": true, "redistributeDerived": true, "commercialUse": true, "modification": true, "note": "HOUSE-00982 selected this from OpenGameArt's CC0 Abstract Textures set. tools/assets/decoration_prepare.py pins original JPEG SHA-256 130869082f07dd2a4b5dc1e147ce92293c31f231c8ab111fe751caee74a64ce1 and produces this centred 360 x 512 sRGB portrait PNG."}
+    },
+    {
+      "id": "TEXTURE_DECOR_WALL_ART_16",
+      "category": "wall-art-albedo",
+      "sourceFile": "assets-src/Textures/Furniture/Decoration/abstract_16.png",
+      "sourceSha256": "2831bff24b2292861d4933d9fcb59e3c71350bf2f8e4e01f5d47fbdc22fb4889",
+      "texture": {"width": 512, "height": 512, "colourSpace": "sRGB", "channelLayout": "RGB"},
+      "contentName": "Textures/Furniture/Decoration/abstract_16",
+      "kind": "texture", "residencyPack": "core",
+      "origin": {"kind": "derived", "name": "PuzzleAndy CC0 Abstract Texture 16 square crop", "url": "https://opengameart.org/sites/default/files/abstract_16.jpg", "author": "PuzzleAndy", "retrieved": "2026-09-23", "licence": "CC0-1.0", "licenceFile": "licenses/cc0-1.0/LICENCE.txt", "attribution": "", "redistributeSource": true, "redistributeDerived": true, "commercialUse": true, "modification": true, "note": "HOUSE-00982 selected this from OpenGameArt's CC0 Abstract Textures set. tools/assets/decoration_prepare.py pins original JPEG SHA-256 b28967e69522ad9daf6c95c4e9c40000a83eda32fa9fd4a58d8657e4cf82c002 and produces this centred 512-square sRGB PNG."}
+    },
+    {
       "id": "VIDEO_SMOKE_CLIP",
       "category": "fixture",
       "sourceFile": "assets-src/Media/Video/smoke_clip.ogv",

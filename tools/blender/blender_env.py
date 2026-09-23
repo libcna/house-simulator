@@ -38,9 +38,9 @@ from pathlib import Path
 
 #: Where a numpy built for Blender's interpreter is kept. Overridable for a machine that puts it
 #: elsewhere; the default is the location `AGENTS.md` rule 4 prescribes.
-DEFAULT_PYTHON_DEPS = Path(os.environ.get("CNAHOUSE_BLENDER_PYTHONPATH", "")) or (
-    Path.home() / "deps" / "blender-python"
-)
+_configured_python_deps = os.environ.get("CNAHOUSE_BLENDER_PYTHONPATH", "").strip()
+DEFAULT_PYTHON_DEPS = (Path(_configured_python_deps) if _configured_python_deps
+                       else Path.home() / "deps" / "blender-python")
 
 #: Lines a tool prints that are its report rather than Blender's noise. Blender writes a good deal
 #: to stdout even in background mode, and a caller wants the tool's answer, not the splash.

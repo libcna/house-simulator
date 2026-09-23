@@ -1560,6 +1560,57 @@
       "footstepSurface": "wood", "audioAbsorption": 0.24,
       "effectTierS": "Basic", "effectTierE": "RoomLit"
     },
+    // HOUSE-00982's one bounded CC0 wall-art set. Each image stays a separate material so the
+    // existing static chunk builder can batch it through BasicEffect without a texture-atlas or
+    // runtime variation system; shared frame and mat geometry remains on existing roles.
+    {
+      "id": "MAT_DECOR_WALL_ART_13", "class": "fabric",
+      "albedo": "Textures/Furniture/Decoration/abstract_13",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [1.0, 1.0, 1.0], "specularColor": [0.015, 0.015, 0.015],
+      "specularPower": 2.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.0, "specularBoost": 1.0, "powerBoost": 1.0 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "wood", "audioAbsorption": 0.24,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    {
+      "id": "MAT_DECOR_WALL_ART_14", "class": "fabric",
+      "albedo": "Textures/Furniture/Decoration/abstract_14",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [1.0, 1.0, 1.0], "specularColor": [0.015, 0.015, 0.015],
+      "specularPower": 2.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.0, "specularBoost": 1.0, "powerBoost": 1.0 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "wood", "audioAbsorption": 0.24,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    {
+      "id": "MAT_DECOR_WALL_ART_15", "class": "fabric",
+      "albedo": "Textures/Furniture/Decoration/abstract_15",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [1.0, 1.0, 1.0], "specularColor": [0.015, 0.015, 0.015],
+      "specularPower": 2.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.0, "specularBoost": 1.0, "powerBoost": 1.0 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "wood", "audioAbsorption": 0.24,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    {
+      "id": "MAT_DECOR_WALL_ART_16", "class": "fabric",
+      "albedo": "Textures/Furniture/Decoration/abstract_16",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [1.0, 1.0, 1.0], "specularColor": [0.015, 0.015, 0.015],
+      "specularPower": 2.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.0, "specularBoost": 1.0, "powerBoost": 1.0 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "wood", "audioAbsorption": 0.24,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
     {
       "id": "MAT_FURNITURE_LAMP_SHADE", "class": "fabric",
       "albedo": "Textures/Furniture/LivingRoom/lamp_shade_stripes",

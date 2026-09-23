@@ -1,3 +1,39 @@
+# Decoration acquisition handoff — 2026-09-23 (`HOUSE-00982`)
+
+The decoration group is complete with four acquisitions inside the six-model cap and one four-image
+CC0 art set inside the eight-image ceiling. Rule R8 retained the existing plant, frame and generated
+rug families. The four remaining recipe shapes are a grouped plant form, standing mirror, wall
+clock and narrow vase. All are static dressing with pinned official 3D Assets CDN bytes and one
+enclosing 12-triangle proxy apiece.
+
+The shared bounded preparation path bakes hierarchy, UV0 and support/wall origins. The plant source
+required `EXT_texture_webp` only for an incidental preview texture; its named material slots are
+remapped to canonical House materials, so the preparation strips those unused image nodes instead
+of adding a CNA dependency or workaround. The existing Blender dependency helper also now resolves
+its documented shared `~/deps/blender-python` default correctly when no override is set.
+
+The art set selects four images from PuzzleAndy's OpenGameArt **CC0 Abstract Textures** collection:
+two landscapes, one centred portrait crop and one square crop. Three deterministic wall-plane frame
+styles embed the image for source review and map it to four ordinary canonical BasicEffect material
+rows; there is no runtime art-selection system. The generated foyer/hall rug planes remain bound to
+ambientCG's already recorded CC0 Fabric061 weave.
+
+The group totals 6,994 visible and 96 collision triangles. Its group, manifest, licence, scale and
+origin gates pass. CNA compiled the eight models to 758,912 bytes and the four texture assets to
+3,182,144 bytes. Four isolated 600 × 600 headless frame renders showed distinct readable images,
+correct wall planes and clean frame/mat contacts; a 900 × 488 composition review showed the mirror,
+clock, plant and vase grounded or fixed correctly without clipping, floating parts or z-fighting.
+All compilation and rendering used affinity restricted to four CPU cores; compilation used at most
+four workers.
+
+The remaining forecast is 182.5 realistic / 221.6 pessimistic hours. With 43.75 task-hours spent
+since the final reduction, the R14 projection is 265.4 h, 14.6 h below the hard limit. Rule that
+chooses the next task: R1's house-wide support exception, R8's kit-first rule and M3 dependency
+order select the final capped acquisition group. The exact next unblocked MUST task is
+`HOUSE-00984`.
+
+---
+
 # Lamp acquisition handoff — 2026-09-23 (`HOUSE-00981`)
 
 The lamp group is complete with only two acquisitions inside the four-model cap. Rule R8 retained

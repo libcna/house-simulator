@@ -7,6 +7,7 @@ adds UV0 for the project's canonical material path and appends one enclosing ``_
 
 Run with: blender --background --python tools/blender/utility_appliance_prepare.py -- \
     --source PATH --out PATH --collision-name NAME [--height-scale FACTOR]
+    [--origin-mode support|wall]
 """
 
 from __future__ import annotations
@@ -40,7 +41,8 @@ def metre_uv(obj, tile_metres: float = 0.25) -> None:
             uv.data[loop_index].uv = (pair[0] / tile_metres, pair[1] / tile_metres)
 
 
-def prepare(source: Path, output: Path, collision_name: str, height_scale: float) -> None:
+def prepare(source: Path, output: Path, collision_name: str, height_scale: float,
+            origin_mode: str, strip_textures: bool) -> None:
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.object.delete(use_global=False)
     for action in tuple(bpy.data.actions):
@@ -50,6 +52,25 @@ def prepare(source: Path, output: Path, collision_name: str, height_scale: float
     visible = [obj for obj in bpy.context.scene.objects if obj.type == "MESH"]
     if not visible:
         raise RuntimeError("source contains no mesh objects")
+
+    # Static chunks bind these source slots to canonical project materials. Some CC0 sources carry
+    # an incidental WebP preview texture and require EXT_texture_webp, which the CNA importer
+    # correctly refuses. A caller may remove those unused image nodes while retaining the named
+    # material split and its base-colour factor; the default leaves every earlier derivative alone.
+    if strip_textures:
+        for entry in bpy.data.materials:
+            if not entry.use_nodes or entry.node_tree is None:
+                continue
+            shader = entry.node_tree.nodes.get("Principled BSDF")
+            if shader is not None:
+                base = shader.inputs.get("Base Color")
+                if base is not None:
+                    for link in tuple(base.links):
+                        entry.node_tree.links.remove(link)
+                    base.default_value = entry.diffuse_color
+            for node in tuple(entry.node_tree.nodes):
+                if node.type == "TEX_IMAGE":
+                    entry.node_tree.nodes.remove(node)
 
     for obj in bpy.context.scene.objects:
         obj.animation_data_clear()
@@ -83,9 +104,12 @@ def prepare(source: Path, output: Path, collision_name: str, height_scale: float
         return low, high
 
     low, high = visible_bounds()
-    # Blender is Z-up here. Preserve the floor support at Z=0 while moving the horizontal X/Y
-    # footprint centre to the origin, so later recipe rotation does not orbit the appliance.
-    horizontal_offset = Vector(((low.x + high.x) * 0.5, (low.y + high.y) * 0.5, 0.0))
+    # Blender is Z-up here and glTF +Z maps to Blender -Y. Floor-supported pieces retain their
+    # authored support height and rotate about the footprint centre. A wall-mounted piece instead
+    # registers its glTF +Z back face (Blender minimum Y) on zero while retaining the authored
+    # vertical datum. The default keeps every earlier acquisition byte-for-byte identical.
+    depth_origin = low.y if origin_mode == "wall" else (low.y + high.y) * 0.5
+    horizontal_offset = Vector(((low.x + high.x) * 0.5, depth_origin, 0.0))
     for obj in visible:
         for vertex in obj.data.vertices:
             vertex.co -= horizontal_offset
@@ -112,11 +136,13 @@ def main() -> int:
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--collision-name", required=True)
     parser.add_argument("--height-scale", type=float, default=1.0)
+    parser.add_argument("--origin-mode", choices=("support", "wall"), default="support")
+    parser.add_argument("--strip-textures", action="store_true")
     options = parser.parse_args(sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else [])
     if options.height_scale <= 0.0:
         parser.error("--height-scale must be positive")
     prepare(options.source.resolve(), options.out.resolve(), options.collision_name,
-            options.height_scale)
+            options.height_scale, options.origin_mode, options.strip_textures)
     print("utility_appliance_prepare: EXIT 0")
     return 0
 

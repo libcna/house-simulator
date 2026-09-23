@@ -55,6 +55,7 @@ WALL_MOUNTED = {
     "service-run",
     "window-treatment",
     "window-blind",
+    "wall-clock",
 }
 
 #: Floor-supported architectural objects which also register against a wall plane. Unlike a
