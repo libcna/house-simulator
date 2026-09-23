@@ -65,6 +65,17 @@ CATEGORIES: dict[str, list[tuple[str, float, float, str]]] = {
     "appliance-refrigerator": [("x", 1.60, 1.90, "large refrigerator width"),
                                ("z", 0.70, 0.90, "depth including door pulls"),
                                ("y", 1.80, 2.10, "appliance body height under bridge")],
+    # HOUSE-00975 keeps three appliance bodies rather than a broad white-goods catalogue. The
+    # bands follow their standard domestic nominal sizes and still catch centimetre/inch imports.
+    "appliance-laundry": [("x", 0.58, 0.70, "600 mm laundry appliance width"),
+                          ("y", 0.80, 0.92, "undercounter laundry appliance height"),
+                          ("z", 0.62, 0.78, "laundry appliance depth including door")],
+    "appliance-chest-freezer": [("x", 1.00, 1.25, "domestic chest-freezer width"),
+                                ("y", 0.78, 0.92, "domestic chest-freezer height"),
+                                ("z", 0.72, 0.90, "domestic chest-freezer depth")],
+    "appliance-boiler": [("x", 0.36, 0.55, "wall boiler width"),
+                         ("y", 0.90, 1.25, "wall boiler body height"),
+                         ("z", 0.25, 0.45, "wall boiler projection")],
     "upright-piano": [("x", 1.35, 1.60, "domestic upright piano width"),
                       ("y", 1.10, 1.35, "domestic upright piano height"),
                       ("z", 0.50, 0.76, "domestic upright piano depth including pedals")],

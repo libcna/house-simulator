@@ -1,3 +1,29 @@
+# Utility-appliance acquisition handoff — 2026-09-23 (`HOUSE-00975`)
+
+The kitchen/utility acquisition group is complete at its exact three-model cap: a 600 mm
+front-load laundry body, a 1.1 m chest freezer and a wall-hung combi boiler. All are closed static
+dressing. The laundry model is intentionally reused with existing tint/material variation for the
+washer/dryer recipe variants; no doors, appliance behavior or runtime manager were retained.
+
+The official 3D Assets Home Appliances and Utility Room manifest and the three CDN bytes are
+source-hash pinned. `tools/assets/utility_appliances_prepare.py` drives one bounded Blender
+preparer that bakes the rest pose, strips the upstream rigid clips and hierarchy, recentres the
+support footprint, adds UV0 and appends one enclosing 12-triangle box proxy. The source pack
+declares these models AI-generated with Claude Fable 5.1 and releases them under CC0 1.0; that fact,
+the author, retrieval date, URLs and hashes are recorded in both the manifest and `SOURCE.md`.
+
+The three derivatives total 6,254 visible triangles. The group, manifest, licence, scale and
+origin gates pass, and CNA compiled them to 405,432-byte, 254,824-byte and 297,240-byte CNBs
+(957,496 bytes total). A 1200 × 700 headless review render with collision hidden showed all three
+closed silhouettes, grounded feet and clean lids/fronts/pipes without clipping, floating parts or
+z-fighting. The remaining forecast is 189 realistic / 228.8 pessimistic hours. With
+37.25 task-hours spent since the final reduction, the R14 projection remains 266.1 h, 13.9 h below
+the hard limit. Rule that chooses the next task: R1's house-wide support exception, R8's kit-first
+rule and M3 dependency order select the next capped acquisition group. The exact next unblocked
+MUST task is `HOUSE-00976`.
+
+---
+
 # Static window-dressing handoff — 2026-09-23 (`HOUSE-02681`)
 
 The existing deterministic family-room curtain family now pairs with one generated static slatted

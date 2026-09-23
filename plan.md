@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **132 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 161 / 190 / 230 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G2 passed.** Next: acquire the bounded kitchen and utility appliance group in `HOUSE-00975` |
+| Active plan | **131 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 161 / 189 / 229 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G2 passed.** Next: acquire the bounded bathroom fixture group in `HOUSE-00976` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -675,11 +675,12 @@ second reduction capped them at 62 and 6.
       trace: absorbs `HOUSE-02682`; earlier wording (interactive blinds, the `translucent` portal mode) superseded
       note: (2026-09-23) The retained deterministic family-room curtains and a new 2,432-triangle generated slatted blind form the bounded static family. The blind has UV0, a wall-plane origin, no collision or interaction state, and uses the existing baked xyz-scale/canonical-tint recipe path; one muted-blue 0.92-width instance fits the east window of `L1_BED2`. The group gate regenerates and measures the blind, checks both family material bridges and placements, pins both referenced portals to `opacity: glass`, and rejects `blindFraction`, interaction or translucent-mode fields. All 140 props pass placement and route checks; the 790-chunk production world builds with one measured blind material batch. Fixed day/night captures of the bedroom blind and both family-room curtains show correct mounting, glass, illumination and silhouettes without clipping or z-fighting. The adjacent generated prop kit's furniture-only material roles were also corrected from UV2 shell paints to existing BasicEffect roles when the complete chunk build exposed that integration error
 
-- [ ] HOUSE-00975 — Acquire the kitchen and utility appliances (cap 3)
+- [x] HOUSE-00975 — Acquire the kitchen and utility appliances (cap 3)
       dep: HOUSE-00296, HOUSE-03302 · sys: content · plat: TOOL · pri: MUST · zone: all · adv: D3 · est: 0.75
       accept: the models of the kit table's *Kitchen and utility* row, within the cap, as static props with collision proxies and manifest and licence rows
       verify: the group gate; the licence gate
       trace: was *the 24 kitchen appliance and fixture models*, then cap 4 (`HOUSE-03206`)
+      note: (2026-09-23) The capped group contains exactly three CC0 static derivatives: one 600 mm front-load laundry body reused by the washer/dryer recipes, one 1.1 m chest freezer and one wall-hung combi boiler. Their official 3D Assets pack/CDN provenance and upstream SHA-256 values are pinned; the source pack declares the models AI-generated with Claude Fable 5.1 under CC0 1.0. The bounded preparation tool bakes the closed rest pose, removes every rigid open/close clip and hierarchy, adds UV0 and appends one enclosing 12-triangle collision box per asset. The shared five-role material bridge reuses existing canonical paint, steel, dark glass, cabinet glass and brass; no appliance behavior or runtime system was added. The group/licence/scale/origin/manifest gates pass, and CNA compiled the 6,254 visible triangles to three CNBs totalling 957,496 bytes. A 1200 × 700 headless review render with collision hidden confirmed recognizable closed silhouettes, grounded feet and clean lids/fronts/pipes without clipping, floating parts or z-fighting
 
 - [ ] HOUSE-00976 — Acquire the bathroom fixtures (cap 4)
       dep: HOUSE-00296, HOUSE-03302 · sys: content · plat: TOOL · pri: MUST · zone: all · adv: D3 · est: 1.25
@@ -1847,7 +1848,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 |---|---|---|---|---|---|---|---|
 | M1 Whole-property traversal | 4 | 9 | **0** | 0 | **0** | 0 | — |
 | M2 Architectural completion | 8 | 18 | **0** | 0 | **0** | 0 | — |
-| M3 The reusable furnishing kit | 16 | 33 | **7** | 7.2 | **8.5** | 9.35 | — |
+| M3 The reusable furnishing kit | 16 | 33 | **6** | 6.6 | **7.75** | 8.5 | — |
 | M4 Dressing everywhere | 40 | 48.75 | **31** | 26.25 | **31** | 37 | R-D +3 |
 | M5 Baseline lighting everywhere | 12 | 24.5 | **10** | 16.75 | **19.75** | 21.75 | — |
 | M6 Main cells and hero areas | 20 | 32.5 | **15** | 16.75 | **19.75** | 21.75 | — |
@@ -1861,11 +1862,11 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **132** | **161.3** | **189.75** | **229.6** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **131** | **160.7** | **189** | **228.8** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-50.4 h. Adding the 36.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+51.2 h. Adding the 37.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
 266.1 h, 13.9 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 

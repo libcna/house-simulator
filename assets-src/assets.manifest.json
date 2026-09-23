@@ -274,6 +274,148 @@
       }
     },
     {
+      "id": "MODEL_APPLIANCE_BOILER",
+      "category": "appliance-boiler",
+      "sourceFile": "assets-src/Models/Furniture/Appliances/boiler.glb",
+      "sourceSha256": "62fbc991680e13dc1f8b40536062324cb543895db76e80cc1d476bf8051754ec",
+      "contentName": "Models/Furniture/Appliances/boiler",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Wall hung combi boiler from Home Appliances and Utility Room",
+        "url": "https://cdn.3dassets.dev/assets/14137/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00975 selected one of exactly three required models from the 3D Assets Home Appliances and Utility Room pack (AI-generated with Claude Fable 5.1 and published under CC0 1.0). tools/assets/utility_appliances_prepare.py pins upstream SHA-256 cd1a6132cb47560b2b4e92083b6707c33440d44ecd43cc57ad8397876820efc6, bakes the closed static rest pose, strips animation, adds UV0 and appends one twelve-triangle enclosing collision box."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.445984,
+          1.1173,
+          0.373427
+        ],
+        "triangles": {
+          "LOD0": 1944
+        },
+        "collision": "Boiler_COL"
+      },
+      "materialMap": {
+        "accent": "MAT_FURNITURE_PIANO_BRASS",
+        "carcass": "MAT_WINDOW_FRAME_WHITE",
+        "dark": "MAT_KITCHEN_OVEN_GLASS",
+        "glass": "MAT_GLASS_CABINET",
+        "metal": "MAT_KITCHEN_HARDWARE_STEEL"
+      },
+      "usedIn": [
+        "B1_UTILITY"
+      ]
+    },
+    {
+      "id": "MODEL_APPLIANCE_CHEST_FREEZER",
+      "category": "appliance-chest-freezer",
+      "sourceFile": "assets-src/Models/Furniture/Appliances/chest_freezer.glb",
+      "sourceSha256": "1d06ba695ae032e3abace631e2989a1999b224d9dadeea883152528dc3efe2e8",
+      "contentName": "Models/Furniture/Appliances/chest_freezer",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Chest freezer 1.1 m from Home Appliances and Utility Room",
+        "url": "https://cdn.3dassets.dev/assets/14043/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00975 selected one of exactly three required models from the 3D Assets Home Appliances and Utility Room pack (AI-generated with Claude Fable 5.1 and published under CC0 1.0). tools/assets/utility_appliances_prepare.py pins upstream SHA-256 f2f885ab83db79982362acdf4a3a95f7f8f0a2cd37d48d2e66cd8678f9dac2f4, bakes the closed static rest pose, strips animation, adds UV0 and appends one twelve-triangle enclosing collision box."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.12,
+          0.882051,
+          0.831407
+        ],
+        "triangles": {
+          "LOD0": 1656
+        },
+        "collision": "ChestFreezer_COL"
+      },
+      "materialMap": {
+        "accent": "MAT_FURNITURE_PIANO_BRASS",
+        "carcass": "MAT_WINDOW_FRAME_WHITE",
+        "dark": "MAT_KITCHEN_OVEN_GLASS",
+        "glass": "MAT_GLASS_CABINET",
+        "metal": "MAT_KITCHEN_HARDWARE_STEEL"
+      },
+      "usedIn": [
+        "B1_UTILITY"
+      ]
+    },
+    {
+      "id": "MODEL_APPLIANCE_LAUNDRY_BODY",
+      "category": "appliance-laundry",
+      "sourceFile": "assets-src/Models/Furniture/Appliances/laundry_body.glb",
+      "sourceSha256": "d5628eecae4dc60198a813723945b6239d336df522226b3e5792258c77aed978",
+      "contentName": "Models/Furniture/Appliances/laundry_body",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Front load washing machine 600 from Home Appliances and Utility Room",
+        "url": "https://cdn.3dassets.dev/assets/14050/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00975 selected one of exactly three required models from the 3D Assets Home Appliances and Utility Room pack (AI-generated with Claude Fable 5.1 and published under CC0 1.0). tools/assets/utility_appliances_prepare.py pins upstream SHA-256 937e52a6c4991697209e1a860034ba535098986847ea3f2b8e27bada62189f02, bakes the closed static rest pose, strips animation, adds UV0 and appends one twelve-triangle enclosing collision box. One static body supports the recipe's washer/dryer variants through existing tint/material variation; no appliance behavior is retained."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.634919,
+          0.8512,
+          0.722977
+        ],
+        "triangles": {
+          "LOD0": 2654
+        },
+        "collision": "LaundryBody_COL"
+      },
+      "materialMap": {
+        "accent": "MAT_FURNITURE_PIANO_BRASS",
+        "carcass": "MAT_WINDOW_FRAME_WHITE",
+        "dark": "MAT_KITCHEN_OVEN_GLASS",
+        "glass": "MAT_GLASS_CABINET",
+        "metal": "MAT_KITCHEN_HARDWARE_STEEL"
+      },
+      "usedIn": [
+        "L0_LAUNDRY",
+        "B1_LAUNDRY2"
+      ]
+    },
+    {
       "id": "MODEL_BUTLERS_CROCKERY_SHELF",
       "category": "pantry-shelf",
       "sourceFile": "assets-src/Models/Furniture/Kitchen/butlers_crockery_shelf.glb",

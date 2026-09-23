@@ -130,6 +130,9 @@ Full text: [`licenses/cc0-1.0/LICENCE.txt`](cc0-1.0/LICENCE.txt)
 - `TEXTURE_VEGETATION_TREE_SMALL_02_BRANCHES` — **Wild syringa branch atlas** — <https://polyhaven.com/a/tree_small_02> (retrieved 2026-09-13)
 - `TEXTURE_VEGETATION_TREE_SMALL_02_LEAVES` — **Wild syringa leaf atlas** — <https://polyhaven.com/a/tree_small_02> (retrieved 2026-09-13)
 - `TEXTURE_VEGETATION_TREE_SMALL_02_TRUNK` — **Wild syringa trunk atlas** — <https://polyhaven.com/a/tree_small_02> (retrieved 2026-09-13)
+- `MODEL_APPLIANCE_BOILER` — **Wall hung combi boiler from Home Appliances and Utility Room** by 3D Assets — <https://cdn.3dassets.dev/assets/14137/v1/model.glb> (retrieved 2026-09-23)
+- `MODEL_APPLIANCE_CHEST_FREEZER` — **Chest freezer 1.1 m from Home Appliances and Utility Room** by 3D Assets — <https://cdn.3dassets.dev/assets/14043/v1/model.glb> (retrieved 2026-09-23)
+- `MODEL_APPLIANCE_LAUNDRY_BODY` — **Front load washing machine 600 from Home Appliances and Utility Room** by 3D Assets — <https://cdn.3dassets.dev/assets/14050/v1/model.glb> (retrieved 2026-09-23)
 - `MODEL_FURNITURE_FOYER_ARMCHAIR` — **Arm Chair 01** by Kirill Sannikov — <https://polyhaven.com/a/ArmChair_01> (retrieved 2026-09-15)
 - `MODEL_FURNITURE_FOYER_CONSOLE` — **Chinese Console Table** by Kirill Sannikov — <https://polyhaven.com/a/chinese_console_table> (retrieved 2026-09-15)
 - `TEXTURE_FURNITURE_FOYER_ARMCHAIR_ALBEDO` — **Arm Chair 01 base colour** by Kirill Sannikov — <https://polyhaven.com/a/ArmChair_01> (retrieved 2026-09-15)
@@ -709,4 +712,4 @@ Full text: [`licenses/us-gov-pd/LICENCE.txt`](us-gov-pd/LICENCE.txt)
 
 ---
 
-*Generated from `assets-src/assets.manifest.json`, sha256 `e63c9439d49c8ec7ae505f99d2c033c95e27513f5e8c00921ff98075f9eacf51`.*
+*Generated from `assets-src/assets.manifest.json`, sha256 `5138b3a06e794d680351a33d7bdf64266ef1f2d2c0579fcb86473bbb152e3b7f`.*
