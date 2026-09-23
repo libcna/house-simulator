@@ -1846,6 +1846,53 @@
       ]
     },
     {
+      "id": "MODEL_FURNITURE_CINEMA_SEAT_ROW",
+      "category": "cinema-seat-row",
+      "sourceFile": "assets-src/Models/Furniture/SeatingTables/cinema_seat_row.glb",
+      "sourceSha256": "a19c2e483d4ba5af604dde2268f34becfc44ee548edb94466033c720e42bf9f9",
+      "contentName": "Models/Furniture/SeatingTables/cinema_seat_row",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Tiered Seating Row Module from Cinema Multiplex and Foyer",
+        "url": "https://cdn.3dassets.dev/assets/34650/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00977 selected one of exactly three required acquisitions within the seven-model seating-and-tables cap. The official 3D Assets pack declares Claude Opus 5 as its AI generator and publishes the model under CC0 1.0. tools/assets/seating_tables_prepare.py pins upstream SHA-256 4057aec4f6f1a13982d1f031057dd44c712ff7dda05354750b6d70a29c6b59f4, bakes the useful seat-down static rest pose, removes the tip-up clips and hierarchy, adds UV0 and appends one twelve-triangle enclosing collision box."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          3.08,
+          1.077667,
+          1.099859
+        ],
+        "triangles": {
+          "LOD0": 6320
+        },
+        "collision": "CinemaSeatRow_COL"
+      },
+      "materialMap": {
+        "accent": "MAT_FAMILY_SOFA_VELVET",
+        "amber": "MAT_FURNITURE_PIANO_BRASS",
+        "dark": "MAT_FURNITURE_PIANO_EBONITE",
+        "frame": "MAT_FAMILY_SOFA_FRAME",
+        "metal": "MAT_KITCHEN_HARDWARE_STEEL"
+      },
+      "usedIn": [
+        "B1_CINEMA"
+      ]
+    },
+    {
       "id": "MODEL_FURNITURE_COFFEE_TABLE",
       "category": "occasional-table",
       "sourceFile": "assets-src/Models/Furniture/LivingRoom/coffee_table.glb",
@@ -2014,6 +2061,54 @@
       },
       "usedIn": [
         "L0_DINING"
+      ]
+    },
+    {
+      "id": "MODEL_FURNITURE_DESK",
+      "category": "desk",
+      "sourceFile": "assets-src/Models/Furniture/SeatingTables/writing_desk.glb",
+      "sourceSha256": "ca065291e27efcce02da30fe7217ff4afa6aa30a3baa87d13bf28b9817d5180c",
+      "contentName": "Models/Furniture/SeatingTables/writing_desk",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Desk Writing from Bedroom and Living Room Furniture",
+        "url": "https://cdn.3dassets.dev/assets/38795/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00977 selected one of exactly three required acquisitions within the seven-model seating-and-tables cap. The official 3D Assets pack declares Muse Spark via T3 Code as its AI generator and publishes the model under CC0 1.0. tools/assets/seating_tables_prepare.py pins upstream SHA-256 29678a25099beed66d4b225b439e0c5fe05ecced4362791d130a15eeb7386146, bakes the closed static rest pose, removes the drawer clips and hierarchy, adds UV0 and appends one twelve-triangle enclosing collision box."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.4,
+          0.745054,
+          0.700107
+        ],
+        "triangles": {
+          "LOD0": 1168
+        },
+        "collision": "Desk_COL"
+      },
+      "materialMap": {
+        "black": "MAT_FURNITURE_PIANO_EBONITE",
+        "carcass": "MAT_DOOR_PAINTED",
+        "oak": "MAT_FURNITURE_DINING_WALNUT"
+      },
+      "usedIn": [
+        "L0_OFFICE",
+        "B1_HOBBY",
+        "L2_LIBRARY",
+        "L3_ROOM"
       ]
     },
     {
@@ -2418,6 +2513,53 @@
       },
       "usedIn": [
         "L0_LIVING"
+      ]
+    },
+    {
+      "id": "MODEL_FURNITURE_POOL_TABLE",
+      "category": "table-pool",
+      "sourceFile": "assets-src/Models/Furniture/SeatingTables/pool_table.glb",
+      "sourceSha256": "bea4304c706b3d63409b8dc04f156b69d19b8daf574fd21c77c679c3b0417b45",
+      "contentName": "Models/Furniture/SeatingTables/pool_table",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Pool Table, Nine Foot from Bowling Alley and Pool Hall",
+        "url": "https://cdn.3dassets.dev/assets/33854/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00977 selected one of exactly three required acquisitions within the seven-model seating-and-tables cap. The official 3D Assets pack declares Claude Opus 5 as its AI generator and publishes the model under CC0 1.0. tools/assets/seating_tables_prepare.py pins upstream SHA-256 9d781d16d488d5865a5a6fb65ef970e5d9e1dfae73415b297af6c5f8f6bac4fd, bakes the static rest pose, adds UV0 and appends one twelve-triangle enclosing collision box."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          2.83,
+          0.801383,
+          1.559968
+        ],
+        "triangles": {
+          "LOD0": 3984
+        },
+        "collision": "PoolTable_COL"
+      },
+      "materialMap": {
+        "cloth": "MAT_FURNITURE_DINING_UPHOLSTERY",
+        "cream": "MAT_FURNITURE_PIANO_IVORY",
+        "dark": "MAT_FURNITURE_PIANO_EBONITE",
+        "metal": "MAT_KITCHEN_HARDWARE_STEEL",
+        "timber": "MAT_FURNITURE_DINING_WALNUT"
+      },
+      "usedIn": [
+        "L2_GAMES"
       ]
     },
     {

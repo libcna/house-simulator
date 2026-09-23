@@ -1,3 +1,29 @@
+# Seating-and-tables acquisition handoff — 2026-09-23 (`HOUSE-00977`)
+
+The acquisition group is complete with only three new models inside the seven-model cap. Rule R8
+was applied first: ten existing ground-floor sofa, armchair, dining-chair, stool, bench,
+coffee/side-table and dining-table models remain the reusable, tintable recipe kit. The three real
+gaps are a four-place seat-down cinema tier, a writing desk and a nine-foot pool table. All are
+static dressing; their source clips were removed and no furniture interaction was added.
+
+The models come from three official CC0 3D Assets packs. Each CDN byte is source-hash pinned; the
+cinema and pool packs declare Claude Opus 5 and the furniture pack declares Muse Spark via T3 Code
+as their AI generators. HOUSE-00975's bounded static conversion bakes the authored rest pose,
+removes animation hierarchy, adds UV0 and appends one enclosing 12-triangle proxy per model.
+Existing canonical fabric, timber, painted, metal and accent material roles cover the complete set.
+
+The derivatives total 11,472 visible triangles. The group, manifest, licence, scale and origin
+gates pass, and CNA compiled them to 712,824-byte, 149,224-byte and 441,224-byte CNBs (1,303,272
+bytes total). A 1400 × 720 headless review with proxies hidden showed grounded, recognizable pieces,
+useful seat/leg openings, six clear pool pockets, and no clipping, floating parts or z-fighting.
+The remaining forecast is 185.75 realistic / 225.2 pessimistic hours. With 40.5 task-hours spent
+since the final reduction, the R14 projection is 265.7 h, 14.3 h below the hard limit. Rule that
+chooses the next task: R1's house-wide support exception, R8's kit-first rule and M3 dependency
+order select the next capped acquisition group. The exact next unblocked MUST task is
+`HOUSE-00979`.
+
+---
+
 # Bathroom-fixture acquisition handoff — 2026-09-23 (`HOUSE-00976`)
 
 The bathroom acquisition group is complete at its exact four-model cap: one close-coupled WC, one
