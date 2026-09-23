@@ -861,7 +861,8 @@
         "FAMILY_ART": "MAT_FAMILY_ART_CANVAS"
       },
       "usedIn": [
-        "L0_FAMILY"
+        "L0_FAMILY",
+        "L1_MASTER_BED"
       ]
     },
     {
@@ -1438,7 +1439,8 @@
         "ChandelierShade": "MAT_FIXTURE_EMISSIVE_WARM"
       },
       "usedIn": [
-        "L0_DINING"
+        "L0_DINING",
+        "L1_MASTER_BED"
       ]
     },
     {
@@ -2312,6 +2314,7 @@
       "usedIn": [
         "L0_OFFICE",
         "B1_HOBBY",
+        "L1_MASTER_BED",
         "L2_LIBRARY",
         "L3_ROOM"
       ]
@@ -2451,7 +2454,8 @@
         "Armchair_01": "MAT_FURNITURE_FOYER_ARMCHAIR"
       },
       "usedIn": [
-        "L0_FOYER"
+        "L0_FOYER",
+        "L1_MASTER_BED"
       ]
     },
     {
@@ -2854,7 +2858,8 @@
       "usedIn": [
         "L0_LIVING",
         "L0_FAMILY",
-        "L0_DINING"
+        "L0_DINING",
+        "L1_MASTER_BED"
       ]
     },
     {
@@ -4175,6 +4180,7 @@
         "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
+        "L1_MASTER_BED",
         "L1_BED2"
       ]
     },
@@ -4681,6 +4687,7 @@
         "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
+        "L1_MASTER_BED",
         "L1_MASTER_CLOSET"
       ]
     },

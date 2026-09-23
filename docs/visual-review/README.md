@@ -4729,3 +4729,25 @@ portal obstruction or other S1/S2 defect in these cells. The production fixed ha
 deliberately dark; final baseline readability is the existing M5 requirement. Next:
 `HOUSE-01000`, selected by R2's tied-zone order and permitted as the second consecutive `Z-L1`
 task under R3.
+
+## Round 114 — first-floor main-bedroom dressing
+
+Commit: `HOUSE-01000` working tree (`2026-09-23`). The local, Git-ignored
+[`clear-day`](captures/house-01000-l1-master-day) set covers all six fixed `Z-L1` views. The
+master-bedroom frame and zone sheet were inspected at full resolution. A forced-light set in
+[`master-lit`](captures/house-01000-l1-master-lit) plus reciprocal room-side views checks the
+furniture that the fixed west-side camera cannot see directly; forced groups are placement
+evidence, not a claim that M5's normal light balance is complete.
+
+The complete `R-BED-PRIMARY` main-tier set is visibly grounded and reads as one room composition:
+the upholstered double bed and paired nightstands anchor the north wall, the wardrobe occupies the
+north-east bay, the desk/seat and dresser stay clear of the west closet door, the armchair keeps
+the south-east glazing approach open, and the rug remains flat beneath the bed. The reused open
+curtain family frames the paired south windows without changing their glass opacity or blocking
+the balcony slider. Reciprocal renders expose the desk, chair and dresser contacts and confirm the
+bed group does not clip the portal, wall trim or other furniture.
+
+No S1/S2 furnishing defect, floating piece, z-fighting, impossible intersection or blocked portal
+is visible. The production daytime view remains deliberately dim; baseline day/night readability
+is M5 scope. Next: `HOUSE-01001`, selected by R2's tied-zone order as R3's permitted third
+consecutive `Z-L1` task.

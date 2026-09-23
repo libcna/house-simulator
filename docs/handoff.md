@@ -1,3 +1,36 @@
+# L1 master-bedroom dressing handoff — 2026-09-23 (`HOUSE-01000`)
+
+The main-tier `R-BED-PRIMARY` composition is complete in `L1_MASTER_BED`. Ten ordinary static rows
+reuse the capped kit: double bed, paired generated nightstands, generated wardrobe and dresser,
+foyer armchair, writing desk and dining chair, rug, and the open-curtain family across the paired
+south windows. The eight solid pieces retain their existing proxies; the thin rug and open window
+treatment keep their established non-colliding contracts. No model, material family, runtime
+system or optional dressing was added.
+
+Placement validation covers all 155 static rows, exact door sweeps and the 0.70 m route. The
+90-cell grand tour passes. During the broader inside-geometry probe, the first draft made the
+master bedroom's east and south wall push-outs dead-end against furniture; moving the wardrobe
+into the north-east bay and shifting the bed group west cleared both. Two earlier failures remain:
+`L1_LANDING west` beside `HOUSE-00999`'s bench and `L1_MASTER_CLOSET north` beside the generated
+wardrobe example. `HOUSE-01001` owns the closet and is the next bounded point to correct that one;
+do not weaken the regression.
+
+The measured master-bedroom build is 19 chunks on 19 materials: its prior eight architectural
+groups plus eleven exact furnishing finishes, with repeated pieces and shared finishes batched and
+no Reach split. The clear-day zone set, forced-light fixed view and reciprocal detail views were
+inspected. The room purpose, bed, storage, seating, desk, rug and open glazing read cleanly; no
+clipping, floating geometry, z-fighting or blocked portal is visible. Normal daytime walls remain
+dark, which is the already-scheduled M5 lighting work rather than an M4 furnishing defect.
+
+The remaining forecast is 179.5 realistic / 218.3 pessimistic hours. With 46.75 task-hours spent
+since the final reduction, the R14 projection is 265.1 h, 14.9 h below the hard limit. Rule R2 and
+M4's tied-zone order select `HOUSE-01001`; it is the third consecutive `Z-L1` task permitted by R3.
+After it, R3 requires moving to the next least-complete eligible zone. All compilation must use at
+most four workers and be pinned to at most four CPUs; the strict-XNA gate additionally requires
+`HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # L1 circulation dressing handoff — 2026-09-23 (`HOUSE-00999`)
 
 M4 dressing has begun breadth-first in `Z-L1`. `L1_LANDING` now reuses the upholstered piano bench

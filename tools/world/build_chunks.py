@@ -308,6 +308,14 @@ CHUNK_BUDGET_EXCEPTIONS["L1_MASTER_BED"] = (
     _master_reason + "; HOUSE-00949 adds the authored aluminium slider frame while its panes "
     "share the established exterior-glass chunk")
 
+_master_limit, _master_reason = CHUNK_BUDGET_EXCEPTIONS["L1_MASTER_BED"]
+CHUNK_BUDGET_EXCEPTIONS["L1_MASTER_BED"] = (
+    _master_limit + 11,
+    _master_reason + "; HOUSE-01000's complete main-tier set adds eleven measured furnishing "
+    "finish groups: painted carcass, curtain textile, three bedding textiles, dining upholstery "
+    "and walnut, armchair textile, desk ebonite, rug and steel hardware. Repeated nightstands "
+    "and every shared finish remain batched, with no Reach split")
+
 CHUNK_BUDGET_EXCEPTIONS["L1_LANDING"] = (
     10, "six measured shell finish chunks plus a weather-facing window-frame chunk, "
         "HOUSE-00930's isolated upper-balcony entry leaf and HOUSE-00932's raised-panel hardwood "

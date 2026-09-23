@@ -75,7 +75,7 @@ SOURCES = (
         "Desk_COL", "desk", (1.4, 0.745054, 0.700107), 1168,
         {"black": "MAT_FURNITURE_PIANO_EBONITE", "carcass": "MAT_DOOR_PAINTED",
          "oak": "MAT_FURNITURE_DINING_WALNUT"},
-        ("L0_OFFICE", "B1_HOBBY", "L2_LIBRARY", "L3_ROOM"),
+        ("L0_OFFICE", "B1_HOBBY", "L1_MASTER_BED", "L2_LIBRARY", "L3_ROOM"),
     ),
     Source(
         "MODEL_FURNITURE_POOL_TABLE", "house-00977-pool.glb", "pool_table.glb",
