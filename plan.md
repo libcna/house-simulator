@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **137 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 169 / 199 / 240 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G2 passed.** Next: enforce believable static placement in `HOUSE-03303` |
+| Active plan | **136 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 167 / 197 / 237 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G2 passed.** Next: add bounded offline prop variation in `HOUSE-00971` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -639,11 +639,12 @@ second reduction capped them at 62 and 6.
       verify: every accessible cell in `layout.cells.json` maps to a recipe
       note: (2026-09-23) `docs/furnishing-kit.md` defines cumulative U/S/M/H recipes, measured placement envelopes and clearances, eight room-type lighting presets tied to the existing authored group roles, the reusable `HOUSE-01037`–`01076` catalogue, and an exhaustive map of all 90 intended-accessible cells. The recipes need 23 acquired models plus one ≤ 8-image art set: 3 appliances, 4 wet fixtures, 3 seating/table models, 2 beds, 2 lamps, 4 decorations and 5 clutter models; existing and generated families replace the nine unused catalogue slots. A data audit proves every `accessible: true` cell occurs exactly once and its tier matches `docs/zones.json`; the visible non-walkable garage loft separately receives its utility recipe
 
-- [ ] HOUSE-03303 — Placement validator for static props
+- [x] HOUSE-03303 — Placement validator for static props
       dep: HOUSE-03225 · sys: world · plat: TOOL · pri: MUST · zone: all · adv: D2, D3 · est: 2
       files: tools/world/validate_world.py (or a sibling checker run by it), tests
       accept: every row in `layout.props.json` (1) rests on a floor or support surface within 1 cm; (2) lies inside its cell; (3) does not intersect walls, openings or other props' collision proxies beyond a stated tolerance; (4) keeps door-swing arcs, window fronts and a ≥ 0.70 m circulation path clear; the check runs in `run_checks.sh`, and the grand tour remains the end-to-end proof
       verify: `--selftest` cases for each rejection; the current 133 props pass or are fixed
+      note: (2026-09-23) `validate_props.py` now reuses the chunk reader, collision builder, cell geometry and terrain interpolation to check all 133 rows' measured LOD0 envelopes and `_COL` components. It enforces 1 cm support/containment/overlap, 0.60 m window fronts, clear apertures and a 0.70 m route; world rule 14 remains the single exact door-sweep implementation. Scoped 4 cm dining-chair/table and 12 cm counter-stool/island tolerances describe broad-box tuck beneath non-intersecting overhangs. Fifteen unsupported, outside-cell or intersecting authored placements were corrected, including terrain-grounded exterior fixtures whose linked light positions moved with them. Rejection selftests, all world rules, inside-geometry and the 90-cell controller grand tour pass
 
 - [ ] HOUSE-00971 — Per-instance tint and scale variation for placed props
       dep: HOUSE-00215, HOUSE-00891 · sys: content · plat: TOOL · pri: MUST · zone: all · adv: D3 · est: 1.5
@@ -1842,7 +1843,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 |---|---|---|---|---|---|---|---|
 | M1 Whole-property traversal | 4 | 9 | **0** | 0 | **0** | 0 | — |
 | M2 Architectural completion | 8 | 18 | **0** | 0 | **0** | 0 | — |
-| M3 The reusable furnishing kit | 16 | 33 | **12** | 14.9 | **17.5** | 19.25 | — |
+| M3 The reusable furnishing kit | 16 | 33 | **11** | 13.2 | **15.5** | 17.05 | — |
 | M4 Dressing everywhere | 40 | 48.75 | **31** | 26.25 | **31** | 37 | R-D +3 |
 | M5 Baseline lighting everywhere | 12 | 24.5 | **10** | 16.75 | **19.75** | 21.75 | — |
 | M6 Main cells and hero areas | 20 | 32.5 | **15** | 16.75 | **19.75** | 21.75 | — |
@@ -1856,12 +1857,12 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **137** | **168.9** | **198.75** | **239.5** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **136** | **167.2** | **196.75** | **237.3** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-40.5 h. Adding the 27.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-267 h, 13 h under the limit. That margin is
+42.7 h. Adding the 29.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+266.8 h, 13.2 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |

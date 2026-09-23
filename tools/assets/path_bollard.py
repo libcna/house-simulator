@@ -35,9 +35,12 @@ PLACEMENTS = (
     ("PROP_EXT_WALK_BOLLARD_4", "LIGHT_EXT_WALK_PATH_4", [0.75, 0.0, -0.80]),
 )
 DRIVEWAY_PLACEMENTS = (
-    ("PROP_EXT_DRIVEWAY_EDGE_BOLLARD_1", "LIGHT_EXT_DRIVEWAY_EDGE_1", [17.55, 0.0, -3.20]),
-    ("PROP_EXT_DRIVEWAY_EDGE_BOLLARD_2", "LIGHT_EXT_DRIVEWAY_EDGE_2", [17.55, 0.0, -7.10]),
-    ("PROP_EXT_DRIVEWAY_EDGE_BOLLARD_3", "LIGHT_EXT_DRIVEWAY_EDGE_3", [17.55, 0.0, -11.00]),
+    ("PROP_EXT_DRIVEWAY_EDGE_BOLLARD_1", "LIGHT_EXT_DRIVEWAY_EDGE_1",
+     [17.55, 0.065356, -3.20]),
+    ("PROP_EXT_DRIVEWAY_EDGE_BOLLARD_2", "LIGHT_EXT_DRIVEWAY_EDGE_2",
+     [17.55, 0.042394, -7.10]),
+    ("PROP_EXT_DRIVEWAY_EDGE_BOLLARD_3", "LIGHT_EXT_DRIVEWAY_EDGE_3",
+     [17.55, 0.019483, -11.00]),
 )
 
 
@@ -194,7 +197,7 @@ def validate_instances() -> None:
                 prop["position"] != position or prop["yawDeg"] != 0 or prop["scale"] != 1 or \
                 not prop["static"] or prop["collision"] != "none":
             raise RuntimeError(f"canonical path-bollard placement changed: {prop_id}")
-        expected_light = [position[0], 0.43, position[2]]
+        expected_light = [position[0], round(position[1] + 0.43, 6), position[2]]
         if light["cell"] != "EXT_WALK" or light["group"] != "LG_EXT_WALK_PATH" or \
                 light["type"] != "spot" or light["position"] != expected_light or \
                 light["direction"] != [0.0, -1.0, 0.0] or light["coneInnerDeg"] != 70.0 or \
@@ -214,7 +217,7 @@ def validate_instances() -> None:
                 prop["yawDeg"] != 0 or prop["scale"] != 1 or not prop["static"] or \
                 prop["collision"] != "none":
             raise RuntimeError(f"canonical driveway-edge bollard placement changed: {prop_id}")
-        expected_light = [position[0], 0.43, position[2]]
+        expected_light = [position[0], round(position[1] + 0.43, 6), position[2]]
         if light["cell"] != "EXT_SIDEYARD_E" or light["group"] != "LG_EXT_DRIVEWAY_EDGE" or \
                 light["type"] != "spot" or light["position"] != expected_light or \
                 light["direction"] != [0.0, -1.0, 0.0] or light["coneInnerDeg"] != 70.0 or \

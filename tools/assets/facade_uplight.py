@@ -33,13 +33,13 @@ LIGHT_OFFSET = (0.0, 0.243, -0.022)
 GROUP = "LG_EXT_FACADE_UPLIGHT"
 PLACEMENTS = (
     ("PROP_EXT_FACADE_UPLIGHT_W1", "LIGHT_EXT_FACADE_UPLIGHT_W1", "EXT_FRONTYARD_W",
-     [-11.35, 0.0, -12.65], ["L1_BED3", "L2_BED6"]),
+     [-11.35, 0.018256, -12.65], ["L1_BED3", "L2_BED6"]),
     ("PROP_EXT_FACADE_UPLIGHT_W2", "LIGHT_EXT_FACADE_UPLIGHT_W2", "EXT_FRONTYARD_W",
-     [-6.15, 0.0, -12.66], ["L1_BED4", "L2_LIBRARY"]),
+     [-6.15, 0.018152, -12.66], ["L1_BED4", "L2_LIBRARY"]),
     ("PROP_EXT_FACADE_UPLIGHT_E1", "LIGHT_EXT_FACADE_UPLIGHT_E1", "EXT_FRONTYARD_E",
-     [4.65, 0.0, -12.66], ["L1_STAIR_MAIN", "L2_STAIR_MAIN"]),
+     [4.65, 0.212530, -12.66], ["L1_STAIR_MAIN", "L2_STAIR_MAIN"]),
     ("PROP_EXT_FACADE_UPLIGHT_E2", "LIGHT_EXT_FACADE_UPLIGHT_E2", "EXT_FRONTYARD_E",
-     [7.95, 0.0, -12.65], ["L1_BED5", "L2_STAIR_ATTIC"]),
+     [7.95, 0.018256, -12.65], ["L1_BED5", "L2_STAIR_ATTIC"]),
 )
 
 
@@ -243,7 +243,7 @@ def validate_instances() -> None:
                 prop["position"] != position or prop["yawDeg"] != 0 or prop["scale"] != 1 or \
                 not prop["static"] or prop["collision"] != "none":
             raise RuntimeError(f"canonical facade-uplight placement changed: {prop_id}")
-        expected_light = [round(position[index] + LIGHT_OFFSET[index], 3)
+        expected_light = [round(position[index] + LIGHT_OFFSET[index], 6)
                           for index in range(3)]
         if light["cell"] != cell_id or light["group"] != GROUP or \
                 light["type"] != "spot" or light["position"] != expected_light or \

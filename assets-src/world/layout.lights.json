@@ -2161,7 +2161,7 @@
     // ---- night exposure or duplicating the porch and garage arrival circuits.
     {
       "id": "LIGHT_EXT_FACADE_UPLIGHT_W1", "cell": "EXT_FRONTYARD_W", "group": "LG_EXT_FACADE_UPLIGHT",
-      "type": "spot", "position": [-11.35, 0.243, -12.672],
+      "type": "spot", "position": [-11.35, 0.261256, -12.672],
       "direction": [0.0, 0.9734, -0.2290], "coneInnerDeg": 24.0, "coneOuterDeg": 44.0,
       "colorK": 3000, "bulbClass": "led", "intensityLm": 2400.0, "range": 9.0,
       "bakeLumensPerRadiantWatt": 5.0, "bakeCells": ["L1_BED3", "L2_BED6"],
@@ -2171,7 +2171,7 @@
     },
     {
       "id": "LIGHT_EXT_FACADE_UPLIGHT_W2", "cell": "EXT_FRONTYARD_W", "group": "LG_EXT_FACADE_UPLIGHT",
-      "type": "spot", "position": [-6.15, 0.243, -12.682],
+      "type": "spot", "position": [-6.15, 0.261152, -12.682],
       "direction": [0.0, 0.9734, -0.2290], "coneInnerDeg": 24.0, "coneOuterDeg": 44.0,
       "colorK": 3000, "bulbClass": "led", "intensityLm": 2400.0, "range": 9.0,
       "bakeLumensPerRadiantWatt": 5.0, "bakeCells": ["L1_BED4", "L2_LIBRARY"],
@@ -2181,7 +2181,7 @@
     },
     {
       "id": "LIGHT_EXT_FACADE_UPLIGHT_E1", "cell": "EXT_FRONTYARD_E", "group": "LG_EXT_FACADE_UPLIGHT",
-      "type": "spot", "position": [4.65, 0.243, -12.682],
+      "type": "spot", "position": [4.65, 0.455530, -12.682],
       "direction": [0.0, 0.9734, -0.2290], "coneInnerDeg": 24.0, "coneOuterDeg": 44.0,
       "colorK": 3000, "bulbClass": "led", "intensityLm": 2400.0, "range": 9.0,
       "bakeLumensPerRadiantWatt": 5.0, "bakeCells": ["L1_STAIR_MAIN", "L2_STAIR_MAIN"],
@@ -2191,7 +2191,7 @@
     },
     {
       "id": "LIGHT_EXT_FACADE_UPLIGHT_E2", "cell": "EXT_FRONTYARD_E", "group": "LG_EXT_FACADE_UPLIGHT",
-      "type": "spot", "position": [7.95, 0.243, -12.672],
+      "type": "spot", "position": [7.95, 0.261256, -12.672],
       "direction": [0.0, 0.9734, -0.2290], "coneInnerDeg": 24.0, "coneOuterDeg": 44.0,
       "colorK": 3000, "bulbClass": "led", "intensityLm": 2400.0, "range": 9.0,
       "bakeLumensPerRadiantWatt": 5.0, "bakeCells": ["L1_BED5", "L2_STAIR_ATTIC"],
@@ -2246,7 +2246,7 @@
     // ---- explicit spill reaches only the adjacent driveway surface.
     {
       "id": "LIGHT_EXT_DRIVEWAY_EDGE_1", "cell": "EXT_SIDEYARD_E", "group": "LG_EXT_DRIVEWAY_EDGE",
-      "type": "spot", "position": [17.55, 0.43, -3.20],
+      "type": "spot", "position": [17.55, 0.495356, -3.20],
       "direction": [0.0, -1.0, 0.0],
       "coneInnerDeg": 70.0, "coneOuterDeg": 120.0,
       "colorK": 2700, "intensityLm": 160.0, "range": 3.00,
@@ -2257,7 +2257,7 @@
     },
     {
       "id": "LIGHT_EXT_DRIVEWAY_EDGE_2", "cell": "EXT_SIDEYARD_E", "group": "LG_EXT_DRIVEWAY_EDGE",
-      "type": "spot", "position": [17.55, 0.43, -7.10],
+      "type": "spot", "position": [17.55, 0.472394, -7.10],
       "direction": [0.0, -1.0, 0.0],
       "coneInnerDeg": 70.0, "coneOuterDeg": 120.0,
       "colorK": 2700, "intensityLm": 160.0, "range": 3.00,
@@ -2268,7 +2268,7 @@
     },
     {
       "id": "LIGHT_EXT_DRIVEWAY_EDGE_3", "cell": "EXT_SIDEYARD_E", "group": "LG_EXT_DRIVEWAY_EDGE",
-      "type": "spot", "position": [17.55, 0.43, -11.00],
+      "type": "spot", "position": [17.55, 0.449483, -11.00],
       "direction": [0.0, -1.0, 0.0],
       "coneInnerDeg": 70.0, "coneOuterDeg": 120.0,
       "colorK": 2700, "intensityLm": 160.0, "range": 3.00,

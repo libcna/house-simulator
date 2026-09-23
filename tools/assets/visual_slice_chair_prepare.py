@@ -49,9 +49,9 @@ EXPECTED_MATERIAL_MAP = {
     "metal": "MAT_KITCHEN_HARDWARE_STEEL",
 }
 EXPECTED_PROPS = {
-    "PROP_LIVING_CHAIR_GREEN": ("L0_LIVING", [-7.3, 0.6, -18], 90),
-    "PROP_LIVING_CHAIR_PURPLE": ("L0_LIVING", [-5.1, 0.6, -15.65], 180),
-    "PROP_FAMILY_CHAIR": ("L0_FAMILY", [4.15, 0.6, -26.15], 0),
+    "PROP_LIVING_CHAIR_GREEN": ("L0_LIVING", [-7.92, 0.6, -17.65], 90, 0.98),
+    "PROP_LIVING_CHAIR_PURPLE": ("L0_LIVING", [-5.1, 0.6, -15.65], 180, 1),
+    "PROP_FAMILY_CHAIR": ("L0_FAMILY", [4.15, 0.6, -26.15], 0, 1),
 }
 
 
@@ -271,11 +271,11 @@ def validate_committed(path: Path, row: dict) -> None:
 def validate_world() -> None:
     layout = layout_io.load_layout(REPO / "assets-src" / "world", ["props"])
     props = layout_io.by_id(layout_io.rows(layout, "props"), "prop")
-    for prop_id, (cell, position, yaw) in EXPECTED_PROPS.items():
+    for prop_id, (cell, position, yaw, scale) in EXPECTED_PROPS.items():
         prop = props[prop_id]
         if (prop["asset"] != ASSET_ID or prop["cell"] != cell or
                 prop["position"] != position or prop["yawDeg"] != yaw or
-                prop["scale"] != 1 or prop["collision"] != "proxy"):
+                prop["scale"] != scale or prop["collision"] != "proxy"):
             raise ValueError(f"{prop_id} placement, scale or collision contract changed")
     if props["PROP_LIVING_SOFA"]["asset"] != "MODEL_FURNITURE_FORMAL_SOFA":
         raise ValueError("chair replacement changed the formal-living sofa")

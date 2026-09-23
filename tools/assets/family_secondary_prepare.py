@@ -139,7 +139,7 @@ def validate_world() -> None:
                 prop["collision"] != collision:
             raise RuntimeError(f"{prop_id}: canonical family placement changed")
     plant = props["PROP_FAMILY_PLANT"]
-    if plant["position"] != [7.95, 2.15, -22.2]:
+    if plant["position"] != [7.95, 2.15, -22.32]:
         raise RuntimeError("PROP_FAMILY_PLANT is no longer dressed on the bookcase")
     beds = layout_io.by_id(layout["nav"].get("beds", []), "bed")
     dog_bed = beds["BED_DOG_FAMILY"]

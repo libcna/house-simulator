@@ -180,7 +180,7 @@ def validate_world(rows: dict[str, dict]) -> None:
         raise RuntimeError("foyer entry rug blocks door swing, hall or side circulation")
     plant = props["PROP_FOYER_ARRIVAL_PLANT"]
     if (plant["asset"] != "MODEL_FURNITURE_POTTED_PLANT_A" or
-            plant["cell"] != "L0_FOYER" or plant["position"] != [-1.78, 0.6, -17.84] or
+            plant["cell"] != "L0_FOYER" or plant["position"] != [-1.67, 0.6, -17.76] or
             plant["yawDeg"] != 35 or plant["scale"] != 1.2 or
             plant["collision"] != "none"):
         raise RuntimeError("foyer arrival plant placement changed")

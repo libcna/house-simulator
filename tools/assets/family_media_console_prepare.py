@@ -329,7 +329,7 @@ def validate_world() -> None:
         raise ValueError("family media-console canonical placement or collision changed")
     television = props["PROP_FAMILY_TV"]
     if (television["asset"] != "MODEL_FURNITURE_TV" or
-            television["position"] != [4.1, 1.315, -22.26] or
+            television["position"] != [4.1, 1.254, -22.33] or
             television["yawDeg"] != 90 or television["scale"] != 1 or
             television["collision"] != "none"):
         raise ValueError("approved television or measured console gap changed")

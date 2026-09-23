@@ -247,6 +247,11 @@ run_gate "world-rules" check_world
 # rules. A schema change once made that fixture invalid, silently preventing every mutation from
 # reaching the rules; running it here keeps the test of the gate as current as the gate itself.
 run_gate "world-rules-selftest" python3 tools/world/validate_world.py --selftest
+# `HOUSE-03303`. Rule 14 owns the exact static-door sweep; this focused companion uses measured
+# LOD0 envelopes and the collision builder's `_COL` grammar to keep every authored prop supported,
+# contained, mutually clear and out of the 0.70 m circulation route.
+run_gate "prop-placement" python3 tools/world/validate_props.py
+run_gate "prop-placement-selftest" python3 tools/world/validate_props.py --selftest
 # `HOUSE-03204`.  The breadth-first plan depends on every authored cell belonging to exactly one
 # planning zone with one quality tier.  A missing or duplicate assignment makes the scoreboard lie
 # precisely where it is meant to prevent another ground-floor-only convergence loop.

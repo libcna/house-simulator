@@ -1,3 +1,30 @@
+# Static-placement handoff — 2026-09-23 (`HOUSE-03303`)
+
+All 133 authored static prop rows now pass the focused offline placement contract. The checker
+reuses the existing glTF, collision, world-layout and terrain readers: it measures each LOD0 visual
+envelope and `_COL` component, rather than adding a runtime placement system. Support and general
+collision tolerance are 1 cm, window fronts retain 0.60 m, door/cased apertures remain empty, and
+each furnished accessible cell retains a 0.70 m route from its standing point to an accessible
+portal approach. Exact posed door-leaf sweeps remain in world-validator rule 14; the controller
+grand tour remains the end-to-end proof.
+
+The audit corrected fifteen unsupported, outside-cell or intersecting placements: a foyer plant,
+one living chair, three rugs, a family-room plant and television, a terrain-grounded garden swing,
+four façade uplights and three driveway bollards (some corrections satisfy more than one rule).
+Linked authored light positions moved with their grounded exterior fixtures. Existing kitchen and
+dining seating composition remains unchanged under documented, pair-specific 12 cm and 4 cm broad-
+proxy tuck allowances; moving the stools instead reproduced an inside-geometry regression, while
+their authored solid meshes are disjoint beneath their respective overhangs.
+
+The rejection selftests, production validator, world content build, all world-validator tests,
+inside-geometry test and the 90-cell controller grand tour pass. The remaining forecast is 196.75
+realistic / 237.3 pessimistic hours. With 29.5 task-hours spent since the final reduction, the R14
+projection is 266.8 h, 13.2 h below the hard limit. Rule that chooses the next task: R1's house-
+wide support exception and dependency order select the now-unblocked offline prop variation path.
+The exact next unblocked MUST task is `HOUSE-00971`.
+
+---
+
 # Furnishing-kit handoff — 2026-09-23 (`HOUSE-03302`)
 
 The bounded furnishing specification is now in `docs/furnishing-kit.md`. It defines cumulative

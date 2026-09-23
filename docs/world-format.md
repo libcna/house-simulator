@@ -485,6 +485,22 @@ and has no runtime object; one that moves becomes a `DynamicInstance`.
 }
 ```
 
+### Static-placement contract
+
+`tools/world/validate_props.py` checks every static placement against the measured LOD0 envelope
+and the same `_COL` components consumed by the collision builder. A visual envelope remains inside
+its cell, its bottom is within 1 cm of the floor, terrain or a measured support surface, and rigid
+collision components may overlap by at most 1 cm. Two deliberately tucked seating arrangements
+have pair-specific interpretations of their broad collision boxes: dining chairs may
+enter a table envelope by 4 cm and counter stools may enter the kitchen-island envelope by 12 cm.
+Their solid authored meshes remain disjoint; these are not general prop exceptions.
+
+Window fronts retain 0.60 m of clear working space, door and cased-opening apertures remain clear,
+and the exact posed-leaf sweep is owned by world-validator rule 14. In each furnished accessible
+cell a 0.70 m disc must still connect the recipe's standing point to an accessible portal
+approach. The controller grand tour is the end-to-end traversal proof. Both the production check
+and its rejection selftests are repository gates (`HOUSE-03303`).
+
 ## `layout.materials.json`
 
 The application-owned material. **`cna-house.md` §22.1 is the authority for this record and §22.2
