@@ -94,7 +94,7 @@
           "reason": "Visible storage loft reached only by a vertical ladder; ladder traversal is outside the walk-only showcase scope."
         }
       ],
-      "reviewPoses": ["garage-interior"]
+      "reviewPoses": ["garage-interior", "garage-loft-access"]
     },
     {
       "id": "Z-L1",

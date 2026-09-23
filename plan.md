@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **144 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 178 / 210 / 252 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G2, not passed.** Next: ground-floor service/garage architecture `HOUSE-03262` by R2 |
+| Active plan | **143 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 177 / 208 / 249 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G2, not passed.** Next: vertical-circulation architecture `HOUSE-03266` by R2 |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -273,7 +273,7 @@ non-accessible appliance interiors.
 
 ## Zone scoreboard
 
-**As of 2026-09-23 (Round 107).** Levels from Round 103's whole-property day/night review
+**As of 2026-09-23 (Round 108).** Levels from Round 103's whole-property day/night review
 (`HOUSE-03203`), Round 104's traversal sweep and subsequent completed zone work; main and hero
 targets re-counted after `HOUSE-03206`'s tier change. Update per rule R10.
 
@@ -285,8 +285,8 @@ proved all 90 intended-accessible cells and the tight-space traversal. G1 clears
 |---|---|---|---|---|---|
 | `Z-B1` | **C2** | 0 / 1 | 0 / 1 | Round 107 day/night; finished/unfinished palettes, exposed utility framing, complete cased door hardware and eight light wells (`HOUSE-03261`) | Furnishing and night readability belong to M4/M5 |
 | `Z-L0M` | **C2** (dressing of C3 done; lighting S2 open) | 0 / 3 | 0 / 5 | Round 103 plus 102 prior rounds. Primary furniture in all 9 cells (`HOUSE-01037`–`01076`) | S2: Basic-lit furniture much darker than the baked receivers (piano, sofas); service-room night depth. **Goes last by R4** |
-| `Z-L0S` | **C1** | — | — | Round 103; shell, materials, bakes | S2: empty; office/mudroom lack readable night depth |
-| `Z-GAR` | **C1** | 0 / 1 | — | Round 103; finished sectional door outside (`HOUSE-00935`, `00947`, `00948`) | S2: 70.6 m² empty dark volume; loft access/guard and interior finish do not read |
+| `Z-L0S` | **C2** | — | — | Round 108; distinct service palettes, finished trim and complete selected door joinery (`HOUSE-03262`) | Furnishing and night readability belong to M4/M5 |
+| `Z-GAR` | **C2** | 0 / 1 | — | Round 108; finished envelope/sectional, fixed loft ladder and complete timber guard (`HOUSE-03262`) | Furnishing and night readability belong to M4/M5 |
 | `Z-L1` | **C2** | 0 / 1 | — | Round 105; all 20 cells have palette finishes, complete trim/window joinery and guarded finished balconies (`HOUSE-03263`) | Furnishing and night readability belong to M4/M5 |
 | `Z-L2` | **C2** | — | 0 / 1 | Round 106; all 15 accessible cells have palette finishes, complete trim/window joinery and finished circulation doors (`HOUSE-03264`) | Furnishing and night readability belong to M4/M5 |
 | `Z-L3` | **C1** | 0 / 1 | — | Round 103; automatic attic crouch (`HOUSE-00558`) | S2: empty; no structure/finished-room contrast |
@@ -304,7 +304,7 @@ visually complete. C4 and C5 are target counts from the tier classification, not
 | `Z-B1` | 14 | 14 | 0 | 0.00 | 14 | 14 / 14 | 4 | 1 | 1 |
 | `Z-L0M` | 9 | 9 | 106 | 11.78 | 0 | 9 / 9 | 23 | 3 | 5 |
 | `Z-L0S` | 8 | 8 | 0 | 0.00 | 8 | 8 / 8 | 2 | 0 | 0 |
-| `Z-GAR` | 2 | 2 | 0 | 0.00 | 2 | 2 / 2 | 1 | 1 | 0 |
+| `Z-GAR` | 2 | 2 | 0 | 0.00 | 2 | 2 / 2 | 2 | 1 | 0 |
 | `Z-L1` | 20 | 20 | 1 | 0.05 | 19 | 20 / 20 | 6 | 1 | 0 |
 | `Z-L2` | 16 | 15 | 0 | 0.00 | 15 | 15 / 15 | 6 | 0 | 1 |
 | `Z-L3` | 5 | 5 | 0 | 0.00 | 5 | 5 / 5 | 2 | 1 | 0 |
@@ -313,8 +313,8 @@ visually complete. C4 and C5 are target counts from the tier classification, not
 | `Z-EXR` | 7 | 7 | 15 | 2.14 | 4 | 3 / 7 | 3 | 2 | 0 |
 | `Z-STR` | 2 | 0 | 0 | — | 0 | 0 / 0 | 1 | 0 | 0 |
 
-**Minimum level today: C1** (four zones). By rules R1 and R2, M2 raises the least-complete zones to
-C2; `Z-L0S` is next because its 8 accessible cells are the greatest remaining count below target.
+**Minimum level today: C1** (two zones). By rules R1 and R2, M2 raises the least-complete zones to
+C2; `Z-STAIR` is next because its 6 accessible cells are the greatest remaining count below target.
 M3 tooling may run alongside.
 
 ---
@@ -543,11 +543,12 @@ green.
       note: Round 103 S2 architecture list: generic slab doors/casings; finished and unfinished room types do not read distinctly; the zone is nearly black even by day
       note: (2026-09-23) Round 107 confirms C2 across all 14 cells. Existing authored palettes distinguish finished rooms from the aged-plaster/concrete utility family and the stone/ochre cellar. The plywood-trim utility/storage palette now drives exposed ceiling joists, rim/slab-edge members and wall-line posts without room-id logic; all 14 B1 leaves reuse the existing four-panel/two-sided steel-lever grammar and their existing generated casings. All eight basement hoppers retain generated exterior light wells. Clear-day, clear-night and lights-forced zone sets were inspected; the focused grand tour and inside-geometry route pass. `verify_shell.py` confirms 8 flights, 128/129 wall cuts and all 63 physical leaves, with only the established nested refrigerator-container limitation unrelated to B1. Furnishing and final night readability remain assigned to M4/M5
 
-- [ ] HOUSE-03262 — Bring the ground-floor service rooms and the garage to C2
+- [x] HOUSE-03262 — Bring the ground-floor service rooms and the garage to C2
       dep: HOUSE-03240, HOUSE-03203 · sys: content · plat: TOOL · pri: MUST · zone: Z-L0S, Z-GAR · adv: G2, D1 · est: 2
       accept: C2 for `Z-L0S` and `Z-GAR`: the garage interior's slab, walls, ceiling and the inside face of the sectional door read as finished garage construction; the loft has a real means of access as designed and a guard; mudroom, laundry, WCs, pantry, office and closets have finished trim and door hardware
       verify: `Z-L0S` and `Z-GAR` captures; grand tour
       note: Round 103 S2 architecture list: office/mudroom night depth is unreadable; garage interior finish and inside door face do not read; loft access and guard are absent
+      note: (2026-09-23) Round 108 confirms C2 for both zones. The existing authored service palettes, generated skirting/cornice/casing and finished garage envelope/inside sectional face remain intact; six remaining service leaves now explicitly reuse the established four-panel/two-sided steel-lever joinery. The garage loft gains a data-derived fixed ladder beneath its authored `H_LOFT` hatch and its four placeholder top rails become a complete timber guard with bottom/top rails, newels and balusters. Clear-day service/garage and lights-forced garage sets were inspected, including a new fixed loft-access view. The focused grand tour, inside-geometry, stair traversal and content-current checks pass. Furnishing and final night readability remain assigned to M4/M5
 
 - [x] HOUSE-03263 — Bring the first upper floor's architecture to C2
       dep: HOUSE-03240, HOUSE-03203 · sys: content · plat: TOOL · pri: MUST · zone: Z-L1 · adv: G2, D1 · est: 2.5
@@ -1833,7 +1834,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | Milestone | Tasks before | Hours before | **Tasks now** | Optimistic | **Realistic** | Pessimistic | Reserve |
 |---|---|---|---|---|---|---|---|
 | M1 Whole-property traversal | 4 | 9 | **0** | 0 | **0** | 0 | — |
-| M2 Architectural completion | 8 | 18 | **5** | 7.23 | **8.5** | 9.35 | — |
+| M2 Architectural completion | 8 | 18 | **4** | 5.53 | **6.5** | 7.15 | — |
 | M3 The reusable furnishing kit | 16 | 33 | **14** | 17 | **20** | 22 | — |
 | M4 Dressing everywhere | 40 | 48.75 | **31** | 26.25 | **31** | 37 | R-D +3 |
 | M5 Baseline lighting everywhere | 12 | 24.5 | **10** | 16.75 | **19.75** | 21.75 | — |
@@ -1848,11 +1849,12 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **144** | **178.23** | **209.75** | **251.6** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **143** | **176.53** | **207.75** | **249.4** | +21 |
 
-The realistic total lies in the 210–250 h target range, and the pessimistic remaining total is
-under the **280 h hard ceiling** (rule R14) by about 28 h. Adding the 16.5 task-hours completed since
-`HOUSE-03206` gives a ceiling projection of 268.1 h, about 11.9 h under the limit. That margin is
+The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
+completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
+about 31 h. Adding the 18.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+267.9 h, about 12.1 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |

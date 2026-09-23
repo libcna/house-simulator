@@ -144,6 +144,7 @@
       "hinge": "left", "swing": "L0_LAUNDRY", "maxAngleDeg": 95.0, "openFraction": 0.90,
       "frame": { "asset": null, "casing": 0.070 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
+      "joineryStyle": "four_panel", "hardwareMaterial": "MAT_KITCHEN_HARDWARE_STEEL",
       "solid": false, "lockable": false
     },
     {
@@ -183,6 +184,7 @@
       "hinge": "right", "swing": "L0_PANTRY", "maxAngleDeg": 95.0, "openFraction": 0.90,
       "frame": { "asset": null, "casing": 0.070 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
+      "joineryStyle": "four_panel", "hardwareMaterial": "MAT_KITCHEN_HARDWARE_STEEL",
       "solid": false, "lockable": false
     },
     {
@@ -192,6 +194,7 @@
       "hinge": "right", "swing": "L0_BUTLERS", "maxAngleDeg": 95.0, "openFraction": 0.90,
       "frame": { "asset": null, "casing": 0.070 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
+      "joineryStyle": "four_panel", "hardwareMaterial": "MAT_KITCHEN_HARDWARE_STEEL",
       "solid": false, "lockable": false
     },
     {
@@ -288,6 +291,7 @@
       "hinge": "left", "swing": "L0_MUDROOM", "maxAngleDeg": 95.0, "openFraction": 0.90,
       "frame": { "asset": null, "casing": 0.070 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
+      "joineryStyle": "four_panel", "hardwareMaterial": "MAT_KITCHEN_HARDWARE_STEEL",
       "solid": false, "lockable": false
     },
 
@@ -320,6 +324,7 @@
       "hinge": "left", "swing": "L0_WC2", "maxAngleDeg": 95.0, "openFraction": 0.90,
       "frame": { "asset": null, "casing": 0.070 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
+      "joineryStyle": "four_panel", "hardwareMaterial": "MAT_KITCHEN_HARDWARE_STEEL",
       "solid": false, "lockable": true
     },
     {
@@ -329,6 +334,7 @@
       "hinge": "left", "swing": "L0_CLOSET_W", "maxAngleDeg": 95.0, "openFraction": 0.90,
       "frame": { "asset": null, "casing": 0.070 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
+      "joineryStyle": "four_panel", "hardwareMaterial": "MAT_KITCHEN_HARDWARE_STEEL",
       "solid": false, "lockable": true
     },
     {

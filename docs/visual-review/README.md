@@ -4587,3 +4587,27 @@ height. The production day/night sheets remain dim but preserve coherent room-fa
 their final readability and all furnishing remain owned by M5 and M4 respectively. No S1/S2
 architecture issue remains in `Z-B1`. Next: `HOUSE-03262`, selected by R1/R2 because `Z-L0S` has
 the most accessible cells still at C1; `Z-L0M` remains frozen by R4.
+
+## Round 108 — service rooms and garage at C2
+
+Commit: `HOUSE-03262` working tree (`2026-09-23`). Before: the two fixed service-room views and the
+garage-interior view in local, Git-ignored [`Z-L0S`](captures/house-03262-before-l0s) and
+[`Z-GAR`](captures/house-03262-before-gar) clear-day sets. After: matching
+[`Z-L0S`](captures/house-03262-after-l0s) and [`Z-GAR`](captures/house-03262-after-gar) clear-day
+sets, plus a [`lights-forced`](captures/house-03262-after-gar-lit) garage set. A second fixed garage
+pose now faces the authored loft hatch so future reviews cannot miss its access and guard.
+
+The existing service palettes and generated trim already establish finished utility/secondary
+envelopes, and the garage retains its concrete/aged-plaster construction and detailed two-sided
+sectional. Six remaining service leaves now select the established four-panel geometry and
+two-sided steel lever. The horizontal loft portal derives a fixed ladder in its parent garage, and
+the former four top-rail placeholders become a complete timber guard. The loft remains visible but
+non-traversable under the walk-only scope; no interaction or ladder-climbing system was added.
+
+The office and mudroom views change 108,059 and 372,079 pixels as detailed adjoining leaves enter
+the frames. The garage-interior control changes only 8 pixels because it faces the sectional; the
+new loft-access view directly resolves the two rails, ten rungs and guarded platform, especially
+with the existing garage groups forced on. No S1/S2 architecture issue remains in `Z-L0S` or
+`Z-GAR`. Their empty-room and normal-night readability gaps stay assigned to M4/M5. Next:
+`HOUSE-03266`, selected by R1/R2 because `Z-STAIR` has the most accessible cells still at C1;
+`Z-L0M` remains frozen by R4.

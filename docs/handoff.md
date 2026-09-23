@@ -1,3 +1,36 @@
+# Service rooms and garage C2 handoff — 2026-09-23 (`HOUSE-03262`)
+
+`Z-L0S` and `Z-GAR` are C2. The existing authored palettes and generated trim already distinguish
+the office, mudroom, laundry, WCs, pantry and closets and provide a finished garage slab, wall and
+ceiling envelope. Six remaining service leaves now reuse the established four-panel/two-sided
+steel-lever joinery. The garage loft's authored horizontal hatch now derives a fixed two-rail,
+ten-rung ladder in its parent cell; its former four floating top rails are replaced by a complete
+timber guard with bottom/top rails, newels and balusters. The loft remains intentionally outside
+the walk-only accessibility manifest, so no ladder-traversal mechanic was added.
+
+Round 108 inspected the two service views and two garage views in clear day, plus a garage set with
+both authored light groups forced for direct architecture judgment. A new fixed loft-access pose
+makes the ladder and guard visible. Office/mudroom frames changed 108,059 / 372,079 pixels as the
+selected joinery entered view; the existing garage-interior control changed only 8 pixels, while
+the new loft view directly confirms the added construction. The service/garage night-readability
+and furnishing gaps remain correctly assigned to M5/M4.
+
+The generator selftest, all 15 world rules, manifest/material checks, shell unwrap and chunk
+selftest/report pass. The result is 770 chunks over 96 cells and 2,218,285 vertices; the garage
+remains at 11/11 chunks, the loft at 4, and only `L0_MUDROOM` needs one measured hardware-role
+increment to 9/9. Generated shell geometry is 80,001 triangles, worst 3,004/3,500 in
+`L2_LANDING`. The controller grand tour, inside-geometry route, both focused stair tests and
+content-current gate pass. `verify_shell.py --report` confirms the geometry budgets and reports
+only the established `FRIDGE_L0_KITCHEN` nested-container cut limitation, unrelated to these zones.
+
+The remaining forecast is 207.75 realistic / 249.4 pessimistic hours. With 18.5 task-hours
+completed since the final reduction, the R14 ceiling projection is 267.9 h, 12.1 h below the hard
+limit. Rule that chooses the next task: R1 keeps work in C2 breadth and R2 selects `Z-STAIR`, whose
+six accessible cells are the greatest remaining count below target. The exact next unblocked MUST
+is `HOUSE-03266`; `Z-L0M` remains frozen by R4.
+
+---
+
 # Basement C2 handoff — 2026-09-23 (`HOUSE-03261`)
 
 `Z-B1` is C2 across all 14 cells. Existing authored palettes already separate the finished cinema,

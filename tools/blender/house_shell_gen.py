@@ -1934,6 +1934,15 @@ BASEMENT_RIM_WIDTH = 0.10
 BASEMENT_RIM_DEPTH = 0.22
 BASEMENT_COLUMN_SECTION = 0.10
 
+#: The visible garage-loft access (`HOUSE-03262`). The loft remains outside the walk-only
+#: accessibility manifest; these are ordinary fixed-ladder dimensions for the architecture under
+#: its authored horizontal H_LOFT hatch, not a ladder-climbing mechanic.
+LOFT_LADDER_WIDTH = 0.55
+LOFT_LADDER_RAIL = 0.05
+LOFT_LADDER_RUNG = 0.03
+LOFT_LADDER_RUNG_SPACING = 0.28
+LOFT_LADDER_TOP_EXTENSION = 0.18
+
 
 def basement_structure_boxes(cell: dict, box: tuple[float, ...],
                               inner: tuple[float, float, float, float]):
@@ -2182,8 +2191,8 @@ def window_well(side: str, outer_plane: float, u0: float, u1: float, sill: float
 
 
 def build_mezzanine_guard(cell: dict, extent: tuple, cells_by_id: dict, levels: dict,
-                          construction, add) -> int:
-    """A railing round a platform nested inside another cell, a storey above its floor.
+                          construction, solid) -> int:
+    """A timber guard round a platform nested inside another cell, a storey above its floor.
 
     The garage's storage loft is the case (`HOUSE-00467`): a 27 m² platform at +2.90 over a slab at
     +0.15, with nothing at its edge. §70.5 asks for a guard at a drop over a metre, and it does not
@@ -2202,10 +2211,107 @@ def build_mezzanine_guard(cell: dict, extent: tuple, cells_by_id: dict, levels: 
     for box in cell_boxes(cell, extent):
         for side in ("-X", "+X", "-Z", "+Z"):
             plane, lo, hi = side_span(side, box)
-            rail_along(add, side in ("-X", "+X"), lo, hi,
-                       extent[0] + height, extent[0] + height, plane, RAIL_SECTION)
+            inward = 1.0 if side in ("-X", "-Z") else -1.0
+            across = plane + BALCONY_GUARD_INSET * inward
+
+            def member(a0, a1, y0, y1, depth):
+                if side in ("-X", "+X"):
+                    solid(across - depth / 2.0, across + depth / 2.0,
+                          y0, y1, a0, a1, "structure")
+                else:
+                    solid(a0, a1, y0, y1,
+                          across - depth / 2.0, across + depth / 2.0, "structure")
+
+            bottom_low = extent[0] + BALCONY_BOTTOM_RAIL_CENTRE \
+                - BALCONY_BOTTOM_RAIL_HEIGHT / 2.0
+            bottom_high = bottom_low + BALCONY_BOTTOM_RAIL_HEIGHT
+            member(lo, hi, bottom_low, bottom_high, BALCONY_BOTTOM_RAIL_DEPTH)
+            member(lo, hi, extent[0] + height - RAIL_SECTION / 2.0,
+                   extent[0] + height + RAIL_SECTION / 2.0, RAIL_SECTION)
+            for centre in (lo + BALCONY_NEWEL_SECTION / 2.0,
+                           hi - BALCONY_NEWEL_SECTION / 2.0):
+                member(centre - BALCONY_NEWEL_SECTION / 2.0,
+                       centre + BALCONY_NEWEL_SECTION / 2.0,
+                       extent[0], extent[0] + height, BALCONY_NEWEL_SECTION)
+            for centre in balcony_baluster_centres(lo, hi):
+                member(centre - BALCONY_BALUSTER_SECTION / 2.0,
+                       centre + BALCONY_BALUSTER_SECTION / 2.0,
+                       bottom_high, extent[0] + height - RAIL_SECTION / 2.0,
+                       BALCONY_BALUSTER_SECTION)
             built += 1
     return built
+
+
+def loft_ladder_boxes(cell: dict, extent: tuple[float, float], portals: list,
+                      openings: dict, cells_by_id: dict) -> list[tuple[float, ...]]:
+    """Return a fixed vertical ladder below each child loft's authored horizontal hatch."""
+    boxes: list[tuple[float, ...]] = []
+    for portal in portals:
+        opening = openings.get(portal.get("id"))
+        plane = portal.get("plane") or {}
+        if (not opening or opening.get("type") != "H_LOFT" or plane.get("axis") != "y"
+                or cell.get("id") not in (portal.get("cellA"), portal.get("cellB"))):
+            continue
+        other_id = (portal.get("cellB") if portal.get("cellA") == cell.get("id")
+                    else portal.get("cellA"))
+        child = cells_by_id.get(other_id)
+        if not child or child.get("parent") != cell.get("id"):
+            continue
+
+        rect = portal.get("rect") or {}
+        u, v = rect.get("u") or (), rect.get("v") or ()
+        if len(u) != 2 or len(v) != 2:
+            continue
+        u0, u1 = float(u[0]), float(u[1])
+        v0, v1 = float(v[0]), float(v[1])
+        centre_x, centre_z = (u0 + u1) / 2.0, (v0 + v1) / 2.0
+        child_boxes = [row for row in layout_io.cell_boxes(child)
+                       if row[0] <= centre_x <= row[1] and row[2] <= centre_z <= row[3]]
+        if not child_boxes:
+            continue
+        cx0, cx1, cz0, cz1 = child_boxes[0]
+        side = min(((abs(u0 - cx0), "-X"), (abs(cx1 - u1), "+X"),
+                    (abs(v0 - cz0), "-Z"), (abs(cz1 - v1), "+Z")))[1]
+        bottom = extent[0] + 0.10
+        top = float(plane.get("value")) + LOFT_LADDER_TOP_EXTENSION
+        if top <= bottom:
+            continue
+        rung_count = max(1, int((top - bottom) / LOFT_LADDER_RUNG_SPACING))
+        rung_pitch = (top - bottom) / (rung_count + 1)
+
+        if side in ("-Z", "+Z"):
+            ladder_z0 = v0 if side == "-Z" else v1 - LOFT_LADDER_RAIL
+            ladder_z1 = ladder_z0 + LOFT_LADDER_RAIL
+            rail_centres = (centre_x - LOFT_LADDER_WIDTH / 2.0,
+                            centre_x + LOFT_LADDER_WIDTH / 2.0)
+            for rail_x in rail_centres:
+                boxes.append((rail_x - LOFT_LADDER_RAIL / 2.0,
+                              rail_x + LOFT_LADDER_RAIL / 2.0,
+                              bottom, top, ladder_z0, ladder_z1))
+            for index in range(1, rung_count + 1):
+                rung_y = bottom + rung_pitch * index
+                boxes.append((rail_centres[0] - LOFT_LADDER_RAIL / 2.0,
+                              rail_centres[1] + LOFT_LADDER_RAIL / 2.0,
+                              rung_y - LOFT_LADDER_RUNG / 2.0,
+                              rung_y + LOFT_LADDER_RUNG / 2.0,
+                              ladder_z0, ladder_z1))
+        else:
+            ladder_x0 = u0 if side == "-X" else u1 - LOFT_LADDER_RAIL
+            ladder_x1 = ladder_x0 + LOFT_LADDER_RAIL
+            rail_centres = (centre_z - LOFT_LADDER_WIDTH / 2.0,
+                            centre_z + LOFT_LADDER_WIDTH / 2.0)
+            for rail_z in rail_centres:
+                boxes.append((ladder_x0, ladder_x1, bottom, top,
+                              rail_z - LOFT_LADDER_RAIL / 2.0,
+                              rail_z + LOFT_LADDER_RAIL / 2.0))
+            for index in range(1, rung_count + 1):
+                rung_y = bottom + rung_pitch * index
+                boxes.append((ladder_x0, ladder_x1,
+                              rung_y - LOFT_LADDER_RUNG / 2.0,
+                              rung_y + LOFT_LADDER_RUNG / 2.0,
+                              rail_centres[0] - LOFT_LADDER_RAIL / 2.0,
+                              rail_centres[1] + LOFT_LADDER_RAIL / 2.0))
+    return boxes
 
 
 def roof_faces_for(level, layout, construction):
@@ -2924,7 +3030,10 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
 
     surface["class"] = "metal"
     build_balcony_edge(cell, extent, list(neighbours), construction, solid, add)
-    build_mezzanine_guard(cell, extent, cells_by_id, levels or {}, construction, add)
+    build_mezzanine_guard(cell, extent, cells_by_id, levels or {}, construction, solid)
+    for ladder_member in loft_ladder_boxes(
+            cell, extent, list(portals), openings, cells_by_id):
+        solid(*ladder_member, "structure")
     surface["class"] = "wall"
 
     # `HOUSE-00464`: a covered deck stands on columns and has a balustrade round its open sides.
@@ -5216,11 +5325,12 @@ def selftest(output: Path) -> int:
     # ---- `HOUSE-00467`: the garage wing ---------------------------------------------------------
     loft = cells["L0_GARAGE_LOFT"]
     loft_extent = extent_of(loft, levels[loft["level"]])[0]
+    loft_guard_members = []
     guards = build_mezzanine_guard(loft, loft_extent, cells, levels, construction,
-                                   lambda *args: None)
-    require(guards == 4,
-            f"the garage loft is a platform 2.75 m over the slab, so it gets a guard on all four "
-            f"sides ({guards})")
+                                   lambda *args: loft_guard_members.append(args))
+    require(guards == 4 and len(loft_guard_members) > 40,
+            f"the garage loft is a platform 2.75 m over the slab, so it gets a complete timber "
+            f"guard on all four sides ({guards} sides, {len(loft_guard_members)} members)")
     fridge = cells["CELL_FRIDGE_INTERIOR"]
     require(not build_mezzanine_guard(fridge, extent_of(fridge, levels["L0"])[0], cells, levels,
                                       construction, lambda *args: None),
@@ -5235,6 +5345,16 @@ def selftest(output: Path) -> int:
     require(abs(garage_extent[0] - 0.15) < 1e-9 and abs(garage_extent[1] - 4.30) < 1e-9,
             f"the garage's slab is §12.2's +0.15 and its head +4.30, which are its own cell's "
             f"({garage_extent})")
+    loft_ladder = loft_ladder_boxes(
+        garage, garage_extent, list(portal_rows.values()), openings_by_portal, cells)
+    ladder_rails = [row for row in loft_ladder if row[3] - row[2] > 2.0]
+    ladder_rungs = [row for row in loft_ladder if row[3] - row[2] < 0.1]
+    require(len(ladder_rails) == 2 and len(ladder_rungs) >= 9,
+            f"and the authored H_LOFT hatch has a fixed two-rail ladder with domestic rung "
+            f"spacing below it ({len(ladder_rails)} rails, {len(ladder_rungs)} rungs)")
+    require(not loft_ladder_boxes(
+        loft, loft_extent, list(portal_rows.values()), openings_by_portal, cells),
+            "while the child loft does not duplicate its access ladder above the hatch")
     sectional = next(row for row in openings_by_portal.values()
                      if row["id"] == "DOOR_GARAGE_SECTIONAL")
     require(sectional.get("kind") == "door",

@@ -383,6 +383,15 @@ CHUNK_BUDGET_EXCEPTIONS["B1_STAIR"] = (
     7, "six measured stair-shell finish chunks plus HOUSE-03261's shared steel stair-head door "
        "hardware role")
 
+# `HOUSE-03262`: the mudroom already carries a separate front shutter role and is the sole service
+# owner cell whose new steel lever rises beyond its measured ceiling. The loft ladder and completed
+# guard reuse the garage's existing plywood structure role; every other service leaf owner remains
+# at or below its prior limit.
+_mudroom_limit, _mudroom_reason = CHUNK_BUDGET_EXCEPTIONS["L0_MUDROOM"]
+CHUNK_BUDGET_EXCEPTIONS["L0_MUDROOM"] = (
+    _mudroom_limit + 1,
+    _mudroom_reason + "; HOUSE-03262 adds the shared steel service-door hardware role")
+
 # HOUSE-01069 is a measured room-wide furnishing/lighting step, not a generic budget increase.
 # The new walnut/brass cabinet shares both established dining roles. Its ceramic serving set is
 # one new finish, and the two sideboard lamps' exact independently switched shade group needs
