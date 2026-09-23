@@ -1,3 +1,35 @@
+# L1 master wet/storage dressing handoff — 2026-09-23 (`HOUSE-01001`)
+
+The secondary-tier `R-BATH` and `R-CLOSET` compositions are complete. `L1_MASTER_BATH` reuses the
+acquired bath, vanity-basin and WC plus the generated mirror and towel rail. The bath occupies the
+north end of the west wall, clear of both the obscured window and the fixed review camera; the
+vanity and WC share the south wall while the towel rail stays on its short west-wall return.
+`L1_MASTER_CLOSET` retains the stable id of the prior wardrobe example but moves it to the
+north-east wall segment, adds a generated dresser on the south-west segment and places one small
+non-colliding folded-textile cluster on the dresser. Both door swings and the central aisle remain
+clear. No asset, material family, subsystem or optional dressing was added.
+
+All 162 static rows pass exact placement, door-sweep and 0.70 m route validation. The 90-cell grand
+tour passes. The wider inside-geometry probe now pushes all master-closet wall starts clear: the
+only remaining failure is the older `L1_LANDING west` point beside `HOUSE-00999`'s bench. This task
+does not weaken or hide that regression. The measured cells are 12 chunks/materials in the bath
+and 8 in the closet, exactly matching their local evidence-backed ceilings with no Reach split.
+
+The clear-day and forced-light `Z-L1` fixed sets plus reciprocal bath/closet detail views were
+inspected. Fixtures and carcasses are grounded, the folded textiles sit on the dresser, both
+closet portals remain unobstructed, and no clipping, floating geometry or z-fighting is visible.
+The normal 10:30 bathroom remains dark, which is the already-scheduled M5 baseline-lighting scope;
+forced light was used only to inspect placement.
+
+The remaining forecast is 178.5 realistic / 217.2 pessimistic hours. With 47.75 task-hours spent
+since the final reduction, the R14 projection is 265.0 h, 15.0 h below the hard limit. Three
+consecutive Track A tasks have now targeted `Z-L1`; R3 therefore requires a zone move, and R2's
+remaining-cell tie-break selects `Z-L2`. The exact next unblocked MUST task is `HOUSE-01009`,
+dressing `L2_LANDING`, `L2_HALL` and `L2_HALL_W`. All compilation must use at most four workers and
+be pinned to CPUs 4,5,7,9; strict-XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # L1 master-bedroom dressing handoff — 2026-09-23 (`HOUSE-01000`)
 
 The main-tier `R-BED-PRIMARY` composition is complete in `L1_MASTER_BED`. Ten ordinary static rows

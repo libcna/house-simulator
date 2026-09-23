@@ -1737,13 +1737,6 @@
       "interactable": null
     },
     {
-      "id": "PROP_KIT_WARDROBE_EXAMPLE",
-      "asset": "MODEL_PROP_KIT_WARDROBE", "cell": "L1_MASTER_CLOSET",
-      "position": [-8.20, 3.65, -26.76], "yawDeg": 0, "scale": 1,
-      "static": true, "lodGroup": null, "collision": "proxy",
-      "material": null, "interactable": null
-    },
-    {
       "id": "PROP_KIT_SHELF_EXAMPLE",
       "asset": "MODEL_PROP_KIT_OPEN_SHELF", "cell": "L3_STORE_W",
       "position": [-12.47, 9.30, -23.30], "yawDeg": 270, "scale": 1,
@@ -1979,6 +1972,110 @@
       "lodGroup": null,
       "collision": "none",
       "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_MASTER_BATH_BATH",
+      "asset": "MODEL_BATHROOM_BATH",
+      "cell": "L1_MASTER_BATH",
+      "position": [-12.35, 3.65, -26.15],
+      "yawDeg": 270,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_MASTER_BATH_VANITY",
+      "asset": "MODEL_BATHROOM_VANITY",
+      "cell": "L1_MASTER_BATH",
+      "position": [-12.10, 3.65, -22.28],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_MASTER_BATH_TOILET",
+      "asset": "MODEL_BATHROOM_TOILET",
+      "cell": "L1_MASTER_BATH",
+      "position": [-10.10, 3.65, -22.33],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_MASTER_BATH_MIRROR",
+      "asset": "MODEL_PROP_KIT_MIRROR",
+      "cell": "L1_MASTER_BATH",
+      "position": [-12.10, 4.92, -22.00],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_MASTER_BATH_TOWEL_RAIL",
+      "asset": "MODEL_PROP_KIT_TOWEL_RAIL",
+      "cell": "L1_MASTER_BATH",
+      "position": [-12.70, 4.45, -22.75],
+      "yawDeg": 270,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_KIT_WARDROBE_EXAMPLE",
+      "asset": "MODEL_PROP_KIT_WARDROBE",
+      "cell": "L1_MASTER_CLOSET",
+      "position": [-7.32, 3.65, -26.30],
+      "yawDeg": 90,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_MASTER_CLOSET_DRESSER",
+      "asset": "MODEL_PROP_KIT_DRESSER",
+      "cell": "L1_MASTER_CLOSET",
+      "position": [-9.12, 3.65, -22.75],
+      "yawDeg": 270,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_MASTER_CLOSET_TEXTILES",
+      "asset": "MODEL_FILL_TEXTILES",
+      "cell": "L1_MASTER_CLOSET",
+      "position": [-9.12, 4.47, -22.75],
+      "yawDeg": 270,
+      "scale": 0.75,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": "MAT_FURNITURE_DINING_LINEN",
       "interactable": null
     }
   ]

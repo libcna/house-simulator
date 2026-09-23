@@ -316,6 +316,13 @@ CHUNK_BUDGET_EXCEPTIONS["L1_MASTER_BED"] = (
     "and walnut, armchair textile, desk ebonite, rug and steel hardware. Repeated nightstands "
     "and every shared finish remain batched, with no Reach split")
 
+_master_bath_limit, _master_bath_reason = CHUNK_BUDGET_EXCEPTIONS["L1_MASTER_BATH"]
+CHUNK_BUDGET_EXCEPTIONS["L1_MASTER_BATH"] = (
+    _master_bath_limit + 5,
+    _master_bath_reason + "; HOUSE-01001's S-tier fixture set adds five measured finishes: "
+    "porcelain, steel hardware, dark glass, muted-blue fronts and cabinet glass. The vanity's "
+    "painted carcass batches with the established room role, with no Reach split")
+
 CHUNK_BUDGET_EXCEPTIONS["L1_LANDING"] = (
     10, "six measured shell finish chunks plus a weather-facing window-frame chunk, "
         "HOUSE-00930's isolated upper-balcony entry leaf and HOUSE-00932's raised-panel hardwood "
@@ -432,6 +439,11 @@ CHUNK_BUDGET_EXCEPTIONS["B1_WORKSHOP"] = (
     _workshop_reason + "; HOUSE-00985's workbench adds one reusable painted-furniture role")
 CHUNK_BUDGET_EXCEPTIONS["L1_MASTER_CLOSET"] = (
     7, "six room/shell roles plus HOUSE-00985's reusable wardrobe paint role")
+_master_closet_limit, _master_closet_reason = CHUNK_BUDGET_EXCEPTIONS["L1_MASTER_CLOSET"]
+CHUNK_BUDGET_EXCEPTIONS["L1_MASTER_CLOSET"] = (
+    _master_closet_limit + 1,
+    _master_closet_reason + "; HOUSE-01001's second carcass batches into the existing roles and "
+    "its bounded folded-textile cluster adds one linen finish, with no Reach split")
 CHUNK_BUDGET_EXCEPTIONS["L3_STORE_W"] = (
     11, CHUNK_BUDGET_EXCEPTIONS["L3_STORE_W"][1] + "; HOUSE-00985's shelf and storage-box "
         "examples add four truthful reusable-kit surface roles")

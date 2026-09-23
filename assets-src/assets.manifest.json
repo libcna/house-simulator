@@ -4181,6 +4181,7 @@
       },
       "usedIn": [
         "L1_MASTER_BED",
+        "L1_MASTER_CLOSET",
         "L1_BED2"
       ]
     },
@@ -4273,7 +4274,8 @@
         "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
-        "B1_WC7"
+        "B1_WC7",
+        "L1_MASTER_BATH"
       ]
     },
     {
@@ -4595,7 +4597,8 @@
         "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
-        "B1_WC7"
+        "B1_WC7",
+        "L1_MASTER_BATH"
       ]
     },
     {

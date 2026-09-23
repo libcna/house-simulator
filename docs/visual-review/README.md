@@ -4751,3 +4751,26 @@ No S1/S2 furnishing defect, floating piece, z-fighting, impossible intersection 
 is visible. The production daytime view remains deliberately dim; baseline day/night readability
 is M5 scope. Next: `HOUSE-01001`, selected by R2's tied-zone order as R3's permitted third
 consecutive `Z-L1` task.
+
+## Round 115 — first-floor master wet/storage dressing
+
+Commit: `HOUSE-01001` working tree (`2026-09-23`). The local, Git-ignored
+[`clear-day`](captures/house-01001-l1-wet-storage-day) and
+[`forced-light`](captures/house-01001-l1-wet-storage-lit) sets cover all six fixed `Z-L1` views.
+The master-bath frame and zone sheet were inspected at full resolution. Supplemental forced-light
+[`detail`](captures/house-01001-l1-wet-storage-detail) views look squarely at the bathroom's south
+fixture wall and reciprocally across both ends of the narrow walk-in closet; these are placement
+evidence, not a claim that M5's normal light balance is complete.
+
+The secondary bathroom reads from the acquired WC, vanity-basin and bath plus the generated mirror
+and towel rail. Moving the bath from the first draft's fixed camera position to the north-west wall
+segment preserved its route, kept the obscured window clear and restored an unobstructed review
+pose. The closet's stable-id wardrobe moved away from the north-wall push-out to the north-east
+segment; a dresser and one bounded folded-textile cluster complete the opposite end. The two
+closet portals and its central passage remain visibly clear.
+
+All visible pieces are grounded or deliberately wall-mounted. The textile cluster rests on the
+dresser, and no clipping, floating object, z-fighting, impossible intersection or blocked portal
+is visible. Normal 10:30 bathroom surfaces are still very dark; that known house-wide readability
+gap belongs to M5. R3 now requires a zone move after three consecutive `Z-L1` tasks, and R2 selects
+`HOUSE-01009` in `Z-L2` next.
