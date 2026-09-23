@@ -373,6 +373,110 @@
       "usedIn": ["L0_BUTLERS"]
     },
     {
+      "id": "MODEL_FILL_BOOKS",
+      "category": "fill-kit",
+      "sourceFile": "assets-src/Models/Furniture/Fill/fill_books.glb",
+      "sourceSha256": "550f493755de5db3230b0cbe8c2c647b79c1a2b9ae01d8d1cfa6a5c28f156807",
+      "contentName": "Models/Furniture/Fill/fill_books",
+      "kind": "model", "residencyPack": "core",
+      "origin": {
+        "kind": "generated", "name": "Seeded reusable book fill kit",
+        "licence": "Ms-PL", "licenceFile": "LICENSE", "attribution": "",
+        "redistributeSource": true, "redistributeDerived": true,
+        "commercialUse": true, "modification": true,
+        "note": "Generated deterministically with seed 97301 by tools/blender/fill_kit_gen.py for HOUSE-00973. Project-authored primitives and approved canonical material roles only; no third-party geometry is copied."
+      },
+      "geometry": {
+        "unitScale": 1, "upAxis": "Y", "boundsMetres": [0.472349, 0.305038, 0.326886],
+        "triangles": {"LOD0": 484}
+      },
+      "materialMap": {
+        "FILL_CREAM": "MAT_FURNITURE_DINING_LINEN", "FILL_BLUE": "MAT_PAINT_DUSTY_BLUE",
+        "FILL_GREEN": "MAT_PAINT_SAGE", "FILL_OCHRE": "MAT_PAINT_SMOKY_OCHRE",
+        "FILL_RED": "MAT_PAINT_PALE_ROSE", "FILL_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "FILL_WOOD": "MAT_DOOR_HARDWOOD", "FILL_GLASS": "MAT_FOYER_CERAMIC"
+      },
+      "usedIn": ["L2_LIBRARY", "L3_ROOM"]
+    },
+    {
+      "id": "MODEL_FILL_TEXTILES",
+      "category": "fill-kit",
+      "sourceFile": "assets-src/Models/Furniture/Fill/fill_textiles.glb",
+      "sourceSha256": "69a41cdaa267c8aa5200a69cd9f79f1f2e964998633fa13e12c07fd3a7baaee9",
+      "contentName": "Models/Furniture/Fill/fill_textiles",
+      "kind": "model", "residencyPack": "core",
+      "origin": {
+        "kind": "generated", "name": "Seeded reusable folded-textile fill kit",
+        "licence": "Ms-PL", "licenceFile": "LICENSE", "attribution": "",
+        "redistributeSource": true, "redistributeDerived": true,
+        "commercialUse": true, "modification": true,
+        "note": "Generated deterministically with seed 97302 by tools/blender/fill_kit_gen.py for HOUSE-00973. Project-authored primitives and approved canonical material roles only; no third-party geometry is copied."
+      },
+      "geometry": {
+        "unitScale": 1, "upAxis": "Y", "boundsMetres": [0.495934, 0.382364, 0.343637],
+        "triangles": {"LOD0": 264}
+      },
+      "materialMap": {
+        "FILL_CREAM": "MAT_FURNITURE_DINING_LINEN", "FILL_BLUE": "MAT_PAINT_DUSTY_BLUE",
+        "FILL_GREEN": "MAT_PAINT_SAGE", "FILL_OCHRE": "MAT_PAINT_SMOKY_OCHRE",
+        "FILL_RED": "MAT_PAINT_PALE_ROSE", "FILL_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "FILL_WOOD": "MAT_DOOR_HARDWOOD", "FILL_GLASS": "MAT_FOYER_CERAMIC"
+      },
+      "usedIn": ["L1_MASTER_CLOSET", "L3_STORE_W"]
+    },
+    {
+      "id": "MODEL_FILL_CROCKERY",
+      "category": "fill-kit",
+      "sourceFile": "assets-src/Models/Furniture/Fill/fill_crockery.glb",
+      "sourceSha256": "11bd4c58ab23b583a27938e6f644f53c7d3c0888cdf4fc44010173e4206526be",
+      "contentName": "Models/Furniture/Fill/fill_crockery",
+      "kind": "model", "residencyPack": "core",
+      "origin": {
+        "kind": "generated", "name": "Seeded reusable crockery and jar fill kit",
+        "licence": "Ms-PL", "licenceFile": "LICENSE", "attribution": "",
+        "redistributeSource": true, "redistributeDerived": true,
+        "commercialUse": true, "modification": true,
+        "note": "Generated deterministically with seed 97303 by tools/blender/fill_kit_gen.py for HOUSE-00973. Project-authored primitives and approved canonical material roles only; no third-party geometry is copied."
+      },
+      "geometry": {
+        "unitScale": 1, "upAxis": "Y", "boundsMetres": [0.601988, 0.236677, 0.229953],
+        "triangles": {"LOD0": 792}
+      },
+      "materialMap": {
+        "FILL_CREAM": "MAT_FURNITURE_DINING_LINEN", "FILL_BLUE": "MAT_PAINT_DUSTY_BLUE",
+        "FILL_GREEN": "MAT_PAINT_SAGE", "FILL_OCHRE": "MAT_PAINT_SMOKY_OCHRE",
+        "FILL_RED": "MAT_PAINT_PALE_ROSE", "FILL_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "FILL_WOOD": "MAT_DOOR_HARDWOOD", "FILL_GLASS": "MAT_FOYER_CERAMIC"
+      },
+      "usedIn": ["L0_PANTRY", "B1_CELLAR"]
+    },
+    {
+      "id": "MODEL_FILL_TOOLS",
+      "category": "fill-kit",
+      "sourceFile": "assets-src/Models/Furniture/Fill/fill_tools.glb",
+      "sourceSha256": "1bfacd49d2ca15a5b679a830aebd44cd74941aa062c2aa1e7b26a8efefb1714d",
+      "contentName": "Models/Furniture/Fill/fill_tools",
+      "kind": "model", "residencyPack": "core",
+      "origin": {
+        "kind": "generated", "name": "Seeded reusable tools and paint-tin fill kit",
+        "licence": "Ms-PL", "licenceFile": "LICENSE", "attribution": "",
+        "redistributeSource": true, "redistributeDerived": true,
+        "commercialUse": true, "modification": true,
+        "note": "Generated deterministically with seed 97304 by tools/blender/fill_kit_gen.py for HOUSE-00973. Project-authored primitives and approved canonical material roles only; no third-party geometry is copied."
+      },
+      "geometry": {
+        "unitScale": 1, "upAxis": "Y", "boundsMetres": [0.610056, 0.218241, 0.347044],
+        "triangles": {"LOD0": 624}
+      },
+      "materialMap": {
+        "FILL_CREAM": "MAT_FURNITURE_DINING_LINEN", "FILL_BLUE": "MAT_PAINT_DUSTY_BLUE",
+        "FILL_GREEN": "MAT_PAINT_SAGE", "FILL_OCHRE": "MAT_PAINT_SMOKY_OCHRE",
+        "FILL_RED": "MAT_PAINT_PALE_ROSE", "FILL_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "FILL_WOOD": "MAT_DOOR_HARDWOOD", "FILL_GLASS": "MAT_FOYER_CERAMIC"
+      },
+      "usedIn": ["L0_GARAGE", "B1_WORKSHOP", "EXT_SHED"]
+    },
+    {
       "id": "MODEL_DINING_TABLE_SETTING",
       "category": "table-setting",
       "sourceFile": "assets-src/Models/Furniture/Dining/table_setting.glb",

@@ -140,6 +140,9 @@ run_gate "butlers-service" python3 tools/assets/butlers_service_prepare.py --che
 # HOUSE-01075: both stocked side-wall shelves retain deterministic authored geometry,
 # approved material roles, measured doorway clearance and enclosing collision.
 run_gate "butlers-shelves" python3 tools/assets/butlers_pantry_shelf_prepare.py --check
+# HOUSE-00973: four compact generated fill families stay reproducible, support-grounded and
+# visibly different between seeds. One group gate owns the family; there is no per-piece process.
+run_gate "fill-kits" python3 tools/assets/fill_kit_prepare.py --check
 # HOUSE-01049: the measured counter stools and three restrained worktop groupings remain
 # reproducible from their authored Blender source, with exact material slots and placement.
 run_gate "kitchen-dressing" python3 tools/assets/kitchen_dressing_prepare.py --check

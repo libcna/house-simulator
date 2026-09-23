@@ -1,3 +1,28 @@
+# Seeded fill-kit handoff — 2026-09-23 (`HOUSE-00973`)
+
+Four bounded reusable fill families now live under `assets-src/Models/Furniture/Fill`: books,
+folded textiles, crockery/jars, and tools/paint tins. `tools/blender/fill_kit_gen.py` takes a kind,
+seed and output path. It varies piece count, spacing, bounded lean/rotation and selection from
+approved colour roles while remaining byte-identical for a repeated seed. These are ordinary
+support-relative static assets; recipes place them with `collision: none`, and there is no runtime
+randomisation, container-interior model or new content subsystem.
+
+The group checker regenerates every canonical seed twice and a second seed beside it, then checks
+the hash, visible structural/palette difference, UV0, y=0 support, measured shelf-scale envelope,
+triangle ceiling and canonical material bridge. The committed set is 2,164 triangles and 170,064
+bytes. A 700x900 headless comparison rendered the canonical and alternate seed for all four kits
+side by side on shelves; visual inspection found no floating pieces, clipping or z-fighting. The
+production placement validator still passes all 133 currently placed props; M4 owns actual room
+placement after `HOUSE-00985` supplies their shelves and work surfaces.
+
+The remaining forecast is 193.75 realistic / 234.0 pessimistic hours. With 32.5 task-hours spent
+since the final reduction, the R14 projection is 266.5 h, 13.5 h below the hard limit. Rule that
+chooses the next task: R1's house-wide support exception, R8's generated-kit-first rule and the M3
+dependency order select the main breadth enabler. The exact next unblocked MUST task is
+`HOUSE-00985`.
+
+---
+
 # Offline prop-variation handoff — 2026-09-23 (`HOUSE-00971`)
 
 Placed static props now support a positive uniform or xyz scale, RGB tint and recipe-opted seeded

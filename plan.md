@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **135 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 166 / 195 / 236 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G2 passed.** Next: generate the four bounded storage fill kits in `HOUSE-00973` |
+| Active plan | **134 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 165 / 194 / 234 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G2 passed.** Next: generate the reusable storage/fixture families in `HOUSE-00985` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -391,7 +391,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M0](#m0--scope-reset-and-breadth-instruments) — Scope reset and breadth instruments | A (support) | 03201–03220 | 0 | done | R10, G1–G5 | 0 |
 | [M1](#m1--whole-property-traversal-c1-everywhere--gate-g1) — Whole-property traversal | A | 03221–03260 | 0 | **G1 passed** · `HOUSE-03240` | D2 | 0 |
 | [M2](#m2--architectural-completion-c2-everywhere--gate-g2) — Architectural completion | A | 03261–03300 | 0 | **G2 passed** · `HOUSE-03280` | D1 | 0 |
-| [M3](#m3--the-reusable-furnishing-kit) — The reusable furnishing kit | A (support) | 03301–03340 | 10 | kit ready for M4 | D3 | 14 |
+| [M3](#m3--the-reusable-furnishing-kit) — The reusable furnishing kit | A (support) | 03301–03340 | 9 | kit ready for M4 | D3 | 12.5 |
 | [M4](#m4--dressing-everywhere-the-furnishing-half-of-c3--checkpoint) — Dressing everywhere | A | 03341–03400 | 31 | checkpoint · `HOUSE-03380` | D3 | 31 |
 | [M5](#m5--baseline-lighting-everywhere-the-lighting-half-of-c3--gate-g3) — Baseline lighting everywhere | A | 03401–03440 | 10 | **G3** · `HOUSE-03420` | D3, D6 | 19.75 |
 | [M6](#m6--main-cells-and-hero-areas-c4-c5--gates-g4-and-g5) — Main cells and hero areas | A | 03441–03500 | 15 | **G4** · `HOUSE-03452`, **G5** · `HOUSE-03480` | D4 | 19.75 |
@@ -653,11 +653,12 @@ second reduction capped them at 62 and 6.
       trace: was *Implement the placement pipeline: a prop row → a chunk entry or a dynamic instance, with per-instance jitter and tint*; the row → chunk path already exists, so only the variation remains (`HOUSE-03206`)
       note: (2026-09-23) `layout.props.json` now accepts positive uniform or xyz scale, RGB tint and deterministic bounded jitter (≤ 15° yaw, ≤ 0.25 m X/Z offset) resolved from SHA-256 of seed plus prop id. One shared offline transform feeds chunk vertices, inverse-transpose normals, collision proxies and the placement validator. Tint selects an already-authored, otherwise-identical canonical material variant, so no chunk-format or runtime rendering system was added. Synthetic probes prove deterministic baked geometry, material selection and matching collision/validation transforms; the C++ loader accepts xyz scale. The production 133-prop chunk file remains byte-identical at `a649fcfa6480a7f5fec3c4f796d4e926e27287675d872dbdae71cb48cbc7709c`
 
-- [ ] HOUSE-00973 — Fill-kit generator: four seeded fill kits for shelves and storage
+- [x] HOUSE-00973 — Fill-kit generator: four seeded fill kits for shelves and storage
       dep: HOUSE-00971 · sys: content · plat: TOOL · pri: MUST · zone: all · adv: D3 · est: 1.5
       accept: (1) four kits: books; folded textiles (towels, linen, clothes); crockery and jars; tools and paint tins; (2) seeded, varied count, spacing, lean and colour, so two invocations never look identical; (3) they dress open shelves, visible surfaces and the basement, attic and garage storage; container interiors are out of scope
       verify: two seeds side by side; the placement validator
       trace: was 12 kits (`FILL_CUTLERY` … `FILL_LINEN`), then 6; toys and shoes are cut, and lower clutter density is intended (`HOUSE-03206`)
+      note: (2026-09-23) `fill_kit_gen.py` now emits four compact support-relative static families: varied upright/stacked books, folded textiles, plate stacks with jars, and hand tools with paint tins. Count, spacing, bounded lean/rotation and approved colour-role selection derive from an explicit seed; repeated equal seeds are byte-identical while a second seed for every family has different geometry/palette signatures. The four canonical GLBs total 2,164 triangles and 166 KiB, need no collision/runtime/container system, and have one group gate covering deterministic regeneration, UVs, support origin, measured shelf-scale envelopes, canonical material bridges and alternate-seed variation. A headless two-column seed comparison rendered all eight clusters on shelves with no floating, clipping or z-fighting; the production 133-prop placement validation remains clean
 
 - [ ] HOUSE-00985 — `prop_kit_gen.py`: generate storage furniture, cabinets, shelving, boxes, fixtures and service runs from data
       dep: HOUSE-00971 · sys: content · plat: TOOL · pri: MUST · zone: all · adv: D3 · est: 3
@@ -1844,7 +1845,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 |---|---|---|---|---|---|---|---|
 | M1 Whole-property traversal | 4 | 9 | **0** | 0 | **0** | 0 | — |
 | M2 Architectural completion | 8 | 18 | **0** | 0 | **0** | 0 | — |
-| M3 The reusable furnishing kit | 16 | 33 | **10** | 11.9 | **14** | 15.4 | — |
+| M3 The reusable furnishing kit | 16 | 33 | **9** | 10.6 | **12.5** | 13.75 | — |
 | M4 Dressing everywhere | 40 | 48.75 | **31** | 26.25 | **31** | 37 | R-D +3 |
 | M5 Baseline lighting everywhere | 12 | 24.5 | **10** | 16.75 | **19.75** | 21.75 | — |
 | M6 Main cells and hero areas | 20 | 32.5 | **15** | 16.75 | **19.75** | 21.75 | — |
@@ -1858,12 +1859,12 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **135** | **166.0** | **195.25** | **235.65** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **134** | **164.7** | **193.75** | **234.0** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-44.35 h. Adding the 31 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-266.65 h, 13.35 h under the limit. That margin is
+46 h. Adding the 32.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+266.5 h, 13.5 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |
