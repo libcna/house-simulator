@@ -3641,8 +3641,8 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 209U)
-            << "HOUSE-01073 adds three measured dining furniture and setting finishes";
+        EXPECT_EQ(contents.materials.size(), 210U)
+            << "HOUSE-03267 adds one generated outdoor clear-glass variant for the shed";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
@@ -3653,8 +3653,8 @@ namespace
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
                                 { return IdRegistry::NameOf(material.id).starts_with("MAT_OUTDOOR_"); }),
-                  18)
-            << "HOUSE-00934 adds the dormer siding to the canonical unbaked Basic variants";
+                  19)
+            << "HOUSE-03267 adds clear glass to the canonical unbaked Basic variants";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
@@ -3900,8 +3900,8 @@ namespace
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
                                 { return material.materialClass == world::MaterialClass::Glass; }),
-                  9)
-            << "HOUSE-00938 adds one opaque opal-glass role for the shared ceiling fixture";
+                  10)
+            << "HOUSE-03267 adds one clear-glass role for the finished shed window";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
