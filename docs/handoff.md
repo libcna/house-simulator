@@ -1,3 +1,29 @@
+# Gate G1 handoff — 2026-09-23 (`HOUSE-03240`)
+
+G1 is passed. Every scoreboard zone is at least C1 and the seven traversal `*` markers are cleared:
+the static leaves now agree across render, collision and portal state; the controller grand tour
+reaches all 90 intended-accessible cells and returns; and Round 104 found no new S1/S2 traversal
+defect. The open S1 list is empty. `zone_scoreboard.py --check` assigns all 96 authored cells
+exactly once across the eleven zones plus the explicit exclusions.
+
+With `SDL_VIDEODRIVER=offscreen`, `SDL_AUDIODRIVER=dummy` and an isolated writable
+`XDG_DATA_HOME`, the complete integration label passes all 141 registrations together at `-j4`.
+The grand tour passed in 16.84 s under that load. A first run without those environment settings
+failed graphics initialization and save writes; a correctly configured `-j16` run then exposed one
+load-sensitive weather-timing failure, which passed alone and in the complete `-j4` run. These were
+test-environment/concurrency failures, not House changes.
+
+The remaining forecast is 216.25 realistic / 258.75 pessimistic hours. Adding the 10 task-hours
+completed since the final reduction gives a 268.75 h ceiling projection, about 11 h below R14's
+280 h limit; no depth reduction is required. M1 used its planned 9 task-hours plus the one-hour G1
+review, within its estimate plus risk reserve.
+
+Rule that chooses the next task: R1 opens C2 architecture after G1, and R2 selects `Z-L1` because
+it has the most accessible cells among the seven zones tied at C1. The exact next unblocked MUST
+task is `HOUSE-03263`; `Z-L0M` remains frozen by R4.
+
+---
+
 # Traversal-sweep handoff — 2026-09-23 (`HOUSE-03227`)
 
 `HOUSE-03227` is complete. `RandomWalkTests.TwentyMinutesOfWanderingStaysInTheHouse` now repeats
