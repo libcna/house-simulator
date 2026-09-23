@@ -4660,3 +4660,27 @@ insulation and walkway boards. The all-cell grand tour reaches all five cells, w
 crouch regressions pass and preserve the feet/eye transition under low rafters. No S1/S2
 architecture issue remains in `Z-L3`; furnishing and final night readability remain M4/M5 work.
 Next: `HOUSE-03267`, the sole remaining M2 zone task, selected by R2.
+
+## Round 111 — rear and side elevations at C2
+
+Commit: `HOUSE-03267` working tree (`2026-09-23`). Before: the three inherited fixed production
+views in local, Git-ignored [`clear-day`](captures/house-03267-before-day) and
+[`clear-night`](captures/house-03267-before-night) sets, plus a direct manual inspection of the
+shed's raw door/window elevation. After: four-view [`clear-day`](captures/house-03267-after-day)
+and [`clear-night`](captures/house-03267-after-night) sets; the latter forces only the existing
+`LG_EXT_SHED_MAIN` group. Both contact sheets and every frame were inspected.
+
+The existing shared house-shell rules already finish rear/side sills, frames, roof edges, gutters
+and downspouts. Data selects six-over-six grilles and black shutters only on the 17 front
+double-hungs, making their absence elsewhere deliberate; both rear sliders retain finished
+aluminium joinery. The remaining defect was the single-material shed: its generator now reuses
+approved outdoor siding, roof, painted trim, steel, clear glass and timber while adding four
+corner boards, paired eaves fascia, a cased door and framed/glazed window. The new path-side pose
+shows those features directly; utility side yards remain zone-walk evidence rather than fixed
+targets.
+
+The inherited garden frame changes 326,482 clear-day and 326,337 clear-night pixels, localized to
+the shed; the two day rear controls change only 560 / 586 pixels. The finished shed remains at the
+ordinary 6-chunk target. The property walk and all-cell grand tour remain green, and no S1/S2
+architecture issue remains in `Z-EXR`. Final furnishing and baseline night balance remain M4/M5
+work. Next: gate review `HOUSE-03280`, selected by R2/R10 because every zone is now at C2.

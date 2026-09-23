@@ -47,6 +47,7 @@ VARIANTS = (
             snow_slope=40.0),
     Variant("MAT_OUTDOOR_FENCE_METAL", "MAT_METAL_GUTTER", (0.84, 0.85, 0.81)),
     Variant("MAT_OUTDOOR_GARDEN_WOOD", "MAT_DECK_WOOD", (0.68, 0.60, 0.47)),
+    Variant("MAT_OUTDOOR_GLASS", "MAT_WINDOW_GLASS_CLEAR"),
     Variant("MAT_OUTDOOR_GRASS", "MAT_GROUND_LAWN", (0.82, 0.66, 0.88)),
     Variant("MAT_OUTDOOR_GRAVEL", "MAT_GRAVEL_PATH"),
     Variant("MAT_OUTDOOR_LAWN_WORN", "MAT_GROUND_LAWN", (0.69, 0.68, 0.48)),
@@ -100,7 +101,7 @@ def problems(rows: dict[str, dict], source: str) -> list[str]:
         block_ids = re.findall(r'"id"\s*:\s*"([^"]+)"', generated_block)
         if block_ids != sorted(ids):
             issues.append(
-                "generated block must contain exactly the 18 owned outdoor variants; "
+                "generated block must contain exactly the owned outdoor variants; "
                 "move independently authored materials after its END marker"
             )
     for variant in VARIANTS:
@@ -109,7 +110,10 @@ def problems(rows: dict[str, dict], source: str) -> list[str]:
             continue
         if variant.tint is not None and any(channel < 0 or channel > 1 for channel in variant.tint):
             issues.append(f"{variant.material_id} has tint outside 0..1")
-        if not rows[variant.base_id].get("albedo"):
+        # Clear glass is intentionally textureless; its tint/alpha/specular fields are the entire
+        # stock-XNA material. Every opaque outdoor source still needs an albedo.
+        if (not rows[variant.base_id].get("albedo")
+                and rows[variant.base_id].get("class") != "glass"):
             issues.append(f"{variant.material_id} source has no albedo")
     return issues
 
@@ -145,6 +149,12 @@ def main() -> int:
     source = MATERIALS_FILE.read_text(encoding="utf-8")
     rows = load_rows()
     issues = problems(rows, source)
+    if args.write:
+        # Adding/removing a declared Variant necessarily makes the generated block stale; writing
+        # is the operation that repairs that one condition. All other structural problems remain
+        # fatal, including a missing marker or canonical source row.
+        issues = [issue for issue in issues
+                  if not issue.startswith("generated block must contain exactly")]
     if issues:
         for issue in issues:
             print(f"outdoor_static_materials: {issue}", file=sys.stderr)

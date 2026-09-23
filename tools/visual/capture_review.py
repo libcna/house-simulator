@@ -135,6 +135,10 @@ NEW_POSES = (
     ("attic-stair-foot", "5.85,6.55,-14.70,0.0,10.0"),
     ("attic-stair-head", "5.85,9.30,-18.05,180.0,-10.0"),
     ("garden", "-15.00,-0.35,-42.80,180.0,0.0"),
+    # HOUSE-03267: the inherited garden view stands beside the shed and sees only its black side
+    # edge. This path-side position remains in the secondary garden cell and squarely reviews the
+    # generated door, window, corner boards and eaves finish.
+    ("garden-shed-facade", "-13.60,-0.35,-42.20,270.0,0.0"),
     ("neighbourhood-street", "0.00,0.00,20.00,0.0,0.0"),
 )
 POSES = LEGACY_POSES + NEW_POSES
@@ -206,6 +210,7 @@ POSE_DETAILS = {
     "attic-stair-foot": ("Z-STAIR", "L2_STAIR_ATTIC", None),
     "attic-stair-head": ("Z-STAIR", "L3_STAIR_HEAD", None),
     "garden": ("Z-EXR", "EXT_GARDEN", None),
+    "garden-shed-facade": ("Z-EXR", "EXT_GARDEN", None),
     "neighbourhood-street": ("Z-STR", "EXT_WORLD", None),
 }
 SCENARIOS = {

@@ -988,6 +988,7 @@ materials/materials	MAT_OUTDOOR_DECK
 materials/materials	MAT_OUTDOOR_FENCE_BOARD
 materials/materials	MAT_OUTDOOR_FENCE_METAL
 materials/materials	MAT_OUTDOOR_GARDEN_WOOD
+materials/materials	MAT_OUTDOOR_GLASS
 materials/materials	MAT_OUTDOOR_GRASS
 materials/materials	MAT_OUTDOOR_GRAVEL
 materials/materials	MAT_OUTDOOR_LAWN_WORN

@@ -30,6 +30,14 @@ ROLE_IDS = {
     "ROAD_grate": "MAT_OUTDOOR_ROAD_GRATE",
     "ROAD_paint": "MAT_OUTDOOR_ROAD_MARKING",
     "SHED_timber": "MAT_OUTDOOR_GARDEN_WOOD",
+    # HOUSE-03267 finishes the existing generated shed with material families already used by the
+    # house shell. Clear glass gets the same generator-owned unbaked variant as those opaque
+    # families; no new texture, shader or runtime path exists.
+    "SHED_siding": "MAT_OUTDOOR_SIDING",
+    "SHED_trim": "MAT_OUTDOOR_SOFFIT",
+    "SHED_roof": "MAT_OUTDOOR_ROOF",
+    "SHED_door": "MAT_OUTDOOR_FENCE_METAL",
+    "SHED_glass": "MAT_OUTDOOR_GLASS",
 }
 
 # House-shell source slots already carry real base ids. When the shell is unbaked outdoors,

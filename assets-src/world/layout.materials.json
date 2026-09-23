@@ -2492,6 +2492,20 @@
       "effectTierS": "Basic", "effectTierE": "RoomLit"
     },
     {
+      "id": "MAT_OUTDOOR_GLASS", "class": "glass",
+      "albedo": null,
+      "normal": null, "lightmapChannel": 0,
+      "tint": [0.78, 0.9, 1.0], "specularColor": [0.9, 0.95, 1.0],
+      "specularPower": 128.0, "alphaMode": "blend",
+      "alpha": 0.12, "alphaCutoff": null,
+      "twoSided": true, "uvScale": [1.0, 1.0],
+      "wetResponse": {"albedoDarken": 0.0, "specularBoost": 1.0, "powerBoost": 1.0},
+      "snowResponse": {"coverable": false, "slopeLimitDeg": 0.0},
+      "footstepSurface": "glass",
+      "audioAbsorption": 0.03,
+      "effectTierS": "Basic", "effectTierE": "RoomLit/Glass"
+    },
+    {
       "id": "MAT_OUTDOOR_GRASS", "class": "grass",
       "albedo": "Textures/Materials/grass_lawn_albedo",
       "normal": "Textures/Materials/grass_lawn_normal", "lightmapChannel": 0,

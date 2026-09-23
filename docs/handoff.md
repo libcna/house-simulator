@@ -1,3 +1,37 @@
+# Rear/side-elevation C2 handoff — 2026-09-23 (`HOUSE-03267`)
+
+`Z-EXR` has no remaining S1/S2 architecture defect. The existing house-shell mechanisms already
+apply the same sill/frame grammar, painted frieze/crown/fascia/soffit, shingle hip/ridge caps,
+K-profile gutters and six data-derived downspouts around the rear and sides. The opening data
+deliberately selects `HOUSE-00933`'s six-over-six grilles and shutters only for the 17 front
+double-hungs; the plainer rear/side windows are therefore consistent rather than incomplete. Both
+rear sliders retain their finished two-panel aluminium joinery.
+
+The actual unfinished item was `STRUCT_SHED`: one timber material covered raw walls, roof and an
+open window hole. Its existing generator now adds four corner boards, paired eaves fascia, casing
+around the already-authored steel door, and a framed/glazed double-hung window. It reuses the
+approved outdoor siding, soffit-paint, roof, steel, clear-glass and garden-timber families; the
+glass variant is generated through the existing outdoor-static-material path. Footprint, portal,
+door pose, collision and structure bounds do not move. `EXT_SHED` measures exactly 6 chunks / 6
+materials, so no budget exception was added.
+
+Round 111 inspected four fixed `Z-EXR` views in clear day and clear night, with only the existing
+`LG_EXT_SHED_MAIN` forced for the night set. A new path-side shed view exposes its door, window,
+corner boards and roof edge; the two utility side yards remain covered by the zone walk under the
+review protocol. The inherited garden frame changes 326,482 day / 326,337 night pixels, localized
+to the shed; the day rear controls change only 560 / 586 pixels. The result is 781 chunks,
+2,224,797 vertices and 54,623,688 packed bytes, a measured increase of 5 chunks, 436 vertices and
+13,952 bytes from the added finish roles.
+
+All 15 world rules, fence selftests, outdoor material generation/check, chunk selftest/report,
+capture coverage, the property walk and the all-cell grand tour pass. The remaining forecast is
+202.25 realistic / 243.35 pessimistic hours. With 24 task-hours completed since the final
+reduction, the R14 projection is 267.35 h, 12.65 h below the hard limit. Rule that chooses the next
+task: R2 and R10 select the M2 gate now that every zone is C2. The exact next unblocked MUST is
+`HOUSE-03280`; `Z-L0M` remains frozen by R4.
+
+---
+
 # Attic C2 handoff — 2026-09-23 (`HOUSE-03265`)
 
 `Z-L3` is C2 across all five cells. The existing rafter-bounded shell already supplied clipped roof

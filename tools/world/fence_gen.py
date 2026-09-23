@@ -71,6 +71,22 @@ PICKET_THICKNESS = 0.02
 BOARD_ASSET = "MODEL_FENCE_BOARD_01"
 ORNAMENTAL_ASSET = "MODEL_FENCE_ORNAMENTAL_01"
 
+#: HOUSE-03267: restrained finish dimensions for the existing generated shed. The footprint,
+#: openings and roof remain data-owned; these ordinary boards merely finish their exposed edges.
+SHED_CORNER_BOARD = 0.075
+SHED_CASING_DEPTH = 0.025
+SHED_FASCIA_HEIGHT = 0.12
+SHED_FASCIA_DEPTH = 0.06
+SHED_SASH_SECTION = 0.045
+SHED_PART_ROLES = {
+    "STRUCT_SHED_WALLS": "SHED_siding",
+    "STRUCT_SHED_DOOR": "SHED_door",
+    "STRUCT_SHED_FLOOR": "SHED_timber",
+    "STRUCT_SHED_ROOF": "SHED_roof",
+    "STRUCT_SHED_TRIM": "SHED_trim",
+    "STRUCT_SHED_GLASS": "SHED_glass",
+}
+
 
 def _box(low: tuple[float, float, float], high: tuple[float, float, float]) -> list[dict]:
     """An axis-aligned box as six outward-facing quads, each `(corners, normal)`."""
@@ -484,6 +500,7 @@ def shed(directory: Path) -> dict | None:
     holes: dict[tuple[str, float], list[tuple[float, float, float, float]]] = {}
     openings_by_id = layout_io.by_id(layout_io.rows(layout, "openings"), "opening")
     shed_door = None
+    shed_window = None
     for portal in layout_io.rows(layout, "portals"):
         if cell["id"] not in (portal.get("cellA"), portal.get("cellB")):
             continue
@@ -496,6 +513,8 @@ def shed(directory: Path) -> dict | None:
         aperture = openings_by_id.get(portal.get("aperture"))
         if aperture and aperture.get("kind") == "door":
             shed_door = (portal, aperture)
+        elif aperture and aperture.get("kind") == "window":
+            shed_window = (portal, aperture)
 
     parts: list[tuple[str, list]] = []
     walls: list[dict] = []
@@ -508,6 +527,68 @@ def shed(directory: Path) -> dict | None:
             high = (max(plane, outer), v1, u1) if axis == "x" else (u1, v1, max(plane, outer))
             walls += _box(low, high)
     parts.append(("STRUCT_SHED_WALLS", walls))
+
+    # Painted corner boards and eaves fascia give the small outbuilding the same disciplined
+    # termination as the house without copying its larger Colonial roof grammar. All boxes stay
+    # inside the authored footprint, so collision and the structure bounds remain unchanged.
+    trim: list[dict] = []
+    for x0, x1, z0, z1 in (
+            (ox0, ox0 + SHED_CORNER_BOARD, oz0, oz0 + SHED_CORNER_BOARD),
+            (ox0, ox0 + SHED_CORNER_BOARD, oz1 - SHED_CORNER_BOARD, oz1),
+            (ox1 - SHED_CORNER_BOARD, ox1, oz0, oz0 + SHED_CORNER_BOARD),
+            (ox1 - SHED_CORNER_BOARD, ox1, oz1 - SHED_CORNER_BOARD, oz1)):
+        trim += _box((x0, floor, z0), (x1, eaves, z1))
+    trim += _box((ox0, eaves - SHED_FASCIA_HEIGHT, oz0),
+                 (ox1, eaves, oz0 + SHED_FASCIA_DEPTH))
+    trim += _box((ox0, eaves - SHED_FASCIA_HEIGHT, oz1 - SHED_FASCIA_DEPTH),
+                 (ox1, eaves, oz1))
+
+    window_glass: list[dict] = []
+
+    def finish_opening(subject, *, window: bool) -> None:
+        if subject is None:
+            return
+        portal, opening = subject
+        plane_data, rect = portal["plane"], portal["rect"]
+        if plane_data["axis"] != "x":
+            raise layout_io.LayoutError("shed openings must be in a gable-end X wall")
+        plane = float(plane_data["value"])
+        outer = ox0 if abs(plane - ix0) < abs(plane - ix1) else ox1
+        inside = outer + SHED_CASING_DEPTH if outer == ox0 else outer - SHED_CASING_DEPTH
+        dx0, dx1 = sorted((outer, inside))
+        u0, u1 = (float(value) for value in rect["u"])
+        v0, v1 = (floor + float(value) for value in rect["v"])
+        casing = float((opening.get("frame") or {}).get("casing") or 0.06)
+        trim.extend(_box((dx0, v0, u0 - casing), (dx1, v1, u0)))
+        trim.extend(_box((dx0, v0, u1), (dx1, v1, u1 + casing)))
+        trim.extend(_box((dx0, v1, u0 - casing), (dx1, v1 + casing, u1 + casing)))
+        if window:
+            trim.extend(_box((dx0, v0 - casing, u0 - casing), (dx1, v0, u1 + casing)))
+            sash_depth = SHED_CASING_DEPTH * 0.75
+            sx0, sx1 = sorted((outer, outer + (sash_depth if outer == ox0 else -sash_depth)))
+            for low, high in ((u0, u0 + SHED_SASH_SECTION),
+                              (u1 - SHED_SASH_SECTION, u1)):
+                trim.extend(_box((sx0, v0, low), (sx1, v1, high)))
+            for low, high in ((v0, v0 + SHED_SASH_SECTION),
+                              ((v0 + v1) / 2.0 - SHED_SASH_SECTION / 2.0,
+                               (v0 + v1) / 2.0 + SHED_SASH_SECTION / 2.0),
+                              (v1 - SHED_SASH_SECTION, v1)):
+                trim.extend(_box((sx0, low, u0), (sx1, high, u1)))
+            glass_x = (sx0 + sx1) / 2.0
+            window_glass.append(([(glass_x, v0 + SHED_SASH_SECTION,
+                                   u1 - SHED_SASH_SECTION),
+                                  (glass_x, v0 + SHED_SASH_SECTION,
+                                   u0 + SHED_SASH_SECTION),
+                                  (glass_x, v1 - SHED_SASH_SECTION,
+                                   u0 + SHED_SASH_SECTION),
+                                  (glass_x, v1 - SHED_SASH_SECTION,
+                                   u1 - SHED_SASH_SECTION)],
+                                 (1.0 if outer == ox1 else -1.0, 0.0, 0.0)))
+
+    finish_opening(shed_door, window=False)
+    finish_opening(shed_window, window=True)
+    parts.append(("STRUCT_SHED_TRIM", trim))
+    parts.append(("STRUCT_SHED_GLASS", window_glass))
 
     door_pose = None
     if shed_door is not None:
@@ -810,23 +891,28 @@ def _triangles(faces: list) -> int:
     return sum(1 if len(corners) == 3 else 2 for corners, _normal in faces)
 
 
-def _document(parts: list[tuple[str, list, dict]], material: str,
+def _document(parts: list[tuple], material: str,
               style: str) -> tuple[dict, bytes]:
-    """@p parts as one glTF document -- a node each, one shared material.
+    """@p parts as one glTF document -- a node each, with an optional source role per part.
 
     `read_shell_geometry`'s shape, so `build_chunks.py` reads a fence the way it reads the shell.
     Several NODES rather than one, because a gate's leaf moves and its hinge straps do not: the
     part that swings is its own node with its pivot in `extras`, which is what §65's behaviour
     reads off the asset instead of re-deriving it from the layout.
     """
-    material_id = outdoor_materials.ROLE_IDS.get(material)
-    if material_id is None:
-        raise layout_io.LayoutError(f"outdoor source role {material!r} has no canonical materialId")
     blob = bytearray()
     accessors: list[dict] = []
     views: list[dict] = []
     meshes: list[dict] = []
     nodes: list[dict] = []
+    material_roles: list[str] = []
+
+    def material_index(role: str) -> int:
+        if role not in outdoor_materials.ROLE_IDS:
+            raise layout_io.LayoutError(f"outdoor source role {role!r} has no canonical materialId")
+        if role not in material_roles:
+            material_roles.append(role)
+        return material_roles.index(role)
 
     def store(values: list[tuple], kind: str) -> int:
         count = {"VEC3": 3, "VEC2": 2}[kind]
@@ -840,7 +926,9 @@ def _document(parts: list[tuple[str, list, dict]], material: str,
                           "max": [max(v[i] for v in values) for i in range(count)]})
         return len(accessors) - 1
 
-    for part, faces, extras in parts:
+    for row in parts:
+        part, faces, extras = row[:3]
+        role = row[3] if len(row) == 4 else material
         if not faces:
             continue
         positions: list[tuple[float, float, float]] = []
@@ -869,7 +957,7 @@ def _document(parts: list[tuple[str, list, dict]], material: str,
                           "count": len(indices), "type": "SCALAR"})
         meshes.append({"name": part, "primitives": [
             {"attributes": {"POSITION": position, "NORMAL": normal_at, "TEXCOORD_0": uv0},
-             "indices": len(accessors) - 1, "material": 0, "mode": 4}]})
+             "indices": len(accessors) - 1, "material": material_index(role), "mode": 4}]})
         node = {"name": part, "mesh": len(meshes) - 1}
         if extras:
             node["extras"] = extras
@@ -881,14 +969,15 @@ def _document(parts: list[tuple[str, list, dict]], material: str,
         "scenes": [{"nodes": list(range(len(nodes)))}],
         "nodes": nodes,
         "meshes": meshes,
-        "materials": [{"name": material,
-                       "extras": {"materialId": material_id,
+        "materials": [{"name": role,
+                       "extras": {"materialId": outdoor_materials.ROLE_IDS[role],
                                   "surfaceClass": "fence",
                                   # Lit by the sun term like the rest of the boundary: a fence is
                                   # thin, and §18.3 keeps the lightmap for surfaces that carry
                                   # low-frequency light rather than for every board.
                                   "lightmapReceiver": False,
-                                  "groundMaterial": style}}],
+                                  "groundMaterial": style}}
+                      for role in material_roles],
         "accessors": accessors,
         "bufferViews": views,
         "buffers": [{"byteLength": len(blob)}],
@@ -930,8 +1019,9 @@ def emit(directory: Path, output: Path) -> dict:
         triangles += _triangles(fence["faces"])
     built = shed(directory)
     if built is not None:
-        document, blob = _document([(name, faces, {}) for name, faces in built["parts"]],
-                                   "SHED_timber", "shed")
+        document, blob = _document(
+            [(name, faces, {}, SHED_PART_ROLES[name]) for name, faces in built["parts"]],
+            "SHED_timber", "shed")
         gltf_io.write_glb(output / f"{built['id']}.glb", document, blob)
         written.append(built["id"])
         triangles += sum(_triangles(faces) for _name, faces in built["parts"])
@@ -1234,6 +1324,22 @@ def selftest() -> int:
         require(built["openings"] == 2,
                 f"§11.1's one door and one window are cut in it, because §16's portals are where "
                 f"the holes are ({built['openings']})")
+
+        shed_parts = {name: faces for name, faces in built["parts"]}
+        require(len(shed_parts.get("STRUCT_SHED_TRIM", [])) >= 100
+                and len(shed_parts.get("STRUCT_SHED_GLASS", [])) == 1,
+                f"HOUSE-03267 finishes the shed with corner boards, eaves fascia, cased door and "
+                f"a framed glazed window ({len(shed_parts.get('STRUCT_SHED_TRIM', []))} trim / "
+                f"{len(shed_parts.get('STRUCT_SHED_GLASS', []))} glass faces)")
+        shed_document, _blob = _document(
+            [(name, faces, {}, SHED_PART_ROLES[name]) for name, faces in built["parts"]],
+            "SHED_timber", "shed")
+        shed_materials = {row["extras"]["materialId"]
+                          for row in shed_document["materials"]}
+        require(shed_materials == {outdoor_materials.ROLE_IDS[role]
+                                   for role in SHED_PART_ROLES.values()},
+                f"and those parts reuse the approved siding, paint, roof, steel, glass and timber "
+                f"families rather than adding a shed-only material ({sorted(shed_materials)})")
 
         # A shed you can walk into: the door's own hole is empty all the way to the floor.
         door = next(portal for portal in layout_io.rows(layout, "portals")
