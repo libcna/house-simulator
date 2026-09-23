@@ -327,6 +327,21 @@ def check(path: Path, category: str, geometry: dict | None = None) -> list[str]:
                     f"{what}: measured seat {value:.3f} m must lie within the model's "
                     f"{size[1]:.3f} m height")
                 continue
+        # A bed's headboard and pillows likewise stand above the mattress. HOUSE-00979 records the
+        # reviewed mattress plane explicitly instead of pretending the model AABB is that plane.
+        if category == "bed" and axis == "y":
+            mattress = (geometry or {}).get("mattressTopMetres")
+            if not isinstance(mattress, (int, float)):
+                problems.append(
+                    f"{what}: manifest geometry.mattressTopMetres is required; the model's "
+                    f"{size[1]:.3f} m overall height includes its headboard and pillows")
+                continue
+            value = float(mattress)
+            if not math.isfinite(value) or value <= 0.0 or value > size[1]:
+                problems.append(
+                    f"{what}: measured mattress top {value:.3f} m must lie within the model's "
+                    f"{size[1]:.3f} m height")
+                continue
         if category in {"kitchen-sink-run", "kitchen-service-run", "kitchen-cooking-wall"} and axis == "y":
             counter = (geometry or {}).get("counterHeightMetres")
             if not isinstance(counter, (int, float)):

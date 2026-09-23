@@ -137,6 +137,8 @@ Full text: [`licenses/cc0-1.0/LICENCE.txt`](cc0-1.0/LICENCE.txt)
 - `MODEL_BATHROOM_SHOWER` — **Square shower enclosure 900 from Fitted Kitchen and Bathroom Builder** by 3D Assets — <https://cdn.3dassets.dev/assets/17894/v1/model.glb> (retrieved 2026-09-23)
 - `MODEL_BATHROOM_TOILET` — **Close coupled WC from Fitted Kitchen and Bathroom Builder** by 3D Assets — <https://cdn.3dassets.dev/assets/17870/v1/model.glb> (retrieved 2026-09-23)
 - `MODEL_BATHROOM_VANITY` — **Bathroom vanity unit 600 from Fitted Kitchen and Bathroom Builder** by 3D Assets — <https://cdn.3dassets.dev/assets/17883/v1/model.glb> (retrieved 2026-09-23)
+- `MODEL_FURNITURE_BED_DOUBLE` — **Double Bed from Bedroom and Living Room Furniture** by 3D Assets — <https://cdn.3dassets.dev/assets/38770/v1/model.glb> (retrieved 2026-09-23)
+- `MODEL_FURNITURE_BED_SINGLE` — **Single Bed from Bedroom and Living Room Furniture** by 3D Assets — <https://cdn.3dassets.dev/assets/38771/v1/model.glb> (retrieved 2026-09-23)
 - `MODEL_FURNITURE_CINEMA_SEAT_ROW` — **Tiered Seating Row Module from Cinema Multiplex and Foyer** by 3D Assets — <https://cdn.3dassets.dev/assets/34650/v1/model.glb> (retrieved 2026-09-23)
 - `MODEL_FURNITURE_DESK` — **Desk Writing from Bedroom and Living Room Furniture** by 3D Assets — <https://cdn.3dassets.dev/assets/38795/v1/model.glb> (retrieved 2026-09-23)
 - `MODEL_FURNITURE_POOL_TABLE` — **Pool Table, Nine Foot from Bowling Alley and Pool Hall** by 3D Assets — <https://cdn.3dassets.dev/assets/33854/v1/model.glb> (retrieved 2026-09-23)
@@ -719,4 +721,4 @@ Full text: [`licenses/us-gov-pd/LICENCE.txt`](us-gov-pd/LICENCE.txt)
 
 ---
 
-*Generated from `assets-src/assets.manifest.json`, sha256 `4610a0ff4927e89f460b5e2540160226be5ddcc9d8c4b32a3f5d8c301de5bbea`.*
+*Generated from `assets-src/assets.manifest.json`, sha256 `6d946f85898aa68baa3cb4dac4069b71d0dfe638131d04bbb6e1e77e516c001f`.*

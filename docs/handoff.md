@@ -1,3 +1,33 @@
+# Bed-frame acquisition handoff — 2026-09-23 (`HOUSE-00979`)
+
+The acquisition group is complete at its exact two-model cap: one upholstered double and one timber
+single frame from the official CC0 3D Assets Bedroom and Living Room Furniture pack. The source
+pack and both CDN bytes are provenance/hash pinned. Its declaration that the models were generated
+with Muse Spark via T3 Code is recorded in the manifest and source note. Both are static dressing;
+there is no animation or object-use behavior.
+
+The existing bounded static preparation path bakes the hierarchy, adds UV0, uses a vertical-only
+normalization to put each mattress top at the canonical 0.60 m, and appends one enclosing
+12-triangle collision proxy. Existing canonical timber/textile materials provide bedding colour
+variation. The same single frame is the child's frame, varied only through HOUSE-00971's baked
+scale/tint data, so the task adds no third model and no runtime system.
+
+The derivatives total 3,928 visible triangles. The group, manifest, licence, scale and origin gates
+pass, and CNA compiled them to 231,624-byte and 240,408-byte CNBs (472,032 bytes total). A 1400 ×
+720 headless Workbench review with proxies hidden showed grounded, recognizable frames, clean
+bedding/headboard silhouettes and no clipping, floating parts or z-fighting. The local full-check
+runner now accepts `HOUSE_XNA_STRICT_JOBS` so constrained sessions can cap strict-XNA compiler
+fan-out without changing CI's default; future local compiles use no more than four workers and four
+CPU affinities.
+
+The remaining forecast is 184.75 realistic / 224.1 pessimistic hours. With 41.5 task-hours spent
+since the final reduction, the R14 projection is 265.6 h, 14.4 h below the hard limit. Rule that
+chooses the next task: R1's house-wide support exception, R8's kit-first rule and M3 dependency
+order select the next capped acquisition group. The exact next unblocked MUST task is
+`HOUSE-00981`.
+
+---
+
 # Seating-and-tables acquisition handoff — 2026-09-23 (`HOUSE-00977`)
 
 The acquisition group is complete with only three new models inside the seven-model cap. Rule R8

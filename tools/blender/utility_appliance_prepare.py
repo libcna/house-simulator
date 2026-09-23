@@ -6,7 +6,7 @@ as static dressing, so this tool bakes their closed rest pose, removes the anima
 adds UV0 for the project's canonical material path and appends one enclosing ``_COL`` box.
 
 Run with: blender --background --python tools/blender/utility_appliance_prepare.py -- \
-    --source PATH --out PATH --collision-name NAME
+    --source PATH --out PATH --collision-name NAME [--height-scale FACTOR]
 """
 
 from __future__ import annotations
@@ -40,7 +40,7 @@ def metre_uv(obj, tile_metres: float = 0.25) -> None:
             uv.data[loop_index].uv = (pair[0] / tile_metres, pair[1] / tile_metres)
 
 
-def prepare(source: Path, output: Path, collision_name: str) -> None:
+def prepare(source: Path, output: Path, collision_name: str, height_scale: float) -> None:
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.object.delete(use_global=False)
     for action in tuple(bpy.data.actions):
@@ -55,6 +55,14 @@ def prepare(source: Path, output: Path, collision_name: str) -> None:
         obj.animation_data_clear()
     for obj in visible:
         bake_world_vertices(obj)
+        # HOUSE-00979's two otherwise correctly metre-scaled source beds stand slightly above the
+        # canonical mattress-height band. A bounded vertical correction keeps their authored
+        # width/depth and avoids hiding a recipe scale in world data. The default preserves every
+        # existing appliance and bathroom derivative byte-for-byte.
+        if height_scale != 1.0:
+            for vertex in obj.data.vertices:
+                vertex.co.z *= height_scale
+            obj.data.update()
         metre_uv(obj)
 
     # Once the world transforms have been baked into mesh data, the imported empties are dead
@@ -103,8 +111,12 @@ def main() -> int:
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--collision-name", required=True)
+    parser.add_argument("--height-scale", type=float, default=1.0)
     options = parser.parse_args(sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else [])
-    prepare(options.source.resolve(), options.out.resolve(), options.collision_name)
+    if options.height_scale <= 0.0:
+        parser.error("--height-scale must be positive")
+    prepare(options.source.resolve(), options.out.resolve(), options.collision_name,
+            options.height_scale)
     print("utility_appliance_prepare: EXIT 0")
     return 0
 

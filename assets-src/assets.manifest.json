@@ -1846,6 +1846,106 @@
       ]
     },
     {
+      "id": "MODEL_FURNITURE_BED_DOUBLE",
+      "category": "bed",
+      "sourceFile": "assets-src/Models/Furniture/Beds/double_bed.glb",
+      "sourceSha256": "dd25a36d452f7157d243b4d8d1bcc9879553b61ea6753e38a761a31f539a8436",
+      "contentName": "Models/Furniture/Beds/double_bed",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Double Bed from Bedroom and Living Room Furniture",
+        "url": "https://cdn.3dassets.dev/assets/38770/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00979 selected this model as the only double frame in the capped two-model bed family. The official 3D Assets pack declares Muse Spark via T3 Code as its AI generator and publishes the model under CC0 1.0. tools/assets/bed_frames_prepare.py pins upstream SHA-256 086be35da80ceffd6528af9490136ccf3f25c10e67160fd2e37d4bb0a9d9e367, bakes the static hierarchy, applies a 0.8695652173913043 vertical scale for a measured 0.60 m mattress top, adds UV0 and appends one twelve-triangle enclosing collision box. Existing material roles permit bedding tint variation without additional models."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.710136,
+          0.960903,
+          2.19
+        ],
+        "triangles": {
+          "LOD0": 1944
+        },
+        "collision": "DoubleBed_COL",
+        "mattressTopMetres": 0.6
+      },
+      "materialMap": {
+        "fabricBlue": "MAT_FAMILY_SOFA_VELVET",
+        "fabricGrey": "MAT_FAMILY_CURTAIN_WOOL",
+        "linen": "MAT_FURNITURE_DINING_LINEN",
+        "mustard": "MAT_FURNITURE_CUSHION_PURPLE_YELLOW",
+        "walnut": "MAT_FURNITURE_DINING_WALNUT"
+      },
+      "usedIn": [
+        "L1_MASTER_BED",
+        "L1_BED2",
+        "L1_BED5",
+        "L2_BED6",
+        "L2_BED7"
+      ]
+    },
+    {
+      "id": "MODEL_FURNITURE_BED_SINGLE",
+      "category": "bed",
+      "sourceFile": "assets-src/Models/Furniture/Beds/single_bed.glb",
+      "sourceSha256": "737b94e80b7fd56b6b3205bc66d14d117c5fc73ce83e9aaf1af77a18603cced4",
+      "contentName": "Models/Furniture/Beds/single_bed",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Single Bed from Bedroom and Living Room Furniture",
+        "url": "https://cdn.3dassets.dev/assets/38771/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00979 selected this model as the only single frame in the capped two-model bed family. The official 3D Assets pack declares Muse Spark via T3 Code as its AI generator and publishes the model under CC0 1.0. tools/assets/bed_frames_prepare.py pins upstream SHA-256 d1dca54ae11c7ac0793fb8f574a29329d83cde653c734c0e2955125105b4d0d0, bakes the static hierarchy, applies a 0.8333333333333334 vertical scale for a measured 0.60 m mattress top, adds UV0 and appends one twelve-triangle enclosing collision box. The same frame is scaled and tinted for the child's room rather than adding a third model."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.980071,
+          0.874966,
+          2.0
+        ],
+        "triangles": {
+          "LOD0": 1984
+        },
+        "collision": "SingleBed_COL",
+        "mattressTopMetres": 0.6
+      },
+      "materialMap": {
+        "linen": "MAT_FURNITURE_DINING_LINEN",
+        "oak": "MAT_DOOR_HARDWOOD",
+        "sage": "MAT_FURNITURE_DINING_UPHOLSTERY",
+        "walnut": "MAT_FURNITURE_DINING_WALNUT"
+      },
+      "usedIn": [
+        "L1_BED3",
+        "L1_BED4"
+      ]
+    },
+    {
       "id": "MODEL_FURNITURE_CINEMA_SEAT_ROW",
       "category": "cinema-seat-row",
       "sourceFile": "assets-src/Models/Furniture/SeatingTables/cinema_seat_row.glb",

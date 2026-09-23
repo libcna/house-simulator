@@ -152,6 +152,9 @@ run_gate "bathroom-fixtures" python3 tools/assets/bathroom_fixtures_prepare.py -
 # HOUSE-00977: the kit reuses existing seating/tables first, leaving exactly three pinned CC0
 # acquisitions within cap seven; each remains static, UV0-mapped and proxy-bounded.
 run_gate "seating-tables" python3 tools/assets/seating_tables_prepare.py --check
+# HOUSE-00979: exactly one double and one single frame remain static, scale-correct, tint-reusable
+# and proxy-bounded; no separate child bed or bedding variants inflate the capped group.
+run_gate "bed-frames" python3 tools/assets/bed_frames_prepare.py --check
 # HOUSE-01049: the measured counter stools and three restrained worktop groupings remain
 # reproducible from their authored Blender source, with exact material slots and placement.
 run_gate "kitchen-dressing" python3 tools/assets/kitchen_dressing_prepare.py --check
@@ -403,7 +406,10 @@ run_gate "fonts"      python3 tools/ci/check_fonts.py
 # NOT in the pre-commit path: it needs a compile database and about 25 s, and the hook's whole
 # value is being fast enough that nobody disables it. CI runs the full script, so CI runs this.
 if [[ "$MODE" != "staged" ]]; then
-    run_gate "xna-strict" python3 tools/ci/check_xna_strict.py --all
+    # Keep the default identical to CI while allowing constrained local sessions to cap the
+    # compiler fan-out explicitly (for example, HOUSE_XNA_STRICT_JOBS=4 tools/ci/run_checks.sh).
+    run_gate "xna-strict" python3 tools/ci/check_xna_strict.py --all \
+        --jobs "${HOUSE_XNA_STRICT_JOBS:-0}"
 fi
 
 echo
