@@ -1,3 +1,23 @@
+# Gate G2 handoff — 2026-09-23 (`HOUSE-03280`)
+
+G2 is passed. Round 112 captured and inspected all 65 fixed clear-day views across all eleven
+planning zones after the seven M2 architecture tasks. Every zone remains at least C2 and no S1/S2
+architecture defect is open. The review deliberately does not reinterpret dark, unfurnished
+secondary rooms as unfinished architecture: their fixture/readability work remains assigned to M5
+and their furnishing to M4. `zone_scoreboard.py --check` assigns all 96 authored cells exactly
+once across the eleven zones plus the two explicit exclusions.
+
+M2 used its planned 18 task-hours exactly, including the one-hour gate review. The remaining
+forecast is 201.25 realistic / 242.25 pessimistic hours. Adding the 25 task-hours completed since
+the final reduction gives a 267.25 h R14 projection, 12.75 h below the 280 h hard limit; no local
+depth reduction is required.
+
+Rule that chooses the next task: R1's house-wide support exception and R11 select the reusable-kit
+path that unlocks furnishing breadth; dependency order starts with removing the obsolete
+pet-navigation coupling. The exact next unblocked MUST task is `HOUSE-03301`.
+
+---
+
 # Rear/side-elevation C2 handoff — 2026-09-23 (`HOUSE-03267`)
 
 `Z-EXR` has no remaining S1/S2 architecture defect. The existing house-shell mechanisms already

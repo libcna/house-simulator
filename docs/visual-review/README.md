@@ -4684,3 +4684,24 @@ the shed; the two day rear controls change only 560 / 586 pixels. The finished s
 ordinary 6-chunk target. The property walk and all-cell grand tour remain green, and no S1/S2
 architecture issue remains in `Z-EXR`. Final furnishing and baseline night balance remain M4/M5
 work. Next: gate review `HOUSE-03280`, selected by R2/R10 because every zone is now at C2.
+
+## Round 112 — G2 whole-property architecture review
+
+Commit: `HOUSE-03280` working tree (`2026-09-23`). The local, Git-ignored
+[`clear-day`](captures/house-03280-g2) set contains all 65 fixed production views, eleven labelled
+zone sheets and one all-zone sheet. The combined sheet and the architecture-critical `Z-B1`,
+`Z-L1`, `Z-L2`, `Z-L3`, `Z-STAIR` and `Z-EXR` sheets were inspected at full resolution; the other
+zone sheets were checked in the combined pass.
+
+The review confirms the finished palettes, reveals, sills, trim and joinery on every house level;
+complete tier-appropriate stair silhouettes; the garage envelope and loft access; the attic's
+finished/unfinished construction contrast; and the shared rear/side elevation and shed finish.
+No clipping, missing shell face, unfinished opening, broken guard, stair mass or other S1/S2
+architecture defect is visible. Several empty secondary rooms remain dark in the normal new-game
+day state. That is the already-scheduled M5 baseline-lighting gap, while their absent props remain
+M4 work; neither is recast as architecture scope at this gate.
+
+`zone_scoreboard.py --check` assigns all 96 authored cells exactly once across eleven zones and two
+explicit exclusions, and the plan scoreboard records every zone at least C2. G2 passes. Next:
+`HOUSE-03301`, selected by the house-wide support exception and dependency order to begin the kit
+path that unlocks broad furnishing.
