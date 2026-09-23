@@ -4563,3 +4563,27 @@ The lit sheet makes the joinery and library/games/sitting/bedroom palette distin
 normal eye height. No S1/S2 architecture issue remains in `Z-L2`. Library shelving, other
 furnishing and dark unlit circulation remain deliberately assigned to M4/M5. Next:
 `HOUSE-03261`, selected by R1/R2 because `Z-B1` now has the most accessible cells still at C1.
+
+## Round 107 — basement at C2
+
+Commit: `HOUSE-03261` working tree (`2026-09-23`). Before: four fixed production views in local,
+Git-ignored [`clear-day`](captures/house-03261-before-day) and
+[`clear-night`](captures/house-03261-before-night) sets. After: matching
+[`clear-day`](captures/house-03261-after-day),
+[`clear-night`](captures/house-03261-after-night) and
+[`lights-forced`](captures/house-03261-after-lit) sets. All contact sheets and the full-size lit
+workshop frame were inspected.
+
+The existing palettes already establish finished carpet/tile/paint room families, the
+aged-plaster/concrete utility family and the stone/ochre cellar. The existing plywood utility trim
+now selects exposed joists, perimeter rim/slab-edge members and unobtrusive wall-line posts with no
+room-id special cases. Every B1 door retains its generated casing and selects the established
+four-panel/two-sided steel-lever treatment. The eight hopper windows retain their physical exterior
+light wells. The workshop frame changes 419,393 pixels; hall, cinema and gym controls change 9,220,
+4,981 and 1,242 as affected adjoining leaves enter those views.
+
+The forced-light workshop view resolves the exposed construction and door finish at normal eye
+height. The production day/night sheets remain dim but preserve coherent room-family silhouettes;
+their final readability and all furnishing remain owned by M5 and M4 respectively. No S1/S2
+architecture issue remains in `Z-B1`. Next: `HOUSE-03262`, selected by R1/R2 because `Z-L0S` has
+the most accessible cells still at C1; `Z-L0M` remains frozen by R4.

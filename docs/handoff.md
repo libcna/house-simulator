@@ -1,3 +1,34 @@
+# Basement C2 handoff — 2026-09-23 (`HOUSE-03261`)
+
+`Z-B1` is C2 across all 14 cells. Existing authored palettes already separate the finished cinema,
+gym, hobby, WC and laundry from the aged-plaster/concrete utility rooms and stone/ochre cellar.
+This task made the construction distinction physical without adding schema or room-id logic: the
+existing plywood utility/storage trim selection drives exposed ceiling joists, four rim/slab-edge
+members and two wall-line support posts. All 14 B1 leaves now reuse `HOUSE-00942`'s established
+four-panel/two-sided steel-lever grammar and retain their generated casing. All eight basement
+hoppers retain the established four-piece exterior light wells.
+
+Round 107 inspected four-view clear-day and clear-night sets plus a lights-forced set for direct
+architectural judgement. The affected workshop view changes 419,393 pixels; hall, cinema and gym
+controls change 9,220 / 4,981 / 1,242 as adjoining detailed leaves enter their views. The lit
+workshop frame visibly resolves joists, rim beams, posts, casing and a lever through the open route.
+Normal day/night views remain intentionally dim; furnishing and final readability belong to M4/M5.
+
+The shell generator selftest, all 15 world rules, shell unwrap, chunk selftest/build and complete
+world-content rebuild pass. The result is 768 chunks over 96 cells. Exposed framing reuses the
+existing plywood batch; five windowed leaf-owner cells and `B1_STAIR` each gained only the measured
+steel-hardware role. The controller grand tour (11.82 s), inside-geometry route and content-current
+gate pass. `verify_shell.py` confirms the flights, geometry budgets, 128/129 wall cuts and all 63
+physical leaves, then reports only the established nested refrigerator-container limitation.
+
+The remaining forecast is 209.75 realistic / 251.6 pessimistic hours. With 16.5 task-hours
+completed since the final reduction, the R14 ceiling projection is 268.1 h, 11.9 h below the hard
+limit. Rule that chooses the next task: R1 keeps work in C2 breadth and R2 selects `Z-L0S`, whose
+eight accessible cells are the greatest remaining count below target. The exact next unblocked
+MUST is `HOUSE-03262`; `Z-L0M` remains frozen by R4.
+
+---
+
 # Second-upper-floor C2 handoff — 2026-09-23 (`HOUSE-03264`)
 
 `Z-L2` is C2 across its 15 accessible cells. The existing shell supplies distinct authored

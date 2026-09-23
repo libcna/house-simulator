@@ -1495,7 +1495,7 @@ def rule_7_openings(world: World) -> list[Problem]:
         if joinery is not None and (
                 opening.get("kind") != "door"
                 or opening.get("type") not in
-                ("D_INT_PASSAGE", "D_INT_PRIVACY", "D_INT_SOLID")
+                ("D_INT_PASSAGE", "D_INT_PRIVACY", "D_INT_SOLID", "D_INT_LOW", "D_STAIRHEAD")
                 or opening.get("material") not in ("MAT_DOOR_PAINTED", "MAT_DOOR_HARDWOOD")):
             problems.append(Problem(
                 7, FILE_OF["openings"], f"openings/{index}/joineryStyle",

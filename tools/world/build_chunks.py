@@ -369,6 +369,20 @@ for second_floor_cell in ("L2_BATH4", "L2_LANDING"):
         previous_limit + 1,
         previous_reason + "; HOUSE-03264 adds the shared steel circulation-door hardware role")
 
+# `HOUSE-03261` reuses that same generated panel/lever grammar throughout B1. The exposed framing
+# shares the unfinished rooms' existing plywood material and adds no batch. Five windowed owner
+# cells gain only the steel lever role; the stair-head owner gains the same role over the global
+# target. All other basement owner cells remain at or below six chunks.
+for basement_door_cell in (
+        "B1_GYM", "B1_MECHANICAL", "B1_STOR1", "B1_STOR2", "B1_WORKSHOP"):
+    previous_limit, previous_reason = CHUNK_BUDGET_EXCEPTIONS[basement_door_cell]
+    CHUNK_BUDGET_EXCEPTIONS[basement_door_cell] = (
+        previous_limit + 1,
+        previous_reason + "; HOUSE-03261 adds the shared steel basement-door hardware role")
+CHUNK_BUDGET_EXCEPTIONS["B1_STAIR"] = (
+    7, "six measured stair-shell finish chunks plus HOUSE-03261's shared steel stair-head door "
+       "hardware role")
+
 # HOUSE-01069 is a measured room-wide furnishing/lighting step, not a generic budget increase.
 # The new walnut/brass cabinet shares both established dining roles. Its ceramic serving set is
 # one new finish, and the two sideboard lamps' exact independently switched shade group needs

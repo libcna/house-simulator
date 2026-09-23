@@ -1922,6 +1922,85 @@ PURLIN_SECTION = 0.15
 WALKWAY_WIDTH = 0.60
 WALKWAY_THICK = 0.030
 
+#: Exposed basement framing (`HOUSE-03261`). The unfinished utility/storage palette already
+#: authors `MAT_HATCH_PLY` as its trim finish, so it is also the data-driven selector for structure
+#: below the L0 slab: no room id or second classification is needed. The members are deliberately
+#: ordinary domestic dimensions and remain tight to the ceiling/wall line so traversal and later
+#: furnishing keep the full useful floor area.
+BASEMENT_JOIST_SPACING = 0.55
+BASEMENT_JOIST_WIDTH = 0.05
+BASEMENT_JOIST_DEPTH = 0.18
+BASEMENT_RIM_WIDTH = 0.10
+BASEMENT_RIM_DEPTH = 0.22
+BASEMENT_COLUMN_SECTION = 0.10
+
+
+def basement_structure_boxes(cell: dict, box: tuple[float, ...],
+                              inner: tuple[float, float, float, float]):
+    """Return exposed joists, rim/slab edge and wall-line posts for an unfinished B1 room."""
+    if (cell.get("level") != "B1" or cell.get("kind") != "room"
+            or cell.get("trimMaterial") != "MAT_HATCH_PLY"):
+        return []
+
+    _x0, _x1, y0, y1, _z0, _z1 = box
+    ix0, ix1, iz0, iz1 = inner
+    width, depth = ix1 - ix0, iz1 - iz0
+    if width <= 2.0 * BASEMENT_RIM_WIDTH or depth <= 2.0 * BASEMENT_RIM_WIDTH:
+        return []
+
+    rim_y0 = y1 - BASEMENT_RIM_DEPTH
+    joist_y0 = y1 - BASEMENT_JOIST_DEPTH
+    boxes = [
+        (ix0, ix1, rim_y0, y1, iz0, iz0 + BASEMENT_RIM_WIDTH),
+        (ix0, ix1, rim_y0, y1, iz1 - BASEMENT_RIM_WIDTH, iz1),
+        (ix0, ix0 + BASEMENT_RIM_WIDTH, rim_y0, y1,
+         iz0 + BASEMENT_RIM_WIDTH, iz1 - BASEMENT_RIM_WIDTH),
+        (ix1 - BASEMENT_RIM_WIDTH, ix1, rim_y0, y1,
+         iz0 + BASEMENT_RIM_WIDTH, iz1 - BASEMENT_RIM_WIDTH),
+    ]
+
+    # Joists span the shorter room dimension and are distributed evenly across the longer one.
+    # Equal end margins avoid a clipped last member when a cell is not an exact pitch multiple.
+    if width <= depth:
+        available = depth - 2.0 * BASEMENT_RIM_WIDTH
+        count = max(1, int(available / BASEMENT_JOIST_SPACING))
+        pitch = available / (count + 1)
+        for index in range(1, count + 1):
+            centre = iz0 + BASEMENT_RIM_WIDTH + pitch * index
+            boxes.append((ix0 + BASEMENT_RIM_WIDTH, ix1 - BASEMENT_RIM_WIDTH,
+                          joist_y0, y1,
+                          centre - BASEMENT_JOIST_WIDTH / 2.0,
+                          centre + BASEMENT_JOIST_WIDTH / 2.0))
+        post_z = (iz0 + iz1) / 2.0
+        boxes.extend([
+            (ix0, ix0 + BASEMENT_COLUMN_SECTION, y0, rim_y0,
+             post_z - BASEMENT_COLUMN_SECTION / 2.0,
+             post_z + BASEMENT_COLUMN_SECTION / 2.0),
+            (ix1 - BASEMENT_COLUMN_SECTION, ix1, y0, rim_y0,
+             post_z - BASEMENT_COLUMN_SECTION / 2.0,
+             post_z + BASEMENT_COLUMN_SECTION / 2.0),
+        ])
+    else:
+        available = width - 2.0 * BASEMENT_RIM_WIDTH
+        count = max(1, int(available / BASEMENT_JOIST_SPACING))
+        pitch = available / (count + 1)
+        for index in range(1, count + 1):
+            centre = ix0 + BASEMENT_RIM_WIDTH + pitch * index
+            boxes.append((centre - BASEMENT_JOIST_WIDTH / 2.0,
+                          centre + BASEMENT_JOIST_WIDTH / 2.0,
+                          joist_y0, y1,
+                          iz0 + BASEMENT_RIM_WIDTH, iz1 - BASEMENT_RIM_WIDTH))
+        post_x = (ix0 + ix1) / 2.0
+        boxes.extend([
+            (post_x - BASEMENT_COLUMN_SECTION / 2.0,
+             post_x + BASEMENT_COLUMN_SECTION / 2.0,
+             y0, rim_y0, iz0, iz0 + BASEMENT_COLUMN_SECTION),
+            (post_x - BASEMENT_COLUMN_SECTION / 2.0,
+             post_x + BASEMENT_COLUMN_SECTION / 2.0,
+             y0, rim_y0, iz1 - BASEMENT_COLUMN_SECTION, iz1),
+        ])
+    return boxes
+
 def covering_floor(cell: dict, extent: tuple[float, float], cells_by_id: dict) -> float | None:
     """Return the floor height of a cell stacked over the whole footprint, or ``None``.
 
@@ -2806,6 +2885,9 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                                    level_y + float(construction.get("railing", 0.0)),
                                    level_y + float(construction.get("railing", 0.0)),
                                    fixed, RAIL_SECTION)
+
+        for member in basement_structure_boxes(cell, box, (ix0, ix1, iz0, iz1)):
+            solid(*member, "structure")
 
     # `HOUSE-00496`: and where the roof is the lid, the roof is what this cell draws overhead.
     # Clipping the walls to the slope without this leaves the attic open to the sky from inside --
@@ -4256,6 +4338,20 @@ def selftest(output: Path) -> int:
     require(not single_door_detail_boxes(
         0.0, 0.86, 0.60, 2.65, -0.02, 0.02, "left", None),
             "while an unselected leaf retains the established plain generated representation")
+
+    unfinished_structure = basement_structure_boxes(
+        {"level": "B1", "kind": "room", "trimMaterial": "MAT_HATCH_PLY"},
+        (0.0, 4.0, -2.30, 0.25, 0.0, 3.0), (0.15, 3.85, 0.15, 2.85))
+    finished_structure = basement_structure_boxes(
+        {"level": "B1", "kind": "room", "trimMaterial": "MAT_DOOR_PAINTED"},
+        (0.0, 4.0, -2.30, 0.25, 0.0, 3.0), (0.15, 3.85, 0.15, 2.85))
+    require(len(unfinished_structure) > 8 and not finished_structure,
+            "unfinished B1 palette emits rim beams, joists and posts while a finished palette "
+            "does not")
+    require(sum(1 for row in unfinished_structure if abs(row[3] - row[2]
+                                                          - (2.55 - BASEMENT_RIM_DEPTH)) < 1e-9)
+            == 2,
+            "and the exposed structure includes exactly two unobtrusive wall-line support posts")
 
     # ...and the builder READS it. The claim above is about the boards; this one is about the path
     # from the opening row to them, which a hard-coded 0.06 satisfies just as well until a door
