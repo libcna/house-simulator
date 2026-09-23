@@ -1,3 +1,32 @@
+# Static window-dressing handoff — 2026-09-23 (`HOUSE-02681`)
+
+The existing deterministic family-room curtain family now pairs with one generated static slatted
+blind. `tools/blender/static_blind.py` authors the 1.32 × 1.6075 × 0.14 m, 2,432-triangle wall-plane
+mesh; room recipes reuse the existing baked xyz-scale and canonical-tint mechanism. A 0.92-width,
+muted-blue instance is aligned to the east window in `L1_BED2`. It has no collision proxy,
+interactable, `blindFraction`, portal mode or runtime manager. Both its portal and the retained
+curtain window remain ordinary `opacity: glass` openings.
+
+The group gate regenerates the blind, pins its hash/bounds/UV0/material/origin, checks the retained
+curtain family and both recipe types, and rejects interactive or translucent-mode fields. All 140
+production props pass placement and 0.70 m route checks. The complete production build contains
+790 chunks, 2,236,773 vertices and 55,006,920 packed vertex bytes (49% below CNA's 48-byte model
+vertex representation); the blind adds one measured BasicEffect material batch to `L1_BED2`.
+The newly exposed prop-kit integration error was corrected by mapping its UV0-only furniture roles
+to existing BasicEffect materials instead of UV2-dependent shell paints.
+
+Linux offscreen fixed-pose captures at 1600×900 reviewed the bedroom blind and both family-room
+curtains at 10:30 and 22:00. The four images show correct wall/window alignment, retained glass,
+distinct day/night illumination and clean silhouettes with no floating, clipping or z-fighting.
+
+The remaining forecast is 189.75 realistic / 229.6 pessimistic hours. With 36.5 task-hours spent
+since the final reduction, the R14 projection is 266.1 h, 13.9 h below the hard limit. Rule that
+chooses the next task: R1's house-wide support exception, R8's kit-first rule and M3 dependency
+order select the first bounded acquisition group. The exact next unblocked MUST task is
+`HOUSE-00975`.
+
+---
+
 # Generated prop-kit handoff — 2026-09-23 (`HOUSE-00985`)
 
 The main furnishing breadth kit is generated from `tools/blender/prop_kit_data.json` by one bounded

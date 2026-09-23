@@ -148,6 +148,9 @@ CATEGORIES: dict[str, list[tuple[str, float, float, str]]] = {
     "window-treatment": [("x", 2.50, 3.50, "picture-window rod and curtain width"),
                          ("y", 2.20, 2.80, "full-length curtain height"),
                          ("z", 0.05, 0.30, "rod and gathered-fabric wall projection")],
+    "window-blind": [("x", 0.55, 2.50, "domestic blind width"),
+                     ("y", 0.55, 2.50, "domestic blind drop"),
+                     ("z", 0.03, 0.25, "slat and head-rail wall projection")],
     # HOUSE-00771's grouped exterior pieces are checked on their full placed silhouettes.  The
     # dining row is a table plus four chairs, while every other row is one reusable object.
     "garden-dining-set": [("x", 2.40, 3.20, "four-place outdoor dining-group width"),

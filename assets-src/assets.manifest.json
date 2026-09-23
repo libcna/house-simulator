@@ -3325,13 +3325,13 @@
         "collision": "propkit_bookcase_COL"
       },
       "materialMap": {
-        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_PAINT": "MAT_DOOR_PAINTED",
         "KIT_WOOD": "MAT_DOOR_HARDWOOD",
         "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
         "KIT_GLASS": "MAT_GLASS_CABINET",
         "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
-        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
-        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+        "KIT_CARDBOARD": "MAT_LIVING_ART_PAPER",
+        "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
         "L2_LIBRARY"
@@ -3371,13 +3371,13 @@
         "collision": "propkit_cable_run_COL"
       },
       "materialMap": {
-        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_PAINT": "MAT_DOOR_PAINTED",
         "KIT_WOOD": "MAT_DOOR_HARDWOOD",
         "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
         "KIT_GLASS": "MAT_GLASS_CABINET",
         "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
-        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
-        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+        "KIT_CARDBOARD": "MAT_LIVING_ART_PAPER",
+        "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
         "B1_ELECTRICAL"
@@ -3417,13 +3417,13 @@
         "collision": "propkit_chest_COL"
       },
       "materialMap": {
-        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_PAINT": "MAT_DOOR_PAINTED",
         "KIT_WOOD": "MAT_DOOR_HARDWOOD",
         "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
         "KIT_GLASS": "MAT_GLASS_CABINET",
         "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
-        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
-        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+        "KIT_CARDBOARD": "MAT_LIVING_ART_PAPER",
+        "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
         "L2_BED6"
@@ -3463,13 +3463,13 @@
         "collision": "propkit_dresser_COL"
       },
       "materialMap": {
-        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_PAINT": "MAT_DOOR_PAINTED",
         "KIT_WOOD": "MAT_DOOR_HARDWOOD",
         "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
         "KIT_GLASS": "MAT_GLASS_CABINET",
         "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
-        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
-        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+        "KIT_CARDBOARD": "MAT_LIVING_ART_PAPER",
+        "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
         "L1_BED2"
@@ -3509,13 +3509,13 @@
         "collision": "propkit_duct_run_COL"
       },
       "materialMap": {
-        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_PAINT": "MAT_DOOR_PAINTED",
         "KIT_WOOD": "MAT_DOOR_HARDWOOD",
         "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
         "KIT_GLASS": "MAT_GLASS_CABINET",
         "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
-        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
-        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+        "KIT_CARDBOARD": "MAT_LIVING_ART_PAPER",
+        "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
         "B1_MECHANICAL"
@@ -3555,13 +3555,13 @@
         "collision": "propkit_mirror_COL"
       },
       "materialMap": {
-        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_PAINT": "MAT_DOOR_PAINTED",
         "KIT_WOOD": "MAT_DOOR_HARDWOOD",
         "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
         "KIT_GLASS": "MAT_GLASS_CABINET",
         "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
-        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
-        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+        "KIT_CARDBOARD": "MAT_LIVING_ART_PAPER",
+        "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
         "B1_WC7"
@@ -3601,13 +3601,13 @@
         "collision": "propkit_nightstand_COL"
       },
       "materialMap": {
-        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_PAINT": "MAT_DOOR_PAINTED",
         "KIT_WOOD": "MAT_DOOR_HARDWOOD",
         "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
         "KIT_GLASS": "MAT_GLASS_CABINET",
         "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
-        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
-        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+        "KIT_CARDBOARD": "MAT_LIVING_ART_PAPER",
+        "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
         "L1_MASTER_BED"
@@ -3647,13 +3647,13 @@
         "collision": "propkit_open_shelf_COL"
       },
       "materialMap": {
-        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_PAINT": "MAT_DOOR_PAINTED",
         "KIT_WOOD": "MAT_DOOR_HARDWOOD",
         "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
         "KIT_GLASS": "MAT_GLASS_CABINET",
         "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
-        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
-        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+        "KIT_CARDBOARD": "MAT_LIVING_ART_PAPER",
+        "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
         "L3_STORE_W"
@@ -3693,13 +3693,13 @@
         "collision": "propkit_pipe_run_COL"
       },
       "materialMap": {
-        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_PAINT": "MAT_DOOR_PAINTED",
         "KIT_WOOD": "MAT_DOOR_HARDWOOD",
         "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
         "KIT_GLASS": "MAT_GLASS_CABINET",
         "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
-        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
-        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+        "KIT_CARDBOARD": "MAT_LIVING_ART_PAPER",
+        "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
         "B1_UTILITY"
@@ -3739,13 +3739,13 @@
         "collision": "propkit_projector_COL"
       },
       "materialMap": {
-        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_PAINT": "MAT_DOOR_PAINTED",
         "KIT_WOOD": "MAT_DOOR_HARDWOOD",
         "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
         "KIT_GLASS": "MAT_GLASS_CABINET",
         "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
-        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
-        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+        "KIT_CARDBOARD": "MAT_LIVING_ART_PAPER",
+        "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
         "B1_CINEMA"
@@ -3785,13 +3785,13 @@
         "collision": "propkit_static_screen_COL"
       },
       "materialMap": {
-        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_PAINT": "MAT_DOOR_PAINTED",
         "KIT_WOOD": "MAT_DOOR_HARDWOOD",
         "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
         "KIT_GLASS": "MAT_GLASS_CABINET",
         "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
-        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
-        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+        "KIT_CARDBOARD": "MAT_LIVING_ART_PAPER",
+        "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
         "B1_CINEMA"
@@ -3831,13 +3831,13 @@
         "collision": "propkit_storage_box_COL"
       },
       "materialMap": {
-        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_PAINT": "MAT_DOOR_PAINTED",
         "KIT_WOOD": "MAT_DOOR_HARDWOOD",
         "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
         "KIT_GLASS": "MAT_GLASS_CABINET",
         "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
-        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
-        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+        "KIT_CARDBOARD": "MAT_LIVING_ART_PAPER",
+        "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
         "L3_STORE_W"
@@ -3877,13 +3877,13 @@
         "collision": "propkit_towel_rail_COL"
       },
       "materialMap": {
-        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_PAINT": "MAT_DOOR_PAINTED",
         "KIT_WOOD": "MAT_DOOR_HARDWOOD",
         "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
         "KIT_GLASS": "MAT_GLASS_CABINET",
         "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
-        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
-        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+        "KIT_CARDBOARD": "MAT_LIVING_ART_PAPER",
+        "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
         "B1_WC7"
@@ -3923,13 +3923,13 @@
         "collision": "propkit_utility_module_COL"
       },
       "materialMap": {
-        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_PAINT": "MAT_DOOR_PAINTED",
         "KIT_WOOD": "MAT_DOOR_HARDWOOD",
         "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
         "KIT_GLASS": "MAT_GLASS_CABINET",
         "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
-        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
-        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+        "KIT_CARDBOARD": "MAT_LIVING_ART_PAPER",
+        "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
         "B1_UTILITY"
@@ -3969,13 +3969,13 @@
         "collision": "propkit_wardrobe_COL"
       },
       "materialMap": {
-        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_PAINT": "MAT_DOOR_PAINTED",
         "KIT_WOOD": "MAT_DOOR_HARDWOOD",
         "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
         "KIT_GLASS": "MAT_GLASS_CABINET",
         "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
-        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
-        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+        "KIT_CARDBOARD": "MAT_LIVING_ART_PAPER",
+        "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
         "L1_MASTER_CLOSET"
@@ -4015,13 +4015,13 @@
         "collision": "propkit_workbench_COL"
       },
       "materialMap": {
-        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_PAINT": "MAT_DOOR_PAINTED",
         "KIT_WOOD": "MAT_DOOR_HARDWOOD",
         "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
         "KIT_GLASS": "MAT_GLASS_CABINET",
         "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
-        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
-        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+        "KIT_CARDBOARD": "MAT_LIVING_ART_PAPER",
+        "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
         "B1_WORKSHOP"
@@ -5096,6 +5096,37 @@
         "wild_rooibos_bush_twigs": "MAT_VEGETATION_SHRUB_FOLIAGE",
         "wild_rooibos_bush_leaves": "MAT_VEGETATION_SHRUB_FOLIAGE"
       }
+    },
+    {
+      "id": "MODEL_WINDOW_BLIND",
+      "category": "window-blind",
+      "sourceFile": "assets-src/Models/Furniture/Generated/static_blind.glb",
+      "sourceSha256": "179eb4a7d07888ba333c8ebabc4aec4fa1802f609776e24a34e9320fc6d6211e",
+      "contentName": "Models/Furniture/Generated/static_blind",
+      "kind": "model",
+      "residencyPack": "house-l1",
+      "origin": {
+        "kind": "generated",
+        "name": "Reusable static slatted window blind",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/static_blind.py for HOUSE-02681. Fixed slats, two ladder cords and rails are meshes/materials only; size and tint are ordinary baked recipe variation. No interaction, blind state or third-party source is present."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [1.32, 1.6075, 0.14],
+        "triangles": {"LOD0": 2432}
+      },
+      "materialMap": {
+        "BLIND_SLAT": "MAT_WINDOW_BLIND_BLUE"
+      },
+      "usedIn": ["L1_BED2"]
     },
     {
       "id": "SOUND_FALLBACK_SILENT",

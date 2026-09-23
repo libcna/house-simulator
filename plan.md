@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **133 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 162 / 191 / 231 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G2 passed.** Next: generate the reusable static curtain and blind families in `HOUSE-02681` |
+| Active plan | **132 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 161 / 190 / 230 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G2 passed.** Next: acquire the bounded kitchen and utility appliance group in `HOUSE-00975` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -391,7 +391,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M0](#m0--scope-reset-and-breadth-instruments) — Scope reset and breadth instruments | A (support) | 03201–03220 | 0 | done | R10, G1–G5 | 0 |
 | [M1](#m1--whole-property-traversal-c1-everywhere--gate-g1) — Whole-property traversal | A | 03221–03260 | 0 | **G1 passed** · `HOUSE-03240` | D2 | 0 |
 | [M2](#m2--architectural-completion-c2-everywhere--gate-g2) — Architectural completion | A | 03261–03300 | 0 | **G2 passed** · `HOUSE-03280` | D1 | 0 |
-| [M3](#m3--the-reusable-furnishing-kit) — The reusable furnishing kit | A (support) | 03301–03340 | 8 | kit ready for M4 | D3 | 9.5 |
+| [M3](#m3--the-reusable-furnishing-kit) — The reusable furnishing kit | A (support) | 03301–03340 | 7 | kit ready for M4 | D3 | 8.5 |
 | [M4](#m4--dressing-everywhere-the-furnishing-half-of-c3--checkpoint) — Dressing everywhere | A | 03341–03400 | 31 | checkpoint · `HOUSE-03380` | D3 | 31 |
 | [M5](#m5--baseline-lighting-everywhere-the-lighting-half-of-c3--gate-g3) — Baseline lighting everywhere | A | 03401–03440 | 10 | **G3** · `HOUSE-03420` | D3, D6 | 19.75 |
 | [M6](#m6--main-cells-and-hero-areas-c4-c5--gates-g4-and-g5) — Main cells and hero areas | A | 03441–03500 | 15 | **G4** · `HOUSE-03452`, **G5** · `HOUSE-03480` | D4 | 19.75 |
@@ -668,11 +668,12 @@ second reduction capped them at 62 and 6.
       trace: absorbs `HOUSE-00980` (acquired storage furniture): storage furniture is generated only (`HOUSE-03206`)
       note: (2026-09-23) One compact JSON table now drives 16 deterministic static GLBs across six reusable families: six door/drawer/open carcasses, open shelving, a workbench, a lidded box, four wall fixtures, and duct/pipe/cable variants from one run author. Every asset carries one 12-triangle `_COL` box, UV0, a support- or wall-plane origin and an approved canonical material bridge; the single group gate regenerates each asset twice and pins hashes, envelopes, triangles, origins, collision and production examples. No radiator was generated because no authored house data contains one. Six family examples are placed in the master closet, attic store, basement workshop/WC/service room; all 139 production props retain support, opening and 0.70 m route clearance. All 16 assets compile through CNA, and a 4×4 rendered shape/material review found no floating, clipping or z-fighting
 
-- [ ] HOUSE-02681 — Static curtains and blinds: one generated curtain family and one blind family
+- [x] HOUSE-02681 — Static curtains and blinds: one generated curtain family and one blind family
       dep: HOUSE-00971, HOUSE-03302 · sys: content · plat: ALL · pri: MUST · zone: all · adv: D3 · est: 1
       accept: (1) one curtain family and one blind family, meshes and materials only, with size and tint variants; (2) placed by the room recipes in M4 and M6; (3) portals keep their glass opacity; there is no `blindFraction`, no interaction and no translucent-mode switching
       verify: one window of each type placed and captured by day and at night
       trace: absorbs `HOUSE-02682`; earlier wording (interactive blinds, the `translucent` portal mode) superseded
+      note: (2026-09-23) The retained deterministic family-room curtains and a new 2,432-triangle generated slatted blind form the bounded static family. The blind has UV0, a wall-plane origin, no collision or interaction state, and uses the existing baked xyz-scale/canonical-tint recipe path; one muted-blue 0.92-width instance fits the east window of `L1_BED2`. The group gate regenerates and measures the blind, checks both family material bridges and placements, pins both referenced portals to `opacity: glass`, and rejects `blindFraction`, interaction or translucent-mode fields. All 140 props pass placement and route checks; the 790-chunk production world builds with one measured blind material batch. Fixed day/night captures of the bedroom blind and both family-room curtains show correct mounting, glass, illumination and silhouettes without clipping or z-fighting. The adjacent generated prop kit's furniture-only material roles were also corrected from UV2 shell paints to existing BasicEffect roles when the complete chunk build exposed that integration error
 
 - [ ] HOUSE-00975 — Acquire the kitchen and utility appliances (cap 3)
       dep: HOUSE-00296, HOUSE-03302 · sys: content · plat: TOOL · pri: MUST · zone: all · adv: D3 · est: 0.75
@@ -1846,7 +1847,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 |---|---|---|---|---|---|---|---|
 | M1 Whole-property traversal | 4 | 9 | **0** | 0 | **0** | 0 | — |
 | M2 Architectural completion | 8 | 18 | **0** | 0 | **0** | 0 | — |
-| M3 The reusable furnishing kit | 16 | 33 | **8** | 8.1 | **9.5** | 10.45 | — |
+| M3 The reusable furnishing kit | 16 | 33 | **7** | 7.2 | **8.5** | 9.35 | — |
 | M4 Dressing everywhere | 40 | 48.75 | **31** | 26.25 | **31** | 37 | R-D +3 |
 | M5 Baseline lighting everywhere | 12 | 24.5 | **10** | 16.75 | **19.75** | 21.75 | — |
 | M6 Main cells and hero areas | 20 | 32.5 | **15** | 16.75 | **19.75** | 21.75 | — |
@@ -1860,12 +1861,12 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **133** | **162.1** | **190.75** | **230.7** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **132** | **161.3** | **189.75** | **229.6** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-49.3 h. Adding the 35.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-266.2 h, 13.8 h under the limit. That margin is
+50.4 h. Adding the 36.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+266.1 h, 13.9 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |

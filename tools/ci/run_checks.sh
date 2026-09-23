@@ -162,6 +162,7 @@ run_gate "sunroom-suite" python3 tools/assets/sunroom_suite_prepare.py --check
 # HOUSE-01067: both dominant family-room picture windows retain measured, physically gathered
 # open curtains aligned to their true wall planes without pretending to implement blind state.
 run_gate "family-window-treatment" python3 tools/assets/family_window_treatment_prepare.py --check
+run_gate "window-dressing" python3 tools/assets/window_dressing_prepare.py --check
 # HOUSE-01052: the close-range family sofa remains the pinned, attributed Wayfair geometry after
 # deterministic XNA-compatible variant selection, grounding and bounded proxy generation.
 run_gate "family-sofa" python3 tools/assets/family_sofa_prepare.py --check

@@ -24,13 +24,15 @@ MODELS = REPO / "assets-src" / "Models" / "Furniture" / "Generated"
 MANIFEST = REPO / "assets-src" / "assets.manifest.json"
 PROPS = REPO / "assets-src" / "world" / "layout.props.json"
 MATERIAL_MAP = {
-    "KIT_PAINT": "MAT_PAINT_SAGE",
+    # Furniture GLBs carry UV0 only, so their surface roles must use the stock Basic path. Shell
+    # paint rows require UV1 and would make an otherwise valid reusable prop fail chunk building.
+    "KIT_PAINT": "MAT_DOOR_PAINTED",
     "KIT_WOOD": "MAT_DOOR_HARDWOOD",
     "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
     "KIT_GLASS": "MAT_GLASS_CABINET",
     "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
-    "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
-    "KIT_WHITE": "MAT_PAINT_AGED_PLASTER",
+    "KIT_CARDBOARD": "MAT_LIVING_ART_PAPER",
+    "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE",
 }
 PLACED_FAMILIES = {
     "carcass": "PROP_KIT_WARDROBE_EXAMPLE",

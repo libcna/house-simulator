@@ -54,6 +54,7 @@ WALL_MOUNTED = {
     "projector",
     "service-run",
     "window-treatment",
+    "window-blind",
 }
 
 #: Floor-supported architectural objects which also register against a wall plane. Unlike a

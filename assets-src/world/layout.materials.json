@@ -1668,6 +1668,32 @@
       "footstepSurface": "carpet", "audioAbsorption": 0.65,
       "effectTierS": "Basic", "effectTierE": "RoomLit"
     },
+    // HOUSE-02681: the reusable static blind uses an ordinary painted slat role. The paired row
+    // differs only by tint so recipe placements can select a baked colour through HOUSE-00971.
+    {
+      "id": "MAT_WINDOW_BLIND_BLUE", "class": "plastic",
+      "albedo": "Textures/Materials/paint_white_fine_albedo",
+      "normal": "Textures/Materials/paint_white_fine_normal", "lightmapChannel": 0,
+      "tint": [0.72, 0.82, 0.91], "specularColor": [0.035, 0.04, 0.05],
+      "specularPower": 10.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": true, "uvScale": [3.0, 3.0],
+      "wetResponse": { "albedoDarken": 0.12, "specularBoost": 1.1, "powerBoost": 1.1 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "wood", "audioAbsorption": 0.22,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    {
+      "id": "MAT_WINDOW_BLIND_BLUE_MUTED", "class": "plastic",
+      "albedo": "Textures/Materials/paint_white_fine_albedo",
+      "normal": "Textures/Materials/paint_white_fine_normal", "lightmapChannel": 0,
+      "tint": [0.64, 0.74, 0.9], "specularColor": [0.035, 0.04, 0.05],
+      "specularPower": 10.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": true, "uvScale": [3.0, 3.0],
+      "wetResponse": { "albedoDarken": 0.12, "specularBoost": 1.1, "powerBoost": 1.1 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "wood", "audioAbsorption": 0.22,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
     // HOUSE-01054: the family dog bed no longer borrows green dining upholstery. Its rounded
     // outer bolster gets a warm woven identity; the inset and tiny sewn cord deliberately share
     // the family sofa velvet and existing blue canvas for a coherent room palette and one rather

@@ -1777,6 +1777,14 @@
       "position": [4.90, -0.55, -16.20], "yawDeg": 270, "scale": 1,
       "static": true, "lodGroup": null, "collision": "proxy",
       "material": null, "interactable": null
+    },
+    {
+      "id": "PROP_L1_BED2_BLIND_EAST",
+      "asset": "MODEL_WINDOW_BLIND", "cell": "L1_BED2",
+      "position": [8.7, 5.3, -25.0], "yawDeg": 90, "scale": [0.92, 1.0, 1.0],
+      "tint": [0.64, 0.74, 0.9],
+      "static": true, "lodGroup": null, "collision": "none",
+      "material": null, "interactable": null
     }
   ]
 }

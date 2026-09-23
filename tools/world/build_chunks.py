@@ -412,6 +412,29 @@ CHUNK_BUDGET_EXCEPTIONS["L3_STORE_W"] = (
     7, "six measured unfinished-attic shell finish chunks plus HOUSE-03265's roof-bay "
        "insulation detail role")
 
+# `HOUSE-00985`: the six production kit examples prove the generated families through the same
+# chunk path used by later recipes. Existing wood/steel roles merge where possible; the remaining
+# close-range paint, paper, glass and screen roles stay truthful instead of being repainted as a
+# room surface. These are the measured counts with only those examples present.
+CHUNK_BUDGET_EXCEPTIONS["B1_WC7"] = (
+    7, "six room/shell roles plus HOUSE-00985's reusable mirror glass example")
+_workshop_limit, _workshop_reason = CHUNK_BUDGET_EXCEPTIONS["B1_WORKSHOP"]
+CHUNK_BUDGET_EXCEPTIONS["B1_WORKSHOP"] = (
+    _workshop_limit + 1,
+    _workshop_reason + "; HOUSE-00985's workbench adds one reusable painted-furniture role")
+CHUNK_BUDGET_EXCEPTIONS["L1_MASTER_CLOSET"] = (
+    7, "six room/shell roles plus HOUSE-00985's reusable wardrobe paint role")
+CHUNK_BUDGET_EXCEPTIONS["L3_STORE_W"] = (
+    11, CHUNK_BUDGET_EXCEPTIONS["L3_STORE_W"][1] + "; HOUSE-00985's shelf and storage-box "
+        "examples add four truthful reusable-kit surface roles")
+
+# `HOUSE-02681`: one ordinary BasicEffect material is the whole cost of the fixed slatted blind;
+# it does not add a portal mode, interaction state or separate runtime draw system.
+_bed2_limit, _bed2_reason = CHUNK_BUDGET_EXCEPTIONS["L1_BED2"]
+CHUNK_BUDGET_EXCEPTIONS["L1_BED2"] = (
+    _bed2_limit + 1,
+    _bed2_reason + "; HOUSE-02681 adds one tintable static-blind material role")
+
 # HOUSE-01069 is a measured room-wide furnishing/lighting step, not a generic budget increase.
 # The new walnut/brass cabinet shares both established dining roles. Its ceramic serving set is
 # one new finish, and the two sideboard lamps' exact independently switched shade group needs
