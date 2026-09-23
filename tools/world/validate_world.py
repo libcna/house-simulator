@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""validate_world.py -- the fourteen world-integrity rules, over a whole world directory.
+"""validate_world.py -- the fifteen world-integrity rules, over a whole world directory.
 
 `HOUSE-00358`. `world_schema.py` (`HOUSE-00341`) checks that each of the sixteen files has the
 right *shape*. This checks that the sixteen agree with each other and with the house: that a
@@ -16,7 +16,7 @@ pre-build step. `cna-house.md` §15.7: a failure fails the build.
 
 ## Every failure, not the first
 
-Each rule collects **all** its failures and the run reports all fourteen rules' worth, because
+Each rule collects **all** its failures and the run reports all fifteen rules' worth, because
 fixing forty authoring mistakes one build at a time is intolerable (`conventions.md` §5.1). Each
 message names the file, the JSON path and what was expected against what was found -- a message
 that says "portal misaligned" and stops has told the author to go and search.
@@ -74,6 +74,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import build_collision  # noqa: E402
 import layout_io  # noqa: E402
 import roof_geometry  # noqa: E402
 import terrain_gen  # noqa: E402
@@ -107,6 +108,14 @@ CAPSULE_HEIGHT = 1.95
 REACH_RANGE = 2.50              # §15.7 rule 11
 EYE_HEIGHT = 1.60               # a standing eye above the floor
 CAPSULE_RADIUS = CAPSULE_WIDTH / 2.0   # somewhere a player can actually stand
+STANDING_HEIGHT = 1.80          # §43.1, the real controller body
+CROUCHED_HEIGHT = 1.25
+SLOPE_LIMIT_COSINE = 0.694658370459  # cos(46°), physics/Move.hpp
+STANDING_POINT_TOLERANCE = 0.01      # authored point to collision surface
+ACCESSIBILITY_EXCLUSIONS = {
+    "EXT_WORLD", "EXT_NORTHSTRIP", "L2_BALCONY_JULIET",
+    "CELL_FRIDGE_INTERIOR", "CELL_FREEZER_INTERIOR",
+}
 SILL_HABITABLE = (0.50, 1.10)   # §70.5, window sill above the room's own floor
 SWITCH_CENTRE = (1.10, 1.30)    # §70.5, light switch centre
 HANDLE_CENTRE = (0.95, 1.10)    # §70.5, door handle centre
@@ -173,6 +182,7 @@ RULE_TITLES = {
     12: "nothing outdoors stands in something else",
     13: "every downspout is at a roof corner, on the ground under it",
     14: "every walkthrough leaf has a clear, collision-free static pose",
+    15: "every intended-accessible cell has a valid standing point",
 }
 
 
@@ -264,7 +274,7 @@ def segment_inside(x0: float, z0: float, x1: float, z1: float,
 
 
 class World:
-    """The layout, indexed the way the rules need it. Built once, read by all fourteen."""
+    """The layout, indexed the way the rules need it. Built once, read by all fifteen."""
 
     def __init__(self, layout: dict[str, dict], directory: Path | None = None) -> None:
         self.layout = layout
@@ -294,21 +304,26 @@ class World:
         self.cell_by_id = {row.get("id"): row for row in self.cells}
         self.portal_by_id = {row.get("id"): row for row in self.portals}
 
-        # `HOUSE-03204` already records the intended-accessible set in the complete zone ledger;
-        # `HOUSE-03225` will add standing points to that same contract.  Use it only when it is a
-        # complete match for this world.  The selftest's small independent fixture therefore
-        # defaults to accessible rather than accidentally inheriting the real house's ids.
+        # `HOUSE-03204` records the intended-accessible set in the complete zone ledger and
+        # `HOUSE-03225` adds its standing points. A fixture can put a `zones.json` beside its
+        # layout; the real house uses the authoritative planning manifest under docs/.
         self.accessible_by_cell = {str(row.get("id")): True for row in self.cells}
+        self.zone_path = ((directory / "zones.json") if directory is not None
+                          and (directory / "zones.json").is_file()
+                          else REPO / "docs" / "zones.json")
+        self.zone_document: dict | None = None
+        self.zone_error: str | None = None
         try:
-            zones = json.loads((REPO / "docs" / "zones.json").read_text(encoding="utf-8"))
+            zones = json.loads(self.zone_path.read_text(encoding="utf-8"))
+            self.zone_document = zones
             authored = {str(row["id"]): bool(row["accessible"])
                         for zone in zones.get("zones", []) for row in zone.get("cells", [])}
             authored.update({str(row["id"]): bool(row["accessible"])
                              for row in zones.get("none", [])})
             if set(authored) == set(self.accessible_by_cell):
                 self.accessible_by_cell = authored
-        except (OSError, KeyError, TypeError, ValueError):
-            pass
+        except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError) as error:
+            self.zone_error = str(error)
 
     @property
     def thickest_wall(self) -> float:
@@ -2749,11 +2764,356 @@ def rule_14_static_leaf_poses(world: World) -> list[Problem]:
     return problems
 
 
+def _zone_rows(world: World) -> list[tuple[dict, str]]:
+    """The accessibility rows and their stable JSON paths."""
+    if not isinstance(world.zone_document, dict):
+        return []
+    rows: list[tuple[dict, str]] = []
+    zones = world.zone_document.get("zones")
+    if isinstance(zones, list):
+        for zone_index, zone in enumerate(zones):
+            if not isinstance(zone, dict) or not isinstance(zone.get("cells"), list):
+                continue
+            for row_index, row in enumerate(zone["cells"]):
+                if isinstance(row, dict):
+                    rows.append((row, f"zones/{zone_index}/cells/{row_index}"))
+    none = world.zone_document.get("none")
+    if isinstance(none, list):
+        for row_index, row in enumerate(none):
+            if isinstance(row, dict):
+                rows.append((row, f"none/{row_index}"))
+    return rows
+
+
+def _terrain_at(terrain: dict | None, x: float, z: float) -> tuple[float, float] | None:
+    """Runtime-equivalent triangle height and upward-normal Y at one terrain point."""
+    if terrain is None:
+        return None
+    nx, nz = int(terrain["samplesX"]), int(terrain["samplesZ"])
+    step = float(terrain["step"])
+    fx = (x - float(terrain["originX"])) / step
+    fz = (z - float(terrain["originZ"])) / step
+    if fx < 0.0 or fz < 0.0 or fx > nx - 1 or fz > nz - 1:
+        return None
+    ix = min(int(fx), nx - 2)
+    iz = min(int(fz), nz - 2)
+    u, v = fx - ix, fz - iz
+    heights = terrain["heights"]
+
+    def height(dx: int, dz: int) -> float:
+        return float(heights[(iz + dz) * nx + ix + dx])
+
+    h00, h10, h01, h11 = height(0, 0), height(1, 0), height(0, 1), height(1, 1)
+    if v <= u:
+        dhdx, dhdz = (h10 - h00) / step, (h11 - h10) / step
+        surface = h00 + dhdx * u * step + dhdz * v * step
+    else:
+        dhdx, dhdz = (h11 - h01) / step, (h01 - h00) / step
+        surface = h00 + dhdx * u * step + dhdz * v * step
+    normal_y = 1.0 / math.sqrt(dhdx * dhdx + 1.0 + dhdz * dhdz)
+    return surface, normal_y
+
+
+def _mesh_surface_at(mesh: dict, x: float, z: float) -> list[tuple[float, float]]:
+    """Walkable triangle intersections of a vertical line, as (height, normal-y)."""
+    out = []
+    vertices = mesh["vertices"]
+    for ia, ib, ic in mesh["triangles"]:
+        a, b, c = vertices[ia], vertices[ib], vertices[ic]
+        denominator = ((b[2] - c[2]) * (a[0] - c[0])
+                       + (c[0] - b[0]) * (a[2] - c[2]))
+        if abs(denominator) < 1e-12:
+            continue
+        wa = ((b[2] - c[2]) * (x - c[0]) + (c[0] - b[0]) * (z - c[2])) / denominator
+        wb = ((c[2] - a[2]) * (x - c[0]) + (a[0] - c[0]) * (z - c[2])) / denominator
+        wc = 1.0 - wa - wb
+        if min(wa, wb, wc) < -1e-8:
+            continue
+        ab = (b[0] - a[0], b[1] - a[1], b[2] - a[2])
+        ac = (c[0] - a[0], c[1] - a[1], c[2] - a[2])
+        normal = (ab[1] * ac[2] - ab[2] * ac[1],
+                  ab[2] * ac[0] - ab[0] * ac[2],
+                  ab[0] * ac[1] - ab[1] * ac[0])
+        length = math.sqrt(sum(component * component for component in normal))
+        normal_y = normal[1] / length if length > 1e-12 else 0.0
+        if normal_y >= SLOPE_LIMIT_COSINE:
+            out.append((wa * a[1] + wb * b[1] + wc * c[1], normal_y))
+    return out
+
+
+def _sub(a: tuple[float, float, float], b: tuple[float, float, float]):
+    return tuple(a[i] - b[i] for i in range(3))
+
+
+def _dot(a, b) -> float:
+    return sum(a[i] * b[i] for i in range(3))
+
+
+def _point_triangle_distance_sq(point, a, b, c) -> float:
+    """Squared distance from a point to a triangle (Real-Time Collision Detection §5.1.5)."""
+    ab, ac, ap = _sub(b, a), _sub(c, a), _sub(point, a)
+    d1, d2 = _dot(ab, ap), _dot(ac, ap)
+    if d1 <= 0.0 and d2 <= 0.0:
+        return _dot(ap, ap)
+    bp = _sub(point, b)
+    d3, d4 = _dot(ab, bp), _dot(ac, bp)
+    if d3 >= 0.0 and d4 <= d3:
+        return _dot(bp, bp)
+    vc = d1 * d4 - d3 * d2
+    if vc <= 0.0 and d1 >= 0.0 and d3 <= 0.0:
+        v = d1 / (d1 - d3)
+        closest = tuple(a[i] + v * ab[i] for i in range(3))
+        delta = _sub(point, closest)
+        return _dot(delta, delta)
+    cp = _sub(point, c)
+    d5, d6 = _dot(ab, cp), _dot(ac, cp)
+    if d6 >= 0.0 and d5 <= d6:
+        return _dot(cp, cp)
+    vb = d5 * d2 - d1 * d6
+    if vb <= 0.0 and d2 >= 0.0 and d6 <= 0.0:
+        w = d2 / (d2 - d6)
+        closest = tuple(a[i] + w * ac[i] for i in range(3))
+        delta = _sub(point, closest)
+        return _dot(delta, delta)
+    va = d3 * d6 - d5 * d4
+    if va <= 0.0 and d4 - d3 >= 0.0 and d5 - d6 >= 0.0:
+        edge = _sub(c, b)
+        w = (d4 - d3) / ((d4 - d3) + (d5 - d6))
+        closest = tuple(b[i] + w * edge[i] for i in range(3))
+        delta = _sub(point, closest)
+        return _dot(delta, delta)
+    denominator = 1.0 / (va + vb + vc)
+    v, w = vb * denominator, vc * denominator
+    closest = tuple(a[i] + ab[i] * v + ac[i] * w for i in range(3))
+    delta = _sub(point, closest)
+    return _dot(delta, delta)
+
+
+def _segment_segment_distance_sq(p1, q1, p2, q2) -> float:
+    """Squared distance between two closed line segments."""
+    d1, d2, r = _sub(q1, p1), _sub(q2, p2), _sub(p1, p2)
+    a, e, f = _dot(d1, d1), _dot(d2, d2), _dot(d2, r)
+    if a <= 1e-12 and e <= 1e-12:
+        return _dot(r, r)
+    if a <= 1e-12:
+        s, t = 0.0, max(0.0, min(1.0, f / e))
+    else:
+        c = _dot(d1, r)
+        if e <= 1e-12:
+            t, s = 0.0, max(0.0, min(1.0, -c / a))
+        else:
+            b = _dot(d1, d2)
+            denominator = a * e - b * b
+            s = max(0.0, min(1.0, (b * f - c * e) / denominator)) if denominator else 0.0
+            t = (b * s + f) / e
+            if t < 0.0:
+                t, s = 0.0, max(0.0, min(1.0, -c / a))
+            elif t > 1.0:
+                t, s = 1.0, max(0.0, min(1.0, (b - c) / a))
+    closest1 = tuple(p1[i] + d1[i] * s for i in range(3))
+    closest2 = tuple(p2[i] + d2[i] * t for i in range(3))
+    delta = _sub(closest1, closest2)
+    return _dot(delta, delta)
+
+
+def _segment_hits_triangle(start, end, a, b, c) -> bool:
+    direction, edge1, edge2 = _sub(end, start), _sub(b, a), _sub(c, a)
+    cross = (direction[1] * edge2[2] - direction[2] * edge2[1],
+             direction[2] * edge2[0] - direction[0] * edge2[2],
+             direction[0] * edge2[1] - direction[1] * edge2[0])
+    determinant = _dot(edge1, cross)
+    if abs(determinant) < 1e-12:
+        return False
+    inverse = 1.0 / determinant
+    offset = _sub(start, a)
+    u = _dot(offset, cross) * inverse
+    if u < 0.0 or u > 1.0:
+        return False
+    q = (offset[1] * edge1[2] - offset[2] * edge1[1],
+         offset[2] * edge1[0] - offset[0] * edge1[2],
+         offset[0] * edge1[1] - offset[1] * edge1[0])
+    v = _dot(direction, q) * inverse
+    t = _dot(edge2, q) * inverse
+    return v >= 0.0 and u + v <= 1.0 and 0.0 <= t <= 1.0
+
+
+def _segment_triangle_distance_sq(start, end, a, b, c) -> float:
+    if _segment_hits_triangle(start, end, a, b, c):
+        return 0.0
+    return min(_point_triangle_distance_sq(start, a, b, c),
+               _point_triangle_distance_sq(end, a, b, c),
+               _segment_segment_distance_sq(start, end, a, b),
+               _segment_segment_distance_sq(start, end, b, c),
+               _segment_segment_distance_sq(start, end, c, a))
+
+
+def _capsule_hits_obb(feet, height: float, obb: tuple) -> bool:
+    (cx, cy, cz), (hx, hy, hz), yaw, _surface, _kind = obb
+    dx, dz = feet[0] - cx, feet[2] - cz
+    cosine, sine = math.cos(yaw), math.sin(yaw)
+    local_x, local_z = dx * cosine - dz * sine, dx * sine + dz * cosine
+    gap_x = max(abs(local_x) - hx, 0.0)
+    gap_z = max(abs(local_z) - hz, 0.0)
+    segment_low, segment_high = feet[1] + CAPSULE_RADIUS, feet[1] + height - CAPSULE_RADIUS
+    gap_y = max(cy - hy - segment_high, segment_low - (cy + hy), 0.0)
+    distance_sq = gap_x * gap_x + gap_y * gap_y + gap_z * gap_z
+    return distance_sq < (CAPSULE_RADIUS - 1e-4) ** 2
+
+
+def _capsule_hits_mesh(feet, height: float, mesh: dict) -> bool:
+    start = (feet[0], feet[1] + CAPSULE_RADIUS, feet[2])
+    end = (feet[0], feet[1] + height - CAPSULE_RADIUS, feet[2])
+    vertices = mesh["vertices"]
+    limit = (CAPSULE_RADIUS - 1e-4) ** 2
+    return any(_segment_triangle_distance_sq(start, end,
+                                             vertices[a], vertices[b], vertices[c]) < limit
+               for a, b, c in mesh["triangles"])
+
+
+def _standing_point_failure(collision: dict, cell_row: dict, point: tuple[float, float, float],
+                            posture: str) -> str | None:
+    """Return why one feet position is invalid, or None when the real capsule can stand there."""
+    collision_cell = next((row for row in collision["cells"] if row["id"] == cell_row["id"]), None)
+    if collision_cell is None:
+        return "has no collision cell"
+    shapes: build_collision.Shapes = collision["shapes"]
+    supports: list[tuple[float, float, int | None]] = []
+    for shape_index in collision_cell["shapes"]:
+        if shape_index < len(shapes.obbs):
+            obb = shapes.obbs[shape_index]
+            (cx, cy, cz), (hx, hy, hz), yaw, _surface, kind = obb
+            if kind not in (build_collision.KIND_FLOOR, build_collision.KIND_STAIR):
+                continue
+            dx, dz = point[0] - cx, point[2] - cz
+            cosine, sine = math.cos(yaw), math.sin(yaw)
+            local_x, local_z = dx * cosine - dz * sine, dx * sine + dz * cosine
+            if abs(local_x) <= hx + 1e-8 and abs(local_z) <= hz + 1e-8:
+                supports.append((cy + hy, 1.0, shape_index))
+        else:
+            mesh = shapes.meshes[shape_index - len(shapes.obbs)]
+            if mesh["kind"] == build_collision.KIND_STAIR:
+                supports.extend((surface, normal, shape_index)
+                                for surface, normal in _mesh_surface_at(
+                                    mesh, point[0], point[2]))
+    if collision_cell.get("outdoors"):
+        ground = _terrain_at(collision.get("terrain"), point[0], point[2])
+        if ground is not None and ground[1] >= SLOPE_LIMIT_COSINE:
+            supports.append((ground[0], ground[1], None))
+    matching = [(surface, shape_index) for surface, _normal, shape_index in supports
+                if abs(surface - point[1]) <= STANDING_POINT_TOLERANCE]
+    if not matching:
+        nearest = min((abs(surface - point[1]), surface)
+                      for surface, _normal, _shape_index in supports) \
+            if supports else None
+        return (f"is not on walkable collision within {STANDING_POINT_TOLERANCE:.2f} m"
+                + (f" (nearest is y={nearest[1]:.3f})" if nearest else ""))
+
+    height = STANDING_HEIGHT if posture == "standing" else CROUCHED_HEIGHT
+    # The support is contact, not an overhead obstruction. This distinction matters on a stair
+    # ramp: a vertical capsule's lower sphere necessarily overlaps the inclined support when its
+    # centre is one radius above the feet, while the runtime controller treats that same triangle
+    # as its grounded surface. Other stair geometry and every non-supporting shape remain part of
+    # the clearance proof.
+    supporting_shapes = {shape_index for _surface, shape_index in matching
+                         if shape_index is not None}
+    for shape_index in collision_cell["shapes"]:
+        if shape_index in supporting_shapes:
+            continue
+        if shape_index < len(shapes.obbs):
+            if _capsule_hits_obb(point, height, shapes.obbs[shape_index]):
+                return f"has no {posture} capsule headroom"
+        elif _capsule_hits_mesh(point, height, shapes.meshes[shape_index - len(shapes.obbs)]):
+            return f"has no {posture} capsule headroom"
+    return None
+
+
+def rule_15_standing_points(world: World) -> list[Problem]:
+    """The grand-tour manifest: one physically valid feet position in every accessible cell."""
+    file_name = str(world.zone_path.relative_to(REPO)) if world.zone_path.is_relative_to(REPO) \
+        else str(world.zone_path)
+    if world.zone_error is not None:
+        return [Problem(15, file_name, "/",
+                        f"accessibility manifest cannot be read: {world.zone_error}")]
+    rows = _zone_rows(world)
+    assigned = [str(row.get("id")) for row, _where in rows]
+    expected = {str(row.get("id")) for row in world.cells}
+    if set(assigned) != expected or len(assigned) != len(set(assigned)):
+        return [Problem(15, file_name, "/",
+                        "accessibility manifest must assign every source cell exactly once before "
+                        "its standing points can be proved")]
+
+    if world.zone_path.resolve() == (REPO / "docs" / "zones.json").resolve():
+        excluded = {str(row.get("id")) for row, _where in rows
+                    if row.get("accessible") is not True}
+        if excluded != ACCESSIBILITY_EXCLUSIONS:
+            return [Problem(
+                15, file_name, "/",
+                "the house accessibility exclusions must be exactly "
+                f"{sorted(ACCESSIBILITY_EXCLUSIONS)}, got {sorted(excluded)}")]
+
+    problems = []
+    candidates = []
+    for row, where in rows:
+        cell_id = str(row.get("id"))
+        if row.get("accessible") is not True:
+            if not isinstance(row.get("reason"), str) or not row["reason"].strip():
+                problems.append(Problem(15, file_name, f"{where}/reason",
+                                        f"excluded cell {cell_id} needs a non-empty reason"))
+            if "standingPoint" in row or "standingPosture" in row:
+                problems.append(Problem(15, file_name, where,
+                                        f"excluded cell {cell_id} must not carry a standing point"))
+            continue
+        point = row.get("standingPoint")
+        posture = row.get("standingPosture", "standing")
+        if (not isinstance(point, list) or len(point) != 3
+                or any(isinstance(value, bool) or not isinstance(value, (int, float))
+                       or not math.isfinite(float(value)) for value in point)):
+            problems.append(Problem(15, file_name, f"{where}/standingPoint",
+                                    f"accessible cell {cell_id} needs three finite feet "
+                                    "coordinates"))
+            continue
+        if posture not in ("standing", "crouched"):
+            problems.append(Problem(15, file_name, f"{where}/standingPosture",
+                                    f"accessible cell {cell_id} posture must be standing or "
+                                    "crouched"))
+            continue
+        cell = world.cell_by_id[cell_id]
+        numeric = tuple(float(value) for value in point)
+        if not standable(numeric[0], numeric[2], boxes_of(cell)):
+            problems.append(Problem(15, file_name, f"{where}/standingPoint",
+                                    f"{cell_id}'s point does not keep the {CAPSULE_RADIUS:.2f} m "
+                                    "capsule inside "
+                                    f"the cell footprint"))
+            continue
+        candidates.append((row, where, numeric, posture))
+    if problems or not candidates:
+        return problems
+    if world.directory is None:
+        return [Problem(15, file_name, "/",
+                        "standing-point collision needs the source world directory")]
+
+    manifest = REPO / "assets-src" / "assets.manifest.json"
+    include_props = (world.directory.resolve()
+                     == (REPO / "assets-src" / "world").resolve())
+    try:
+        collision = build_collision.build(world.directory, manifest if include_props else None,
+                                          include_props=include_props)
+    except (OSError, layout_io.LayoutError) as error:
+        return [Problem(15, file_name, "/",
+                        f"standing-point collision could not be built: {error}")]
+    for row, where, point, posture in candidates:
+        failure = _standing_point_failure(collision, row, point, posture)
+        if failure is not None:
+            problems.append(Problem(15, file_name, f"{where}/standingPoint",
+                                    f"{row['id']} point {list(point)} {failure}"))
+    return problems
+
+
 RULES = {
     1: rule_1_ids, 2: rule_2_boxes, 3: rule_3_overlap, 4: rule_4_portal_planes,
     5: rule_5_connected, 6: rule_6_references, 7: rule_7_openings, 8: rule_8_stairs,
     9: rule_9_plumbing, 10: rule_10_realism, 11: rule_11_reachable, 12: rule_12_outdoors,
-    13: rule_13_downspouts, 14: rule_14_static_leaf_poses,
+    13: rule_13_downspouts, 14: rule_14_static_leaf_poses, 15: rule_15_standing_points,
 }
 
 
@@ -2782,7 +3142,7 @@ def validate(directory: Path, wanted: list[int] | None = None,
 def report(directory: Path, wanted: list[int] | None = None, stream=sys.stdout) -> int:
     shape, problems = validate(directory, wanted)
     if shape:
-        print(f"validate_world: {len(shape)} shape problem(s); the fourteen rules did not run, "
+        print(f"validate_world: {len(shape)} shape problem(s); the fifteen rules did not run, "
               f"because a rule cannot read a field that is not the type it says it is.",
               file=stream)
         for line in shape:
@@ -2816,7 +3176,7 @@ def report(directory: Path, wanted: list[int] | None = None, stream=sys.stdout) 
 
 
 def fixture() -> dict[str, dict]:
-    """A small house that satisfies all fourteen rules, and exercises each at least once.
+    """A small house that satisfies all fifteen rules, and exercises each at least once.
 
     Small enough to hold in the head and real enough to be worth passing: two storeys, a foyer that
     everything is reachable from, a WC stacked over a WC on the drain the plumbing rule wants, a
@@ -3123,13 +3483,43 @@ def fixture() -> dict[str, dict]:
             "initialstate": initialstate}
 
 
+def fixture_zones(documents: dict[str, dict]) -> dict:
+    """A complete accessibility manifest that follows a mutated selftest fixture."""
+    levels = {row["id"]: row for row in documents["levels"]["levels"]}
+    rows = []
+    for cell in documents["cells"]["cells"]:
+        boxes = boxes_of(cell)
+        x = (boxes[0][0] + boxes[0][1]) / 2.0
+        z = (boxes[0][2] + boxes[0][3]) / 2.0
+        # The fixture's stair footprint is deliberately only a bounding box for a U flight, and
+        # the landing centre is deliberately the well. They exercise the stair rules, not the
+        # authored standing-point contract, so exclude those two synthetic cells explicitly.
+        accessible = (cell.get("kind") != "void" and cell.get("kind") != "stair"
+                      and "LANDING" not in str(cell.get("id")) and standable(x, z, boxes))
+        row = {"id": cell["id"], "accessible": accessible}
+        if accessible:
+            row["standingPoint"] = [x, layout_io.cell_extent(cell, levels[cell["level"]])[0], z]
+        else:
+            row["reason"] = "Synthetic fixture cell is not large enough for the player capsule."
+        rows.append(row)
+    return {"schema": "cna-house/zones/1",
+            "zones": [{"id": "Z-FIXTURE", "name": "Fixture", "cells": rows}], "none": []}
+
+
 def write_fixture(directory: Path, documents: dict[str, dict]) -> None:
     import json
 
     directory.mkdir(parents=True, exist_ok=True)
     for kind, document in documents.items():
+        if kind == "zones":
+            (directory / "zones.json").write_text(json.dumps(document, indent=2) + "\n",
+                                                   encoding="utf-8")
+            continue
         name, _ = layout_io.FILES[kind]
         (directory / name).write_text(json.dumps(document, indent=2) + "\n", encoding="utf-8")
+    if "zones" not in documents:
+        (directory / "zones.json").write_text(
+            json.dumps(fixture_zones(documents), indent=2) + "\n", encoding="utf-8")
 
 
 # ====================================================================================== selftest ==
@@ -3169,7 +3559,7 @@ def selftest() -> int:
         shape, problems = validate(world_dir)
         require(not shape, f"the fixture matches every schema ({shape[:2]})")
         require(not problems,
-                f"and passes all fourteen rules ({[str(p) for p in problems[:3]]})")
+                f"and passes all fifteen rules ({[str(p) for p in problems[:3]]})")
 
         # 2. Every rule is actually exercised by the fixture -- a rule with nothing to look at
         #    passes for the wrong reason. Counted as: the rule reads at least one row.
@@ -3926,6 +4316,11 @@ def selftest() -> int:
         def _(docs):
             row(docs, "openings", "DOOR_WC1").pop("openFraction")
 
+        @mutation(15, "an accessible standing point one metre above its floor")
+        def _(docs):
+            docs["zones"] = fixture_zones(docs)
+            docs["zones"]["zones"][0]["cells"][0]["standingPoint"][1] += 1.0
+
         # ...and rule 13's other three conditions need a world with a ROOF and a height field,
         # which the fixture has neither of. The property has both, so they are driven against it
         # directly (`HOUSE-00776`). The first version of this rule read `world.directory` on a
@@ -3990,15 +4385,61 @@ def selftest() -> int:
                 f"a swing arc through a placed prop is rejected "
                 f"({[str(problem) for problem in problems]})")
 
-        require(sorted({rule for rule, _, _ in mutations}) == list(range(1, 15)),
-                "there is a mutation for each of the fourteen rules")
+        # Rule 15 owns both halves of the manifest contract: a point must exist in the footprint,
+        # and its selected real controller posture must fit the collision above it.
+        missing_point = copy.deepcopy(base)
+        missing_point["zones"] = fixture_zones(missing_point)
+        missing_point["zones"]["zones"][0]["cells"][0].pop("standingPoint")
+        missing_dir = workspace / "standing-point-missing"
+        write_fixture(missing_dir, missing_point)
+        _, problems = validate(missing_dir, wanted=[15])
+        require(any("needs three finite feet coordinates" in problem.message
+                    for problem in problems),
+                f"an accessible cell without a standing point is rejected "
+                f"({[str(problem) for problem in problems]})")
+
+        outside_point = copy.deepcopy(base)
+        outside_point["zones"] = fixture_zones(outside_point)
+        outside_point["zones"]["zones"][0]["cells"][0]["standingPoint"] = [20.0, 0.6, 20.0]
+        outside_dir = workspace / "standing-point-outside"
+        write_fixture(outside_dir, outside_point)
+        _, problems = validate(outside_dir, wanted=[15])
+        require(any("capsule inside the cell footprint" in problem.message
+                    for problem in problems),
+                f"a standing point outside its cell is rejected "
+                f"({[str(problem) for problem in problems]})")
+
+        low_room = copy.deepcopy(base)
+        row(low_room, "cells", "L0_FOYER")["yOverride"] = [0.6, 2.1]
+        low_room["zones"] = fixture_zones(low_room)
+        low_dir = workspace / "standing-point-low-room"
+        write_fixture(low_dir, low_room)
+        _, problems = validate(low_dir, wanted=[15])
+        require(any("no standing capsule headroom" in problem.message
+                    for problem in problems),
+                f"a standing posture under a low ceiling is rejected "
+                f"({[str(problem) for problem in problems]})")
+        low_room["zones"]["zones"][0]["cells"][0]["standingPosture"] = "crouched"
+        crouched_dir = workspace / "standing-point-low-room-crouched"
+        write_fixture(crouched_dir, low_room)
+        _, problems = validate(crouched_dir, wanted=[15])
+        require(not problems,
+                f"the same low room accepts its explicit crouched posture "
+                f"({[str(problem) for problem in problems]})")
+
+        require(sorted({rule for rule, _, _ in mutations}) == list(range(1, 16)),
+                "there is a mutation for each of the fifteen rules")
 
         for rule, description, mutate in mutations:
             docs = copy.deepcopy(base)
             mutate(docs)
             broken = workspace / f"broken-{rule}"
             write_fixture(broken, docs)
-            shape, problems = validate(broken)
+            # Rule 15 deliberately consumes collision generated from otherwise-valid world data.
+            # Preserve the original cross-rule isolation test for rules 1..14, but do not ask the
+            # collision-backed rule to interpret a mutation already owned by one of those rules.
+            wanted = [15] if rule == 15 else list(range(1, 15))
+            shape, problems = validate(broken, wanted=wanted)
             hit = sorted({problem.rule for problem in problems})
             require(not shape, f"rule {rule}: {description} is a SEMANTIC error, not a shape one")
             require(hit == [rule],
@@ -4017,7 +4458,7 @@ def selftest() -> int:
         row(docs, "props", "PROP_WC1_PAN")["asset"] = "MODEL_MISSING"
         many = workspace / "broken-many"
         write_fixture(many, docs)
-        _, problems = validate(many)
+        _, problems = validate(many, wanted=list(range(1, 15)))
         require(sorted({p.rule for p in problems}) == [6, 8, 10],
                 f"three unrelated mistakes are all reported in one run "
                 f"({sorted({p.rule for p in problems})})")
@@ -4034,7 +4475,7 @@ def selftest() -> int:
         stream = io.StringIO()
         code = report(broken, stream=stream)
         require(code == 1 and "did not run" in stream.getvalue(),
-                "and the report says the rules did not run, instead of printing fourteen oks")
+                "and the report says the rules did not run, instead of printing fifteen oks")
 
         # 7. --rules runs what it is asked for and nothing else.
         docs = copy.deepcopy(base)

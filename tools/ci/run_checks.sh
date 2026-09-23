@@ -89,7 +89,7 @@ check_format()
     clang-format --dry-run -Werror "${files[@]}"
 }
 
-# `HOUSE-00363`. The twelve rules of §15.7 over the authored layout. Skipped, loudly, until
+# `HOUSE-00363`. The fifteen rules of §15.7 over the authored layout. Skipped, loudly, until
 # `HOUSE-00366` writes the first world file -- a gate over nothing must say so rather than print
 # a green line that means "there was nothing to check". Unlike the rest of this script it needs
 # `jsonschema`, so a checkout without it is told, not quietly passed.
@@ -243,7 +243,7 @@ run_gate "content-graph" python3 tools/ci/build_content.py --selftest
 # editor and `validate_world.py` read, and a stale copy of it is worse than none.
 run_gate "world-schema" python3 tools/world/world_schema.py --check
 run_gate "world-rules" check_world
-# `HOUSE-01707`. The validator's synthetic world is the mutation suite for all thirteen semantic
+# `HOUSE-01707`. The validator's synthetic world is the mutation suite for all fifteen semantic
 # rules. A schema change once made that fixture invalid, silently preventing every mutation from
 # reaching the rules; running it here keeps the test of the gate as current as the gate itself.
 run_gate "world-rules-selftest" python3 tools/world/validate_world.py --selftest
@@ -304,7 +304,7 @@ run_gate "shell-manifest" python3 tools/blender/house_shell_gen.py --check-manif
 run_gate "shell-materials" python3 tools/blender/house_shell_gen.py --check-materials
 # `HOUSE-00399`. An id is the only durable name anything has, and a save file is a list of them
 # (§68). Renaming a room leaves the layout internally consistent and every save broken, so none of
-# §15.7's twelve rules can see it. This gate can: the golden list is append-only, and an id that
+# §15.7's fifteen rules can see it. This gate can: the golden list is append-only, and an id that
 # leaves it fails until a person deletes the line and says why.
 run_gate "world-ids" python3 tools/world/id_golden.py --check
 # `HOUSE-01532`. §35.1's calendar is checked against 500 conversions Python computed, and the value

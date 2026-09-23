@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import collections
 import json
+import math
 import re
 import sys
 from pathlib import Path
@@ -36,10 +37,37 @@ HERO_AREAS = {"H1", "H2", "H3", "H5", "H6"}
 HERO_CELLS = 11
 MAIN_CELLS = 12
 ZONE_ID = re.compile(r"^Z-[A-Z0-9]+$")
+EXPECTED_EXCLUSIONS = {
+    "EXT_WORLD", "EXT_NORTHSTRIP", "L2_BALCONY_JULIET",
+    "CELL_FRIDGE_INTERIOR", "CELL_FREEZER_INTERIOR",
+}
 
 
 class ZoneError(Exception):
     """The zone manifest is malformed or disagrees with the authored world."""
+
+
+def _accessibility_problems(row: dict, where: str) -> list[str]:
+    """Validate the manifest half of HOUSE-03225; collision is validate_world rule 15."""
+    accessible = row.get("accessible")
+    if not isinstance(accessible, bool):
+        return [f"{where}: accessible must be true or false"]
+    point = row.get("standingPoint")
+    posture = row.get("standingPosture", "standing")
+    if accessible:
+        if (not isinstance(point, list) or len(point) != 3
+                or any(isinstance(value, bool) or not isinstance(value, (int, float))
+                       or not math.isfinite(value) for value in point)):
+            return [f"{where}: an accessible cell needs a finite [x, y, z] standingPoint"]
+        if posture not in ("standing", "crouched"):
+            return [f"{where}: standingPosture must be standing or crouched"]
+        return []
+    found = []
+    if not isinstance(row.get("reason"), str) or not row["reason"].strip():
+        found.append(f"{where}: a non-accessible cell needs a non-empty reason")
+    if "standingPoint" in row or "standingPosture" in row:
+        found.append(f"{where}: a non-accessible cell must not have a standing point")
+    return found
 
 
 def load_zones(path: Path) -> dict:
@@ -78,6 +106,7 @@ def problems(document: dict, source_cells: set[str]) -> list[str]:
     zone_ids: set[str] = set()
     hero_cells = 0
     main_cells = 0
+    excluded: set[str] = set()
 
     if len(zones) != 11:
         found.append(f"zones has {len(zones)} entries; the plan defines 11")
@@ -113,14 +142,13 @@ def problems(document: dict, source_cells: set[str]) -> list[str]:
             assignments[cell_id].append(zone_id)
             accessible = row.get("accessible")
             tier = row.get("tier")
-            if not isinstance(accessible, bool):
-                found.append(f"{zone_id}/{cell_id}: accessible must be true or false")
+            found.extend(_accessibility_problems(row, f"{zone_id}/{cell_id}"))
+            if accessible is False:
+                excluded.add(cell_id)
             if tier not in TIERS and tier is not None:
                 found.append(f"{zone_id}/{cell_id}: tier must be H, M, S, U, or null")
             if accessible and tier not in TIERS:
                 found.append(f"{zone_id}/{cell_id}: an accessible cell needs a quality tier")
-            if not accessible and not isinstance(row.get("reason"), str):
-                found.append(f"{zone_id}/{cell_id}: a non-accessible cell needs a reason")
             hero = row.get("heroArea")
             if tier == "H":
                 hero_cells += 1
@@ -152,12 +180,12 @@ def problems(document: dict, source_cells: set[str]) -> list[str]:
             found.append(f"{where}.id must be a string")
             continue
         assignments[cell_id].append("none")
+        excluded.add(cell_id)
+        found.extend(_accessibility_problems(row, f"none/{cell_id}"))
         if row.get("accessible") is not False:
             found.append(f"none/{cell_id}: accessible must be false")
         if row.get("tier") is not None:
             found.append(f"none/{cell_id}: tier must be null")
-        if not isinstance(row.get("reason"), str) or not row["reason"].strip():
-            found.append(f"none/{cell_id}: reason must be a non-empty string")
 
     for cell_id in sorted(source_cells | set(assignments)):
         places = assignments.get(cell_id, [])
@@ -171,6 +199,10 @@ def problems(document: dict, source_cells: set[str]) -> list[str]:
     for pose, owners in sorted(poses.items()):
         if len(owners) > 1:
             found.append(f"review pose {pose!r} is assigned more than once: {', '.join(owners)}")
+    if excluded != EXPECTED_EXCLUSIONS:
+        found.append("accessibility exclusions must be exactly "
+                     f"{', '.join(sorted(EXPECTED_EXCLUSIONS))}; got "
+                     f"{', '.join(sorted(excluded))}")
     if hero_cells != HERO_CELLS:
         found.append(f"manifest has {hero_cells} tier-H cells; the approved plan defines {HERO_CELLS}")
     if main_cells != MAIN_CELLS:

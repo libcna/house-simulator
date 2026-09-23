@@ -2049,7 +2049,7 @@ def build_grid(bounds, shape_aabbs):
 # ========================================================================================== build
 
 
-def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
+def build(world_dir: Path, manifest_path: Path | None = None, *, include_props: bool = True) -> dict:
     """Read the layout, generate every shape, and return the world ready to be written."""
     layout = layout_io.load_layout(world_dir, ["levels", "cells", "portals"])
     # `exterior` joins them for `HOUSE-00774`: §11.2's fences, §11.4's kerbs and cars, §11.1's
@@ -2083,7 +2083,8 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
     build_stairwell_guards(layout, shapes, per_cell, stats)
     build_rafters(layout, shapes, per_cell, stats)
     build_mezzanine_guards(layout, shapes, per_cell, stats)
-    build_props(layout, shapes, per_cell, asset_paths, stats)
+    if include_props:
+        build_props(layout, shapes, per_cell, asset_paths, stats)
     build_posed_leaves(layout, shapes, per_cell, stats, world_dir)
     build_exterior(layout, shapes, per_cell, stats, world_dir)
 

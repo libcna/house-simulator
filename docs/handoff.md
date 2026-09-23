@@ -1,3 +1,33 @@
+# World handoff — 2026-09-23 (`HOUSE-03225` accessibility manifest)
+
+`HOUSE-03225` is complete. `docs/zones.json` now gives all 91 intended-accessible cells a concrete
+feet position on the real static collision; `B1_UNDERSTAIR`, `L0_STAIR_MAIN` and
+`L0_GARAGE_LOFT` explicitly select the crouched controller, while the other 88 select standing.
+The excluded set is exactly `EXT_WORLD`, `EXT_NORTHSTRIP`, `L2_BALCONY_JULIET`,
+`CELL_FRIDGE_INTERIOR` and `CELL_FREEZER_INTERIOR`, each with its retained reason.
+
+World-validator rule 15 rebuilds production collision including placed-prop proxies and terrain.
+For each point it proves the 0.31 m-radius capsule remains in the cell footprint, the feet are
+within 1 cm of a walkable floor/stair/terrain surface under the controller's slope limit, and the
+selected 1.80 m standing or 1.25 m crouched capsule has clearance. Supporting stair triangles are
+treated as grounded contact rather than an overhead obstacle, while every other collision shape
+still participates. The zone-scoreboard gate also rejects missing/malformed points, postures,
+reasons and any change to the five exclusions. Focused selftests cover missing and out-of-cell
+points plus the standing-versus-crouched headroom distinction.
+
+Rule that chose this task: M1 dependency order and R1/G1. The house-wide accessibility contract is
+the remaining prerequisite for the grand tour and advances every zone equally without starting
+ground-floor polish. Next is the independent G1 repair `HOUSE-03228`, then `HOUSE-03226` can consume
+these points for the controller-driven grand tour.
+
+Validation: the configured build and all 1,418 unit tests pass. All fifteen authored-world rules,
+the validator mutation suite, collision-builder selftest and zone-scoreboard gate pass. The full
+static suite passes every substantive gate, including 324 strict-XNA translation units, but exits
+nonzero on the pre-existing ignored `.claude` root directory reported by `check_layout.py`; this
+task neither touched nor staged it. No runtime code or content asset changed.
+
+---
+
 # Planning handoff — 2026-09-22 (`HOUSE-03206` final scope reduction)
 
 `HOUSE-03206` is complete. It is the **third and final proactive scope reduction**

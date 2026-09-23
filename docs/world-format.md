@@ -946,6 +946,25 @@ The fresh-world `rngState` is a single 64-bit seed (16 hexadecimal digits), expa
 SplitMix64 into xoshiro256++'s four-word state. Saves carry the expanded 64-digit state instead;
 conflating the two would make the first save/load change the future sequence.
 
+## `docs/zones.json`
+
+The zone manifest is the complete planning and traversal ledger for authored cells. Every source
+cell appears exactly once. An accessible row has a `standingPoint: [x, y, z]`, expressed as the
+player capsule's feet in world metres, and may set `standingPosture` to `"crouched"`; omitting the
+posture means `"standing"`. A non-accessible row has a non-empty `reason` and has neither standing
+field.
+
+The only excluded cells are `EXT_WORLD`, `EXT_NORTHSTRIP`, `L2_BALCONY_JULIET`,
+`CELL_FRIDGE_INTERIOR`, and `CELL_FREEZER_INTERIOR`. The first two are scenery outside the fenced
+traversal area, the third is facade architecture, and the last two are nested appliance interiors
+whose interaction gameplay is outside the showcase scope.
+
+Validator rule 15 rebuilds the same static collision used by the runtime. It proves that every
+point keeps the 0.31 m-radius player capsule inside its cell footprint, lies within 1 cm of a
+walkable floor, stair or terrain surface no steeper than the controller's 46-degree limit, and has
+clearance for the selected 1.80 m standing or 1.25 m crouched capsule. This is a physical contract,
+not merely a list consumed by the grand-tour test.
+
 ## `assets.manifest.json`
 
 The asset manifest ([ADR-0012](decisions/ADR-0012-asset-licensing.md)). One row per file under
@@ -966,7 +985,7 @@ the `schema` header rule are one definition rather than sixteen that can quietly
 `world_schema.py --check` is a CI gate; regenerate with `--emit` after changing a shape here.
 
 The schemas check **shape**: presence, type, range, and that an id looks like an id, each problem
-reported against the field that carries it. They deliberately do **not** check the fourteen rules
+reported against the field that carries it. They deliberately do **not** check the fifteen rules
 below. Rules 4, 5, 6, 7, 9 and 11 span two files or the whole layout, and JSON Schema cannot see
 across a file boundary; rules 2, 3, 8 and 10 compare two numbers to each other, which it also
 cannot do. A schema that attempted them would be a second, weaker validator — so a portal naming a
@@ -975,9 +994,9 @@ the validator.
 
 ## Validation
 
-`tools/world/validate_world.py`, mirrored by a C++ validator the unit tests use, enforces twelve
-rules (`cna-house.md` §15.7) on top of the schemas above. It runs in CI and as a pre-build step, and a failure **fails the
-build**:
+`tools/world/validate_world.py`, mirrored in part by a C++ validator the unit tests use, enforces
+fifteen rules (`cna-house.md` §15.7) on top of the schemas above. It runs in CI and as a pre-build
+step, and a failure **fails the build**:
 
 1. every id is unique and matches `^[A-Z][A-Z0-9_]*$`;
 2. every cell box is non-degenerate and inside its level's envelope;
@@ -1016,6 +1035,12 @@ build**:
     compared them, which is how a garden path came to run three metres through the shed. A
     centimetre of overlap is the tolerance, so a lean-to against a wall and a path that stops at a
     threshold are both still legal.
+13. every downspout is at its declared roof corner and its splash point is directly below on the
+    authored terrain height field;
+14. every leaf and gate has a valid static pose, every intended-accessible route retains at least
+    0.70 m clearance, and a hinged leaf's swept arc hits neither wall nor placed prop;
+15. `docs/zones.json` assigns every cell once, keeps exactly the five documented exclusions, and
+    gives every accessible cell a collision-proven standing or explicitly crouched point.
 
 Error messages name the file, the JSON path and what was expected, and the validator reports
 **every** failing row rather than the first: fixing 40 authoring mistakes one build at a time is

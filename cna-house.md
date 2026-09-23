@@ -1833,6 +1833,17 @@ surprise. This keeps the data declarative without inventing a VM.
     `HOUSE-00776`). The pipes have been drawn since `HOUSE-00468` and nothing outside the shell
     knew they existed; §37.3's splashes and §37.4's trickle emitter both need to know where the
     water lands, and neither can read a Blender mesh.
+14. **every movable leaf has a safe authored static pose**: leafed portals and gates declare an
+    open fraction, intended-accessible routes retain at least 0.70 m of clearance, and a hinged
+    leaf's complete swept arc remains inside its swing cell without meeting a wall or placed prop
+    (added 2026-09-22 by `HOUSE-03224`). The showcase does not animate interaction gameplay, so
+    the authored pose is both what collision exposes and what the shell draws.
+15. **every intended-accessible cell has a physically valid arrival point**: `docs/zones.json`
+    assigns all source cells exactly once, excludes exactly the two scenery cells, the Juliet
+    balcony and the two appliance interiors with reasons, and gives every other cell a feet
+    position on walkable floor, stair or terrain collision. The 0.31 m-radius capsule remains in
+    the cell footprint and has headroom for the row's standing or explicitly crouched posture
+    (added 2026-09-23 by `HOUSE-03225`).
 
 Validation runs in CI and as a pre-build step. A failure fails the build.
 
@@ -6907,7 +6918,7 @@ images.
 | No booleans for continuous weather | the same script | A member matching `is(Raining|Snowing|Windy|Stormy)` appears |
 | Manifest completeness | `check_manifest.py` | A file under `assets-src/` has no manifest row, or a hash mismatches |
 | Licence completeness | `verify_licences.py` | A manifest row lacks a licence, or references a licence file that does not exist, or is marked `PROVENANCE UNKNOWN` in a packaging build |
-| World validity | `validate_world.py` + the C++ validator | Any of the 11 rules in §15.7 |
+| World validity | `validate_world.py` + the C++ validator | Any of the 15 rules in §15.7 |
 | Content freshness | `make content-verify` | A rebuild produces different bytes |
 | Compiler | `-Wall -Wextra -Wpedantic -Werror` | Any warning |
 | Sanitizers | `build-asan`, `build-ubsan` in CI | Any report |
@@ -6934,7 +6945,7 @@ The golden list is [`tests/unit/reference/world-ids.golden.txt`](tests/unit/refe
 2 152 ids over 27 kinds, maintained by `tools/world/id_golden.py` and gated as `world-ids`
 (`HOUSE-00399`). It is **append-only**: `--emit` records ids the world has gained and never deletes
 one, so a rename shows up as an id that left the world and keeps failing until a person removes the
-line and says why. Nothing in §15.7's thirteen rules can see a rename — the layout is internally
+line and says why. Nothing in §15.7's fifteen rules can see a rename — the layout is internally
 consistent under either name — and a save file is a list of ids (§68), so this is the only gate
 that stands between a tidy-up and every save ever written.
 
