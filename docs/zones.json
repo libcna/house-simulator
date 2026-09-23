@@ -109,7 +109,7 @@
         {"id": "L1_BED2", "accessible": true, "standingPoint": [5.45, 3.65, -25.0], "tier": "S"},
         {"id": "L1_BED3", "accessible": true, "standingPoint": [-10.45, 3.65, -16.3], "tier": "S"},
         {"id": "L1_BED4", "accessible": true, "standingPoint": [-5.2, 3.65, -16.3], "tier": "S"},
-        {"id": "L1_BED5", "accessible": true, "standingPoint": [6.8, 3.65, -16.3], "tier": "S"},
+        {"id": "L1_BED5", "accessible": true, "standingPoint": [8.05, 3.65, -14.90], "tier": "S"},
         {"id": "L1_BATH2", "accessible": true, "standingPoint": [-11.2, 3.65, -20.15], "tier": "S"},
         {"id": "L1_BATH3", "accessible": true, "standingPoint": [6.8, 3.65, -20.15], "tier": "S"},
         {"id": "L1_WC3", "accessible": true, "standingPoint": [-5.7, 3.65, -21.3], "tier": "S"},

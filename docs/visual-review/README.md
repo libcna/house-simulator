@@ -4814,3 +4814,23 @@ defect is visible. The normal clear-day hall is still dim; final baseline readab
 
 Rule R2 now selects `Z-L1`, with fourteen accessible cells still below target versus twelve each
 in `Z-B1` and `Z-L2`. Next: `HOUSE-01002`, furnishing `L1_BED2` and `L1_BED5`.
+
+## Round 118 — first-floor double-bedroom dressing
+
+Commit: `HOUSE-01002` working tree (`2026-09-24`). The local, Git-ignored
+[`clear-day`](captures/house-01002-l1-double-day) set covers all six fixed `Z-L1` views.
+Together with the fixed bedroom frame, supplemental forced-light
+[`detail`](captures/house-01002-l1-double-detail) views inspect the opposite side of the
+`L1_BED2` bed group and the compact `L1_BED5` composition reciprocally; these are placement
+evidence, not a claim that M5's normal day/night balance is complete.
+
+Both secondary rooms reuse the same bounded `R-BED-DOUBLE` recipe: one acquired double bed and the
+generated nightstand, wardrobe and dresser. `L1_BED2` uses its wider west bay for the bed group and
+the east wall for both carcasses. In `L1_BED5`, the bed remains central, the carcasses occupy the
+short west segments and the 0.75-scale dresser preserves the east-side route between both doors.
+The fixed view and reciprocal details show all pieces grounded, separated from one another and
+clear of windows, leaves and trim. No clipping, floating geometry, z-fighting, blocked route or
+other S1/S2 furnishing defect is visible. The dark normal daytime interiors remain M5 work.
+
+Rule R2 now ties `Z-L1`, `Z-L2` and `Z-B1` at twelve accessible cells still below target. The
+least-recently worked zone is `Z-L2`, so the next task is `HOUSE-01010`, furnishing `L2_LIBRARY`.

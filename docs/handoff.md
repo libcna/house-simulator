@@ -1,3 +1,33 @@
+# L1 double-bedroom dressing handoff — 2026-09-24 (`HOUSE-01002`)
+
+The cumulative secondary `R-BED-DOUBLE` recipe is complete in `L1_BED2` and `L1_BED5`. Each room
+reuses the acquired double bed and the generated nightstand, wardrobe and dresser. The wider
+bedroom puts its bed group in the west bay and both carcasses against the east wall. The compact
+guest room keeps the bed central, places its storage on the west segments and scales the dresser
+to 0.75, leaving a clear east-side route between the stair and bathroom portals. These eight
+ordinary static rows retain existing proxies and introduce no asset, material family, subsystem
+or optional dressing.
+
+All 180 production prop rows pass exact support, overlap, opening, door-sweep and 0.70 m route
+validation. The 90-cell grand tour passes. The wider inside-geometry probe has no bedroom failure;
+its sole failure remains the older `L1_LANDING west` start beside `HOUSE-00999`'s bench. Both rooms
+build at their measured 15-chunk ceilings with no Reach split.
+
+The clear-day `Z-L1` set and reciprocal forced-light details were inspected at full resolution.
+Both room purposes read clearly, every piece is grounded, the two guest-room portals and the wider
+bedroom's windows remain clear, and no clipping, floating geometry, z-fighting or new S1/S2 defect
+is visible. Normal daytime interiors remain dark, which is the already-scheduled M5 baseline-
+lighting scope.
+
+The remaining forecast is 175.75 realistic / 214.25 pessimistic hours. With 50.5 task-hours spent
+since the final reduction, the R14 projection is 264.75 h, 15.25 h below the hard limit. Rule R2
+now ties `Z-L1`, `Z-L2` and `Z-B1` at twelve accessible cells still below target and selects the
+least-recently worked `Z-L2`. The exact next unblocked MUST task is `HOUSE-01010`, furnishing
+`L2_LIBRARY`. All compilation must use at most four workers and be pinned to CPUs 4,5,7,9;
+strict-XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Basement circulation dressing handoff — 2026-09-24 (`HOUSE-01020`)
 
 The cumulative secondary/utility recipes are complete in `B1_HALL`, `B1_STAIR` and

@@ -455,6 +455,16 @@ CHUNK_BUDGET_EXCEPTIONS["L1_BED2"] = (
     _bed2_limit + 1,
     _bed2_reason + "; HOUSE-02681 adds one tintable static-blind material role")
 
+# `HOUSE-01002` reuses one four-piece secondary-bedroom recipe in both double bedrooms.  The bed
+# and three generated carcasses add seven canonical finish groups after batching against each
+# room's existing shell/window roles; the measured result is the same in both rooms.
+for bedroom_cell in ("L1_BED2", "L1_BED5"):
+    previous_limit, previous_reason = CHUNK_BUDGET_EXCEPTIONS[bedroom_cell]
+    CHUNK_BUDGET_EXCEPTIONS[bedroom_cell] = (
+        previous_limit + 7,
+        previous_reason + "; HOUSE-01002 adds seven measured shared double-bed/carcass finish "
+                          "groups; no vertex or Reach-cap split")
+
 # `HOUSE-00999`: the first upper-floor circulation recipe deliberately reuses the established
 # runner, framed-art and piano-bench assets without flattening their physically distinct finishes.
 # These are the exact post-build counts: the two halls each add the runner's two wool roles and
