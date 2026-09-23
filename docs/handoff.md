@@ -1,3 +1,33 @@
+# Second-upper-floor C2 handoff — 2026-09-23 (`HOUSE-03264`)
+
+`Z-L2` is C2 across its 15 accessible cells. The existing shell supplies distinct authored
+library, games, sitting, bedroom, bathroom, closet and corridor palettes plus generated window
+reveals, sills and continuous interior trim. The existing landing-to-Juliet double door already
+has the finished paired joinery. This task reused `HOUSE-00942`'s established four-panel/two-sided
+steel-lever treatment on all seven single leaves facing `L2_LANDING`, `L2_HALL` or `L2_HALL_W`.
+The library's shelving correctly remains M4 furnishing scope.
+
+Round 106 inspected matching six-view before/after clear-day captures and an after set with the
+L2 main light groups forced on. The fixed landing/hall views changed 31,573 / 12,323 pixels and
+the affected room controls 1,001–1,570; the sitting-room control remained identical. The lit
+contact sheet resolves the panel profiles, lock-side levers, room palettes and existing Juliet
+pair. World/schema validation, deterministic shell generation, the manifest/material checks,
+shell unwrap, the chunk selftest/build and content-current check pass. The camera tour,
+inside-geometry route and 90-cell controller grand tour pass; the latter took 10.43 s.
+
+The generated world is 754 chunks over 96 cells, seven more than `HOUSE-03263`, one per newly
+detailed owner leaf. `L2_BATH4` and the already-complex `L2_LANDING` each required one measured
+chunk-ceiling increment; the other five owner cells remain within their established ceilings.
+Furnishing and final night readability remain assigned to M4/M5 rather than being pulled into C2.
+
+The remaining forecast is 211.75 realistic / 253.8 pessimistic hours. With 14.5 task-hours
+completed since the final reduction, the R14 ceiling projection is 268.3 h, 11.7 h below the hard
+limit. Rule that chooses the next task: R1 keeps work in C2 breadth and R2 selects `Z-B1`, whose
+14 accessible cells are the greatest remaining count below target. The exact next unblocked MUST
+is `HOUSE-03261`; `Z-L0M` remains frozen by R4.
+
+---
+
 # First-upper-floor C2 handoff — 2026-09-23 (`HOUSE-03263`)
 
 `Z-L1` is C2 across all 20 cells. The existing shell already supplied distinct authored bedroom,

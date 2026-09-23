@@ -360,6 +360,15 @@ CHUNK_BUDGET_EXCEPTIONS["L1_BATH2"] = (
     _bath2_limit + 1,
     _bath2_reason + "; HOUSE-03263 adds the shared steel hall-door hardware role")
 
+# `HOUSE-03264` applies the same existing joinery to L2. The windowed shared bathroom and the
+# landing that already owns the finished Juliet pair are the only cells that rise past their
+# prior measured ceilings; the five other owner cells remain within the global target.
+for second_floor_cell in ("L2_BATH4", "L2_LANDING"):
+    previous_limit, previous_reason = CHUNK_BUDGET_EXCEPTIONS[second_floor_cell]
+    CHUNK_BUDGET_EXCEPTIONS[second_floor_cell] = (
+        previous_limit + 1,
+        previous_reason + "; HOUSE-03264 adds the shared steel circulation-door hardware role")
+
 # HOUSE-01069 is a measured room-wide furnishing/lighting step, not a generic budget increase.
 # The new walnut/brass cabinet shares both established dining roles. Its ceramic serving set is
 # one new finish, and the two sideboard lamps' exact independently switched shade group needs

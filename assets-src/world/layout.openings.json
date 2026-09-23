@@ -220,6 +220,7 @@
       "hinge": "left", "swing": "L2_LANDING", "maxAngleDeg": 95.0, "openFraction": 0.90,
       "frame": { "asset": null, "casing": 0.070 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
+      "joineryStyle": "four_panel", "hardwareMaterial": "MAT_KITCHEN_HARDWARE_STEEL",
       "solid": false, "lockable": false
     },
     {
@@ -229,6 +230,7 @@
       "hinge": "right", "swing": "L2_CLOSET_4", "maxAngleDeg": 95.0, "openFraction": 0.90,
       "frame": { "asset": null, "casing": 0.070 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
+      "joineryStyle": "four_panel", "hardwareMaterial": "MAT_KITCHEN_HARDWARE_STEEL",
       "solid": false, "lockable": false
     },
     {
@@ -238,6 +240,7 @@
       "hinge": "left", "swing": "L2_LINEN2", "maxAngleDeg": 95.0, "openFraction": 0.90,
       "frame": { "asset": null, "casing": 0.070 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
+      "joineryStyle": "four_panel", "hardwareMaterial": "MAT_KITCHEN_HARDWARE_STEEL",
       "solid": false, "lockable": false
     },
     {
@@ -247,6 +250,7 @@
       "hinge": "left", "swing": "L2_HALL", "maxAngleDeg": 95.0, "openFraction": 0.90,
       "frame": { "asset": null, "casing": 0.070 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
+      "joineryStyle": "four_panel", "hardwareMaterial": "MAT_KITCHEN_HARDWARE_STEEL",
       "solid": false, "lockable": false
     },
     {
@@ -445,6 +449,7 @@
       "hinge": "left", "swing": "L2_BATH4", "maxAngleDeg": 95.0, "openFraction": 0.90,
       "frame": { "asset": null, "casing": 0.070 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
+      "joineryStyle": "four_panel", "hardwareMaterial": "MAT_KITCHEN_HARDWARE_STEEL",
       "solid": false, "lockable": true
     },
     {
@@ -454,6 +459,7 @@
       "hinge": "left", "swing": "L2_WC5", "maxAngleDeg": 95.0, "openFraction": 0.90,
       "frame": { "asset": null, "casing": 0.070 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
+      "joineryStyle": "four_panel", "hardwareMaterial": "MAT_KITCHEN_HARDWARE_STEEL",
       "solid": false, "lockable": true
     },
     {
@@ -472,6 +478,7 @@
       "hinge": "left", "swing": "L2_WC6", "maxAngleDeg": 95.0, "openFraction": 0.90,
       "frame": { "asset": null, "casing": 0.070 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
+      "joineryStyle": "four_panel", "hardwareMaterial": "MAT_KITCHEN_HARDWARE_STEEL",
       "solid": false, "lockable": true
     },
     {

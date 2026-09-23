@@ -4542,3 +4542,24 @@ the bedroom, bathroom, closet and corridor material distinctions. Both balconies
 and match the established front-balcony language. No S1/S2 architecture issue remains in `Z-L1`;
 empty-room furnishing and dark unlit circulation are still the already-scheduled M4/M5 work.
 Next: `HOUSE-03264`, selected by R1/R2 because `Z-L2` has the most accessible cells still at C1.
+
+## Round 106 — second upper floor at C2
+
+Commit: `HOUSE-03264` working tree (`2026-09-23`). Before: the six fixed production views in the
+local, Git-ignored [`clear-day`](captures/house-03264-before) set. After: the matching
+[`clear-day`](captures/house-03264-after) and
+[`lights-forced`](captures/house-03264-after-lit) sets. Both contact sheets and the affected
+full-size frames were inspected; the forced main groups expose architecture for review without
+claiming the M5 day/night-lighting requirement.
+
+The existing L2 envelope already carries distinct room-family palettes and the shared physical
+window reveal, sill, skirting, cornice and casing grammar. Its Juliet pair also retains the
+finished double-door treatment. All seven single leaves facing the landing or either hall now
+explicitly reuse `HOUSE-00942`'s four-panel moulding and two-sided lock-stile steel lever. The
+fixed landing and hall frames change 31,573 and 12,323 pixels; library, games and bedroom controls
+change 1,001–1,570 pixels, while the unaffected sitting-room frame is byte-identical.
+
+The lit sheet makes the joinery and library/games/sitting/bedroom palette distinctions legible at
+normal eye height. No S1/S2 architecture issue remains in `Z-L2`. Library shelving, other
+furnishing and dark unlit circulation remain deliberately assigned to M4/M5. Next:
+`HOUSE-03261`, selected by R1/R2 because `Z-B1` now has the most accessible cells still at C1.
