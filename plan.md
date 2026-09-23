@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **138 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 170 / 200 / 241 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G2 passed.** Next: define the bounded room recipes and kit catalogue in `HOUSE-03302` |
+| Active plan | **137 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 169 / 199 / 240 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G2 passed.** Next: enforce believable static placement in `HOUSE-03303` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -632,11 +632,12 @@ second reduction capped them at 62 and 6.
       note: `HOUSE-01074` had to shift two sunroom pet waypoints to place two chairs. That cost now buys nothing
       note: (2026-09-23) Rule 5 in both offline and runtime validators now proves only player portal-graph connectivity; it no longer fails a valid walkthrough because retained pet nodes form disconnected components. The dedicated furniture-aware pet-navigation selftest is no longer a repository gate. A regression fixture places a chair directly over an isolated historical node and passes validation. `layout.nav.json`, its intrinsic reference checks, `build_nav.py`, loader support and `nav.bin` remain intact as frozen cleanup candidates; no pet system is revived
 
-- [ ] HOUSE-03302 — Room recipes and the kit catalogue
+- [x] HOUSE-03302 — Room recipes and the kit catalogue
       dep: HOUSE-03201 · sys: content · plat: TOOL · pri: MUST · zone: all · adv: D3, G3 · est: 1.5
       files: docs/furnishing-kit.md
       accept: (1) one recipe per room type in the house (bedroom by variant, bathroom, WC, closet and store, study, library, games and sitting room, mudroom, laundry, pantry, garage and loft, basement hall, mechanical, electrical, utility, cinema, gym, workshop, wine cellar, hobby room, attic room, attic store, shed, stair landing, balcony), each **tiered**: utility lists only the essential pieces, secondary enough to read as the room, main the complete set, hero the complete set plus secondary dressing; (2) each recipe names its pieces from the kit table above, its typical dimensions and clearances, and its **lighting preset** (fixture type, light group, schedule class) so that M5 lights rooms by type, not one by one; (3) a catalogue of the existing reusable ground-floor pieces (`HOUSE-01037`–`01076`) and the recipes they serve; (4) the reuse policy of rule R8; (5) the needed count per acquisition group, within its cap
       verify: every accessible cell in `layout.cells.json` maps to a recipe
+      note: (2026-09-23) `docs/furnishing-kit.md` defines cumulative U/S/M/H recipes, measured placement envelopes and clearances, eight room-type lighting presets tied to the existing authored group roles, the reusable `HOUSE-01037`–`01076` catalogue, and an exhaustive map of all 90 intended-accessible cells. The recipes need 23 acquired models plus one ≤ 8-image art set: 3 appliances, 4 wet fixtures, 3 seating/table models, 2 beds, 2 lamps, 4 decorations and 5 clutter models; existing and generated families replace the nine unused catalogue slots. A data audit proves every `accessible: true` cell occurs exactly once and its tier matches `docs/zones.json`; the visible non-walkable garage loft separately receives its utility recipe
 
 - [ ] HOUSE-03303 — Placement validator for static props
       dep: HOUSE-03225 · sys: world · plat: TOOL · pri: MUST · zone: all · adv: D2, D3 · est: 2
@@ -1841,7 +1842,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 |---|---|---|---|---|---|---|---|
 | M1 Whole-property traversal | 4 | 9 | **0** | 0 | **0** | 0 | — |
 | M2 Architectural completion | 8 | 18 | **0** | 0 | **0** | 0 | — |
-| M3 The reusable furnishing kit | 16 | 33 | **13** | 16.15 | **19** | 20.9 | — |
+| M3 The reusable furnishing kit | 16 | 33 | **12** | 14.9 | **17.5** | 19.25 | — |
 | M4 Dressing everywhere | 40 | 48.75 | **31** | 26.25 | **31** | 37 | R-D +3 |
 | M5 Baseline lighting everywhere | 12 | 24.5 | **10** | 16.75 | **19.75** | 21.75 | — |
 | M6 Main cells and hero areas | 20 | 32.5 | **15** | 16.75 | **19.75** | 21.75 | — |
@@ -1855,12 +1856,12 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **138** | **170.15** | **200.25** | **241.15** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **137** | **168.9** | **198.75** | **239.5** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-38.85 h. Adding the 26 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-267.15 h, 12.85 h under the limit. That margin is
+40.5 h. Adding the 27.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+267 h, 13 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |

@@ -1,0 +1,289 @@
+# Furnishing kit and room recipes
+
+`HOUSE-03302` defines the bounded furnishing vocabulary used by M3--M6. It is a placement
+specification, not a request for unique assets. Objects are static visual dressing: doors and
+drawers stay closed, screens stay inert, and no recipe implies interaction or simulation.
+
+## Reuse and tier rules
+
+Rule R8 applies before every acquisition. Reuse a suitable existing ground-floor model first,
+then a generated family, and acquire a model only when neither can make the room recognisable.
+One model may be repeated without limit and varied by authored dimensions, tint, physically
+reasonable scale, yaw, arrangement, and small accessory swaps. There is no uniqueness or density
+quota. Stop as soon as the room reads correctly during ordinary exploration.
+
+Every recipe has the same cumulative tier interpretation:
+
+| Tier | Recipe depth |
+|---|---|
+| **U -- utility** | The `U` column only: essential equipment or storage, with a clear route. |
+| **S -- secondary** | `U + S`: enough primary furniture and fixtures to identify the room. |
+| **M -- main** | `U + S + M`: a complete composition, including the principal secondary pieces. |
+| **H -- hero** | `U + S + M + H`: the complete set plus restrained secondary dressing and signs of habitation. At most one bespoke piece is allowed by the area's C5 task. |
+
+The following shorthand is used in the recipes:
+
+- `E:*` is an existing reusable model catalogued below.
+- `G:carcass`, `G:shelf`, `G:box`, `G:worktop`, `G:service-run`, `G:mirror`,
+  `G:towel-rail`, `G:screen`, and `G:projector` are `HOUSE-00985` families.
+- `G:books`, `G:textiles`, `G:crockery`, and `G:tools` are the four `HOUSE-00973` fill kits.
+- `G:curtain`, `G:blind`, and `G:rug` are the generated window-treatment and rug families.
+- `A:*` is one of the explicitly needed acquired models in the acquisition table below.
+
+## Placement dimensions and clearances
+
+Dimensions are typical planning envelopes in metres (`width x depth`; height is included only
+where it matters). Generated families adapt to the room but must remain plausible. The placement
+validator owns the final geometric proof.
+
+| Code | Typical envelope | Required clear space |
+|---|---|---|
+| `D-bed` | double `1.6 x 2.1`, single `0.95 x 2.0` | `0.60` at an occupied side and `0.75` at the foot |
+| `D-seat` | chair `0.75 x 0.80`, sofa `2.0 x 0.9` | `0.45` to a table; do not narrow the `0.70` route |
+| `D-desk` | `1.2 x 0.60`; chair pull-out `0.60 x 0.60` | `0.90` behind the chair |
+| `D-table` | dining `1.8 x 0.9`, side `0.55 x 0.55`, pool `2.2 x 1.25` | dining `0.90`; pool `1.20` where the cue is used visually |
+| `D-store` | carcass/shelf `0.45--1.2 x 0.35--0.60` | `0.80` clear in front |
+| `D-work` | worktop/bench `1.2--2.4 x 0.60` | `0.90` clear in front |
+| `D-appliance` | laundry `0.60 x 0.65`; freezer `1.0 x 0.65`; boiler `0.65 x 0.65` | `0.90` service face |
+| `D-wet` | toilet `0.40 x 0.70`; vanity `0.8 x 0.55`; bath `1.7 x 0.75`; shower `0.9 x 0.9` | toilet `0.60` front/`0.20` side; vanity `0.80`; bath/shower entry `0.70` |
+| `D-circ` | console/bench at most `0.45` deep | preserve a continuous `0.70` route and every door swing |
+| `D-window` | treatment fits the authored opening | keep `0.60` in front of glazing and do not alter portal opacity |
+| `D-service` | pipes/ducts/cables within a `0.30` wall or ceiling band | do not cross the standing route or opening volume |
+
+All recipes also keep the full authored door-swing arc clear. A window-front clearance may contain
+a low piece only when it does not block the opening, the fixed review view, or the circulation
+route.
+
+## Lighting presets
+
+These presets reuse the authored light groups in `layout.cells.json`; they do not introduce a
+second lighting system. `MAIN`, `TASK`, and `ACCENT` below mean the matching existing suffix for
+the cell (`DESK`, `BEDSIDE`, `VANITY`, `BENCH`, `TABLE`, `READING`, `SHELVES`, and similar are
+task/accent groups). `HOUSE-03401` implements the schedule classes and seeded group offsets.
+
+| Preset | Fixture type and group roles | Schedule class |
+|---|---|---|
+| `LP-LIVING` | warm ceiling/pendant on `MAIN`; table/floor/practical on existing accent groups | `SC-LIVING`: dusk to late evening |
+| `LP-BED` | warm ceiling on `MAIN`; bedside or desk lamp on `BEDSIDE`/`DESK`/equivalent | `SC-BED`: evening |
+| `LP-WET` | ceiling/downlight on `MAIN`; mirror light on `VANITY`, bath accent when authored | `SC-WET`: named evening interval |
+| `LP-TASK` | neutral ceiling on `MAIN`; desk, table, bench, shelf, or mirror practical on authored task group | `SC-TASK`: dusk to late evening |
+| `LP-CIRC` | ceiling/sconce/batten on `MAIN`; step, art, seat, or night group where authored | `SC-CIRC`: night |
+| `LP-SERVICE` | neutral bare batten/downlight on `MAIN`; task fitting only on an existing task group | `SC-OFF`: no automatic interval; utility rooms are reviewed by day |
+| `LP-CINEMA` | warm dimmable-look ceiling/sconce on `MAIN`; low aisle practical on `AISLE` | `SC-LIVING`: dusk to late evening |
+| `LP-GARAGE` | neutral fluorescent/LED battens on `MAIN`; opener practical where authored | `SC-CIRC`: night |
+| `LP-EXTERIOR` | existing lantern, bollard, flood, street, or shed group; otherwise nearby lantern/window spill | `SC-DUSK`: existing automatic dusk sensor |
+
+Bathrooms use the explicitly named `SC-WET` interval; closets and stores remain `SC-OFF`. This is
+the deliberate exception mechanism required by `HOUSE-03401`, not an assumption that every
+interior group burns all night.
+
+## Interior recipes
+
+Each row is cumulative from `U` through the cell's assigned tier. Codes in the clearance column
+refer to the table above.
+
+| Recipe | U -- essential | S -- recognisable | M -- complete | H -- secondary dressing | Clearances | Light |
+|---|---|---|---|---|---|---|
+| `R-BED-PRIMARY` | `A:double-bed`, two `G:nightstand` | `G:wardrobe`, `G:dresser`, `E:chair` | `G:rug`, desk/seat or small sitting pair, `G:curtain` | lamps, `A:plant`, framed art, vase/books | `D-bed`, `D-desk`, `D-window` | `LP-BED` |
+| `R-BED-DOUBLE` | `A:double-bed`, `G:nightstand` | `G:wardrobe`, `G:dresser` | desk and reused chair, `G:rug`, `G:curtain` | lamp, plant, framed art/books | `D-bed`, `D-desk`, `D-window` | `LP-BED` |
+| `R-BED-SINGLE` | `A:single-bed`, `G:nightstand` | `G:wardrobe`, desk and reused chair | `G:dresser`, `G:rug`, `G:curtain` | lamp, framed art, one restrained `A:bin` or `G:box` cluster | `D-bed`, `D-desk`, `D-window` | `LP-BED` |
+| `R-BATH` | `A:toilet`, `A:vanity-basin` | `A:bath` or `A:shower`, `G:mirror`, `G:towel-rail` | bath and shower where space allows, small `G:carcass`, `G:blind` | towels, plant/vase and framed art | `D-wet`, `D-window` | `LP-WET` |
+| `R-WC` | `A:toilet`, `A:vanity-basin` | `G:mirror`, `G:towel-rail` | narrow `G:carcass` or shelf | small framed art or vase | `D-wet` | `LP-WET` |
+| `R-CLOSET` | `G:wardrobe` or `G:shelf` | second carcass plus `G:textiles` | dresser/chest and mirror | suitcase, box and small lamp | `D-store`, `D-circ` | `LP-SERVICE` |
+| `R-STORE` | `G:shelf`, `G:box` | second shelf and varied boxes | relevant fill kit and chest | labelled-looking clusters, suitcase or crate substitute | `D-store`, `D-circ` | `LP-SERVICE` |
+| `R-STUDY` | `A:desk`, reused dining/desk chair | `G:bookcase`, desk lamp | side table or armchair, `G:curtain`, `G:rug` | books, plant, clock and framed art | `D-desk`, `D-seat`, `D-window` | `LP-TASK` |
+| `R-LIBRARY` | two `G:bookcase` runs, `G:books` | reading chair and side table | shelf wall, second reading seat, desk or central table, `G:rug`, `G:curtain` | lamps, plant, art and shelf dressing | `D-store`, `D-seat`, `D-desk` | `LP-TASK` |
+| `R-GAMES` | `A:pool-table` | reused stools/chairs and side table | score/storage shelf, sitting pair, `G:blind` | clock, framed art and restrained shelf dressing | `D-table`, `D-seat` | `LP-TASK` |
+| `R-SITTING` | reused sofa or two chairs, coffee/side table | floor/table lamp and `G:rug` | bookcase/console, `G:curtain` | plant, books, art and vase | `D-seat`, `D-window` | `LP-LIVING` |
+| `R-MUDROOM` | bench-height `G:carcass`, wall shelf | tall storage and `A:bin` | second bench/storage run, blind | clock, basket-like `G:box` cluster | `D-store`, `D-circ` | `LP-SERVICE` |
+| `R-LAUNDRY` | two variants of `A:laundry-body` | `G:worktop`, wall cabinet/shelf | sink-like closed utility module, `G:textiles`, `A:bin` | jars and one plant or framed print | `D-appliance`, `D-work` | `LP-SERVICE` |
+| `R-PANTRY` | `G:shelf`, `G:crockery` | shelving on a second wall | closed base carcass/worktop and boxes | clock, jars and labels implied by tint | `D-store`, `D-work` | `LP-SERVICE` |
+| `R-GARAGE` | workbench, `G:shelf`, `G:box` | `A:toolbox`, `A:garden-tools`, service run | storage wall, second bench, `A:paint-tin`, `A:bin` | clock and controlled tool/box cluster | `D-work`, `D-store`, `D-service` | `LP-GARAGE` |
+| `R-GARAGE-LOFT` | `G:box`, low `G:shelf` | varied box stack and suitcase | second shelf and covered-storage composition | restrained clutter only | `D-store`; keep ladder head clear | `LP-SERVICE` |
+| `R-BASE-HALL` | narrow shelf/console | bench or reused chair | runner and one wall item | framed art and small plant | `D-circ` | `LP-CIRC` |
+| `R-MECHANICAL` | `A:boiler`, `G:service-run` | one wall shelf and `G:box` | second service run/work surface | no cosmetic dressing | `D-appliance`, `D-service` | `LP-SERVICE` |
+| `R-ELECTRICAL` | generated panel-like carcass and cable run | narrow shelf and toolbox | second cable/run cluster | no cosmetic dressing | `D-service`, `D-circ` | `LP-SERVICE` |
+| `R-UTILITY` | `A:chest-freezer`, shelf | worktop and boxes | service run and tall carcass | no cosmetic dressing | `D-appliance`, `D-store` | `LP-SERVICE` |
+| `R-CINEMA` | `G:screen`, `G:projector`, one row `A:cinema-seat` | second seating row and low console | aisle composition, acoustic-looking generated panels and side table | framed posters from the art set, small bin, restrained snack-like dressing | `D-seat`; `0.80` aisle | `LP-CINEMA` |
+| `R-GYM` | open exercise floor, mirror | bench and generated rack/box forms | second equipment grouping and towel shelf | clock, towels, bottle-like vase | keep `1.5 x 2.0` open exercise area | `LP-TASK` |
+| `R-WORKSHOP` | `G:workbench`, shelf | toolbox, tools and service run | second bench/storage wall, paint tin and bin | clock and dense but bounded tool fill | `D-work`, `D-store` | `LP-TASK` |
+| `R-WINE-CELLAR` | bottle-reading `G:shelf` plus `G:crockery` | two rack runs and a crate-like generated box | tasting side table and two reused chairs | vase and framed print | `D-store`, `D-seat` | `LP-SERVICE` |
+| `R-HOBBY` | work table/desk and reused chair | shelf/carcass and relevant fill kit | second chair, storage and task lamp | plant, clock and framed art | `D-desk`, `D-store` | `LP-TASK` |
+| `R-ATTIC-ROOM` | reused seating plus side table | desk/chair and bookcase | rug, storage chest and curtains | lamp, books, plant and framed art | `D-seat`, `D-desk`, `D-window` | `LP-LIVING` |
+| `R-ATTIC-STORE` | low shelf and boxes | second shelf, textiles or suitcase | varied storage composition | restrained clock/print only if tier permits | `D-store`; keep crouch route clear | `LP-SERVICE` |
+| `R-SHED` | workbench and shelf | garden tools, toolbox and bin | box/storage wall and paint tin | clock and one small framed print | `D-work`, `D-store` | `LP-SERVICE` on `LG_EXT_SHED_MAIN`, `SC-DUSK` |
+| `R-STAIR-LANDING` | clear landing and route | slim console/bench where the measured width permits | runner, reused chair or plant at a broad landing | framed art and small surface dressing | `D-circ`; never narrow stair width | `LP-CIRC` |
+| `R-BALCONY` | clear standing route | two reused outdoor chairs or one lounger plus side table | planter and second seat where space permits | lantern/string-light composition already authored | `D-seat`; `0.70` to door | `LP-EXTERIOR` |
+
+## Existing finished-ground-floor recipes
+
+These rooms already have complete compositions from `HOUSE-01037`--`HOUSE-01076`. Their recipes
+are retention and reuse rules, not M4 invitations to add more ground-floor content.
+
+| Recipe | Existing composition (U/S/M/H stop points follow the common tier rule) | Clearances | Light |
+|---|---|---|---|
+| `R-FOYER` | console and armchair; entry rug and plant; console dressing; existing arrival art/fixture composition | `D-seat`, `D-circ` | `LP-LIVING` |
+| `R-HALL` | runner; portal art; east/west galleries; existing ceiling fixtures | `D-circ` | `LP-CIRC` |
+| `R-LIVING` | sofa/chairs, coffee table, rug and floor lamp; fireplace and piano/bench; plant, throw, table dressing and wall/piano art | `D-seat`, piano front `0.90` | `LP-LIVING` |
+| `R-FAMILY` | sofa/chair/coffee table; media console/static screen, bookcase and side table; rug, lamp, plant, wall art and curtains | `D-seat`, `D-window` | `LP-LIVING` |
+| `R-KITCHEN` | north base run, island and range wall; closed refrigerator and stools; canisters, kettle and island dressing | work aisle `1.0`, `D-appliance` | `LP-TASK` |
+| `R-DINING` | table/eight chairs; sideboard and practical lamps; rug and eight-place table dressing | `D-table` | `LP-LIVING` |
+| `R-SUNROOM` | breakfast group; wet bar and lounge group; plant and existing task/ceiling fixtures | `D-seat`, `D-table`, `D-window` | `LP-LIVING` |
+| `R-BUTLERS` | service run; dry and crockery shelves; existing ceiling fixture | `D-work`, `D-store` | `LP-SERVICE` |
+| `R-PORCH` | clear arrival route and the existing paired lantern composition; no extra furniture required for C3 | `D-circ` | `LP-EXTERIOR` |
+
+## Exterior recipes
+
+| Recipe | U -- essential | S -- recognisable | M -- complete | H -- secondary dressing | Clearances | Light |
+|---|---|---|---|---|---|---|
+| `R-ROAD-EDGE` | clear walkable verge | street furniture/planting already generated | no extra property dressing | no extra property dressing | keep route/barrier geometry clear | `LP-EXTERIOR`, `LG_EXT_STREET` |
+| `R-FRONT-WALK` | clear path | existing bollards/planting | planters or bench only where route permits | composed arrival planting | `0.70` continuous route | `LP-EXTERIOR`, `LG_EXT_WALK_PATH` |
+| `R-FRONT-YARD` | lawn/planting structure | existing border planting | layered reusable planting | bounded hero arrival composition | keep path and windows clear | `LP-EXTERIOR`, `LG_EXT_FACADE_UPLIGHT` |
+| `R-DRIVEWAY` | clear vehicle-scale surface | existing lantern/flood fixtures | edge planting and bin/storage only by garage wall | bounded arrival dressing | preserve grand-tour route | `LP-EXTERIOR`, `LG_EXT_DRIVEWAY_FLOOD`/`LG_EXT_GARAGE_LANTERN` |
+| `R-TERRACE` | existing dining set | lounger and planter | coherent dining/lounge grouping | small table dressing only at H | `D-seat`, `D-table`; keep doors clear | `LP-EXTERIOR`, `LG_EXT_TERRACE_MAIN` |
+| `R-BACKYARD` | existing fire pit | swing bench and birdbath | complete seating/fire-pit grouping | plant/clutter accents only at H | `D-seat`; keep garden route clear | `LP-EXTERIOR`, terrace/window spill |
+| `R-GARDEN` | planting/paths | reused planter or garden-tool cluster | bench/work focal point | bounded plant variety only at H | keep `0.70` path | `LP-EXTERIOR`, shed/house spill |
+| `R-ORCHARD` | authored trees and walk route | one reused bench or box cluster | restrained harvest/storage cue | no extra density target | keep `0.70` route | `LP-EXTERIOR`, house/window spill |
+| `R-SIDEYARD` | clear service path | bin or garden-tool cue where width permits | wall-side planting/storage only if broad enough | no hero dressing | keep `0.70` route and window fronts | `LP-EXTERIOR`, nearby dusk groups/window spill |
+
+## Existing reusable catalogue
+
+This catalogue groups the pieces delivered by `HOUSE-01037`--`HOUSE-01076` that are suitable for
+reuse elsewhere. Room-specific composite dressing may be reused only when its full composition
+fits; individual source meshes need not be split merely to increase variety.
+
+| Existing family | Canonical asset ids | Recipes served |
+|---|---|---|
+| Upholstered seating | `MODEL_FURNITURE_FOYER_ARMCHAIR`, `MODEL_FURNITURE_SHEEN_CHAIR`, `MODEL_FURNITURE_FORMAL_SOFA`, `MODEL_FAMILY_GLAM_VELVET_SOFA` | bedrooms, study, library, sitting, attic room, landings |
+| Tables and cabinets | `MODEL_FURNITURE_COFFEE_TABLE`, `MODEL_FAMILY_SIDE_TABLE`, `MODEL_FURNITURE_DINING_TABLE`, `MODEL_FURNITURE_DINING_SIDEBOARD`, `MODEL_FURNITURE_FOYER_CONSOLE` | bedrooms, study, library, sitting, hobby, cellar, halls |
+| Chairs and stools | `MODEL_FURNITURE_DINING_CHAIR`, `MODEL_FURNITURE_KITCHEN_COUNTER_STOOL`, `MODEL_FURNITURE_PIANO_BENCH` | study/desks, games, hobby, cellar, balcony |
+| Rugs and textiles | `MODEL_FURNITURE_RUG`, `MODEL_FOYER_ENTRY_RUG`, `MODEL_HALL_RUNNER`, `MODEL_LIVING_SOFA_THROW`, `MODEL_FAMILY_WINDOW_TREATMENT` | bedrooms, sitting, study, library, attic room, circulation |
+| Storage and media | `MODEL_FAMILY_BOOKCASE`, `MODEL_FAMILY_MEDIA_CONSOLE`, `MODEL_FURNITURE_TV` | library, sitting, study, attic room; screen remains static |
+| Lamps and fixtures | `MODEL_FURNITURE_FLOOR_LAMP`, `MODEL_FAMILY_FLOOR_LAMP_LIT`, `MODEL_FIXTURE_DINING_SIDE_LAMP`, `MODEL_FIXTURE_FAMILY_CEILING`, `MODEL_FIXTURE_KITCHEN_PENDANT`, `MODEL_FIXTURE_KITCHEN_TASK_PUCK` | living, bedrooms, study, library, sitting, hobby |
+| Plants and art | `MODEL_FURNITURE_POTTED_PLANT_A`, `MODEL_FAMILY_WALL_ART`, `MODEL_LIVING_WALL_ART_PAIR`, `MODEL_LIVING_PIANO_ART`, `MODEL_HALL_PORTAL_ART_PAIR`, `MODEL_HALL_GALLERY_EAST`, `MODEL_HALL_GALLERY_WEST` | every M/H living room and restrained S-room accents |
+| Surface dressing | `MODEL_FOYER_CONSOLE_DRESSING`, `MODEL_LIVING_TABLE_DRESSING`, `MODEL_DINING_TABLE_SETTING`, `MODEL_PROP_KITCHEN_CANISTERS`, `MODEL_PROP_KITCHEN_KETTLE`, `MODEL_PROP_KITCHEN_ISLAND_DRESSING` | hero/main tables and shelves only |
+| Fitted/service pieces | `MODEL_KITCHEN_NORTH_BASE_RUN`, `MODEL_KITCHEN_ISLAND`, `MODEL_KITCHEN_RANGE_WALL`, `MODEL_KITCHEN_REFRIGERATOR`, `MODEL_BUTLERS_SERVICE_RUN`, `MODEL_BUTLERS_DRY_SHELF`, `MODEL_BUTLERS_CROCKERY_SHELF` | kitchen/pantry/laundry/service references; generated families handle different dimensions |
+| Sunroom groups | `MODEL_SUNROOM_BREAKFAST_GROUP`, `MODEL_SUNROOM_LOUNGE_GROUP`, `MODEL_SUNROOM_WET_BAR` | sunroom; lounge/breakfast groups may serve large sitting or balcony spaces only when they fit |
+| Exterior furniture | `MODEL_GARDEN_DINING_SET`, `MODEL_GARDEN_LOUNGER`, `MODEL_GARDEN_PLANTER`, `MODEL_GARDEN_FIRE_PIT`, `MODEL_GARDEN_SWING_BENCH`, `MODEL_GARDEN_BIRDBATH` | terrace, backyard, garden, orchard, balconies |
+
+The static dog-bed mesh remains harmless existing dressing in `L0_FAMILY`, but it is not a kit
+family and serves no recipe. This catalogue does not revive pets or any removed behaviour.
+
+## Acquisition count
+
+The recipes require 23 acquired models, nine below the 32-model ceiling, plus one CC0 wall-art set
+of at most eight images. Existing pieces and generated families deliberately replace the omitted
+cap entries.
+
+| Group | Needed / cap | Models actually needed | Reused/generated instead of other cap entries |
+|---|---:|---|---|
+| Kitchen and utility appliances | **3 / 3** | laundry body (washer/dryer variants), chest freezer, boiler/water heater | all other plant and cabinetry is generated |
+| Bathroom fixtures | **4 / 4** | toilet, vanity/basin, bath, shower tray/screen | mirrors, rails and cabinets generated |
+| Seating and tables | **3 / 7** | cinema seat, desk, pool table | existing armchairs, dining chairs, stools, coffee/side tables |
+| Beds | **2 / 2** | double frame, single frame | bedding varies by tint |
+| Lamps | **2 / 4** | desk lamp, bare utility fitting | existing table/floor/ceiling fixtures |
+| Decoration | **4 / 6 + art** | second plant form, mirror frame, clock, vase; one art set of at most 8 images | existing plant and frames; generated rug planes |
+| Clutter | **5 / 6** | bin, suitcase, toolbox, garden-tool set, paint tin | generated boxes replace a separate crate model |
+| Storage furniture | **0 / 0** | none | all carcasses and shelves generated |
+
+## Accessible-cell recipe map
+
+This block is the exhaustive, machine-auditable assignment. It contains all 90 cells marked
+`accessible: true` in `docs/zones.json`, exactly once. The tier repeats that authoritative data so
+that a furnishing task cannot accidentally apply hero depth to a utility room.
+
+```text
+B1_HALL R-BASE-HALL S
+B1_MECHANICAL R-MECHANICAL U
+B1_ELECTRICAL R-ELECTRICAL U
+B1_UTILITY R-UTILITY U
+B1_CINEMA R-CINEMA H
+B1_WC7 R-WC S
+B1_GYM R-GYM S
+B1_WORKSHOP R-WORKSHOP M
+B1_STOR1 R-STORE U
+B1_STOR2 R-STORE U
+B1_HOBBY R-HOBBY S
+B1_CELLAR R-WINE-CELLAR S
+B1_LAUNDRY2 R-LAUNDRY U
+B1_UNDERSTAIR R-STORE U
+L0_FOYER R-FOYER H
+L0_HALL R-HALL H
+L0_LIVING R-LIVING H
+L0_FAMILY R-FAMILY M
+L0_KITCHEN R-KITCHEN H
+L0_DINING R-DINING M
+L0_SUNROOM R-SUNROOM M
+L0_BUTLERS R-BUTLERS S
+L0_PORCH R-PORCH H
+L0_MUDROOM R-MUDROOM S
+L0_LAUNDRY R-LAUNDRY U
+L0_WC1 R-WC S
+L0_WC2 R-WC S
+L0_OFFICE R-STUDY S
+L0_CLOSET_W R-CLOSET U
+L0_STOR R-STORE U
+L0_PANTRY R-PANTRY S
+L0_GARAGE R-GARAGE M
+L1_LANDING R-STAIR-LANDING S
+L1_HALL R-HALL S
+L1_HALL_W R-HALL S
+L1_MASTER_BED R-BED-PRIMARY M
+L1_MASTER_BATH R-BATH S
+L1_MASTER_CLOSET R-CLOSET S
+L1_BED2 R-BED-DOUBLE S
+L1_BED3 R-BED-SINGLE S
+L1_BED4 R-BED-SINGLE S
+L1_BED5 R-BED-DOUBLE S
+L1_BATH2 R-BATH S
+L1_BATH3 R-BATH S
+L1_WC3 R-WC S
+L1_WC4 R-WC S
+L1_LINEN R-CLOSET U
+L1_STOR R-STORE U
+L1_CLOSET_2 R-CLOSET U
+L1_CLOSET_3 R-CLOSET U
+L1_BALCONY_REAR R-BALCONY S
+L1_BALCONY_FRONT R-BALCONY S
+L2_LANDING R-STAIR-LANDING S
+L2_HALL R-HALL S
+L2_HALL_W R-HALL S
+L2_LIBRARY R-LIBRARY H
+L2_GAMES R-GAMES S
+L2_SITTING R-SITTING S
+L2_BED6 R-BED-DOUBLE S
+L2_BED7 R-BED-DOUBLE S
+L2_BATH4 R-BATH S
+L2_BATH5 R-BATH S
+L2_WC5 R-WC S
+L2_WC6 R-WC S
+L2_CLOSET_4 R-CLOSET U
+L2_LINEN2 R-CLOSET U
+L2_STOR2 R-STORE U
+L3_ROOM R-ATTIC-ROOM M
+L3_STORE_W R-ATTIC-STORE S
+L3_STORE_E R-ATTIC-STORE U
+L3_STORE_N R-ATTIC-STORE U
+L3_STORE_S R-ATTIC-STORE U
+B1_STAIR R-STAIR-LANDING S
+L0_STAIR_MAIN R-STAIR-LANDING M
+L1_STAIR_MAIN R-STAIR-LANDING M
+L2_STAIR_MAIN R-STAIR-LANDING M
+L2_STAIR_ATTIC R-STAIR-LANDING S
+L3_STAIR_HEAD R-STAIR-LANDING S
+EXT_ROAD R-ROAD-EDGE S
+EXT_WALK R-FRONT-WALK H
+EXT_FRONTYARD_W R-FRONT-YARD H
+EXT_FRONTYARD_E R-FRONT-YARD H
+EXT_DRIVEWAY R-DRIVEWAY H
+EXT_TERRACE R-TERRACE M
+EXT_BACKYARD R-BACKYARD M
+EXT_GARDEN R-GARDEN S
+EXT_ORCHARD R-ORCHARD S
+EXT_SHED R-SHED S
+EXT_SIDEYARD_W R-SIDEYARD U
+EXT_SIDEYARD_E R-SIDEYARD U
+```
+
+The visible but non-walkable `L0_GARAGE_LOFT` uses `R-GARAGE-LOFT` at U depth. The Juliet balcony,
+street scenery, north strip, and nested appliance interiors are not accessible furnishing cells.

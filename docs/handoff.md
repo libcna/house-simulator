@@ -1,3 +1,26 @@
+# Furnishing-kit handoff — 2026-09-23 (`HOUSE-03302`)
+
+The bounded furnishing specification is now in `docs/furnishing-kit.md`. It defines cumulative
+utility, secondary, main and hero depths for every room/space type, measured planning envelopes
+and clearances, and eight lighting presets that use the authored cell group roles and the schedule
+classes owned by `HOUSE-03401`. The existing finished ground-floor route remains frozen: its
+`HOUSE-01037`--`HOUSE-01076` pieces are catalogued for reuse rather than treated as a reason for
+more L0 work.
+
+The exhaustive map contains all 90 cells marked accessible in `docs/zones.json` exactly once, and
+a data audit confirms every repeated tier matches that file. The visible, non-walkable garage loft
+separately receives the utility-depth loft recipe. The selected acquisitions total 23 models plus
+one wall-art set of at most eight images: existing armchairs, dining chairs, stools, side tables,
+floor/table lamps, plants and frames plus generated boxes avoid nine unnecessary catalogue slots.
+No runtime subsystem, behaviour or optional content was added.
+
+The remaining forecast is 198.75 realistic / 239.5 pessimistic hours. With 27.5 task-hours spent
+since the final reduction, the R14 projection is 267 h, 13 h below the hard limit. Rule that
+chooses the next task: R1's house-wide support exception and dependency order select the placement
+validator before variation or bulk furnishing. The exact next unblocked MUST is `HOUSE-03303`.
+
+---
+
 # Pet-navigation decoupling handoff — 2026-09-23 (`HOUSE-03301`)
 
 Static furnishing no longer has to preserve the retired pet navigation graph. Rule 5 in both
