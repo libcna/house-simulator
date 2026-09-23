@@ -269,7 +269,7 @@ def build() -> dict[str, dict]:
          # id opts the same opening into the generated paired shutter assembly.
          "muntinPattern": {"enum": ["six_over_six"]},
          "shutterMaterial": ID,
-         # Selected close-route single leaves opt into spatial painted joinery explicitly.  The
+         # Selected close-route painted or hardwood single leaves opt into spatial joinery.  The
          # paired hardware material keeps the generator from inferring a finish from a room name.
          "joineryStyle": {"enum": ["four_panel"]},
          # The canonical sectional leaf may opt into a measured top-lite treatment.  Glass and

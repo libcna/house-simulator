@@ -1,3 +1,36 @@
+# First-upper-floor C2 handoff — 2026-09-23 (`HOUSE-03263`)
+
+`Z-L1` is C2 across all 20 cells. The existing shell already supplied distinct authored bedroom,
+bathroom, closet and corridor palettes; generated window reveals, projecting sills, skirtings,
+cornices and casings; and the same measured open balustrade on both elevated balconies. This task
+closed the remaining circulation-joinery gap without a new content system: all eight interior
+leaves facing `L1_HALL` or `L1_HALL_W` now select `HOUSE-00942`'s existing four-panel treatment
+and two-sided steel lever. The validator now permits that established treatment on both painted
+and hardwood single leaves, covering the solid master-bedroom door without changing its acoustic
+or portal semantics.
+
+Round 105 inspected the six-view `Z-L1` clear-day set before/after and a second after set with the
+zone's main light groups forced on so the dark circulation geometry could be judged directly. The
+fixed `first-hall` frame changed 6,460 pixels; the lit contact sheet visibly resolves the casing,
+raised panels, lock-side levers, room palettes and balcony guards. The task did not claim a night-
+lighting fix: furnishing and night readability remain M4/M5 work. World validation, schema checks,
+the shell generator selftest/manifest/material checks, shell UV unwrap, chunk selftest/build and
+content-current check pass. The complete controller grand tour (10.33 s), camera tour and inside-
+geometry tour pass. The generated world is 747 chunks over 96 cells, one more than before; only
+`L1_BATH2` needed a measured one-chunk exception for the shared steel hardware role.
+
+`verify_shell.py --report`, run as an extra diagnostic rather than this task's required verifier,
+still reports the established `FRIDGE_L0_KITCHEN` nested-container cut limitation (128/129
+openings). It is recorded in prior handoffs and legacy task findings and is unrelated to L1.
+
+The remaining forecast is 213.75 realistic / 256 pessimistic hours. Adding the 12.5 task-hours
+completed since the final reduction gives a 268.5 h ceiling projection, 11.5 h below R14's hard
+limit. Rule that chooses the next task: R1 keeps work in C2 breadth and R2 selects `Z-L2`, whose 15
+accessible cells are the greatest remaining count below target. The exact next unblocked MUST is
+`HOUSE-03264`; `Z-L0M` remains frozen by R4.
+
+---
+
 # Gate G1 handoff — 2026-09-23 (`HOUSE-03240`)
 
 G1 is passed. Every scoreboard zone is at least C1 and the seven traversal `*` markers are cleared:

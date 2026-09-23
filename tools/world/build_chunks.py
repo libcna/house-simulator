@@ -351,6 +351,15 @@ for single_door_cell in ("L0_DINING", "L0_HALL", "L0_PANTRY"):
         previous_limit + 1,
         previous_reason + "; HOUSE-00942 adds one shared steel single-door hardware role")
 
+# `HOUSE-03263`: the L1 circulation doors reuse `HOUSE-00942`'s exact joinery grammar and steel
+# finish. Most affected cells stay at or below their existing measured ceiling; the windowed
+# shared bathroom is the one owner cell whose physical lever adds a distinct seventh shell role
+# beyond its weather-facing frame exception.
+_bath2_limit, _bath2_reason = CHUNK_BUDGET_EXCEPTIONS["L1_BATH2"]
+CHUNK_BUDGET_EXCEPTIONS["L1_BATH2"] = (
+    _bath2_limit + 1,
+    _bath2_reason + "; HOUSE-03263 adds the shared steel hall-door hardware role")
+
 # HOUSE-01069 is a measured room-wide furnishing/lighting step, not a generic budget increase.
 # The new walnut/brass cabinet shares both established dining roles. Its ceramic serving set is
 # one new finish, and the two sideboard lamps' exact independently switched shade group needs

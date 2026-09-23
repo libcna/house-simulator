@@ -4519,3 +4519,26 @@ Round 103 remain visible and remain assigned to their existing M2/M5 tasks; they
 movement defects. The scoreboard is unchanged pending the explicit G1 review. Next:
 `HOUSE-03240`, chosen by M1 dependency order and R1 because all three of its traversal/integration
 dependencies are now complete.
+
+## Round 105 — first upper floor at C2
+
+Commit: `HOUSE-03263` working tree (`2026-09-23`). Before: the six fixed production views in the
+local, Git-ignored [`clear-day`](captures/house-03263-before) set. After: the matching
+[`clear-day`](captures/house-03263-after) set and a second
+[`lights-forced`](captures/house-03263-after-lit) set with the L1 main groups on. The normal-day
+and lights-forced contact sheets and each affected full-size frame were inspected. The latter is
+review evidence only: M5 still owns final day/night readability.
+
+The floor already had authored room-type palettes, generated reveals and sills, continuous
+skirting/cornice/casing, and one common measured balustrade grammar for its front and rear decks.
+The remaining C2 gap was the plain circulation joinery. All eight painted or hardwood single
+leaves facing `L1_HALL`/`L1_HALL_W` now explicitly reuse the existing `four_panel` geometry and
+two-sided steel lever from `HOUSE-00942`; no room-specific generator branch or new asset family was
+introduced. The fixed `first-hall` view changes 6,460 pixels; the other fixed controls change
+0–499 pixels except for the adjoining landing at 296, consistent with the local shell change.
+
+The lit sheet resolves the raised panels and lock-side handles at normal eye height while retaining
+the bedroom, bathroom, closet and corridor material distinctions. Both balconies remain guarded
+and match the established front-balcony language. No S1/S2 architecture issue remains in `Z-L1`;
+empty-room furnishing and dark unlit circulation are still the already-scheduled M4/M5 work.
+Next: `HOUSE-03264`, selected by R1/R2 because `Z-L2` has the most accessible cells still at C1.

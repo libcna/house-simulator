@@ -1496,10 +1496,10 @@ def rule_7_openings(world: World) -> list[Problem]:
                 opening.get("kind") != "door"
                 or opening.get("type") not in
                 ("D_INT_PASSAGE", "D_INT_PRIVACY", "D_INT_SOLID")
-                or opening.get("material") != "MAT_DOOR_PAINTED"):
+                or opening.get("material") not in ("MAT_DOOR_PAINTED", "MAT_DOOR_HARDWOOD")):
             problems.append(Problem(
                 7, FILE_OF["openings"], f"openings/{index}/joineryStyle",
-                f"opening {opening.get('id')} assigns generated painted single-leaf joinery to "
+                f"opening {opening.get('id')} assigns generated interior single-leaf joinery to "
                 f"unsupported type/material {opening.get('type')!r}/"
                 f"{opening.get('material')!r}"))
 
@@ -5039,6 +5039,19 @@ def selftest() -> int:
         require(not problems,
                 f"a painted supported single leaf may explicitly select complete joinery "
                 f"({[str(p) for p in problems]})")
+
+        hardwood = copy.deepcopy(joined)
+        row(hardwood, "openings", "DOOR_WC1")["material"] = "MAT_DOOR_HARDWOOD"
+        hardwood["materials"]["materials"].append({
+            **copy.deepcopy(hardwood["materials"]["materials"][0]),
+            "id": "MAT_DOOR_HARDWOOD",
+        })
+        hardwood_dir = workspace / "selected-hardwood-single-joinery"
+        write_fixture(hardwood_dir, hardwood)
+        _, problems = validate(hardwood_dir, wanted=[7])
+        require(not problems,
+                f"a hardwood supported single leaf may explicitly select the same complete "
+                f"joinery ({[str(p) for p in problems]})")
 
         unhandled = copy.deepcopy(joined)
         row(unhandled, "openings", "DOOR_WC1").pop("hardwareMaterial")
