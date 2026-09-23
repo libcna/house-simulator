@@ -206,6 +206,7 @@ namespace
         ASSERT_TRUE(world::WorldLoader::LoadPortals(directory, contents));
         ASSERT_TRUE(world::WorldLoader::LoadOpenings(directory, contents));
         ASSERT_TRUE(world::WorldLoader::LoadLights(directory, contents));
+        ASSERT_TRUE(world::WorldLoader::LoadProps(directory, contents));
         ASSERT_TRUE(world::WorldLoader::LoadNav(directory, contents));
         ASSERT_TRUE(world::WorldLoader::LoadInteractables(directory, contents));
         auto built = world::WorldData::Create(std::move(contents));

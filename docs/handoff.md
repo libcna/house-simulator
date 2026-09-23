@@ -1,3 +1,25 @@
+# CI handoff — 2026-09-23 (`HOUSE-03228` integration repairs)
+
+`HOUSE-03228` is complete. `WorldLoadTests.ValidatingTheHouseCostsLessThanReadingIt` now loads
+`layout.props.json` before constructing its measured world, so the validator sees the fixture props
+named by authored lights rather than reporting all links missing. It still times only validation:
+the measured medians were 2.09 ms Fast and 2.50 ms Full.
+
+The F3 walk-frame diagnostic is a repeatable 115 / 620 draw calls after the authored static leaf
+poses. Three consecutive runs returned 115, so the stale `< 110` assertion is now the narrow
+measured guard `< 120`; the number and five-call allowance live beside the assertion. No renderer,
+visibility or content behavior changed.
+
+Rule that chose this task: M1's explicit dependency order and R1/G1. This was the independent G1
+repair after the accessibility manifest, advances the all-zone CI deliverable D11, and clears the
+last known red test before the controller-driven tour. Next is `HOUSE-03226`.
+
+Validation: both focused reproductions failed before the change and pass after it; the F3 test
+passes three repeated runs at 115 calls; and the full integration label passes all 140 invoked
+tests (139 integration cases plus the world-content fixture setup).
+
+---
+
 # World handoff — 2026-09-23 (`HOUSE-03225` accessibility manifest)
 
 `HOUSE-03225` is complete. `docs/zones.json` now gives all 91 intended-accessible cells a concrete

@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **151 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 191 / 224 / 271 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G1, not passed.** Next: `HOUSE-03228`, then the grand tour `HOUSE-03226` |
+| Active plan | **150 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 190 / 223 / 269 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G1, not passed.** Next: the grand tour `HOUSE-03226` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -497,12 +497,13 @@ green.
       verify: `validate_world.py`
       note: (2026-09-23) `docs/zones.json` now records collision-proven feet positions for all 91 intended-accessible cells; the under-stair store, main-stair lower pocket and garage loft explicitly use the crouched capsule. Rule 15 rebuilds the real static collision (including props and terrain), requires the exact five documented exclusions, and proves footprint containment, walkable support and posture headroom. The full authored world and focused missing/outside/low-headroom selftests pass
 
-- [ ] HOUSE-03228 — Repair the two integration tests left failing by the fixture-prop and posed-leaf changes
+- [x] HOUSE-03228 — Repair the two integration tests left failing by the fixture-prop and posed-leaf changes
       dep: HOUSE-03223 · sys: ci · plat: CI · pri: MUST · zone: all · adv: D11, G1 · est: 1
       files: tests/integration/WorldLoadTests.cpp, tests/integration/HeadlessRunTests.cpp (as found)
       accept: (1) `WorldLoadTests.ValidatingTheHouseCostsLessThanReadingIt` validates a world with its props loaded, so it no longer rejects every light `fixtureProp` (broken since `HOUSE-01259`), and still measures what its name says; (2) `HeadlessRunTests.PressingF3ShowsTheWalkTheFrameActuallyDid` meets a draw-call bound re-measured against the posed leaves of `HOUSE-03222`/`03224` (115 calls from the road against `< 110`), with the measured number recorded beside the bound, or the extra draws are removed; no bound is loosened without its measurement; (3) the full integration suite passes
       verify: integration suite
       note: (2026-09-22) recorded in `docs/handoff.md` by `HOUSE-03223`; neither failure is caused by collision
+      note: (2026-09-23) the validation benchmark now loads `layout.props.json`, so Fast and Full validation both pass while measuring 2.09 ms and 2.50 ms median respectively. The posed-leaf frame is a repeatable 115 / 620 draws across three runs; its narrow guard is now `< 120`, with that measurement beside the assertion. The full integration label passes all 140 invoked tests
 
 - [ ] HOUSE-03226 — Grand-tour test: walk the real controller from the spawn to every accessible cell and back
       dep: HOUSE-03223, HOUSE-03224, HOUSE-03225 · sys: ci · plat: CI · pri: MUST · zone: all · adv: D2, G1 · est: 4
@@ -1825,7 +1826,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 
 | Milestone | Tasks before | Hours before | **Tasks now** | Optimistic | **Realistic** | Pessimistic | Reserve |
 |---|---|---|---|---|---|---|---|
-| M1 Whole-property traversal | 4 | 9 | **4** | 6.8 | **8** | 11.8 | R-E +3 |
+| M1 Whole-property traversal | 4 | 9 | **3** | 5.95 | **7** | 10.7 | R-E +3 |
 | M2 Architectural completion | 8 | 18 | **8** | 12.75 | **15** | 16.5 | — |
 | M3 The reusable furnishing kit | 16 | 33 | **14** | 17 | **20** | 22 | — |
 | M4 Dressing everywhere | 40 | 48.75 | **31** | 26.25 | **31** | 37 | R-D +3 |
@@ -1841,10 +1842,10 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **151** | **190.55** | **224.25** | **270.55** | +24 |
+| **Total, all three platforms** | **205** | **318.75** | **150** | **189.7** | **223.25** | **269.45** | +24 |
 
 The realistic total lies in the 210–250 h target range, and the pessimistic total is under the
-**280 h hard ceiling** (rule R14) by about 9 h. That margin is small on purpose: the ceiling is a
+**280 h hard ceiling** (rule R14) by about 10.5 h. That margin is small on purpose: the ceiling is a
 limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |
@@ -1855,7 +1856,7 @@ limit, not a budget to fill.
 | R-D | M4 | 3 | a few rooms (the library shelving, the cinema, the workshop) need more than their recipe estimate |
 | R-E | M1 | 3 | the grand tour and the sweep expose geometry and collision fixes beyond M1's budget |
 
-**By area,** against the owner's sanity reference for this pass: traversal 8 h (≈ 11); architecture
+**By area,** against the owner's sanity reference for this pass: traversal 7 h (≈ 11); architecture
 15 h (≈ 18); furnishing kit 20 h (18–22); whole-house furnishing 31 h (30–38); lighting 19.75 h
 (18–22); C4/C5 polish 19.75 h (18–24); environment 13.25 h (10–15); audio 9 h (8–10); shell 8.5 h
 (8–10); performance 9.5 h (≈ 10); final polish 7 h (6–8); tests 3.5 h (≈ 5); Linux 10.25 h
