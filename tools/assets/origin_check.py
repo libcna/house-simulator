@@ -65,6 +65,13 @@ FLOOR_AND_WALL = {
     "fireplace-surround",
 }
 
+# Ceiling fittings register their highest point against the ceiling plane. Treating one as a
+# floor-supported prop would either reject the correct negative-Y geometry or encourage every
+# placement to bury its drop rods above the ceiling.
+CEILING_MOUNTED = {
+    "ceiling-light",
+}
+
 #: Categories with no meaningful support point.
 EXEMPT = {
     "fallback": "a placeholder whose origin is not used for placement",
@@ -117,7 +124,13 @@ def check(path: Path, category: str) -> list[str]:
                 f"wall-mounted: the back face is at Z {high[2]:+.3f} m, not 0 (tolerance "
                 f"±{TOLERANCE:.2f} m); it will float off the wall or sink into it by that much"
             )
-    if category not in WALL_MOUNTED or category in FLOOR_AND_WALL:
+    if category in CEILING_MOUNTED:
+        if abs(high[1]) > TOLERANCE:
+            problems.append(
+                f"ceiling-mounted: the fixing face is at Y {high[1]:+.3f} m, not 0 "
+                f"(tolerance ±{TOLERANCE:.2f} m); it will float below or enter the ceiling"
+            )
+    elif category not in WALL_MOUNTED or category in FLOOR_AND_WALL:
         # The support point: the lowest vertex, at Y = 0.
         if abs(low[1]) > TOLERANCE:
             direction = "above" if low[1] > 0 else "below"
@@ -204,6 +217,20 @@ def selftest() -> int:
                 [-0.90, 0.10, -0.60],
                 [0.90, 2.40, 0.0],
                 "fireplace-surround",
+                1,
+            ),
+            (
+                "a ceiling fitting with its fixing face on the origin",
+                [-1.20, -0.34, -0.13],
+                [1.20, 0.0, 0.13],
+                "ceiling-light",
+                0,
+            ),
+            (
+                "a ceiling fitting floating below the origin",
+                [-1.20, -0.44, -0.13],
+                [1.20, -0.10, 0.13],
+                "ceiling-light",
                 1,
             ),
         ]

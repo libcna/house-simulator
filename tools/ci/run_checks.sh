@@ -155,6 +155,9 @@ run_gate "seating-tables" python3 tools/assets/seating_tables_prepare.py --check
 # HOUSE-00979: exactly one double and one single frame remain static, scale-correct, tint-reusable
 # and proxy-bounded; no separate child bed or bedding variants inflate the capped group.
 run_gate "bed-frames" python3 tools/assets/bed_frames_prepare.py --check
+# HOUSE-00981: existing table/floor/ceiling fixtures stay the first choice; only the two missing
+# desk/utility shapes are pinned static acquisitions with physical diffusers and bounded proxies.
+run_gate "lamp-fixtures" python3 tools/assets/lamp_fixtures_prepare.py --check
 # HOUSE-01049: the measured counter stools and three restrained worktop groupings remain
 # reproducible from their authored Blender source, with exact material slots and placement.
 run_gate "kitchen-dressing" python3 tools/assets/kitchen_dressing_prepare.py --check

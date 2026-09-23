@@ -137,6 +137,8 @@ Full text: [`licenses/cc0-1.0/LICENCE.txt`](cc0-1.0/LICENCE.txt)
 - `MODEL_BATHROOM_SHOWER` — **Square shower enclosure 900 from Fitted Kitchen and Bathroom Builder** by 3D Assets — <https://cdn.3dassets.dev/assets/17894/v1/model.glb> (retrieved 2026-09-23)
 - `MODEL_BATHROOM_TOILET` — **Close coupled WC from Fitted Kitchen and Bathroom Builder** by 3D Assets — <https://cdn.3dassets.dev/assets/17870/v1/model.glb> (retrieved 2026-09-23)
 - `MODEL_BATHROOM_VANITY` — **Bathroom vanity unit 600 from Fitted Kitchen and Bathroom Builder** by 3D Assets — <https://cdn.3dassets.dev/assets/17883/v1/model.glb> (retrieved 2026-09-23)
+- `MODEL_FIXTURE_DESK_LAMP` — **Desk Lamp Task from Bedroom and Living Room Furniture** by 3D Assets — <https://cdn.3dassets.dev/assets/38798/v1/model.glb> (retrieved 2026-09-23)
+- `MODEL_FIXTURE_UTILITY_CEILING` — **Workshop ceiling light bar, 2.4 m from Woodworking Workshop and Joinery** by 3D Assets — <https://cdn.3dassets.dev/assets/34238/v1/model.glb> (retrieved 2026-09-23)
 - `MODEL_FURNITURE_BED_DOUBLE` — **Double Bed from Bedroom and Living Room Furniture** by 3D Assets — <https://cdn.3dassets.dev/assets/38770/v1/model.glb> (retrieved 2026-09-23)
 - `MODEL_FURNITURE_BED_SINGLE` — **Single Bed from Bedroom and Living Room Furniture** by 3D Assets — <https://cdn.3dassets.dev/assets/38771/v1/model.glb> (retrieved 2026-09-23)
 - `MODEL_FURNITURE_CINEMA_SEAT_ROW` — **Tiered Seating Row Module from Cinema Multiplex and Foyer** by 3D Assets — <https://cdn.3dassets.dev/assets/34650/v1/model.glb> (retrieved 2026-09-23)
@@ -721,4 +723,4 @@ Full text: [`licenses/us-gov-pd/LICENCE.txt`](us-gov-pd/LICENCE.txt)
 
 ---
 
-*Generated from `assets-src/assets.manifest.json`, sha256 `6d946f85898aa68baa3cb4dac4069b71d0dfe638131d04bbb6e1e77e516c001f`.*
+*Generated from `assets-src/assets.manifest.json`, sha256 `fa0383680ed7844cf1489913d0997677ff01708b0dee9e4fb937110028c56194`.*

@@ -90,6 +90,14 @@ CATEGORIES: dict[str, list[tuple[str, float, float, str]]] = {
     "table-lamp": [("x", 0.32, 0.44, "table lamp shade diameter"),
                     ("y", 0.60, 0.72, "domestic table lamp height"),
                     ("z", 0.32, 0.44, "table lamp shade diameter")],
+    # HOUSE-00981 fills only the two fixture shapes the reusable ground-floor catalogue lacks.
+    # These broad but physical bands reject unit mistakes without forcing one decorative design.
+    "desk-lamp": [("x", 0.15, 0.35, "desk lamp footprint width"),
+                  ("y", 0.35, 0.75, "desk lamp height"),
+                  ("z", 0.15, 0.45, "desk lamp footprint depth")],
+    "ceiling-light": [("x", 0.15, 2.50, "utility ceiling fitting length"),
+                      ("y", 0.05, 0.60, "utility ceiling fitting drop"),
+                      ("z", 0.10, 0.80, "utility ceiling fitting width")],
     "desk": [("x", 1.00, 1.80, "domestic desk width"),
              ("y", 0.72, 0.78, "desk top"),
              ("z", 0.55, 0.90, "domestic desk depth")],

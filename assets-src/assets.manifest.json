@@ -1351,6 +1351,57 @@
       ]
     },
     {
+      "id": "MODEL_FIXTURE_DESK_LAMP",
+      "category": "desk-lamp",
+      "sourceFile": "assets-src/Models/Furniture/Lamps/desk_lamp.glb",
+      "sourceSha256": "6855c76c46ddeba3e9cdac645eb6de9f01fb5d57df7ab98be56f7559b5461c44",
+      "contentName": "Models/Furniture/Lamps/desk_lamp",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Desk Lamp Task from Bedroom and Living Room Furniture",
+        "url": "https://cdn.3dassets.dev/assets/38798/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00981 selected this as one of only two acquisitions within the four-model lamp cap after reusing the six existing table, floor and ceiling fixture families. The official 3D Assets pack declares Muse Spark via T3 Code as its AI generator and publishes the model under CC0 1.0. tools/assets/lamp_fixtures_prepare.py pins upstream SHA-256 cb3870cb3d46718a31c267a14eb8f670caaa346c457572aa982342dbd9889c21, bakes its static hierarchy, adds UV0 and appends one twelve-triangle enclosing collision box; the linen diffuser maps to the existing warm switched-emissive role."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.200026,
+          0.598535,
+          0.346816
+        ],
+        "triangles": {
+          "LOD0": 736
+        },
+        "collision": "DeskLamp_COL"
+      },
+      "materialMap": {
+        "black": "MAT_FURNITURE_PIANO_EBONITE",
+        "metal": "MAT_KITCHEN_HARDWARE_STEEL",
+        "sage": "MAT_PAINT_SAGE",
+        "linen": "MAT_FIXTURE_EMISSIVE_WARM"
+      },
+      "usedIn": [
+        "B1_HOBBY",
+        "L0_OFFICE",
+        "L1_BED3",
+        "L1_BED4",
+        "L2_LIBRARY",
+        "L3_ROOM"
+      ]
+    },
+    {
       "id": "MODEL_FIXTURE_DINING_CHANDELIER",
       "category": "fixture",
       "sourceFile": "assets-src/Models/Furniture/Dining/dining_chandelier.glb",
@@ -1759,6 +1810,60 @@
         "EXT_DRIVEWAY",
         "L0_PORCH",
         "L1_BALCONY_FRONT"
+      ]
+    },
+    {
+      "id": "MODEL_FIXTURE_UTILITY_CEILING",
+      "category": "ceiling-light",
+      "sourceFile": "assets-src/Models/Furniture/Lamps/utility_ceiling_light.glb",
+      "sourceSha256": "ffcd814c868ae6075eaba646c4717dfc62cf1aaf374c0f114a1f9913a9873d33",
+      "contentName": "Models/Furniture/Lamps/utility_ceiling_light",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Workshop ceiling light bar, 2.4 m from Woodworking Workshop and Joinery",
+        "url": "https://cdn.3dassets.dev/assets/34238/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00981 selected this unadorned twin-tube utility fitting as one of only two acquisitions within the four-model lamp cap after reusing the six existing table, floor and ceiling fixture families. The official 3D Assets pack declares Claude Opus 5 as its AI generator and publishes the model under CC0 1.0. tools/assets/lamp_fixtures_prepare.py pins upstream SHA-256 602452de98c0ae8087936b47549d271fc8b446da029bd01bf34261f6bf46fa63, bakes its static hierarchy, adds UV0 and appends one twelve-triangle enclosing collision box while retaining the top fixing face at the ceiling origin; the two cream tubes map to the existing neutral switched-emissive role."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          2.4,
+          0.341994,
+          0.259993
+        ],
+        "triangles": {
+          "LOD0": 208
+        },
+        "collision": "UtilityLight_COL"
+      },
+      "materialMap": {
+        "steel": "MAT_APPLIANCE_STEEL",
+        "paint": "MAT_DOOR_PAINTED",
+        "charcoal": "MAT_FURNITURE_PIANO_EBONITE",
+        "cream": "MAT_FIXTURE_EMISSIVE_NEUTRAL"
+      },
+      "usedIn": [
+        "B1_ELECTRICAL",
+        "B1_MECHANICAL",
+        "B1_UTILITY",
+        "B1_STOR1",
+        "B1_STOR2",
+        "L0_GARAGE",
+        "L3_STORE_E",
+        "L3_STORE_W",
+        "EXT_SHED"
       ]
     },
     {

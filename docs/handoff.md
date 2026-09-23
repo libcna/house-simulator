@@ -1,3 +1,32 @@
+# Lamp acquisition handoff — 2026-09-23 (`HOUSE-00981`)
+
+The lamp group is complete with only two acquisitions inside the four-model cap. Rule R8 retained
+six existing table, floor, ceiling, pendant and task-puck families. The remaining recipe gaps are a
+0.60 m articulated desk lamp and an unadorned 2.4 m twin-tube utility ceiling fitting. Both are
+static dressing and expose a physical diffuser material for M5's existing light-group path; no
+runtime lighting or interaction system was added.
+
+The desk lamp comes from the official CC0 3D Assets Bedroom and Living Room Furniture pack, which
+declares Muse Spark via T3 Code as its generator. The utility fitting comes from its official CC0
+Woodworking Workshop and Joinery pack, which declares Claude Opus 5. Both CDN bytes are hash
+pinned. The existing bounded static preparation path bakes hierarchy, adds UV0 and one enclosing
+12-triangle proxy. The desk lamp keeps its support-plane origin; a small origin-check extension now
+proves the utility fitting's top fixing face remains on the ceiling plane.
+
+The derivatives total 944 visible triangles. The group, manifest, licence, scale and origin gates
+pass, and CNA compiled them to 102,840-byte and 29,944-byte CNBs (132,784 bytes total). A 1400 ×
+720 headless Workbench review showed both support contacts, recognizable silhouettes and no
+clipping, floating parts or z-fighting. Compilation used four workers with affinity restricted to
+four CPU cores.
+
+The remaining forecast is 183.75 realistic / 223 pessimistic hours. With 42.5 task-hours spent
+since the final reduction, the R14 projection is 265.5 h, 14.5 h below the hard limit. Rule that
+chooses the next task: R1's house-wide support exception, R8's kit-first rule and M3 dependency
+order select the next capped acquisition group. The exact next unblocked MUST task is
+`HOUSE-00982`.
+
+---
+
 # Bed-frame acquisition handoff — 2026-09-23 (`HOUSE-00979`)
 
 The acquisition group is complete at its exact two-model cap: one upholstered double and one timber
