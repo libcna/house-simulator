@@ -287,9 +287,6 @@ run_gate "neighbourhood" python3 tools/world/neighbourhood_gen.py --selftest
 # writer and `NeighbourhoodReader` drifting apart.
 run_gate "neighbourhood-bin" python3 tools/world/build_neighbourhood.py --selftest
 run_gate "world-deploy" python3 tools/world/deploy_world.py --check
-# Furniture-aware pet waypoints must keep conservative mesh broad-phase equivalent to the exact
-# triangle-distance query. The fixture is cheap; the production graph is a content-build stage.
-run_gate "nav-selftest" python3 tools/world/build_nav.py --selftest
 # `HOUSE-00477`. §70.5 over the GENERATED SHELL, not over the layout: `validate_world.py` rule 10
 # checks the numbers an author typed and this checks the geometry the generator made of them. It
 # pins the exact set of problems the house has, so a new one fails the day it appears. Skipped,

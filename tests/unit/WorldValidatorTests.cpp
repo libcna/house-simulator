@@ -223,6 +223,36 @@ namespace
         IdRegistry::ResetForTesting();
     }
 
+    TEST(WorldValidatorTest, ObsoletePetWaypointsDoNotConstrainFurniture)
+    {
+        IdRegistry::ResetForTesting();
+        auto contents = Fixture();
+
+        world::Prop chair;
+        chair.id = Intern("PROP_HALL_CHAIR");
+        chair.asset = Intern("MODEL_CHAIR");
+        chair.cell = Intern("L0_HALL");
+        chair.position = {0.0F, 0.60F, 7.0F};
+        contents.props.push_back(chair);
+
+        world::NavNode oldHallNode;
+        oldHallNode.id = Intern("NAV_HALL_OLD");
+        oldHallNode.cell = chair.cell;
+        oldHallNode.position = chair.position;
+        contents.navNodes.push_back(oldHallNode);
+
+        world::NavNode isolatedFoyerNode;
+        isolatedFoyerNode.id = Intern("NAV_FOYER_OLD");
+        isolatedFoyerNode.cell = Intern("L0_FOYER");
+        isolatedFoyerNode.position = {0.0F, 0.60F, 2.0F};
+        contents.navNodes.push_back(isolatedFoyerNode);
+
+        // No edge joins the two historical nodes. The player portal graph is still complete, and
+        // HOUSE-03301 makes that the only connectivity question rule 5 owns.
+        EXPECT_FALSE(Fired(ProblemsFor(std::move(contents)), 5));
+        IdRegistry::ResetForTesting();
+    }
+
     TEST(WorldValidatorTest, EachRuleCatchesItsOwnBreakage)
     {
         IdRegistry::ResetForTesting();

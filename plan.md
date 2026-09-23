@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **139 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 171 / 201 / 242 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G2 passed.** Next: remove the obsolete pet-navigation furnishing coupling in `HOUSE-03301` |
+| Active plan | **138 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 170 / 200 / 241 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G2 passed.** Next: define the bounded room recipes and kit catalogue in `HOUSE-03302` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -391,7 +391,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M0](#m0--scope-reset-and-breadth-instruments) — Scope reset and breadth instruments | A (support) | 03201–03220 | 0 | done | R10, G1–G5 | 0 |
 | [M1](#m1--whole-property-traversal-c1-everywhere--gate-g1) — Whole-property traversal | A | 03221–03260 | 0 | **G1 passed** · `HOUSE-03240` | D2 | 0 |
 | [M2](#m2--architectural-completion-c2-everywhere--gate-g2) — Architectural completion | A | 03261–03300 | 0 | **G2 passed** · `HOUSE-03280` | D1 | 0 |
-| [M3](#m3--the-reusable-furnishing-kit) — The reusable furnishing kit | A (support) | 03301–03340 | 14 | kit ready for M4 | D3 | 20 |
+| [M3](#m3--the-reusable-furnishing-kit) — The reusable furnishing kit | A (support) | 03301–03340 | 13 | kit ready for M4 | D3 | 19 |
 | [M4](#m4--dressing-everywhere-the-furnishing-half-of-c3--checkpoint) — Dressing everywhere | A | 03341–03400 | 31 | checkpoint · `HOUSE-03380` | D3 | 31 |
 | [M5](#m5--baseline-lighting-everywhere-the-lighting-half-of-c3--gate-g3) — Baseline lighting everywhere | A | 03401–03440 | 10 | **G3** · `HOUSE-03420` | D3, D6 | 19.75 |
 | [M6](#m6--main-cells-and-hero-areas-c4-c5--gates-g4-and-g5) — Main cells and hero areas | A | 03441–03500 | 15 | **G4** · `HOUSE-03452`, **G5** · `HOUSE-03480` | D4 | 19.75 |
@@ -624,12 +624,13 @@ For comparison: the legacy plan asked for about 234 acquired models (24 kitchen,
 seating, 14 table, 12 bed, 22 storage, 26 lamp, 55 decoration, 45 clutter) and 12 fill kits; the
 second reduction capped them at 62 and 6.
 
-- [ ] HOUSE-03301 — Stop furnishing from paying for the pet navigation graph
+- [x] HOUSE-03301 — Stop furnishing from paying for the pet navigation graph
       dep: HOUSE-03201 · sys: world · plat: TOOL · pri: MUST · zone: all · adv: D3 · est: 1
       files: tools/world/validate_world.py, tools/ci/run_checks.sh, src/world/WorldLoader.cpp (only if it rejects a stale graph)
       accept: (1) no gate or world rule requires `layout.nav.json`'s waypoints, perches, beds or bowls to stay consistent with props, so placing furniture never requires moving a pet waypoint again; (2) the data files and loader stay (this task removes the coupling only); (3) the gates and unit tests are green
       verify: `run_checks.sh`; a probe prop placed across an old waypoint passes validation
       note: `HOUSE-01074` had to shift two sunroom pet waypoints to place two chairs. That cost now buys nothing
+      note: (2026-09-23) Rule 5 in both offline and runtime validators now proves only player portal-graph connectivity; it no longer fails a valid walkthrough because retained pet nodes form disconnected components. The dedicated furniture-aware pet-navigation selftest is no longer a repository gate. A regression fixture places a chair directly over an isolated historical node and passes validation. `layout.nav.json`, its intrinsic reference checks, `build_nav.py`, loader support and `nav.bin` remain intact as frozen cleanup candidates; no pet system is revived
 
 - [ ] HOUSE-03302 — Room recipes and the kit catalogue
       dep: HOUSE-03201 · sys: content · plat: TOOL · pri: MUST · zone: all · adv: D3, G3 · est: 1.5
@@ -1840,7 +1841,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 |---|---|---|---|---|---|---|---|
 | M1 Whole-property traversal | 4 | 9 | **0** | 0 | **0** | 0 | — |
 | M2 Architectural completion | 8 | 18 | **0** | 0 | **0** | 0 | — |
-| M3 The reusable furnishing kit | 16 | 33 | **14** | 17 | **20** | 22 | — |
+| M3 The reusable furnishing kit | 16 | 33 | **13** | 16.15 | **19** | 20.9 | — |
 | M4 Dressing everywhere | 40 | 48.75 | **31** | 26.25 | **31** | 37 | R-D +3 |
 | M5 Baseline lighting everywhere | 12 | 24.5 | **10** | 16.75 | **19.75** | 21.75 | — |
 | M6 Main cells and hero areas | 20 | 32.5 | **15** | 16.75 | **19.75** | 21.75 | — |
@@ -1854,12 +1855,12 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **139** | **171** | **201.25** | **242.25** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **138** | **170.15** | **200.25** | **241.15** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-37.75 h. Adding the 25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-267.25 h, 12.75 h under the limit. That margin is
+38.85 h. Adding the 26 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+267.15 h, 12.85 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |
@@ -1871,7 +1872,7 @@ small on purpose: the ceiling is a limit, not a budget to fill.
 | R-E | M1 | 0 (retired at G1) | the grand tour and sweep stayed within M1's budget plus gate review |
 
 **By area,** against the owner's sanity reference for this pass: traversal 0 h (complete); architecture
-4 h (≈ 18); furnishing kit 20 h (18–22); whole-house furnishing 31 h (30–38); lighting 19.75 h
+4 h (≈ 18); furnishing kit 19 h (18–22); whole-house furnishing 31 h (30–38); lighting 19.75 h
 (18–22); C4/C5 polish 19.75 h (18–24); environment 13.25 h (10–15); audio 9 h (8–10); shell 8.5 h
 (8–10); performance 9.5 h (≈ 10); final polish 7 h (6–8); tests 3.5 h (≈ 5); Linux 10.25 h
 (11–13); Web 19.5 h (18–22); Android 23.75 h (23–27); release 6.5 h (6–8).

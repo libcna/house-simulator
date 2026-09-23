@@ -174,7 +174,7 @@ namespace cnahouse::world
             }
         }
 
-        /// @brief Rule 5, both graphs: the portal graph from `L0_FOYER`, and the pet graph.
+        /// @brief Rule 5: the portal graph from `L0_FOYER`.
         void CheckConnectivity(const WorldData& world, Sink& sink)
         {
             const Id root = util::Intern(kRootCell);
@@ -222,59 +222,6 @@ namespace cnahouse::world
                          "cells/" + Name(cell.id),
                          "cell " + Name(cell.id) + " is not reachable from " + kRootCell +
                              " through open or door portals");
-            }
-
-            // ...and the pet graph, which has its own edges (`HOUSE-00389`).
-            if (world.NavNodes().empty())
-            {
-                return;
-            }
-            std::map<Id, std::vector<Id>> neighbours;
-            for (const NavEdge& edge : world.NavEdges())
-            {
-                neighbours[edge.a].push_back(edge.b);
-                neighbours[edge.b].push_back(edge.a);
-            }
-            const Id start = world.NavNodes().front().id;
-            std::set<Id> walked{start};
-            std::vector<Id> queue{start};
-            while (!queue.empty())
-            {
-                const Id current = queue.back();
-                queue.pop_back();
-                const auto found = neighbours.find(current);
-                if (found == neighbours.end())
-                {
-                    continue;
-                }
-                for (const Id next : found->second)
-                {
-                    if (walked.insert(next).second)
-                    {
-                        queue.push_back(next);
-                    }
-                }
-            }
-            std::set<Id> stranded;
-            for (const NavNode& node : world.NavNodes())
-            {
-                if (walked.count(node.id) == 0)
-                {
-                    stranded.insert(node.cell);
-                }
-            }
-            if (!stranded.empty())
-            {
-                std::string rooms;
-                for (const Id cell : stranded)
-                {
-                    rooms += (rooms.empty() ? "" : ", ") + Name(cell);
-                }
-                sink.Add(5,
-                         "layout.nav.json",
-                         "nodes",
-                         "the pet graph is in more than one piece: nothing reaches " + rooms + " from " +
-                             Name(start));
             }
         }
 

@@ -889,38 +889,6 @@ def rule_5_connected(world: World) -> list[Problem]:
                 reached.add(neighbour)
                 frontier.append(neighbour)
 
-    # ...and the pet graph, for the same reason one hop down. A pet that cannot reach its bowl is
-    # a bug nobody sees until the dog starves politely in a corner (`HOUSE-00389`). The graph is
-    # its own connectivity question: it has its own edges, and a room reachable through a door is
-    # not reachable by a dog unless somebody put a waypoint in it.
-    nav = world.layout.get("nav") or {}
-    if world.nav_nodes:
-        neighbours: dict[str, set[str]] = {}
-        for edge in nav.get("edges", []):
-            first, second = edge.get("a"), edge.get("b")
-            if first is None or second is None:
-                continue
-            neighbours.setdefault(first, set()).add(second)
-            neighbours.setdefault(second, set()).add(first)
-        start = str(world.nav_nodes[0].get("id"))
-        walked = {start}
-        pending = [start]
-        while pending:
-            current = pending.pop()
-            for neighbour in neighbours.get(current, ()):
-                if neighbour not in walked:
-                    walked.add(neighbour)
-                    pending.append(neighbour)
-        stranded = sorted(str(node.get("id")) for node in world.nav_nodes
-                          if node.get("id") not in walked)
-        if stranded:
-            rooms = sorted({str(node.get("cell")) for node in world.nav_nodes
-                            if node.get("id") in set(stranded)})
-            problems.append(Problem(
-                5, FILE_OF["nav"], "nodes",
-                f"the pet graph is in more than one piece: {len(stranded)} node(s) in "
-                f"{', '.join(rooms)} cannot be walked to from {start}"))
-
     for index, cell in enumerate(world.cells):
         cell_id = cell.get("id")
         if cell_id in walkable and cell_id not in reached:
@@ -4153,18 +4121,18 @@ def selftest() -> int:
                 f"a shell the right width and the wrong depth is caught too "
                 f"({[str(x) for x in problems]})")
 
-        # The pet graph (`HOUSE-00389`). A pet that cannot reach its bowl is a bug nobody sees
-        # until the dog starves politely in a corner, so rule 5 asks the same connectivity
-        # question of it that it asks of the portal graph.
+        # HOUSE-03301: retained pet navigation is inert historical data. Furnishing may cover an
+        # old node or disconnect that graph without blocking a valid walkthrough. The fixture's
+        # WC pan already occupies NAV_WC1, so cutting its obsolete edge is a direct regression
+        # probe for the coupling that made HOUSE-01074 move pet waypoints to place two chairs.
         cut = copy.deepcopy(base)
         cut["nav"]["edges"] = [e for e in cut["nav"]["edges"] if e["b"] != "NAV_WC1"]
         stranded = workspace / "nav-cut"
         write_fixture(stranded, cut)
         _, problems = validate(stranded, wanted=[5])
-        require(any("more than one piece" in x.message for x in problems)
-                and any("L0_WC1" in x.message for x in problems),
-                f"a nav node nothing reaches is caught, and the room is named "
-                f"({[str(x) for x in problems]})")
+        require(not problems,
+                f"a prop may occupy an old, disconnected pet waypoint without making the "
+                f"walkable house fail rule 5 ({[str(x) for x in problems]})")
 
         # An edge across a portal has to join THAT portal's two cells, or the route goes through a
         # wall while claiming to go through the door.

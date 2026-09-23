@@ -1,3 +1,25 @@
+# Pet-navigation decoupling handoff — 2026-09-23 (`HOUSE-03301`)
+
+Static furnishing no longer has to preserve the retired pet navigation graph. Rule 5 in both
+`validate_world.py` and `WorldValidator` now proves only the player portal graph; disconnected
+historical pet nodes do not invalidate an otherwise walkable house. The furniture-aware
+`build_nav.py --selftest` is no longer a repository gate. A Python selftest and a C++ unit
+regression both place a prop directly over an isolated old waypoint and prove validation passes.
+
+This is a coupling removal, not a deletion or revival. `layout.nav.json`, `build_nav.py`, intrinsic
+nav reference checks, `WorldLoader` support and the generated `nav.bin` remain untouched as frozen
+scope-reduction cleanup candidates. The authored-world validator and focused regression pass; the
+complete unit binary passes after advancing `HOUSE-03267`'s missed material-count golden in the
+separate `cc5de11` correction. The full repository gate passes every substantive gate and all 325
+strict-XNA translation units; only the pre-existing user-owned root `.claude` layout entry fails.
+
+The remaining forecast is 200.25 realistic / 241.15 pessimistic hours. With 26 task-hours spent
+since the final reduction, the R14 projection is 267.15 h, 12.85 h below the hard limit. Rule that
+chooses the next task: R1's house-wide support exception and dependency order continue the kit
+path with its bounded recipes. The exact next unblocked MUST task is `HOUSE-03302`.
+
+---
+
 # Gate G2 handoff — 2026-09-23 (`HOUSE-03280`)
 
 G2 is passed. Round 112 captured and inspected all 65 fixed clear-day views across all eleven
