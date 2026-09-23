@@ -114,7 +114,7 @@ SLOPE_LIMIT_COSINE = 0.694658370459  # cos(46°), physics/Move.hpp
 STANDING_POINT_TOLERANCE = 0.01      # authored point to collision surface
 ACCESSIBILITY_EXCLUSIONS = {
     "EXT_WORLD", "EXT_NORTHSTRIP", "L2_BALCONY_JULIET",
-    "CELL_FRIDGE_INTERIOR", "CELL_FREEZER_INTERIOR",
+    "CELL_FRIDGE_INTERIOR", "CELL_FREEZER_INTERIOR", "L0_GARAGE_LOFT",
 }
 SILL_HABITABLE = (0.50, 1.10)   # §70.5, window sill above the room's own floor
 SWITCH_CENTRE = (1.10, 1.30)    # §70.5, light switch centre

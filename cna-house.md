@@ -1186,7 +1186,7 @@ Every flight satisfies `2·rise + going ∈ [600, 650] mm` and a consistent rise
 |---|---|---|---|---|---|---|---|
 | `STAIR_MAIN_L0_L1` | L0 +0.60 → L1 +3.65 | 3.050 m | 17 × 179.4 mm | 280 mm | 1.10 m | U, half-landing at riser 9, **+2.2147** | X +2.20…+4.90, Z −20.20…−14.30 |
 | `STAIR_MAIN_L1_L2` | L1 +3.65 → L2 +6.55 | 2.900 m | 16 × 181.3 mm | 280 mm | 1.10 m | U, landing at riser 12, **+2.175 rel.** | same footprint |
-| `STAIR_ATTIC_L2_L3` | L2 +6.55 → L3 +9.30 | 2.750 m | 15 × 183.3 mm | 265 mm | 0.90 m | straight, north-running | X +5.40…+8.20, Z −18.30…−14.30 |
+| `STAIR_ATTIC_L2_L3` | L2 +6.55 → L3 +9.30 | 2.750 m | 15 × 183.3 mm | 235 mm | 0.90 m | straight, north-running | X +5.40…+8.20, Z −18.30…−14.30 |
 | `STAIR_BASEMENT_L0_B1` | L0 +0.60 → B1 −2.30 | 2.900 m | 16 × 181.3 mm | 275 mm | 1.00 m | straight, north-running, **directly beneath the main stair** | X +2.20…+4.90, Z −20.20…−14.30 |
 | `STEPS_PORCH` | grade 0.00 → porch +0.57 | 0.570 m | 3 × 190 mm | 300 mm | 3.00 m | straight | Z −11.60…−10.70 |
 | `STEPS_TERRACE_LAWN` | lawn 0.00 → terrace +0.45 | 0.450 m | 3 × 150 mm | 350 mm | 3.00 m | straight | Z −36.00, the terrace's south edge |
@@ -1200,7 +1200,7 @@ upper-level exit strips connect the returning treads to the hall openings; L2 al
 full-width south cross landing for its attic-stair door. The shell, collision and railing gaps
 derive from the same flight placement, rather than moving a decorative stair mesh alone.
 
-`2·179.4 + 280 = 638.8` ✔ · `2·181.3 + 280 = 642.6` ✔ · `2·183.3 + 265 = 631.6` ✔ ·
+`2·179.4 + 280 = 638.8` ✔ · `2·181.3 + 280 = 642.6` ✔ · `2·183.3 + 235 = 601.6` ✔ ·
 `2·181.3 + 275 = 637.6` ✔ · `2·150 + 350 = 650` ✔ (both terrace flights) ·
 `2·150 + 300 = 600` ✔ (garage) · `2·190 + 300 = 680` (exterior, permitted) ✔
 
@@ -1213,6 +1213,11 @@ derive from the same flight placement, rather than moving a decorative stair mes
 > above L0's floor and 12 × 181.3 mm above L1's, which is +2.2147 and +2.175 rel. The rises
 > themselves are exact — 3.05/17, 2.90/16, 2.75/15 — and this table's tenths of a millimetre are
 > those numbers rounded.
+
+> Corrected 2026-09-23 by `HOUSE-03226`. The attic flight's 265 mm going left a 230 mm terminal
+> rise after the ramp, above the controller's 220 mm step-up limit. The 235 mm going reaches the L3
+> floor before capsule contact and remains inside the required Blondel band. The existing attic
+> store opening was shifted onto the resulting 0.90 m landing; no room or new route was added.
 
 Headroom under every flight and at every landing nosing is ≥ 2.00 m, verified by
 `HOUSE-00360`'s automated check against the level heights.
@@ -1341,11 +1346,11 @@ Footprint: the main block only, interior X −12.70 … +8.70, Z −27.10 … �
 
 | ID | Name | X | Z | Area | Lights | Win | Doors | Notes |
 |---|---|---|---|---|---|---|---|---|
-| `B1_STAIR` | Basement stair foot | +2.20 … +4.90 | −20.20 … −14.30 | 15.9 | 1 | — | 3 | Straight flight, under `STAIR_MAIN`; its only door is at the head, on L0 |
+| `B1_STAIR` | Basement stair foot | +2.20 … +4.90 | −20.20 … −14.30 | 15.9 | 1 | — | 1 | Straight flight, under `STAIR_MAIN`; its only door is at the head, on L0 |
 | `B1_HALL` | Basement hallway | −2.20 … +2.20 | −27.10 … −14.30 | 56.3 | 3 | — | 7 | Spine; exposed joists, duct trunk overhead |
 | `B1_MECHANICAL` | Mechanical / HVAC | +4.90 … +8.70 | −18.30 … −14.30 | 15.2 | 1 | 1 | 1 | Furnace, air handler, water heater, water main, expansion tank |
-| `B1_ELECTRICAL` | Electrical / service | +4.90 … +8.70 | −20.60 … −18.30 | 8.7 | 1 | — | 1 | Panel board, meter tails, structured-wiring cabinet |
-| `B1_UTILITY` | Utility / drainage | +4.90 … +8.70 | −23.00 … −20.60 | 9.1 | 1 | — | 1 | Sump, ejector pit, main drain, softener, STACK-A/D landing |
+| `B1_ELECTRICAL` | Electrical / service | +4.90 … +8.70 | −20.60 … −18.30 | 8.7 | 1 | — | 2 | Panel board, meter tails, structured-wiring cabinet |
+| `B1_UTILITY` | Utility / drainage | +4.90 … +8.70 | −23.00 … −20.60 | 9.1 | 1 | — | 2 | Sump, ejector pit, main drain, softener, STACK-A/D landing |
 | `B1_CINEMA` | Home cinema | +2.20 … +8.70 | −27.10 … −23.00 | 26.7 | 2 | — | 2 | Projector, screen, 6 seats, acoustic panels, no windows |
 | `B1_WC7` | Basement WC | +2.20 … +3.80 | −23.00 … −21.20 | 2.9 | 1 | — | 1 | Off `B1_HALL`, on STACK-F |
 | `B1_GYM` | Home gym | −8.20 … −2.20 | −18.30 … −14.30 | 24.0 | 2 | 2 | 2 | Rubber floor, mirror wall, treadmill, rack, bench |
@@ -1388,7 +1393,7 @@ Footprint: the main block only, interior X −12.70 … +8.70, Z −27.10 … �
 | `L0_KITCHEN` | Kitchen | −8.20 … +2.20 | −27.10 … −23.00 | 42.6 | 4 | 2 | 2 | Island, **large refrigerator**, range, ovens, dishwasher, sink |
 | `L0_SUNROOM` | Sunroom / breakfast room (rear extension) | −6.70 … +2.70 | −32.10 … −27.10 | 47.0 | 2 | 6 | 1 | Breakfast table, wicker chairs, plants and wet bar; the visible suite and physical main/task fixtures are established by `HOUSE-01068`; five fixed panels and a slider to the terrace; roof = rear balcony |
 | `L0_GARAGE` | Garage | +8.70 … +17.10 | −21.70 … −13.30 | 70.6 | 2 | 1 | 4 | **One car**, workbench, shelving, bins, bikes; sectional, side and house doors, plus the loft hatch |
-| `L0_GARAGE_LOFT` | Garage storage loft | +9.20 … +16.60 | −21.20 … −17.50 | 27.4 | 1 | — | 1 | Nested in `L0_GARAGE` at +2.90; reached by a ladder through a 0.90 m hatch (`HOUSE-00377`) |
+| `L0_GARAGE_LOFT` | Garage storage loft | +9.20 … +16.60 | −21.20 … −17.50 | 27.4 | 1 | — | 1 | Nested in `L0_GARAGE` at +2.90; the ladder and 0.90 m hatch remain visible architecture, but the loft is not an intended-accessible area because the walk-only showcase has no ladder traversal (`HOUSE-00377`, PC-2026-09-23) |
 | `L0_PORCH` | Front porch (exterior cell) | −3.60 … +3.60 | −14.30 … −11.60 | 19.4 | 1 | 3 | 1 | Two rockers, a doormat, a wall lantern each side of the door |
 
 **19 cells. 410.9 m² incl. garage and porch; 273.9 m² of heated interior in the main block plus
@@ -1449,8 +1454,8 @@ garage's, already counted (`HOUSE-00377`).
 | `L2_LINEN2` | Linen closet | −4.40 … −2.20 | −22.00 … −20.60 | 3.1 | 1 | — | 1 | |
 | `L2_BED7` | Bedroom 7 | −12.70 … −7.00 | −27.10 … −22.00 | 29.1 | 2 | 2 | 1 | Big north bedroom, currently a store-room-in-waiting |
 | `L2_GAMES` | Games / hobby room | −7.00 … +2.20 | −27.10 … −22.00 | 46.9 | 3 | 2 | 2 | Pool table, dartboard, sofa, arcade cabinet, model shelves |
-| `L2_SITTING` | Secondary sitting room | +2.20 … +8.70 | −27.10 … −22.90 | 27.3 | 2 | 2 | 1 | Sofa, coffee table, record player, plants |
-| `L2_STOR2` | Store | +2.20 … +8.70 | −22.90 … −22.00 | 5.8 | 1 | — | 3 | Shallow but long walk-in |
+| `L2_SITTING` | Secondary sitting room | +2.20 … +8.70 | −27.10 … −23.10 | 26.0 | 2 | 2 | 1 | Sofa, coffee table, record player, plants |
+| `L2_STOR2` | Store | +2.20 … +8.70 | −23.10 … −22.00 | 7.2 | 1 | — | 3 | 1.10 m connector; all three leaves swing into their destination rooms |
 | `L2_BATH5` | Bathroom 5 | +4.90 … +8.70 | −22.00 … −18.30 | 14.1 | 2 | — | 1 | Bath, vanity, WC, STACK-D; no exterior wall (`HOUSE-00376`) |
 | `L2_WC6` | WC | +2.20 … +4.90 | −22.00 … −20.20 | 4.9 | 1 | — | 1 | STACK-A; no exterior wall (`HOUSE-00376`) |
 | `L2_BALCONY_JULIET` | Juliet balcony (exterior) | −1.00 … +1.00 | −14.30 … −13.85 | 0.9 | — | — | 1 | Doors open onto a railing; standing room only |
@@ -1462,6 +1467,11 @@ garage's, already counted (`HOUSE-00377`).
 > step 4 calls a world-data bug. At the full bay the interior totals 273.9 m², exactly the
 > envelope and exactly what `B1`, `L0` and `L1` come to. `L3_STAIR_HEAD` had the same footprint
 > and the same fix.
+>
+> Corrected 2026-09-23 by `HOUSE-03226`. The store connector was 0.90 m deep and all three door
+> leaves swung into it, blocking the only controller route to `L2_BATH5`. Moving its shared
+> boundary with `L2_SITTING` by 0.20 m and swinging each existing leaf into the adjacent room gives
+> the route usable clearance without changing the envelope, cell set or total area.
 
 ### 13.6 `L3` — Attic · floor +9.30, rafter ceiling to +14.30
 

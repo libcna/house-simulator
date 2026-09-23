@@ -40,7 +40,7 @@
       // 2.75 m / 15, straight, north-running, and narrower because it serves the attic.
       "id": "STAIR_ATTIC_L2_L3",
       "fromCell": "L2_STAIR_ATTIC", "toCell": "L3_STAIR_HEAD",
-      "risers": 15, "rise": 0.1833333, "going": 0.265, "width": 0.90,
+      "risers": 15, "rise": 0.1833333, "going": 0.235, "width": 0.90,
       "footprint": { "x": [5.40, 8.20], "z": [-18.30, -14.30] },
       "run": "-Z", "shape": "straight",
       "landings": [],
@@ -102,7 +102,7 @@
       "fromCell": "L0_GARAGE", "toCell": "L0_MUDROOM",
       "risers": 3, "rise": 0.150, "going": 0.300, "width": 1.10,
       "fromY": 0.15, "toY": 0.60,
-      "footprint": { "x": [8.70, 9.60], "z": [-17.90, -16.80] },
+      "footprint": { "x": [8.70, 9.60], "z": [-16.85, -15.75] },
       "run": "-X", "shape": "straight",
       "landings": [],
       "collisionRamp": true, "surface": "concrete"

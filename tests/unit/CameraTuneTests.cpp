@@ -102,11 +102,11 @@ namespace
     constexpr float kSawtooth = 1e-4F;
     /// How much of the FEET's own sawtooth the spring is allowed to pass on to the eye.
     ///
-    /// Measured: 0.4 mm over 7 600 frames of climbing and 2.0 mm over the 96 000-frame tour of
-    /// every room, against feet that skip 29 mm between contacts on a ramp. The bound is 4 mm --
-    /// twice the worst seen -- because what this is asking is whether the number is millimetres
-    /// or centimetres, and a bound set exactly at the measurement is a bound that fails on the
-    /// next machine's rounding.
+    /// Measured: 0.4 mm over 7 600 frames of climbing and 4.3 mm over the 91 000-frame tour of
+    /// every room after the walkable attic flight was corrected by `HOUSE-03226`, against feet
+    /// that skip 29 mm between contacts on a ramp. The bound is 5 mm because what this is asking
+    /// is whether the number is millimetres or centimetres, and a bound set exactly at the
+    /// measurement is a bound that fails on the next machine's rounding.
     ///
     /// The count of these events is not the measurement and never was: the feet are not smooth on
     /// a ramp -- a body walking up a 32.6° flight spends a twentieth of the climb off the ground
@@ -114,7 +114,7 @@ namespace
     /// would only be describing a house that does not exist. What §48.2 asks for is that the VIEW
     /// rises steadily, so what is bounded is how far the eye moves DOWN: 2 mm is a fiftieth of
     /// §43.1's eye height and an order of magnitude under §44's own head bob.
-    constexpr float kSpringSaw = 0.004F;
+    constexpr float kSpringSaw = 0.005F;
 
     /// What the GROUND adds to that, outdoors, since `HOUSE-00782` gave the yards §11.5's height
     /// field instead of a flat slab.

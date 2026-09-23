@@ -87,7 +87,12 @@
       "name": "Garage",
       "cells": [
         {"id": "L0_GARAGE", "accessible": true, "standingPoint": [12.9, 0.15, -17.5], "tier": "M"},
-        {"id": "L0_GARAGE_LOFT", "accessible": true, "standingPoint": [12.9, 2.9, -19.35], "standingPosture": "crouched", "tier": "U"}
+        {
+          "id": "L0_GARAGE_LOFT",
+          "accessible": false,
+          "tier": "U",
+          "reason": "Visible storage loft reached only by a vertical ladder; ladder traversal is outside the walk-only showcase scope."
+        }
       ],
       "reviewPoses": ["garage-interior"]
     },
@@ -143,7 +148,7 @@
         {"id": "L2_WC6", "accessible": true, "standingPoint": [3.55, 6.55, -21.1], "tier": "S"},
         {"id": "L2_CLOSET_4", "accessible": true, "standingPoint": [-8.35, 6.55, -21.3], "tier": "U"},
         {"id": "L2_LINEN2", "accessible": true, "standingPoint": [-3.3, 6.55, -21.3], "tier": "U"},
-        {"id": "L2_STOR2", "accessible": true, "standingPoint": [5.45, 6.55, -22.45], "tier": "U"},
+        {"id": "L2_STOR2", "accessible": true, "standingPoint": [5.45, 6.55, -22.55], "tier": "U"},
         {
           "id": "L2_BALCONY_JULIET",
           "accessible": false,
@@ -176,12 +181,12 @@
       "id": "Z-STAIR",
       "name": "Vertical circulation",
       "cells": [
-        {"id": "B1_STAIR", "accessible": true, "standingPoint": [2.52, -2.3, -17.124], "tier": "S"},
-        {"id": "L0_STAIR_MAIN", "accessible": true, "standingPoint": [3.55, 0.6, -17.25], "standingPosture": "crouched", "tier": "M"},
+        {"id": "B1_STAIR", "accessible": true, "standingPoint": [2.55, -2.3, -17.25], "tier": "S"},
+        {"id": "L0_STAIR_MAIN", "accessible": true, "standingPoint": [3.1, 0.6, -17.25], "standingPosture": "crouched", "tier": "M"},
         {"id": "L1_STAIR_MAIN", "accessible": true, "standingPoint": [2.52, 3.65, -15.113], "tier": "M"},
         {"id": "L2_STAIR_MAIN", "accessible": true, "standingPoint": [2.52, 6.55, -16.873], "tier": "M"},
         {"id": "L2_STAIR_ATTIC", "accessible": true, "standingPoint": [6.8, 6.55, -16.3], "tier": "S"},
-        {"id": "L3_STAIR_HEAD", "accessible": true, "standingPoint": [5.85, 8.937, -17.75], "tier": "S"}
+        {"id": "L3_STAIR_HEAD", "accessible": true, "standingPoint": [5.85, 9.3, -17.99], "standingPosture": "crouched", "tier": "S"}
       ],
       "reviewPoses": [
         "main-stair-foot",

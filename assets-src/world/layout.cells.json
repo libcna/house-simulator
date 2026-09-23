@@ -2193,7 +2193,7 @@
     },
     {
       "id": "L2_SITTING", "level": "L2", "name": "Secondary Sitting Room", "kind": "room",
-      "boxes": [{ "x": [2.20, 8.70], "z": [-27.10, -22.90] }],
+      "boxes": [{ "x": [2.20, 8.70], "z": [-27.10, -23.10] }],
       "floorMaterial": "MAT_CARPET_GREY", "wallMaterial": "MAT_PAINT_LINEN",
       "ceilingMaterial": "MAT_PAINT_CEILING_COOL", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "carpet",
@@ -2224,8 +2224,9 @@
     },
     {
       "id": "L2_STOR2", "level": "L2", "name": "Upper Store 2", "kind": "closet",
-      "boxes": [{ "x": [2.20, 8.70], "z": [-22.90, -22.00] }],
-      // Shallow but long: 0.90 m deep and 6.50 m wide, so it is reached into along its length.
+      "boxes": [{ "x": [2.20, 8.70], "z": [-23.10, -22.00] }],
+      // Shallow but long: 1.10 m deep and 6.50 m wide. The 1.10 m depth preserves capsule
+      // clearance along the only walkable route to Bathroom 5.
       "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_SOFT_WHITE",
       "ceilingMaterial": "MAT_PAINT_CEILING_COOL", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "hardwood",

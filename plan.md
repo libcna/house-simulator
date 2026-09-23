@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **150 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 190 / 223 / 269 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G1, not passed.** Next: the grand tour `HOUSE-03226` |
+| Active plan | **149 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 186 / 219 / 265 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G1, not passed.** Next: the traversal sweep `HOUSE-03227` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -388,7 +388,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | Milestone | Track | ID range (new tasks) | Open tasks | Gate / exit | Advances | Budget (realistic agent-h) |
 |---|---|---|---|---|---|---|
 | [M0](#m0--scope-reset-and-breadth-instruments) — Scope reset and breadth instruments | A (support) | 03201–03220 | 0 | done | R10, G1–G5 | 0 |
-| [M1](#m1--whole-property-traversal-c1-everywhere--gate-g1) — Whole-property traversal | A | 03221–03260 | 5 | **G1** · `HOUSE-03240` | D2 | 10 |
+| [M1](#m1--whole-property-traversal-c1-everywhere--gate-g1) — Whole-property traversal | A | 03221–03260 | 2 | **G1** · `HOUSE-03240` | D2 | 3 |
 | [M2](#m2--architectural-completion-c2-everywhere--gate-g2) — Architectural completion | A | 03261–03300 | 8 | **G2** · `HOUSE-03280` | D1 | 15 |
 | [M3](#m3--the-reusable-furnishing-kit) — The reusable furnishing kit | A (support) | 03301–03340 | 14 | kit ready for M4 | D3 | 20 |
 | [M4](#m4--dressing-everywhere-the-furnishing-half-of-c3--checkpoint) — Dressing everywhere | A | 03341–03400 | 31 | checkpoint · `HOUSE-03380` | D3 | 31 |
@@ -493,9 +493,9 @@ green.
 - [x] HOUSE-03225 — Accessibility manifest: the intended-accessible cells and a validated standing point in each
       dep: HOUSE-03204 · sys: world · plat: TOOL · pri: MUST · zone: all · adv: D2, G1 · est: 2
       files: docs/zones.json or assets-src/world (recorded in docs/world-format.md), tools/world/validate_world.py
-      accept: (1) data lists every intended-accessible cell with a standing point: every interior cell except the two appliance interiors, the exterior cells inside the fences, the porch and balconies, and the accessible part of the road; (2) excluded cells (`EXT_WORLD`, `EXT_NORTHSTRIP`, `L2_BALCONY_JULIET`, `CELL_FRIDGE_INTERIOR`, `CELL_FREEZER_INTERIOR`) are listed with reasons; (3) the validator proves each standing point is on walkable collision inside its cell with headroom for the standing or crouched capsule (`HOUSE-00558`)
+      accept: (1) data lists every intended-accessible cell with a standing point: every walk-accessible interior cell except the two appliance interiors and garage loft, the exterior cells inside the fences, the porch and balconies, and the accessible part of the road; (2) excluded cells (`EXT_WORLD`, `EXT_NORTHSTRIP`, `L2_BALCONY_JULIET`, `L0_GARAGE_LOFT`, `CELL_FRIDGE_INTERIOR`, `CELL_FREEZER_INTERIOR`) are listed with reasons; (3) the validator proves each standing point is on walkable collision inside its cell with headroom for the standing or crouched capsule (`HOUSE-00558`)
       verify: `validate_world.py`
-      note: (2026-09-23) `docs/zones.json` now records collision-proven feet positions for all 91 intended-accessible cells; the under-stair store, main-stair lower pocket and garage loft explicitly use the crouched capsule. Rule 15 rebuilds the real static collision (including props and terrain), requires the exact five documented exclusions, and proves footprint containment, walkable support and posture headroom. The full authored world and focused missing/outside/low-headroom selftests pass
+      note: (2026-09-23) `docs/zones.json` now records collision-proven feet positions for all 90 intended-accessible cells; the under-stair store, main-stair lower pocket and attic stair head explicitly use the crouched capsule. Rule 15 rebuilds the real static collision (including props and terrain), requires the exact six documented exclusions, and proves footprint containment, walkable support and posture headroom. `HOUSE-03226`'s controller proof established that the ladder-only garage loft is visible architecture outside the walk-only accessibility contract (PC-2026-09-23). The full authored world and focused missing/outside/low-headroom selftests pass
 
 - [x] HOUSE-03228 — Repair the two integration tests left failing by the fixture-prop and posed-leaf changes
       dep: HOUSE-03223 · sys: ci · plat: CI · pri: MUST · zone: all · adv: D11, G1 · est: 1
@@ -505,12 +505,13 @@ green.
       note: (2026-09-22) recorded in `docs/handoff.md` by `HOUSE-03223`; neither failure is caused by collision
       note: (2026-09-23) the validation benchmark now loads `layout.props.json`, so Fast and Full validation both pass while measuring 2.09 ms and 2.50 ms median respectively. The posed-leaf frame is a repeatable 115 / 620 draws across three runs; its narrow guard is now `< 120`, with that measurement beside the assertion. The full integration label passes all 140 invoked tests
 
-- [ ] HOUSE-03226 — Grand-tour test: walk the real controller from the spawn to every accessible cell and back
+- [x] HOUSE-03226 — Grand-tour test: walk the real controller from the spawn to every accessible cell and back
       dep: HOUSE-03223, HOUSE-03224, HOUSE-03225 · sys: ci · plat: CI · pri: MUST · zone: all · adv: D2, G1 · est: 4
       files: tests/integration/GrandTourTests.cpp
       accept: (1) a deterministic headless run from the `EXT_ROAD` spawn through posed doors and gates and all 8 flights to every manifest standing point, and back; (2) arrival within 0.60 m (`HOUSE-00615`'s tolerance); (3) no step ends inside geometry, the boundary counter stays 0, and nothing falls below a floor; (4) the route is computed from the portal graph and the standing points, never a hand-written script per room; (5) runtime < 120 s so it runs in CI
       verify: integration GrandTourTests.EveryAccessibleCellIsReachedOnFoot
       note: from here on every architecture and furnishing task keeps this test green. A prop that blocks a route fails its own task; no later review has to catch it
+      note: (2026-09-23) the deterministic portal-graph tour drives production `PlayerStep` at 120 Hz from the road spawn through all eight flights and 90 manifest cells, then returns to the road. Its 558 derived stops completed in 90,614 controller steps with 33 local collision detours and 0 boundary, floor-loss or obstacle-penetration failures in 10.28 s. The real traversal exposed and fixed five minimal data defects: a garage-step offset, two basement service doors behind the stair wedge, the blocked L2 store connector, the attic flight's terminal rise and its misaligned landing opening. PC-2026-09-23 records the evidence and retained scope
 
 - [ ] HOUSE-03227 — Traversal sweep of every zone, and fix what it finds
       dep: HOUSE-03226 · sys: physics · plat: LNX · pri: MUST · zone: all · adv: D2, G1 · est: 2
@@ -1826,7 +1827,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 
 | Milestone | Tasks before | Hours before | **Tasks now** | Optimistic | **Realistic** | Pessimistic | Reserve |
 |---|---|---|---|---|---|---|---|
-| M1 Whole-property traversal | 4 | 9 | **3** | 5.95 | **7** | 10.7 | R-E +3 |
+| M1 Whole-property traversal | 4 | 9 | **2** | 2.55 | **3** | 6.3 | R-E +3 |
 | M2 Architectural completion | 8 | 18 | **8** | 12.75 | **15** | 16.5 | — |
 | M3 The reusable furnishing kit | 16 | 33 | **14** | 17 | **20** | 22 | — |
 | M4 Dressing everywhere | 40 | 48.75 | **31** | 26.25 | **31** | 37 | R-D +3 |
@@ -1842,10 +1843,10 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **150** | **189.7** | **223.25** | **269.45** | +24 |
+| **Total, all three platforms** | **205** | **318.75** | **149** | **186.3** | **219.25** | **265.05** | +24 |
 
 The realistic total lies in the 210–250 h target range, and the pessimistic total is under the
-**280 h hard ceiling** (rule R14) by about 10.5 h. That margin is small on purpose: the ceiling is a
+**280 h hard ceiling** (rule R14) by about 15 h. That margin is small on purpose: the ceiling is a
 limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |
@@ -1856,7 +1857,7 @@ limit, not a budget to fill.
 | R-D | M4 | 3 | a few rooms (the library shelving, the cinema, the workshop) need more than their recipe estimate |
 | R-E | M1 | 3 | the grand tour and the sweep expose geometry and collision fixes beyond M1's budget |
 
-**By area,** against the owner's sanity reference for this pass: traversal 7 h (≈ 11); architecture
+**By area,** against the owner's sanity reference for this pass: traversal 3 h (≈ 6); architecture
 15 h (≈ 18); furnishing kit 20 h (18–22); whole-house furnishing 31 h (30–38); lighting 19.75 h
 (18–22); C4/C5 polish 19.75 h (18–24); environment 13.25 h (10–15); audio 9 h (8–10); shell 8.5 h
 (8–10); performance 9.5 h (≈ 10); final polish 7 h (6–8); tests 3.5 h (≈ 5); Linux 10.25 h
@@ -1886,7 +1887,7 @@ limit, not a budget to fill.
 M1 grew by 1 h: `HOUSE-03228` gives the two integration failures found by `HOUSE-03223` a task, so
 G1 cannot pass while they are open.
 
-**Critical path.** M1 (`03225`, `03228`, the grand tour `03226`, the sweep, **G1**) → M2 (seven
+**Critical path.** M1 (the sweep `03227`, **G1**) → M2 (seven
 zone tasks, **G2**) → M4 (31 tasks on the M3 kit, the dressing checkpoint) → M5 (props versus bake,
 the furnished re-bake, zone lighting, **G3**) → M6a (**G4**) → M6b (**G5**) → M11 → M13 → the Web and
 Android verification blocks → M16. M3 must be ready before M4 starts; it may begin at any time under
@@ -1917,6 +1918,29 @@ Corrections made to `cna-house.md` or to this file during implementation, with t
 forced each one. Nothing is changed silently. The 2026-09-06 → 2026-09-20 corrections are in the
 legacy ledger; the two of 2026-09-21 (`HOUSE-03201`, `HOUSE-03205`) are in
 [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md).
+
+### PC-2026-09-23 — Walk-only accessibility and traversal topology (`HOUSE-03226`)
+
+* **Evidence:** the production controller cannot reach `L0_GARAGE_LOFT`: its floor is 2.75 m above
+  the garage and the showcase deliberately has no ladder or jump traversal. The first complete
+  controller tour then found four authored route obstructions: `STEPS_GARAGE` did not overlap the
+  mudroom aperture; both basement service doors were behind the solid basement-stair wedge; the
+  0.90 m-deep `L2_STOR2` connector's three leaves all swung inward and blocked the only route to
+  `L2_BATH5`; and the attic flight ended in a 230 mm rise, above the controller's 220 mm step-up,
+  while its store opening overlapped the 0.90 m landing by only 50 mm.
+* **Correction:** classify the visible ladder-only garage loft as excluded from the walk-only
+  accessibility manifest (91 → 90 accessible cells; five → six documented exclusions). Move the
+  existing garage steps onto their aperture and the two existing basement doors to unobstructed
+  positions. Widen `L2_STOR2` by 0.20 m at its shared boundary with `L2_SITTING` and swing its three
+  existing leaves into their destination rooms. Set the attic going to 235 mm and align its
+  existing store opening with the landing. Standing points were adjusted only where these facts
+  changed the safe destination.
+* **Result:** the deterministic tour derives 558 stops from the portal graph and manifest, drives
+  the real controller through all eight flights and all 90 accessible cells, and returns to the
+  road in 90,614 steps / 10.28 s with zero boundary, floor-loss or obstacle-penetration failures.
+* **Preserved:** every floor, the garage and loft architecture, every room, the exterior and all
+  three platforms remain. No room, door, feature or system was added, and the 280-hour ceiling was
+  unchanged. This is the smallest evidence-driven R15 correction, not another scope reduction.
 
 ### PC-2026-09-22 — Final scope reduction: canonical tasks, five hero areas, a 280-hour ceiling (`HOUSE-03206`, ADR-0016)
 

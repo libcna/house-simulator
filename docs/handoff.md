@@ -1,3 +1,37 @@
+# Traversal handoff — 2026-09-23 (`HOUSE-03226` grand tour)
+
+`HOUSE-03226` is complete. `GrandTourTests.EveryAccessibleCellIsReachedOnFoot` derives a
+deterministic spanning tour from the production portal graph, the accessibility manifest and all
+eight authored flights. It drives production `PlayerStep` at 120 Hz from the `EXT_ROAD` spawn to
+all 90 intended-accessible cells and back. The final route has 558 stops and completes in 90,614
+controller steps with 33 bounded local collision detours; the measured focused run was 10.28 s,
+well below the 120 s CI limit. Every arrival is within 0.60 m, the boundary counter remains zero,
+and no step loses its floor or ends meaningfully inside terrain, walls, props, ceilings or exterior
+collision.
+
+The first real tour exposed narrowly scoped world-data faults. The garage steps were shifted onto
+the mudroom aperture; the two basement service doors were moved from behind the solid stair wedge;
+the L2 store connector gained 0.20 m from the adjoining sitting room and its three existing leaves
+now swing outward; and the attic going was shortened to 235 mm so its terminal rise no longer
+exceeds the controller's 220 mm step-up, with the existing landing opening aligned to it. The
+ladder-only garage loft is now one of six explicit exclusions because the walk-only showcase has no
+ladder traversal. PC-2026-09-23 records the evidence; no room, door, gameplay feature or subsystem
+was added.
+
+Rule that chose this task: M1's dependency order and R1/G1. It advances every zone's C1 proof at
+once and consumes `HOUSE-03223`–`03225` exactly as scheduled. The next unblocked MUST task is the
+Linux traversal sweep `HOUSE-03227`; after it, `HOUSE-03240` reviews gate G1.
+
+Validation: the world content rebuilt; all fifteen authored-world rules pass; the focused grand
+tour passes repeatedly with the same 90 cells, 558 stops, 90,614 steps and 33 detours. The changed
+shell was regenerated and unwrapped; all eight flights, 128 wall openings and 63 physical door
+leaves pass `verify_shell.py`. All 1,418 unit tests and all 141 integration invocations pass. The
+full static suite passes every substantive gate, including 325 strict-XNA translation units, but
+exits nonzero on the pre-existing ignored `.claude` root directory reported by `check_layout.py`;
+this task neither touched nor staged it.
+
+---
+
 # CI handoff — 2026-09-23 (`HOUSE-03228` integration repairs)
 
 `HOUSE-03228` is complete. `WorldLoadTests.ValidatingTheHouseCostsLessThanReadingIt` now loads
@@ -22,11 +56,12 @@ tests (139 integration cases plus the world-content fixture setup).
 
 # World handoff — 2026-09-23 (`HOUSE-03225` accessibility manifest)
 
-`HOUSE-03225` is complete. `docs/zones.json` now gives all 91 intended-accessible cells a concrete
-feet position on the real static collision; `B1_UNDERSTAIR`, `L0_STAIR_MAIN` and
-`L0_GARAGE_LOFT` explicitly select the crouched controller, while the other 88 select standing.
-The excluded set is exactly `EXT_WORLD`, `EXT_NORTHSTRIP`, `L2_BALCONY_JULIET`,
-`CELL_FRIDGE_INTERIOR` and `CELL_FREEZER_INTERIOR`, each with its retained reason.
+`HOUSE-03225` is complete. As corrected by the first real controller tour in `HOUSE-03226`,
+`docs/zones.json` gives all 90 intended-accessible cells a concrete feet position on the real
+static collision; `B1_UNDERSTAIR`, `L0_STAIR_MAIN` and `L3_STAIR_HEAD` explicitly select the
+crouched controller, while the other 87 select standing. The excluded set is exactly `EXT_WORLD`,
+`EXT_NORTHSTRIP`, `L2_BALCONY_JULIET`, `L0_GARAGE_LOFT`, `CELL_FRIDGE_INTERIOR` and
+`CELL_FREEZER_INTERIOR`, each with its retained reason.
 
 World-validator rule 15 rebuilds production collision including placed-prop proxies and terrain.
 For each point it proves the 0.31 m-radius capsule remains in the cell footprint, the feet are
@@ -34,7 +69,7 @@ within 1 cm of a walkable floor/stair/terrain surface under the controller's slo
 selected 1.80 m standing or 1.25 m crouched capsule has clearance. Supporting stair triangles are
 treated as grounded contact rather than an overhead obstacle, while every other collision shape
 still participates. The zone-scoreboard gate also rejects missing/malformed points, postures,
-reasons and any change to the five exclusions. Focused selftests cover missing and out-of-cell
+reasons and any change to the six exclusions. Focused selftests cover missing and out-of-cell
 points plus the standing-versus-crouched headroom distinction.
 
 Rule that chose this task: M1 dependency order and R1/G1. The house-wide accessibility contract is

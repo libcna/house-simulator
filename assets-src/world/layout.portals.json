@@ -172,7 +172,7 @@
     {
       "id": "P_L3_HEAD__L3_STORE_E", "cellA": "L3_STAIR_HEAD", "cellB": "L3_STORE_E",
       "plane": { "axis": "z", "value": -18.3 },
-      "rect": { "u": [6.25, 7.35], "v": [9.3, 11.1] },
+      "rect": { "u": [5.35, 6.35], "v": [9.3, 11.1] },
       "kind": "cased_opening", "aperture": null, "opacity": "open", "crouch": true,
       "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
@@ -401,17 +401,17 @@
       "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
-      "id": "P_B1_STAIR__B1_MECHANICAL", "cellA": "B1_STAIR", "cellB": "B1_MECHANICAL",
-      "plane": { "axis": "x", "value": 4.9 },
-      "rect": { "u": [-15.25, -14.35], "v": [-2.3, -0.2] },
-      "kind": "door", "aperture": "DOOR_B1_STAIR__B1_MECHANICAL", "opacity": "opaque_when_closed",
+      "id": "P_B1_MECHANICAL__B1_ELECTRICAL", "cellA": "B1_MECHANICAL", "cellB": "B1_ELECTRICAL",
+      "plane": { "axis": "z", "value": -18.3 },
+      "rect": { "u": [6.2, 7.1], "v": [-2.3, -0.2] },
+      "kind": "door", "aperture": "DOOR_B1_MECHANICAL__B1_ELECTRICAL", "opacity": "opaque_when_closed",
       "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
-      "id": "P_B1_STAIR__B1_ELECTRICAL", "cellA": "B1_STAIR", "cellB": "B1_ELECTRICAL",
-      "plane": { "axis": "x", "value": 4.9 },
-      "rect": { "u": [-19.7, -18.8], "v": [-2.3, -0.2] },
-      "kind": "door", "aperture": "DOOR_B1_STAIR__B1_ELECTRICAL", "opacity": "opaque_when_closed",
+      "id": "P_B1_ELECTRICAL__B1_UTILITY", "cellA": "B1_ELECTRICAL", "cellB": "B1_UTILITY",
+      "plane": { "axis": "z", "value": -20.6 },
+      "rect": { "u": [7.5, 8.4], "v": [-2.3, -0.2] },
+      "kind": "door", "aperture": "DOOR_B1_ELECTRICAL__B1_UTILITY", "opacity": "opaque_when_closed",
       "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
@@ -738,7 +738,7 @@
     },
     {
       "id": "P_L2_STOR2__L2_SITTING", "cellA": "L2_STOR2", "cellB": "L2_SITTING",
-      "plane": { "axis": "z", "value": -22.9 },
+      "plane": { "axis": "z", "value": -23.1 },
       "rect": { "u": [5.0, 5.9], "v": [6.55, 8.65] },
       "kind": "door", "aperture": "DOOR_L2_STOR2__L2_SITTING", "opacity": "opaque_when_closed",
       "soundLoss": { "open": 0.109, "closed": 0.842 }

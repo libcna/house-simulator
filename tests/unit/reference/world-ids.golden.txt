@@ -148,6 +148,7 @@ interactables/interactables	DOOR_B1_CELLAR
 interactables/interactables	DOOR_B1_CINEMA
 openings/openings	DOOR_B1_CINEMA__B1_UTILITY
 interactables/interactables	DOOR_B1_ELECTRICAL
+openings/openings	DOOR_B1_ELECTRICAL__B1_UTILITY
 interactables/interactables	DOOR_B1_GYM
 openings/openings	DOOR_B1_GYM__B1_WORKSHOP
 openings/openings	DOOR_B1_HALL__B1_CINEMA
@@ -162,9 +163,8 @@ openings/openings	DOOR_B1_HOBBY__B1_STOR1
 openings/openings	DOOR_B1_HOBBY__B1_STOR2
 interactables/interactables	DOOR_B1_LAUNDRY2
 interactables/interactables	DOOR_B1_MECHANICAL
-openings/openings	DOOR_B1_STAIR__B1_ELECTRICAL
+openings/openings	DOOR_B1_MECHANICAL__B1_ELECTRICAL
 openings/openings	DOOR_B1_STAIR__B1_HALL
-openings/openings	DOOR_B1_STAIR__B1_MECHANICAL
 interactables/interactables	DOOR_B1_STOR1
 interactables/interactables	DOOR_B1_STOR2
 interactables/interactables	DOOR_B1_UNDERSTAIR
@@ -1764,6 +1764,7 @@ props/props	PROP_LIVING_TABLE_DRESSING
 props/props	PROP_LIVING_UPRIGHT_PIANO
 props/props	PROP_LIVING_WALL_ART_PAIR
 portals/portals	P_B1_CINEMA__B1_UTILITY
+portals/portals	P_B1_ELECTRICAL__B1_UTILITY
 portals/portals	P_B1_GYM__B1_WORKSHOP
 portals/portals	P_B1_GYM__W1
 portals/portals	P_B1_GYM__W2
@@ -1776,10 +1777,9 @@ portals/portals	P_B1_HALL__B1_WC7
 portals/portals	P_B1_HOBBY__B1_CELLAR
 portals/portals	P_B1_HOBBY__B1_STOR1
 portals/portals	P_B1_HOBBY__B1_STOR2
+portals/portals	P_B1_MECHANICAL__B1_ELECTRICAL
 portals/portals	P_B1_MECHANICAL__W1
-portals/portals	P_B1_STAIR__B1_ELECTRICAL
 portals/portals	P_B1_STAIR__B1_HALL
-portals/portals	P_B1_STAIR__B1_MECHANICAL
 portals/portals	P_B1_STOR1__W1
 portals/portals	P_B1_STOR2__W1
 portals/portals	P_B1_STOR2__W2

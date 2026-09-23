@@ -55,14 +55,14 @@
     {
       "id": "SWITCH_B1_ELECTRICAL", "kind": "light_switch", "cell": "B1_ELECTRICAL",
       "prop": null,
-      "focus": { "point": [4.96, -1.10, -20.00], "normal": [1.0, 0.0, 0.0], "radius": 0.30 },
+      "focus": { "point": [7.40, -1.10, -20.54], "normal": [0.0, 0.0, 1.0], "radius": 0.30 },
       "actions": [
         { "verb": "lights", "do": "toggle(state.LG_B1_ELECTRICAL_MAIN)",
           "sound": "SFX_SWITCH_CLICK", "duration": 0.12 }
       ],
       "state": { "LG_B1_ELECTRICAL_MAIN": false },
       "persist": ["LG_B1_ELECTRICAL_MAIN"],
-      "portal": "P_B1_STAIR__B1_ELECTRICAL"
+      "portal": "P_B1_ELECTRICAL__B1_UTILITY"
     },
 
     // ---- SWITCH_B1_GYM: 2 gangs
@@ -134,14 +134,14 @@
     {
       "id": "SWITCH_B1_MECHANICAL", "kind": "light_switch", "cell": "B1_MECHANICAL",
       "prop": null,
-      "focus": { "point": [4.96, -1.10, -17.05], "normal": [1.0, 0.0, 0.0], "radius": 0.30 },
+      "focus": { "point": [6.10, -1.10, -18.24], "normal": [0.0, 0.0, 1.0], "radius": 0.30 },
       "actions": [
         { "verb": "lights", "do": "toggle(state.LG_B1_MECHANICAL_MAIN)",
           "sound": "SFX_SWITCH_CLICK", "duration": 0.12 }
       ],
       "state": { "LG_B1_MECHANICAL_MAIN": false },
       "persist": ["LG_B1_MECHANICAL_MAIN"],
-      "portal": "P_B1_STAIR__B1_MECHANICAL"
+      "portal": "P_B1_MECHANICAL__B1_ELECTRICAL"
     },
 
     // ---- SWITCH_B1_STAIR: 1 gang
@@ -1047,7 +1047,7 @@
     {
       "id": "SWITCH_L2_SITTING", "kind": "light_switch", "cell": "L2_SITTING",
       "prop": null,
-      "focus": { "point": [4.70, 7.75, -22.96], "normal": [0.0, 0.0, -1.0], "radius": 0.30 },
+      "focus": { "point": [4.70, 7.75, -23.16], "normal": [0.0, 0.0, -1.0], "radius": 0.30 },
       "actions": [
         { "verb": "lights", "do": "toggle(state.LG_L2_SITTING_MAIN)",
           "sound": "SFX_SWITCH_CLICK", "duration": 0.12 }
@@ -1236,8 +1236,8 @@
     {
       "id": "DOOR_B1_MECHANICAL", "kind": "door", "cell": "B1_MECHANICAL",
       "prop": null,
-      "focus": { "point": [4.96, -1.25, -15.94], "normal": [1.0, 0.0, 0.0], "radius": 0.35 },
-      "bounds": { "min": [4.87, -2.30, -16.75], "max": [4.93, -0.20, -15.85] },
+      "focus": { "point": [6.65, -1.25, -18.24], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "bounds": { "min": [6.20, -2.30, -18.33], "max": [7.10, -0.20, -18.27] },
       "actions": [
         { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
           "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
@@ -1246,13 +1246,13 @@
       ],
       "state": { "openFraction": 0.0, "latched": true, "locked": false },
       "persist": ["openFraction"],
-      "portal": "P_B1_STAIR__B1_MECHANICAL"
+      "portal": "P_B1_MECHANICAL__B1_ELECTRICAL"
     },
     {
       "id": "DOOR_B1_ELECTRICAL", "kind": "door", "cell": "B1_ELECTRICAL",
       "prop": null,
-      "focus": { "point": [4.96, -1.25, -18.89], "normal": [1.0, 0.0, 0.0], "radius": 0.35 },
-      "bounds": { "min": [4.87, -2.30, -19.70], "max": [4.93, -0.20, -18.80] },
+      "focus": { "point": [7.95, -1.25, -20.54], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "bounds": { "min": [7.50, -2.30, -20.63], "max": [8.40, -0.20, -20.57] },
       "actions": [
         { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
           "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
@@ -1261,7 +1261,7 @@
       ],
       "state": { "openFraction": 0.0, "latched": true, "locked": false },
       "persist": ["openFraction"],
-      "portal": "P_B1_STAIR__B1_ELECTRICAL"
+      "portal": "P_B1_ELECTRICAL__B1_UTILITY"
     },
     {
       "id": "DOOR_B1_UTILITY", "kind": "door", "cell": "B1_UTILITY",
@@ -1611,8 +1611,8 @@
     {
       "id": "DOOR_L2_STOR2_2", "kind": "door", "cell": "L2_STOR2",
       "prop": null,
-      "focus": { "point": [5.81, 7.60, -22.84], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
-      "bounds": { "min": [5.00, 6.55, -22.93], "max": [5.90, 8.65, -22.87] },
+      "focus": { "point": [5.81, 7.60, -23.04], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "bounds": { "min": [5.00, 6.55, -23.13], "max": [5.90, 8.65, -23.07] },
       "actions": [
         { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
           "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },

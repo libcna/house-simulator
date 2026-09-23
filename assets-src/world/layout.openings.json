@@ -28,8 +28,8 @@
   "openings": [
     // ---- D_INT_PASSAGE x27 -- §12.3's 0.86 x 2.05 interior leaf, latch only.
     {
-      "id": "DOOR_B1_STAIR__B1_MECHANICAL", "kind": "door", "type": "D_INT_PASSAGE",
-      "portal": "P_B1_STAIR__B1_MECHANICAL",
+      "id": "DOOR_B1_MECHANICAL__B1_ELECTRICAL", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_B1_MECHANICAL__B1_ELECTRICAL",
       "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
       "hinge": "left", "swing": "B1_MECHANICAL", "maxAngleDeg": 95.0, "openFraction": 0.90,
       "frame": { "asset": null, "casing": 0.070 },
@@ -37,8 +37,8 @@
       "solid": false, "lockable": false
     },
     {
-      "id": "DOOR_B1_STAIR__B1_ELECTRICAL", "kind": "door", "type": "D_INT_PASSAGE",
-      "portal": "P_B1_STAIR__B1_ELECTRICAL",
+      "id": "DOOR_B1_ELECTRICAL__B1_UTILITY", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_B1_ELECTRICAL__B1_UTILITY",
       "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
       "hinge": "left", "swing": "B1_ELECTRICAL", "maxAngleDeg": 95.0, "openFraction": 0.90,
       "frame": { "asset": null, "casing": 0.070 },
@@ -251,7 +251,7 @@
       "id": "DOOR_L2_GAMES__L2_STOR2", "kind": "door", "type": "D_INT_PASSAGE",
       "portal": "P_L2_GAMES__L2_STOR2",
       "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
-      "hinge": "left", "swing": "L2_STOR2", "maxAngleDeg": 95.0, "openFraction": 0.90,
+      "hinge": "left", "swing": "L2_GAMES", "maxAngleDeg": 95.0, "openFraction": 0.90,
       "frame": { "asset": null, "casing": 0.070 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
       "solid": false, "lockable": false
@@ -260,7 +260,7 @@
       "id": "DOOR_L2_STOR2__L2_SITTING", "kind": "door", "type": "D_INT_PASSAGE",
       "portal": "P_L2_STOR2__L2_SITTING",
       "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
-      "hinge": "left", "swing": "L2_STOR2", "maxAngleDeg": 95.0, "openFraction": 0.90,
+      "hinge": "left", "swing": "L2_SITTING", "maxAngleDeg": 95.0, "openFraction": 0.90,
       "frame": { "asset": null, "casing": 0.070 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
       "solid": false, "lockable": false
@@ -471,7 +471,7 @@
       "id": "DOOR_L2_STOR2__L2_BATH5", "kind": "door", "type": "D_INT_PRIVACY",
       "portal": "P_L2_STOR2__L2_BATH5",
       "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
-      "hinge": "left", "swing": "L2_STOR2", "maxAngleDeg": 95.0, "openFraction": 0.90,
+      "hinge": "left", "swing": "L2_BATH5", "maxAngleDeg": 95.0, "openFraction": 0.90,
       "frame": { "asset": null, "casing": 0.070 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
       "solid": false, "lockable": true
