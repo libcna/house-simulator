@@ -1,3 +1,28 @@
+# Generated prop-kit handoff — 2026-09-23 (`HOUSE-00985`)
+
+The main furnishing breadth kit is generated from `tools/blender/prop_kit_data.json` by one bounded
+Blender author. Its 16 static pieces cover six door/drawer/open carcasses (wardrobe, dresser,
+chest, nightstand, bookcase and utility module), open shelving, a workbench/worktop, a lidded box,
+mirror, towel rail, static cinema screen, projector body, and duct/pipe/cable variants from one
+service-run author. No radiator exists in the authored house data, so the conditional radiator
+variant was correctly omitted. This is content generation only, not a new runtime system.
+
+Every GLB has UV0, a support- or wall-plane origin, approved material-role mappings and exactly one
+12-triangle `_COL` proxy. The one group gate regenerates each piece twice and checks byte identity,
+manifest hashes, bounds, triangle ceilings, materials, collision and the six production family
+examples. Those examples are placed in `L1_MASTER_CLOSET`, `L3_STORE_W`, `B1_WORKSHOP`, `B1_WC7`
+and `B1_MECHANICAL`; all 139 production prop rows preserve support, openings and a 0.70 m route.
+All 16 assets compile through CNA. A 900×675 rendered 4×4 kit overview was inspected with collision
+meshes hidden; no floating, clipping or z-fighting was visible.
+
+The remaining forecast is 190.75 realistic / 230.7 pessimistic hours. With 35.5 task-hours spent
+since the final reduction, the R14 projection is 266.2 h, 13.8 h below the hard limit. Rule that
+chooses the next task: R1's house-wide support exception, R8's kit-first rule and M3 dependency
+order select the remaining generated window dressing. The exact next unblocked MUST task is
+`HOUSE-02681`.
+
+---
+
 # Seeded fill-kit handoff — 2026-09-23 (`HOUSE-00973`)
 
 Four bounded reusable fill families now live under `assets-src/Models/Furniture/Fill`: books,

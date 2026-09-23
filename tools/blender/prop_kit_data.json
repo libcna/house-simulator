@@ -1,0 +1,18 @@
+{
+  "wardrobe": {"family": "carcass", "variant": "doors", "size": [1.20, 2.05, 0.58], "category": "storage-furniture"},
+  "dresser": {"family": "carcass", "variant": "drawers", "size": [1.20, 0.82, 0.50], "category": "storage-furniture"},
+  "chest": {"family": "carcass", "variant": "chest", "size": [0.90, 0.52, 0.48], "category": "storage-furniture"},
+  "nightstand": {"family": "carcass", "variant": "door-drawer", "size": [0.48, 0.58, 0.42], "category": "storage-furniture"},
+  "bookcase": {"family": "carcass", "variant": "open", "size": [0.92, 1.82, 0.34], "category": "storage-furniture"},
+  "utility_module": {"family": "carcass", "variant": "doors", "size": [0.90, 0.92, 0.58], "category": "storage-furniture"},
+  "open_shelf": {"family": "shelving", "variant": "open", "size": [1.20, 1.80, 0.42], "category": "open-shelving"},
+  "workbench": {"family": "worktop", "variant": "bench", "size": [1.60, 0.90, 0.68], "category": "workbench"},
+  "storage_box": {"family": "box", "variant": "lidded", "size": [0.58, 0.38, 0.42], "category": "storage-box"},
+  "mirror": {"family": "fixture", "variant": "mirror", "size": [0.62, 0.82, 0.035], "category": "mirror", "mount": "wall"},
+  "towel_rail": {"family": "fixture", "variant": "towel-rail", "size": [0.64, 0.18, 0.08], "category": "towel-rail", "mount": "wall"},
+  "static_screen": {"family": "fixture", "variant": "screen", "size": [2.40, 1.35, 0.06], "category": "static-screen", "mount": "wall"},
+  "projector": {"family": "fixture", "variant": "projector", "size": [0.34, 0.14, 0.30], "category": "projector", "mount": "wall"},
+  "duct_run": {"family": "service-run", "variant": "duct", "size": [1.80, 0.30, 0.36], "category": "service-run", "mount": "wall"},
+  "pipe_run": {"family": "service-run", "variant": "pipe", "size": [1.80, 0.12, 0.12], "category": "service-run", "mount": "wall"},
+  "cable_run": {"family": "service-run", "variant": "cable", "size": [1.80, 0.055, 0.055], "category": "service-run", "mount": "wall"}
+}

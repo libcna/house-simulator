@@ -255,6 +255,9 @@ run_gate "world-rules-selftest" python3 tools/world/validate_world.py --selftest
 # contained, mutually clear and out of the 0.70 m circulation route.
 run_gate "prop-placement" python3 tools/world/validate_props.py
 run_gate "prop-placement-selftest" python3 tools/world/validate_props.py --selftest
+# `HOUSE-00985`. One group gate regenerates the bounded storage/fixture/service kit from its
+# compact data table and pins collision, material, origin and canonical-example contracts.
+run_gate "prop-kit" python3 tools/assets/prop_kit_prepare.py --check
 # `HOUSE-03204`.  The breadth-first plan depends on every authored cell belonging to exactly one
 # planning zone with one quality tier.  A missing or duplicate assignment makes the scoreboard lie
 # precisely where it is meant to prevent another ground-floor-only convergence loop.

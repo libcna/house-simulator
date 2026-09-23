@@ -274,6 +274,94 @@
       }
     },
     {
+      "id": "MODEL_BUTLERS_CROCKERY_SHELF",
+      "category": "pantry-shelf",
+      "sourceFile": "assets-src/Models/Furniture/Kitchen/butlers_crockery_shelf.glb",
+      "sourceSha256": "f3c01dde03ee0a4fae1ccce41dca32b7bc289bedf882045234444f67ac20c8f4",
+      "contentName": "Models/Furniture/Kitchen/butlers_crockery_shelf",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Butler pantry crockery shelving",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored measured cabinet, stacked plates, mugs and jars from tools/blender/butlers_pantry_shelf.py for HOUSE-01075; existing approved material textures are reused."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.055,
+          2.24,
+          0.322
+        ],
+        "triangles": {
+          "LOD0": 2928
+        },
+        "collision": "butlers_crockery_shelf_001_back_COL"
+      },
+      "materialMap": {
+        "CAB_OAK": "MAT_DOOR_HARDWOOD",
+        "CAB_PAINT": "MAT_DOOR_PAINTED",
+        "CAB_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "PANTRY_CERAMIC": "MAT_FOYER_CERAMIC"
+      },
+      "usedIn": [
+        "L0_BUTLERS"
+      ]
+    },
+    {
+      "id": "MODEL_BUTLERS_DRY_SHELF",
+      "category": "pantry-shelf",
+      "sourceFile": "assets-src/Models/Furniture/Kitchen/butlers_dry_shelf.glb",
+      "sourceSha256": "149511e117260acd8f5958ef5278349bb896099f55185e66b6dd210ba0b7487a",
+      "contentName": "Models/Furniture/Kitchen/butlers_dry_shelf",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Butler pantry dry-goods shelving",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored measured cabinet, tins, baskets and provisions from tools/blender/butlers_pantry_shelf.py for HOUSE-01075; existing approved material textures are reused."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.055,
+          2.24,
+          0.322
+        ],
+        "triangles": {
+          "LOD0": 2824
+        },
+        "collision": "butlers_dry_shelf_001_back_COL"
+      },
+      "materialMap": {
+        "CAB_OAK": "MAT_DOOR_HARDWOOD",
+        "CAB_PAINT": "MAT_DOOR_PAINTED",
+        "CAB_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "PANTRY_CERAMIC": "MAT_FOYER_CERAMIC",
+        "PANTRY_LINEN": "MAT_FURNITURE_DINING_LINEN",
+        "PANTRY_PAPER": "MAT_LIVING_ART_PAPER"
+      },
+      "usedIn": [
+        "L0_BUTLERS"
+      ]
+    },
+    {
       "id": "MODEL_BUTLERS_SERVICE_RUN",
       "category": "kitchen-service-run",
       "sourceFile": "assets-src/Models/Furniture/Kitchen/butlers_run.glb",
@@ -317,164 +405,6 @@
       "usedIn": [
         "L0_BUTLERS"
       ]
-    },
-    {
-      "id": "MODEL_BUTLERS_DRY_SHELF",
-      "category": "pantry-shelf",
-      "sourceFile": "assets-src/Models/Furniture/Kitchen/butlers_dry_shelf.glb",
-      "sourceSha256": "149511e117260acd8f5958ef5278349bb896099f55185e66b6dd210ba0b7487a",
-      "contentName": "Models/Furniture/Kitchen/butlers_dry_shelf",
-      "kind": "model", "residencyPack": "house-l0",
-      "origin": {
-        "kind": "authored", "name": "Butler pantry dry-goods shelving",
-        "licence": "Ms-PL", "licenceFile": "LICENSE", "attribution": "",
-        "redistributeSource": true, "redistributeDerived": true,
-        "commercialUse": true, "modification": true,
-        "note": "Project-authored measured cabinet, tins, baskets and provisions from tools/blender/butlers_pantry_shelf.py for HOUSE-01075; existing approved material textures are reused."
-      },
-      "geometry": {
-        "unitScale": 1, "upAxis": "Y", "boundsMetres": [1.055, 2.24, 0.322],
-        "triangles": {"LOD0": 2824},
-        "collision": "butlers_dry_shelf_001_back_COL"
-      },
-      "materialMap": {
-        "CAB_OAK": "MAT_DOOR_HARDWOOD", "CAB_PAINT": "MAT_DOOR_PAINTED",
-        "CAB_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
-        "PANTRY_CERAMIC": "MAT_FOYER_CERAMIC",
-        "PANTRY_LINEN": "MAT_FURNITURE_DINING_LINEN",
-        "PANTRY_PAPER": "MAT_LIVING_ART_PAPER"
-      },
-      "usedIn": ["L0_BUTLERS"]
-    },
-    {
-      "id": "MODEL_BUTLERS_CROCKERY_SHELF",
-      "category": "pantry-shelf",
-      "sourceFile": "assets-src/Models/Furniture/Kitchen/butlers_crockery_shelf.glb",
-      "sourceSha256": "f3c01dde03ee0a4fae1ccce41dca32b7bc289bedf882045234444f67ac20c8f4",
-      "contentName": "Models/Furniture/Kitchen/butlers_crockery_shelf",
-      "kind": "model", "residencyPack": "house-l0",
-      "origin": {
-        "kind": "authored", "name": "Butler pantry crockery shelving",
-        "licence": "Ms-PL", "licenceFile": "LICENSE", "attribution": "",
-        "redistributeSource": true, "redistributeDerived": true,
-        "commercialUse": true, "modification": true,
-        "note": "Project-authored measured cabinet, stacked plates, mugs and jars from tools/blender/butlers_pantry_shelf.py for HOUSE-01075; existing approved material textures are reused."
-      },
-      "geometry": {
-        "unitScale": 1, "upAxis": "Y", "boundsMetres": [1.055, 2.24, 0.322],
-        "triangles": {"LOD0": 2928},
-        "collision": "butlers_crockery_shelf_001_back_COL"
-      },
-      "materialMap": {
-        "CAB_OAK": "MAT_DOOR_HARDWOOD", "CAB_PAINT": "MAT_DOOR_PAINTED",
-        "CAB_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
-        "PANTRY_CERAMIC": "MAT_FOYER_CERAMIC"
-      },
-      "usedIn": ["L0_BUTLERS"]
-    },
-    {
-      "id": "MODEL_FILL_BOOKS",
-      "category": "fill-kit",
-      "sourceFile": "assets-src/Models/Furniture/Fill/fill_books.glb",
-      "sourceSha256": "550f493755de5db3230b0cbe8c2c647b79c1a2b9ae01d8d1cfa6a5c28f156807",
-      "contentName": "Models/Furniture/Fill/fill_books",
-      "kind": "model", "residencyPack": "core",
-      "origin": {
-        "kind": "generated", "name": "Seeded reusable book fill kit",
-        "licence": "Ms-PL", "licenceFile": "LICENSE", "attribution": "",
-        "redistributeSource": true, "redistributeDerived": true,
-        "commercialUse": true, "modification": true,
-        "note": "Generated deterministically with seed 97301 by tools/blender/fill_kit_gen.py for HOUSE-00973. Project-authored primitives and approved canonical material roles only; no third-party geometry is copied."
-      },
-      "geometry": {
-        "unitScale": 1, "upAxis": "Y", "boundsMetres": [0.472349, 0.305038, 0.326886],
-        "triangles": {"LOD0": 484}
-      },
-      "materialMap": {
-        "FILL_CREAM": "MAT_FURNITURE_DINING_LINEN", "FILL_BLUE": "MAT_PAINT_DUSTY_BLUE",
-        "FILL_GREEN": "MAT_PAINT_SAGE", "FILL_OCHRE": "MAT_PAINT_SMOKY_OCHRE",
-        "FILL_RED": "MAT_PAINT_PALE_ROSE", "FILL_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
-        "FILL_WOOD": "MAT_DOOR_HARDWOOD", "FILL_GLASS": "MAT_FOYER_CERAMIC"
-      },
-      "usedIn": ["L2_LIBRARY", "L3_ROOM"]
-    },
-    {
-      "id": "MODEL_FILL_TEXTILES",
-      "category": "fill-kit",
-      "sourceFile": "assets-src/Models/Furniture/Fill/fill_textiles.glb",
-      "sourceSha256": "69a41cdaa267c8aa5200a69cd9f79f1f2e964998633fa13e12c07fd3a7baaee9",
-      "contentName": "Models/Furniture/Fill/fill_textiles",
-      "kind": "model", "residencyPack": "core",
-      "origin": {
-        "kind": "generated", "name": "Seeded reusable folded-textile fill kit",
-        "licence": "Ms-PL", "licenceFile": "LICENSE", "attribution": "",
-        "redistributeSource": true, "redistributeDerived": true,
-        "commercialUse": true, "modification": true,
-        "note": "Generated deterministically with seed 97302 by tools/blender/fill_kit_gen.py for HOUSE-00973. Project-authored primitives and approved canonical material roles only; no third-party geometry is copied."
-      },
-      "geometry": {
-        "unitScale": 1, "upAxis": "Y", "boundsMetres": [0.495934, 0.382364, 0.343637],
-        "triangles": {"LOD0": 264}
-      },
-      "materialMap": {
-        "FILL_CREAM": "MAT_FURNITURE_DINING_LINEN", "FILL_BLUE": "MAT_PAINT_DUSTY_BLUE",
-        "FILL_GREEN": "MAT_PAINT_SAGE", "FILL_OCHRE": "MAT_PAINT_SMOKY_OCHRE",
-        "FILL_RED": "MAT_PAINT_PALE_ROSE", "FILL_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
-        "FILL_WOOD": "MAT_DOOR_HARDWOOD", "FILL_GLASS": "MAT_FOYER_CERAMIC"
-      },
-      "usedIn": ["L1_MASTER_CLOSET", "L3_STORE_W"]
-    },
-    {
-      "id": "MODEL_FILL_CROCKERY",
-      "category": "fill-kit",
-      "sourceFile": "assets-src/Models/Furniture/Fill/fill_crockery.glb",
-      "sourceSha256": "11bd4c58ab23b583a27938e6f644f53c7d3c0888cdf4fc44010173e4206526be",
-      "contentName": "Models/Furniture/Fill/fill_crockery",
-      "kind": "model", "residencyPack": "core",
-      "origin": {
-        "kind": "generated", "name": "Seeded reusable crockery and jar fill kit",
-        "licence": "Ms-PL", "licenceFile": "LICENSE", "attribution": "",
-        "redistributeSource": true, "redistributeDerived": true,
-        "commercialUse": true, "modification": true,
-        "note": "Generated deterministically with seed 97303 by tools/blender/fill_kit_gen.py for HOUSE-00973. Project-authored primitives and approved canonical material roles only; no third-party geometry is copied."
-      },
-      "geometry": {
-        "unitScale": 1, "upAxis": "Y", "boundsMetres": [0.601988, 0.236677, 0.229953],
-        "triangles": {"LOD0": 792}
-      },
-      "materialMap": {
-        "FILL_CREAM": "MAT_FURNITURE_DINING_LINEN", "FILL_BLUE": "MAT_PAINT_DUSTY_BLUE",
-        "FILL_GREEN": "MAT_PAINT_SAGE", "FILL_OCHRE": "MAT_PAINT_SMOKY_OCHRE",
-        "FILL_RED": "MAT_PAINT_PALE_ROSE", "FILL_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
-        "FILL_WOOD": "MAT_DOOR_HARDWOOD", "FILL_GLASS": "MAT_FOYER_CERAMIC"
-      },
-      "usedIn": ["L0_PANTRY", "B1_CELLAR"]
-    },
-    {
-      "id": "MODEL_FILL_TOOLS",
-      "category": "fill-kit",
-      "sourceFile": "assets-src/Models/Furniture/Fill/fill_tools.glb",
-      "sourceSha256": "1bfacd49d2ca15a5b679a830aebd44cd74941aa062c2aa1e7b26a8efefb1714d",
-      "contentName": "Models/Furniture/Fill/fill_tools",
-      "kind": "model", "residencyPack": "core",
-      "origin": {
-        "kind": "generated", "name": "Seeded reusable tools and paint-tin fill kit",
-        "licence": "Ms-PL", "licenceFile": "LICENSE", "attribution": "",
-        "redistributeSource": true, "redistributeDerived": true,
-        "commercialUse": true, "modification": true,
-        "note": "Generated deterministically with seed 97304 by tools/blender/fill_kit_gen.py for HOUSE-00973. Project-authored primitives and approved canonical material roles only; no third-party geometry is copied."
-      },
-      "geometry": {
-        "unitScale": 1, "upAxis": "Y", "boundsMetres": [0.610056, 0.218241, 0.347044],
-        "triangles": {"LOD0": 624}
-      },
-      "materialMap": {
-        "FILL_CREAM": "MAT_FURNITURE_DINING_LINEN", "FILL_BLUE": "MAT_PAINT_DUSTY_BLUE",
-        "FILL_GREEN": "MAT_PAINT_SAGE", "FILL_OCHRE": "MAT_PAINT_SMOKY_OCHRE",
-        "FILL_RED": "MAT_PAINT_PALE_ROSE", "FILL_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
-        "FILL_WOOD": "MAT_DOOR_HARDWOOD", "FILL_GLASS": "MAT_FOYER_CERAMIC"
-      },
-      "usedIn": ["L0_GARAGE", "B1_WORKSHOP", "EXT_SHED"]
     },
     {
       "id": "MODEL_DINING_TABLE_SETTING",
@@ -876,6 +806,195 @@
       },
       "usedIn": [
         "L0_FAMILY"
+      ]
+    },
+    {
+      "id": "MODEL_FILL_BOOKS",
+      "category": "fill-kit",
+      "sourceFile": "assets-src/Models/Furniture/Fill/fill_books.glb",
+      "sourceSha256": "550f493755de5db3230b0cbe8c2c647b79c1a2b9ae01d8d1cfa6a5c28f156807",
+      "contentName": "Models/Furniture/Fill/fill_books",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Seeded reusable book fill kit",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically with seed 97301 by tools/blender/fill_kit_gen.py for HOUSE-00973. Project-authored primitives and approved canonical material roles only; no third-party geometry is copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.472349,
+          0.305038,
+          0.326886
+        ],
+        "triangles": {
+          "LOD0": 484
+        }
+      },
+      "materialMap": {
+        "FILL_CREAM": "MAT_FURNITURE_DINING_LINEN",
+        "FILL_BLUE": "MAT_PAINT_DUSTY_BLUE",
+        "FILL_GREEN": "MAT_PAINT_SAGE",
+        "FILL_OCHRE": "MAT_PAINT_SMOKY_OCHRE",
+        "FILL_RED": "MAT_PAINT_PALE_ROSE",
+        "FILL_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "FILL_WOOD": "MAT_DOOR_HARDWOOD",
+        "FILL_GLASS": "MAT_FOYER_CERAMIC"
+      },
+      "usedIn": [
+        "L2_LIBRARY",
+        "L3_ROOM"
+      ]
+    },
+    {
+      "id": "MODEL_FILL_CROCKERY",
+      "category": "fill-kit",
+      "sourceFile": "assets-src/Models/Furniture/Fill/fill_crockery.glb",
+      "sourceSha256": "11bd4c58ab23b583a27938e6f644f53c7d3c0888cdf4fc44010173e4206526be",
+      "contentName": "Models/Furniture/Fill/fill_crockery",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Seeded reusable crockery and jar fill kit",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically with seed 97303 by tools/blender/fill_kit_gen.py for HOUSE-00973. Project-authored primitives and approved canonical material roles only; no third-party geometry is copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.601988,
+          0.236677,
+          0.229953
+        ],
+        "triangles": {
+          "LOD0": 792
+        }
+      },
+      "materialMap": {
+        "FILL_CREAM": "MAT_FURNITURE_DINING_LINEN",
+        "FILL_BLUE": "MAT_PAINT_DUSTY_BLUE",
+        "FILL_GREEN": "MAT_PAINT_SAGE",
+        "FILL_OCHRE": "MAT_PAINT_SMOKY_OCHRE",
+        "FILL_RED": "MAT_PAINT_PALE_ROSE",
+        "FILL_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "FILL_WOOD": "MAT_DOOR_HARDWOOD",
+        "FILL_GLASS": "MAT_FOYER_CERAMIC"
+      },
+      "usedIn": [
+        "L0_PANTRY",
+        "B1_CELLAR"
+      ]
+    },
+    {
+      "id": "MODEL_FILL_TEXTILES",
+      "category": "fill-kit",
+      "sourceFile": "assets-src/Models/Furniture/Fill/fill_textiles.glb",
+      "sourceSha256": "69a41cdaa267c8aa5200a69cd9f79f1f2e964998633fa13e12c07fd3a7baaee9",
+      "contentName": "Models/Furniture/Fill/fill_textiles",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Seeded reusable folded-textile fill kit",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically with seed 97302 by tools/blender/fill_kit_gen.py for HOUSE-00973. Project-authored primitives and approved canonical material roles only; no third-party geometry is copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.495934,
+          0.382364,
+          0.343637
+        ],
+        "triangles": {
+          "LOD0": 264
+        }
+      },
+      "materialMap": {
+        "FILL_CREAM": "MAT_FURNITURE_DINING_LINEN",
+        "FILL_BLUE": "MAT_PAINT_DUSTY_BLUE",
+        "FILL_GREEN": "MAT_PAINT_SAGE",
+        "FILL_OCHRE": "MAT_PAINT_SMOKY_OCHRE",
+        "FILL_RED": "MAT_PAINT_PALE_ROSE",
+        "FILL_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "FILL_WOOD": "MAT_DOOR_HARDWOOD",
+        "FILL_GLASS": "MAT_FOYER_CERAMIC"
+      },
+      "usedIn": [
+        "L1_MASTER_CLOSET",
+        "L3_STORE_W"
+      ]
+    },
+    {
+      "id": "MODEL_FILL_TOOLS",
+      "category": "fill-kit",
+      "sourceFile": "assets-src/Models/Furniture/Fill/fill_tools.glb",
+      "sourceSha256": "1bfacd49d2ca15a5b679a830aebd44cd74941aa062c2aa1e7b26a8efefb1714d",
+      "contentName": "Models/Furniture/Fill/fill_tools",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Seeded reusable tools and paint-tin fill kit",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically with seed 97304 by tools/blender/fill_kit_gen.py for HOUSE-00973. Project-authored primitives and approved canonical material roles only; no third-party geometry is copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.610056,
+          0.218241,
+          0.347044
+        ],
+        "triangles": {
+          "LOD0": 624
+        }
+      },
+      "materialMap": {
+        "FILL_CREAM": "MAT_FURNITURE_DINING_LINEN",
+        "FILL_BLUE": "MAT_PAINT_DUSTY_BLUE",
+        "FILL_GREEN": "MAT_PAINT_SAGE",
+        "FILL_OCHRE": "MAT_PAINT_SMOKY_OCHRE",
+        "FILL_RED": "MAT_PAINT_PALE_ROSE",
+        "FILL_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "FILL_WOOD": "MAT_DOOR_HARDWOOD",
+        "FILL_GLASS": "MAT_FOYER_CERAMIC"
+      },
+      "usedIn": [
+        "L0_GARAGE",
+        "B1_WORKSHOP",
+        "EXT_SHED"
       ]
     },
     {
@@ -3173,6 +3292,742 @@
       ]
     },
     {
+      "id": "MODEL_PROP_KIT_BOOKCASE",
+      "category": "storage-furniture",
+      "sourceFile": "assets-src/Models/Furniture/Generated/bookcase.glb",
+      "sourceSha256": "e8208d97c6977a5a72df41a6cef17eb6b258bfc2bd2e4205949080885df851eb",
+      "contentName": "Models/Furniture/Generated/bookcase",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Reusable bookcase prop-kit piece",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically from tools/blender/prop_kit_data.json by tools/blender/prop_kit_gen.py for HOUSE-00985; project-authored primitives and approved canonical material roles only."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.92,
+          1.82,
+          0.34
+        ],
+        "triangles": {
+          "LOD0": 972
+        },
+        "collision": "propkit_bookcase_COL"
+      },
+      "materialMap": {
+        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_WOOD": "MAT_DOOR_HARDWOOD",
+        "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "KIT_GLASS": "MAT_GLASS_CABINET",
+        "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
+        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
+        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+      },
+      "usedIn": [
+        "L2_LIBRARY"
+      ]
+    },
+    {
+      "id": "MODEL_PROP_KIT_CABLE_RUN",
+      "category": "service-run",
+      "sourceFile": "assets-src/Models/Furniture/Generated/cable_run.glb",
+      "sourceSha256": "2124100e8eaa1924b5a805eca01fa9cc5a9788e45800aaa67f4b2bed8c34cef7",
+      "contentName": "Models/Furniture/Generated/cable_run",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Reusable cable run prop-kit piece",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically from tools/blender/prop_kit_data.json by tools/blender/prop_kit_gen.py for HOUSE-00985; project-authored primitives and approved canonical material roles only."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.8,
+          0.0715,
+          0.055
+        ],
+        "triangles": {
+          "LOD0": 368
+        },
+        "collision": "propkit_cable_run_COL"
+      },
+      "materialMap": {
+        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_WOOD": "MAT_DOOR_HARDWOOD",
+        "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "KIT_GLASS": "MAT_GLASS_CABINET",
+        "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
+        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
+        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+      },
+      "usedIn": [
+        "B1_ELECTRICAL"
+      ]
+    },
+    {
+      "id": "MODEL_PROP_KIT_CHEST",
+      "category": "storage-furniture",
+      "sourceFile": "assets-src/Models/Furniture/Generated/chest.glb",
+      "sourceSha256": "8faf2e4f6619928137cc289e4a23a767e7166c8ca38b1ab303b75db085c7a3a2",
+      "contentName": "Models/Furniture/Generated/chest",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Reusable chest prop-kit piece",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically from tools/blender/prop_kit_data.json by tools/blender/prop_kit_gen.py for HOUSE-00985; project-authored primitives and approved canonical material roles only."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.925,
+          0.544,
+          0.511
+        ],
+        "triangles": {
+          "LOD0": 756
+        },
+        "collision": "propkit_chest_COL"
+      },
+      "materialMap": {
+        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_WOOD": "MAT_DOOR_HARDWOOD",
+        "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "KIT_GLASS": "MAT_GLASS_CABINET",
+        "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
+        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
+        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+      },
+      "usedIn": [
+        "L2_BED6"
+      ]
+    },
+    {
+      "id": "MODEL_PROP_KIT_DRESSER",
+      "category": "storage-furniture",
+      "sourceFile": "assets-src/Models/Furniture/Generated/dresser.glb",
+      "sourceSha256": "01b8732b346097585d53f3e1203f1c39cd484cff0703d2a7bfd9c5bbe7e34bee",
+      "contentName": "Models/Furniture/Generated/dresser",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Reusable dresser prop-kit piece",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically from tools/blender/prop_kit_data.json by tools/blender/prop_kit_gen.py for HOUSE-00985; project-authored primitives and approved canonical material roles only."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.2,
+          0.82,
+          0.5445
+        ],
+        "triangles": {
+          "LOD0": 1404
+        },
+        "collision": "propkit_dresser_COL"
+      },
+      "materialMap": {
+        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_WOOD": "MAT_DOOR_HARDWOOD",
+        "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "KIT_GLASS": "MAT_GLASS_CABINET",
+        "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
+        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
+        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+      },
+      "usedIn": [
+        "L1_BED2"
+      ]
+    },
+    {
+      "id": "MODEL_PROP_KIT_DUCT_RUN",
+      "category": "service-run",
+      "sourceFile": "assets-src/Models/Furniture/Generated/duct_run.glb",
+      "sourceSha256": "5c8dbb983ebafce4832ff0752cd7d39c2c5bc00b36c98838f232329a48905680",
+      "contentName": "Models/Furniture/Generated/duct_run",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Reusable duct run prop-kit piece",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically from tools/blender/prop_kit_data.json by tools/blender/prop_kit_gen.py for HOUSE-00985; project-authored primitives and approved canonical material roles only."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.8,
+          0.325,
+          0.372
+        ],
+        "triangles": {
+          "LOD0": 432
+        },
+        "collision": "propkit_duct_run_COL"
+      },
+      "materialMap": {
+        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_WOOD": "MAT_DOOR_HARDWOOD",
+        "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "KIT_GLASS": "MAT_GLASS_CABINET",
+        "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
+        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
+        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+      },
+      "usedIn": [
+        "B1_MECHANICAL"
+      ]
+    },
+    {
+      "id": "MODEL_PROP_KIT_MIRROR",
+      "category": "mirror",
+      "sourceFile": "assets-src/Models/Furniture/Generated/mirror.glb",
+      "sourceSha256": "b7c9841bd1c7d538f2105e9cee52bc83e56610211d1d6062e0ba89440aa5109c",
+      "contentName": "Models/Furniture/Generated/mirror",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Reusable mirror prop-kit piece",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically from tools/blender/prop_kit_data.json by tools/blender/prop_kit_gen.py for HOUSE-00985; project-authored primitives and approved canonical material roles only."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.62,
+          0.82,
+          0.041
+        ],
+        "triangles": {
+          "LOD0": 216
+        },
+        "collision": "propkit_mirror_COL"
+      },
+      "materialMap": {
+        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_WOOD": "MAT_DOOR_HARDWOOD",
+        "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "KIT_GLASS": "MAT_GLASS_CABINET",
+        "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
+        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
+        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+      },
+      "usedIn": [
+        "B1_WC7"
+      ]
+    },
+    {
+      "id": "MODEL_PROP_KIT_NIGHTSTAND",
+      "category": "storage-furniture",
+      "sourceFile": "assets-src/Models/Furniture/Generated/nightstand.glb",
+      "sourceSha256": "043c0f2a543fc28e5faad6647c160fe0b5cf7a5df5aa51cacd505e365038ee2d",
+      "contentName": "Models/Furniture/Generated/nightstand",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Reusable nightstand prop-kit piece",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically from tools/blender/prop_kit_data.json by tools/blender/prop_kit_gen.py for HOUSE-00985; project-authored primitives and approved canonical material roles only."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.48,
+          0.58,
+          0.4645
+        ],
+        "triangles": {
+          "LOD0": 864
+        },
+        "collision": "propkit_nightstand_COL"
+      },
+      "materialMap": {
+        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_WOOD": "MAT_DOOR_HARDWOOD",
+        "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "KIT_GLASS": "MAT_GLASS_CABINET",
+        "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
+        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
+        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+      },
+      "usedIn": [
+        "L1_MASTER_BED"
+      ]
+    },
+    {
+      "id": "MODEL_PROP_KIT_OPEN_SHELF",
+      "category": "open-shelving",
+      "sourceFile": "assets-src/Models/Furniture/Generated/open_shelf.glb",
+      "sourceSha256": "7629709a682a4bf5b44771651b8f80b8bbefc28a734df3918b1a7fb3ef771006",
+      "contentName": "Models/Furniture/Generated/open_shelf",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Reusable open shelf prop-kit piece",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically from tools/blender/prop_kit_data.json by tools/blender/prop_kit_gen.py for HOUSE-00985; project-authored primitives and approved canonical material roles only."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.2,
+          1.8,
+          0.42
+        ],
+        "triangles": {
+          "LOD0": 972
+        },
+        "collision": "propkit_open_shelf_COL"
+      },
+      "materialMap": {
+        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_WOOD": "MAT_DOOR_HARDWOOD",
+        "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "KIT_GLASS": "MAT_GLASS_CABINET",
+        "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
+        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
+        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+      },
+      "usedIn": [
+        "L3_STORE_W"
+      ]
+    },
+    {
+      "id": "MODEL_PROP_KIT_PIPE_RUN",
+      "category": "service-run",
+      "sourceFile": "assets-src/Models/Furniture/Generated/pipe_run.glb",
+      "sourceSha256": "03041844ef5e519716a7370d1dcd9e4b4d67045be5d9e511e8ea8665b4405220",
+      "contentName": "Models/Furniture/Generated/pipe_run",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Reusable pipe run prop-kit piece",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically from tools/blender/prop_kit_data.json by tools/blender/prop_kit_gen.py for HOUSE-00985; project-authored primitives and approved canonical material roles only."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.8,
+          0.156,
+          0.12
+        ],
+        "triangles": {
+          "LOD0": 368
+        },
+        "collision": "propkit_pipe_run_COL"
+      },
+      "materialMap": {
+        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_WOOD": "MAT_DOOR_HARDWOOD",
+        "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "KIT_GLASS": "MAT_GLASS_CABINET",
+        "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
+        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
+        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+      },
+      "usedIn": [
+        "B1_UTILITY"
+      ]
+    },
+    {
+      "id": "MODEL_PROP_KIT_PROJECTOR",
+      "category": "projector",
+      "sourceFile": "assets-src/Models/Furniture/Generated/projector.glb",
+      "sourceSha256": "a454ab57e04e8f04ad713d62bcd116d877fe4e38b924f725785256f16c0961bc",
+      "contentName": "Models/Furniture/Generated/projector",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Reusable projector prop-kit piece",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically from tools/blender/prop_kit_data.json by tools/blender/prop_kit_gen.py for HOUSE-00985; project-authored primitives and approved canonical material roles only."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.34,
+          0.14,
+          0.336
+        ],
+        "triangles": {
+          "LOD0": 216
+        },
+        "collision": "propkit_projector_COL"
+      },
+      "materialMap": {
+        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_WOOD": "MAT_DOOR_HARDWOOD",
+        "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "KIT_GLASS": "MAT_GLASS_CABINET",
+        "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
+        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
+        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+      },
+      "usedIn": [
+        "B1_CINEMA"
+      ]
+    },
+    {
+      "id": "MODEL_PROP_KIT_STATIC_SCREEN",
+      "category": "static-screen",
+      "sourceFile": "assets-src/Models/Furniture/Generated/static_screen.glb",
+      "sourceSha256": "863b3afb40bb375887e2e69c6d6c00769323bc2d719f4182dc2481bbe14daf85",
+      "contentName": "Models/Furniture/Generated/static_screen",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Reusable static screen prop-kit piece",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically from tools/blender/prop_kit_data.json by tools/blender/prop_kit_gen.py for HOUSE-00985; project-authored primitives and approved canonical material roles only."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          2.4,
+          1.35,
+          0.066
+        ],
+        "triangles": {
+          "LOD0": 216
+        },
+        "collision": "propkit_static_screen_COL"
+      },
+      "materialMap": {
+        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_WOOD": "MAT_DOOR_HARDWOOD",
+        "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "KIT_GLASS": "MAT_GLASS_CABINET",
+        "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
+        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
+        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+      },
+      "usedIn": [
+        "B1_CINEMA"
+      ]
+    },
+    {
+      "id": "MODEL_PROP_KIT_STORAGE_BOX",
+      "category": "storage-box",
+      "sourceFile": "assets-src/Models/Furniture/Generated/storage_box.glb",
+      "sourceSha256": "765104b3cb1a4c1e8f6db4aeab90d358fa4a9939d63a3215e769cc9a331636e7",
+      "contentName": "Models/Furniture/Generated/storage_box",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Reusable storage box prop-kit piece",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically from tools/blender/prop_kit_data.json by tools/blender/prop_kit_gen.py for HOUSE-00985; project-authored primitives and approved canonical material roles only."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.615,
+          0.38,
+          0.455
+        ],
+        "triangles": {
+          "LOD0": 324
+        },
+        "collision": "propkit_storage_box_COL"
+      },
+      "materialMap": {
+        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_WOOD": "MAT_DOOR_HARDWOOD",
+        "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "KIT_GLASS": "MAT_GLASS_CABINET",
+        "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
+        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
+        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+      },
+      "usedIn": [
+        "L3_STORE_W"
+      ]
+    },
+    {
+      "id": "MODEL_PROP_KIT_TOWEL_RAIL",
+      "category": "towel-rail",
+      "sourceFile": "assets-src/Models/Furniture/Generated/towel_rail.glb",
+      "sourceSha256": "a8439753dac4a964761117ed411201a1a47dc4769c26e971f79206637959e03c",
+      "contentName": "Models/Furniture/Generated/towel_rail",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Reusable towel rail prop-kit piece",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically from tools/blender/prop_kit_data.json by tools/blender/prop_kit_gen.py for HOUSE-00985; project-authored primitives and approved canonical material roles only."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.64,
+          0.18,
+          0.0975
+        ],
+        "triangles": {
+          "LOD0": 324
+        },
+        "collision": "propkit_towel_rail_COL"
+      },
+      "materialMap": {
+        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_WOOD": "MAT_DOOR_HARDWOOD",
+        "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "KIT_GLASS": "MAT_GLASS_CABINET",
+        "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
+        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
+        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+      },
+      "usedIn": [
+        "B1_WC7"
+      ]
+    },
+    {
+      "id": "MODEL_PROP_KIT_UTILITY_MODULE",
+      "category": "storage-furniture",
+      "sourceFile": "assets-src/Models/Furniture/Generated/utility_module.glb",
+      "sourceSha256": "9949b5254180e0452a8eeb6a045c2715f216c9eaf004b8d7851ec979ac3aae5d",
+      "contentName": "Models/Furniture/Generated/utility_module",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Reusable utility module prop-kit piece",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically from tools/blender/prop_kit_data.json by tools/blender/prop_kit_gen.py for HOUSE-00985; project-authored primitives and approved canonical material roles only."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.9,
+          0.92,
+          0.6235
+        ],
+        "triangles": {
+          "LOD0": 972
+        },
+        "collision": "propkit_utility_module_COL"
+      },
+      "materialMap": {
+        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_WOOD": "MAT_DOOR_HARDWOOD",
+        "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "KIT_GLASS": "MAT_GLASS_CABINET",
+        "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
+        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
+        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+      },
+      "usedIn": [
+        "B1_UTILITY"
+      ]
+    },
+    {
+      "id": "MODEL_PROP_KIT_WARDROBE",
+      "category": "storage-furniture",
+      "sourceFile": "assets-src/Models/Furniture/Generated/wardrobe.glb",
+      "sourceSha256": "831c1f308e3ef86ae5b5fbfcd6e124c4f1517f71b1367ce78f2fab5f58af5516",
+      "contentName": "Models/Furniture/Generated/wardrobe",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Reusable wardrobe prop-kit piece",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically from tools/blender/prop_kit_data.json by tools/blender/prop_kit_gen.py for HOUSE-00985; project-authored primitives and approved canonical material roles only."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.2,
+          2.05,
+          0.6235
+        ],
+        "triangles": {
+          "LOD0": 972
+        },
+        "collision": "propkit_wardrobe_COL"
+      },
+      "materialMap": {
+        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_WOOD": "MAT_DOOR_HARDWOOD",
+        "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "KIT_GLASS": "MAT_GLASS_CABINET",
+        "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
+        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
+        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+      },
+      "usedIn": [
+        "L1_MASTER_CLOSET"
+      ]
+    },
+    {
+      "id": "MODEL_PROP_KIT_WORKBENCH",
+      "category": "workbench",
+      "sourceFile": "assets-src/Models/Furniture/Generated/workbench.glb",
+      "sourceSha256": "49a876ade5a64a24bb722a2de4d9d76cbc92e3f1b770880debecc7a95b5f4c91",
+      "contentName": "Models/Furniture/Generated/workbench",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Reusable workbench prop-kit piece",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically from tools/blender/prop_kit_data.json by tools/blender/prop_kit_gen.py for HOUSE-00985; project-authored primitives and approved canonical material roles only."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.6,
+          0.9,
+          0.68
+        ],
+        "triangles": {
+          "LOD0": 648
+        },
+        "collision": "propkit_workbench_COL"
+      },
+      "materialMap": {
+        "KIT_PAINT": "MAT_PAINT_SAGE",
+        "KIT_WOOD": "MAT_DOOR_HARDWOOD",
+        "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "KIT_GLASS": "MAT_GLASS_CABINET",
+        "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
+        "KIT_CARDBOARD": "MAT_PAINT_SMOKY_OCHRE",
+        "KIT_WHITE": "MAT_PAINT_AGED_PLASTER"
+      },
+      "usedIn": [
+        "B1_WORKSHOP"
+      ]
+    },
+    {
       "id": "MODEL_SMOKE_MARKER",
       "category": "fixture",
       "sourceFile": "assets-src/Models/Smoke/marker.glb",
@@ -3261,8 +4116,14 @@
       "geometry": {
         "unitScale": 1,
         "upAxis": "Y",
-        "boundsMetres": [1.474238, 1.006, 2.16],
-        "triangles": {"LOD0": 3220},
+        "boundsMetres": [
+          1.474238,
+          1.006,
+          2.16
+        ],
+        "triangles": {
+          "LOD0": 3220
+        },
         "collision": "sunroom_lounge_001_lounge_1_seat_frame_COL"
       },
       "materialMap": {
@@ -3271,7 +4132,9 @@
         "SUNROOM_OAK": "MAT_FURNITURE_PIANO_WOOD",
         "SUNROOM_RATTAN": "MAT_SUNROOM_RATTAN"
       },
-      "usedIn": ["L0_SUNROOM"]
+      "usedIn": [
+        "L0_SUNROOM"
+      ]
     },
     {
       "id": "MODEL_SUNROOM_WET_BAR",

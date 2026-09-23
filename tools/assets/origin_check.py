@@ -49,6 +49,10 @@ WALL_MOUNTED = {
     "radiator",
     "wall-light",
     "mirror",
+    "towel-rail",
+    "static-screen",
+    "projector",
+    "service-run",
     "window-treatment",
 }
 
