@@ -161,6 +161,9 @@ run_gate "lamp-fixtures" python3 tools/assets/lamp_fixtures_prepare.py --check
 # HOUSE-00982: four reuse-first CC0 decoration acquisitions, one four-image CC0 art family and
 # the existing generated CC0-weave rug planes remain inside their caps under one group gate.
 run_gate "decoration" python3 tools/assets/decoration_prepare.py --check
+# HOUSE-00984: five named clutter shapes stay inside cap six; generated boxes and completed fill
+# families replace the removed crate and shelf-item acquisitions.
+run_gate "clutter" python3 tools/assets/clutter_prepare.py --check
 # HOUSE-01049: the measured counter stools and three restrained worktop groupings remain
 # reproducible from their authored Blender source, with exact material slots and placement.
 run_gate "kitchen-dressing" python3 tools/assets/kitchen_dressing_prepare.py --check

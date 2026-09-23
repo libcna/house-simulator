@@ -1,3 +1,29 @@
+# Clutter acquisition handoff — 2026-09-23 (`HOUSE-00984`)
+
+M3's reusable furnishing kit is complete. Its final group contains exactly the five clutter shapes
+named by the authoritative recipe table, one below cap six: bin, suitcase, toolbox, garden-tool set
+and paint tin. The completed generated storage box replaces a crate and the four fill-kit families
+remain the pantry/shelf source, so no duplicate content was acquired.
+
+All five model sources are official 3D Assets CC0 releases with publisher bytes and hashes pinned.
+The existing bounded static preparation path bakes their hierarchy, adds UV0 and one enclosing
+12-triangle proxy each, and strips the toolbox source clips after retaining its compact default
+pose. No interaction, inventory or clutter system was added. The group totals 6,210 visible and 60
+collision triangles. CNA compiled the five models to 869,976 bytes.
+
+The group, manifest, packaging-licence, glTF, scale and origin checks pass. A 1400 × 720 headless
+workbench composition showed all five models recognizable and grounded at their intended support
+plane, with no clipping, floating parts or z-fighting. Rendering and compilation were restricted by
+CPU affinity to four cores; compilation used at most four workers.
+
+The remaining forecast is 181.25 realistic / 220.2 pessimistic hours. With 45 task-hours spent
+since the final reduction, the R14 projection is 265.2 h, 14.8 h below the hard limit. Rule R2 and
+M4's explicit tied-zone order select `Z-L1`; R3 permits its first three tasks before moving to
+another zone. The exact next unblocked MUST task is `HOUSE-00999`, dressing `L1_LANDING`,
+`L1_HALL` and `L1_HALL_W`.
+
+---
+
 # Decoration acquisition handoff — 2026-09-23 (`HOUSE-00982`)
 
 The decoration group is complete with four acquisitions inside the six-model cap and one four-image

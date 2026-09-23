@@ -137,6 +137,11 @@ Full text: [`licenses/cc0-1.0/LICENCE.txt`](cc0-1.0/LICENCE.txt)
 - `MODEL_BATHROOM_SHOWER` — **Square shower enclosure 900 from Fitted Kitchen and Bathroom Builder** by 3D Assets — <https://cdn.3dassets.dev/assets/17894/v1/model.glb> (retrieved 2026-09-23)
 - `MODEL_BATHROOM_TOILET` — **Close coupled WC from Fitted Kitchen and Bathroom Builder** by 3D Assets — <https://cdn.3dassets.dev/assets/17870/v1/model.glb> (retrieved 2026-09-23)
 - `MODEL_BATHROOM_VANITY` — **Bathroom vanity unit 600 from Fitted Kitchen and Bathroom Builder** by 3D Assets — <https://cdn.3dassets.dev/assets/17883/v1/model.glb> (retrieved 2026-09-23)
+- `MODEL_CLUTTER_BIN` — **Office waste bin from Office Lobby and Building Facilities** by 3D Assets — <https://cdn.3dassets.dev/assets/26268/v1/model.glb> (retrieved 2026-09-23)
+- `MODEL_CLUTTER_GARDEN_TOOLS` — **Long handled tool bin from Garden Centre and Florist** by 3D Assets — <https://cdn.3dassets.dev/assets/17752/v1/model.glb> (retrieved 2026-09-23)
+- `MODEL_CLUTTER_PAINT_TIN` — **Paint tin, 5 litre from Hardware Store and DIY Warehouse** by 3D Assets — <https://cdn.3dassets.dev/assets/23929/v1/model.glb> (retrieved 2026-09-23)
+- `MODEL_CLUTTER_SUITCASE` — **Suitcase from Mountain Border Checkpoint** by 3D Assets — <https://cdn.3dassets.dev/assets/30311/v1/model.glb> (retrieved 2026-09-23)
+- `MODEL_CLUTTER_TOOLBOX` — **Cantilever tool box from Hardware Store and DIY Warehouse** by 3D Assets — <https://cdn.3dassets.dev/assets/23944/v1/model.glb> (retrieved 2026-09-23)
 - `MODEL_DECOR_FLOOR_MIRROR` — **Dressing Mirror Round from Bedroom and Living Room Furniture** by 3D Assets — <https://cdn.3dassets.dev/assets/38808/v1/model.glb> (retrieved 2026-09-23)
 - `MODEL_DECOR_NARROW_VASE` — **Narrow Neck Vase from Ceramics Pottery Studio** by 3D Assets — <https://cdn.3dassets.dev/assets/29517/v1/model.glb> (retrieved 2026-09-23)
 - `MODEL_DECOR_PLANT_GROUP` — **Potted Plant Group from Indian Bazaar Street and Temple** by 3D Assets — <https://cdn.3dassets.dev/assets/36579/v1/model.glb> (retrieved 2026-09-23)
@@ -735,4 +740,4 @@ Full text: [`licenses/us-gov-pd/LICENCE.txt`](us-gov-pd/LICENCE.txt)
 
 ---
 
-*Generated from `assets-src/assets.manifest.json`, sha256 `5693866125658dba55132ddffbb86ea9a66824bc38a1e0b6891de99a31ed85fc`.*
+*Generated from `assets-src/assets.manifest.json`, sha256 `86eae72bdd28a672075c0b621ddca2031492fbaabf2d5bd333a00e9afaf1b150`.*
