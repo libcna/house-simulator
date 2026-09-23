@@ -4795,3 +4795,22 @@ baseline readability is the existing M5 requirement.
 R2 now ties `Z-B1` and `Z-L1` at fourteen accessible cells still below target and selects the
 least-recently worked `Z-B1`; `Z-L2` has twelve. Next: `HOUSE-01020`, dressing `B1_HALL`,
 `B1_STAIR` and `B1_UNDERSTAIR`.
+
+## Round 117 — basement circulation dressing
+
+Commit: `HOUSE-01020` working tree (`2026-09-24`). The local, Git-ignored
+[`clear-day`](captures/house-01020-b1-circulation-day) and
+[`forced-light`](captures/house-01020-b1-circulation-lit) sets cover all four fixed `Z-B1` views.
+Supplemental forced-light [`detail`](captures/house-01020-b1-circulation-detail) views inspect the
+hall console and bench, the stair-landing bench and the low under-stair storage cluster directly;
+these are placement evidence, not a claim that M5's normal basement balance is complete.
+
+The hall's console is grounded at the closed north end and its bench occupies the short south-east
+wall without approaching a door sweep. The second bench remains clear of both the basement flight
+and its landing door. In the 1.75 m-high L-shaped store, the scaled shelf and box read as a bounded
+utility composition beyond the crouched standing point. All five pieces are grounded, no portal or
+route is obstructed, and no clipping, floating geometry, z-fighting or other S1/S2 furnishing
+defect is visible. The normal clear-day hall is still dim; final baseline readability remains M5.
+
+Rule R2 now selects `Z-L1`, with fourteen accessible cells still below target versus twelve each
+in `Z-B1` and `Z-L2`. Next: `HOUSE-01002`, furnishing `L1_BED2` and `L1_BED5`.

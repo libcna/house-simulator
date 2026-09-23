@@ -2142,6 +2142,71 @@
       "collision": "proxy",
       "material": null,
       "interactable": null
+    },
+    {
+      "id": "PROP_B1_HALL_CONSOLE",
+      "asset": "MODEL_FURNITURE_FOYER_CONSOLE",
+      "cell": "B1_HALL",
+      "position": [0.0, -2.30, -26.90],
+      "yawDeg": 180,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_HALL_BENCH",
+      "asset": "MODEL_FURNITURE_PIANO_BENCH",
+      "cell": "B1_HALL",
+      "position": [1.98, -2.30, -15.15],
+      "yawDeg": 270,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_STAIR_BENCH",
+      "asset": "MODEL_FURNITURE_PIANO_BENCH",
+      "cell": "B1_STAIR",
+      "position": [2.42, -2.30, -19.45],
+      "yawDeg": 270,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_UNDERSTAIR_SHELF",
+      "asset": "MODEL_PROP_KIT_OPEN_SHELF",
+      "cell": "B1_UNDERSTAIR",
+      "position": [4.77, -2.30, -22.45],
+      "yawDeg": 270,
+      "scale": 0.60,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_UNDERSTAIR_BOX",
+      "asset": "MODEL_PROP_KIT_STORAGE_BOX",
+      "cell": "B1_UNDERSTAIR",
+      "position": [4.05, -2.30, -22.86],
+      "yawDeg": 0,
+      "scale": 0.60,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
     }
   ]
 }

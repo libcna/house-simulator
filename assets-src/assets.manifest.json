@@ -1908,6 +1908,7 @@
         "ARRIVAL_CERAMIC": "MAT_FOYER_CERAMIC"
       },
       "usedIn": [
+        "B1_HALL",
         "L0_FOYER"
       ]
     },
@@ -2721,6 +2722,8 @@
         "PIANO_BRASS": "MAT_FURNITURE_PIANO_BRASS"
       },
       "usedIn": [
+        "B1_HALL",
+        "B1_STAIR",
         "L0_LIVING",
         "L1_LANDING",
         "L2_LANDING"
@@ -4370,6 +4373,7 @@
         "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
+        "B1_UNDERSTAIR",
         "L3_STORE_W"
       ]
     },
@@ -4554,6 +4558,7 @@
         "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
+        "B1_UNDERSTAIR",
         "L3_STORE_W"
       ]
     },

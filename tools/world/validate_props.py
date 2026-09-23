@@ -363,6 +363,39 @@ def _nearest_free(point, nodes) -> tuple[int, int] | None:
     return min(nodes, key=lambda node: math.dist(point, nodes[node]), default=None)
 
 
+def _disc_inside_box_union(point, boxes, radius: float) -> bool:
+    """Return whether a horizontal disc is inside the union of axis-aligned cell boxes.
+
+    Most cells are one box, so retain that cheap path.  An L-shaped cell can join two boxes along
+    a complete edge, though, and a valid circulation disc may straddle that authored seam.  Test
+    the exact rectangle arrangement around the disc instead of requiring one box to contain it.
+    """
+    if any(bx0 + radius <= point[0] <= bx1 - radius
+           and bz0 + radius <= point[1] <= bz1 - radius
+           for bx0, bx1, bz0, bz1 in boxes):
+        return True
+
+    px, pz = point
+    x_min, x_max = px - radius, px + radius
+    z_min, z_max = pz - radius, pz + radius
+    x_edges = {x_min, x_max}
+    z_edges = {z_min, z_max}
+    for bx0, bx1, bz0, bz1 in boxes:
+        x_edges.update(edge for edge in (bx0, bx1) if x_min < edge < x_max)
+        z_edges.update(edge for edge in (bz0, bz1) if z_min < edge < z_max)
+    xs, zs = sorted(x_edges), sorted(z_edges)
+    for xa, xb in zip(xs, xs[1:]):
+        for za, zb in zip(zs, zs[1:]):
+            sample = ((xa + xb) / 2.0, (za + zb) / 2.0)
+            if any(bx0 <= sample[0] <= bx1 and bz0 <= sample[1] <= bz1
+                   for bx0, bx1, bz0, bz1 in boxes):
+                continue
+            nearest = (min(max(px, xa), xb), min(max(pz, za), zb))
+            if math.dist(point, nearest) < radius - 1e-9:
+                return False
+    return True
+
+
 def _route_exists(cell: dict, obstacles, goals, *, require_all: bool = True) -> bool:
     boxes = _cell_boxes(cell)
     x0, x1 = min(box[0] for box in boxes), max(box[1] for box in boxes)
@@ -375,11 +408,7 @@ def _route_exists(cell: dict, obstacles, goals, *, require_all: bool = True) -> 
         for ix in range(nx):
             x = x0 + (ix + 0.5) * GRID_STEP
             point = (x, z)
-            # The union-of-boxes footprint may have internal seams.  A point is valid if one box
-            # contains the entire 0.70 m disc.
-            if not any(bx0 + ROUTE_RADIUS <= x <= bx1 - ROUTE_RADIUS
-                       and bz0 + ROUTE_RADIUS <= z <= bz1 - ROUTE_RADIUS
-                       for bx0, bx1, bz0, bz1 in boxes):
+            if not _disc_inside_box_union(point, boxes, ROUTE_RADIUS):
                 continue
             if any(_point_near_polygon(point, polygon, ROUTE_RADIUS)
                    for polygon in obstacles):
@@ -601,6 +630,17 @@ def selftest() -> int:
             "a rigid barrier that removes the 0.70 m route is rejected")
     require(_route_exists(room, [], [(0.7, 2.0), (3.3, 2.0)]),
             "the same room passes with a clear 0.70 m route")
+    elbow = {"boxes": [
+        {"x": [2.2, 3.8], "z": [-21.2, -20.2]},
+        {"x": [3.8, 4.9], "z": [-23.0, -20.2]},
+    ]}
+    elbow_boxes = _cell_boxes(elbow)
+    require(_disc_inside_box_union((3.8, -20.7), elbow_boxes, ROUTE_RADIUS),
+            "a circulation disc may straddle the complete seam of an L-shaped cell")
+    require(not _disc_inside_box_union((3.8, -21.2), elbow_boxes, ROUTE_RADIUS),
+            "the same disc may not cut across the L-shaped cell's missing inner corner")
+    require(_route_exists(elbow, [], [(2.8, -20.7), (4.35, -21.6)]),
+            "a clear 0.70 m route turns through an L-shaped cell")
     # Exact curved door/prop rejection is already exercised by validate_world.py --selftest and
     # intentionally has one implementation, not an approximate second opinion here.
     require(hasattr(__import__("validate_world"), "rule_14_static_leaf_poses"),

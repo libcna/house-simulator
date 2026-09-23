@@ -485,6 +485,21 @@ CHUNK_BUDGET_EXCEPTIONS["L2_HALL_W"] = (
     9, "four measured shell finish chunks plus HOUSE-01009's two runner-wool roles and three "
        "framed-art roles; no vertex or Reach-cap split")
 
+# `HOUSE-01020` keeps the basement circulation set deliberately small, but its reused pieces retain
+# their truthful finishes. The hall's console adds one role and its bench three; the stair bench
+# adds the same three to its existing architectural exception. The low store's scaled shelf and
+# box batch together into four generated-kit roles over its five shell groups.
+CHUNK_BUDGET_EXCEPTIONS["B1_HALL"] = (
+    9, "five measured shell finish chunks plus HOUSE-01020's console role and three reused-bench "
+       "roles; no vertex or Reach-cap split")
+_b1_stair_limit, _b1_stair_reason = CHUNK_BUDGET_EXCEPTIONS["B1_STAIR"]
+CHUNK_BUDGET_EXCEPTIONS["B1_STAIR"] = (
+    _b1_stair_limit + 3,
+    _b1_stair_reason + "; HOUSE-01020 adds the reused bench's three measured finish groups")
+CHUNK_BUDGET_EXCEPTIONS["B1_UNDERSTAIR"] = (
+    9, "five measured shell finish chunks plus HOUSE-01020's four shared low-shelf and storage-box "
+       "kit roles; no vertex or Reach-cap split")
+
 # HOUSE-01069 is a measured room-wide furnishing/lighting step, not a generic budget increase.
 # The new walnut/brass cabinet shares both established dining roles. Its ceramic serving set is
 # one new finish, and the two sideboard lamps' exact independently switched shade group needs

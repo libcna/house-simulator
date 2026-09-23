@@ -1,3 +1,37 @@
+# Basement circulation dressing handoff — 2026-09-24 (`HOUSE-01020`)
+
+The cumulative secondary/utility recipes are complete in `B1_HALL`, `B1_STAIR` and
+`B1_UNDERSTAIR`. The long hall reuses the foyer's narrow console at its closed north end and a
+slim upholstered bench on the short south-east wall segment. A second bench sits on the stair
+landing's west wall, outside the flight and basement-door approach. The low L-shaped store uses a
+0.60-scale open shelf and storage box beyond its crouched standing point. These five ordinary
+static rows retain existing proxies and introduce no asset, material family, subsystem or optional
+dressing.
+
+All 172 production prop rows pass exact placement, door-sweep and 0.70 m route validation. Adding
+the first rigid pieces to the L-shaped store exposed one validator defect: its route grid required
+the whole circulation disc to fit one authored cell box even where two boxes form a continuous
+union. The minimal fix tests the exact axis-aligned union and adds focused selftests for a valid
+seam, the missing inner corner and an actual turning route. The 90-cell grand tour passes. The
+wider inside-geometry probe has no B1 failure; its sole failure remains the older `L1_LANDING west`
+start beside `HOUSE-00999`'s bench.
+
+Measured chunk totals are 9 in the hall, 11 in the stair and 9 in the store, exactly matching their
+evidence-backed ceilings without a Reach split. The clear-day and forced-light `Z-B1` sets plus
+direct views of both benches, the console and low store were inspected. All pieces are grounded,
+the store cluster fits below its 1.75 m ceiling, and no door, flight or crouch route is blocked. No
+clipping, floating geometry, z-fighting or new S1/S2 furnishing defect is visible. Normal basement
+daylight remains dark, which is the already-scheduled M5 baseline-lighting scope.
+
+The remaining forecast is 177 realistic / 215.75 pessimistic hours. With 49.25 task-hours spent
+since the final reduction, the R14 projection remains 265.0 h, 15.0 h below the hard limit. Rule
+R2 selects `Z-L1`, which has fourteen accessible cells still below target versus twelve each in
+`Z-B1` and `Z-L2`. The exact next unblocked MUST task is `HOUSE-01002`, furnishing `L1_BED2` and
+`L1_BED5`. All compilation must use at most four workers and be pinned to CPUs 4,5,7,9;
+strict-XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # L2 circulation dressing handoff — 2026-09-24 (`HOUSE-01009`)
 
 The secondary-tier circulation composition is complete in `L2_LANDING`, `L2_HALL` and
