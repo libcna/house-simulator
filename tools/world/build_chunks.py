@@ -392,6 +392,15 @@ CHUNK_BUDGET_EXCEPTIONS["L0_MUDROOM"] = (
     _mudroom_limit + 1,
     _mudroom_reason + "; HOUSE-03262 adds the shared steel service-door hardware role")
 
+# `HOUSE-03266`: completed timber-flight details reuse the resident trim role. The concrete
+# basement and garage flights instead gain exactly one established metal carriage/guard role;
+# exterior stone steps already share that role with their zones' existing architecture.
+for concrete_stair_cell in ("B1_STAIR", "L0_GARAGE"):
+    previous_limit, previous_reason = CHUNK_BUDGET_EXCEPTIONS[concrete_stair_cell]
+    CHUNK_BUDGET_EXCEPTIONS[concrete_stair_cell] = (
+        previous_limit + 1,
+        previous_reason + "; HOUSE-03266 adds one measured metal stair-detail role")
+
 # HOUSE-01069 is a measured room-wide furnishing/lighting step, not a generic budget increase.
 # The new walnut/brass cabinet shares both established dining roles. Its ceramic serving set is
 # one new finish, and the two sideboard lamps' exact independently switched shade group needs

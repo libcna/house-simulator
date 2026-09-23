@@ -1,3 +1,34 @@
+# Vertical-circulation C2 handoff — 2026-09-23 (`HOUSE-03266`)
+
+`Z-STAIR` is C2 across all eight authored flights. The existing shell flight grammar now gives
+every exposed side a raked handrail and closed stringer, end newels and pitch-bounded vertical
+balusters. Authored treads retain their nosings, and turn, exit and cross landings gain shallow
+edge trim. The main stair reuses its finished timber trim; basement, attic, garage and exterior
+transitions retain deliberately plainer concrete, metal or timber finishes. Collision remains the
+authoritative traversable ramp, so the change adds no movement system and does not alter portal or
+saved-state data.
+
+Round 109 inspected nine fixed `Z-STAIR` views in clear day and with the existing stair light
+groups forced, plus front/rear exterior controls. Five new fixed poses complete foot/head coverage
+for the main transition, basement and attic flights. The final contact sheets resolve the finished
+main balustrade and the plainer lower/upper flights without a ramp or solid-mass silhouette. The
+matching clear-day frames changed 546–451,206 pixels where the new construction entered view.
+Final production-night readability remains correctly assigned to M5.
+
+All 15 world rules, the shell generator selftest and manifest/material checks, chunk selftest and
+content-current gate pass. The focused camera, inside-geometry and both stair-traversal tests pass.
+The result is 773 chunks over 96 cells and 2,224,189 vertices. Generated shell geometry is 82,953
+triangles, worst 3,004/3,500 in `L2_LANDING`; all eight flights retain valid rise/going and the
+worst measured headroom is 2.175 m. `verify_shell.py --report` reports only the established
+`FRIDGE_L0_KITCHEN` nested-container cut limitation, unrelated to the circulation work.
+
+The remaining forecast is 205.75 realistic / 247.2 pessimistic hours. With 20.5 task-hours
+completed since the final reduction, the R14 ceiling projection is 267.7 h, 12.3 h below the hard
+limit. Rule that chooses the next task: R1 leaves only `Z-L3` below C2, so R2 selects it without a
+tie. The exact next unblocked MUST is `HOUSE-03265`; `Z-L0M` remains frozen by R4.
+
+---
+
 # Service rooms and garage C2 handoff — 2026-09-23 (`HOUSE-03262`)
 
 `Z-L0S` and `Z-GAR` are C2. The existing authored palettes and generated trim already distinguish

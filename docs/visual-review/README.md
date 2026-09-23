@@ -4611,3 +4611,28 @@ with the existing garage groups forced on. No S1/S2 architecture issue remains i
 `Z-GAR`. Their empty-room and normal-night readability gaps stay assigned to M4/M5. Next:
 `HOUSE-03266`, selected by R1/R2 because `Z-STAIR` has the most accessible cells still at C1;
 `Z-L0M` remains frozen by R4.
+
+## Round 109 — vertical circulation at C2
+
+Commit: `HOUSE-03266` working tree (`2026-09-23`). Before: nine fixed production views in the
+local, Git-ignored [`clear-day`](captures/house-03266-before-complete) set. After: matching
+[`clear-day`](captures/house-03266-after-final-day) and
+[`lights-forced`](captures/house-03266-after-final-lit) sets, plus final
+[`front`](captures/house-03266-after-final-exf) and
+[`rear`](captures/house-03266-after-final-exr) exterior controls. All four contact sheets and the
+affected full-size frames were inspected. The forced set exposes architecture for review without
+claiming the M5 production-night requirement.
+
+The existing shell flight grammar now supplies a raked closed stringer, raked handrail, end newels
+and pitch-bounded vertical balusters on every exposed flight side. Existing treads retain one
+nosing apiece, and turn, exit and cross landings gain shallow edge trim. The main stair uses its
+finished timber trim; basement, attic, garage and exterior transitions use their deliberately
+plainer authored finishes. Five added fixed poses complete the basement, attic and main-transition
+foot/head evidence. Matching clear-day frames change 546–451,206 pixels where the new construction
+enters view.
+
+Every view retains a stepped silhouette rather than a ramp or solid mass, and the exterior controls
+show guards aligned with the established facade treatment. Both focused traversal tests pass, so
+the visual treads and rails did not change the authoritative walkable collision. No S1/S2
+architecture issue remains in `Z-STAIR`; final night readability and furnishing remain assigned to
+M5/M4. Next: `HOUSE-03265`, selected by R1/R2 because `Z-L3` is the only zone still below C2.

@@ -192,7 +192,12 @@
         "main-stair-foot",
         "main-stair-l1-exit",
         "main-stair-l2-exit",
-        "basement-stair"
+        "basement-stair",
+        "main-stair-l1-transition",
+        "basement-stair-foot",
+        "basement-stair-head",
+        "attic-stair-foot",
+        "attic-stair-head"
       ]
     },
     {

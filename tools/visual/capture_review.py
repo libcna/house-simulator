@@ -121,6 +121,14 @@ NEW_POSES = (
     ("attic-store-west", "-11.90,9.30,-20.50,90.0,0.0"),
     ("main-stair-l2-exit", "3.55,6.55,-15.50,0.0,0.0"),
     ("basement-stair", "4.30,-2.30,-19.50,180.0,0.0"),
+    # HOUSE-03266: the inherited stair views miss several end-on silhouettes. These paired
+    # standing-height views retain them as controls and explicitly show each interior flight from
+    # its foot and head; the exterior three-step flights remain covered by their zone walks.
+    ("main-stair-l1-transition", "3.55,3.65,-15.50,0.0,0.0"),
+    ("basement-stair-foot", "4.10,-2.30,-14.70,0.0,10.0"),
+    ("basement-stair-head", "4.10,0.60,-19.45,180.0,-10.0"),
+    ("attic-stair-foot", "5.85,6.55,-14.70,0.0,10.0"),
+    ("attic-stair-head", "5.85,9.30,-18.05,180.0,-10.0"),
     ("garden", "-15.00,-0.35,-42.80,180.0,0.0"),
     ("neighbourhood-street", "0.00,0.00,20.00,0.0,0.0"),
 )
@@ -185,6 +193,11 @@ POSE_DETAILS = {
     "attic-store-west": ("Z-L3", "L3_STORE_W", None),
     "main-stair-l2-exit": ("Z-STAIR", "L2_STAIR_MAIN", None),
     "basement-stair": ("Z-STAIR", "B1_STAIR", None),
+    "main-stair-l1-transition": ("Z-STAIR", "L1_STAIR_MAIN", None),
+    "basement-stair-foot": ("Z-STAIR", "B1_STAIR", None),
+    "basement-stair-head": ("Z-STAIR", "L0_STAIR_MAIN", None),
+    "attic-stair-foot": ("Z-STAIR", "L2_STAIR_ATTIC", None),
+    "attic-stair-head": ("Z-STAIR", "L3_STAIR_HEAD", None),
     "garden": ("Z-EXR", "EXT_GARDEN", None),
     "neighbourhood-street": ("Z-STR", "EXT_WORLD", None),
 }
