@@ -738,27 +738,30 @@ def shell_layout(name: str, extras: dict, baked: bool) -> int:
     return LAYOUT_DUAL if (flag and baked) else LAYOUT_BASIC
 
 
-def place(mesh: dict, position, yaw_deg: float, scale: float) -> dict:
+def place(mesh: dict, position, yaw_deg: float, scale) -> dict:
     """Bake the prop's placement into the geometry -- §17.4's chunks draw with `Matrix::Identity`.
 
-    Normals are rotated but **not scaled**, and with a uniform scale that is the whole story. A
-    non-uniform scale would need the inverse transpose, so it is refused rather than silently
-    producing normals that are wrong by a factor nobody can see in a wireframe.
+    Per-axis scale is applied before yaw. Normals use the scale's inverse transpose before they
+    are rotated and normalized, so a stretched prop remains correctly lit.
     """
     yaw = math.radians(yaw_deg)
     c, s = math.cos(yaw), math.sin(yaw)
     px, py, pz = position
+    if isinstance(scale, (int, float)):
+        sx = sy = sz = float(scale)
+    else:
+        sx, sy, sz = (float(value) for value in scale)
 
     def rotate(x, y, z):
         return (x * c + z * s, y, -x * s + z * c)
 
     out_positions = []
     for x, y, z in mesh["positions"]:
-        rx, ry, rz = rotate(x * scale, y * scale, z * scale)
+        rx, ry, rz = rotate(x * sx, y * sy, z * sz)
         out_positions.append((px + rx, py + ry, pz + rz))
     out_normals = []
     for x, y, z in mesh["normals"]:
-        nx, ny, nz = rotate(x, y, z)
+        nx, ny, nz = rotate(x / sx, y / sy, z / sz)
         length = math.sqrt(nx * nx + ny * ny + nz * nz)
         out_normals.append((nx / length, ny / length, nz / length) if length > EPS
                            else (0.0, 1.0, 0.0))
@@ -917,6 +920,31 @@ def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=(),
                 f"{identifier!r} resolves to material {material_id!r}, which does not exist")
         return material_id, material
 
+    def tinted_material(identifier: str, material_id: str, material: dict,
+                        tint) -> tuple[str, dict]:
+        """Resolve an authored RGB override to an existing canonical material variant.
+
+        Chunks name materials rather than carrying shader parameters. Reusing a material row
+        whose only difference is ``tint`` preserves that format and the runtime renderer while
+        still making the variation genuinely per placement at authoring time.
+        """
+        if tint is None:
+            return material_id, material
+        requested = [float(value) for value in tint]
+        if material.get("tint") == requested:
+            return material_id, material
+        signature = {key: value for key, value in material.items() if key not in ("id", "tint")}
+        matches = sorted(
+            (candidate_id, candidate) for candidate_id, candidate in materials.items()
+            if candidate.get("tint") == requested
+            and {key: value for key, value in candidate.items() if key not in ("id", "tint")}
+            == signature)
+        if not matches:
+            raise LayoutError(
+                f"{identifier!r} requests tint {requested}, but material {material_id!r} has no "
+                "canonical variant with that tint and otherwise identical parameters")
+        return matches[0]
+
     for prop in sorted(layout_io.rows(layout, "props"), key=lambda p: p["id"]):
         stats["props"] += 1
         if not prop.get("static", True):
@@ -937,6 +965,8 @@ def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=(),
         for source_material, mesh in meshes:
             material_id, material = canonical_material(
                 f"prop {prop['id']}", asset, source_material, override)
+            material_id, material = tinted_material(
+                f"prop {prop['id']}", material_id, material, prop.get("tint"))
 
             emissive_group = ""
             if fixture is not None and source_material == fixture[1]:
@@ -954,8 +984,8 @@ def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=(),
                     f"{material_id!r}, class {material.get('class')!r}) but {path.name} has no "
                     f"TEXCOORD_1; run tools/blender/lightmap_unwrap.py over it (HOUSE-00205)")
 
-            placed = place(mesh, [float(c) for c in prop["position"]],
-                           float(prop.get("yawDeg", 0.0)), float(prop.get("scale", 1.0)))
+            position, yaw_deg, scale = layout_io.prop_transform(prop)
+            placed = place(mesh, position, yaw_deg, scale)
             key = (prop["cell"], group_key(prop, cell, material, emissive_group))
             groups.setdefault(key, []).append({
                 "prop": prop["id"], "mesh": placed, "layout": layout_id,
@@ -1879,6 +1909,8 @@ def selftest() -> int:
                  "effectTierS": "AlphaTest"},
                 {"id": "MAT_LAMP", "class": "emissive", "alphaMode": "opaque",
                  "effectTierS": "Basic"},
+                {"id": "MAT_LAMP_AMBER", "class": "emissive", "alphaMode": "opaque",
+                 "effectTierS": "Basic", "tint": [1.0, 0.5, 0.25]},
                 {"id": "MAT_FLOOR", "class": "tile", "alphaMode": "opaque",
                  "effectTierS": "DualTexture"},
                 {"id": "MAT_WALL", "class": "paint", "alphaMode": "opaque",
@@ -1993,6 +2025,38 @@ def selftest() -> int:
                 f"turned 90 degrees it is -z: normals are rotated with the prop, not left in "
                 f"asset space where every lit surface would face the wrong way "
                 f"({tuple(round(c, 3) for c in rotated[0][1])})")
+
+        # 4a. HOUSE-00971's variation is resolved once and baked into all downstream geometry.
+        # The fixture is deliberately anisotropic, so all three scale axes are visible in its
+        # bounds. Its tint resolves to an otherwise-identical canonical material: no chunk format
+        # or runtime renderer extension is involved.
+        varied_row = prop("PROP_VARIANT", "MAT_LAMP", position=[5.0, 1.0, 2.0],
+                          yawDeg=20.0, scale=[2.0, 0.5, 1.5],
+                          tint=[1.0, 0.5, 0.25],
+                          jitter={"seed": 971, "yawDeg": 8.0, "offset": 0.12})
+        write_props([varied_row])
+        varied = build(world_dir, manifest)
+        repeated = build(world_dir, manifest)
+        position, yaw_deg, scale = layout_io.prop_transform(varied_row)
+        expected = place(read_geometry(assets / "lit.glb"), position, yaw_deg, scale)
+        require(serialise(varied) == serialise(repeated),
+                "the same seed produces byte-identical baked chunks")
+        require(varied["chunks"][0]["material"] == "MAT_LAMP_AMBER",
+                "a prop tint selects the otherwise-identical canonical material variant")
+        require(all(abs(a - b) < 1e-5 for a, b in
+                    zip(varied["chunks"][0]["bounds"], bounds_of(expected["positions"]))),
+                "per-axis scale plus seeded yaw/offset is baked into the rendered vertices")
+        require(position != (5.0, 1.0, 2.0) and abs(yaw_deg - 20.0) > 1e-6,
+                "the probe's seeded jitter changes both horizontal position and yaw")
+
+        write_props([prop("PROP_BAD_TINT", "MAT_LAMP", tint=[0.1, 0.2, 0.3])])
+        try:
+            build(world_dir, manifest)
+            raised = ""
+        except LayoutError as exc:
+            raised = str(exc)
+        require("no canonical variant" in raised,
+                "a tint with no authored material variant is refused instead of rendering white")
 
         # 4b. A null per-placement override retains the asset's authored material split through
         #     an explicit manifest bridge. The LOD node deliberately repeats both primitives; if

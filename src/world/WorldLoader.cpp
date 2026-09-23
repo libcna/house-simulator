@@ -2615,20 +2615,34 @@ namespace cnahouse::world
             }
             prop.yawDeg = yaw.Value();
 
-            const Result<float> scale = row.OptionalFloat("scale", 1.0F);
-            if (!scale)
+            Microsoft::Xna::Framework::Vector3 scale(1.0F, 1.0F, 1.0F);
+            if (row.Has("scale"))
             {
-                return scale.Error().WithContext("layout.props.json");
+                const Result<float> uniform = row.RequireFloat("scale");
+                if (uniform)
+                {
+                    scale =
+                        Microsoft::Xna::Framework::Vector3(uniform.Value(), uniform.Value(), uniform.Value());
+                }
+                else
+                {
+                    const Result<Microsoft::Xna::Framework::Vector3> perAxis = row.RequireVector3("scale");
+                    if (!perAxis)
+                    {
+                        return perAxis.Error().WithContext("layout.props.json");
+                    }
+                    scale = perAxis.Value();
+                }
             }
-            if (scale.Value() <= 0.0F)
+            if (scale.X <= 0.0F || scale.Y <= 0.0F || scale.Z <= 0.0F)
             {
                 return Err(ErrorCode::InvalidData,
-                           "a scale is positive; this is " + std::to_string(scale.Value()) +
-                               ". Zero collapses the prop to a point and a negative scale turns "
-                               "it inside out, which reads as a broken model",
+                           "every scale component is positive. Zero collapses the prop to a "
+                           "plane or point and a negative scale turns it inside out, which "
+                           "reads as a broken model",
                            "layout.props.json/" + row.Path() + "/scale");
             }
-            prop.scale = scale.Value();
+            prop.scale = scale;
 
             // `static` defaults to TRUE, which is what §17.4's batching assumes and what the file's
             // prose says: a prop that never moves is batched offline, and a row has to SAY `false`

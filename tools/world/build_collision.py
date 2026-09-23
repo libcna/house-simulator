@@ -1726,9 +1726,9 @@ def build_props(layout, shapes: Shapes, per_cell, asset_paths, stats) -> None:
             stats["propsSkipped"] += 1
             continue
         cell_id = prop["cell"]
-        yaw = math.radians(float(prop.get("yawDeg", 0.0)))
-        scale = float(prop.get("scale", 1.0))
-        px, py, pz = (float(c) for c in prop["position"])
+        position, yaw_deg, scale = layout_io.prop_transform(prop)
+        yaw = math.radians(yaw_deg)
+        px, py, pz = position
         surface = None
         material = prop.get("material")
         if material and material in materials:
@@ -1755,7 +1755,8 @@ def build_props(layout, shapes: Shapes, per_cell, asset_paths, stats) -> None:
             half = tuple((hi[i] - lo[i]) / 2 for i in range(3))
             _add(per_cell, cell_id, shapes.obb(
                 _place(centre, px, py, pz, yaw, scale),
-                tuple(h * scale for h in half), yaw, surface, KIND_PROP))
+                tuple(h * component for h, component in zip(half, scale)),
+                yaw, surface, KIND_PROP))
             stats["propObbs"] += 1
             continue
 
@@ -1764,7 +1765,8 @@ def build_props(layout, shapes: Shapes, per_cell, asset_paths, stats) -> None:
             if box is not None:
                 _add(per_cell, cell_id, shapes.obb(
                     _place(box[0], px, py, pz, yaw, scale),
-                    tuple(h * scale for h in box[1]), yaw, surface, KIND_PROP))
+                    tuple(h * component for h, component in zip(box[1], scale)),
+                    yaw, surface, KIND_PROP))
                 stats["propObbs"] += 1
             else:
                 placed = [_place(v, px, py, pz, yaw, scale) for v in vertices]
@@ -1998,7 +2000,11 @@ def build_posed_leaves(layout, shapes: Shapes, per_cell: dict[str, list[int]], s
 
 def _place(point, px, py, pz, yaw, scale):
     """Local point -> world: scale, then yaw about Y, then translate."""
-    x, y, z = (c * scale for c in point)
+    if isinstance(scale, (int, float)):
+        sx = sy = sz = float(scale)
+    else:
+        sx, sy, sz = scale
+    x, y, z = (point[0] * sx, point[1] * sy, point[2] * sz)
     c, s = math.cos(yaw), math.sin(yaw)
     return (px + x * c + z * s, py + y, pz - x * s + z * c)
 
@@ -3426,6 +3432,11 @@ def selftest() -> int:
                        "static": True, "collision": "proxy"},
                       {"id": "PROP_E", "asset": "MODEL_D", "cell": "L0_LOUNGE",
                        "position": [1.5, 0.0, 4.5], "yawDeg": 0.0, "scale": 3.0,
+                       "static": True, "collision": "proxy"},
+                      {"id": "PROP_F", "asset": "MODEL_D", "cell": "L0_LOUNGE",
+                       "position": [5.0, 0.0, 4.5], "yawDeg": 0.0,
+                       "scale": [2.0, 0.5, 3.0],
+                       "jitter": {"seed": 971, "yawDeg": 0.0, "offset": 0.1},
                        "static": True, "collision": "proxy"}]},
             indent=2) + "\n", encoding="utf-8")
         manifest = workspace / "assets.manifest.json"
@@ -3437,8 +3448,8 @@ def selftest() -> int:
                 {"id": "MODEL_D", "sourceFile": str(assets_dir / "offset_box.glb")},
             ]}, indent=2) + "\n", encoding="utf-8")
         world = build(world_dir, manifest)
-        require(world["stats"]["propObbs"] == 8 and world["stats"]["propMeshes"] == 0,
-                f"eight prop OBBs (one box + five boxes + two offset), no triangle meshes "
+        require(world["stats"]["propObbs"] == 9 and world["stats"]["propMeshes"] == 0,
+                f"nine prop OBBs (one box + five boxes + three offset), no triangle meshes "
                 f"(got {world['stats']['propObbs']} and {world['stats']['propMeshes']})")
         require(world["stats"]["propsSkipped"] == 1,
                 "a non-static prop is excluded -- it becomes a DynamicInstance, not static "
@@ -3459,6 +3470,18 @@ def selftest() -> int:
         require(scaled and all(abs(a - b) < 1e-5 for a, b in zip(scaled[0][0], (4.5, 1.5, 4.5))),
                 f"...and scales the offset too: 1 m out becomes 3 m out, at (4.5, 1.5, 4.5) "
                 f"(got {tuple(round(c, 4) for c in scaled[0][0]) if scaled else None})")
+        variant_row = layout_io.rows(
+            layout_io.load_layout(world_dir, ["props"]), "props")[-1]
+        variant_position, variant_yaw, _variant_scale = layout_io.prop_transform(variant_row)
+        variant = [o for o in world["shapes"].obbs
+                   if o[4] == KIND_PROP
+                   and all(abs(a - b) < 1e-6 for a, b in
+                           zip(o[1], (0.2, 0.25, 0.3)))]
+        expected_centre = _place((1.0, 0.5, 0.0), *variant_position,
+                                 math.radians(variant_yaw), (2.0, 0.5, 3.0))
+        require(len(variant) == 1
+                and all(abs(a - b) < 1e-5 for a, b in zip(variant[0][0], expected_centre)),
+                "per-axis scale and seeded offset move the collision proxy with rendered geometry")
 
         # 10. The grid. §49.2's claim is "about six shapes, not nine hundred".
         require(world["stats"]["maxBucketOccupancy"] < 20,

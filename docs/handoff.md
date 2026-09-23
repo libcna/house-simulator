@@ -1,3 +1,27 @@
+# Offline prop-variation handoff — 2026-09-23 (`HOUSE-00971`)
+
+Placed static props now support a positive uniform or xyz scale, RGB tint and recipe-opted seeded
+jitter. One `layout_io.prop_transform` interpretation feeds chunk vertices, inverse-transpose
+normals, collision proxies and placement validation. Jitter is deliberately bounded to 15 degrees
+of yaw and 0.25 m of horizontal offset and is stable across hosts through SHA-256 of the seed and
+prop id. Tint resolves at build time to an existing canonical material row whose other parameters
+match the base material; a missing variant fails authoring instead of adding per-instance runtime
+state or silently rendering white.
+
+Synthetic chunk, collision and placement probes cover xyz scale, tint, yaw/offset jitter and
+repeatability. The C++ world loader accepts scalar and xyz scale. The real 133-prop placement
+validator passes, and rebuilding all 781 chunks produces the exact pre-task SHA-256
+`a649fcfa6480a7f5fec3c4f796d4e926e27287675d872dbdae71cb48cbc7709c`, proving rows without the new
+fields are unchanged. The warning-clean build and all 1,420 unit tests pass.
+
+The remaining forecast is 195.25 realistic / 235.65 pessimistic hours. With 31 task-hours spent
+since the final reduction, the R14 projection is 266.65 h, 13.35 h below the hard limit. Rule that
+chooses the next task: R1's house-wide support exception, R8's kit-first rule and dependency order
+select the newly unblocked four-kit storage-fill generator. The exact next unblocked MUST task is
+`HOUSE-00973`.
+
+---
+
 # Static-placement handoff — 2026-09-23 (`HOUSE-03303`)
 
 All 133 authored static prop rows now pass the focused offline placement contract. The checker

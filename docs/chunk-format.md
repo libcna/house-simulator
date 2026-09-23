@@ -99,6 +99,12 @@ own prop's. A sub-range carrying the group's box culls nothing and costs 24 byte
 Textures are not named here. A chunk names its material, and `layout.materials.json` names the
 material's albedo; duplicating the path would be a second place for it to be wrong.
 
+`HOUSE-00971` keeps placement variation outside this format. Uniform or per-axis scale and seeded
+yaw/offset jitter are baked into the world-space vertices and sub-range box. An optional prop tint
+selects an already-authored, otherwise-identical canonical material row before grouping. Existing
+chunks therefore remain byte-identical when those fields are absent, and runtime receives no new
+instance state.
+
 ## 4a. The shell is chunked too
 
 `HOUSE-00473`. §17.4 was written about "every cell's static props", and a cell's own floor,

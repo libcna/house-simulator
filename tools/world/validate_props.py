@@ -103,11 +103,11 @@ def _bounds(points) -> tuple[float, float, float, float, float, float]:
 
 
 def _transform_point(point, row: dict) -> tuple[float, float, float]:
-    scale = float(row.get("scale", 1.0))
-    yaw = math.radians(float(row.get("yawDeg", 0.0)))
+    position, yaw_deg, scale = layout_io.prop_transform(row)
+    yaw = math.radians(yaw_deg)
     cosine, sine = math.cos(yaw), math.sin(yaw)
-    px, py, pz = (float(value) for value in row["position"])
-    x, y, z = (float(value) * scale for value in point)
+    px, py, pz = position
+    x, y, z = (float(value) * component for value, component in zip(point, scale))
     return (px + x * cosine + z * sine, py + y, pz - x * sine + z * cosine)
 
 
@@ -588,6 +588,14 @@ def selftest() -> int:
     require(abs(1.0 - 1.005) <= SUPPORT_TOLERANCE
             and abs(1.0 - 1.02) > SUPPORT_TOLERANCE,
             "support contact accepts 5 mm and rejects 20 mm")
+    varied_row = {"id": "PROP_PROBE", "position": [1.0, 2.0, 3.0], "yawDeg": 0.0,
+                  "scale": [2.0, 3.0, 4.0],
+                  "jitter": {"seed": 971, "yawDeg": 0.0, "offset": 0.1}}
+    resolved, _yaw, _scale = layout_io.prop_transform(varied_row)
+    transformed = _transform_point((1.0, 1.0, 1.0), varied_row)
+    require(all(abs(a - b) < 1e-9 for a, b in
+                zip(transformed, (resolved[0] + 2.0, 5.0, resolved[2] + 4.0))),
+            "placement validation uses the same per-axis scale and seeded offset as the builders")
     barrier = [[(1.6, 0.0), (2.4, 0.0), (2.4, 4.0), (1.6, 4.0)]]
     require(not _route_exists(room, barrier, [(0.7, 2.0), (3.3, 2.0)]),
             "a rigid barrier that removes the 0.70 m route is rejected")

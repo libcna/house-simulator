@@ -103,6 +103,29 @@
           "interactable": {
             "$ref": "#/$defs/idOrNull"
           },
+          "jitter": {
+            "additionalProperties": false,
+            "properties": {
+              "offset": {
+                "maximum": 0.25,
+                "minimum": 0,
+                "type": "number"
+              },
+              "seed": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "yawDeg": {
+                "maximum": 15,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "required": [
+              "seed"
+            ],
+            "type": "object"
+          },
           "lodGroup": {
             "$ref": "#/$defs/idOrNull"
           },
@@ -116,11 +139,27 @@
             "$ref": "#/$defs/vector3"
           },
           "scale": {
-            "exclusiveMinimum": 0,
-            "type": "number"
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "number"
+              },
+              {
+                "items": {
+                  "exclusiveMinimum": 0,
+                  "type": "number"
+                },
+                "maxItems": 3,
+                "minItems": 3,
+                "type": "array"
+              }
+            ]
           },
           "static": {
             "type": "boolean"
+          },
+          "tint": {
+            "$ref": "#/$defs/rgb"
           },
           "yawDeg": {
             "type": "number"

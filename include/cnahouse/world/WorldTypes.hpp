@@ -684,7 +684,8 @@ namespace cnahouse::world
         util::Id cell;
         Microsoft::Xna::Framework::Vector3 position;
         float yawDeg = 0.0F;
-        float scale = 1.0F;
+        /// Offline chunk/collision builders bake this xyz scale into static geometry.
+        Microsoft::Xna::Framework::Vector3 scale{1.0F, 1.0F, 1.0F};
         bool isStatic = true;
         util::Id lodGroup;
         PropCollision collision = PropCollision::Proxy;

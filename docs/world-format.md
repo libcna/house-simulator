@@ -475,7 +475,11 @@ and has no runtime object; one that moves becomes a `DynamicInstance`.
       "asset": "MODEL_PROP_KITCHEN_FRIDGE_01",
       "cell": "L0_KITCHEN",
       "position": [1.20, 0.60, -26.70], "yawDeg": 180.0, "scale": 1.0,
-      "static": false,                    // false -> a dynamic instance, excluded from batching
+      // Optional offline variation: scale may instead be [x,y,z]. Tint must match an authored
+      // canonical material variant; jitter is bounded and deterministic from seed + prop id.
+      "tint": [0.92, 0.88, 0.98],
+      "jitter": { "seed": 971, "yawDeg": 5.0, "offset": 0.08 },
+      "static": true,                     // true -> baked into a static chunk
       "lodGroup": "LODG_APPLIANCE",
       "collision": "proxy",               // proxy | none | box
       "material": null,                   // null = the asset's own materials
@@ -485,9 +489,19 @@ and has no runtime object; one that moves becomes a `DynamicInstance`.
 }
 ```
 
+`scale` is either one positive number or three positive axis factors. `jitter.yawDeg` is a maximum
+absolute yaw change (0–15 degrees), while `jitter.offset` independently offsets X and Z by at most
+0–0.25 m; Y never jitters. SHA-256 over the non-negative integer seed and prop id makes the result
+identical on every build host. Recipes opt into jitter by writing the object—absence changes
+nothing. `tint` is an RGB override resolved by the chunk builder to an existing material row whose
+other parameters exactly match the prop's base material. Thus tint stays an ordinary material
+parameter and the chunk format and runtime renderer need no per-instance extension. A missing
+variant is an authoring error, not a silent white fallback (`HOUSE-00971`).
+
 ### Static-placement contract
 
-`tools/world/validate_props.py` checks every static placement against the measured LOD0 envelope
+`tools/world/validate_props.py` checks every resolved static placement—including scale and seeded
+jitter—against the measured LOD0 envelope
 and the same `_COL` components consumed by the collision builder. A visual envelope remains inside
 its cell, its bottom is within 1 cm of the floor, terrain or a measured support surface, and rigid
 collision components may overlap by at most 1 cm. Two deliberately tucked seating arrangements

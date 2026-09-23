@@ -2237,7 +2237,7 @@ namespace
         EXPECT_EQ(fridge.cell, Intern("L0_KITCHEN"));
         EXPECT_FLOAT_EQ(fridge.position.X, 1.20F);
         EXPECT_FLOAT_EQ(fridge.yawDeg, 180.0F);
-        EXPECT_FLOAT_EQ(fridge.scale, 1.0F);
+        EXPECT_EQ(fridge.scale, Microsoft::Xna::Framework::Vector3(1.0F, 1.0F, 1.0F));
         EXPECT_FALSE(fridge.isStatic);
         EXPECT_EQ(fridge.lodGroup, Intern("LODG_APPLIANCE"));
         EXPECT_EQ(fridge.collision, world::PropCollision::Proxy);
@@ -2259,7 +2259,7 @@ namespace
         EXPECT_TRUE(contents.props[1].isStatic) << "the worktop says nothing";
         EXPECT_EQ(contents.props[1].collision, world::PropCollision::Proxy)
             << "and collision defaults to proxy";
-        EXPECT_FLOAT_EQ(contents.props[1].scale, 1.0F);
+        EXPECT_EQ(contents.props[1].scale, Microsoft::Xna::Framework::Vector3(1.0F, 1.0F, 1.0F));
     }
 
     TEST_F(WorldLoaderTest, APlumbingFixtureNamesTheStackItDrainsTo)
@@ -2273,7 +2273,7 @@ namespace
         EXPECT_EQ(contents.props[2].plumbing, Intern("STACK_A"));
         // 0.98 and not 1.0, because 1.0 is the default: a reader that ignored the field would
         // have passed against a fixture that agreed with it by accident.
-        EXPECT_FLOAT_EQ(contents.props[2].scale, 0.98F);
+        EXPECT_EQ(contents.props[2].scale, Microsoft::Xna::Framework::Vector3(0.98F, 0.98F, 0.98F));
         EXPECT_FALSE(contents.props[0].plumbing.IsValid()) << "a fridge is not on a drain";
     }
 
@@ -2293,6 +2293,19 @@ namespace
             ASSERT_FALSE(props) << "accepted a scale of " << scale;
             EXPECT_NE(props.Error().Context().find("scale"), std::string::npos) << props.Error().ToString();
         }
+    }
+
+    TEST_F(WorldLoaderTest, APropMayCarryPerAxisScale)
+    {
+        Write("layout.props.json",
+              R"({"schema": "cna-house/props/1",
+                  "props": [{"id": "P", "asset": "A", "cell": "C",
+                             "position": [0, 0, 0], "scale": [0.8, 1.2, 1.1]}]})");
+        world::WorldData::Contents contents;
+        const auto props = world::WorldLoader::LoadProps(directory_, contents);
+        ASSERT_TRUE(props) << props.Error().ToString();
+        ASSERT_EQ(contents.props.size(), 1U);
+        EXPECT_EQ(contents.props[0].scale, Microsoft::Xna::Framework::Vector3(0.8F, 1.2F, 1.1F));
     }
 
     TEST_F(WorldLoaderTest, ACollisionModeOutsideItsVocabularyIsRefused)

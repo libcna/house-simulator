@@ -101,7 +101,7 @@
     "ROOF_MAIN.glb": "sha256:a31c23077a6e78e4fbb780102b8aae8e4dcf0e4293a53773582b2fa623fe70c9"
   },
   "generator": "tools/blender/house_shell_gen.py",
-  "generatorVersion": "sha256:f2109908ca9126afee63e559b6206f6b1cac4b5306e72142f8dabba558bf062d",
+  "generatorVersion": "sha256:4e536370611f249851909cdc6b7aaf2769feb57d82e82c4ed804f45714a9f59a",
   "origin": {
     "attribution": "",
     "kind": "generated",

@@ -23,6 +23,8 @@ Offline tooling: not runtime code, not subject to the XNA-only rule.
 from __future__ import annotations
 
 import json
+import hashlib
+import math
 import sys
 from pathlib import Path
 
@@ -166,6 +168,79 @@ def by_id(row_list: list[dict], what: str) -> dict[str, dict]:
     return out
 
 
+def prop_transform(row: dict) -> tuple[tuple[float, float, float], float,
+                                       tuple[float, float, float]]:
+    """Resolve one prop's deterministic, offline-baked placement variation.
+
+    ``scale`` remains backwards compatible with the original scalar form and may also be an
+    xyz vector.  ``jitter`` states maximum yaw and horizontal-offset magnitudes; SHA-256 gives a
+    platform-independent stream keyed by the authored seed and prop id.  The 25 cm / 15 degree
+    bounds keep this a composition aid rather than a way to move furniture to another location.
+    """
+    identifier = row.get("id")
+    if not isinstance(identifier, str) or not identifier:
+        raise LayoutError("a prop transform needs a non-empty string id")
+
+    position = row.get("position")
+    if not isinstance(position, list) or len(position) != 3:
+        raise LayoutError(f"prop {identifier!r}: position must be a three-number array")
+    try:
+        resolved_position = tuple(float(value) for value in position)
+        yaw = float(row.get("yawDeg", 0.0))
+    except (TypeError, ValueError) as exc:
+        raise LayoutError(f"prop {identifier!r}: position and yawDeg must be numbers") from exc
+
+    authored_scale = row.get("scale", 1.0)
+    if isinstance(authored_scale, list):
+        if len(authored_scale) != 3:
+            raise LayoutError(f"prop {identifier!r}: per-axis scale must contain x, y and z")
+        try:
+            scale = tuple(float(value) for value in authored_scale)
+        except (TypeError, ValueError) as exc:
+            raise LayoutError(f"prop {identifier!r}: scale components must be numbers") from exc
+    else:
+        try:
+            uniform = float(authored_scale)
+        except (TypeError, ValueError) as exc:
+            raise LayoutError(f"prop {identifier!r}: scale must be a number or xyz array") from exc
+        scale = (uniform, uniform, uniform)
+
+    if not all(math.isfinite(value) for value in (*resolved_position, yaw, *scale)):
+        raise LayoutError(f"prop {identifier!r}: transform values must be finite")
+    if any(value <= 0.0 for value in scale):
+        raise LayoutError(f"prop {identifier!r}: every scale component must be positive")
+
+    jitter = row.get("jitter")
+    if jitter is not None:
+        if not isinstance(jitter, dict):
+            raise LayoutError(f"prop {identifier!r}: jitter must be an object")
+        seed = jitter.get("seed")
+        if isinstance(seed, bool) or not isinstance(seed, int) or seed < 0:
+            raise LayoutError(f"prop {identifier!r}: jitter.seed must be a non-negative integer")
+        try:
+            yaw_extent = float(jitter.get("yawDeg", 0.0))
+            offset_extent = float(jitter.get("offset", 0.0))
+        except (TypeError, ValueError) as exc:
+            raise LayoutError(f"prop {identifier!r}: jitter extents must be numbers") from exc
+        if not (math.isfinite(yaw_extent) and 0.0 <= yaw_extent <= 15.0):
+            raise LayoutError(f"prop {identifier!r}: jitter.yawDeg must be within 0..15")
+        if not (math.isfinite(offset_extent) and 0.0 <= offset_extent <= 0.25):
+            raise LayoutError(f"prop {identifier!r}: jitter.offset must be within 0..0.25 m")
+
+        digest = hashlib.sha256(f"{seed}\0{identifier}".encode("utf-8")).digest()
+
+        def signed_unit(offset: int) -> float:
+            integer = int.from_bytes(digest[offset:offset + 8], "little")
+            return 2.0 * integer / float((1 << 64) - 1) - 1.0
+
+        resolved_position = (resolved_position[0] + offset_extent * signed_unit(0),
+                             resolved_position[1],
+                             resolved_position[2] + offset_extent * signed_unit(8))
+        yaw += yaw_extent * signed_unit(16)
+
+    return resolved_position, yaw, scale
+
+
 # ---------------------------------------------------------------------------------- geometry ----
 
 
@@ -284,6 +359,24 @@ def selftest() -> int:
     except LayoutError as exc:
         raised = str(exc)
     require("degenerate" in raised, "a zero-width cell box is refused")
+
+    # 8. Placement variation is deterministic and bounded; every builder imports this function
+    # rather than implementing its own random stream or transform interpretation.
+    variant = {"id": "PROP_TEST", "position": [1.0, 2.0, 3.0], "yawDeg": 10.0,
+               "scale": [0.8, 1.2, 1.1],
+               "jitter": {"seed": 971, "yawDeg": 5.0, "offset": 0.2}}
+    first = prop_transform(variant)
+    require(first == prop_transform(variant), "a seeded prop transform is byte-stable within a run")
+    require(first[2] == (0.8, 1.2, 1.1)
+            and abs(first[0][0] - 1.0) <= 0.2 and abs(first[0][2] - 3.0) <= 0.2
+            and abs(first[1] - 10.0) <= 5.0,
+            "per-axis scale is retained and jitter stays inside its authored extents")
+    try:
+        prop_transform(dict(variant, jitter={"seed": 1, "offset": 0.26}))
+        raised = ""
+    except LayoutError as exc:
+        raised = str(exc)
+    require("0..0.25" in raised, "an offset beyond the bounded composition jitter is refused")
 
     if failures:
         return 1

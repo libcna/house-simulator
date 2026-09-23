@@ -342,7 +342,16 @@ def build() -> dict[str, dict]:
     schemas["props"] = envelope("props", "layout.props.json", rows("props", obj(
         ["id", "asset", "cell", "position"],
         {"id": ID, "asset": ID, "cell": ID, "position": VEC3,
-         "yawDeg": NUM, "scale": {"type": "number", "exclusiveMinimum": 0},
+         "yawDeg": NUM,
+         "scale": {"anyOf": [
+             {"type": "number", "exclusiveMinimum": 0},
+             {"type": "array", "items": {"type": "number", "exclusiveMinimum": 0},
+              "minItems": 3, "maxItems": 3}]},
+         "tint": RGB,
+         "jitter": obj(["seed"], {
+             "seed": {"type": "integer", "minimum": 0},
+             "yawDeg": {"type": "number", "minimum": 0, "maximum": 15},
+             "offset": {"type": "number", "minimum": 0, "maximum": 0.25}}),
          "static": BOOL, "lodGroup": ID_OR_NULL,
          "collision": {"enum": ["proxy", "none", "box"]},
          "material": ID_OR_NULL, "interactable": ID_OR_NULL,
