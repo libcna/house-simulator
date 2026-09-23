@@ -1,3 +1,31 @@
+# Traversal-sweep handoff — 2026-09-23 (`HOUSE-03227`)
+
+`HOUSE-03227` is complete. `RandomWalkTests.TwentyMinutesOfWanderingStaysInTheHouse` now repeats
+the complete seed-618, 144,000-step soak from safe standing points on B1, L0, L1, L2 and L3 and
+from `EXT_ROAD`. The six starts each walked 1,034–1,410 m, changed named cells 67–473 times, stayed
+inside the playable boundary, did not fall and did not penetrate collision beyond the existing
+0.1 mm contact tolerance. The coverage assertion retains six distinct cells on full-size levels
+and scales to half of the five-cell attic, where requiring six would make success depend on a
+random inter-storey descent rather than a meaningful attic soak.
+
+The local `house-03227-traversal` capture set contains all 56 fixed clear-day production views.
+The live Linux review also drove real keyboard input in every zone with accessible cells and made
+focused passes through two closets, beneath the basement stair and into/out of the attic eaves.
+The attic pass visibly lowered and restored eye height without clipping. `Z-STR` is scenery-only
+and has zero accessible cells, so its fixed view—not an invalid player spawn outside the property
+boundary—is its review evidence. No new S1/S2 traversal issue was found. Round 104 records the
+findings; existing darkness, emptiness and architectural-identity gaps stay with their already
+scheduled M2/M5 tasks.
+
+Rule that chose this task: M1 dependency order and R1/G1, immediately after the grand tour. The
+next unblocked MUST task is `HOUSE-03240`, the G1 review.
+
+Validation: the focused six-start soak passes in 64.79 s. All fixed captures completed and were
+inspected together with the keyboard-driven tight-space frames. No private X server or game
+process remained after the review.
+
+---
+
 # Traversal handoff — 2026-09-23 (`HOUSE-03226` grand tour)
 
 `HOUSE-03226` is complete. `GrandTourTests.EveryAccessibleCellIsReachedOnFoot` derives a

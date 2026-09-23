@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **149 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 186 / 219 / 265 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G1, not passed.** Next: the traversal sweep `HOUSE-03227` |
+| Active plan | **148 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 185 / 217 / 263 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G1, not passed.** Next: the gate review `HOUSE-03240` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -513,10 +513,11 @@ green.
       note: from here on every architecture and furnishing task keeps this test green. A prop that blocks a route fails its own task; no later review has to catch it
       note: (2026-09-23) the deterministic portal-graph tour drives production `PlayerStep` at 120 Hz from the road spawn through all eight flights and 90 manifest cells, then returns to the road. Its 558 derived stops completed in 90,614 controller steps with 33 local collision detours and 0 boundary, floor-loss or obstacle-penetration failures in 10.28 s. The real traversal exposed and fixed five minimal data defects: a garage-step offset, two basement service doors behind the stair wedge, the blocked L2 store connector, the attic flight's terminal rise and its misaligned landing opening. PC-2026-09-23 records the evidence and retained scope
 
-- [ ] HOUSE-03227 — Traversal sweep of every zone, and fix what it finds
+- [x] HOUSE-03227 — Traversal sweep of every zone, and fix what it finds
       dep: HOUSE-03226 · sys: physics · plat: LNX · pri: MUST · zone: all · adv: D2, G1 · est: 2
       accept: (1) the 20-minute seeded random walk (`HOUSE-00618`) is run from a start on each level and outside; (2) a manual first-person walk of every zone checks stuck points, snagging edges, head bumps, stair transitions, attic crouch entry and exit, and eye clipping in the tightest spaces (closets, under the stair, the eaves); (3) every S1/S2 finding is fixed or filed as a task in the right milestone; (4) findings are recorded in the ledger
       verify: the seeded walks; the ledger round
+      note: (2026-09-23) the reproducible seed-618 soak now runs the full 144,000 steps from B1, L0, L1, L2, L3 and `EXT_ROAD`: each start walked 1,034–1,410 m with 0 boundary escapes, falls or geometry penetrations. Round 104 records the 56-pose production review plus keyboard-driven walks in every accessible planning zone and focused closet, under-stair and attic-eaves checks. The attic camera lowered on entry and restored its standing height on exit. No new S1/S2 traversal finding was found; the already-filed architecture/lighting gaps remain owned by M2/M5
 
 - [ ] HOUSE-03240 — **Gate G1 review: every zone at C1**
       dep: HOUSE-03226, HOUSE-03227, HOUSE-03228 · sys: — · plat: ALL · pri: MUST · zone: all · adv: G1 · est: 1
@@ -1827,7 +1828,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 
 | Milestone | Tasks before | Hours before | **Tasks now** | Optimistic | **Realistic** | Pessimistic | Reserve |
 |---|---|---|---|---|---|---|---|
-| M1 Whole-property traversal | 4 | 9 | **2** | 2.55 | **3** | 6.3 | R-E +3 |
+| M1 Whole-property traversal | 4 | 9 | **1** | 0.85 | **1** | 4.1 | R-E +3 |
 | M2 Architectural completion | 8 | 18 | **8** | 12.75 | **15** | 16.5 | — |
 | M3 The reusable furnishing kit | 16 | 33 | **14** | 17 | **20** | 22 | — |
 | M4 Dressing everywhere | 40 | 48.75 | **31** | 26.25 | **31** | 37 | R-D +3 |
@@ -1843,10 +1844,10 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **149** | **186.3** | **219.25** | **265.05** | +24 |
+| **Total, all three platforms** | **205** | **318.75** | **148** | **184.6** | **217.25** | **262.85** | +24 |
 
 The realistic total lies in the 210–250 h target range, and the pessimistic total is under the
-**280 h hard ceiling** (rule R14) by about 15 h. That margin is small on purpose: the ceiling is a
+**280 h hard ceiling** (rule R14) by about 17 h. That margin is small on purpose: the ceiling is a
 limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |

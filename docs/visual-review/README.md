@@ -4492,3 +4492,30 @@ areas merit their planned depth, while the service/storage cells remain utility 
 rather than hidden hero work. The concrete architecture subset of each S2 list is copied onto the
 corresponding M2 task in `plan.md`. Next: `HOUSE-03221` by M1 dependency order and R1, not another
 ground-floor polish round.
+
+## Round 104 — whole-property traversal sweep
+
+Commit: `HOUSE-03227` working tree (`2026-09-23`). The 56 fixed production views in the local,
+Git-ignored [`clear-day`](captures/house-03227-traversal) set cover all eleven planning zones.
+They were inspected as one labelled contact sheet and at the affected zone/tight-space frames.
+The fixed `Z-STR` view is the correct evidence for that scenery-only zone: both of its cells are
+deliberately inaccessible and are not player-walk targets.
+
+The live pass used the production Linux executable on a private X11 display. Keyboard-driven
+first-person movement covered each of the ten zones with accessible cells, with separate close
+checks in `L1_MASTER_CLOSET`, `L2_CLOSET_4` and `B1_UNDERSTAIR`. A westbound walk from `L3_ROOM`
+entered the low eaves, visibly lowered to the crouched eye, returned along the same route and
+restored the standing eye without clipping. The all-cell grand tour remains the exhaustive route
+proof; this pass supplied the human-scale checks for snagging, head clearance and the rendered eye.
+
+The seed-618 random soak ran 144,000 fixed steps (20 simulated minutes) independently from
+`B1_HALL`, `L0_HALL`, `L1_HALL`, `L2_HALL`, `L3_ROOM` and `EXT_ROAD`. The six walks covered
+1,034–1,410 m and 3–18 named cells apiece, with 0 boundary escapes, 0 falls and no sampled
+penetration deeper than the established 0.1 mm contact tolerance. The attic's coverage guard is
+bounded by its five authored cells rather than requiring a chance descent to a different storey.
+
+**S1/S2 traversal findings:** none. The dark/empty-room and architectural identity items from
+Round 103 remain visible and remain assigned to their existing M2/M5 tasks; they are not new
+movement defects. The scoreboard is unchanged pending the explicit G1 review. Next:
+`HOUSE-03240`, chosen by M1 dependency order and R1 because all three of its traversal/integration
+dependencies are now complete.

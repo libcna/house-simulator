@@ -12,6 +12,7 @@
 // a NAMED cell -- §16.4's lookup answers with a room, never with `EXT_WORLD` -- and §10.3's
 // playable volume is never crossed, which `HOUSE-00564`'s counter is what says.
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstdio>
 #include <filesystem>
@@ -165,212 +166,243 @@ TEST(RandomWalkTests, TwentyMinutesOfWanderingStaysInTheHouse)
     ASSERT_TRUE(loaded) << loaded.Error().Message();
     const CollisionWorld& statics = loaded.Value();
 
-    // Where a player starts a new house: §13's entrance hall.
-    const world::Cell* start = data.FindCell(cnahouse::util::Intern("L0_HALL"));
-    ASSERT_NE(start, nullptr);
-    const world::Level* level = data.FindLevel(start->level);
-    ASSERT_NE(level, nullptr);
-    const world::Footprint& box = start->boxes.front();
-
-    PlayerState state;
-    state.position =
-        Vector3((box.minX + box.maxX) * 0.5F, level->ffl + kRise + 0.002F, (box.minZ + box.maxZ) * 0.5F);
-
-    Rng rng(kSeed);
-    BroadPhase broad;
-    CellTracker tracker;
-    BoundaryGuard guard;
-    tracker.Forget();
-    tracker.Update(data, index, state.position);
-    ASSERT_TRUE(tracker.Current().IsValid()) << "the bot did not even start in a named cell";
-
-    std::vector<std::string> lostCells;
-    std::vector<std::string> wedged;
-    std::vector<std::string> visited;
-    float deepest = 0.0F;
-    int hold = 0;
-    bool fell = false;
-    int fellAt = -1;
-    int firstWedge = -1;
-    bool steering = false;
-    Vector3 aim;
-    int changes = 0;
-    int blocked = 0;
-    int steppedUp = 0;
-    int landings = 0;
-    float travelled = 0.0F;
-
-    InputState input;
-    input.move.Y = 1.0F;
-
-    for (int step = 0; step < kSteps; ++step)
+    struct WalkStart
     {
-        if (hold <= 0)
+        const char* cell;
+        Vector3 feet;
+    };
+
+    // HOUSE-03227 repeats HOUSE-00618's full twenty-minute soak on every authored level and
+    // outside. These are the corresponding safe standing points in docs/zones.json; keeping the
+    // explicit cells beside them makes a moved or invalid fixture fail at the start, not halfway
+    // through an otherwise opaque walk.
+    const std::array<WalkStart, 6> starts = {{{"B1_HALL", Vector3(0.0F, -2.3F, -20.7F)},
+                                              {"L0_HALL", Vector3(0.0F, 0.6F, -20.65F)},
+                                              {"L1_HALL", Vector3(0.0F, 3.65F, -20.15F)},
+                                              {"L2_HALL", Vector3(0.0F, 6.55F, -20.15F)},
+                                              {"L3_ROOM", Vector3(-0.55F, 9.3F, -20.5F)},
+                                              {"EXT_ROAD", Vector3(0.0F, 0.0F, 6.7F)}}};
+
+    const auto run = [&](const WalkStart& start)
+    {
+        SCOPED_TRACE(start.cell);
+        const world::Cell* startCell = data.FindCell(cnahouse::util::Intern(start.cell));
+        ASSERT_NE(startCell, nullptr);
+
+        PlayerState state;
+        state.position = Vector3(start.feet.X, start.feet.Y + kRise + 0.002F, start.feet.Z);
+
+        Rng rng(kSeed);
+        BroadPhase broad;
+        CellTracker tracker;
+        BoundaryGuard guard;
+        tracker.Forget();
+        tracker.Update(data, index, state.position);
+        ASSERT_EQ(tracker.Current(), startCell->id) << "the bot did not start in " << start.cell;
+
+        std::vector<std::string> lostCells;
+        std::vector<std::string> wedged;
+        std::vector<std::string> visited = {start.cell};
+        float deepest = 0.0F;
+        int hold = 0;
+        bool fell = false;
+        int fellAt = -1;
+        int firstWedge = -1;
+        bool steering = false;
+        Vector3 aim;
+        int changes = 0;
+        int blocked = 0;
+        int steppedUp = 0;
+        int landings = 0;
+        float travelled = 0.0F;
+
+        InputState input;
+        input.move.Y = 1.0F;
+
+        for (int step = 0; step < kSteps; ++step)
         {
-            // A destination rather than a heading, three times in four: one of the current cell's
-            // own doorways, picked at random. A pure heading-walk in a house with doors spends
-            // twenty minutes in the room it started in -- measured: 9 cells of 96 -- and the
-            // places worth soaking are the doorways, which a body has to aim at to find. The
-            // fourth is a bare heading, so the bot still walks into walls and corners on purpose.
-            const std::span<const std::uint32_t> doors = data.PortalsOf(tracker.Current());
-            if (!doors.empty() && rng.NextInt(0, 3) != 0)
+            if (hold <= 0)
             {
-                const world::Portal& portal = data.Portals()[doors[static_cast<std::size_t>(
-                    rng.NextInt(0, static_cast<std::int32_t>(doors.size()) - 1))]];
-                aim = PortalCentre(portal);
-                steering = true;
-            }
-            else
-            {
-                state.yaw = rng.NextFloat(-3.1415927F, 3.1415927F);
-                steering = false;
-            }
-            // §43.2's walk mode is a TOGGLE, and a bot that never uses it never tests the fast
-            // walk's 2.05 m/s against a doorway.
-            state.fastWalk = rng.NextInt(0, 3) == 0;
-            hold = rng.NextInt(kMinHold, kMaxHold);
-        }
-        --hold;
-        if (steering)
-        {
-            // §14: yaw 0 looks north (-Z) and positive turns east.
-            state.yaw = std::atan2(aim.X - state.position.X, state.position.Z - aim.Z);
-        }
-
-        const cnahouse::util::Id before = tracker.Current();
-        const CollisionCell* cell = statics.Cell(Name(before));
-        if (cell == nullptr)
-        {
-            lostCells.push_back(std::string(Name(before)) + " has no collision geometry (step " +
-                                std::to_string(step) + ")");
-            break;
-        }
-        state.cellId = cell->id;
-
-        const Vector3 was = state.position;
-        const PlayerStepReport report = PlayerStep(statics, *cell, broad, state, input, kDt);
-        blocked += report.blocked ? 1 : 0;
-        steppedUp += report.steppedUp ? 1 : 0;
-        landings += report.landing != cnahouse::physics::Landing::None ? 1 : 0;
-        travelled += std::sqrt((state.position.X - was.X) * (state.position.X - was.X) +
-                               (state.position.Z - was.Z) * (state.position.Z - was.Z));
-
-        // §10.3's playable volume, §10's fifth and last containment layer.
-        if (guard.Contain(state.position))
-        {
-            // Recorded rather than asserted here so the walk carries on and the count at the end
-            // is the whole story: one escape and one hundred are different failures.
-            lostCells.push_back("crossed §10.3's boundary at (" + std::to_string(state.position.X) + ", " +
-                                std::to_string(state.position.Y) + ", " + std::to_string(state.position.Z) +
-                                ") on step " + std::to_string(step));
-        }
-
-        if (tracker.Update(data, index, state.position))
-        {
-            ++changes;
-            const std::string name(Name(tracker.Current()));
-            if (std::find(visited.begin(), visited.end(), name) == visited.end())
-            {
-                visited.push_back(name);
-            }
-        }
-        if (!tracker.Current().IsValid())
-        {
-            lostCells.push_back("no cell at (" + std::to_string(state.position.X) + ", " +
-                                std::to_string(state.position.Y) + ", " + std::to_string(state.position.Z) +
-                                ") on step " + std::to_string(step) + ", last named " +
-                                std::string(Name(before)));
-            break;
-        }
-
-        // Sampled rather than asked every step: `HOUSE-00617` owns this invariant and asks it
-        // 41 000 times, and asking it here as well doubles the cost of the longest test in the
-        // suite to repeat a thing that is already known.
-        // Did it fall into the stair well? §12.3 gives a flight a 0.95 m balustrade and the shell
-        // draws the parapets it does draw, but the collision has no guard round a floor's hole --
-        // `build_collision.py` says so in as many words and calls it a gap against this phase. So
-        // a body that walks over the edge of the well goes down it, which is what the house says
-        // and not what a house does.
-        // Below the floor of an INDOOR room by more than a step: it has gone down a hole. Not
-        // outdoors, where §11.5's ground is the terrain and the front walk is 0.60 m below L0's
-        // FFL by construction -- an earlier version of this line counted that as a fall and let
-        // every wedge after it through, which is a test that passes for the wrong reason.
-        if (!fell && indoors(data, tracker.Current()) && !OnDownwardStair(data, tracker.Current(), state) &&
-            state.position.Y - state.Rise() < levelFloor(data, tracker.Current()) - 0.60F)
-        {
-            fell = true;
-            fellAt = step;
-            std::printf("  fell at (%.2f, %.2f, %.2f) out of %s\n",
-                        static_cast<double>(state.position.X),
-                        static_cast<double>(state.position.Y),
-                        static_cast<double>(state.position.Z),
-                        std::string(Name(tracker.Current())).c_str());
-        }
-
-        if (step % 8 == 0)
-        {
-            const float depth = OverlapCell(statics, *cell, broad, state.Body()).depth;
-            deepest = std::max(deepest, depth);
-            if (depth > kInside)
-            {
-                if (wedged.empty())
+                // A destination rather than a heading, three times in four: one of the current cell's
+                // own doorways, picked at random. A pure heading-walk in a house with doors spends
+                // twenty minutes in the room it started in -- measured: 9 cells of 96 -- and the
+                // places worth soaking are the doorways, which a body has to aim at to find. The
+                // fourth is a bare heading, so the bot still walks into walls and corners on purpose.
+                const std::span<const std::uint32_t> doors = data.PortalsOf(tracker.Current());
+                if (!doors.empty() && rng.NextInt(0, 3) != 0)
                 {
-                    firstWedge = step;
-                    const cnahouse::physics::CellOverlap in =
-                        OverlapCell(statics, *cell, broad, state.Body());
-                    std::printf("  FIRST WEDGE step %d in %s at (%.3f, %.3f, %.3f) depth %.3f shape %u "
-                                "n (%.2f,%.2f,%.2f) onGround %d fall %.2f\n",
-                                step,
-                                std::string(Name(before)).c_str(),
-                                static_cast<double>(state.position.X),
-                                static_cast<double>(state.position.Y),
-                                static_cast<double>(state.position.Z),
-                                static_cast<double>(in.depth),
-                                in.shape,
-                                static_cast<double>(in.normal.X),
-                                static_cast<double>(in.normal.Y),
-                                static_cast<double>(in.normal.Z),
-                                state.onGround ? 1 : 0,
-                                static_cast<double>(state.fall.speed));
+                    const world::Portal& portal = data.Portals()[doors[static_cast<std::size_t>(
+                        rng.NextInt(0, static_cast<std::int32_t>(doors.size()) - 1))]];
+                    aim = PortalCentre(portal);
+                    steering = true;
                 }
-                wedged.push_back("inside by " + std::to_string(depth) + " m in " + std::string(Name(before)) +
-                                 " on step " + std::to_string(step));
+                else
+                {
+                    state.yaw = rng.NextFloat(-3.1415927F, 3.1415927F);
+                    steering = false;
+                }
+                // §43.2's walk mode is a TOGGLE, and a bot that never uses it never tests the fast
+                // walk's 2.05 m/s against a doorway.
+                state.fastWalk = rng.NextInt(0, 3) == 0;
+                hold = rng.NextInt(kMinHold, kMaxHold);
+            }
+            --hold;
+            if (steering)
+            {
+                // §14: yaw 0 looks north (-Z) and positive turns east.
+                state.yaw = std::atan2(aim.X - state.position.X, state.position.Z - aim.Z);
+            }
+
+            const cnahouse::util::Id before = tracker.Current();
+            const CollisionCell* cell = statics.Cell(Name(before));
+            if (cell == nullptr)
+            {
+                lostCells.push_back(std::string(Name(before)) + " has no collision geometry (step " +
+                                    std::to_string(step) + ")");
+                break;
+            }
+            state.cellId = cell->id;
+
+            const Vector3 was = state.position;
+            const PlayerStepReport report = PlayerStep(statics, *cell, broad, state, input, kDt);
+            blocked += report.blocked ? 1 : 0;
+            steppedUp += report.steppedUp ? 1 : 0;
+            landings += report.landing != cnahouse::physics::Landing::None ? 1 : 0;
+            travelled += std::sqrt((state.position.X - was.X) * (state.position.X - was.X) +
+                                   (state.position.Z - was.Z) * (state.position.Z - was.Z));
+
+            // §10.3's playable volume, §10's fifth and last containment layer.
+            if (guard.Contain(state.position))
+            {
+                // Recorded rather than asserted here so the walk carries on and the count at the end
+                // is the whole story: one escape and one hundred are different failures.
+                lostCells.push_back("crossed §10.3's boundary at (" + std::to_string(state.position.X) +
+                                    ", " + std::to_string(state.position.Y) + ", " +
+                                    std::to_string(state.position.Z) + ") on step " + std::to_string(step));
+            }
+
+            if (tracker.Update(data, index, state.position))
+            {
+                ++changes;
+                const std::string name(Name(tracker.Current()));
+                if (std::find(visited.begin(), visited.end(), name) == visited.end())
+                {
+                    visited.push_back(name);
+                }
+            }
+            if (!tracker.Current().IsValid())
+            {
+                lostCells.push_back("no cell at (" + std::to_string(state.position.X) + ", " +
+                                    std::to_string(state.position.Y) + ", " +
+                                    std::to_string(state.position.Z) + ") on step " + std::to_string(step) +
+                                    ", last named " + std::string(Name(before)));
+                break;
+            }
+
+            // Sampled rather than asked every step: `HOUSE-00617` owns this invariant and asks it
+            // 41 000 times, and asking it here as well doubles the cost of the longest test in the
+            // suite to repeat a thing that is already known.
+            // Did it fall into the stair well? §12.3 gives a flight a 0.95 m balustrade and the shell
+            // draws the parapets it does draw, but the collision has no guard round a floor's hole --
+            // `build_collision.py` says so in as many words and calls it a gap against this phase. So
+            // a body that walks over the edge of the well goes down it, which is what the house says
+            // and not what a house does.
+            // Below the floor of an INDOOR room by more than a step: it has gone down a hole. Not
+            // outdoors, where §11.5's ground is the terrain and the front walk is 0.60 m below L0's
+            // FFL by construction -- an earlier version of this line counted that as a fall and let
+            // every wedge after it through, which is a test that passes for the wrong reason.
+            if (!fell && indoors(data, tracker.Current()) &&
+                !OnDownwardStair(data, tracker.Current(), state) &&
+                state.position.Y - state.Rise() < levelFloor(data, tracker.Current()) - 0.60F)
+            {
+                fell = true;
+                fellAt = step;
+                std::printf("  fell at (%.2f, %.2f, %.2f) out of %s\n",
+                            static_cast<double>(state.position.X),
+                            static_cast<double>(state.position.Y),
+                            static_cast<double>(state.position.Z),
+                            std::string(Name(tracker.Current())).c_str());
+            }
+
+            if (step % 8 == 0)
+            {
+                const float depth = OverlapCell(statics, *cell, broad, state.Body()).depth;
+                deepest = std::max(deepest, depth);
+                if (depth > kInside)
+                {
+                    if (wedged.empty())
+                    {
+                        firstWedge = step;
+                        const cnahouse::physics::CellOverlap in =
+                            OverlapCell(statics, *cell, broad, state.Body());
+                        std::printf("  FIRST WEDGE step %d in %s at (%.3f, %.3f, %.3f) depth %.3f shape %u "
+                                    "n (%.2f,%.2f,%.2f) onGround %d fall %.2f\n",
+                                    step,
+                                    std::string(Name(before)).c_str(),
+                                    static_cast<double>(state.position.X),
+                                    static_cast<double>(state.position.Y),
+                                    static_cast<double>(state.position.Z),
+                                    static_cast<double>(in.depth),
+                                    in.shape,
+                                    static_cast<double>(in.normal.X),
+                                    static_cast<double>(in.normal.Y),
+                                    static_cast<double>(in.normal.Z),
+                                    state.onGround ? 1 : 0,
+                                    static_cast<double>(state.fall.speed));
+                    }
+                    wedged.push_back("inside by " + std::to_string(depth) + " m in " +
+                                     std::string(Name(before)) + " on step " + std::to_string(step));
+                }
             }
         }
-    }
 
-    std::printf("  %d step(s) = %.1f minutes; %.0f m walked, %d cell change(s) over %zu named "
-                "cell(s); %d blocked, %d step-up(s), %d landing(s); deepest contact %.6f m; "
-                "%llu boundary escape(s)\n",
-                kSteps,
-                static_cast<double>(kSteps) * static_cast<double>(kDt) / 60.0,
-                static_cast<double>(travelled),
-                changes,
-                visited.size(),
-                blocked,
-                steppedUp,
-                landings,
-                static_cast<double>(deepest),
-                static_cast<unsigned long long>(guard.Escapes()));
+        std::printf("  %s: %d step(s) = %.1f minutes; %.0f m walked, %d cell change(s) over %zu named "
+                    "cell(s); %d blocked, %d step-up(s), %d landing(s); deepest contact %.6f m; "
+                    "%llu boundary escape(s)\n",
+                    start.cell,
+                    kSteps,
+                    static_cast<double>(kSteps) * static_cast<double>(kDt) / 60.0,
+                    static_cast<double>(travelled),
+                    changes,
+                    visited.size(),
+                    blocked,
+                    steppedUp,
+                    landings,
+                    static_cast<double>(deepest),
+                    static_cast<unsigned long long>(guard.Escapes()));
 
-    EXPECT_GT(travelled, 500.0F) << "the bot barely moved, so twenty minutes of it proves nothing";
-    EXPECT_GT(visited.size(), 5u) << "the bot never left the room it started in";
-    EXPECT_EQ(guard.Escapes(), 0u) << "§10.3's boundary was crossed";
-    EXPECT_TRUE(lostCells.empty()) << lostCells.size() << " time(s) outside the named cells; first: "
-                                   << (lostCells.empty() ? std::string() : lostCells.front());
-    // Never inside anything, and never below the floor of a room. Both were false when this test
-    // was written -- the bot walked in off the front lawn through a 1.30 m hole in the house's
-    // front wall at the main stair, and spent its last four minutes wedged under the ground floor
-    // -- and `HOUSE-00567` is what closed them.
-    if (fell)
+        EXPECT_GT(travelled, 500.0F) << "the bot barely moved, so twenty minutes of it proves nothing";
+        const std::size_t authoredOnLevel = static_cast<std::size_t>(
+            std::count_if(data.Cells().begin(),
+                          data.Cells().end(),
+                          [&](const world::Cell& cell) { return cell.level == startCell->level; }));
+        // Six distinct cells remains the full-size-floor guard from HOUSE-00618. The attic has
+        // only five authored cells, so demand at least half of its level instead of making success
+        // depend on the random walk happening to descend to another storey.
+        const std::size_t minimumVisited = std::min<std::size_t>(6u, (authoredOnLevel + 1u) / 2u);
+        EXPECT_GE(visited.size(), minimumVisited) << "the bot did not meaningfully leave its start";
+        EXPECT_EQ(guard.Escapes(), 0u) << "§10.3's boundary was crossed";
+        EXPECT_TRUE(lostCells.empty()) << lostCells.size() << " time(s) outside the named cells; first: "
+                                       << (lostCells.empty() ? std::string() : lostCells.front());
+        // Never inside anything, and never below the floor of a room. Both were false when this test
+        // was written -- the bot walked in off the front lawn through a 1.30 m hole in the house's
+        // front wall at the main stair, and spent its last four minutes wedged under the ground floor
+        // -- and `HOUSE-00567` is what closed them.
+        if (fell)
+        {
+            std::printf("  went below an indoor floor on step %d (%.1f minutes in); first wedge on "
+                        "step %d\n",
+                        fellAt,
+                        static_cast<double>(fellAt) * static_cast<double>(kDt) / 60.0,
+                        firstWedge);
+        }
+        EXPECT_FALSE(fell) << "the bot ended up below the floor of a room it was in";
+        EXPECT_TRUE(wedged.empty()) << wedged.size() << " sample(s) found the body inside geometry; first: "
+                                    << (wedged.empty() ? std::string() : wedged.front());
+    };
+
+    for (const WalkStart& start : starts)
     {
-        std::printf("  went below an indoor floor on step %d (%.1f minutes in); first wedge on "
-                    "step %d\n",
-                    fellAt,
-                    static_cast<double>(fellAt) * static_cast<double>(kDt) / 60.0,
-                    firstWedge);
+        run(start);
     }
-    EXPECT_FALSE(fell) << "the bot ended up below the floor of a room it was in";
-    EXPECT_TRUE(wedged.empty()) << wedged.size() << " sample(s) found the body inside geometry; first: "
-                                << (wedged.empty() ? std::string() : wedged.front());
 }
