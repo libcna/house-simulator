@@ -2738,6 +2738,7 @@
         "PIANO_BRASS": "MAT_FURNITURE_PIANO_BRASS"
       },
       "usedIn": [
+        "B1_GYM",
         "B1_HALL",
         "B1_STAIR",
         "L0_LIVING",
@@ -4112,7 +4113,8 @@
         "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
-        "B1_ELECTRICAL"
+        "B1_ELECTRICAL",
+        "B1_WORKSHOP"
       ]
     },
     {
@@ -4300,6 +4302,7 @@
         "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
+        "B1_GYM",
         "B1_WC7",
         "L1_MASTER_BATH",
         "L1_BATH2",
@@ -4403,7 +4406,9 @@
         "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
+        "B1_GYM",
         "B1_UNDERSTAIR",
+        "B1_WORKSHOP",
         "L3_STORE_W"
       ]
     },
@@ -4589,6 +4594,7 @@
         "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
+        "B1_GYM",
         "B1_UNDERSTAIR",
         "L3_STORE_W"
       ]

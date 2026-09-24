@@ -1,3 +1,35 @@
+# Basement gym and workshop dressing handoff — 2026-09-24 (`HOUSE-01024`)
+
+The secondary gym and main-tier workshop now meet their bounded recipes with thirteen new static
+rows while reusing the retained workbench example. The gym has three repeated generated mirror
+panels, a reused upholstered bench and scaled shelf/box forms around an unobstructed exercise
+floor. The workshop has two benches, open storage, supported toolbox/tools/paint tin, a wall
+service run and a floor bin. No exercise-machine asset, bespoke workshop piece, interaction or
+runtime system was added.
+
+All 276 production props pass exact support, overlap, opening, door-sweep and 0.70 m route
+validation. The 90-cell grand tour and `world-content-current` pass. The first collidable mirror
+row created a `B1_GYM north` push-out pocket; making only the thin wall-mounted panels
+non-colliding is correct because the structural wall behind them remains collidable, and returns
+the wider probe to its two pre-existing `L1_LANDING west` and `L2_LIBRARY north` results. Measured
+chunks are exactly `B1_GYM` 14/14 and `B1_WORKSHOP` 11/11, with no vertex or Reach-cap split.
+
+Clear-day fixed controls, forced-light controls and direct room views were inspected at full
+resolution. They show the open gym floor, grounded bench/rack composition, both workshop benches,
+supported clutter, clear doors/windows and no clipping, floating geometry or z-fighting. The HUD
+reported 21.50–22.88 ms in the direct software-renderer captures; these are review observations,
+not a performance claim. Normal-light balance remains M5 scope.
+
+The remaining forecast is 165.75 realistic / 202.75 pessimistic hours. With 60.5 task-hours spent
+since the final reduction, the R14 projection is 263.25 h, 16.75 h below the hard ceiling. Among
+the active upper/basement rotation, rule R2 now selects `Z-L2` with seven accessible cells below
+target, versus six in `Z-L1` and five in `Z-B1`; the exact next unblocked MUST task is
+`HOUSE-01014`, furnishing `L2_BATH4`, `L2_BATH5`, `L2_WC5` and `L2_WC6`. Every compilation/test
+invocation must remain at no more than four workers and pinned to CPUs 4,5,7,9; strict-XNA also
+requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Second-floor bedroom dressing handoff — 2026-09-24 (`HOUSE-01013`)
 
 Both second-floor bedrooms now meet their secondary recipes with ten static rows. `L2_BED6` uses

@@ -446,6 +446,21 @@ _workshop_limit, _workshop_reason = CHUNK_BUDGET_EXCEPTIONS["B1_WORKSHOP"]
 CHUNK_BUDGET_EXCEPTIONS["B1_WORKSHOP"] = (
     _workshop_limit + 1,
     _workshop_reason + "; HOUSE-00985's workbench adds one reusable painted-furniture role")
+
+# `HOUSE-01024` composes the secondary gym from repeated kit mirrors, one existing bench and
+# generated rack/box forms.  Repetition batches exactly into six truthful kit/bench finish groups.
+# The main-tier workshop reuses its established workbench and kit roles; its bounded supported
+# clutter/service composition introduces only two additional measured finish groups.
+_gym_limit, _gym_reason = CHUNK_BUDGET_EXCEPTIONS["B1_GYM"]
+CHUNK_BUDGET_EXCEPTIONS["B1_GYM"] = (
+    _gym_limit + 6,
+    _gym_reason + "; HOUSE-01024 adds six measured shared mirror, bench and rack/box finish "
+                  "groups; no vertex or Reach-cap split")
+_workshop_limit, _workshop_reason = CHUNK_BUDGET_EXCEPTIONS["B1_WORKSHOP"]
+CHUNK_BUDGET_EXCEPTIONS["B1_WORKSHOP"] = (
+    _workshop_limit + 2,
+    _workshop_reason + "; HOUSE-01024 adds two measured shared storage, clutter and service-run "
+                       "finish groups; no vertex or Reach-cap split")
 CHUNK_BUDGET_EXCEPTIONS["L1_MASTER_CLOSET"] = (
     7, "six room/shell roles plus HOUSE-00985's reusable wardrobe paint role")
 _master_closet_limit, _master_closet_reason = CHUNK_BUDGET_EXCEPTIONS["L1_MASTER_CLOSET"]

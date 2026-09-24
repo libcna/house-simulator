@@ -4973,3 +4973,24 @@ bespoke dress form, optional decoration and deeper bedroom polish were not added
 Rule R2 now ties `Z-B1` and `Z-L2` at seven accessible cells below target and selects the
 less-recently worked `Z-B1` (Round 124 versus Round 125). Next: `HOUSE-01024`, furnishing
 `B1_GYM` and `B1_WORKSHOP`.
+
+## Round 126 — basement gym and workshop dressing
+
+Commit: `HOUSE-01024` working tree (`2026-09-24`). The local, Git-ignored
+[`clear-day`](captures/house-01024-b1-day) and
+[`forced-light`](captures/house-01024-b1-lit) sets retain all four fixed `Z-B1` controls. Direct
+south-to-north gym and workshop views in [`detail`](captures/house-01024-b1-detail) expose the
+complete mirror/bench/rack and paired-bench compositions. Forced light is placement evidence, not
+a claim that M5's normal day/night balance is complete.
+
+The gym stops at its secondary recipe: repeated generated mirror panels, a reused bench and
+scaled shelf/box forms leave the required open exercise floor. The workshop reaches its main-tier
+recipe with the retained and repeated workbenches, open shelf, toolbox, bounded tool/paint fill,
+wall service run and bin. The first collidable mirror placement exposed a north-wall push-out
+pocket; the final thin wall panels rely on the structural wall's collision and create no separate
+unreachable sliver. Fixed, direct and reciprocal views show grounded pieces, supported clutter,
+clear openings and no clipping, floating geometry or z-fighting. Exercise-machine acquisitions,
+bespoke workshop pieces and cosmetic hero dressing were not added.
+
+Rule R2 now selects `Z-L2`, with seven accessible cells below target versus six in `Z-L1` and five
+in `Z-B1`. Next: `HOUSE-01014`, furnishing `L2_BATH4`, `L2_BATH5`, `L2_WC5` and `L2_WC6`.
