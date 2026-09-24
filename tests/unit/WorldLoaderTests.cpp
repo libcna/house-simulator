@@ -4137,10 +4137,10 @@ namespace
         EXPECT_EQ(distinct.size(), 138U)
             << "§13's Lights column, the exterior groups and the neighbours' porches";
 
-        // `HOUSE-03403` and `HOUSE-03404` close the first two C3 lighting bands with existing
-        // fixture families. Every authored source in these 60 basement, upper-floor, attic and
-        // stair cells must remain attached to a physical prop and an exact independently
-        // switchable material slot.
+        // `HOUSE-03403`--`HOUSE-03405` close the first three C3 lighting bands with existing
+        // fixture families. Every authored source in these 70 basement, upper-floor, attic,
+        // stair, ground-service and garage cells must remain attached to a physical prop and an
+        // exact independently switchable material slot.
         const std::set<cnahouse::util::Id> c3FixtureCells{
             Intern("B1_STAIR"),         Intern("B1_HALL"),         Intern("B1_MECHANICAL"),
             Intern("B1_ELECTRICAL"),    Intern("B1_UTILITY"),      Intern("B1_CINEMA"),
@@ -4161,7 +4161,11 @@ namespace
             Intern("L2_LIBRARY"),       Intern("L2_GAMES"),        Intern("L2_SITTING"),
             Intern("L2_BED6"),          Intern("L2_BED7"),         Intern("L2_BATH4"),
             Intern("L2_BATH5"),         Intern("L2_WC5"),          Intern("L2_WC6"),
-            Intern("L2_CLOSET_4"),      Intern("L2_LINEN2"),       Intern("L2_STOR2")};
+            Intern("L2_CLOSET_4"),      Intern("L2_LINEN2"),       Intern("L2_STOR2"),
+            Intern("L0_MUDROOM"),       Intern("L0_LAUNDRY"),      Intern("L0_WC1"),
+            Intern("L0_WC2"),           Intern("L0_OFFICE"),       Intern("L0_CLOSET_W"),
+            Intern("L0_STOR"),          Intern("L0_PANTRY"),       Intern("L0_GARAGE"),
+            Intern("L0_GARAGE_LOFT")};
         std::size_t physicalC3Sources = 0U;
         for (const world::Light& light : contents.lights)
         {
@@ -4173,7 +4177,7 @@ namespace
             EXPECT_TRUE(light.fixtureProp.IsValid()) << light.id.Value();
             EXPECT_FALSE(light.emissiveMaterialSlot.empty()) << light.id.Value();
         }
-        EXPECT_EQ(physicalC3Sources, 158U);
+        EXPECT_EQ(physicalC3Sources, 176U);
 
         // §15.7 rule 6's index, asserted by the other implementation: a cell's `lightGroups` is
         // exactly the groups its own lights belong to, and §28.1 walks it once per frame.

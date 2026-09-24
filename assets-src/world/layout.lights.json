@@ -581,7 +581,7 @@
       "type": "point", "position": [6.80, 3.28, -16.97],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 700.0, "range": 4.73,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "fixtureProp": "PROP_L0_MUDROOM_MAIN_1_FIXTURE", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
     {
@@ -589,7 +589,7 @@
       "type": "point", "position": [6.80, 3.28, -15.63],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 700.0, "range": 4.73,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "fixtureProp": "PROP_L0_MUDROOM_MAIN_2_FIXTURE", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -599,7 +599,7 @@
       "type": "point", "position": [6.80, 3.28, -20.77],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 700.0, "range": 4.61,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "fixtureProp": "PROP_L0_LAUNDRY_MAIN_1_FIXTURE", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
     {
@@ -607,17 +607,17 @@
       "type": "point", "position": [6.80, 3.28, -19.53],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 700.0, "range": 4.61,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "fixtureProp": "PROP_L0_LAUNDRY_MAIN_2_FIXTURE", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
     // ---- LG_L0_WC1_MAIN x1
     {
       "id": "LIGHT_L0_WC1_MAIN_1", "cell": "L0_WC1", "group": "LG_L0_WC1_MAIN",
-      "type": "point", "position": [3.55, 3.28, -21.10],
+      "type": "point", "position": [3.55, 3.12, -21.10],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 3.63,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "fixtureProp": "PROP_L0_WC1_MAIN_1_FIXTURE", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -748,38 +748,38 @@
     // ---- LG_L0_OFFICE_MAIN x2
     {
       "id": "LIGHT_L0_OFFICE_MAIN_1", "cell": "L0_OFFICE", "group": "LG_L0_OFFICE_MAIN",
-      "type": "point", "position": [-10.45, 3.28, -16.97],
+      "type": "point", "position": [-10.45, 3.12, -16.97],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 700.0, "range": 4.90,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "fixtureProp": "PROP_L0_OFFICE_MAIN_1_FIXTURE", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
     {
       "id": "LIGHT_L0_OFFICE_MAIN_2", "cell": "L0_OFFICE", "group": "LG_L0_OFFICE_MAIN",
-      "type": "point", "position": [-10.45, 3.28, -15.63],
+      "type": "point", "position": [-10.45, 3.12, -15.63],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 700.0, "range": 4.90,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "fixtureProp": "PROP_L0_OFFICE_MAIN_2_FIXTURE", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
     // ---- LG_L0_OFFICE_DESK x1
     {
       "id": "LIGHT_L0_OFFICE_DESK_1", "cell": "L0_OFFICE", "group": "LG_L0_OFFICE_DESK",
-      "type": "spot", "position": [-10.45, 3.00, -16.30],
+      "type": "spot", "position": [-11.35, 1.93, -14.58],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 30.0, "coneOuterDeg": 55.0,
       "colorK": 3500, "bulbClass": "led", "intensityLm": 500.0, "range": 4.35,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "fixtureProp": "PROP_L0_OFFICE_DESK_LAMP", "emissiveMaterialSlot": "linen",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
 
     // ---- LG_L0_WC2_MAIN x1
     {
       "id": "LIGHT_L0_WC2_MAIN_1", "cell": "L0_WC2", "group": "LG_L0_WC2_MAIN",
-      "type": "point", "position": [-9.30, 3.28, -19.25],
+      "type": "point", "position": [-9.30, 3.12, -19.25],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 3.55,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "fixtureProp": "PROP_L0_WC2_MAIN_1_FIXTURE", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -789,7 +789,7 @@
       "type": "point", "position": [-11.55, 3.28, -19.25],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 3.57,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "fixtureProp": "PROP_L0_CLOSET_W_MAIN_1_FIXTURE", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -827,7 +827,7 @@
       "type": "point", "position": [-10.45, 3.28, -21.40],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 4.20,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "fixtureProp": "PROP_L0_STOR_MAIN_1_FIXTURE", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -857,7 +857,7 @@
       "type": "point", "position": [-10.45, 3.28, -26.05],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 4.15,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "fixtureProp": "PROP_L0_PANTRY_MAIN_1_FIXTURE", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -1033,7 +1033,7 @@
       "type": "point", "position": [11.50, 4.25, -18.90],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "bulbClass": "fluorescent", "intensityLm": 2400.0, "range": 9.42,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "fixtureProp": "PROP_L0_GARAGE_MAIN_1_FIXTURE", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
     {
@@ -1041,7 +1041,7 @@
       "type": "point", "position": [14.30, 4.25, -18.90],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "bulbClass": "fluorescent", "intensityLm": 2400.0, "range": 9.42,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "fixtureProp": "PROP_L0_GARAGE_MAIN_2_FIXTURE", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
     {
@@ -1049,7 +1049,7 @@
       "type": "point", "position": [11.50, 4.25, -16.10],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "bulbClass": "fluorescent", "intensityLm": 2400.0, "range": 9.42,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "fixtureProp": "PROP_L0_GARAGE_MAIN_3_FIXTURE", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
     {
@@ -1057,7 +1057,7 @@
       "type": "point", "position": [14.30, 4.25, -16.10],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "bulbClass": "fluorescent", "intensityLm": 2400.0, "range": 9.42,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "fixtureProp": "PROP_L0_GARAGE_MAIN_4_FIXTURE", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -1067,7 +1067,7 @@
       "type": "point", "position": [12.90, 4.28, -17.50],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 7.73,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "fixtureProp": "PROP_L0_GARAGE_OPENER_1_FIXTURE", "emissiveMaterialSlot": "PuckDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -1077,7 +1077,7 @@
       "type": "point", "position": [12.90, 4.28, -19.35],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 4.86,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "fixtureProp": "PROP_L0_GARAGE_LOFT_MAIN_1_FIXTURE", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 

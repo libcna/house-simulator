@@ -882,6 +882,28 @@ for _fixture_cell, _fixture_limit, _fixture_detail in (
         _fixture_limit,
         _fixture_reason + f"; HOUSE-03404 adds {_fixture_detail}; no split")
 
+# `HOUSE-03405`: ground-floor service rooms and the garage reuse the same bounded fixture
+# catalogue. Repeated fittings batch by their truthful source roles and independently switched
+# emitters remain separate. These are the exact post-build counts; none is a vertex- or Reach-cap
+# split.
+for _fixture_cell, _fixture_limit, _fixture_detail in (
+        ("L0_CLOSET_W", 10, "four shared utility-fixture roles"),
+        ("L0_GARAGE", 20, "four shared utility and opener-fixture roles"),
+        ("L0_GARAGE_LOFT", 10, "four shared utility-fixture roles"),
+        ("L0_LAUNDRY", 13, "three remaining utility-fixture roles after steel reuse"),
+        ("L0_MUDROOM", 13, "three remaining utility-fixture roles after steel reuse"),
+        ("L0_OFFICE", 19, "five shared ceiling and desk-lamp roles"),
+        ("L0_PANTRY", 13, "three remaining utility-fixture roles after steel reuse"),
+        ("L0_STOR", 12, "three remaining utility-fixture roles after steel reuse"),
+        ("L0_WC1", 12, "three shared ceiling-fixture roles"),
+        ("L0_WC2", 12, "three shared ceiling-fixture roles")):
+    _previous = CHUNK_BUDGET_EXCEPTIONS.get(_fixture_cell)
+    _fixture_reason = (_previous[1] if _previous is not None
+                       else "§17.4's six-chunk target")
+    CHUNK_BUDGET_EXCEPTIONS[_fixture_cell] = (
+        _fixture_limit,
+        _fixture_reason + f"; HOUSE-03405 adds {_fixture_detail}; no split")
+
 #: The vertex layouts, one per stock effect, with the attributes that effect actually reads.
 #: `MaterialBinder`'s `MaterialKind` is the same closed list of four; `Skinned` never appears here
 #: because a skinned prop is an animated one and animated props are not batched (§17.4).

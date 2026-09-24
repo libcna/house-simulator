@@ -478,7 +478,8 @@
           "scale": 6.354013442993164
         }
       ],
-      "shellHash": "sha256:be7867f5d36976625882641c6a54bac2e9c0279e6915262d5bcc33b870dfde73"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:af76159f6b44e961cd477ad71dbec0a2ecfcde6231c715965ec31e512168b621"
     },
     {
       "cell": "L0_DINING",
@@ -651,7 +652,8 @@
           "scale": 0.385384202003479
         }
       ],
-      "shellHash": "sha256:50e078a9efa74a26189f34970690cecb90847524477cf04881f5d87558531d25"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:0409ef807aea8e2e3236187b8bff5212bf39828a61c8ce65de83a7d12c395c3a"
     },
     {
       "cell": "L0_GARAGE_LOFT",
@@ -672,7 +674,8 @@
           "scale": 4.694340229034424
         }
       ],
-      "shellHash": "sha256:dc3da0104cf746a0cf5c728adc1ec05176e907da950115c8613a1f6f0e4f99bf"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:f0ebafdf605a986fc7820b2591e1a7714918de55f0b572ee36f0b71682e79299"
     },
     {
       "cell": "L0_HALL",
@@ -791,7 +794,8 @@
           "scale": 7.041205883026123
         }
       ],
-      "shellHash": "sha256:3f281eeaf2e604e612a7d329a5fd8d8fb26015b55888c69332d0ecdfdda3422e"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:c497b30e9a5bdab5d86082cb548697e8843b7152742dede545a6cbf2b0a16345"
     },
     {
       "cell": "L0_LIVING",
@@ -871,7 +875,8 @@
           "scale": 7.689886093139648
         }
       ],
-      "shellHash": "sha256:fe092374060dc11372c1430065e1a115fa3b424a806abb32509f9249ffa325aa"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:fdb59a5eb20c186abfdb46fd2eefbb393a24ea0e2953100c6cf4d2e60ea480bc"
     },
     {
       "cell": "L0_OFFICE",
@@ -886,10 +891,10 @@
           "lights": [
             "LIGHT_L0_OFFICE_DESK_1"
           ],
-          "mean": 0.00013508027042434087,
-          "peak": 0.0035394812002778053,
-          "receiverMean": 0.00035747515250910555,
-          "scale": 0.0035394812002778053
+          "mean": 7.368156524578653e-05,
+          "peak": 0.04235180467367172,
+          "receiverMean": 0.0002364652768483673,
+          "scale": 0.04235180467367172
         },
         {
           "group": "LG_L0_OFFICE_MAIN",
@@ -898,13 +903,14 @@
             "LIGHT_L0_OFFICE_MAIN_1",
             "LIGHT_L0_OFFICE_MAIN_2"
           ],
-          "mean": 0.008434345071956324,
-          "peak": 15.175592422485352,
-          "receiverMean": 0.0220009923734658,
-          "scale": 15.175592422485352
+          "mean": 0.00873567195819152,
+          "peak": 0.776252806186676,
+          "receiverMean": 0.022772505397732307,
+          "scale": 0.776252806186676
         }
       ],
-      "shellHash": "sha256:e20d8f547c63b27580d5338755c7ea30915676af6ff2833f4926152cb22afb20"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:c071d26696e288e694e7e08ce872536527d4261517e00d4f21401b93f508d52a"
     },
     {
       "cell": "L0_PANTRY",
@@ -925,7 +931,8 @@
           "scale": 2.5114643573760986
         }
       ],
-      "shellHash": "sha256:62c98ac8bad0a23a38321cd5d20d128bc19f82c2d52f28d7e17d8def34da7106"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:91e30315a99fec8ee67fa0c7de31252d2af04b8ec9a0b9d6bcffcc277f72fddd"
     },
     {
       "cell": "L0_STAIR_MAIN",
@@ -991,7 +998,8 @@
           "scale": 32.664825439453125
         }
       ],
-      "shellHash": "sha256:55a2cc122c4427b857d101ded628ee18179c9843444f456c8124cdefacfba091"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:758d56276ae5be98c0076296a6454ae305373b82b7079b20ee9dfd913f888011"
     },
     {
       "cell": "L0_SUNROOM",
@@ -1054,13 +1062,14 @@
           "lights": [
             "LIGHT_L0_WC1_MAIN_1"
           ],
-          "mean": 0.016215118729891717,
-          "peak": 29.038036346435547,
-          "receiverMean": 0.03551714409221898,
-          "scale": 29.038036346435547
+          "mean": 0.017260309931564938,
+          "peak": 0.9345681667327881,
+          "receiverMean": 0.03777620193182426,
+          "scale": 0.9345681667327881
         }
       ],
-      "shellHash": "sha256:210703b82c79168d69802171fbacfab7594819edea42fc059ddf92440c6b1fdc"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:f5adf497ab1584db36de03078677e48c6a01c3ddbe0fb1f42712abefb7651ad4"
     },
     {
       "cell": "L0_WC2",
@@ -1075,13 +1084,14 @@
           "lights": [
             "LIGHT_L0_WC2_MAIN_1"
           ],
-          "mean": 0.01956905080601698,
-          "peak": 30.967252731323242,
-          "receiverMean": 0.03708294041715739,
-          "scale": 30.967252731323242
+          "mean": 0.020807918818398573,
+          "peak": 0.9296267032623291,
+          "receiverMean": 0.03940777994812762,
+          "scale": 0.9296267032623291
         }
       ],
-      "shellHash": "sha256:2ad71453cad5bb6562b108f0503fc5201d09a3943fe7c749a00bec2d6b106db0"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:209962f5f8aab1993145be5d796e1196e35061b1f21b01fa9556fe26b74674ae"
     },
     {
       "cell": "L1_BATH2",
@@ -2462,16 +2472,21 @@
     }
   ],
   "promotedSubsetCells": [
-    "L1_HALL",
-    "L1_HALL_W",
-    "L1_MASTER_BATH",
-    "L2_HALL",
-    "L2_LANDING"
+    "L0_CLOSET_W",
+    "L0_GARAGE",
+    "L0_GARAGE_LOFT",
+    "L0_LAUNDRY",
+    "L0_MUDROOM",
+    "L0_OFFICE",
+    "L0_PANTRY",
+    "L0_STOR",
+    "L0_WC1",
+    "L0_WC2"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 9043968,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 954970,
+  "sourceBytes": 971723,
   "tool": "bake_house_lightmaps.py"
 }

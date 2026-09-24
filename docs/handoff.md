@@ -1,3 +1,39 @@
+# Ground-service and garage baseline lighting handoff — 2026-09-24 (`HOUSE-03405`)
+
+`Z-L0S` and `Z-GAR` are at C3. Seventeen new static fixture rows plus the office's existing desk
+lamp back all 18 authored sources across the eight service cells, garage and visible loft; every
+source names its physical prop and exact switched emissive slot. Four existing fixture families,
+the existing schedule, lightmap baker and prop path are reused. No runtime code, exposure constant,
+new material family, acquired asset or subsystem was added.
+
+Round 149 contains fixed before/after day and scheduled-night sets for both poses in each zone.
+Day mean linear RGB stays within 0.5% of the baseline. Night changes cover 876,638 pixels in
+`Z-L0S` and 581,985 in `Z-GAR`, with warm office task depth and the garage's four neutral
+fluorescent battens. `SC-OFF` utility rooms remain deliberately off at night and readable by day.
+Inspection found no clipping, floating or overlapping fixture, z-fighting, missing texture or
+blocked route. Exact measurements and capture directories are in
+`docs/visual-review/house-03405-ground-service-garage-lighting.md`.
+
+The final targeted products cover 10 receiver cells, 10 daylight atlases and 13 artificial group
+atlases. The rebuilt world is 1,380 chunks / 611 props / 3,119,436 vertices / 83,227,272 packed
+bytes, with 8 16-bit splits, 15 Reach splits and no 32-bit chunk; all 88 exceptions exactly match
+their documented ceilings. The deployed chunk SHA-256 is
+`f8f8115250c57cd2c0368a0104bc6d71dbc63e4adb1987f711b84e61e6c6d971`. All fifteen world rules,
+all 611 prop placements, fixture/manifest/licence checks, the focused fixture test and all 1,424
+unit tests pass. Strict XNA compiles all 325 translation units clean with six workers;
+`world-content-current` and the 90-cell grand tour pass 2/2. The complete static gate's only
+failure is the known user-owned root `.claude` layout entry.
+
+Rule R2 and M5's dependency order select `HOUSE-03406`, lighting the rear and side exterior to C3
+and re-checking the front without rework. The remaining forecast is 135 realistic / 166.25
+pessimistic hours. With 91.25 task-hours spent since the final reduction, the R14 projection is
+257.5 h, 22.5 h below the ceiling. Every future compilation must use at most six CPU cores: pin
+the process tree with `taskset`, set build/test parallelism to 6, use
+`HOUSE_XNA_STRICT_JOBS=6`, and retain the shared `/rv/cnaccache`. The user-owned root `.claude`
+entry remains the known layout-gate failure; do not modify or stage it.
+
+---
+
 # Upper-floor baseline lighting handoff — 2026-09-24 (`HOUSE-03404`)
 
 Both upper floors are at C3. One hundred ten new static fixture rows plus the two already-present

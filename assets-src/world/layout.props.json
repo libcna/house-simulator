@@ -3999,7 +3999,7 @@
       "static": true,
       "lodGroup": null,
       "collision": "none",
-      "material": "MAT_DOOR_PAINTED",
+      "material": null,
       "interactable": null
     },
     {
@@ -6768,6 +6768,125 @@
       "id": "PROP_L2_WC6_MAIN_1_FIXTURE",
       "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_WC6",
       "position": [3.55, 8.98, -21.1], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_MUDROOM_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L0_MUDROOM",
+      "position": [6.8, 3.28, -16.97], "yawDeg": 0, "scale": 0.65,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_MUDROOM_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L0_MUDROOM",
+      "position": [6.8, 3.28, -15.63], "yawDeg": 0, "scale": 0.65,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_LAUNDRY_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L0_LAUNDRY",
+      "position": [6.8, 3.28, -20.77], "yawDeg": 0, "scale": 0.65,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_LAUNDRY_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L0_LAUNDRY",
+      "position": [6.8, 3.28, -19.53], "yawDeg": 0, "scale": 0.65,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_WC1_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L0_WC1",
+      "position": [3.55, 3.12, -21.1], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_OFFICE_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L0_OFFICE",
+      "position": [-10.45, 3.12, -16.97], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_OFFICE_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L0_OFFICE",
+      "position": [-10.45, 3.12, -15.63], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_WC2_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L0_WC2",
+      "position": [-9.3, 3.12, -19.25], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_CLOSET_W_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L0_CLOSET_W",
+      "position": [-11.55, 3.28, -19.25], "yawDeg": 0, "scale": 0.4,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_STOR_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L0_STOR",
+      "position": [-10.45, 3.28, -21.4], "yawDeg": 0, "scale": 0.65,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_PANTRY_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L0_PANTRY",
+      "position": [-10.45, 3.28, -26.05], "yawDeg": 0, "scale": 0.65,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_GARAGE_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L0_GARAGE",
+      "position": [11.5, 4.25, -18.9], "yawDeg": 0, "scale": 0.8,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_GARAGE_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L0_GARAGE",
+      "position": [14.3, 4.25, -18.9], "yawDeg": 0, "scale": 0.8,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_GARAGE_MAIN_3_FIXTURE",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L0_GARAGE",
+      "position": [11.5, 4.25, -16.1], "yawDeg": 0, "scale": 0.8,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_GARAGE_MAIN_4_FIXTURE",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L0_GARAGE",
+      "position": [14.3, 4.25, -16.1], "yawDeg": 0, "scale": 0.8,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_GARAGE_OPENER_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L0_GARAGE",
+      "position": [12.9, 4.28, -17.5], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_GARAGE_LOFT_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L0_GARAGE_LOFT",
+      "position": [12.9, 4.28, -19.35], "yawDeg": 0, "scale": 0.75,
       "static": true, "lodGroup": null, "collision": "none", "material": null,
       "interactable": null
     }
