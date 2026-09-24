@@ -4513,7 +4513,8 @@
       },
       "usedIn": [
         "B1_MECHANICAL",
-        "B1_UTILITY"
+        "B1_UTILITY",
+        "EXT_SIDEYARD_E"
       ]
     },
     {
@@ -4664,7 +4665,11 @@
         "L3_STAIR_HEAD",
         "L3_STORE_N",
         "L3_STORE_S",
-        "L3_STORE_W"
+        "L3_STORE_W",
+        "EXT_DRIVEWAY",
+        "EXT_FRONTYARD_E",
+        "EXT_SIDEYARD_E",
+        "EXT_SIDEYARD_W"
       ]
     },
     {
@@ -4721,7 +4726,8 @@
         "L2_BATH4",
         "L2_BATH5",
         "L2_WC5",
-        "L2_WC6"
+        "L2_WC6",
+        "EXT_SIDEYARD_E"
       ]
     },
     {
@@ -4770,7 +4776,10 @@
         "B1_ELECTRICAL",
         "B1_UTILITY",
         "L0_MUDROOM",
-        "L3_STORE_E"
+        "L3_STORE_E",
+        "EXT_FRONTYARD_E",
+        "EXT_SIDEYARD_E",
+        "EXT_SIDEYARD_W"
       ]
     },
     {

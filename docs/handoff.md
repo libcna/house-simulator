@@ -1,3 +1,35 @@
+# Exterior service-props handoff — 2026-09-24 (`HOUSE-00770`)
+
+The pedestrian gate now has a two-piece post mailbox, the east service strip has three grouped
+full-height bins plus a wall-mounted hose holder and tap, the east and west elevations have a
+compact condenser and gas-meter cabinet, and all six authored downspouts have a low splash block.
+All fifteen rows are static and carry collision proxies. They reuse the capped prop kit and the
+bronze/service-metal roles already resident in the affected exterior cells; no asset, material
+family, behaviour or runtime system was added. The chunk builder initially proved that new stone
+and paint roles would breach four exterior exceptions, so the final rows deliberately reuse each
+cell's existing physically suitable metal role and leave every exception unchanged.
+
+All 440 production prop rows pass exact placement and route checks, all 15 authored-world rules
+pass, the 90-cell grand tour and `world-content-current` pass, and the offscreen material-binding
+integration test passes. The final world is 1,114 chunks / 3,010,601 vertices / 79,744,552 packed
+bytes, with 8 16-bit splits, 15 Reach splits and no 32-bit chunk. Four fixed clear-day `Z-EXF`
+views and five direct service views were inspected: the pieces are grounded or wall-mounted,
+separated, visible at their intended scale and clear of traversal, without clipping, floating
+geometry or z-fighting. Captures remain local under
+`docs/visual-review/captures/house-00770-front-services-r142/`.
+
+The wider inside-geometry probe retains exactly the nine pre-existing bodies first recorded by
+`HOUSE-00847`, beginning at `B1_HOBBY south`; none is caused by these exterior rows. The broad
+authored-material count test also retains its pre-existing stale expectations (220 actual versus
+210 expected materials; 42 versus 38 snow-coverable dry roles). Rule R2 and M4 dependency order
+selected this last content task after `HOUSE-01018`. The remaining forecast is 151 realistic /
+184.5 pessimistic hours. With 75.25 task-hours spent since the final reduction, the R14 projection
+is 259.75 h, 20.25 h below the hard ceiling. The exact next unblocked MUST task is the M4 dressing
+checkpoint `HOUSE-03380`. Every compilation/test invocation must use no more than four workers and
+stay pinned to CPUs 4,5,7,9; strict-XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # East attic services handoff — 2026-09-24 (`HOUSE-01018`)
 
 `L3_STORE_E` now has its complete bounded utility recipe from the existing kit: a low header-tank
