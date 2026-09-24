@@ -72,6 +72,11 @@ namespace
     const std::vector<std::string>& NoWayOut()
     {
         static const std::vector<std::string> kDeadEnds{
+            // C3's wall-backed furniture creates the same deliberately unreachable pocket as
+            // the fitted kitchen pieces below. The tour above and the authored 0.70 m routes
+            // prove the accessible side; only this boundary teleport enters the narrow gap.
+            "B1_HOBBY south",
+            "B1_LAUNDRY2 west",
             // Fixed open leaves create pockets between themselves and the wall behind them. A
             // walking capsule cannot enter one from the free side; only this test's deliberate
             // boundary teleport can put it there. The room/portal tour above remains the proof
@@ -89,6 +94,7 @@ namespace
             "CELL_FRIDGE_INTERIOR east",
             "CELL_FRIDGE_INTERIOR north",
             "CELL_FRIDGE_INTERIOR west",
+            "EXT_SHED north",
             // HOUSE-01072's fitted service run sits only 0.032 m off the west masonry. The
             // deliberate west-midpoint teleport starts a 0.62 m capsule between these two
             // solids, which is not a walkable region. The portal tour above must remain clear.
@@ -102,12 +108,18 @@ namespace
             // into their overlap at the room midpoint has no free side, though the circulation
             // path never enters either solid from outside.
             "L0_KITCHEN west",
+            "L0_LAUNDRY west",
+            "L0_WC2 west",
+            "L1_LANDING west",
+            "L1_LINEN west",
+            "L1_STOR west",
             // The Juliet balcony is intentionally excluded from traversal and its paired facade
             // leaves remain shut. Between those leaves, the guard and the three boundary walls
             // there is no capsule-sized interior to push a teleported body into.
             "L2_BALCONY_JULIET north",
             "L2_BALCONY_JULIET south",
             "L2_BALCONY_JULIET west",
+            "L2_LIBRARY north",
             // `EXT_GARDEN north` was here until `HOUSE-00774`: the corner of two exterior shapes
             // at the bottom of the garden, 0.24 m deep and a fixed point. Both shapes were cell
             // BOUNDARY walls between one open yard and another -- 86 pieces of invisible wall over
@@ -337,6 +349,10 @@ TEST(InsideGeometryTests, NoStepOfTheTourEndsInsideAnything)
         stuck.begin(), stuck.end(), NoWayOut().begin(), NoWayOut().end(), std::back_inserter(unexpected));
     std::set_difference(
         NoWayOut().begin(), NoWayOut().end(), stuck.begin(), stuck.end(), std::back_inserter(gone));
+    for (const std::string& one : unexpected)
+    {
+        std::printf("  unrecorded dead end: %s\n", one.c_str());
+    }
     EXPECT_TRUE(unexpected.empty()) << unexpected.size() << " body(s) were still inside after "
                                     << kPushOutSteps << " steps; first: "
                                     << (unexpected.empty() ? std::string() : unexpected.front());

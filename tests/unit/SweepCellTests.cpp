@@ -209,6 +209,8 @@ TEST(SweepCellTests, TheCameraArmInTheRealHouse)
     // A camera arm in a house is blocked most of the time -- that is what §45's narrow-space rule
     // exists for -- and an arm that were never blocked would mean the sweep is finding nothing.
     EXPECT_GT(blocked, swept / 2) << blocked << " of " << swept << " arms were blocked";
-    EXPECT_LT(maxTested, 40u) << "the broad phase handed the narrow phase " << maxTested
+    // The complete C3 furnishing set raises the measured worst case from 39 to 41 shapes. Keep a
+    // tight two-shape ceiling over that checkpoint rather than the now-stale empty-room budget.
+    EXPECT_LE(maxTested, 43u) << "the broad phase handed the narrow phase " << maxTested
                               << " shapes for one camera arm";
 }

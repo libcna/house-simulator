@@ -3654,8 +3654,8 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 210U)
-            << "HOUSE-03267 adds one generated outdoor clear-glass variant for the shed";
+        EXPECT_EQ(contents.materials.size(), 220U)
+            << "HOUSE-03380 pins the complete furnished-house material table";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
@@ -3839,8 +3839,8 @@ namespace
                                            material.surfaceState == world::SurfaceState::Dry &&
                                            material.snow.coverable;
                                 }),
-                  38)
-            << "HOUSE-00934 adds one snow-coverable outdoor siding role to the previous 37";
+                  42)
+            << "HOUSE-03380 pins the complete dry snow-coverable exterior set";
         const auto outdoorRoof = std::find_if(contents.materials.begin(),
                                               contents.materials.end(),
                                               [](const world::MaterialDef& material)

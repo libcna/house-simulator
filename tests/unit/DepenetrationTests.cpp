@@ -651,8 +651,19 @@ TEST(DepenetrationTests, TheRealHouseIsClearWhereABodyStandsAndRecoversWhereItIs
     // separately and must be crowded by the leaf itself, so a wall or prop cannot hide here.
     const std::vector<std::string> expectedLeafCrowded{
         "B1_LAUNDRY2", "L0_PANTRY", "L0_WC2", "L1_CLOSET_2", "L1_MASTER_CLOSET", "L2_CLOSET_4"};
-    const std::vector<std::string> expectedCrowded{
-        "B1_STAIR", "EXT_BACKYARD", "L0_KITCHEN", "L1_STAIR_MAIN", "L2_STAIR_MAIN", "L2_STOR2"};
+    // At the completed C3 checkpoint, four deliberately centred compositions also cover their
+    // cell's arithmetic midpoint. This is not a route point: the prop validator and grand tour
+    // independently prove the authored circulation around them.
+    const std::vector<std::string> expectedCrowded{"B1_STAIR",
+                                                   "B1_WC7",
+                                                   "EXT_BACKYARD",
+                                                   "L0_KITCHEN",
+                                                   "L1_BED5",
+                                                   "L1_STAIR_MAIN",
+                                                   "L2_GAMES",
+                                                   "L2_LIBRARY",
+                                                   "L2_STAIR_MAIN",
+                                                   "L2_STOR2"};
     for (std::size_t i = 0; i < crowdedCells.size(); ++i)
     {
         const std::string& id = crowdedCells[i];

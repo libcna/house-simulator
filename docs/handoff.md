@@ -1,3 +1,38 @@
+# Dressing-checkpoint handoff — 2026-09-24 (`HOUSE-03380`)
+
+M4 is complete. Round 143 captured and inspected all 68 fixed clear-day views across the eleven
+zones. `zone_scoreboard.py` assigns all 96 cells exactly once and reports zero zero-prop accessible
+rooms in every zone. Every accessible room now has its tier's bounded essential composition; no
+S1/S2 dressing defect remains. The dark secondary interiors visible in the contact sheet are the
+explicit M5 baseline-lighting work, not additional M4 scope. Captures remain local under
+`docs/visual-review/captures/house-03380-dressed-checkpoint-r143/`.
+
+The checkpoint also refreshed validation snapshots that had remained pinned to partially dressed
+content. The finished house is 1,114 chunks, 50 alpha-test batches, 131 opaque material-state
+changes and 220 authored materials, including 42 dry snow-coverable roles. Collision tests retain
+their real safety assertions while accounting for the furnished house: 939 valid random falls
+still cover all 96 collision cells; the L2 soak walks 576 m through four named cells and eight
+portal changes while the deterministic grand tour proves all fifteen accessible L2 cells; and nine
+deliberate boundary teleports into sub-capsule wall/furniture gaps are named separately. These are
+not reachable routes: all 440 prop placements, authored 0.70 m routes and the 90-cell grand tour
+remain green.
+
+The complete 1,420-test unit label passes at `-j4`. The complete 141-registration integration
+label has 140 passes and one known load-sensitive weather-timing miss (target expiry 137.893 versus
+138 minutes); that exact case plus `world-content-current` passed immediately at `-j1`. The build,
+all-zone captures and scoreboard pass. The static gate run immediately before this checkpoint had
+all gates green after correcting the exterior manifest, except the pre-existing user-owned root
+`.claude` layout entry; strict XNA compiled all 325 translation units clean with four workers.
+
+Rule R1(b) and the M5 dependency order select the house-wide static-prop/baked-receiver correction
+`HOUSE-03402` next, before the furnished re-bake and per-zone lighting. The remaining forecast is
+150.25 realistic / 183.25 pessimistic hours. With 76 task-hours spent since the final reduction,
+the R14 projection is 259.25 h, 20.75 h below the hard ceiling. Every future compilation/test run
+must remain pinned to CPUs 4,5,7,9 with at most four workers; strict XNA additionally requires
+`HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Exterior service-props handoff — 2026-09-24 (`HOUSE-00770`)
 
 The pedestrian gate now has a two-piece post mailbox, the east service strip has three grouped

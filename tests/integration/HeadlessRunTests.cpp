@@ -84,13 +84,13 @@ namespace
         const auto& list = game.RenderListForTesting();
         ASSERT_GT(list.Size(), 0U) << "the frame drew from an empty list";
         EXPECT_TRUE(list.IsSorted()) << "the pass read its slice, which is what sorts the list";
-        // HOUSE-01075's stocked pantry shelves add three measured ceramic, linen and
-        // paper batches, bringing the unculled house to 746 calls over FOUR frames:
+        // HOUSE-03380's completed C3 furnishing pass brings the unculled house to 1,114 calls.
+        // The 1,400-call design envelope still distinguishes one frame from FOUR accumulated frames:
         // a list not emptied between them would be four houses long and still draw a
         // correct-looking picture. This diagnostic remains far below §71.2's 1,400-call
         // worst-case envelope; the materials
         // stay truthful instead of being flattened into a shell finish to satisfy the snapshot.
-        EXPECT_LE(list.DrawCalls(), 746) << "the list was not cleared between frames";
+        EXPECT_LE(list.DrawCalls(), 1400) << "the list was not cleared between frames";
 
         const cnahouse::debug::Counter* chunks = game.CountersForTesting().Find("static.chunks");
         const cnahouse::debug::Counter* states = game.CountersForTesting().Find("static.stateChanges");
@@ -128,20 +128,20 @@ namespace
             previousOpaque = &item;
             ++opaque;
         }
-        // HOUSE-01071 adds one foyer-scoped plant-foliage batch: 48 is the measured world-wide
-        // alpha-test slice, including the formal sofa fringe, indoor plants and exterior trees.
+        // HOUSE-03380 measures 50 world-wide alpha-test batches in the completed C3 house,
+        // including the formal sofa fringe, indoor plants and exterior trees.
         // Repeated plants remain sub-ranges of shared draws within each owner cell.
-        EXPECT_EQ(cutouts, 48U) << "the formal sofa fringe, indoor plant leaves and exterior foliage batches";
+        EXPECT_EQ(cutouts, 50U) << "the formal sofa fringe, indoor plant leaves and exterior foliage batches";
         EXPECT_EQ(opaque + cutouts, list.Size()) << "unexpected pass items entered the blockout list";
         // Every opaque item was drawn: nothing in that slice named a chunk the runtime could
         // not find. Alpha-tested leaves belong to AlphaTestPass, not this debug opaque pass.
         EXPECT_EQ(static_cast<std::size_t>(chunks->Max()), opaque);
         // And the material was bound once per run, not once per chunk. The unculled diagnostic
-        // reaches 116 with HOUSE-01073's three dining finishes; each role contributes
+        // reaches 131 at HOUSE-03380; each role contributes
         // one sorted material bind.
         // That remains below §71.2's 210 worst case; visible poses protect smaller rows.
         EXPECT_GT(states->Max(), 0);
-        EXPECT_LE(states->Max(), 116);
+        EXPECT_LE(states->Max(), 140);
         EXPECT_LT(states->Max(), chunks->Max() / 4)
             << "the sort bought nothing: the pass is rebinding almost per chunk";
         // The pass's own count and the list's agree, which is what says the two are counting the

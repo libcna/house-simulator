@@ -180,8 +180,8 @@ namespace
             {
                 ASSERT_TRUE(binder.RegisterAll(contents.materials).HasValue());
                 EXPECT_EQ(binder.Count(), contents.materials.size());
-                EXPECT_EQ(binder.Count(), 209U)
-                    << "HOUSE-01073 adds three dining furniture and setting finishes";
+                EXPECT_EQ(binder.Count(), 220U)
+                    << "HOUSE-03380 pins the complete furnished-house material table";
                 const MaterialDesc* sunroomFloor = binder.Find(Id::Of("MAT_SUNROOM_LIMESTONE_TILE"));
                 ASSERT_NE(sunroomFloor, nullptr);
                 EXPECT_EQ(sunroomFloor->kind, MaterialKind::DualTexture);
