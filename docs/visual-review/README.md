@@ -5506,3 +5506,26 @@ evidence is in `captures/house-00989-ground-main-{day,night}-r160/`.
 
 All twelve main cells are now C4. Dependency order next selects `HOUSE-03452`, the G4 all-main gate
 review.
+
+## Round 161 — G4 all-main presentation review
+
+Commit: `HOUSE-03452` working tree (`2026-09-25`). Fresh clear-10:30 and scheduled-22:00 sets each
+contain all 68 fixed views, eleven labelled zone sheets and one all-zone sheet, with no light
+override. The seven zone sheets containing main cells were inspected at full resolution. One
+representative fixed view for each of the twelve main cells was additionally inspected individually
+at full resolution in both conditions.
+
+Every main-tier composition remains complete, grounded, readable and traversable. No S1/S2,
+clipping, floating/intersecting furnishing, z-fighting or missing texture is open. The deliberately
+restrained day lighting in the window-limited workshop and garage is still readable; their
+scheduled night lighting works; and the rear exterior preserves its intended dark hierarchy
+without an exposure override. No runtime, content, asset, material, light, schedule, chunk or
+lightmap change was needed.
+
+The scoreboard assigns all 96 cells exactly once and its *Main at C4* column is complete in every
+zone. All eleven hero cells retain the C3 baseline proved at G3, and all five hero areas remain in
+the fixed-view set. G4 passes. Local evidence is in
+`captures/house-03452-main-gate-{day,night}-r161/`.
+
+Rule R2 next selects `HOUSE-03454`: among the three newly unblocked hero levels, `Z-L2` has the
+most accessible cells still below the hero target. Rule R4 keeps the ground-floor hero tasks last.

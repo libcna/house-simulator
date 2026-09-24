@@ -1,3 +1,32 @@
+# G4 presentation-gate handoff — 2026-09-25 (`HOUSE-03452`)
+
+Gate G4 passes. Round 161 captured all 68 fixed Tier-S/High views at clear 10:30 and scheduled
+22:00 without light overrides, producing eleven zone sheets plus one all-zone sheet per condition.
+The seven zone sheets containing the twelve main cells were inspected at full resolution. One
+representative fixed view for each main cell was then inspected individually at full resolution in
+both conditions: workshop; family, dining and sunroom; garage; master bedroom; attic room; all
+three main-stair levels; terrace and backyard.
+
+Every main-cell composition remains complete, grounded and readable with a clear route. No S1/S2,
+clipping, floating/intersecting furnishing, z-fighting or missing texture is open. The deliberately
+restrained day lighting in the window-limited workshop and garage stays readable, their scheduled
+night lighting works, and the rear exterior retains its intended night hierarchy without a global
+exposure lift. No content or runtime change was justified.
+
+The scoreboard assigns all 96 authored cells exactly once and its *Main at C4* column is complete
+in every zone. All eleven hero cells retain the C3 baseline proved at G3; the fixed-view checker
+still covers all five hero areas. Captures remain Git-ignored under
+`house-03452-main-gate-{day,night}-r161`.
+
+Rule R2 selects `HOUSE-03454` next. The library's second-upper-floor zone has the most accessible
+cells below the hero target among the three newly unblocked levels; ground-floor hero work remains
+dependency-delayed by rule R4. The remaining forecast is 121.75 realistic / 150.5 pessimistic
+hours. With 104.5 task-hours spent since the final reduction, the R14 projection is 255 h, 25 h
+below the ceiling. Every build/test/render remains limited to four workers and pinned to CPUs
+4,5,7,9; strict-XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Ground-floor main-cell C4 handoff — 2026-09-25 (`HOUSE-00989`)
 
 `L0_FAMILY`, `L0_DINING` and `L0_SUNROOM` meet C4 without new content. Their retained
