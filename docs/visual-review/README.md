@@ -5363,3 +5363,25 @@ tolerance. Exact poses and the deterministic-capture evidence are in
 [`house-01275-representative-render-set.md`](house-01275-representative-render-set.md).
 
 Rule R2 now selects `HOUSE-03420`, the G3 all-zone dressed-and-lit baseline review.
+
+## Round 153 — G3 dressed-and-lit baseline review
+
+Commit: `HOUSE-03420` working tree (`2026-09-24`). Fresh clear-10:30 and scheduled-22:00 sets each
+contain all 68 fixed views, eleven labelled zone sheets and one all-zone sheet, with no light
+override. All 22 zone sheets were inspected at full resolution. A separate day-only utility walk
+captures all four cardinal directions in every one of the 22 accessible utility cells, plus eight
+targeted views toward the essential content in the four darkest compact spaces.
+
+Every accessible room remains recognizable, dressed and readable at its required review times.
+The restrained utility rooms preserve their approved `LP-SERVICE`/`SC-OFF` treatment and remain
+non-black with essential service or storage silhouettes visible. No S1/S2, clipping, floating
+prop or fixture, z-fighting, missing texture, broken shadow, blocked route or impossible placement
+is open. No content, schedule, exposure or runtime change was needed.
+
+The scoreboard assigns all 96 authored cells exactly once and reports zero zero-prop accessible
+rooms. The controller grand tour reaches all 90 accessible cells through 558 stops in 11.46 s.
+G3 passes. Exact evidence is in [`house-03420-g3-review.md`](house-03420-g3-review.md).
+
+Rule R2 next selects `HOUSE-03447`: all M6a zones start with zero main cells at C4, and
+`Z-STAIR` has the largest remaining main-tier target (three cells). Rule R4 keeps ground-floor C4
+work last.

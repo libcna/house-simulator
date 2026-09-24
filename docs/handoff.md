@@ -1,3 +1,28 @@
+# G3 baseline-complete handoff — 2026-09-24 (`HOUSE-03420`)
+
+Gate G3 passes. Round 153 captured all 68 fixed Tier-S/High views at clear 10:30 and scheduled
+22:00 without light overrides, producing eleven zone sheets plus one all-zone sheet per condition.
+All 22 zone sheets were inspected at full resolution. The 22 accessible utility cells additionally
+received 88 cardinal clear-day frames and eight targeted views toward overhead services/storage.
+Their deliberately restrained `LP-SERVICE`/`SC-OFF` treatment remains non-black and exposes the
+essential utility content without adding a schedule class, exposure lift or polish.
+
+No accessible room has an open S1/S2. There is no visible clipping, floating prop or fixture,
+z-fighting, missing texture, broken shadow, blocked route or impossible placement. The scoreboard
+assigns all 96 authored cells exactly once and reports zero zero-prop accessible rooms. The exact
+controller grand tour passes: 90 cells, 558 stops, 90,469 controller steps, 27 collision detours
+and 11.46 s. Full evidence is in `docs/visual-review/house-03420-g3-review.md`; captures remain
+Git-ignored under the three `house-03420-g3-*-r153` directories.
+
+Rule R2 selects `HOUSE-03447` next: all M6a zones have zero completed main cells and `Z-STAIR` has
+the largest remaining target with three main stair cells. Rule R4 keeps ground-floor C4 work last.
+The remaining forecast is 130.5 realistic / 161.25 pessimistic hours. With 95.75 task-hours spent
+since the final reduction, the R14 projection remains 257 h, 23 h below the ceiling. Every build,
+test and render must remain pinned to at most CPUs 4,5,7,9, with all parallelism variables set to 4
+and the shared `/rv/cnaccache`. Do not modify or stage the user-owned root `.claude` entry.
+
+---
+
 # Representative day/night render-set handoff — 2026-09-24 (`HOUSE-01275`)
 
 The M5 implementation band is complete. `RepresentativeInteriorRenderTests` now owns exactly 32
