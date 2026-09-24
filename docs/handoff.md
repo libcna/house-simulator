@@ -1,3 +1,42 @@
+# Furnished-house rebake handoff — 2026-09-24 (`HOUSE-01030`)
+
+The current 440-prop house has been rebuilt and both production lightmap families have been
+rebaked. The world remains 1,114 chunks / 3,010,601 vertices / 79,744,552 packed vertex bytes;
+all 79 cells above the six-chunk target exactly equal their documented exceptions. The build has
+8 16-bit-cap splits, 15 Reach-cap splits and no 32-bit chunk. Source and deployed `chunks.bin`
+match at SHA-256 `1c136cc070539bdec5897be5909ff8c3c0f21e50d83683f3806735369c583bc2`.
+
+The existing Blender bake path now imports the 252 solid static `collision: proxy` props in the 78
+receiver cells as caster-only LOD0 geometry (2,585 visible mesh objects). Collision nodes, lower
+LODs and thin non-colliding dressing stay excluded. A per-cell signature covers the exact prop
+rows and referenced GLB bytes, preventing stale furnished products from passing `--resume`.
+At 256 samples, the complete daylight bake produced 78 atlases in 206.455 s and artificial
+produced 138 atlases in 477.534 s. Every receiver mean is positive; shell and prop signatures
+match across both families and the generated layout bindings. A subsequent full resume reused all
+78 cells in each mode. `HOUSE-03402` consumes the refreshed receiver means for Basic-lit furniture,
+while the newly imported solid furniture now casts into the shell atlases.
+
+Round 145 compared one fixed clear-day pose from every zone with Round 144. Indoor differences are
+the expected furnished-bake contact and occlusion response; outdoor views differ only in HUD/frame
+timing. Inspection found no black atlas, S1/S2 seam, gutter bleed, clipping or z-fighting. The
+78-cell unwrap report has no problem or attention row. Exact bake, image-difference and validation
+evidence is in `docs/visual-review/house-01030-furnished-rebake.md`; local captures are under
+`docs/visual-review/captures/house-01030-furnished-bake-r145/`.
+
+The build, manifest/schema/world/licence/budget/deployment gates, 1,420 unit tests and all 49
+runnable render tests pass.
+Integration has 140/141 passes under load; the unrelated weather-clock threshold case passed its
+exact focused retry. Rule R1(b) selected this house-wide pipeline task. M5's dependency order now
+selects the automatic interior schedule `HOUSE-03401`; it unlocks the three interior zone-lighting
+tasks together with the completed furnished bake. The remaining forecast is 142.25 realistic /
+174.25 pessimistic hours. With 84 task-hours spent since the final reduction, the R14 projection
+is 258.25 h, 21.75 h below the ceiling. Every future compilation/test invocation must use no more
+than four workers pinned to CPUs 4,5,7,9; strict XNA additionally requires
+`HOUSE_XNA_STRICT_JOBS=4`. The user-owned root `.claude` entry remains the only known layout-gate
+failure; do not modify or stage it.
+
+---
+
 # Static-prop lighting handoff — 2026-09-24 (`HOUSE-03402`)
 
 Static indoor props now follow the same existing bake products as their cell's shell without a new

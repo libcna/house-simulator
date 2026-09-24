@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **93 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 124 / 146 / 179 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **M4 dressing checkpoint passed; M5 baseline lighting is in progress.** Next: rebuild and re-bake the furnished house in `HOUSE-01030` |
+| Active plan | **92 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 121 / 142 / 174 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **M4 dressing checkpoint passed; M5 baseline lighting is in progress.** Next: implement the automatic interior schedule in `HOUSE-03401` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -943,11 +943,12 @@ light, nothing more. No new lighting system is added for polish (rule R9).
       note: generalises Round 102's top ground-floor defect (piano, sofas, sunroom chairs) to the whole house. With every zone dressed, this is a system fix, not a room fix (R1 exception b)
       note: (2026-09-24) Round 144 chooses the cheapest accepted option: each existing daylight/artificial bake now records its non-padding linear receiver mean (216 scalar bindings), and indoor Basic-lit detail composes the owning cell's daylight tint plus active owned fixture groups. The established heuristic remains the floor and a measured 1.40x component-wise cap prevents a cell average from overpowering local UV2 shade; no UV1, prop atlas, vertex stream, draw, manager or global gain was added. Eight indoor fixed views measured by day/night finish inside the stated 0.25–3.50 linear-luminance ratio band (0.283–3.369); three exterior-zone controls are pixel-identical before/after. The rejected uncapped candidate reached 10.834 in the master bedroom and 37.680 in the library and was discarded. Full numbers and ROIs are in `docs/visual-review/house-03402-prop-lighting.md`. Matched captures show no clipping, new warm cast or outdoor change; no render golden failed or required replacement. The 1,420 unit tests, 140 integration tests, schema validation, authored-world validation and focused static-pass tests pass
 
-- [ ] HOUSE-01030 — Rebuild the chunks and re-bake the lightmaps over the furnished house
+- [x] HOUSE-01030 — Rebuild the chunks and re-bake the lightmaps over the furnished house
       dep: HOUSE-03380, HOUSE-00473, HOUSE-00909 · sys: content · plat: TOOL · pri: MUST · zone: all · adv: G3, D6 · est: 4
       accept: (1) the chunks are rebuilt over the furnished house and the ≤ 6-chunks-per-cell target still holds, or each exception is measured and recorded; (2) the lightmaps are re-baked so furniture casts and receives baked light; (3) S1/S2 lightmap seams and gutter bleed found on inspection are fixed on this bake; smaller seams are S3/S4
       verify: the chunk budget check; one capture per zone by day; the bake log
       trace: absorbs `HOUSE-01029` (chunk rebuild) and `HOUSE-00913` (seams)
+      note: (2026-09-24) Round 145 rebuilds the final furnished world at 1,114 chunks / 3,010,601 vertices / 79,744,552 packed vertex bytes. All 79 cells above the six-chunk target exactly match their measured existing exceptions; there are 8 16-bit-cap splits, 15 Reach-cap splits and no 32-bit chunk. The existing deterministic baker now imports only the 252 solid static `collision: proxy` props in the 78 receiver cells as caster-only geometry (2,585 visible mesh objects), excluding `_COL`, lower LOD and thin dressing nodes. It records a per-cell hash of the exact prop rows and GLB bytes so resume cannot reuse a stale furnished bake. The 256-sample full runs produced 78 daylight and 138 artificial atlases in 206.455 s and 477.534 s; every receiver mean is positive, both families bind the same 78 current shell/prop signatures, and a full resume reuses all 78 cells. The refreshed receiver means continue to light furniture through `HOUSE-03402` while the imported solid furniture casts into the shell atlases. Round 145 inspected one fixed clear-day view per zone against Round 144: interior changes are the expected furnishing/contact-shadow response, exterior controls are unchanged apart from HUD timing, and there is no black atlas, S1/S2 seam, gutter bleed, clipping or z-fighting. The unwrap report covers 78 cells/atlases with no problem or attention row. Full evidence is in `docs/visual-review/house-01030-furnished-rebake.md`; the build, schema/world/manifest/licence/budget/deployment gates, 1,420 unit tests and 49 runnable render tests pass. Integration has 140/141 passes under load; the sole weather-clock timing miss passes on its exact focused retry and is unrelated to the bake
 
 - [ ] HOUSE-03403 — Light the basement, the attic and the stairwells to the C3 baseline
       dep: HOUSE-03402, HOUSE-01030, HOUSE-03401 · sys: lighting · plat: TOOL · pri: MUST · zone: Z-B1, Z-L3, Z-STAIR · adv: G3, D6 · est: 2
@@ -1889,7 +1890,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M2 Architectural completion | 8 | 18 | **0** | 0 | **0** | 0 | — |
 | M3 The reusable furnishing kit | 16 | 33 | **0** | 0 | **0** | 0 | — |
 | M4 Dressing everywhere | 40 | 48.75 | **0** | 0 | **0** | 0 | R-D +3 |
-| M5 Baseline lighting everywhere | 12 | 24.5 | **9** | 13.5 | **15.75** | 17.25 | — |
+| M5 Baseline lighting everywhere | 12 | 24.5 | **8** | 10.25 | **11.75** | 12.75 | — |
 | M6 Main cells and hero areas | 20 | 32.5 | **15** | 16.75 | **19.75** | 21.75 | — |
 | M7 A compact environment | 13 | 21 | **8** | 11.25 | **13.25** | 14.5 | — |
 | M8 Atmospheric audio essentials | 11 | 14.5 | **6** | 7.75 | **9** | 10 | — |
@@ -1901,12 +1902,12 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **93** | **124.25** | **146.25** | **178.75** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **92** | **121** | **142.25** | **174.25** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-101.25 h. Adding the 80 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-258.75 h, 21.25 h under the limit. That margin is
+105.75 h. Adding the 84 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+258.25 h, 21.75 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |

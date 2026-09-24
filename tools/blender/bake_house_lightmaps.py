@@ -26,6 +26,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[2]
 SHELL = REPO / "build" / "shell-lm"
 LIGHTS = REPO / "assets-src" / "world" / "layout.lights.json"
+PROPS = REPO / "assets-src" / "world" / "layout.props.json"
 CELLS = REPO / "assets-src" / "world" / "layout.cells.json"
 OUTPUT = REPO / "assets-src" / "Textures" / "Lightmaps"
 META = REPO / "build" / "visual-lightmap-meta"
@@ -50,6 +51,23 @@ def json_sha256(value: object) -> str:
     """Hash semantic JSON, so editing another cell's lamps does not stale this cell's bake."""
     encoded = json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
     return hashlib.sha256(encoded).hexdigest()
+
+
+def prop_signature(cell: str, props: list[dict], assets: dict[str, dict]) -> str:
+    """Hash exactly the solid static prop inputs imported into one cell's bake."""
+    rows = []
+    for prop in sorted((row for row in props
+                        if row.get("cell") == cell and row.get("static", True)
+                        and row.get("collision") == "proxy"),
+                       key=lambda row: row["id"]):
+        asset = assets.get(prop.get("asset"))
+        source = asset.get("sourceFile") if isinstance(asset, dict) else None
+        if not isinstance(source, str) or not source.endswith(".glb"):
+            raise ValueError(
+                f"prop {prop['id']} names asset {prop.get('asset')!r} without a manifest GLB")
+        path = REPO / source
+        rows.append({"prop": prop, "sourceFile": source, "sourceSha256": sha256(path)})
+    return json_sha256(rows)
 
 
 def pack_for(cell: str) -> str:
@@ -238,6 +256,10 @@ def promote_subset(selected: set[str], per_cell: dict[str, int],
     """
     sidecars: dict[str, dict[str, dict]] = {"daylight": {}, "artificial": {}}
     images: dict[str, list[Path]] = {"daylight": [], "artificial": []}
+    prop_document = json.loads(layout_io.strip_jsonc(PROPS.read_text(encoding="utf-8")))
+    manifest_document = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    assets = {row["id"]: row for row in manifest_document.get("assets", [])
+              if isinstance(row.get("id"), str)}
     for cell in sorted(selected):
         shell = SHELL / f"{cell}.glb"
         expected_shell = sha256(shell)
@@ -248,6 +270,8 @@ def promote_subset(selected: set[str], per_cell: dict[str, int],
             if (sidecar.get("sourceGlbSha256") != expected_shell or
                     sidecar.get("cellLightsSha256") != expected_lights or
                     sidecar.get("bakerSha256") != sha256(BAKER) or
+                    sidecar.get("cellPropsSha256") != prop_signature(
+                        cell, prop_document.get("props", []), assets) or
                     sidecar.get("seed") != seed or sidecar.get("samples") != samples or
                     sidecar.get("size") != per_cell[cell] or
                     sidecar.get("lumensPerRadiantWatt") != lumens_per_radiant_watt):
@@ -285,6 +309,9 @@ def promote_subset(selected: set[str], per_cell: dict[str, int],
         for cell, sidecar in selected_products.items():
             products[cell] = {"cell": cell, "shellHash": sidecar["shellHash"],
                               "groups": sidecar["groups"], "daylight": sidecar["daylight"],
+                              "furnishedProps": sidecar["furnishedProps"],
+                              "furnishedMeshes": sidecar["furnishedMeshes"],
+                              "cellPropsSha256": sidecar["cellPropsSha256"],
                               "lumensPerRadiantWatt": lumens_per_radiant_watt}
         report["products"] = [products[cell] for cell in sorted(products)]
         family = OUTPUT / ("Daylight" if mode == "daylight" else "Artificial")
@@ -375,6 +402,14 @@ def main() -> int:
                if row.get("cell") == cell or cell in (row.get("bakeCells") or [])]
         for cell in per_cell
     }
+    prop_document = json.loads(layout_io.strip_jsonc(PROPS.read_text(encoding="utf-8")))
+    manifest_document = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    asset_rows = {row["id"]: row for row in manifest_document.get("assets", [])
+                  if isinstance(row.get("id"), str)}
+    prop_signatures = {
+        cell: prop_signature(cell, prop_document.get("props", []), asset_rows)
+        for cell in per_cell
+    }
 
     wanted = set(per_cell)
     if args.cells:
@@ -419,6 +454,7 @@ def main() -> int:
                     and previous.get("sourceGlbSha256") == source_hash
                     and previous.get("cellLightsSha256") == lights_hash
                     and previous.get("bakerSha256") == baker_hash
+                    and previous.get("cellPropsSha256") == prop_signatures[cell]
                     and all((destination / name).is_file() for name in products)):
                 dark = unlit_products(previous, mode)
                 if dark:
@@ -430,6 +466,8 @@ def main() -> int:
                 reused_cells += 1
                 continue
         command = [sys.executable, str(BAKER), str(shell), "--lights", str(LIGHTS),
+                   "--props", str(PROPS), "--manifest", str(MANIFEST),
+                   "--prop-signature", prop_signatures[cell],
                    "--cell", cell, "--out", str(destination), "--size", str(per_cell[cell]),
                    "--samples", str(args.samples), "--seed", str(args.seed),
                    "--lumens-per-radiant-watt", str(args.lumens_per_radiant_watt),
@@ -488,7 +526,12 @@ def main() -> int:
             "shellHash": row["shellHash"],
             "groups": row["groups"],
             "daylight": row["daylight"],
+            "furnishedProps": row["furnishedProps"],
+            "furnishedMeshes": row["furnishedMeshes"],
+            "cellPropsSha256": row["cellPropsSha256"],
         } for row in sidecars],
+        "furnishedProps": sum(int(row["furnishedProps"]) for row in sidecars),
+        "furnishedMeshes": sum(int(row["furnishedMeshes"]) for row in sidecars),
     }
     if full_house and reused_cells == 0:
         report["fullBakeSeconds"] = round(elapsed, 3)

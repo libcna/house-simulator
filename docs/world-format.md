@@ -217,6 +217,13 @@ without adding UV1 or another texture lookup.
 refuses daylight and artificial reports whose hashes disagree. Exterior cells without baked
 receivers omit the field.
 
+The production bake also imports each solid static prop in the receiver cell whose authored
+`collision` mode is `proxy`. Its visible LOD0 geometry casts into the architectural receivers but
+is not itself a lightmap receiver; `_COL`, lower-LOD and thin non-colliding dressing geometry are
+excluded. The sidecar's `cellPropsSha256` binds the product to the exact selected prop rows and GLB
+source bytes. Changing either invalidates `--resume`, while the refreshed `receiverMean` is the
+existing cell-wide lighting sample used by non-lightmapped static detail.
+
 ### Container sub-cells
 
 `cna-house.md` §54: "a container is a tiny sub-cell with its own portal, so this falls out of the

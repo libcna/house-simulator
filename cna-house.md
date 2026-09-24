@@ -3876,8 +3876,10 @@ BL-09 probe confirms it, else RGBA8-packed depth.
   transform into light space, `BoundingBox::CreateFromPoints`. This is exactly SAMPLE-038's proven
   technique.
 * Texel snapping (round the light-space origin to whole texels) removes shimmer.
-* Casters: dynamic objects, plus static objects within 45 m that are marked `castsShadow`
-  (the architectural shell casts; small dressing props do not).
+* Casters: dynamic objects, plus static objects within 45 m that are marked `castsShadow`.
+  The architectural shell and solid static furniture (`collision: proxy`) cast into the offline
+  lightmaps; small dressing props do not. The runtime shadow-map path still excludes small static
+  dressing.
 * Receivers: everything drawn with `RoomLit.fx`/`SkinLit.fx`.
 * Filtering: 3 × 3 PCF, 4 taps at ps_3_0 cost.
 * **Indoors the shadow map is disabled** unless the cell's `daylight ≥ 0.25`, because indoor

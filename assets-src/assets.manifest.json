@@ -761,6 +761,680 @@
       ]
     },
     {
+      "id": "MODEL_CLUTTER_BIN",
+      "category": "waste-bin",
+      "sourceFile": "assets-src/Models/Furniture/Clutter/bin.glb",
+      "sourceSha256": "e8b29567e61f38ea524e6aa9a7acbb815e093d0308e592574504b46f98f7fe1f",
+      "contentName": "Models/Furniture/Clutter/bin",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Office waste bin from Office Lobby and Building Facilities",
+        "url": "https://cdn.3dassets.dev/assets/26268/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00984 selected this static bin within the five-of-six clutter cap. The official 3D Assets pack declares Claude Fable 5.1 as its AI generator and publishes the model under CC0 1.0. tools/assets/clutter_prepare.py pins upstream SHA-256 c9d03d627722f8fa9207868582060188d90e01ec2734c32d27ba23e5d56a2cdb, bakes its hierarchy, adds UV0 and appends one twelve-triangle enclosing collision box."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.32,
+          0.439993,
+          0.32
+        ],
+        "triangles": {
+          "LOD0": 556
+        },
+        "collision": "Bin_COL"
+      },
+      "materialMap": {
+        "dark": "MAT_FURNITURE_PIANO_EBONITE",
+        "metal": "MAT_APPLIANCE_STEEL",
+        "accent": "MAT_PAINT_MUTED_TEAL"
+      },
+      "usedIn": [
+        "B1_CINEMA",
+        "B1_WORKSHOP",
+        "L0_LAUNDRY",
+        "L0_MUDROOM",
+        "L0_GARAGE",
+        "EXT_SHED",
+        "EXT_SIDEYARD_E"
+      ]
+    },
+    {
+      "id": "MODEL_CLUTTER_GARDEN_TOOLS",
+      "category": "garden-tool-set",
+      "sourceFile": "assets-src/Models/Furniture/Clutter/garden_tools.glb",
+      "sourceSha256": "2151ca51ee1ade7195473d6995a32c24f46ca8eaff3e2cec6c8b73bb49a315f6",
+      "contentName": "Models/Furniture/Clutter/garden_tools",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Long handled tool bin from Garden Centre and Florist",
+        "url": "https://cdn.3dassets.dev/assets/17752/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00984 selected this grounded long-handled garden-tool set within the five-of-six clutter cap. The official 3D Assets pack declares Claude Fable 5.1 as its AI generator and publishes the model under CC0 1.0. tools/assets/clutter_prepare.py pins upstream SHA-256 e1b3888a6ba75492647ea8b6e2fa2ef4bf1d72fc35e9f39d1739683f9f1bb229, bakes its hierarchy, adds UV0 and appends one twelve-triangle enclosing collision box."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.88588,
+          1.580602,
+          0.669707
+        ],
+        "triangles": {
+          "LOD0": 2804
+        },
+        "collision": "GardenTools_COL"
+      },
+      "materialMap": {
+        "dark": "MAT_FURNITURE_PIANO_EBONITE",
+        "metal": "MAT_OUTDOOR_FENCE_METAL",
+        "surface": "MAT_OUTDOOR_GARDEN_WOOD",
+        "accent": "MAT_PAINT_MUTED_TEAL"
+      },
+      "usedIn": [
+        "L0_GARAGE",
+        "EXT_GARDEN",
+        "EXT_SHED"
+      ]
+    },
+    {
+      "id": "MODEL_CLUTTER_PAINT_TIN",
+      "category": "paint-tin",
+      "sourceFile": "assets-src/Models/Furniture/Clutter/paint_tin.glb",
+      "sourceSha256": "265d163002adb740aefdc0dd9f355e56794f7a764ab95e686074c9eb29f4307f",
+      "contentName": "Models/Furniture/Clutter/paint_tin",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Paint tin, 5 litre from Hardware Store and DIY Warehouse",
+        "url": "https://cdn.3dassets.dev/assets/23929/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00984 selected this single domestic 5 litre paint tin within the five-of-six clutter cap. The official 3D Assets pack declares Claude Fable 5.1 as its AI generator and publishes the model under CC0 1.0. tools/assets/clutter_prepare.py pins upstream SHA-256 c7269c2acd263fc4078aa5b3c98cb3728472ef12471396ff5f9546d3b84d342c, bakes its hierarchy, adds UV0 and appends one twelve-triangle enclosing collision box."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.236896,
+          0.343995,
+          0.233293
+        ],
+        "triangles": {
+          "LOD0": 598
+        },
+        "collision": "PaintTin_COL"
+      },
+      "materialMap": {
+        "metal": "MAT_APPLIANCE_STEEL",
+        "accent": "MAT_PAINT_SAGE"
+      },
+      "usedIn": [
+        "B1_WORKSHOP",
+        "L0_GARAGE",
+        "EXT_SHED"
+      ]
+    },
+    {
+      "id": "MODEL_CLUTTER_SUITCASE",
+      "category": "suitcase",
+      "sourceFile": "assets-src/Models/Furniture/Clutter/suitcase.glb",
+      "sourceSha256": "550f1579b84de39549e56eabdc2ac9d03a6550502a8ba258b82c00fe127b398d",
+      "contentName": "Models/Furniture/Clutter/suitcase",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Suitcase from Mountain Border Checkpoint",
+        "url": "https://cdn.3dassets.dev/assets/30311/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00984 selected this static upright suitcase within the five-of-six clutter cap. The official 3D Assets pack declares GPT-6 as its AI generator and publishes the model under CC0 1.0. tools/assets/clutter_prepare.py pins upstream SHA-256 0a6cf35a040fc9b8a3ba842920a455e822de2c18124d15932bb25f52c17c7f28, bakes its hierarchy, adds UV0 and appends one twelve-triangle enclosing collision box."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.579014,
+          0.85,
+          0.307957
+        ],
+        "triangles": {
+          "LOD0": 1308
+        },
+        "collision": "Suitcase_COL"
+      },
+      "materialMap": {
+        "fabric": "MAT_FAMILY_CURTAIN_WOOL",
+        "steel": "MAT_KITCHEN_HARDWARE_STEEL",
+        "dark": "MAT_FURNITURE_PIANO_EBONITE"
+      },
+      "usedIn": [
+        "L0_GARAGE_LOFT",
+        "L1_MASTER_CLOSET",
+        "L1_CLOSET_2",
+        "L1_CLOSET_3",
+        "L2_CLOSET_4",
+        "L3_STORE_E",
+        "L3_STORE_W"
+      ]
+    },
+    {
+      "id": "MODEL_CLUTTER_TOOLBOX",
+      "category": "toolbox",
+      "sourceFile": "assets-src/Models/Furniture/Clutter/toolbox.glb",
+      "sourceSha256": "19be2ac8e7751e3a1a16bc68fe3a23bdfdb29c0f8df3bd54884fc5b1e785c520",
+      "contentName": "Models/Furniture/Clutter/toolbox",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Cantilever tool box from Hardware Store and DIY Warehouse",
+        "url": "https://cdn.3dassets.dev/assets/23944/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00984 selected this toolbox within the five-of-six clutter cap. The official 3D Assets pack declares Claude Fable 5.1 as its AI generator and publishes the model under CC0 1.0. tools/assets/clutter_prepare.py pins upstream SHA-256 0af6f33a5508f40757ff6092467d2ec889c57710cc5a28137a320e3b794f0cba, bakes its closed default pose, removes its source open/close clips, adds UV0 and appends one twelve-triangle enclosing collision box."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.555,
+          0.481332,
+          0.276839
+        ],
+        "triangles": {
+          "LOD0": 944
+        },
+        "collision": "Toolbox_COL"
+      },
+      "materialMap": {
+        "dark": "MAT_FURNITURE_PIANO_EBONITE",
+        "accent": "MAT_PAINT_DUSTY_BLUE",
+        "metal": "MAT_KITCHEN_HARDWARE_STEEL"
+      },
+      "usedIn": [
+        "B1_ELECTRICAL",
+        "B1_WORKSHOP",
+        "L0_GARAGE",
+        "EXT_SHED"
+      ]
+    },
+    {
+      "id": "MODEL_DECOR_FLOOR_MIRROR",
+      "category": "floor-mirror",
+      "sourceFile": "assets-src/Models/Furniture/Decoration/floor_mirror.glb",
+      "sourceSha256": "0e70a79a2ad3e9e33b39825b933b3904c99dabb6f0c3bdc6d21ec69513284bea",
+      "contentName": "Models/Furniture/Decoration/floor_mirror",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Dressing Mirror Round from Bedroom and Living Room Furniture",
+        "url": "https://cdn.3dassets.dev/assets/38808/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00982 selected one of only four decoration acquisitions after reusing the existing plant and frame families. The official 3D Assets pack declares Muse Spark via T3 Code as its AI generator and publishes this model under CC0 1.0. tools/assets/decoration_prepare.py pins upstream SHA-256 3a8d064c228cde84ff16e17c86bdd7352a1d596fc7ad658ea979017b649ce2a9, bakes static geometry, adds UV0 and appends one twelve-triangle enclosing collision box."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.82,
+          1.792,
+          0.43992
+        ],
+        "triangles": {
+          "LOD0": 1104
+        },
+        "collision": "Mirror_COL"
+      },
+      "materialMap": {
+        "walnut": "MAT_FURNITURE_PIANO_WOOD",
+        "metal": "MAT_KITCHEN_HARDWARE_STEEL",
+        "glass": "MAT_GLASS_CLEAR"
+      },
+      "usedIn": [
+        "L1_MASTER_CLOSET",
+        "L1_BED2",
+        "L2_BED5",
+        "L2_BED6"
+      ]
+    },
+    {
+      "id": "MODEL_DECOR_NARROW_VASE",
+      "category": "vase",
+      "sourceFile": "assets-src/Models/Furniture/Decoration/narrow_vase.glb",
+      "sourceSha256": "d29d644e60201b6b3e7590bbc25d1d76dbdd2d0917682b8b807e385ad42ee27b",
+      "contentName": "Models/Furniture/Decoration/narrow_vase",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Narrow Neck Vase from Ceramics Pottery Studio",
+        "url": "https://cdn.3dassets.dev/assets/29517/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00982 selected one of only four decoration acquisitions. The official 3D Assets pack declares GPT-6 as its AI generator and publishes this model under CC0 1.0. tools/assets/decoration_prepare.py pins upstream SHA-256 99d4497e6995aa92c5293c7d437a12c190edf0b7489c965d8df9aae86e653239, bakes static geometry, adds UV0 and appends one twelve-triangle enclosing collision box."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.29998,
+          0.48,
+          0.29998
+        ],
+        "triangles": {
+          "LOD0": 1792
+        },
+        "collision": "Vase_COL"
+      },
+      "materialMap": {
+        "sage": "MAT_FOYER_CERAMIC"
+      },
+      "usedIn": [
+        "B1_WINE",
+        "L1_SITTING",
+        "L2_LIBRARY",
+        "L3_ROOM"
+      ]
+    },
+    {
+      "id": "MODEL_DECOR_PLANT_GROUP",
+      "category": "houseplant",
+      "sourceFile": "assets-src/Models/Furniture/Decoration/plant_group.glb",
+      "sourceSha256": "fb5286a463a0e40bb1bdf094db85ea2517649cda968e2a8e13d0b26565f9e7ca",
+      "contentName": "Models/Furniture/Decoration/plant_group",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Potted Plant Group from Indian Bazaar Street and Temple",
+        "url": "https://cdn.3dassets.dev/assets/36579/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00982 selected this second plant form after retaining the existing ground-floor plant. The official 3D Assets pack declares Claude Opus 5 as its AI generator and publishes this model under CC0 1.0. tools/assets/decoration_prepare.py pins upstream SHA-256 2336e6733dc6d3c825da78a04b4bd6122e823e66075158af4c65a6b1448a58fa, bakes static geometry, removes the unused WebP preview nodes because the source slots bind canonical project materials, adds UV0 and appends one twelve-triangle enclosing collision box."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.0782,
+          0.821747,
+          0.974054
+        ],
+        "triangles": {
+          "LOD0": 1326
+        },
+        "collision": "PlantGroup_COL"
+      },
+      "materialMap": {
+        "terracotta": "MAT_FOYER_CERAMIC",
+        "timber": "MAT_FURNITURE_PIANO_WOOD",
+        "leaf": "MAT_FURNITURE_PLANT_LEAF",
+        "teal": "MAT_PAINT_MUTED_TEAL"
+      },
+      "usedIn": [
+        "B1_GYM",
+        "L1_SITTING",
+        "L2_LIBRARY",
+        "L3_ROOM"
+      ]
+    },
+    {
+      "id": "MODEL_DECOR_WALL_ART_13",
+      "category": "picture",
+      "sourceFile": "assets-src/Models/Furniture/Decoration/wall_art_13.glb",
+      "sourceSha256": "b432f197d4e1951392c30541dbdcaafa569b89f0c5d215b2ab9b2e53a14a7148",
+      "contentName": "Models/Furniture/Decoration/wall_art_13",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Dark-frame variant for PuzzleAndy abstract 13",
+        "url": "https://opengameart.org/sites/default/files/abstract_13.jpg",
+        "author": "PuzzleAndy / frame geometry by cna-house",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00982 wall-art set member. The source page publishes the abstract image under CC0; tools/assets/decoration_prepare.py pins original JPEG SHA-256 3019297b5ea067c205f4879111ad1c2b929bbafe26aa86067e81ddc1b803c7f2 and tools/blender/wall_art_set.py deterministically authors this wall-plane frame and twelve-triangle proxy."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.994,
+          0.714,
+          0.05
+        ],
+        "triangles": {
+          "LOD0": 446
+        },
+        "collision": "WallArt_COL"
+      },
+      "materialMap": {
+        "ART_FRAME_DARK": "MAT_FURNITURE_PIANO_WOOD",
+        "ART_MAT": "MAT_LIVING_ART_PAPER",
+        "ART_IMAGE_13": "MAT_DECOR_WALL_ART_13"
+      },
+      "usedIn": [
+        "B1_STAIR",
+        "L1_SITTING",
+        "L1_STAIR_MAIN",
+        "L2_LIBRARY"
+      ]
+    },
+    {
+      "id": "MODEL_DECOR_WALL_ART_14",
+      "category": "picture",
+      "sourceFile": "assets-src/Models/Furniture/Decoration/wall_art_14.glb",
+      "sourceSha256": "2b28cfbbfcd615d5845a51093003c0dcf02d3b9c57bc5af476c751600f612623",
+      "contentName": "Models/Furniture/Decoration/wall_art_14",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Brass-frame variant for PuzzleAndy abstract 14",
+        "url": "https://opengameart.org/sites/default/files/abstract_14.jpg",
+        "author": "PuzzleAndy / frame geometry by cna-house",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00982 wall-art set member. The source page publishes the abstract image under CC0; tools/assets/decoration_prepare.py pins original JPEG SHA-256 2c985e7a036016c5774a2568f57093afe7a36c3947a7e605f134de182633c59c and tools/blender/wall_art_set.py deterministically authors this wall-plane frame and twelve-triangle proxy."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.084,
+          0.764,
+          0.05
+        ],
+        "triangles": {
+          "LOD0": 446
+        },
+        "collision": "WallArt_COL"
+      },
+      "materialMap": {
+        "ART_FRAME_BRASS": "MAT_FURNITURE_PIANO_BRASS",
+        "ART_MAT": "MAT_LIVING_ART_PAPER",
+        "ART_IMAGE_14": "MAT_DECOR_WALL_ART_14"
+      },
+      "usedIn": [
+        "L0_STAIR_MAIN",
+        "L1_MASTER_BED",
+        "L2_BED5",
+        "L2_STAIR_ATTIC"
+      ]
+    },
+    {
+      "id": "MODEL_DECOR_WALL_ART_15",
+      "category": "picture",
+      "sourceFile": "assets-src/Models/Furniture/Decoration/wall_art_15.glb",
+      "sourceSha256": "71f71f8f38a417b4c9af595f19f6f5d2265b707b826060c11e0d9661b7fecbe7",
+      "contentName": "Models/Furniture/Decoration/wall_art_15",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Portrait wide-mat variant for PuzzleAndy abstract 15",
+        "url": "https://opengameart.org/sites/default/files/abstract_15.jpg",
+        "author": "PuzzleAndy / frame geometry by cna-house",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00982 wall-art set member. The source page publishes the abstract image under CC0; tools/assets/decoration_prepare.py pins original JPEG SHA-256 130869082f07dd2a4b5dc1e147ce92293c31f231c8ab111fe751caee74a64ce1 and tools/blender/wall_art_set.py deterministically authors this wall-plane frame and twelve-triangle proxy."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.694,
+          0.894,
+          0.05
+        ],
+        "triangles": {
+          "LOD0": 446
+        },
+        "collision": "WallArt_COL"
+      },
+      "materialMap": {
+        "ART_FRAME_DARK": "MAT_FURNITURE_PIANO_WOOD",
+        "ART_MAT": "MAT_LIVING_ART_PAPER",
+        "ART_IMAGE_15": "MAT_DECOR_WALL_ART_15"
+      },
+      "usedIn": [
+        "B1_CINEMA",
+        "L1_HALL",
+        "L1_HALL_W",
+        "L2_HALL",
+        "L2_HALL_W",
+        "L2_STAIR_MAIN"
+      ]
+    },
+    {
+      "id": "MODEL_DECOR_WALL_ART_16",
+      "category": "picture",
+      "sourceFile": "assets-src/Models/Furniture/Decoration/wall_art_16.glb",
+      "sourceSha256": "f811da0b993c67242155da7c9d277253a7a9610fe8ab14e8ce4053c6c8b16d96",
+      "contentName": "Models/Furniture/Decoration/wall_art_16",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Square dark-frame variant for PuzzleAndy abstract 16",
+        "url": "https://opengameart.org/sites/default/files/abstract_16.jpg",
+        "author": "PuzzleAndy / frame geometry by cna-house",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00982 wall-art set member. The source page publishes the abstract image under CC0; tools/assets/decoration_prepare.py pins original JPEG SHA-256 b28967e69522ad9daf6c95c4e9c40000a83eda32fa9fd4a58d8657e4cf82c002 and tools/blender/wall_art_set.py deterministically authors this wall-plane frame and twelve-triangle proxy."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.774,
+          0.774,
+          0.05
+        ],
+        "triangles": {
+          "LOD0": 446
+        },
+        "collision": "WallArt_COL"
+      },
+      "materialMap": {
+        "ART_FRAME_DARK": "MAT_FURNITURE_PIANO_WOOD",
+        "ART_MAT": "MAT_LIVING_ART_PAPER",
+        "ART_IMAGE_16": "MAT_DECOR_WALL_ART_16"
+      },
+      "usedIn": [
+        "B1_HOBBY",
+        "L3_ROOM",
+        "L3_STAIR_HEAD"
+      ]
+    },
+    {
+      "id": "MODEL_DECOR_WALL_CLOCK",
+      "category": "wall-clock",
+      "sourceFile": "assets-src/Models/Furniture/Decoration/wall_clock.glb",
+      "sourceSha256": "af6da4c0176aa56920505267fe1b5e0f1b2c0a51ed8bbb44aaae1b4bfb169117",
+      "contentName": "Models/Furniture/Decoration/wall_clock",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Wall clock from Laundromat and Cleaning Services",
+        "url": "https://cdn.3dassets.dev/assets/25552/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00982 selected one of only four decoration acquisitions. The official 3D Assets pack declares Claude Fable 5.1 as its AI generator and publishes this model under CC0 1.0. tools/assets/decoration_prepare.py pins upstream SHA-256 2ba3406ef891bf9ea941e52f4c9dd2295301c0ea167ef4012de43f191a9549da, bakes static geometry, moves the back fixing plane to the wall origin, adds UV0 and appends one twelve-triangle enclosing collision box."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.34,
+          0.34,
+          0.122999
+        ],
+        "triangles": {
+          "LOD0": 988
+        },
+        "collision": "WallClock_COL"
+      },
+      "materialMap": {
+        "dark": "MAT_FIXTURE_DARK_BRONZE",
+        "carcass": "MAT_DOOR_PAINTED",
+        "accent": "MAT_PAINT_PALE_ROSE",
+        "metal": "MAT_KITCHEN_HARDWARE_STEEL",
+        "glass": "MAT_GLASS_CLEAR"
+      },
+      "usedIn": [
+        "B1_WORKSHOP",
+        "L0_LAUNDRY",
+        "L1_HALL",
+        "L2_HALL"
+      ]
+    },
+    {
+      "id": "MODEL_DELIVERY_VAN_WHITE",
+      "category": "delivery-van",
+      "sourceFile": "assets-src/Models/Furniture/Vehicles/delivery_van_white.glb",
+      "sourceSha256": "3b73ffc45b5227137cc5f96a3f1e93ac1209c449305cc30278f25432d4adfbdf",
+      "contentName": "Models/Furniture/Vehicles/delivery_van_white",
+      "kind": "model",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "generated",
+        "name": "Low-detail delivery van family, white tint",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored deterministic box/prism geometry from tools/world/neighbourhood_gen.py for HOUSE-00847. The van shares the estate family's wheels, glazing, lamps and construction; no third-party mesh or texture is used."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          2.26,
+          2.4,
+          5.424
+        ],
+        "triangles": {
+          "LOD0": 212
+        },
+        "collision": "MODEL_DELIVERY_VAN_WHITE_COL"
+      },
+      "materialMap": {
+        "MAT_FURNITURE_PIANO_EBONITE": "MAT_FURNITURE_PIANO_EBONITE",
+        "MAT_KITCHEN_HARDWARE_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "MAT_KITCHEN_OVEN_GLASS": "MAT_KITCHEN_OVEN_GLASS",
+        "MAT_VEHICLE_BODY_WHITE": "MAT_VEHICLE_BODY_WHITE",
+        "MAT_WINDOW_FRAME_WHITE": "MAT_WINDOW_FRAME_WHITE"
+      },
+      "usedIn": [
+        "EXT_WORLD"
+      ]
+    },
+    {
       "id": "MODEL_DINING_TABLE_SETTING",
       "category": "table-setting",
       "sourceFile": "assets-src/Models/Furniture/Dining/table_setting.glb",
@@ -2157,6 +2831,58 @@
       ]
     },
     {
+      "id": "MODEL_FURNITURE_DESK",
+      "category": "desk",
+      "sourceFile": "assets-src/Models/Furniture/SeatingTables/writing_desk.glb",
+      "sourceSha256": "ca065291e27efcce02da30fe7217ff4afa6aa30a3baa87d13bf28b9817d5180c",
+      "contentName": "Models/Furniture/SeatingTables/writing_desk",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "Desk Writing from Bedroom and Living Room Furniture",
+        "url": "https://cdn.3dassets.dev/assets/38795/v1/model.glb",
+        "author": "3D Assets",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00977 selected one of exactly three required acquisitions within the seven-model seating-and-tables cap. The official 3D Assets pack declares Muse Spark via T3 Code as its AI generator and publishes the model under CC0 1.0. tools/assets/seating_tables_prepare.py pins upstream SHA-256 29678a25099beed66d4b225b439e0c5fe05ecced4362791d130a15eeb7386146, bakes the closed static rest pose, removes the drawer clips and hierarchy, adds UV0 and appends one twelve-triangle enclosing collision box."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.4,
+          0.745054,
+          0.700107
+        ],
+        "triangles": {
+          "LOD0": 1168
+        },
+        "collision": "Desk_COL"
+      },
+      "materialMap": {
+        "black": "MAT_FURNITURE_PIANO_EBONITE",
+        "carcass": "MAT_DOOR_PAINTED",
+        "oak": "MAT_FURNITURE_DINING_WALNUT"
+      },
+      "usedIn": [
+        "L0_OFFICE",
+        "B1_HOBBY",
+        "L1_MASTER_BED",
+        "L1_BED3",
+        "L1_BED4",
+        "L2_LIBRARY",
+        "L2_BED6",
+        "L3_ROOM"
+      ]
+    },
+    {
       "id": "MODEL_FURNITURE_DINING_CHAIR",
       "category": "chair",
       "sourceFile": "assets-src/Models/Furniture/Dining/dining_chair.glb",
@@ -2288,58 +3014,6 @@
       },
       "usedIn": [
         "L0_DINING"
-      ]
-    },
-    {
-      "id": "MODEL_FURNITURE_DESK",
-      "category": "desk",
-      "sourceFile": "assets-src/Models/Furniture/SeatingTables/writing_desk.glb",
-      "sourceSha256": "ca065291e27efcce02da30fe7217ff4afa6aa30a3baa87d13bf28b9817d5180c",
-      "contentName": "Models/Furniture/SeatingTables/writing_desk",
-      "kind": "model",
-      "residencyPack": "core",
-      "origin": {
-        "kind": "derived",
-        "name": "Desk Writing from Bedroom and Living Room Furniture",
-        "url": "https://cdn.3dassets.dev/assets/38795/v1/model.glb",
-        "author": "3D Assets",
-        "retrieved": "2026-09-23",
-        "licence": "CC0-1.0",
-        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "HOUSE-00977 selected one of exactly three required acquisitions within the seven-model seating-and-tables cap. The official 3D Assets pack declares Muse Spark via T3 Code as its AI generator and publishes the model under CC0 1.0. tools/assets/seating_tables_prepare.py pins upstream SHA-256 29678a25099beed66d4b225b439e0c5fe05ecced4362791d130a15eeb7386146, bakes the closed static rest pose, removes the drawer clips and hierarchy, adds UV0 and appends one twelve-triangle enclosing collision box."
-      },
-      "geometry": {
-        "unitScale": 1,
-        "upAxis": "Y",
-        "boundsMetres": [
-          1.4,
-          0.745054,
-          0.700107
-        ],
-        "triangles": {
-          "LOD0": 1168
-        },
-        "collision": "Desk_COL"
-      },
-      "materialMap": {
-        "black": "MAT_FURNITURE_PIANO_EBONITE",
-        "carcass": "MAT_DOOR_PAINTED",
-        "oak": "MAT_FURNITURE_DINING_WALNUT"
-      },
-      "usedIn": [
-        "L0_OFFICE",
-        "B1_HOBBY",
-        "L1_MASTER_BED",
-        "L1_BED3",
-        "L1_BED4",
-        "L2_LIBRARY",
-        "L2_BED6",
-        "L3_ROOM"
       ]
     },
     {
@@ -3924,6 +4598,139 @@
       },
       "usedIn": [
         "L0_LIVING"
+      ]
+    },
+    {
+      "id": "MODEL_PARKED_CAR_BLUE",
+      "category": "car",
+      "sourceFile": "assets-src/Models/Furniture/Vehicles/estate_blue.glb",
+      "sourceSha256": "32fffa42f40ebaaa447b485dd4f549e73475970b7033e4e1bf44dab3b1d67ce6",
+      "contentName": "Models/Furniture/Vehicles/estate_blue",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Low-detail estate vehicle family, blue tint",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored deterministic box/prism geometry from tools/world/neighbourhood_gen.py for HOUSE-00847. The household car reuses the same estate body as the three street tint variants and adds only the model-owned 12-triangle collision proxy; no third-party mesh or texture is used."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.96,
+          1.5,
+          4.424
+        ],
+        "triangles": {
+          "LOD0": 248
+        },
+        "collision": "MODEL_PARKED_CAR_BLUE_COL"
+      },
+      "materialMap": {
+        "MAT_FURNITURE_PIANO_EBONITE": "MAT_FURNITURE_PIANO_EBONITE",
+        "MAT_KITCHEN_HARDWARE_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "MAT_KITCHEN_OVEN_GLASS": "MAT_KITCHEN_OVEN_GLASS",
+        "MAT_VEHICLE_BODY_BLUE": "MAT_VEHICLE_BODY_BLUE",
+        "MAT_WINDOW_FRAME_WHITE": "MAT_WINDOW_FRAME_WHITE"
+      },
+      "usedIn": [
+        "L0_GARAGE",
+        "EXT_ROAD"
+      ]
+    },
+    {
+      "id": "MODEL_PARKED_CAR_RED",
+      "category": "car",
+      "sourceFile": "assets-src/Models/Furniture/Vehicles/estate_red.glb",
+      "sourceSha256": "82bc5258d2957c611eccc24d623292a25747785fbfb7da352e2aeb8d3beb07cd",
+      "contentName": "Models/Furniture/Vehicles/estate_red",
+      "kind": "model",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "generated",
+        "name": "Low-detail estate vehicle family, red tint",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored deterministic geometry from tools/world/neighbourhood_gen.py for HOUSE-00847. This is the shared estate body under a red paint material; no third-party mesh or texture is used."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.96,
+          1.5,
+          4.424
+        ],
+        "triangles": {
+          "LOD0": 248
+        },
+        "collision": "MODEL_PARKED_CAR_RED_COL"
+      },
+      "materialMap": {
+        "MAT_FURNITURE_PIANO_EBONITE": "MAT_FURNITURE_PIANO_EBONITE",
+        "MAT_KITCHEN_HARDWARE_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "MAT_KITCHEN_OVEN_GLASS": "MAT_KITCHEN_OVEN_GLASS",
+        "MAT_VEHICLE_BODY_RED": "MAT_VEHICLE_BODY_RED",
+        "MAT_WINDOW_FRAME_WHITE": "MAT_WINDOW_FRAME_WHITE"
+      },
+      "usedIn": [
+        "EXT_ROAD"
+      ]
+    },
+    {
+      "id": "MODEL_PARKED_CAR_SILVER",
+      "category": "car",
+      "sourceFile": "assets-src/Models/Furniture/Vehicles/estate_silver.glb",
+      "sourceSha256": "4e63b6d5ac66f283ac1ace6f3cdd34e600929d0d8548d55247f2d50eb0429430",
+      "contentName": "Models/Furniture/Vehicles/estate_silver",
+      "kind": "model",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "generated",
+        "name": "Low-detail estate vehicle family, silver tint",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored deterministic geometry from tools/world/neighbourhood_gen.py for HOUSE-00847. This is the shared estate body under a silver paint material; no third-party mesh or texture is used."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.96,
+          1.5,
+          4.424
+        ],
+        "triangles": {
+          "LOD0": 248
+        },
+        "collision": "MODEL_PARKED_CAR_SILVER_COL"
+      },
+      "materialMap": {
+        "MAT_FURNITURE_PIANO_EBONITE": "MAT_FURNITURE_PIANO_EBONITE",
+        "MAT_KITCHEN_HARDWARE_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "MAT_KITCHEN_OVEN_GLASS": "MAT_KITCHEN_OVEN_GLASS",
+        "MAT_VEHICLE_BODY_SILVER": "MAT_VEHICLE_BODY_SILVER",
+        "MAT_WINDOW_FRAME_WHITE": "MAT_WINDOW_FRAME_WHITE"
+      },
+      "usedIn": [
+        "EXT_WORLD"
       ]
     },
     {
@@ -5979,13 +6786,21 @@
       "geometry": {
         "unitScale": 1,
         "upAxis": "Y",
-        "boundsMetres": [1.32, 1.6075, 0.14],
-        "triangles": {"LOD0": 2432}
+        "boundsMetres": [
+          1.32,
+          1.6075,
+          0.14
+        ],
+        "triangles": {
+          "LOD0": 2432
+        }
       },
       "materialMap": {
         "BLIND_SLAT": "MAT_WINDOW_BLIND_BLUE"
       },
-      "usedIn": ["L1_BED2"]
+      "usedIn": [
+        "L1_BED2"
+      ]
     },
     {
       "id": "SOUND_FALLBACK_SILENT",
@@ -21646,7 +22461,7 @@
       "id": "TEXTURE_B1_CELLAR_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_CELLAR_LM_DAY.png",
-      "sourceSha256": "b3ed275ae72a7fc65e77bb32e8e3ffdbb72d76f5b650848fbe2579d950190365",
+      "sourceSha256": "7fe6ff9c3be6896afe094d0b750228971e1df968d0ca1b6f64398c52b00cda5a",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21673,7 +22488,7 @@
       "id": "TEXTURE_B1_CELLAR_LM_LG_B1_CELLAR_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_CELLAR_LM_LG_B1_CELLAR_MAIN.png",
-      "sourceSha256": "8f29b77afcc8c25bda3c556b7e423f8ec2b2a94e29ea859a563579f4ef6e0e08",
+      "sourceSha256": "334acde6b5a3fe78e04682191bb003689f3a0c40d523e459b82e71d1e372e956",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21700,7 +22515,7 @@
       "id": "TEXTURE_B1_CINEMA_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_CINEMA_LM_DAY.png",
-      "sourceSha256": "930baa2acc661e439f8847da6c106623c04cd776471bbb34f4d5bfd55777d0d3",
+      "sourceSha256": "f09fad92fb31729d7783742036e492ebab7c52953757d045e75f687f647bdd67",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21727,7 +22542,7 @@
       "id": "TEXTURE_B1_CINEMA_LM_LG_B1_CINEMA_AISLE",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_CINEMA_LM_LG_B1_CINEMA_AISLE.png",
-      "sourceSha256": "bc7b9c1054312b7e6abb2f32c265be1273665565cf96c4a2bb3d1da8ecf3c76c",
+      "sourceSha256": "0db6a0f3e9f67fcbaa05bdfd788ac93c904ae57466b3d80cc1baa6e6408a2e29",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21754,7 +22569,7 @@
       "id": "TEXTURE_B1_CINEMA_LM_LG_B1_CINEMA_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_CINEMA_LM_LG_B1_CINEMA_MAIN.png",
-      "sourceSha256": "8ebf6ca3cf7508effe12fbad6f60eaae0b8d7942978b3d92bcf5db7cbe884c67",
+      "sourceSha256": "ab503717eea6bbe018c53799b8843567c8c634e84275f673e95caeec349d8abf",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21781,7 +22596,7 @@
       "id": "TEXTURE_B1_ELECTRICAL_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_ELECTRICAL_LM_DAY.png",
-      "sourceSha256": "30961a5aa1000d29f690c2b740e0412014459220539bb742424576bac74cf2eb",
+      "sourceSha256": "70f9af1975492d0cf968dade15ce4e7e8e095fb5c373bb571574ee32e1dc8862",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21808,7 +22623,7 @@
       "id": "TEXTURE_B1_ELECTRICAL_LM_LG_B1_ELECTRICAL_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_ELECTRICAL_LM_LG_B1_ELECTRICAL_MAIN.png",
-      "sourceSha256": "0ca3b5814fdc55a6822cd4e70a38cee8a4eb3348bc7b1086bcdbe79d7ede5908",
+      "sourceSha256": "a32e404ce4e11c8ab1a0d8f8482554c71e2ff094d48f37645151723c4b014d68",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21835,7 +22650,7 @@
       "id": "TEXTURE_B1_GYM_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_GYM_LM_DAY.png",
-      "sourceSha256": "de429ca198d366893423e20a4e6a3df385c68530805797b366bb22081f9acd5e",
+      "sourceSha256": "cf157205474f7cf40fbf994402af762f5d6285eae46820fc8c8de3c1553eab0d",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21862,7 +22677,7 @@
       "id": "TEXTURE_B1_GYM_LM_LG_B1_GYM_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_GYM_LM_LG_B1_GYM_MAIN.png",
-      "sourceSha256": "150185d5c7dc321fece66d5a67ad3c489e7a370374da1478a7b5e3c9613981c6",
+      "sourceSha256": "4525be41dfdd15ecf76305d0f36d968281a7697f91d1fa6d55b30aa50461c203",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21889,7 +22704,7 @@
       "id": "TEXTURE_B1_GYM_LM_LG_B1_GYM_MIRROR",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_GYM_LM_LG_B1_GYM_MIRROR.png",
-      "sourceSha256": "9695c6ce74ae1e9f9b4d9db8940ab93ec4f35dbff423f2bfb576dccae2515a9b",
+      "sourceSha256": "6621106d6d5083271bba64f099b2cc9ee84e0b60f9c51eeb34072ecca4d81216",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21916,7 +22731,7 @@
       "id": "TEXTURE_B1_HALL_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_HALL_LM_DAY.png",
-      "sourceSha256": "eea8654857ae247f82ce39d005563c67511c835c6ffd439aeffdff1e5fac1102",
+      "sourceSha256": "dfe39445a2456f576cf8ecaeba0d9c2b98f9c0f18e6d0b4e07e734e061f31622",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21943,7 +22758,7 @@
       "id": "TEXTURE_B1_HALL_LM_LG_B1_HALL_MAIN_C",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_HALL_LM_LG_B1_HALL_MAIN_C.png",
-      "sourceSha256": "a9a669a049151789996ed3d25ebef7ddcbfb7a357c755b7b5a02bda3a026beea",
+      "sourceSha256": "c99d98390ac988ce369a5539e00b00ff49de32257a34a9a9c67e4ce46b63c177",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21970,7 +22785,7 @@
       "id": "TEXTURE_B1_HALL_LM_LG_B1_HALL_MAIN_N",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_HALL_LM_LG_B1_HALL_MAIN_N.png",
-      "sourceSha256": "a9a669a049151789996ed3d25ebef7ddcbfb7a357c755b7b5a02bda3a026beea",
+      "sourceSha256": "c99d98390ac988ce369a5539e00b00ff49de32257a34a9a9c67e4ce46b63c177",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21997,7 +22812,7 @@
       "id": "TEXTURE_B1_HALL_LM_LG_B1_HALL_MAIN_S",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_HALL_LM_LG_B1_HALL_MAIN_S.png",
-      "sourceSha256": "a9a669a049151789996ed3d25ebef7ddcbfb7a357c755b7b5a02bda3a026beea",
+      "sourceSha256": "c99d98390ac988ce369a5539e00b00ff49de32257a34a9a9c67e4ce46b63c177",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22024,7 +22839,7 @@
       "id": "TEXTURE_B1_HOBBY_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_HOBBY_LM_DAY.png",
-      "sourceSha256": "30a9216061c7b4e10d05fe4c0f85038e7429079f51bbc5ce68b1e60020cb895f",
+      "sourceSha256": "7ebb0ee691e69dddd3b3a23a15ded8cd11daed2330579a38779466c0e163d222",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22051,7 +22866,7 @@
       "id": "TEXTURE_B1_HOBBY_LM_LG_B1_HOBBY_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_HOBBY_LM_LG_B1_HOBBY_MAIN.png",
-      "sourceSha256": "41125b86d2d1a60d1e021d23499bf7e5e312201944809abcb48e78940a538295",
+      "sourceSha256": "d79c65e971657ca5dc84e0e9abb61cf61f5c5826d2cf869e05f8c2822286898b",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22078,7 +22893,7 @@
       "id": "TEXTURE_B1_HOBBY_LM_LG_B1_HOBBY_TABLE",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_HOBBY_LM_LG_B1_HOBBY_TABLE.png",
-      "sourceSha256": "81fdeb41e2021c26d25982a5c2c4311a9e2a26cd1cb391d69b7e071ee956723d",
+      "sourceSha256": "1621fd5e4265554b1828355ae4a798f59a16e4451eb5730ef128693683e87f93",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22105,7 +22920,7 @@
       "id": "TEXTURE_B1_LAUNDRY2_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_LAUNDRY2_LM_DAY.png",
-      "sourceSha256": "fd9ba6a99bae6fd6910b6a178e3c02bea8c76bf4f0e98f85493d59c79c1480b0",
+      "sourceSha256": "1b55d61e77e0f3f449e61905106e9c486ef8cfefae8dbba08d3327b5cb0b3494",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22132,7 +22947,7 @@
       "id": "TEXTURE_B1_LAUNDRY2_LM_LG_B1_LAUNDRY2_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_LAUNDRY2_LM_LG_B1_LAUNDRY2_MAIN.png",
-      "sourceSha256": "9cc9e90840b2055f885a7b094e8f8b01174f521242b4e26b229bdcda028f8e8f",
+      "sourceSha256": "178cde7c7ebb139568aa4407df4eeb602564224153e204b4834da3afb2fa1f28",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22159,7 +22974,7 @@
       "id": "TEXTURE_B1_MECHANICAL_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_MECHANICAL_LM_DAY.png",
-      "sourceSha256": "1656f33f78e9e98fb1903725192d12e1f2ab7e6a6036a86fb370fa79a525c4a9",
+      "sourceSha256": "bec19bc9c71133e7b1abd582aad0d5fa82a3c7186d3345b43dff3bacd65c7c3b",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22186,7 +23001,7 @@
       "id": "TEXTURE_B1_MECHANICAL_LM_LG_B1_MECHANICAL_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_MECHANICAL_LM_LG_B1_MECHANICAL_MAIN.png",
-      "sourceSha256": "fbf50fba4e9f146a428b5dd64f5b18b14c06f9f84463df7749d2c8bab5f710c9",
+      "sourceSha256": "2a2b2c07d90f7566504ac00dd80782123299f4aefc5a0d4d7b78da9a870e08e4",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22213,7 +23028,7 @@
       "id": "TEXTURE_B1_STAIR_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_STAIR_LM_DAY.png",
-      "sourceSha256": "c3eb4a480fdcf9e24130c2f962971eb5819ffaac18eb6e66064186ad2dd54af7",
+      "sourceSha256": "ca3f209ca121b9fa46db2b3e6d8191c44016dbb89b8bc06bf4fcba8accf8b165",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22240,7 +23055,7 @@
       "id": "TEXTURE_B1_STAIR_LM_LG_B1_STAIR_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_STAIR_LM_LG_B1_STAIR_MAIN.png",
-      "sourceSha256": "ecab68e3413fa78f5e587e2d3367aabc9d928805423a7f8732f3becd7cd8ffe8",
+      "sourceSha256": "0ceba2c5e0ae5ea25fa62bb3210bf4c2724fed70363c9de4072db632f3d3965c",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22267,7 +23082,7 @@
       "id": "TEXTURE_B1_STOR1_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_STOR1_LM_DAY.png",
-      "sourceSha256": "6b855b429c3c7a21059220b4b9d1f82ee1004e1d15f1f28bb3966181d70eaea5",
+      "sourceSha256": "1c7b04810d832e3c4ecc557973dfc2e3875f95819774833763d2ca3d46b4dd29",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22294,7 +23109,7 @@
       "id": "TEXTURE_B1_STOR1_LM_LG_B1_STOR1_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_STOR1_LM_LG_B1_STOR1_MAIN.png",
-      "sourceSha256": "c7b5b769dd340b53cac94ac8de0ab6c5534b13ccdb2a60bb2e1167f6916f68dd",
+      "sourceSha256": "131cc6ba9abee3f9addd6385b689567db3a5201ef78a25c682a25c2d23c495c0",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22321,7 +23136,7 @@
       "id": "TEXTURE_B1_STOR2_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_STOR2_LM_DAY.png",
-      "sourceSha256": "8d4d35af3a6080a75ed63b31769eef0f1e8ec300d63fb694382a49b194e897ae",
+      "sourceSha256": "84bd07e9560dd2f52b19ef48c7cc2f2cbaadb0ba103fe19dfb0dc6a2a9ff1ee0",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22348,7 +23163,7 @@
       "id": "TEXTURE_B1_STOR2_LM_LG_B1_STOR2_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_STOR2_LM_LG_B1_STOR2_MAIN.png",
-      "sourceSha256": "c951ebb13813b59d9cc16d55d160d2d4da5eaa947ed417213968928d0e4911ff",
+      "sourceSha256": "f78b22c56b52d9f320a47eec66b3bfb393de44f8de4990f4dbdb99df77ed194b",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22375,7 +23190,7 @@
       "id": "TEXTURE_B1_UNDERSTAIR_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_UNDERSTAIR_LM_DAY.png",
-      "sourceSha256": "1f8a9a00122e475c5f6005f03a824d64309dd145b3f6b7e167ac2a5674a94775",
+      "sourceSha256": "7498f12644f03af817d89276b916fc7de2cf728a18f9bd8ce107c776cd451f5e",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22402,7 +23217,7 @@
       "id": "TEXTURE_B1_UNDERSTAIR_LM_LG_B1_UNDERSTAIR_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_UNDERSTAIR_LM_LG_B1_UNDERSTAIR_MAIN.png",
-      "sourceSha256": "6852bc4d2d0294d01518ea2ed514b5cee37406afcbf17f2cc478dfe5f74181f7",
+      "sourceSha256": "d971201fd82f91d1a4cd8856fa7577772c242faec0ca01a3f8a217fd530f83c4",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22429,7 +23244,7 @@
       "id": "TEXTURE_B1_UTILITY_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_UTILITY_LM_DAY.png",
-      "sourceSha256": "fd1d86149a76fda1a5cabb47cd054159eb56172d90b38b45d0a5232022085e88",
+      "sourceSha256": "98931280d861ea82d564fc2636cf0452997e7e04d0f5430a25a6a193ed7f51ac",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22456,7 +23271,7 @@
       "id": "TEXTURE_B1_UTILITY_LM_LG_B1_UTILITY_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_UTILITY_LM_LG_B1_UTILITY_MAIN.png",
-      "sourceSha256": "82de61115ee9973f793d261c99b54061bf2b939e94250a92dc2ca2b3f7da5c00",
+      "sourceSha256": "5983fcc75d2cbb5def878804b9789f6f225bab71a9168245d6405ec29f5e6618",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22483,7 +23298,7 @@
       "id": "TEXTURE_B1_WC7_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_WC7_LM_DAY.png",
-      "sourceSha256": "9810680c1da0fdf3b5a00b8cc4e87c225aa6169560484e1cfa7cfa51363254f4",
+      "sourceSha256": "c17ccdd0f3d52dacbeedc33d63e447c2f33962b95174b76de47dcf9e534f552b",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22510,7 +23325,7 @@
       "id": "TEXTURE_B1_WC7_LM_LG_B1_WC7_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_WC7_LM_LG_B1_WC7_MAIN.png",
-      "sourceSha256": "01f5558510e9e3be4db06e48b52e057ae47f6acff995639e6f352d9594a4475d",
+      "sourceSha256": "514278b53c183d60936c132d54af52b5f188a86fe70fe821e2b2fde79e5d37e4",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22537,7 +23352,7 @@
       "id": "TEXTURE_B1_WORKSHOP_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_WORKSHOP_LM_DAY.png",
-      "sourceSha256": "aa9a6ceffce8d467483a047463d7ef5054b8d46459ef3780ce82f809a28ffe98",
+      "sourceSha256": "7ce248d5a1d1860474d3f0dd818033349e809f2a3388ab2200958a42e349ae25",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22564,7 +23379,7 @@
       "id": "TEXTURE_B1_WORKSHOP_LM_LG_B1_WORKSHOP_BENCH",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_WORKSHOP_LM_LG_B1_WORKSHOP_BENCH.png",
-      "sourceSha256": "6e0090fc0a0321b0a96231621d4f011c5cde2fe25f50336b57d220155dbc2b54",
+      "sourceSha256": "891c9839f03b2e85df60154f573c100f6d3892cad7deaeccbc52fdec41b3cc07",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22591,7 +23406,7 @@
       "id": "TEXTURE_B1_WORKSHOP_LM_LG_B1_WORKSHOP_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_WORKSHOP_LM_LG_B1_WORKSHOP_MAIN.png",
-      "sourceSha256": "56c19f1ca8693484b0d10a152c022d812bd65fdfe66ea25db2bb6dfc51fbdff0",
+      "sourceSha256": "5876400bd8705d2391950604815cddc1e0d1059dc3f69e2d314e09923ac9bc9c",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22638,7 +23453,7 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 256 samples and 683 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
@@ -22665,7 +23480,127 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 256 samples and 683 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_DECOR_WALL_ART_13",
+      "category": "wall-art-albedo",
+      "sourceFile": "assets-src/Textures/Furniture/Decoration/abstract_13.png",
+      "sourceSha256": "b47d5679f0759b02a24cf8c492d41744c64077a77c493e7ecc555e1c01f5893c",
+      "texture": {
+        "width": 512,
+        "height": 512,
+        "colourSpace": "sRGB",
+        "channelLayout": "RGB"
+      },
+      "contentName": "Textures/Furniture/Decoration/abstract_13",
+      "kind": "texture",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "PuzzleAndy CC0 Abstract Texture 13",
+        "url": "https://opengameart.org/sites/default/files/abstract_13.jpg",
+        "author": "PuzzleAndy",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00982 selected this from OpenGameArt's CC0 Abstract Textures set. tools/assets/decoration_prepare.py pins original JPEG SHA-256 3019297b5ea067c205f4879111ad1c2b929bbafe26aa86067e81ddc1b803c7f2 and produces this 512-pixel sRGB PNG."
+      }
+    },
+    {
+      "id": "TEXTURE_DECOR_WALL_ART_14",
+      "category": "wall-art-albedo",
+      "sourceFile": "assets-src/Textures/Furniture/Decoration/abstract_14.png",
+      "sourceSha256": "62787bb46c4845dc5e8cba353d99148c76042c29483bbb43ab08bc24cb523b48",
+      "texture": {
+        "width": 512,
+        "height": 512,
+        "colourSpace": "sRGB",
+        "channelLayout": "RGB"
+      },
+      "contentName": "Textures/Furniture/Decoration/abstract_14",
+      "kind": "texture",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "PuzzleAndy CC0 Abstract Texture 14",
+        "url": "https://opengameart.org/sites/default/files/abstract_14.jpg",
+        "author": "PuzzleAndy",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00982 selected this from OpenGameArt's CC0 Abstract Textures set. tools/assets/decoration_prepare.py pins original JPEG SHA-256 2c985e7a036016c5774a2568f57093afe7a36c3947a7e605f134de182633c59c and produces this 512-pixel sRGB PNG."
+      }
+    },
+    {
+      "id": "TEXTURE_DECOR_WALL_ART_15",
+      "category": "wall-art-albedo",
+      "sourceFile": "assets-src/Textures/Furniture/Decoration/abstract_15.png",
+      "sourceSha256": "05f04ee31942ae18359e7229759280d127cc32296e2836c7d32f8f5a925db929",
+      "texture": {
+        "width": 512,
+        "height": 512,
+        "colourSpace": "sRGB",
+        "channelLayout": "RGB"
+      },
+      "contentName": "Textures/Furniture/Decoration/abstract_15",
+      "kind": "texture",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "PuzzleAndy CC0 Abstract Texture 15 portrait crop",
+        "url": "https://opengameart.org/sites/default/files/abstract_15.jpg",
+        "author": "PuzzleAndy",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00982 selected this from OpenGameArt's CC0 Abstract Textures set. tools/assets/decoration_prepare.py pins original JPEG SHA-256 130869082f07dd2a4b5dc1e147ce92293c31f231c8ab111fe751caee74a64ce1 and produces this centred 360 x 512 sRGB portrait PNG."
+      }
+    },
+    {
+      "id": "TEXTURE_DECOR_WALL_ART_16",
+      "category": "wall-art-albedo",
+      "sourceFile": "assets-src/Textures/Furniture/Decoration/abstract_16.png",
+      "sourceSha256": "2831bff24b2292861d4933d9fcb59e3c71350bf2f8e4e01f5d47fbdc22fb4889",
+      "texture": {
+        "width": 512,
+        "height": 512,
+        "colourSpace": "sRGB",
+        "channelLayout": "RGB"
+      },
+      "contentName": "Textures/Furniture/Decoration/abstract_16",
+      "kind": "texture",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "derived",
+        "name": "PuzzleAndy CC0 Abstract Texture 16 square crop",
+        "url": "https://opengameart.org/sites/default/files/abstract_16.jpg",
+        "author": "PuzzleAndy",
+        "retrieved": "2026-09-23",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-00982 selected this from OpenGameArt's CC0 Abstract Textures set. tools/assets/decoration_prepare.py pins original JPEG SHA-256 b28967e69522ad9daf6c95c4e9c40000a83eda32fa9fd4a58d8657e4cf82c002 and produces this centred 512-square sRGB PNG."
       }
     },
     {
@@ -23014,7 +23949,7 @@
       "id": "TEXTURE_L0_BUTLERS_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_BUTLERS_LM_DAY.png",
-      "sourceSha256": "2af6f2d43c46ec427733f820f61928bb2fba081b1356788386496e8b5db610c3",
+      "sourceSha256": "c93b46a7cd3db826bdc33ca9a2673845b98edcb5746c78a195c80fd083ba4df4",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23041,7 +23976,7 @@
       "id": "TEXTURE_L0_BUTLERS_LM_LG_L0_BUTLERS_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_BUTLERS_LM_LG_L0_BUTLERS_MAIN.png",
-      "sourceSha256": "1e5702ea405367a76fcb8d64f627f00cff63990ddfdf257eb3ba3f69a38b0695",
+      "sourceSha256": "a7995ed11729aeff3303ee338e2084b8530310e9a55f34961a0e6b9e59475987",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23068,7 +24003,7 @@
       "id": "TEXTURE_L0_CLOSET_W_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_CLOSET_W_LM_DAY.png",
-      "sourceSha256": "1a366df95336bde65d657c867ea90fc4974f397341b19124e579a6ed81a1320f",
+      "sourceSha256": "4d427baccaaefac4d89fea49670487ecb3bbcdfedbec48d49044638408eb45fa",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23095,7 +24030,7 @@
       "id": "TEXTURE_L0_CLOSET_W_LM_LG_L0_CLOSET_W_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_CLOSET_W_LM_LG_L0_CLOSET_W_MAIN.png",
-      "sourceSha256": "18b65720f55744b94ba30c7038e84c3d40abd1100d834e679c66418ce31a5925",
+      "sourceSha256": "99f94ff99ff14c71a555d68970410bcea674f4ddcad5f6967eb06915755494b2",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23122,7 +24057,7 @@
       "id": "TEXTURE_L0_DINING_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_DINING_LM_DAY.png",
-      "sourceSha256": "dcbb0e3d4c9f80be3900ec0fb79c776db57293eb44d385a6936559c55e6af673",
+      "sourceSha256": "41d7c57d9df0a8c00d1fff2682a7d9d2773fd93f49c1d1bf1a4a262678c529ea",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23149,7 +24084,7 @@
       "id": "TEXTURE_L0_DINING_LM_LG_L0_DINING_CHANDELIER",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_DINING_LM_LG_L0_DINING_CHANDELIER.png",
-      "sourceSha256": "18f38639c049eb2820b5ee4e599cb16ad7f785a59824625070401e70089a8ad7",
+      "sourceSha256": "2f85cf05feda6032b9088f4734635d3b4434919a725f5a270bf88efb26751666",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23176,7 +24111,7 @@
       "id": "TEXTURE_L0_DINING_LM_LG_L0_DINING_SIDE",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_DINING_LM_LG_L0_DINING_SIDE.png",
-      "sourceSha256": "7a01c473ed0b4d2d4bd571116ca97354aad4fd76c169f2b0ea10bf602286a624",
+      "sourceSha256": "9e4b9e1d875a7b644300f945d82a3fafc9357fe23a225c76dcdaa56cc838c6be",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23203,7 +24138,7 @@
       "id": "TEXTURE_L0_FAMILY_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_FAMILY_LM_DAY.png",
-      "sourceSha256": "3247cfcc29ea222e536eb410c61e331371101f58127ecf38095784d95f1d0302",
+      "sourceSha256": "0095786b305073f517367aa9c98a2ed933e30bbc9173b6432d8ec31087b179ab",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23223,14 +24158,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 256 samples and 100 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L0_FAMILY_LM_LG_L0_FAMILY_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_FAMILY_LM_LG_L0_FAMILY_MAIN.png",
-      "sourceSha256": "357a5809c3890b2adfcea76f87f5caf03a49d7129c2710e122021ffd8142a7c8",
+      "sourceSha256": "c8078c26ac007f4a025ea1abce9a3f722b86a6d1910a3daaf3cd6e811eaa37d0",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23250,14 +24185,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 256 samples and 100 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L0_FAMILY_LM_LG_L0_FAMILY_MEDIA",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_FAMILY_LM_LG_L0_FAMILY_MEDIA.png",
-      "sourceSha256": "c1794b21cff816cf5a0933b52ad846560bb4e4e0d9e0cc2fdbe3dc5789443dad",
+      "sourceSha256": "e1ad020af99923987e75a910a0af80adfd24396f2c3daeec2b506a6eb52a5c63",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23277,14 +24212,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 256 samples and 100 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L0_FAMILY_LM_LG_L0_FAMILY_READING",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_FAMILY_LM_LG_L0_FAMILY_READING.png",
-      "sourceSha256": "7a0c31fbe513adaa8184936a719bc86c372a9b92cef6b7744cef5ef105bcbbec",
+      "sourceSha256": "55fb24f83eb68bdb89ba88413f2f2d298b304075775f1e14962283367ce0b1f1",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23304,14 +24239,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 256 samples and 100 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L0_FOYER_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_FOYER_LM_DAY.png",
-      "sourceSha256": "cf50e7aff796d4dfbcbe6622945460d9bcce93e82590f88f422939d90e91d29f",
+      "sourceSha256": "85e6d4290de1f3a10c284e79de9d6c78ddad1fa7ff72db47d963c437352e506b",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23331,14 +24266,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py for HOUSE-01038 with seed 20260907, 256 samples and 100 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L0_FOYER_LM_LG_L0_FOYER_ACCENT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_FOYER_ACCENT.png",
-      "sourceSha256": "0d9f93788cc528aebe81277f719e14847bba90035dd44dfb750035e1563c62cd",
+      "sourceSha256": "81fd440226a87dce84ac497b7775a23631711221cf5e97e75decbc69c1961b91",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23358,14 +24293,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py for HOUSE-01038 with seed 20260907, 256 samples and 100 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L0_FOYER_LM_LG_L0_FOYER_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_FOYER_MAIN.png",
-      "sourceSha256": "ffa5abf2df3f8ccbac64a44a4b38bd0b84ad05d999daa5fa7416e71f4d6c9cad",
+      "sourceSha256": "c429893d9924f44144e901ad53fac2ecba562a66c5be6c409efd6b6bb564ac90",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23385,14 +24320,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py for HOUSE-01038 with seed 20260907, 256 samples and 100 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L0_FOYER_LM_LG_L0_PORCH_LANTERN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_PORCH_LANTERN.png",
-      "sourceSha256": "1aa082e695777b5d85a7f0a535f1c1b2163b7684f257d75c256301eb45857c8a",
+      "sourceSha256": "220ff30633ae12e34bf64996e9f52759b23b0d67ff4fb03bd4853aabf91a6842",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23412,14 +24347,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py for HOUSE-01281 with seed 20260907, 256 samples and 100 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L0_GARAGE_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_GARAGE_LM_DAY.png",
-      "sourceSha256": "315b7699e849715ea0e6287c608bbb43f5c64f6bc5002a9b58f62d1c19fc46e1",
+      "sourceSha256": "7c31e92a09491b2d6a7e8bedfa57a1bbeaa061ea19df0f909da91321dcc40098",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23466,14 +24401,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 256 samples and 683 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L0_GARAGE_LM_LG_L0_GARAGE_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_GARAGE_LM_LG_L0_GARAGE_MAIN.png",
-      "sourceSha256": "caca53b75a8d10b8e5e27695112466b5011b0f510b97e92386355c5fe2802581",
+      "sourceSha256": "3ed2962f156269a1b6637ac822f04c64dd3b4ab5b53ad7c407c4e5812c48b9fd",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23500,7 +24435,7 @@
       "id": "TEXTURE_L0_GARAGE_LM_LG_L0_GARAGE_OPENER",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_GARAGE_LM_LG_L0_GARAGE_OPENER.png",
-      "sourceSha256": "fd7b93c30698b148225774ce54937e7bb572388825846039e09b7931e79c22ed",
+      "sourceSha256": "e2af39ac0c7157b6144e0366b36fdfa38f9852810b5e8920eb4443371051c3df",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23527,7 +24462,7 @@
       "id": "TEXTURE_L0_GARAGE_LOFT_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_GARAGE_LOFT_LM_DAY.png",
-      "sourceSha256": "00d3ebcac42484e1a6dd4da5f8b0b8f1a1518a71100311f501fb070e34f20239",
+      "sourceSha256": "bc8b565d3620e8dd111351d5b00249326fa488dad26a80ab38ccf9172e976bbc",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23547,14 +24482,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 256 samples and 683 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L0_GARAGE_LOFT_LM_LG_L0_GARAGE_LOFT_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_GARAGE_LOFT_LM_LG_L0_GARAGE_LOFT_MAIN.png",
-      "sourceSha256": "74df8048175d18f9465a38a5a300401882e78f88b07e019c4b62386c5afd4c23",
+      "sourceSha256": "33e84210e6e9251514ffc213c3e1828f062ed19864d43fbde3c19b0eb196723c",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23574,14 +24509,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 256 samples and 683 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L0_HALL_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_HALL_LM_DAY.png",
-      "sourceSha256": "71de4f61b2a768e094e7174a7288292ee1160ff9c2c8f87817ed31e5d771d73c",
+      "sourceSha256": "f64cd9c6a4e4856ebe5a8ed3bca683e58cd2adf8e72d745d0bb02d7ce6fa3a1b",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23601,14 +24536,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py for HOUSE-01038 with seed 20260907, 256 samples and 100 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L0_HALL_LM_LG_L0_HALL_GALLERY",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_HALL_LM_LG_L0_HALL_GALLERY.png",
-      "sourceSha256": "cffdeafa2f9210a7efd66b4de0f9acf1ea04c66b537bc340d4aebdf7eeb59380",
+      "sourceSha256": "3f4270db8f8f69738379d17c7e910d277231a5c85296e8746d274aab1bed27bd",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23628,14 +24563,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py for HOUSE-01038 with seed 20260907, 256 samples and 100 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L0_HALL_LM_LG_L0_HALL_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_HALL_LM_LG_L0_HALL_MAIN.png",
-      "sourceSha256": "20d8006f274008dbeb5c10c4463fd2b1f6ae62a988e75a41ca1595734a083a64",
+      "sourceSha256": "978eaf4e36f11f17961552661a32e7ea8a3e1d277e38517263d5f9bcabf1e8f1",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23655,14 +24590,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py for HOUSE-01038 with seed 20260907, 256 samples and 100 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L0_KITCHEN_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_KITCHEN_LM_DAY.png",
-      "sourceSha256": "468fdc475f21ca9650a47e6fa78853b2d6e3e218dc9cd818294851a800171964",
+      "sourceSha256": "e489097d425d51b97ac0589c801d49a062f0bcbd9a012d8c558e5d0871eea927",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23682,14 +24617,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 256 samples and 100 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L0_KITCHEN_LM_LG_L0_KITCHEN_ISLAND",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_ISLAND.png",
-      "sourceSha256": "5a8340d83b0a66981fc7ed706eef00d0dce4f3ce040577224542490f604bd343",
+      "sourceSha256": "dab6b03cafd4bdc7bcb294c7c71e037f4615ac27ef30ac71ad44500d9e8b3632",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23709,14 +24644,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 256 samples and 100 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L0_KITCHEN_LM_LG_L0_KITCHEN_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_MAIN.png",
-      "sourceSha256": "c48f80fdc17e113495c516df87da72c4cb70d7cd680bf089feddcae33fea55e5",
+      "sourceSha256": "c2166e63a1fdf4163cbd71f65ff7626a96eedd3156eec23602fb767457704784",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23736,14 +24671,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 256 samples and 100 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L0_KITCHEN_LM_LG_L0_KITCHEN_SINK",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_SINK.png",
-      "sourceSha256": "9a974fc0bcc4e7c635bc28c064e0061b5d7aa941abf2e5b961fe5bef27e71ab8",
+      "sourceSha256": "cd01cd9c35ef009fae6b83baccde50384f7013517fc82ca4f5ba849482a3dbb5",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23763,14 +24698,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 256 samples and 100 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L0_KITCHEN_LM_LG_L0_KITCHEN_UNDERCAB",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_UNDERCAB.png",
-      "sourceSha256": "770d0d5f73b37e864090863711b149f4c3521fa9613dfedb778470c1d33cf5f0",
+      "sourceSha256": "acec0d3e85cbc9f2b6f1c9bc7cb91f889b36484b5e8aa7c0bfeb49d7407df53b",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23790,14 +24725,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 256 samples and 100 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L0_LAUNDRY_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_LAUNDRY_LM_DAY.png",
-      "sourceSha256": "b7bf50f79493f4c86b2a67513f0512636c27b21e69d514ac20041b2f70967cc1",
+      "sourceSha256": "9ea88ded7b3ee7015a73b1fd8c054fdc740897b9a29cf8cbace90c38ce2a8647",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23824,7 +24759,7 @@
       "id": "TEXTURE_L0_LAUNDRY_LM_LG_L0_LAUNDRY_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_LAUNDRY_LM_LG_L0_LAUNDRY_MAIN.png",
-      "sourceSha256": "20b6d72a8634eb0536573855d1ca79df2d94491398d303f5b4e11a4fd105f842",
+      "sourceSha256": "37a56c05651936d00fb50ae4557288de683022eb2a9568c9ffcf237ceb6e774f",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23851,7 +24786,7 @@
       "id": "TEXTURE_L0_LIVING_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_LIVING_LM_DAY.png",
-      "sourceSha256": "66b34df3ff212aa9ddf6d0f69c3a65808e7076a3e66a7dbcb2d39c79857969b6",
+      "sourceSha256": "0dfcdc3b5103c548915a0a1bccb048d266179394ec219c0bb26bcf31dc5730c4",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23878,7 +24813,7 @@
       "id": "TEXTURE_L0_LIVING_LM_LG_L0_LIVING_FIRE",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_LIVING_LM_LG_L0_LIVING_FIRE.png",
-      "sourceSha256": "49c47507d5471f508230f8da7fba0d3f80d8e0378a032148901381db757414b6",
+      "sourceSha256": "563b6bf195df984f6970606035aa27c121f95a7001ee6ac939b5892e14c3eb1c",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23905,7 +24840,7 @@
       "id": "TEXTURE_L0_LIVING_LM_LG_L0_LIVING_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_LIVING_LM_LG_L0_LIVING_MAIN.png",
-      "sourceSha256": "5e2f8ae27fbe334c99180865824260dd71a6ed46a79abbaf4879629e666c66da",
+      "sourceSha256": "af5f512dde29b3b0a10663ea9b6bfda678019badee18f0b11802f74351071d35",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23932,7 +24867,7 @@
       "id": "TEXTURE_L0_LIVING_LM_LG_L0_LIVING_PIANO",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_LIVING_LM_LG_L0_LIVING_PIANO.png",
-      "sourceSha256": "e155f949611e1b98195d3197db5d1f42bfa10fe1ffb725603f2ec66a44e3fccd",
+      "sourceSha256": "3f954d365c65a602dbd76ab064b2d0efc7585f97a25b20bb2041f6a9c429b988",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23979,14 +24914,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 256 samples and 683 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L0_MUDROOM_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_MUDROOM_LM_DAY.png",
-      "sourceSha256": "6dc343eff9dda0de8dcb3238ddb156a23c57061fcff06052787dfabe4cae6925",
+      "sourceSha256": "6b7c1e52723a1742fb03563a26fe6f1ec9b960dd9b2a6eb5b5faa9b842f4bd9d",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24013,7 +24948,7 @@
       "id": "TEXTURE_L0_MUDROOM_LM_LG_L0_MUDROOM_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_MUDROOM_LM_LG_L0_MUDROOM_MAIN.png",
-      "sourceSha256": "835f565021f7fc54d05a8656867f0a5681ed577791c061db4658294301ab8c1d",
+      "sourceSha256": "49be1c1304487f26aa92b31e75d693d1047f15d648e35c78a9d57884ec94d721",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24040,7 +24975,7 @@
       "id": "TEXTURE_L0_OFFICE_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_OFFICE_LM_DAY.png",
-      "sourceSha256": "9442a5019eec56c823d648c8f4625cdb02915b5ad688539d3ae03e56a06ba33e",
+      "sourceSha256": "6473c8775baf3099f8eb2e7c1d5c6efd3dd4c3e477ecf31b10a1be0c8ecf0945",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24067,7 +25002,7 @@
       "id": "TEXTURE_L0_OFFICE_LM_LG_L0_OFFICE_DESK",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_OFFICE_LM_LG_L0_OFFICE_DESK.png",
-      "sourceSha256": "c3278a30f77980bf30043a82d9f881f4db6c3468d76059ffb443b2a13414d16a",
+      "sourceSha256": "1454cb7f43d889d2bf34eb76b0ecc5ac4bcab0ac9e8a6aaf67e852390c9376f3",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24094,7 +25029,7 @@
       "id": "TEXTURE_L0_OFFICE_LM_LG_L0_OFFICE_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_OFFICE_LM_LG_L0_OFFICE_MAIN.png",
-      "sourceSha256": "1fb64eb82ed996fde83d46bc7557e4ad7245f0fe534d72163a9020366886cb74",
+      "sourceSha256": "f5d9e83dec56315ecf0829c70479e32ab3899d7d17838b06d63150867b20c120",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24121,7 +25056,7 @@
       "id": "TEXTURE_L0_PANTRY_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_PANTRY_LM_DAY.png",
-      "sourceSha256": "0b1c1cf90e21b2a12dc86acc0e3b4cb419745ff5e94652237ee5115997f4c539",
+      "sourceSha256": "09840c5c22281eeee634037ca7e01bcd189734749ab66a6420dfac95519d56e2",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24148,7 +25083,7 @@
       "id": "TEXTURE_L0_PANTRY_LM_LG_L0_PANTRY_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_PANTRY_LM_LG_L0_PANTRY_MAIN.png",
-      "sourceSha256": "a0f6db2274a3e063945a5e6a35d949135c310e86ae796e26488a7ec4f73abdf3",
+      "sourceSha256": "45aefa54c9473ba75a97e1189d52278efda882e459bf99a7b2c9b2ed202c5aa0",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24175,7 +25110,7 @@
       "id": "TEXTURE_L0_STAIR_MAIN_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_STAIR_MAIN_LM_DAY.png",
-      "sourceSha256": "ceeaa1b7b0b383f653d7fb1e92b4fb2cab9e088127fc34bd6c28ca870dc0759b",
+      "sourceSha256": "f1ae23aa98e49696b2777b4ff94059a859066bcf720aad666e97353cb90535fb",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24222,14 +25157,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 256 samples and 683 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_MAIN.png",
-      "sourceSha256": "5ef60cf95858c1f40f23fd63d243084024ba648ab2aa8ac6382871ced54fea15",
+      "sourceSha256": "a98ee78c7e5f124ce67134e49c89d7566ed2b082e5b0729996d02e00e9cae04c",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24256,7 +25191,7 @@
       "id": "TEXTURE_L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_STEP",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_STEP.png",
-      "sourceSha256": "a588c4d1728c8c606a72994b905df1ae961acf4e40d30607b4f7cc506a1d29f1",
+      "sourceSha256": "c3c6e9e445badee32065f64b41dabcd5e9de7b998bf8b9b89b66a6fbf93477b2",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24283,7 +25218,7 @@
       "id": "TEXTURE_L0_STOR_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_STOR_LM_DAY.png",
-      "sourceSha256": "4c937fd4ca693d531ec4a0286a74757b2f4a391e791b34ca1fb0b97e5a82a5fe",
+      "sourceSha256": "ced378e69d719b7d2113fc370c56b2f917c308a4b946a822a149329eda79525e",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24310,7 +25245,7 @@
       "id": "TEXTURE_L0_STOR_LM_LG_L0_STOR_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_STOR_LM_LG_L0_STOR_MAIN.png",
-      "sourceSha256": "fc37d1cd8bc3bc1a1bd37242a1c072a6b48bd5959c98a4f567a2ada4849e0875",
+      "sourceSha256": "ff18ec6458988813a569b885cdf97ed04d946cd822e70f5ec6f4369901591f0b",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24337,7 +25272,7 @@
       "id": "TEXTURE_L0_SUNROOM_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_SUNROOM_LM_DAY.png",
-      "sourceSha256": "16ff170b56c75be9628dd4e87a31ecce3afa660a3af62e6c474c6f7bf6e4c8f7",
+      "sourceSha256": "26dbe95994fdeeb367474bb0a1c78494a80ad6f8c30c744d8a903dec415639ff",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24384,14 +25319,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 256 samples and 683 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L0_SUNROOM_LM_LG_L0_SUNROOM_BAR",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_SUNROOM_LM_LG_L0_SUNROOM_BAR.png",
-      "sourceSha256": "36808184c337a0809b4f7d0d539c3056c8a287ad3e7b07a389231d70c52ff8a8",
+      "sourceSha256": "06f85e775190e0f59e23f68f9d8ed4eae508b04d96dd65c12a065bc99a2ea308",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24418,7 +25353,7 @@
       "id": "TEXTURE_L0_SUNROOM_LM_LG_L0_SUNROOM_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_SUNROOM_LM_LG_L0_SUNROOM_MAIN.png",
-      "sourceSha256": "6b98a1811519a4b0fddbe385ac77fa4741d9ad2f05a785d3ed5722239735f18a",
+      "sourceSha256": "0b36f3ca4f439ccd11a10a6bff3346f0f4a63c7ceb7311fb8b2ada295f7dc005",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24445,7 +25380,7 @@
       "id": "TEXTURE_L0_WC1_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_WC1_LM_DAY.png",
-      "sourceSha256": "d62ebd6dc1ecb93cc217e835309ec93b44ac0d0121100d23304d6541920e76a1",
+      "sourceSha256": "1fc68943e28241381833295fc04eb005b38393f6a2f6df7d85bd1c988eb470e6",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24472,7 +25407,7 @@
       "id": "TEXTURE_L0_WC1_LM_LG_L0_WC1_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_WC1_LM_LG_L0_WC1_MAIN.png",
-      "sourceSha256": "27c6a1e3f96156f476c8e95ab024ce1d515c786a41993fc424d796a8aebeee65",
+      "sourceSha256": "cdf85a2a7819ae4c2597812abcdaa3fc56827ff00ffa3edcdc36bbab3b3175a6",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24499,7 +25434,7 @@
       "id": "TEXTURE_L0_WC2_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_WC2_LM_DAY.png",
-      "sourceSha256": "ac13e882cb4a5856bbdd5a64fee2ce5712a8a3b555b17ae3e6f0853d1ebc3d2c",
+      "sourceSha256": "fd854cd62ea3431c6e7b9dc412fed447731e85946c6cbc28bcd05fc5d129b93b",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24526,7 +25461,7 @@
       "id": "TEXTURE_L0_WC2_LM_LG_L0_WC2_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_WC2_LM_LG_L0_WC2_MAIN.png",
-      "sourceSha256": "5396c91d6e21d4b4b44d5ba2e491f7f8011f729e7a5e7f3ea77a337aabeb4a76",
+      "sourceSha256": "e197cc0164d9a874fa8a2ca1a6ba8b22b5858d2f4f4b3d823874338ff2be154f",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24553,7 +25488,7 @@
       "id": "TEXTURE_L1_BATH2_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_BATH2_LM_DAY.png",
-      "sourceSha256": "cc4bf35b74699db5eb7fed5263b28f9fc112a62a722c6b97766cb8214063661d",
+      "sourceSha256": "02191a5b69c2761dbd5a9c5d26dc0a2411f55e95049f486342aba152fdc75073",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24580,7 +25515,7 @@
       "id": "TEXTURE_L1_BATH2_LM_LG_L1_BATH2_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BATH2_LM_LG_L1_BATH2_MAIN.png",
-      "sourceSha256": "63e75d0243e7d5a32249f2e51de43a56bcf5e536a0a742d9b0b8e60ca55a2376",
+      "sourceSha256": "9d11d4d840dd3320f64c4cc35bace67d46831398c59b0195ae4658b3c4b70ef5",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24607,7 +25542,7 @@
       "id": "TEXTURE_L1_BATH2_LM_LG_L1_BATH2_VANITY",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BATH2_LM_LG_L1_BATH2_VANITY.png",
-      "sourceSha256": "491c52c5dc3003d0462c051eab6ab1ec5698a3cc63a0177c6b1f1ae2c466357f",
+      "sourceSha256": "2fff4546de6c815c41878735910e6abea74c9cdb37b4a8b0de126f15794ff9ff",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24634,7 +25569,7 @@
       "id": "TEXTURE_L1_BATH3_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_BATH3_LM_DAY.png",
-      "sourceSha256": "58f79facfb4c5cef15f481f59f2306daf9655af2049f853d5665b7cf63e02031",
+      "sourceSha256": "0422a86b24c004235105a37d44b707d5a3d5b39050e7c140237c467832dff4a0",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24661,7 +25596,7 @@
       "id": "TEXTURE_L1_BATH3_LM_LG_L1_BATH3_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BATH3_LM_LG_L1_BATH3_MAIN.png",
-      "sourceSha256": "c5a76bf31e2397d7175d661fd270b771ca9b789a3bb038b9bd1af387cd9abe98",
+      "sourceSha256": "18b8ef514364c5a700846980bd61912c50854145c657c5e6674b93462e9b9934",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24688,7 +25623,7 @@
       "id": "TEXTURE_L1_BATH3_LM_LG_L1_BATH3_VANITY",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BATH3_LM_LG_L1_BATH3_VANITY.png",
-      "sourceSha256": "e49443370bc59843528116e2d755956871a667ac0b8d2172b80faad465f9c532",
+      "sourceSha256": "214f27cf7381e8d8383d63ab22ce454580b073b74ce3c5924f49d003df8bb2de",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24715,7 +25650,7 @@
       "id": "TEXTURE_L1_BED2_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_BED2_LM_DAY.png",
-      "sourceSha256": "e67c1cbdd6958abcd67c59dca900aa7ef7762cf719da661e4bf469d89dcb0ee7",
+      "sourceSha256": "844c942aaeb72d1da0461cc387744796d3de5d056e9669628530a65f28640e94",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24742,7 +25677,7 @@
       "id": "TEXTURE_L1_BED2_LM_LG_L1_BED2_DESK",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED2_LM_LG_L1_BED2_DESK.png",
-      "sourceSha256": "3fe3a579da6116e08443a02489651ba2c99722ff1242142453b500c822562fde",
+      "sourceSha256": "82e0031554fe5837c6ed98659e7e32fb3559e4326106a8b70e0f9db849256875",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24769,7 +25704,7 @@
       "id": "TEXTURE_L1_BED2_LM_LG_L1_BED2_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED2_LM_LG_L1_BED2_MAIN.png",
-      "sourceSha256": "657ffc3139aefc5b3c9add9ff70c3819765ea897ec5a9ad67553e3cc78ccd46c",
+      "sourceSha256": "338bd31dc430e43f624a351ce1ce78648b11246a3fad2163d8d18754f83e30d1",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24796,7 +25731,7 @@
       "id": "TEXTURE_L1_BED3_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_BED3_LM_DAY.png",
-      "sourceSha256": "6ce6caf1cb14d0ccffd9217a12afff458a84dcd926ae6c5add62edff9f503662",
+      "sourceSha256": "778576727192d3412dc0290aa48c6b9d6076b88ac16497288627bde54872f0ad",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24823,7 +25758,7 @@
       "id": "TEXTURE_L1_BED3_LM_LG_EXT_FACADE_UPLIGHT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED3_LM_LG_EXT_FACADE_UPLIGHT.png",
-      "sourceSha256": "3f68f807acad89c4ef17b9b4668f1de51a9019c406fc91ead7870140dedc403c",
+      "sourceSha256": "306b0ac1466a22790dd8158a837dfc259647f7da7b2aeb7b5f0265387f78da86",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24843,14 +25778,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 32 samples and 683 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L1_BED3_LM_LG_L1_BED3_BEDSIDE",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED3_LM_LG_L1_BED3_BEDSIDE.png",
-      "sourceSha256": "e8b716cea573bb906498b94e0248a414c484f02bac038e92f91b077e10477147",
+      "sourceSha256": "157d3f3997af214faddd35bb0f2b1768382d69657ff58ea6bb52d74f600e4288",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24877,7 +25812,7 @@
       "id": "TEXTURE_L1_BED3_LM_LG_L1_BED3_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED3_LM_LG_L1_BED3_MAIN.png",
-      "sourceSha256": "4e5e540d2076fc531cb6cf2f163b7e429425e58f4b5babfec9c4bb0dfcbb93ea",
+      "sourceSha256": "2bb71e79be6956cd1d29925864d0ce29121bf5f3065fce202d2e6d806ca08cc5",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24904,7 +25839,7 @@
       "id": "TEXTURE_L1_BED4_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_BED4_LM_DAY.png",
-      "sourceSha256": "b0ffe016426bb23a0734445b94fa130501d0fd5ff3a39df46bc7feb27a94d760",
+      "sourceSha256": "0515927db59f2c384f049a8327f9593461f614d0ed40645353f7266280065916",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24931,7 +25866,7 @@
       "id": "TEXTURE_L1_BED4_LM_LG_EXT_FACADE_UPLIGHT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED4_LM_LG_EXT_FACADE_UPLIGHT.png",
-      "sourceSha256": "d15169a9bca4fc0dea56248d4c8f67b69496e72d96ce567f005b4b83de340336",
+      "sourceSha256": "f75ba2cdbdf0fa743db0cd957fd01c435dc6076128f3e9320e512169933b83b3",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24951,14 +25886,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 32 samples and 683 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L1_BED4_LM_LG_L1_BED4_DESK",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED4_LM_LG_L1_BED4_DESK.png",
-      "sourceSha256": "616cd11a377416408739b9250aecf73612fb453c80ebd99a77afb35657b767be",
+      "sourceSha256": "55881acd5d8eab5dd85bc2dd09c3eca7d46c31420b691064dc9113c9b254f0d6",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24985,7 +25920,7 @@
       "id": "TEXTURE_L1_BED4_LM_LG_L1_BED4_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED4_LM_LG_L1_BED4_MAIN.png",
-      "sourceSha256": "cd1ed081c0c925f4c6c8af811543c72f5c70ec0e2c38dbb180568230adf6d472",
+      "sourceSha256": "57b090697807b427be1d4545841fdb9e9c6a565d8e14af1a742d694dbd63f5b4",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25012,7 +25947,7 @@
       "id": "TEXTURE_L1_BED5_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_BED5_LM_DAY.png",
-      "sourceSha256": "8f0d157cbe7ccfef40037cf13f7f8f5e2969249ad258923c142d7ae70df94d9c",
+      "sourceSha256": "de067036e7b58cd35ba3c913e32c67fe6af414e7de3a08655c83e5ec9c26147b",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25039,7 +25974,7 @@
       "id": "TEXTURE_L1_BED5_LM_LG_EXT_FACADE_UPLIGHT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED5_LM_LG_EXT_FACADE_UPLIGHT.png",
-      "sourceSha256": "85f5291870f94fcd7c98ca8d73f53e5edf24f7dfed0cfaf4718fc6cf0c2b52bd",
+      "sourceSha256": "59280b15303340d3c2e16ba7bfd4c6f8eb8660c4e9a86d9e8d1f8b75e0daf898",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25059,14 +25994,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 32 samples and 683 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L1_BED5_LM_LG_L1_BED5_BEDSIDE",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED5_LM_LG_L1_BED5_BEDSIDE.png",
-      "sourceSha256": "6d9d9b19886105533108297fd5b4393db2db19f321e29609af9b01f2a5c74f95",
+      "sourceSha256": "a1310357078a9636752e050a540f776fffbf7d6f89d3e60f46f677167db3b15f",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25093,7 +26028,7 @@
       "id": "TEXTURE_L1_BED5_LM_LG_L1_BED5_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED5_LM_LG_L1_BED5_MAIN.png",
-      "sourceSha256": "29f0202191dba33ebe6d82135f488bb629af122313ba4cd09754a07eba5c5a13",
+      "sourceSha256": "f7b3021ec70b3dfa7449a25f4bf4e0051799bfa4153acc371da6406a0696ca30",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25120,7 +26055,7 @@
       "id": "TEXTURE_L1_CLOSET_2_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_CLOSET_2_LM_DAY.png",
-      "sourceSha256": "36e5f3edd1768cf9bf1ef9dfa8af44350ef8c92203cdb2e60738735c425a5905",
+      "sourceSha256": "512695f9d6e65a916a0578b88846cc9a7e0d267c3a31c814ca6829464dc4cb62",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25147,7 +26082,7 @@
       "id": "TEXTURE_L1_CLOSET_2_LM_LG_L1_CLOSET_2_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_CLOSET_2_LM_LG_L1_CLOSET_2_MAIN.png",
-      "sourceSha256": "fa3396c51553993b13b2b193f54591f86678555282ec8186c6df549c1b5f990f",
+      "sourceSha256": "37c0427fe800f99834c2173cafe5f37f904456edd8100305acdd3e9b8983e355",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25174,7 +26109,7 @@
       "id": "TEXTURE_L1_CLOSET_3_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_CLOSET_3_LM_DAY.png",
-      "sourceSha256": "5ec550892d991b6eaf04d2b1eec4da98443d10fb007fbd1f5f19da3e369d9d05",
+      "sourceSha256": "7c2041f98e2214b946d10a9b61ee806ebaee82dc6d5076a3b9f2c3bdc1131547",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25201,7 +26136,7 @@
       "id": "TEXTURE_L1_CLOSET_3_LM_LG_L1_CLOSET_3_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_CLOSET_3_LM_LG_L1_CLOSET_3_MAIN.png",
-      "sourceSha256": "fb9d8687d8876e96d4da24dff3fd1d2a9ac7d213bac402d41e630de478241765",
+      "sourceSha256": "6790cfe23253b200fe83316b79b58c5aa3c9e142f9aa7f3fc9ca324de5c40f39",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25228,7 +26163,7 @@
       "id": "TEXTURE_L1_HALL_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_HALL_LM_DAY.png",
-      "sourceSha256": "672f0bf765ca2a4e189bcbf37d857b5e9a8ab89b4d7e5d8571b7fd206af829ba",
+      "sourceSha256": "8d31c27b4c1b4a4c797bf8c5555eb4717fca8db84fdeb167fcb17845d21d5bab",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25255,7 +26190,7 @@
       "id": "TEXTURE_L1_HALL_LM_LG_L1_HALL_ART",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_HALL_LM_LG_L1_HALL_ART.png",
-      "sourceSha256": "1800e4c666fff8e98f39c1d63dfe9207f3ffacbf99ee1c00ba096c8309d423a3",
+      "sourceSha256": "90df1cbc060a70e340be34c4e0b26bf4f5db7ff5e9f9bb5445793eedebe5791e",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25282,7 +26217,7 @@
       "id": "TEXTURE_L1_HALL_LM_LG_L1_HALL_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_HALL_LM_LG_L1_HALL_MAIN.png",
-      "sourceSha256": "5e14895d1a8dcfb088c39c5ee83fa800c7a58248f406d15fce795142d2af5d59",
+      "sourceSha256": "d10b0ff215a02aeff1b3f9c4a01e3d88ae93709e5b155188eb0816633739377f",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25309,7 +26244,7 @@
       "id": "TEXTURE_L1_HALL_W_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_HALL_W_LM_DAY.png",
-      "sourceSha256": "c3619ec729146e78eca716012f0c1ca064d991cdd2b5ed08d75681fa7d6781d3",
+      "sourceSha256": "094907c8702c4ba7ce13bfe56c3ec2f4af7752f531061eb41e14ee6b25be0d8e",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25336,7 +26271,7 @@
       "id": "TEXTURE_L1_HALL_W_LM_LG_L1_HALL_W_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_HALL_W_LM_LG_L1_HALL_W_MAIN.png",
-      "sourceSha256": "0b9b448b7e4a487db39e15b70d94495cae907cd5be89b00316f39a6e2f76c9eb",
+      "sourceSha256": "424ab5aef89f5590e19d9ab5ee414b230bdb61726ba117e6174550cf97a06ee4",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25363,7 +26298,7 @@
       "id": "TEXTURE_L1_HALL_W_LM_LG_L1_HALL_W_NIGHT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_HALL_W_LM_LG_L1_HALL_W_NIGHT.png",
-      "sourceSha256": "48622dce5dd88870178faddcc867c686bd45c33143eaedb937338f1b7c5bef17",
+      "sourceSha256": "c11d5ced139233831e5cb89db4ea65fd5c91dc4a11f5b8dcbfec26b9ce224acc",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25390,7 +26325,7 @@
       "id": "TEXTURE_L1_LANDING_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_LANDING_LM_DAY.png",
-      "sourceSha256": "4d24c86d871148ed8c737ac7b088b9e5e3fa8a78c14a5b9192c163e324b35867",
+      "sourceSha256": "1fe23215349e4b399a9b1260e0986334178b86314a83d2493e20fa8e86519b7f",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25417,7 +26352,7 @@
       "id": "TEXTURE_L1_LANDING_LM_LG_L1_BALCONY_FRONT_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_LANDING_LM_LG_L1_BALCONY_FRONT_MAIN.png",
-      "sourceSha256": "50c09b4318fc6fb16465c57d96967c698270fcef1912a1c9a3afaa20472176e6",
+      "sourceSha256": "60c9aa7464b28364c6ae10aecaccceafe2d6a0544d3169e3f322a095147c41ba",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25437,14 +26372,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 256 samples and 100 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L1_LANDING_LM_LG_L1_LANDING_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_LANDING_LM_LG_L1_LANDING_MAIN.png",
-      "sourceSha256": "08060f455df369ec76e613ceb3d20d29840545bd7cd45c8facb552e78eca048b",
+      "sourceSha256": "ebfced5bfe4744f2322b04556727de297589301bc2e1741111a37af8bf34a757",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25471,7 +26406,7 @@
       "id": "TEXTURE_L1_LANDING_LM_LG_L1_LANDING_SEAT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_LANDING_LM_LG_L1_LANDING_SEAT.png",
-      "sourceSha256": "45d7e8a1a78a79f473e5e0d888b5ae03c577eef4ca0f8c03b090d022ee8a6461",
+      "sourceSha256": "e49ad420b5e4c2693e121e23bbd4bae05df75c38b8e3ef78e409714ada144b03",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25498,7 +26433,7 @@
       "id": "TEXTURE_L1_LINEN_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_LINEN_LM_DAY.png",
-      "sourceSha256": "579027d2abee4d6e029538e2f37b29c097c0b3c78b3f981fadc70171a6c767a9",
+      "sourceSha256": "999870dc93e17b9fd8b1befd901b0a0de0391f8d7ee1b16fe8ebceb5eaa02110",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25525,7 +26460,7 @@
       "id": "TEXTURE_L1_LINEN_LM_LG_L1_LINEN_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_LINEN_LM_LG_L1_LINEN_MAIN.png",
-      "sourceSha256": "26d568bcaecce4701ea75497785fae0989eec17441b88d9a838f0d7dff737be7",
+      "sourceSha256": "fec2e3f43f5bdebe92cdbdf469d350bf07bbb4e64d6b8b82e98a57d423e1c411",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25552,7 +26487,7 @@
       "id": "TEXTURE_L1_MASTER_BATH_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_MASTER_BATH_LM_DAY.png",
-      "sourceSha256": "8876d715afe791ce30a091e70e54e69c394a666546ea848551f25bea43756acd",
+      "sourceSha256": "a73d77c214e1e1134388622cf0bf35997d4e6eda320f2de9c042bebaf853bbb8",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25579,7 +26514,7 @@
       "id": "TEXTURE_L1_MASTER_BATH_LM_LG_L1_MASTER_BATH_BATH",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_MASTER_BATH_LM_LG_L1_MASTER_BATH_BATH.png",
-      "sourceSha256": "92edabfa842ad99ce09190e8a0f2a70d632b692a7b8a19d5108892b1423b0890",
+      "sourceSha256": "0ddad0c724122019a7b10230332137b2e22e1f43fc0fc2b22e3a9c575208da82",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25606,7 +26541,7 @@
       "id": "TEXTURE_L1_MASTER_BATH_LM_LG_L1_MASTER_BATH_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_MASTER_BATH_LM_LG_L1_MASTER_BATH_MAIN.png",
-      "sourceSha256": "8a4f6d72c69402f4f72f3f1a3a164eabda02eb376436b8b34144a0559a456f3b",
+      "sourceSha256": "e9604c72fb56ee5bd437d04591c4fe99163e155b1d22d5046503060a24581c79",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25633,7 +26568,7 @@
       "id": "TEXTURE_L1_MASTER_BATH_LM_LG_L1_MASTER_BATH_VANITY",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_MASTER_BATH_LM_LG_L1_MASTER_BATH_VANITY.png",
-      "sourceSha256": "ac45cfba432b6bca2940b1a4b6ec21530a5803a45a3203e14eed5b2d22484b0e",
+      "sourceSha256": "a3a61eb82272fc710d06d6ea1ec9499c437ba68ce515f376f1610e20e836e17c",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25660,7 +26595,7 @@
       "id": "TEXTURE_L1_MASTER_BED_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_MASTER_BED_LM_DAY.png",
-      "sourceSha256": "babb99b45e2e6112337750a001b363b9b380493dc627b48ba6d7df3f1d225a70",
+      "sourceSha256": "77203ca1c5193f2c418cc1fe25991f39d442b25f994d9ff264613907690eece1",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25687,7 +26622,7 @@
       "id": "TEXTURE_L1_MASTER_BED_LM_LG_L1_MASTER_BED_BEDSIDE",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_MASTER_BED_LM_LG_L1_MASTER_BED_BEDSIDE.png",
-      "sourceSha256": "2a55ec9e8fb4d17fbe513ddf1ee65d82f7cf2381854e822526b9abf0f9b45815",
+      "sourceSha256": "675cef1dd52793485b103eadadc46b4b0d354a496996dcfecd1a56a3ae036c13",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25714,7 +26649,7 @@
       "id": "TEXTURE_L1_MASTER_BED_LM_LG_L1_MASTER_BED_DRESSER",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_MASTER_BED_LM_LG_L1_MASTER_BED_DRESSER.png",
-      "sourceSha256": "d7d213144937fbaf1dbe414684967e6b9e5b38dd083ac6e4f574a819d20ddf3f",
+      "sourceSha256": "8d3be9dc8b4e040f71ea368486936dfe2c03091ba17a6fa003e0141bd39f5ffa",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25741,7 +26676,7 @@
       "id": "TEXTURE_L1_MASTER_BED_LM_LG_L1_MASTER_BED_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_MASTER_BED_LM_LG_L1_MASTER_BED_MAIN.png",
-      "sourceSha256": "e37ed4f1a64baf75c6ce7d5dabbc4ce7505b6ea80c50101834fafbe21a30c357",
+      "sourceSha256": "12fe8ca292145db5042db9e9b270b7b8dc3c38e99530974279471b751e2a9b7d",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25768,7 +26703,7 @@
       "id": "TEXTURE_L1_MASTER_BED_LM_LG_L1_MASTER_BED_SEATING",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_MASTER_BED_LM_LG_L1_MASTER_BED_SEATING.png",
-      "sourceSha256": "28553acaccdc457a43d0522b7e25fe4c2ee0f59355f9cb5bbaf3d7d693b02360",
+      "sourceSha256": "4471065f75d67f92779a9ce1d79466762d4a08e1df3528010215d292df9bb682",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25795,7 +26730,7 @@
       "id": "TEXTURE_L1_MASTER_CLOSET_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_MASTER_CLOSET_LM_DAY.png",
-      "sourceSha256": "bb795d92df181f3f9b6aaa7f194711811139e6c72e756275fbcb8368c2547feb",
+      "sourceSha256": "d3cf950df6341c430fa94ab7240b9e00a6b3827f3878df9d1691129e770de901",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25822,7 +26757,7 @@
       "id": "TEXTURE_L1_MASTER_CLOSET_LM_LG_L1_MASTER_CLOSET_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_MASTER_CLOSET_LM_LG_L1_MASTER_CLOSET_MAIN.png",
-      "sourceSha256": "a12bc8bd3a7776ef0e610125a66cce6518b27e58c40a275f1eda87b348b63523",
+      "sourceSha256": "3c0cb6bdb30aee392e91f4adb9ed9e6dcdc3042b34a8a582cda3e4b4ce9000bc",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25849,7 +26784,7 @@
       "id": "TEXTURE_L1_MASTER_CLOSET_LM_LG_L1_MASTER_CLOSET_MIRROR",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_MASTER_CLOSET_LM_LG_L1_MASTER_CLOSET_MIRROR.png",
-      "sourceSha256": "d3361b3e7d5ad158b6ec588b0f53ed8cde0b2e971cf633d7652dc73786b5e9d8",
+      "sourceSha256": "cbb6a7948ed3bcd88297b6437fae2776c7745563aa2e79614886fac50b354b49",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25876,7 +26811,7 @@
       "id": "TEXTURE_L1_STAIR_MAIN_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_STAIR_MAIN_LM_DAY.png",
-      "sourceSha256": "44f1b0fdded341086d4beec52c3c6095193bf4a03a95f3fb18d32d70713136fd",
+      "sourceSha256": "0a47d30a4af36fc96ce5949d1908cfbcb6b99627bfc03532e35e09f8b5e97b7c",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25903,7 +26838,7 @@
       "id": "TEXTURE_L1_STAIR_MAIN_LM_LG_EXT_FACADE_UPLIGHT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_STAIR_MAIN_LM_LG_EXT_FACADE_UPLIGHT.png",
-      "sourceSha256": "5c0d3ba2f5fa0e88e536afd83e7f08e61735ac2b5c9792630cac3cf5f093b3a1",
+      "sourceSha256": "a418a724910350ea00ed138a4bd0a0c77f7490d5e220e532643df552c8a2eeee",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25923,14 +26858,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 32 samples and 683 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L1_STAIR_MAIN_LM_LG_L1_STAIR_MAIN_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_STAIR_MAIN_LM_LG_L1_STAIR_MAIN_MAIN.png",
-      "sourceSha256": "a9dcdbd688c9e8a7dbf8adbb4f17243c920813fb59a07d99eb1688108e5f8903",
+      "sourceSha256": "cc020e666e99af3ff1c1aa9fad57c6e4839b3176db5a03cf529111a853ed833c",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25957,7 +26892,7 @@
       "id": "TEXTURE_L1_STOR_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_STOR_LM_DAY.png",
-      "sourceSha256": "fdec5fbade594239c7cd884611eee27727eb464f23fd2bb1e52a546710cf5817",
+      "sourceSha256": "7056b3be3d41bde17bc4a6e647bb18239dea169042fc21e681e98272031e258a",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25984,7 +26919,7 @@
       "id": "TEXTURE_L1_STOR_LM_LG_L1_STOR_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_STOR_LM_LG_L1_STOR_MAIN.png",
-      "sourceSha256": "5719dcb7825b054b1c7c73c6a708a3ddc5f84924ddfbb20244db86da085fa14c",
+      "sourceSha256": "5fb6f997e65d4dbdf1122a9f16b72c93a2c7ba804202ede2f7b8d2967890faa1",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26011,7 +26946,7 @@
       "id": "TEXTURE_L1_WC3_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_WC3_LM_DAY.png",
-      "sourceSha256": "da3e3ae2a6fa0e4ac0c6807089a20ed880e372ab0e3f60c464296eefc4742f68",
+      "sourceSha256": "66d24447ad2fb651fbaa6234a22c9a240f367898b2af1f59fa9dabb8966ba6dc",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26038,7 +26973,7 @@
       "id": "TEXTURE_L1_WC3_LM_LG_L1_WC3_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_WC3_LM_LG_L1_WC3_MAIN.png",
-      "sourceSha256": "1582f9915dbadc0f60397b95dac95d4685c6e055892de962134145a7f65fbf59",
+      "sourceSha256": "e7c464c3fe67c47398a674424c7d0c73c2fec933dbc59038b596e27db9df092b",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26065,7 +27000,7 @@
       "id": "TEXTURE_L1_WC4_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_WC4_LM_DAY.png",
-      "sourceSha256": "12e8a92ddc1823c9719d70ce5d5ad625871cdc1fb7c33974d8677930fa5d7cb7",
+      "sourceSha256": "cd5e816492a7d5552d5c3d8d2e18a611c9fdbcc6ce492007c0101f8abae8a2c8",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26092,7 +27027,7 @@
       "id": "TEXTURE_L1_WC4_LM_LG_L1_WC4_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_WC4_LM_LG_L1_WC4_MAIN.png",
-      "sourceSha256": "bd1711fede094e30604b8a56fec220f58b679c6eaff40241af78bcdadfd885ce",
+      "sourceSha256": "b21d83ca663a6c2b60ee7fb2f258dea915835016e082a72fbf51c2344f174c86",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26119,7 +27054,7 @@
       "id": "TEXTURE_L2_BATH4_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_BATH4_LM_DAY.png",
-      "sourceSha256": "baac1736ee24016f3fec7669609af02ade277d112584aef89e63685b43f3ac54",
+      "sourceSha256": "2c43dfb1a1fc76bd4340fce5913e5de94f70d1eab9a696bec0f9a509ec8e8eb6",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26146,7 +27081,7 @@
       "id": "TEXTURE_L2_BATH4_LM_LG_L2_BATH4_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_BATH4_LM_LG_L2_BATH4_MAIN.png",
-      "sourceSha256": "b904c53507c42e64fa185880284c6d63b93bfccc325c3f469043cb4e553562f1",
+      "sourceSha256": "1b30749b491c7c3d93806396b2b7e8f631c192a2ef6ba6dddeffeecdfdc4b17d",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26173,7 +27108,7 @@
       "id": "TEXTURE_L2_BATH4_LM_LG_L2_BATH4_VANITY",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_BATH4_LM_LG_L2_BATH4_VANITY.png",
-      "sourceSha256": "c8b39b6da793c97bdbf939c374c60778190ab436ce7244e2ad2e6c86c3f7fcaf",
+      "sourceSha256": "82e64914cc7ffadb6664d196080b8fa76b99f1700abe7bcd38e03ba3f79ba2d7",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26200,7 +27135,7 @@
       "id": "TEXTURE_L2_BATH5_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_BATH5_LM_DAY.png",
-      "sourceSha256": "a0f8001cf7e5430fcde157fe0bfaf1a8a8bbcd1a8a62ccaf6cd808487af150a5",
+      "sourceSha256": "e1e8b1a742abd0dbcd1ebb3a742d43655b36e878736f944bd1c606d859ee1002",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26227,7 +27162,7 @@
       "id": "TEXTURE_L2_BATH5_LM_LG_L2_BATH5_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_BATH5_LM_LG_L2_BATH5_MAIN.png",
-      "sourceSha256": "9dbf5f8aed5f2885cd267dcb013633b2b288d17be8fd977e8ad2b7ab91356b9d",
+      "sourceSha256": "cdb2059dad9f598f2c15a1a0b565718a72154ed55b9372ebcfe0a85ce4ff91be",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26254,7 +27189,7 @@
       "id": "TEXTURE_L2_BATH5_LM_LG_L2_BATH5_VANITY",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_BATH5_LM_LG_L2_BATH5_VANITY.png",
-      "sourceSha256": "bcebb689cf4d41c357c2b676dc26cbf223614542b362a26fa01a3434fc0e1744",
+      "sourceSha256": "5ded1d60713158f889b7a0f94b193ae8b0f6991e8c583443de8f6da4408bc87a",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26281,7 +27216,7 @@
       "id": "TEXTURE_L2_BED6_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_BED6_LM_DAY.png",
-      "sourceSha256": "2d9b7b23be05f30fa0b55f668b314bc537310b841315c5c6e5cc81b2aacc131a",
+      "sourceSha256": "01e14fd1a489c06cc257236352be87f798dddf1b04b0c389d2409ed5b9c141b6",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26308,7 +27243,7 @@
       "id": "TEXTURE_L2_BED6_LM_LG_EXT_FACADE_UPLIGHT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_BED6_LM_LG_EXT_FACADE_UPLIGHT.png",
-      "sourceSha256": "ed4801554061e564bd4393f0c4f1d431f0ad6f0420d83d20c4d52ee3efca2e27",
+      "sourceSha256": "0336ed37bab0de0f5b8607c0fbd0de23e0b8143765325dc62d297609adace673",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26328,14 +27263,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 32 samples and 683 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L2_BED6_LM_LG_L2_BED6_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_BED6_LM_LG_L2_BED6_MAIN.png",
-      "sourceSha256": "8f2b4cfdc91d8adc0c44fcd4be0231ec204334267bc200d68179839a0ff4e825",
+      "sourceSha256": "2d66c4c4937f8fc7571a9f5f9dda07ba1da33945e85c13e50eced9a032d6f053",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26362,7 +27297,7 @@
       "id": "TEXTURE_L2_BED6_LM_LG_L2_BED6_SEWING",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_BED6_LM_LG_L2_BED6_SEWING.png",
-      "sourceSha256": "f1f7a7c27790226427526179ca5e907ea7f3c344fe0cee41b168a07b548aa316",
+      "sourceSha256": "c500d1f92f122780ea6ac1346f0813b24bde150152b0ba24bed8282332bcd475",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26389,7 +27324,7 @@
       "id": "TEXTURE_L2_BED7_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_BED7_LM_DAY.png",
-      "sourceSha256": "5b164609e26912cf06012e66b6e8df980891cce10f997c29ed21ff1964df4d29",
+      "sourceSha256": "970a25a0b7fb8527ac9bc47d082a2466709a0b11f697852415b63138c3bf82ad",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26416,7 +27351,7 @@
       "id": "TEXTURE_L2_BED7_LM_LG_L2_BED7_BEDSIDE",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_BED7_LM_LG_L2_BED7_BEDSIDE.png",
-      "sourceSha256": "3113b53b27e203c9735240b9215ab899b2269300085c3b644803d04a44c0ac3d",
+      "sourceSha256": "15ff089ecc658ebf4245cd12a9a0b574bad987da88ce19a01e167051b9e21139",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26443,7 +27378,7 @@
       "id": "TEXTURE_L2_BED7_LM_LG_L2_BED7_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_BED7_LM_LG_L2_BED7_MAIN.png",
-      "sourceSha256": "6567fccfefe39e4111acdcf2bf3d19c8d407a26c93832a2bf6de7114d28f71e0",
+      "sourceSha256": "5ead89e20c8ed7f4c8afd609a145fc614d80b1da823ce77112aa6081812f864c",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26470,7 +27405,7 @@
       "id": "TEXTURE_L2_CLOSET_4_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_CLOSET_4_LM_DAY.png",
-      "sourceSha256": "ccdd9f63ef8236b554e6f71ca8e9111df779677d774766bdd49440f44b4940ef",
+      "sourceSha256": "12d30bf631e1d83579281c90561f17432a8acca4ff41b5d208f11b72606ef580",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26497,7 +27432,7 @@
       "id": "TEXTURE_L2_CLOSET_4_LM_LG_L2_CLOSET_4_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_CLOSET_4_LM_LG_L2_CLOSET_4_MAIN.png",
-      "sourceSha256": "ea5db1c03a52981c1e0c1f0bc2a06760bf265423bcaaa9db45c4c7010e2e80ae",
+      "sourceSha256": "7f5d234f9617ef3f48b1deba66a7f15c63d7c52265b087f0481c09784b588093",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26524,7 +27459,7 @@
       "id": "TEXTURE_L2_GAMES_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_GAMES_LM_DAY.png",
-      "sourceSha256": "cfb343a3134af986278a9b734e18296e1cedddddd887bf0eee2bbe163ad8381f",
+      "sourceSha256": "b0cb7eb87acb98a06b6117cbdccda51fbb85e22fcd36069a4a026626136f977c",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26551,7 +27486,7 @@
       "id": "TEXTURE_L2_GAMES_LM_LG_L2_GAMES_ARCADE",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_GAMES_LM_LG_L2_GAMES_ARCADE.png",
-      "sourceSha256": "109c9b42fc787dc6879b059fc23fc1eb4d231111489575a1a12279035d214eed",
+      "sourceSha256": "16013bed1747b2920ce271719fe4de5396f8e40ec27198ccce8912a65bc6dc31",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26578,7 +27513,7 @@
       "id": "TEXTURE_L2_GAMES_LM_LG_L2_GAMES_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_GAMES_LM_LG_L2_GAMES_MAIN.png",
-      "sourceSha256": "148f996831894efe5ff573a15cac10dfbac611b1f300ad302f02ea5ffbbb9751",
+      "sourceSha256": "98204289922d21e8d8758e896764a6b971c12ba956bb4da1f0f7e6236800fc07",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26605,7 +27540,7 @@
       "id": "TEXTURE_L2_GAMES_LM_LG_L2_GAMES_TABLE",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_GAMES_LM_LG_L2_GAMES_TABLE.png",
-      "sourceSha256": "5aa279b1757d42ebbf5a9bfc10747ec6f08e81acc367334e1098942c836b83a5",
+      "sourceSha256": "9d2cb9cfa9630785070b849d4cad86469efeecad533c0cc7249536920999bd22",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26632,7 +27567,7 @@
       "id": "TEXTURE_L2_HALL_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_HALL_LM_DAY.png",
-      "sourceSha256": "b08f4be73babd2e7d51603abec3b20324edb906c328e5216ab0f783b1080fffd",
+      "sourceSha256": "e60f54fb3abc882179b3ae7ca09581ac044b5cfbbb60c334c2c04d2fa9d1a106",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26659,7 +27594,7 @@
       "id": "TEXTURE_L2_HALL_LM_LG_L2_HALL_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_HALL_LM_LG_L2_HALL_MAIN.png",
-      "sourceSha256": "43c110bcb804a67b7c18dc93fff1d77b30d568f7ec3b1000746d53be3f7f3a5e",
+      "sourceSha256": "19942330bbb306e7094d07e5ac2c7c550291287162a801bb09e3da099eecf362",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26686,7 +27621,7 @@
       "id": "TEXTURE_L2_HALL_LM_LG_L2_HALL_NIGHT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_HALL_LM_LG_L2_HALL_NIGHT.png",
-      "sourceSha256": "13d0050fbefa5e33e0c4a671b375bcd7d60dbd1b3057a2dee62d6917bce23c65",
+      "sourceSha256": "88065187a44a0c66a8e89c515dfee0eaf8d3c32a6a4c9adc8fcfa3e06a15bc6e",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26713,7 +27648,7 @@
       "id": "TEXTURE_L2_HALL_W_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_HALL_W_LM_DAY.png",
-      "sourceSha256": "20e294d03f49ddb9abc9868ed67e3c2e28a87d29b9d866ee1d2717da5912a8f3",
+      "sourceSha256": "4be40bf63b76336709d11aa3627ced5256cb5d28e58d4421496b1918f2ad77e8",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26740,7 +27675,7 @@
       "id": "TEXTURE_L2_HALL_W_LM_LG_L2_HALL_W_ART",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_HALL_W_LM_LG_L2_HALL_W_ART.png",
-      "sourceSha256": "19f9462964ac920e346bccadcfb7223671ee70d0383185d0303b9f43685afdd8",
+      "sourceSha256": "9851b8b03a6f1b058484f265d814de9de880ef2de47383b9a132b36319828bfc",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26767,7 +27702,7 @@
       "id": "TEXTURE_L2_HALL_W_LM_LG_L2_HALL_W_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_HALL_W_LM_LG_L2_HALL_W_MAIN.png",
-      "sourceSha256": "d3162a476ef5b099ac1e07191a6802c04617f6e6ab547649ac4fdda3c1aeadc0",
+      "sourceSha256": "39a8d0c44cc695f0f9bcf55881e507a1a44ca3a8c8a575cd78c4b0137923755f",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26794,7 +27729,7 @@
       "id": "TEXTURE_L2_LANDING_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_LANDING_LM_DAY.png",
-      "sourceSha256": "6244cb49a623d6ed8a0c6933a62eac1ac589c6864780f5ec93adf842c0ae4141",
+      "sourceSha256": "aeec93d59f8bb8f0f8c0daf454ad98fe85b15af87cee6747006bc1ba75838a34",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26821,7 +27756,7 @@
       "id": "TEXTURE_L2_LANDING_LM_LG_L2_LANDING_JULIET",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_LANDING_LM_LG_L2_LANDING_JULIET.png",
-      "sourceSha256": "9573696015b7b509c0a0f5117a23331686679d7aaecdc69cc3620ae55669e85b",
+      "sourceSha256": "ce8fe345c0a838af0b25c0290c0bf3b3ae877c2c9801bca7eb8b96e19fd8f4d8",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26848,7 +27783,7 @@
       "id": "TEXTURE_L2_LANDING_LM_LG_L2_LANDING_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_LANDING_LM_LG_L2_LANDING_MAIN.png",
-      "sourceSha256": "7fa48428a75d43b88400a0bb0e6b700bf746413919c9e9242891107ea0201409",
+      "sourceSha256": "92947b26d823e34811958cb6005abae58ac643a615d540300ebb5683022194e2",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26875,7 +27810,7 @@
       "id": "TEXTURE_L2_LIBRARY_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_LIBRARY_LM_DAY.png",
-      "sourceSha256": "183ab974203c40d8efbc5adfe20d108fba8f6444ce680f773c5ab66a5208f9c0",
+      "sourceSha256": "2b1b31d0f28b674761ec593a6b60597146be0faee282c139de3db16d5b0f593c",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26902,7 +27837,7 @@
       "id": "TEXTURE_L2_LIBRARY_LM_LG_EXT_FACADE_UPLIGHT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_LIBRARY_LM_LG_EXT_FACADE_UPLIGHT.png",
-      "sourceSha256": "5c2ddac8469e4f90ca7e0a95faffc0a921c9dcfecddbf03c0b0e067c7ddbd9fb",
+      "sourceSha256": "86e42c701e85928c415baa12b5b0108717b5590ad5bddf810a9c73700621f67e",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26922,14 +27857,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 32 samples and 683 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L2_LIBRARY_LM_LG_L2_LIBRARY_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_LIBRARY_LM_LG_L2_LIBRARY_MAIN.png",
-      "sourceSha256": "3e2fd0c371ad57254e7ecd6c89117a0a39dc6c6413313371c3b1a274faedb24c",
+      "sourceSha256": "011af6e3ab5f93427c496878490b58f83d8cba616ce30fdbff63ba5478f8a96c",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26956,7 +27891,7 @@
       "id": "TEXTURE_L2_LIBRARY_LM_LG_L2_LIBRARY_READING",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_LIBRARY_LM_LG_L2_LIBRARY_READING.png",
-      "sourceSha256": "aa88216fd9c327e3d41b1a6d5cea7b55a844402203b0abebaf59f185193e23fe",
+      "sourceSha256": "1ae8b3d83db9652a9deac17ebd3dfa6e719fe47c058dd17184e40c7753f7df5d",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26983,7 +27918,7 @@
       "id": "TEXTURE_L2_LIBRARY_LM_LG_L2_LIBRARY_SHELVES",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_LIBRARY_LM_LG_L2_LIBRARY_SHELVES.png",
-      "sourceSha256": "7d68e054ddae086f1cbb2531ea4befc39aa659313d90dc9b776eb54ec15d44c9",
+      "sourceSha256": "0572c0f196f1de05d6780843febb2d70ab566770d2230071c9b79c999bf7a0fa",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27010,7 +27945,7 @@
       "id": "TEXTURE_L2_LINEN2_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_LINEN2_LM_DAY.png",
-      "sourceSha256": "eaa2356fcf64bd3fd7646481066766ece79a7e888802bc21f78937eaff67d147",
+      "sourceSha256": "dccd8bea856002f93f5bf6b1ff30e78963e26fa47ddf48cc0bac926a14192048",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27037,7 +27972,7 @@
       "id": "TEXTURE_L2_LINEN2_LM_LG_L2_LINEN2_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_LINEN2_LM_LG_L2_LINEN2_MAIN.png",
-      "sourceSha256": "e3569da7a4cff9f3e70128b0caa025ce24be483b70ea967eaf325c9cbebcb4bc",
+      "sourceSha256": "6f28d93dd93a1a8bb622dcb4c1e54526e0182647cabff7284e887f9ad1d62661",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27064,7 +27999,7 @@
       "id": "TEXTURE_L2_SITTING_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_SITTING_LM_DAY.png",
-      "sourceSha256": "3f383c3a52cc8406a1abdc3d6bf723f00f8d021bbe45fe900c5576ae27cba2b7",
+      "sourceSha256": "739b164781d3a5035efefe13451a07aa683b2cfd0e73ace1f657976b7d37c3cd",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27091,7 +28026,7 @@
       "id": "TEXTURE_L2_SITTING_LM_LG_L2_SITTING_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_SITTING_LM_LG_L2_SITTING_MAIN.png",
-      "sourceSha256": "c034d8926f619e57faaf12b70e05927f706672205e5542df9453dd91740d2a54",
+      "sourceSha256": "ed6387e5c89ebef364bf02becc4eafad82513f05971ef9c9249f38034001b67f",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27118,7 +28053,7 @@
       "id": "TEXTURE_L2_SITTING_LM_LG_L2_SITTING_READING",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_SITTING_LM_LG_L2_SITTING_READING.png",
-      "sourceSha256": "1ff2346e9c843dc971fafbec8c5627fc2912bed7f8529224f232b5fac8979082",
+      "sourceSha256": "40046ee613e82491a96837bb41a47c3be9410eafb5ac88f3df8044b075bd5a01",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27145,7 +28080,7 @@
       "id": "TEXTURE_L2_STAIR_ATTIC_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_STAIR_ATTIC_LM_DAY.png",
-      "sourceSha256": "fe79630155a081b6a7616724d6933aa06c35cffd9c62795f9041cd184f86edd0",
+      "sourceSha256": "67e7ca7dea368249381e6d99eb968b2271bce0751963155032a340af78ad588d",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27172,7 +28107,7 @@
       "id": "TEXTURE_L2_STAIR_ATTIC_LM_LG_EXT_FACADE_UPLIGHT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_STAIR_ATTIC_LM_LG_EXT_FACADE_UPLIGHT.png",
-      "sourceSha256": "d24cb66c3890138a9aff91b1930a50a0d18595234455d1ad568564956f988d9d",
+      "sourceSha256": "bd8a427c55a4d4089a49542749dbfa450f261df94f250e68c072454a4a235763",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27192,14 +28127,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 32 samples and 683 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L2_STAIR_ATTIC_LM_LG_L2_STAIR_ATTIC_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_STAIR_ATTIC_LM_LG_L2_STAIR_ATTIC_MAIN.png",
-      "sourceSha256": "ca49b217ea557265569018b95c525616e33402501fe806d71256446733d53071",
+      "sourceSha256": "b884c5a732d67685f42b98c9c513ab7f3b4624ce7358d45dce05fdc3b7b0fa1b",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27226,7 +28161,7 @@
       "id": "TEXTURE_L2_STAIR_MAIN_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_STAIR_MAIN_LM_DAY.png",
-      "sourceSha256": "3836aa32242d503578c5259405efe43ee7563949962711c4a77d8cf23be60882",
+      "sourceSha256": "0d4893b751342f738b8ad6113e19d64a34ad958ab8470d3107e6225d378c40ad",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27253,7 +28188,7 @@
       "id": "TEXTURE_L2_STAIR_MAIN_LM_LG_EXT_FACADE_UPLIGHT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_STAIR_MAIN_LM_LG_EXT_FACADE_UPLIGHT.png",
-      "sourceSha256": "bb9415ebba1e646beaf9a4418f8d9eccb7b7b49255b290dfde7bddd03c669113",
+      "sourceSha256": "974de5aa50b447c61afa061d924d5781f8c7e35640bd0c932f21092172b1e9b8",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27273,14 +28208,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated by tools/blender/bake_house_lightmaps.py with seed 20260907, 32 samples and 683 lm per radiant watt; selected-cell calibration, not a full-house rebake."
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
     },
     {
       "id": "TEXTURE_L2_STAIR_MAIN_LM_LG_L2_STAIR_MAIN_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_STAIR_MAIN_LM_LG_L2_STAIR_MAIN_MAIN.png",
-      "sourceSha256": "eed2278540582cab2772e6f4eb143790af8746b28d6abdc2ffea14ecc84109c2",
+      "sourceSha256": "a5bfcad2ca7c49f724ab178d91eee836a87465f9adb8d2598180999669a0b144",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27307,7 +28242,7 @@
       "id": "TEXTURE_L2_STOR2_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_STOR2_LM_DAY.png",
-      "sourceSha256": "9fbf5a520d06cfb023140120192b6c17498355f192016b47ad744a692f2a65cd",
+      "sourceSha256": "0bc2dccf61281cb5b38962bda1ad073de54cacc5f45d9f5572a288d36c60e750",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27334,7 +28269,7 @@
       "id": "TEXTURE_L2_STOR2_LM_LG_L2_STOR2_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_STOR2_LM_LG_L2_STOR2_MAIN.png",
-      "sourceSha256": "c24162ee4d6ba40f6ceff2dee618156701bdec7641dfe9477c328d00a2feb3e9",
+      "sourceSha256": "976d0df08d23b342052a871138d4cfdf5753fc119e2f7c07907a115a1565eb60",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27361,7 +28296,7 @@
       "id": "TEXTURE_L2_WC5_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_WC5_LM_DAY.png",
-      "sourceSha256": "c8d3d5bd6ce05605c517d2d43713cffb91a2ae77ef569a778466740f9107a4b5",
+      "sourceSha256": "590375d9e3ca126d37b7830cd997f9fa33dc84dafc372de3f6c9b05ab9fb3e31",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27388,7 +28323,7 @@
       "id": "TEXTURE_L2_WC5_LM_LG_L2_WC5_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_WC5_LM_LG_L2_WC5_MAIN.png",
-      "sourceSha256": "554b1f7dd39e8ea8ccb9e1435155658cb3cd5f1b7f687f949f3ccf67ca8903b3",
+      "sourceSha256": "dcd1e87fd95a47925ede5ee28aca926dcf649e0acf5a982707b9931354edfc6e",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27415,7 +28350,7 @@
       "id": "TEXTURE_L2_WC6_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_WC6_LM_DAY.png",
-      "sourceSha256": "6a9f4c49a96244d7625e39862ac7bdacb919714f2c088647da0cb0b41e72a124",
+      "sourceSha256": "b02ff6902bb1f651d7a38f7bb8491eb37d1c2dc8cfa7a6f6b4ac8b0298fc643d",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27442,7 +28377,7 @@
       "id": "TEXTURE_L2_WC6_LM_LG_L2_WC6_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_WC6_LM_LG_L2_WC6_MAIN.png",
-      "sourceSha256": "76f7263b43644d881a7ad465d5c6235a3abc819099bf34b3aca9cee931d71fb5",
+      "sourceSha256": "95eb16aa9a8e94dc815357c7bbb5aad9e7d53017b32bd5b0dbee7f22a2d49dc8",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27469,7 +28404,7 @@
       "id": "TEXTURE_L3_ROOM_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L3_ROOM_LM_DAY.png",
-      "sourceSha256": "377f47e1b772ce1a4d0f01245cc79f2907aa614b26e56a1f1a1e07e66fad0a75",
+      "sourceSha256": "0912d1fb94cbcbd23110f0af8323641c498fad29f5cd6759ffb346e1fe28967f",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27496,7 +28431,7 @@
       "id": "TEXTURE_L3_ROOM_LM_LG_L3_ROOM_DESK",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L3_ROOM_LM_LG_L3_ROOM_DESK.png",
-      "sourceSha256": "09a893a6b1a589342c28b0708810e619601b5d294092cf523216e186b7dfe7d8",
+      "sourceSha256": "4a2126351723be2aac15839b578e9b4cec842c438b11827b9e314fa5f0dd3c0a",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27523,7 +28458,7 @@
       "id": "TEXTURE_L3_ROOM_LM_LG_L3_ROOM_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L3_ROOM_LM_LG_L3_ROOM_MAIN.png",
-      "sourceSha256": "7166056a5c5266e07f8f19d142ef98ad93c1239be1cc5742f5c3650a77b6beff",
+      "sourceSha256": "fb759e2d5a7bac586f6de56b7d16568d06a5ba178905339dc59f2d26a114e616",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27550,7 +28485,7 @@
       "id": "TEXTURE_L3_STAIR_HEAD_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L3_STAIR_HEAD_LM_DAY.png",
-      "sourceSha256": "839efb3a48023290a45266833d1e1e43e74e2d4531b4bfc5ad0d38859963e5fb",
+      "sourceSha256": "e1009b8fd780494f34ec9ec73cc8088194afb47d1c54df7d51d2078c842bd576",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27577,7 +28512,7 @@
       "id": "TEXTURE_L3_STAIR_HEAD_LM_LG_L3_STAIR_HEAD_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L3_STAIR_HEAD_LM_LG_L3_STAIR_HEAD_MAIN.png",
-      "sourceSha256": "e521b1cbf3fb47c9bcc1a3cb0695b5d0e95320d20ebe39188401816e64ebd9dc",
+      "sourceSha256": "8155a6287328e49c03b465c6c646eee47c5491ef588abf67e583deadb2af3d9a",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27604,7 +28539,7 @@
       "id": "TEXTURE_L3_STORE_E_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L3_STORE_E_LM_DAY.png",
-      "sourceSha256": "be490f5130f9360f0223c0b0e7aa455c2bfd1fe0ccc6c0527609a548cd5aa37a",
+      "sourceSha256": "be096733b9be3b1c7010b7a35b764c9f049f9b24edd7d1fd12b3c3942098a4df",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27631,7 +28566,7 @@
       "id": "TEXTURE_L3_STORE_E_LM_LG_L3_STORE_E_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L3_STORE_E_LM_LG_L3_STORE_E_MAIN.png",
-      "sourceSha256": "5966c7aae76c8092e15973f897eab53d442701d0cc43b76440646676b01ec81d",
+      "sourceSha256": "4ab7c8b65e3e820bad5bcc26d57b222d1c2c3ac88b86761369c81d42c62a96da",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27658,7 +28593,7 @@
       "id": "TEXTURE_L3_STORE_N_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L3_STORE_N_LM_DAY.png",
-      "sourceSha256": "20c39ab67b7fff5bfb31c2236a12f54c6adb27ea7e8888ddd88533e9a512eda2",
+      "sourceSha256": "2cf3d7535305c44182ca334de5925007ba746f84a983b4af8498eee84a70dc7f",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27685,7 +28620,7 @@
       "id": "TEXTURE_L3_STORE_N_LM_LG_L3_STORE_N_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L3_STORE_N_LM_LG_L3_STORE_N_MAIN.png",
-      "sourceSha256": "1fbd94915c7c14e193986aebd47e7a3d9574ffdeea2e4e78b413d29399da3676",
+      "sourceSha256": "d15fe3ef6534b34a85c25c3d3e9feebca0faf4ced1daffd80934aef1ba98ce6b",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27712,7 +28647,7 @@
       "id": "TEXTURE_L3_STORE_S_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L3_STORE_S_LM_DAY.png",
-      "sourceSha256": "3a49cf91240dc8ae9de29de7562a103baf785533062f1f9abc386032caf2587e",
+      "sourceSha256": "afed2ccc16a1807489863631da1e3c143ef23ecba374f7ff4f931a589f4cff89",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27739,7 +28674,7 @@
       "id": "TEXTURE_L3_STORE_S_LM_LG_L3_STORE_S_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L3_STORE_S_LM_LG_L3_STORE_S_MAIN.png",
-      "sourceSha256": "1ac64e432269f634f36eeb5d0f50ef8aa9e9e516bd54ae2e3d73d88d965ddcfe",
+      "sourceSha256": "2f56d11f55f27b237a0b8ae353edd73d4b3858e6d9b169898aa93204818f03a0",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27766,7 +28701,7 @@
       "id": "TEXTURE_L3_STORE_W_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L3_STORE_W_LM_DAY.png",
-      "sourceSha256": "e3b1082502bf7baa3a47fa5163ba14d2bbbec590fd691e76feac0f7f7197008b",
+      "sourceSha256": "194160039b922403645df561d822f0ee966dd0be16a754d4cd9b6f13ccb325c6",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27793,7 +28728,7 @@
       "id": "TEXTURE_L3_STORE_W_LM_LG_L3_STORE_W_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L3_STORE_W_LM_LG_L3_STORE_W_MAIN.png",
-      "sourceSha256": "49407b907f63ffab949040c185c56607a0388639764432b68d4823eee8df62f7",
+      "sourceSha256": "9d6b7caddf3aceeb3390bf65262d7b51d3eabaf727d201133af51f4eef493ad0",
       "texture": {
         "width": 128,
         "height": 128,
@@ -31712,565 +32647,6 @@
         "retrieved": "2026-09-13",
         "note": "Prepared by tools/assets/moon_albedo.py for HOUSE-01605 from hash-pinned lroc_color_poles_2k.tif: orthographic near-side projection, 1024-square resample and Rec.709 greyscale conversion. NASA source and usage terms verified in docs/licence-evidence/astronomical.md and assets-src/Textures/Sky/SOURCE.md; no NASA identifier or logo is present."
       }
-    },
-    {
-      "id": "MODEL_DECOR_FLOOR_MIRROR",
-      "category": "floor-mirror",
-      "sourceFile": "assets-src/Models/Furniture/Decoration/floor_mirror.glb",
-      "sourceSha256": "0e70a79a2ad3e9e33b39825b933b3904c99dabb6f0c3bdc6d21ec69513284bea",
-      "contentName": "Models/Furniture/Decoration/floor_mirror",
-      "kind": "model",
-      "residencyPack": "core",
-      "origin": {
-        "kind": "derived",
-        "name": "Dressing Mirror Round from Bedroom and Living Room Furniture",
-        "url": "https://cdn.3dassets.dev/assets/38808/v1/model.glb",
-        "author": "3D Assets",
-        "retrieved": "2026-09-23",
-        "licence": "CC0-1.0",
-        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "HOUSE-00982 selected one of only four decoration acquisitions after reusing the existing plant and frame families. The official 3D Assets pack declares Muse Spark via T3 Code as its AI generator and publishes this model under CC0 1.0. tools/assets/decoration_prepare.py pins upstream SHA-256 3a8d064c228cde84ff16e17c86bdd7352a1d596fc7ad658ea979017b649ce2a9, bakes static geometry, adds UV0 and appends one twelve-triangle enclosing collision box."
-      },
-      "geometry": {
-        "unitScale": 1,
-        "upAxis": "Y",
-        "boundsMetres": [0.82, 1.792, 0.43992],
-        "triangles": {"LOD0": 1104},
-        "collision": "Mirror_COL"
-      },
-      "materialMap": {
-        "walnut": "MAT_FURNITURE_PIANO_WOOD",
-        "metal": "MAT_KITCHEN_HARDWARE_STEEL",
-        "glass": "MAT_GLASS_CLEAR"
-      },
-      "usedIn": ["L1_MASTER_CLOSET", "L1_BED2", "L2_BED5", "L2_BED6"]
-    },
-    {
-      "id": "MODEL_DECOR_WALL_CLOCK",
-      "category": "wall-clock",
-      "sourceFile": "assets-src/Models/Furniture/Decoration/wall_clock.glb",
-      "sourceSha256": "af6da4c0176aa56920505267fe1b5e0f1b2c0a51ed8bbb44aaae1b4bfb169117",
-      "contentName": "Models/Furniture/Decoration/wall_clock",
-      "kind": "model",
-      "residencyPack": "core",
-      "origin": {
-        "kind": "derived",
-        "name": "Wall clock from Laundromat and Cleaning Services",
-        "url": "https://cdn.3dassets.dev/assets/25552/v1/model.glb",
-        "author": "3D Assets",
-        "retrieved": "2026-09-23",
-        "licence": "CC0-1.0",
-        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "HOUSE-00982 selected one of only four decoration acquisitions. The official 3D Assets pack declares Claude Fable 5.1 as its AI generator and publishes this model under CC0 1.0. tools/assets/decoration_prepare.py pins upstream SHA-256 2ba3406ef891bf9ea941e52f4c9dd2295301c0ea167ef4012de43f191a9549da, bakes static geometry, moves the back fixing plane to the wall origin, adds UV0 and appends one twelve-triangle enclosing collision box."
-      },
-      "geometry": {
-        "unitScale": 1,
-        "upAxis": "Y",
-        "boundsMetres": [0.34, 0.34, 0.122999],
-        "triangles": {"LOD0": 988},
-        "collision": "WallClock_COL"
-      },
-      "materialMap": {
-        "dark": "MAT_FIXTURE_DARK_BRONZE",
-        "carcass": "MAT_DOOR_PAINTED",
-        "accent": "MAT_PAINT_PALE_ROSE",
-        "metal": "MAT_KITCHEN_HARDWARE_STEEL",
-        "glass": "MAT_GLASS_CLEAR"
-      },
-      "usedIn": ["B1_WORKSHOP", "L0_LAUNDRY", "L1_HALL", "L2_HALL"]
-    },
-    {
-      "id": "MODEL_DECOR_PLANT_GROUP",
-      "category": "houseplant",
-      "sourceFile": "assets-src/Models/Furniture/Decoration/plant_group.glb",
-      "sourceSha256": "fb5286a463a0e40bb1bdf094db85ea2517649cda968e2a8e13d0b26565f9e7ca",
-      "contentName": "Models/Furniture/Decoration/plant_group",
-      "kind": "model",
-      "residencyPack": "core",
-      "origin": {
-        "kind": "derived",
-        "name": "Potted Plant Group from Indian Bazaar Street and Temple",
-        "url": "https://cdn.3dassets.dev/assets/36579/v1/model.glb",
-        "author": "3D Assets",
-        "retrieved": "2026-09-23",
-        "licence": "CC0-1.0",
-        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "HOUSE-00982 selected this second plant form after retaining the existing ground-floor plant. The official 3D Assets pack declares Claude Opus 5 as its AI generator and publishes this model under CC0 1.0. tools/assets/decoration_prepare.py pins upstream SHA-256 2336e6733dc6d3c825da78a04b4bd6122e823e66075158af4c65a6b1448a58fa, bakes static geometry, removes the unused WebP preview nodes because the source slots bind canonical project materials, adds UV0 and appends one twelve-triangle enclosing collision box."
-      },
-      "geometry": {
-        "unitScale": 1,
-        "upAxis": "Y",
-        "boundsMetres": [1.0782, 0.821747, 0.974054],
-        "triangles": {"LOD0": 1326},
-        "collision": "PlantGroup_COL"
-      },
-      "materialMap": {
-        "terracotta": "MAT_FOYER_CERAMIC",
-        "timber": "MAT_FURNITURE_PIANO_WOOD",
-        "leaf": "MAT_FURNITURE_PLANT_LEAF",
-        "teal": "MAT_PAINT_MUTED_TEAL"
-      },
-      "usedIn": ["B1_GYM", "L1_SITTING", "L2_LIBRARY", "L3_ROOM"]
-    },
-    {
-      "id": "MODEL_DECOR_NARROW_VASE",
-      "category": "vase",
-      "sourceFile": "assets-src/Models/Furniture/Decoration/narrow_vase.glb",
-      "sourceSha256": "d29d644e60201b6b3e7590bbc25d1d76dbdd2d0917682b8b807e385ad42ee27b",
-      "contentName": "Models/Furniture/Decoration/narrow_vase",
-      "kind": "model",
-      "residencyPack": "core",
-      "origin": {
-        "kind": "derived",
-        "name": "Narrow Neck Vase from Ceramics Pottery Studio",
-        "url": "https://cdn.3dassets.dev/assets/29517/v1/model.glb",
-        "author": "3D Assets",
-        "retrieved": "2026-09-23",
-        "licence": "CC0-1.0",
-        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "HOUSE-00982 selected one of only four decoration acquisitions. The official 3D Assets pack declares GPT-6 as its AI generator and publishes this model under CC0 1.0. tools/assets/decoration_prepare.py pins upstream SHA-256 99d4497e6995aa92c5293c7d437a12c190edf0b7489c965d8df9aae86e653239, bakes static geometry, adds UV0 and appends one twelve-triangle enclosing collision box."
-      },
-      "geometry": {
-        "unitScale": 1,
-        "upAxis": "Y",
-        "boundsMetres": [0.29998, 0.48, 0.29998],
-        "triangles": {"LOD0": 1792},
-        "collision": "Vase_COL"
-      },
-      "materialMap": {"sage": "MAT_FOYER_CERAMIC"},
-      "usedIn": ["B1_WINE", "L1_SITTING", "L2_LIBRARY", "L3_ROOM"]
-    },
-    {
-      "id": "MODEL_DECOR_WALL_ART_13",
-      "category": "picture",
-      "sourceFile": "assets-src/Models/Furniture/Decoration/wall_art_13.glb",
-      "sourceSha256": "b432f197d4e1951392c30541dbdcaafa569b89f0c5d215b2ab9b2e53a14a7148",
-      "contentName": "Models/Furniture/Decoration/wall_art_13",
-      "kind": "model",
-      "residencyPack": "core",
-      "origin": {
-        "kind": "derived",
-        "name": "Dark-frame variant for PuzzleAndy abstract 13",
-        "url": "https://opengameart.org/sites/default/files/abstract_13.jpg",
-        "author": "PuzzleAndy / frame geometry by cna-house",
-        "retrieved": "2026-09-23",
-        "licence": "CC0-1.0",
-        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "HOUSE-00982 wall-art set member. The source page publishes the abstract image under CC0; tools/assets/decoration_prepare.py pins original JPEG SHA-256 3019297b5ea067c205f4879111ad1c2b929bbafe26aa86067e81ddc1b803c7f2 and tools/blender/wall_art_set.py deterministically authors this wall-plane frame and twelve-triangle proxy."
-      },
-      "geometry": {"unitScale": 1, "upAxis": "Y", "boundsMetres": [0.994, 0.714, 0.05], "triangles": {"LOD0": 446}, "collision": "WallArt_COL"},
-      "materialMap": {"ART_FRAME_DARK": "MAT_FURNITURE_PIANO_WOOD", "ART_MAT": "MAT_LIVING_ART_PAPER", "ART_IMAGE_13": "MAT_DECOR_WALL_ART_13"},
-      "usedIn": ["B1_STAIR", "L1_SITTING", "L1_STAIR_MAIN", "L2_LIBRARY"]
-    },
-    {
-      "id": "MODEL_DECOR_WALL_ART_14",
-      "category": "picture",
-      "sourceFile": "assets-src/Models/Furniture/Decoration/wall_art_14.glb",
-      "sourceSha256": "2b28cfbbfcd615d5845a51093003c0dcf02d3b9c57bc5af476c751600f612623",
-      "contentName": "Models/Furniture/Decoration/wall_art_14",
-      "kind": "model",
-      "residencyPack": "core",
-      "origin": {
-        "kind": "derived",
-        "name": "Brass-frame variant for PuzzleAndy abstract 14",
-        "url": "https://opengameart.org/sites/default/files/abstract_14.jpg",
-        "author": "PuzzleAndy / frame geometry by cna-house",
-        "retrieved": "2026-09-23",
-        "licence": "CC0-1.0", "licenceFile": "licenses/cc0-1.0/LICENCE.txt", "attribution": "",
-        "redistributeSource": true, "redistributeDerived": true, "commercialUse": true, "modification": true,
-        "note": "HOUSE-00982 wall-art set member. The source page publishes the abstract image under CC0; tools/assets/decoration_prepare.py pins original JPEG SHA-256 2c985e7a036016c5774a2568f57093afe7a36c3947a7e605f134de182633c59c and tools/blender/wall_art_set.py deterministically authors this wall-plane frame and twelve-triangle proxy."
-      },
-      "geometry": {"unitScale": 1, "upAxis": "Y", "boundsMetres": [1.084, 0.764, 0.05], "triangles": {"LOD0": 446}, "collision": "WallArt_COL"},
-      "materialMap": {"ART_FRAME_BRASS": "MAT_FURNITURE_PIANO_BRASS", "ART_MAT": "MAT_LIVING_ART_PAPER", "ART_IMAGE_14": "MAT_DECOR_WALL_ART_14"},
-      "usedIn": ["L0_STAIR_MAIN", "L1_MASTER_BED", "L2_BED5", "L2_STAIR_ATTIC"]
-    },
-    {
-      "id": "MODEL_DECOR_WALL_ART_15",
-      "category": "picture",
-      "sourceFile": "assets-src/Models/Furniture/Decoration/wall_art_15.glb",
-      "sourceSha256": "71f71f8f38a417b4c9af595f19f6f5d2265b707b826060c11e0d9661b7fecbe7",
-      "contentName": "Models/Furniture/Decoration/wall_art_15",
-      "kind": "model",
-      "residencyPack": "core",
-      "origin": {
-        "kind": "derived",
-        "name": "Portrait wide-mat variant for PuzzleAndy abstract 15",
-        "url": "https://opengameart.org/sites/default/files/abstract_15.jpg",
-        "author": "PuzzleAndy / frame geometry by cna-house",
-        "retrieved": "2026-09-23",
-        "licence": "CC0-1.0", "licenceFile": "licenses/cc0-1.0/LICENCE.txt", "attribution": "",
-        "redistributeSource": true, "redistributeDerived": true, "commercialUse": true, "modification": true,
-        "note": "HOUSE-00982 wall-art set member. The source page publishes the abstract image under CC0; tools/assets/decoration_prepare.py pins original JPEG SHA-256 130869082f07dd2a4b5dc1e147ce92293c31f231c8ab111fe751caee74a64ce1 and tools/blender/wall_art_set.py deterministically authors this wall-plane frame and twelve-triangle proxy."
-      },
-      "geometry": {"unitScale": 1, "upAxis": "Y", "boundsMetres": [0.694, 0.894, 0.05], "triangles": {"LOD0": 446}, "collision": "WallArt_COL"},
-      "materialMap": {"ART_FRAME_DARK": "MAT_FURNITURE_PIANO_WOOD", "ART_MAT": "MAT_LIVING_ART_PAPER", "ART_IMAGE_15": "MAT_DECOR_WALL_ART_15"},
-      "usedIn": ["B1_CINEMA", "L1_HALL", "L1_HALL_W", "L2_HALL", "L2_HALL_W", "L2_STAIR_MAIN"]
-    },
-    {
-      "id": "MODEL_DECOR_WALL_ART_16",
-      "category": "picture",
-      "sourceFile": "assets-src/Models/Furniture/Decoration/wall_art_16.glb",
-      "sourceSha256": "f811da0b993c67242155da7c9d277253a7a9610fe8ab14e8ce4053c6c8b16d96",
-      "contentName": "Models/Furniture/Decoration/wall_art_16",
-      "kind": "model",
-      "residencyPack": "core",
-      "origin": {
-        "kind": "derived",
-        "name": "Square dark-frame variant for PuzzleAndy abstract 16",
-        "url": "https://opengameart.org/sites/default/files/abstract_16.jpg",
-        "author": "PuzzleAndy / frame geometry by cna-house",
-        "retrieved": "2026-09-23",
-        "licence": "CC0-1.0", "licenceFile": "licenses/cc0-1.0/LICENCE.txt", "attribution": "",
-        "redistributeSource": true, "redistributeDerived": true, "commercialUse": true, "modification": true,
-        "note": "HOUSE-00982 wall-art set member. The source page publishes the abstract image under CC0; tools/assets/decoration_prepare.py pins original JPEG SHA-256 b28967e69522ad9daf6c95c4e9c40000a83eda32fa9fd4a58d8657e4cf82c002 and tools/blender/wall_art_set.py deterministically authors this wall-plane frame and twelve-triangle proxy."
-      },
-      "geometry": {"unitScale": 1, "upAxis": "Y", "boundsMetres": [0.774, 0.774, 0.05], "triangles": {"LOD0": 446}, "collision": "WallArt_COL"},
-      "materialMap": {"ART_FRAME_DARK": "MAT_FURNITURE_PIANO_WOOD", "ART_MAT": "MAT_LIVING_ART_PAPER", "ART_IMAGE_16": "MAT_DECOR_WALL_ART_16"},
-      "usedIn": ["B1_HOBBY", "L3_ROOM", "L3_STAIR_HEAD"]
-    },
-    {
-      "id": "TEXTURE_DECOR_WALL_ART_13",
-      "category": "wall-art-albedo",
-      "sourceFile": "assets-src/Textures/Furniture/Decoration/abstract_13.png",
-      "sourceSha256": "b47d5679f0759b02a24cf8c492d41744c64077a77c493e7ecc555e1c01f5893c",
-      "texture": {"width": 512, "height": 512, "colourSpace": "sRGB", "channelLayout": "RGB"},
-      "contentName": "Textures/Furniture/Decoration/abstract_13",
-      "kind": "texture", "residencyPack": "core",
-      "origin": {"kind": "derived", "name": "PuzzleAndy CC0 Abstract Texture 13", "url": "https://opengameart.org/sites/default/files/abstract_13.jpg", "author": "PuzzleAndy", "retrieved": "2026-09-23", "licence": "CC0-1.0", "licenceFile": "licenses/cc0-1.0/LICENCE.txt", "attribution": "", "redistributeSource": true, "redistributeDerived": true, "commercialUse": true, "modification": true, "note": "HOUSE-00982 selected this from OpenGameArt's CC0 Abstract Textures set. tools/assets/decoration_prepare.py pins original JPEG SHA-256 3019297b5ea067c205f4879111ad1c2b929bbafe26aa86067e81ddc1b803c7f2 and produces this 512-pixel sRGB PNG."}
-    },
-    {
-      "id": "TEXTURE_DECOR_WALL_ART_14",
-      "category": "wall-art-albedo",
-      "sourceFile": "assets-src/Textures/Furniture/Decoration/abstract_14.png",
-      "sourceSha256": "62787bb46c4845dc5e8cba353d99148c76042c29483bbb43ab08bc24cb523b48",
-      "texture": {"width": 512, "height": 512, "colourSpace": "sRGB", "channelLayout": "RGB"},
-      "contentName": "Textures/Furniture/Decoration/abstract_14",
-      "kind": "texture", "residencyPack": "core",
-      "origin": {"kind": "derived", "name": "PuzzleAndy CC0 Abstract Texture 14", "url": "https://opengameart.org/sites/default/files/abstract_14.jpg", "author": "PuzzleAndy", "retrieved": "2026-09-23", "licence": "CC0-1.0", "licenceFile": "licenses/cc0-1.0/LICENCE.txt", "attribution": "", "redistributeSource": true, "redistributeDerived": true, "commercialUse": true, "modification": true, "note": "HOUSE-00982 selected this from OpenGameArt's CC0 Abstract Textures set. tools/assets/decoration_prepare.py pins original JPEG SHA-256 2c985e7a036016c5774a2568f57093afe7a36c3947a7e605f134de182633c59c and produces this 512-pixel sRGB PNG."}
-    },
-    {
-      "id": "TEXTURE_DECOR_WALL_ART_15",
-      "category": "wall-art-albedo",
-      "sourceFile": "assets-src/Textures/Furniture/Decoration/abstract_15.png",
-      "sourceSha256": "05f04ee31942ae18359e7229759280d127cc32296e2836c7d32f8f5a925db929",
-      "texture": {"width": 512, "height": 512, "colourSpace": "sRGB", "channelLayout": "RGB"},
-      "contentName": "Textures/Furniture/Decoration/abstract_15",
-      "kind": "texture", "residencyPack": "core",
-      "origin": {"kind": "derived", "name": "PuzzleAndy CC0 Abstract Texture 15 portrait crop", "url": "https://opengameart.org/sites/default/files/abstract_15.jpg", "author": "PuzzleAndy", "retrieved": "2026-09-23", "licence": "CC0-1.0", "licenceFile": "licenses/cc0-1.0/LICENCE.txt", "attribution": "", "redistributeSource": true, "redistributeDerived": true, "commercialUse": true, "modification": true, "note": "HOUSE-00982 selected this from OpenGameArt's CC0 Abstract Textures set. tools/assets/decoration_prepare.py pins original JPEG SHA-256 130869082f07dd2a4b5dc1e147ce92293c31f231c8ab111fe751caee74a64ce1 and produces this centred 360 x 512 sRGB portrait PNG."}
-    },
-    {
-      "id": "TEXTURE_DECOR_WALL_ART_16",
-      "category": "wall-art-albedo",
-      "sourceFile": "assets-src/Textures/Furniture/Decoration/abstract_16.png",
-      "sourceSha256": "2831bff24b2292861d4933d9fcb59e3c71350bf2f8e4e01f5d47fbdc22fb4889",
-      "texture": {"width": 512, "height": 512, "colourSpace": "sRGB", "channelLayout": "RGB"},
-      "contentName": "Textures/Furniture/Decoration/abstract_16",
-      "kind": "texture", "residencyPack": "core",
-      "origin": {"kind": "derived", "name": "PuzzleAndy CC0 Abstract Texture 16 square crop", "url": "https://opengameart.org/sites/default/files/abstract_16.jpg", "author": "PuzzleAndy", "retrieved": "2026-09-23", "licence": "CC0-1.0", "licenceFile": "licenses/cc0-1.0/LICENCE.txt", "attribution": "", "redistributeSource": true, "redistributeDerived": true, "commercialUse": true, "modification": true, "note": "HOUSE-00982 selected this from OpenGameArt's CC0 Abstract Textures set. tools/assets/decoration_prepare.py pins original JPEG SHA-256 b28967e69522ad9daf6c95c4e9c40000a83eda32fa9fd4a58d8657e4cf82c002 and produces this centred 512-square sRGB PNG."}
-    },
-    {
-      "id": "MODEL_CLUTTER_BIN",
-      "category": "waste-bin",
-      "sourceFile": "assets-src/Models/Furniture/Clutter/bin.glb",
-      "sourceSha256": "e8b29567e61f38ea524e6aa9a7acbb815e093d0308e592574504b46f98f7fe1f",
-      "contentName": "Models/Furniture/Clutter/bin",
-      "kind": "model",
-      "residencyPack": "core",
-      "origin": {
-        "kind": "derived",
-        "name": "Office waste bin from Office Lobby and Building Facilities",
-        "url": "https://cdn.3dassets.dev/assets/26268/v1/model.glb",
-        "author": "3D Assets",
-        "retrieved": "2026-09-23",
-        "licence": "CC0-1.0",
-        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "HOUSE-00984 selected this static bin within the five-of-six clutter cap. The official 3D Assets pack declares Claude Fable 5.1 as its AI generator and publishes the model under CC0 1.0. tools/assets/clutter_prepare.py pins upstream SHA-256 c9d03d627722f8fa9207868582060188d90e01ec2734c32d27ba23e5d56a2cdb, bakes its hierarchy, adds UV0 and appends one twelve-triangle enclosing collision box."
-      },
-      "geometry": {"unitScale": 1, "upAxis": "Y", "boundsMetres": [0.32, 0.439993, 0.32], "triangles": {"LOD0": 556}, "collision": "Bin_COL"},
-      "materialMap": {"dark": "MAT_FURNITURE_PIANO_EBONITE", "metal": "MAT_APPLIANCE_STEEL", "accent": "MAT_PAINT_MUTED_TEAL"},
-      "usedIn": ["B1_CINEMA", "B1_WORKSHOP", "L0_LAUNDRY", "L0_MUDROOM", "L0_GARAGE", "EXT_SHED", "EXT_SIDEYARD_E"]
-    },
-    {
-      "id": "MODEL_CLUTTER_SUITCASE",
-      "category": "suitcase",
-      "sourceFile": "assets-src/Models/Furniture/Clutter/suitcase.glb",
-      "sourceSha256": "550f1579b84de39549e56eabdc2ac9d03a6550502a8ba258b82c00fe127b398d",
-      "contentName": "Models/Furniture/Clutter/suitcase",
-      "kind": "model",
-      "residencyPack": "core",
-      "origin": {
-        "kind": "derived",
-        "name": "Suitcase from Mountain Border Checkpoint",
-        "url": "https://cdn.3dassets.dev/assets/30311/v1/model.glb",
-        "author": "3D Assets",
-        "retrieved": "2026-09-23",
-        "licence": "CC0-1.0",
-        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "HOUSE-00984 selected this static upright suitcase within the five-of-six clutter cap. The official 3D Assets pack declares GPT-6 as its AI generator and publishes the model under CC0 1.0. tools/assets/clutter_prepare.py pins upstream SHA-256 0a6cf35a040fc9b8a3ba842920a455e822de2c18124d15932bb25f52c17c7f28, bakes its hierarchy, adds UV0 and appends one twelve-triangle enclosing collision box."
-      },
-      "geometry": {"unitScale": 1, "upAxis": "Y", "boundsMetres": [0.579014, 0.85, 0.307957], "triangles": {"LOD0": 1308}, "collision": "Suitcase_COL"},
-      "materialMap": {"fabric": "MAT_FAMILY_CURTAIN_WOOL", "steel": "MAT_KITCHEN_HARDWARE_STEEL", "dark": "MAT_FURNITURE_PIANO_EBONITE"},
-      "usedIn": ["L0_GARAGE_LOFT", "L1_MASTER_CLOSET", "L1_CLOSET_2", "L1_CLOSET_3", "L2_CLOSET_4", "L3_STORE_E", "L3_STORE_W"]
-    },
-    {
-      "id": "MODEL_CLUTTER_TOOLBOX",
-      "category": "toolbox",
-      "sourceFile": "assets-src/Models/Furniture/Clutter/toolbox.glb",
-      "sourceSha256": "19be2ac8e7751e3a1a16bc68fe3a23bdfdb29c0f8df3bd54884fc5b1e785c520",
-      "contentName": "Models/Furniture/Clutter/toolbox",
-      "kind": "model",
-      "residencyPack": "core",
-      "origin": {
-        "kind": "derived",
-        "name": "Cantilever tool box from Hardware Store and DIY Warehouse",
-        "url": "https://cdn.3dassets.dev/assets/23944/v1/model.glb",
-        "author": "3D Assets",
-        "retrieved": "2026-09-23",
-        "licence": "CC0-1.0",
-        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "HOUSE-00984 selected this toolbox within the five-of-six clutter cap. The official 3D Assets pack declares Claude Fable 5.1 as its AI generator and publishes the model under CC0 1.0. tools/assets/clutter_prepare.py pins upstream SHA-256 0af6f33a5508f40757ff6092467d2ec889c57710cc5a28137a320e3b794f0cba, bakes its closed default pose, removes its source open/close clips, adds UV0 and appends one twelve-triangle enclosing collision box."
-      },
-      "geometry": {"unitScale": 1, "upAxis": "Y", "boundsMetres": [0.555, 0.481332, 0.276839], "triangles": {"LOD0": 944}, "collision": "Toolbox_COL"},
-      "materialMap": {"dark": "MAT_FURNITURE_PIANO_EBONITE", "accent": "MAT_PAINT_DUSTY_BLUE", "metal": "MAT_KITCHEN_HARDWARE_STEEL"},
-      "usedIn": ["B1_ELECTRICAL", "B1_WORKSHOP", "L0_GARAGE", "EXT_SHED"]
-    },
-    {
-      "id": "MODEL_CLUTTER_GARDEN_TOOLS",
-      "category": "garden-tool-set",
-      "sourceFile": "assets-src/Models/Furniture/Clutter/garden_tools.glb",
-      "sourceSha256": "2151ca51ee1ade7195473d6995a32c24f46ca8eaff3e2cec6c8b73bb49a315f6",
-      "contentName": "Models/Furniture/Clutter/garden_tools",
-      "kind": "model",
-      "residencyPack": "core",
-      "origin": {
-        "kind": "derived",
-        "name": "Long handled tool bin from Garden Centre and Florist",
-        "url": "https://cdn.3dassets.dev/assets/17752/v1/model.glb",
-        "author": "3D Assets",
-        "retrieved": "2026-09-23",
-        "licence": "CC0-1.0",
-        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "HOUSE-00984 selected this grounded long-handled garden-tool set within the five-of-six clutter cap. The official 3D Assets pack declares Claude Fable 5.1 as its AI generator and publishes the model under CC0 1.0. tools/assets/clutter_prepare.py pins upstream SHA-256 e1b3888a6ba75492647ea8b6e2fa2ef4bf1d72fc35e9f39d1739683f9f1bb229, bakes its hierarchy, adds UV0 and appends one twelve-triangle enclosing collision box."
-      },
-      "geometry": {"unitScale": 1, "upAxis": "Y", "boundsMetres": [0.88588, 1.580602, 0.669707], "triangles": {"LOD0": 2804}, "collision": "GardenTools_COL"},
-      "materialMap": {"dark": "MAT_FURNITURE_PIANO_EBONITE", "metal": "MAT_OUTDOOR_FENCE_METAL", "surface": "MAT_OUTDOOR_GARDEN_WOOD", "accent": "MAT_PAINT_MUTED_TEAL"},
-      "usedIn": ["L0_GARAGE", "EXT_GARDEN", "EXT_SHED"]
-    },
-    {
-      "id": "MODEL_CLUTTER_PAINT_TIN",
-      "category": "paint-tin",
-      "sourceFile": "assets-src/Models/Furniture/Clutter/paint_tin.glb",
-      "sourceSha256": "265d163002adb740aefdc0dd9f355e56794f7a764ab95e686074c9eb29f4307f",
-      "contentName": "Models/Furniture/Clutter/paint_tin",
-      "kind": "model",
-      "residencyPack": "core",
-      "origin": {
-        "kind": "derived",
-        "name": "Paint tin, 5 litre from Hardware Store and DIY Warehouse",
-        "url": "https://cdn.3dassets.dev/assets/23929/v1/model.glb",
-        "author": "3D Assets",
-        "retrieved": "2026-09-23",
-        "licence": "CC0-1.0",
-        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "HOUSE-00984 selected this single domestic 5 litre paint tin within the five-of-six clutter cap. The official 3D Assets pack declares Claude Fable 5.1 as its AI generator and publishes the model under CC0 1.0. tools/assets/clutter_prepare.py pins upstream SHA-256 c7269c2acd263fc4078aa5b3c98cb3728472ef12471396ff5f9546d3b84d342c, bakes its hierarchy, adds UV0 and appends one twelve-triangle enclosing collision box."
-      },
-      "geometry": {"unitScale": 1, "upAxis": "Y", "boundsMetres": [0.236896, 0.343995, 0.233293], "triangles": {"LOD0": 598}, "collision": "PaintTin_COL"},
-      "materialMap": {"metal": "MAT_APPLIANCE_STEEL", "accent": "MAT_PAINT_SAGE"},
-      "usedIn": ["B1_WORKSHOP", "L0_GARAGE", "EXT_SHED"]
-    },
-    {
-      "id": "MODEL_PARKED_CAR_BLUE",
-      "category": "car",
-      "sourceFile": "assets-src/Models/Furniture/Vehicles/estate_blue.glb",
-      "sourceSha256": "32fffa42f40ebaaa447b485dd4f549e73475970b7033e4e1bf44dab3b1d67ce6",
-      "contentName": "Models/Furniture/Vehicles/estate_blue",
-      "kind": "model",
-      "residencyPack": "core",
-      "origin": {
-        "kind": "generated",
-        "name": "Low-detail estate vehicle family, blue tint",
-        "licence": "Ms-PL",
-        "licenceFile": "LICENSE",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "Project-authored deterministic box/prism geometry from tools/world/neighbourhood_gen.py for HOUSE-00847. The household car reuses the same estate body as the three street tint variants and adds only the model-owned 12-triangle collision proxy; no third-party mesh or texture is used."
-      },
-      "geometry": {
-        "unitScale": 1,
-        "upAxis": "Y",
-        "boundsMetres": [1.96, 1.5, 4.424],
-        "triangles": {"LOD0": 248},
-        "collision": "MODEL_PARKED_CAR_BLUE_COL"
-      },
-      "materialMap": {
-        "MAT_FURNITURE_PIANO_EBONITE": "MAT_FURNITURE_PIANO_EBONITE",
-        "MAT_KITCHEN_HARDWARE_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
-        "MAT_KITCHEN_OVEN_GLASS": "MAT_KITCHEN_OVEN_GLASS",
-        "MAT_VEHICLE_BODY_BLUE": "MAT_VEHICLE_BODY_BLUE",
-        "MAT_WINDOW_FRAME_WHITE": "MAT_WINDOW_FRAME_WHITE"
-      },
-      "usedIn": ["L0_GARAGE", "EXT_ROAD"]
-    },
-    {
-      "id": "MODEL_PARKED_CAR_RED",
-      "category": "car",
-      "sourceFile": "assets-src/Models/Furniture/Vehicles/estate_red.glb",
-      "sourceSha256": "82bc5258d2957c611eccc24d623292a25747785fbfb7da352e2aeb8d3beb07cd",
-      "contentName": "Models/Furniture/Vehicles/estate_red",
-      "kind": "model",
-      "residencyPack": "exterior",
-      "origin": {
-        "kind": "generated",
-        "name": "Low-detail estate vehicle family, red tint",
-        "licence": "Ms-PL",
-        "licenceFile": "LICENSE",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "Project-authored deterministic geometry from tools/world/neighbourhood_gen.py for HOUSE-00847. This is the shared estate body under a red paint material; no third-party mesh or texture is used."
-      },
-      "geometry": {
-        "unitScale": 1,
-        "upAxis": "Y",
-        "boundsMetres": [1.96, 1.5, 4.424],
-        "triangles": {"LOD0": 248},
-        "collision": "MODEL_PARKED_CAR_RED_COL"
-      },
-      "materialMap": {
-        "MAT_FURNITURE_PIANO_EBONITE": "MAT_FURNITURE_PIANO_EBONITE",
-        "MAT_KITCHEN_HARDWARE_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
-        "MAT_KITCHEN_OVEN_GLASS": "MAT_KITCHEN_OVEN_GLASS",
-        "MAT_VEHICLE_BODY_RED": "MAT_VEHICLE_BODY_RED",
-        "MAT_WINDOW_FRAME_WHITE": "MAT_WINDOW_FRAME_WHITE"
-      },
-      "usedIn": ["EXT_ROAD"]
-    },
-    {
-      "id": "MODEL_PARKED_CAR_SILVER",
-      "category": "car",
-      "sourceFile": "assets-src/Models/Furniture/Vehicles/estate_silver.glb",
-      "sourceSha256": "4e63b6d5ac66f283ac1ace6f3cdd34e600929d0d8548d55247f2d50eb0429430",
-      "contentName": "Models/Furniture/Vehicles/estate_silver",
-      "kind": "model",
-      "residencyPack": "exterior",
-      "origin": {
-        "kind": "generated",
-        "name": "Low-detail estate vehicle family, silver tint",
-        "licence": "Ms-PL",
-        "licenceFile": "LICENSE",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "Project-authored deterministic geometry from tools/world/neighbourhood_gen.py for HOUSE-00847. This is the shared estate body under a silver paint material; no third-party mesh or texture is used."
-      },
-      "geometry": {
-        "unitScale": 1,
-        "upAxis": "Y",
-        "boundsMetres": [1.96, 1.5, 4.424],
-        "triangles": {"LOD0": 248},
-        "collision": "MODEL_PARKED_CAR_SILVER_COL"
-      },
-      "materialMap": {
-        "MAT_FURNITURE_PIANO_EBONITE": "MAT_FURNITURE_PIANO_EBONITE",
-        "MAT_KITCHEN_HARDWARE_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
-        "MAT_KITCHEN_OVEN_GLASS": "MAT_KITCHEN_OVEN_GLASS",
-        "MAT_VEHICLE_BODY_SILVER": "MAT_VEHICLE_BODY_SILVER",
-        "MAT_WINDOW_FRAME_WHITE": "MAT_WINDOW_FRAME_WHITE"
-      },
-      "usedIn": ["EXT_WORLD"]
-    },
-    {
-      "id": "MODEL_DELIVERY_VAN_WHITE",
-      "category": "delivery-van",
-      "sourceFile": "assets-src/Models/Furniture/Vehicles/delivery_van_white.glb",
-      "sourceSha256": "3b73ffc45b5227137cc5f96a3f1e93ac1209c449305cc30278f25432d4adfbdf",
-      "contentName": "Models/Furniture/Vehicles/delivery_van_white",
-      "kind": "model",
-      "residencyPack": "exterior",
-      "origin": {
-        "kind": "generated",
-        "name": "Low-detail delivery van family, white tint",
-        "licence": "Ms-PL",
-        "licenceFile": "LICENSE",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "Project-authored deterministic box/prism geometry from tools/world/neighbourhood_gen.py for HOUSE-00847. The van shares the estate family's wheels, glazing, lamps and construction; no third-party mesh or texture is used."
-      },
-      "geometry": {
-        "unitScale": 1,
-        "upAxis": "Y",
-        "boundsMetres": [2.26, 2.4, 5.424],
-        "triangles": {"LOD0": 212},
-        "collision": "MODEL_DELIVERY_VAN_WHITE_COL"
-      },
-      "materialMap": {
-        "MAT_FURNITURE_PIANO_EBONITE": "MAT_FURNITURE_PIANO_EBONITE",
-        "MAT_KITCHEN_HARDWARE_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
-        "MAT_KITCHEN_OVEN_GLASS": "MAT_KITCHEN_OVEN_GLASS",
-        "MAT_VEHICLE_BODY_WHITE": "MAT_VEHICLE_BODY_WHITE",
-        "MAT_WINDOW_FRAME_WHITE": "MAT_WINDOW_FRAME_WHITE"
-      },
-      "usedIn": ["EXT_WORLD"]
     },
     {
       "id": "VIDEO_SMOKE_CLIP",

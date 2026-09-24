@@ -54,6 +54,7 @@ import hashlib
 import json
 import math
 import os
+import re
 import sys
 
 try:
@@ -134,11 +135,95 @@ def receiver_objects():
     """
     receivers = []
     for obj in mesh_objects():
+        if obj.get("cnahouseBakeOccluder", False):
+            continue
         flags = [material.get("lightmapReceiver") for material in obj.data.materials
                  if material is not None and material.get("lightmapReceiver") is not None]
         if not flags or any(bool(flag) for flag in flags):
             receivers.append(obj)
     return receivers
+
+
+def _is_auxiliary_prop_object(obj) -> bool:
+    """Collision and authored lower-LOD nodes are not visible furniture casters."""
+    names = [str(obj.name)]
+    if getattr(obj, "data", None) is not None:
+        names.append(str(obj.data.name))
+    return any(re.search(r"(?:_COL|_LOD[1-9][0-9]*)(?:\.\d+)?$", name) for name in names)
+
+
+def _place_prop_occluder(imported: list, prop: dict, prop_transform) -> int:
+    """Keep one imported prop's LOD0 geometry as a placed, non-receiver bake occluder."""
+    visible = []
+    for obj in imported:
+        if _is_auxiliary_prop_object(obj):
+            bpy.data.objects.remove(obj, do_unlink=True)
+            continue
+        visible.append(obj)
+        if obj.type == "MESH":
+            obj["cnahouseBakeOccluder"] = True
+
+    meshes = [obj for obj in visible if obj.type == "MESH"]
+    if not meshes:
+        raise SystemExit(f"lightmap_bake: prop {prop['id']} has no visible LOD0 mesh")
+
+    imported_set = set(visible)
+    roots = [obj for obj in visible if obj.parent not in imported_set]
+    anchor = bpy.data.objects.new(f"{prop['id']}_BAKE_OCCLUDER", None)
+    bpy.context.scene.collection.objects.link(anchor)
+    for root in roots:
+        root.parent = anchor
+
+    position, yaw_deg, scale = prop_transform(prop)
+    # Authored/glTF space is Y-up. Blender's importer maps (x, y, z) to (x, -z, y), so the
+    # placement and per-axis scale use the same mapping. Positive authored yaw is positive
+    # Blender-Z rotation under that conversion (the exact matrix used by build_chunks.py).
+    anchor.location = (position[0], -position[2], position[1])
+    anchor.rotation_euler[2] = math.radians(yaw_deg)
+    anchor.scale = (scale[0], scale[2], scale[1])
+    return len(meshes)
+
+
+def import_static_prop_occluders(cell: str, props_path: str, manifest_path: str) -> tuple[int, int]:
+    """Import solid static furniture in @p cell so it casts into the shell's bake.
+
+    `collision: proxy` is the existing authored distinction between solid furniture/appliances
+    and thin dressing such as rugs, pictures, curtains and fixture shades. Only the former earns
+    bake cost. Imported meshes deliberately own no UV2 and are never selected as receivers.
+    """
+    world_tools = os.path.join(os.path.dirname(os.path.dirname(__file__)), "world")
+    if world_tools not in sys.path:
+        sys.path.insert(0, world_tools)
+    import layout_io  # type: ignore  # noqa: PLC0415
+
+    with open(props_path, encoding="utf-8") as handle:
+        props_document = json.loads(layout_io.strip_jsonc(handle.read()))
+    with open(manifest_path, encoding="utf-8") as handle:
+        manifest_document = json.loads(handle.read())
+    assets = {row["id"]: row for row in manifest_document.get("assets", [])
+              if isinstance(row.get("id"), str)}
+    repository = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+    imported_props = 0
+    imported_meshes = 0
+    rows = sorted((row for row in props_document.get("props", [])
+                   if row.get("cell") == cell and row.get("static", True)
+                   and row.get("collision") == "proxy"),
+                  key=lambda row: row["id"])
+    for prop in rows:
+        asset = assets.get(prop.get("asset"))
+        source = asset.get("sourceFile") if isinstance(asset, dict) else None
+        if not isinstance(source, str) or not source.endswith(".glb"):
+            raise SystemExit(
+                f"lightmap_bake: prop {prop['id']} names asset {prop.get('asset')!r} "
+                "without a manifest GLB source")
+        path = os.path.join(repository, source)
+        before = {obj.as_pointer() for obj in bpy.data.objects}
+        bpy.ops.import_scene.gltf(filepath=path)
+        imported = [obj for obj in bpy.data.objects if obj.as_pointer() not in before]
+        imported_meshes += _place_prop_occluder(imported, prop, layout_io.prop_transform)
+        imported_props += 1
+    return imported_props, imported_meshes
 
 
 def lightmap_uv(obj):
@@ -409,7 +494,10 @@ def pack_rgb(channels: list[list[float]], size: int, path: str) -> list[float]:
 def bake_cell(lights: list[dict], cell: str, out_dir: str, size: int, samples: int,
               seed: int, pack: bool, *, artificial: bool = True,
               daylight: bool = True,
-              lumens_per_radiant_watt: float = LEGACY_LUMENS_PER_RADIANT_WATT) -> dict:
+              lumens_per_radiant_watt: float = LEGACY_LUMENS_PER_RADIANT_WATT,
+              furnished_props: int = 0,
+              furnished_meshes: int = 0,
+              cell_props_sha256: str | None = None) -> dict:
     """The requested artificial groups and/or daylight atlas. Returns the sidecar."""
     scene = bpy.context.scene
     configure(scene, seed, samples)
@@ -466,6 +554,8 @@ def bake_cell(lights: list[dict], cell: str, out_dir: str, size: int, samples: i
     sidecar = {
         "tool": "lightmap_bake.py", "version": VERSION,
         "cell": cell, "seed": seed, "samples": samples, "size": size,
+        "furnishedProps": furnished_props, "furnishedMeshes": furnished_meshes,
+        "cellPropsSha256": cell_props_sha256,
         "denoised": True, "viewTransform": scene.view_settings.view_transform,
         "bakePassColor": scene.render.bake.use_pass_color,
         "uvSet": LIGHTMAP_UV,
@@ -813,6 +903,31 @@ def selftest() -> int:
                 "an explicit non-receiver with no UV2 stays in the bake scene only as an occluder")
         bpy.data.objects.remove(detail, do_unlink=True)
 
+        # 6d. Solid furniture is placed with the same authored-space conversion as chunks, while
+        #      collision/LOD helpers are removed and the visible mesh remains caster-only.
+        prop_mesh = bpy.data.meshes.new("chair_mesh")
+        prop_mesh.from_pydata([(1, 0, 0), (0, 0, 0), (0, 1, 0)], [], [(0, 1, 2)])
+        prop_object = bpy.data.objects.new("chair", prop_mesh)
+        bpy.context.collection.objects.link(prop_object)
+        proxy_mesh = prop_mesh.copy()
+        proxy = bpy.data.objects.new("chair_COL", proxy_mesh)
+        bpy.context.collection.objects.link(proxy)
+        prop_row = {"id": "PROP_TEST", "position": [1.0, 2.0, 3.0], "yawDeg": 90.0,
+                    "scale": [2.0, 3.0, 4.0]}
+        meshes = _place_prop_occluder(
+            [prop_object, proxy], prop_row,
+            lambda _row: ((1.0, 2.0, 3.0), 90.0, (2.0, 3.0, 4.0)))
+        anchor = bpy.data.objects["PROP_TEST_BAKE_OCCLUDER"]
+        require(meshes == 1 and bpy.data.objects.get("chair_COL") is None
+                and prop_object not in receiver_objects()
+                and tuple(round(value, 6) for value in anchor.location) == (1.0, -3.0, 2.0)
+                and tuple(round(value, 6) for value in anchor.scale) == (2.0, 4.0, 3.0)
+                and abs(anchor.rotation_euler[2] - math.pi / 2.0) < 1e-6,
+                "a solid prop keeps only LOD0 as a non-receiver caster and maps Y-up position, "
+                "yaw and xyz scale exactly into Blender space")
+        bpy.data.objects.remove(prop_object, do_unlink=True)
+        bpy.data.objects.remove(anchor, do_unlink=True)
+
         # 7. A missing lightmap UV set is refused, naming the tool that makes one.
         mesh.uv_layers[1].name = LIGHTMAP_UV
         mesh.uv_layers.remove(mesh.uv_layers[LIGHTMAP_UV])
@@ -1060,14 +1175,23 @@ def main() -> int:
             index += 2
         else:
             index += 1
-    for key in ("lights", "cell", "out", "size", "samples", "seed", "lumens-per-radiant-watt"):
+    for key in ("lights", "cell", "out", "size", "samples", "seed", "lumens-per-radiant-watt",
+                "props", "manifest", "prop-signature"):
         positional = [p for p in positional if p != options.get(key)]
 
     if len(positional) != 1 or "lights" not in options or "cell" not in options \
             or "out" not in options:
         print("lightmap_bake: usage: SHELL.glb --lights lights.json --cell ID --out DIR "
               "[--size N] [--samples N] [--seed N] [--lumens-per-radiant-watt N] [--pack] "
+              "[--props layout.props.json --manifest assets.manifest.json "
+              "--prop-signature SHA256] "
               "[--artificial-only|--daylight-only]", file=sys.stderr)
+        return 2
+    if ("props" in options) != ("manifest" in options):
+        print("lightmap_bake: --props and --manifest must be supplied together", file=sys.stderr)
+        return 2
+    if "props" in options and "prop-signature" not in options:
+        print("lightmap_bake: furnished bakes require --prop-signature", file=sys.stderr)
         return 2
 
     artificial_only = "--artificial-only" in argv
@@ -1091,9 +1215,17 @@ def main() -> int:
     if world_tools not in sys.path:
         sys.path.insert(0, world_tools)
     import layout_io  # type: ignore  # noqa: E402
+    furnished_props = 0
+    furnished_meshes = 0
+    cell_props_sha256 = options.get("prop-signature")
+    cell = options["cell"]
+    if "props" in options:
+        furnished_props, furnished_meshes = import_static_prop_occluders(
+            cell, options["props"], options["manifest"])
+        report(f"{cell}: {furnished_props} solid static prop(s), "
+               f"{furnished_meshes} visible mesh object(s) cast into the bake")
     with open(options["lights"], encoding="utf-8") as handle:
         document = json.loads(layout_io.strip_jsonc(handle.read()))
-    cell = options["cell"]
     # A fixed source can illuminate a neighbouring fixed shell. `cell` remains its runtime
     # owner; `bakeCells` is an offline-only receiver list and never changes switching semantics.
     lights = [light for light in document.get("lights", [])
@@ -1107,7 +1239,10 @@ def main() -> int:
               "--pack" in argv,
               artificial=not daylight_only,
               daylight=not artificial_only,
-              lumens_per_radiant_watt=lumens_per_radiant_watt)
+              lumens_per_radiant_watt=lumens_per_radiant_watt,
+              furnished_props=furnished_props,
+              furnished_meshes=furnished_meshes,
+              cell_props_sha256=cell_props_sha256)
     return 0
 
 
