@@ -1,3 +1,41 @@
+# Basement, attic and stair lighting handoff — 2026-09-24 (`HOUSE-03403`)
+
+The first zone-lighting band is at C3. Forty-four physical fixture props now back all 46 authored
+sources in the exact 25 cells of `Z-B1`, `Z-L3` and `Z-STAIR`, with each source naming its physical
+prop and exact switched emissive slot. The implementation reuses four existing fixture families,
+the existing schedule, lightmap baker and static-prop path; no runtime code, exposure constant,
+material family, asset or subsystem was added. The basement hall's three sources now span the
+hall, windowless working spaces are readable, the attic reads by dormer daylight and bounded
+fittings, all eight flights are readable, and the main-stair-foot S2 is closed.
+
+Round 147 includes fixed day sets and matched night before/after sets. Measured night mean linear
+RGB rises 1.37–6.46x in the four basement controls, 5.11x in the attic room and 1.25–3.31x at the
+measured stair transitions. Intentional `SC-OFF` attic stores remain dark at night and readable by
+day. Inspection found no fixture clipping, floating geometry, z-fighting, missing texture or
+blocked flight. Exact measurements and capture directories are in
+`docs/visual-review/house-03403-basement-attic-stairs-lighting.md`.
+
+The targeted 256-sample promotion refreshed 25 daylight and 37 artificial products. The world is
+1,209 chunks / 484 props / 3,032,941 vertices / 80,459,432 packed bytes, with 8 16-bit splits, 15
+Reach splits and no 32-bit chunk; all 81 exceptions exactly match their documented ceilings. The
+deployed chunk SHA-256 is `1d6fb660962fc9be2906cc955d3a22d0c708dc03b8de0be45eae188f3bc579f8`.
+Schema/world/scoreboard/chunk validation, 39 focused lighting tests and all 1,424 unit tests pass.
+Integration is 140/141 under six-way load solely because the known weather-clock threshold reports
+137.688 versus 138; its exact retry plus `world-content-current` passes 2/2. Strict XNA compiles
+all 325 translation units clean with six workers. The complete static gate leaves every
+project-owned check green and exits nonzero only for the known user-owned root `.claude` layout
+entry.
+
+Rule R1(b), R2 and M5's declared dependency order now select `HOUSE-03404`, lighting `Z-L1` and
+`Z-L2` to C3. The remaining forecast is 138.25 realistic / 169.75 pessimistic hours. With 88 task
+hours spent since the final reduction, the R14 projection is 257.75 h, 22.25 h below the ceiling.
+Per the user's latest instruction, every future compilation must use at most six CPU cores; pin
+the complete compiler/CI process tree with `taskset` and set each tool's internal worker limit.
+The user-owned root `.claude` entry remains the known layout-gate failure; do not modify or stage
+it.
+
+---
+
 # Automatic-light schedule handoff — 2026-09-24 (`HOUSE-03401`)
 
 Every one of the house's 138 light groups now has exactly one authored automatic class. The compact

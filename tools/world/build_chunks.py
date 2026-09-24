@@ -791,6 +791,51 @@ CHUNK_BUDGET_EXCEPTIONS["L0_DINING"] = (
     _dining_reason + "; HOUSE-01073 adds measured linen and porcelain table-setting "
     "batches while its napkins reuse the already resident upholstery")
 
+# `HOUSE-03403`: C3 lighting makes every basement, attic and stair group a physical fixture.
+# The established fixture families retain their truthful body/glass/emissive materials, and each
+# independently switched group keeps a separate emissive chunk. These are exact post-build counts;
+# repeated fixtures in one cell batch and no entry is a vertex- or Reach-cap split.
+_baseline_fixture_exceptions = {
+    "B1_UTILITY": (
+        10,
+        "six measured utility-room shell finish groups; HOUSE-03403 adds four measured shared "
+        "body and switched-emissive roles for its physical utility fitting; no split"),
+    "L3_STORE_E": (
+        10,
+        "six measured unfinished-attic shell finish groups; HOUSE-03403 adds four measured "
+        "shared body and switched-emissive roles for its physical utility fitting; no split"),
+}
+CHUNK_BUDGET_EXCEPTIONS.update(_baseline_fixture_exceptions)
+
+for _fixture_cell, _fixture_limit, _fixture_detail in (
+        ("B1_CELLAR", 13, "four utility-fixture roles"),
+        ("B1_CINEMA", 17, "four shared ceiling and aisle-fixture roles"),
+        ("B1_ELECTRICAL", 11, "three remaining utility-fixture roles after steel reuse"),
+        ("B1_GYM", 18, "four shared utility and mirror-fixture roles"),
+        ("B1_HALL", 14, "five shared body and three independently switched emitter roles"),
+        ("B1_HOBBY", 14, "five shared utility and task-lamp roles"),
+        ("B1_LAUNDRY2", 13, "two remaining utility-fixture roles after resident finish reuse"),
+        ("B1_MECHANICAL", 15, "four shared utility-fixture roles"),
+        ("B1_STAIR", 16, "three remaining utility-fixture roles after steel reuse"),
+        ("B1_STOR1", 14, "four shared utility-fixture roles"),
+        ("B1_STOR2", 14, "four shared utility-fixture roles"),
+        ("B1_UNDERSTAIR", 13, "four shared utility-fixture roles"),
+        ("B1_WC7", 13, "three shared ceiling-fixture roles"),
+        ("B1_WORKSHOP", 14, "three remaining utility/task-fixture roles after finish reuse"),
+        ("L0_STAIR_MAIN", 21, "five shared ceiling and step-fixture roles"),
+        ("L1_STAIR_MAIN", 17, "three shared ceiling-fixture roles"),
+        ("L2_STAIR_ATTIC", 14, "four shared utility-fixture roles"),
+        ("L2_STAIR_MAIN", 16, "three shared ceiling-fixture roles"),
+        ("L3_ROOM", 27, "six shared ceiling and task-lamp roles"),
+        ("L3_STAIR_HEAD", 16, "four shared utility-fixture roles"),
+        ("L3_STORE_N", 15, "four shared utility-fixture roles"),
+        ("L3_STORE_S", 14, "four shared utility-fixture roles"),
+        ("L3_STORE_W", 16, "two remaining utility-fixture roles after resident finish reuse")):
+    _fixture_reason = CHUNK_BUDGET_EXCEPTIONS[_fixture_cell][1]
+    CHUNK_BUDGET_EXCEPTIONS[_fixture_cell] = (
+        _fixture_limit,
+        _fixture_reason + f"; HOUSE-03403 adds {_fixture_detail}; no split")
+
 #: The vertex layouts, one per stock effect, with the attributes that effect actually reads.
 #: `MaterialBinder`'s `MaterialKind` is the same closed list of four; `Skinned` never appears here
 #: because a skinned prop is an animated one and animated props are not batched (§17.4).

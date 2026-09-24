@@ -5641,6 +5641,314 @@
       "interactable": null
     },
     {
+      "id": "PROP_B1_STAIR_UTILITY_LIGHT",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "B1_STAIR",
+      "position": [3.55, 0.55, -17.25], "yawDeg": 0, "scale": 0.75,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_HALL_UTILITY_LIGHT_S",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "B1_HALL",
+      "position": [0.0, 0.20, -24.97], "yawDeg": 0, "scale": 0.75,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_HALL_UTILITY_LIGHT_C",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "B1_HALL",
+      "position": [0.0, 0.20, -20.70], "yawDeg": 0, "scale": 0.75,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_HALL_UTILITY_LIGHT_N",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "B1_HALL",
+      "position": [0.0, 0.20, -16.43], "yawDeg": 0, "scale": 0.75,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_MECHANICAL_UTILITY_LIGHT_1",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "B1_MECHANICAL",
+      "position": [6.80, 0.20, -16.97], "yawDeg": 90, "scale": 0.65,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_MECHANICAL_UTILITY_LIGHT_2",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "B1_MECHANICAL",
+      "position": [6.80, 0.20, -15.63], "yawDeg": 90, "scale": 0.65,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_ELECTRICAL_UTILITY_LIGHT",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "B1_ELECTRICAL",
+      "position": [6.80, 0.20, -19.45], "yawDeg": 0, "scale": 0.65,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_UTILITY_CEILING_LIGHT",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "B1_UTILITY",
+      "position": [6.80, 0.20, -21.80], "yawDeg": 0, "scale": 0.65,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_CINEMA_CEILING_1",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "B1_CINEMA",
+      "position": [4.37, 0.23, -25.73], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_CINEMA_CEILING_2",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "B1_CINEMA",
+      "position": [6.53, 0.23, -25.73], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_CINEMA_CEILING_3",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "B1_CINEMA",
+      "position": [4.37, 0.23, -24.37], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_CINEMA_CEILING_4",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "B1_CINEMA",
+      "position": [6.53, 0.23, -24.37], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_CINEMA_AISLE_PUCK_1",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "B1_CINEMA",
+      "position": [5.45, -1.94, -25.73], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_CINEMA_AISLE_PUCK_2",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "B1_CINEMA",
+      "position": [5.45, -1.94, -24.37], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_WC7_CEILING_LIGHT",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "B1_WC7",
+      "position": [3.0, 0.23, -22.1], "yawDeg": 0, "scale": 0.75,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_GYM_UTILITY_LIGHT_W",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "B1_GYM",
+      "position": [-6.20, 0.20, -16.30], "yawDeg": 90, "scale": 0.72,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_GYM_UTILITY_LIGHT_E",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "B1_GYM",
+      "position": [-4.20, 0.20, -16.30], "yawDeg": 90, "scale": 0.72,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_GYM_MIRROR_PUCK",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "B1_GYM",
+      "position": [-5.20, 0.16, -16.30], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_WORKSHOP_UTILITY_LIGHT_1",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "B1_WORKSHOP",
+      "position": [-10.45, 0.20, -16.97], "yawDeg": 0, "scale": 0.80,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_WORKSHOP_UTILITY_LIGHT_2",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "B1_WORKSHOP",
+      "position": [-10.45, 0.20, -15.63], "yawDeg": 0, "scale": 0.80,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_WORKSHOP_BENCH_PUCK",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "B1_WORKSHOP",
+      "position": [-10.45, -0.04, -16.30], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_STOR1_UTILITY_LIGHT",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "B1_STOR1",
+      "position": [-10.45, 0.23, -20.15], "yawDeg": 0, "scale": 0.65,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_STOR2_UTILITY_LIGHT",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "B1_STOR2",
+      "position": [-10.45, 0.23, -24.55], "yawDeg": 0, "scale": 0.65,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_HOBBY_UTILITY_LIGHT_1",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "B1_HOBBY",
+      "position": [-5.20, 0.20, -22.57], "yawDeg": 0, "scale": 0.72,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_HOBBY_UTILITY_LIGHT_2",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "B1_HOBBY",
+      "position": [-5.20, 0.20, -21.15], "yawDeg": 0, "scale": 0.72,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_HOBBY_UTILITY_LIGHT_3",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "B1_HOBBY",
+      "position": [-5.20, 0.20, -19.73], "yawDeg": 0, "scale": 0.72,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_HOBBY_TASK_LAMP",
+      "asset": "MODEL_FIXTURE_DINING_SIDE_LAMP", "cell": "B1_HOBBY",
+      "position": [-5.05, -1.555, -18.70], "yawDeg": 180, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none",
+      "material": null, "interactable": null
+    },
+    {
+      "id": "PROP_B1_CELLAR_UTILITY_LIGHT",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "B1_CELLAR",
+      "position": [-6.40, 0.23, -25.55], "yawDeg": 90, "scale": 0.60,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_LAUNDRY2_UTILITY_LIGHT",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "B1_LAUNDRY2",
+      "position": [-3.40, 0.23, -25.55], "yawDeg": 90, "scale": 0.52,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_B1_UNDERSTAIR_UTILITY_LIGHT",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "B1_UNDERSTAIR",
+      "position": [4.35, -0.57, -21.60], "yawDeg": 90, "scale": 0.40,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_STAIR_MAIN_CEILING_LIGHT",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L0_STAIR_MAIN",
+      "position": [3.55, 2.80, -17.25], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_STAIR_MAIN_STEP_PUCK_1",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L0_STAIR_MAIN",
+      "position": [3.55, 1.46, -18.23], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_STAIR_MAIN_STEP_PUCK_2",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L0_STAIR_MAIN",
+      "position": [3.55, 1.46, -16.27], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_STAIR_MAIN_CEILING_LIGHT",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_STAIR_MAIN",
+      "position": [3.55, 5.70, -17.25], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_STAIR_MAIN_CEILING_LIGHT",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_STAIR_MAIN",
+      "position": [3.55, 8.15, -17.25], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_STAIR_ATTIC_UTILITY_LIGHT",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L2_STAIR_ATTIC",
+      "position": [6.80, 9.28, -16.30], "yawDeg": 0, "scale": 0.40,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L3_STAIR_HEAD_UTILITY_LIGHT",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L3_STAIR_HEAD",
+      "position": [6.80, 11.60, -16.30], "yawDeg": 0, "scale": 0.40,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L3_ROOM_CEILING_LIGHT_1",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L3_ROOM",
+      "position": [-0.55, 11.75, -21.67], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L3_ROOM_CEILING_LIGHT_2",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L3_ROOM",
+      "position": [-0.55, 11.75, -19.33], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L3_ROOM_TASK_LAMP",
+      "asset": "MODEL_FIXTURE_DINING_SIDE_LAMP", "cell": "L3_ROOM",
+      "position": [4.40, 10.045, -21.65], "yawDeg": 90, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none",
+      "material": null, "interactable": null
+    },
+    {
+      "id": "PROP_L3_STORE_W_UTILITY_LIGHT",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L3_STORE_W",
+      "position": [-9.35, 12.45, -20.70], "yawDeg": 90, "scale": 0.50,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L3_STORE_E_UTILITY_LIGHT",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L3_STORE_E",
+      "position": [6.80, 11.60, -22.70], "yawDeg": 0, "scale": 0.50,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L3_STORE_N_UTILITY_LIGHT",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L3_STORE_N",
+      "position": [-0.55, 11.40, -25.55], "yawDeg": 0, "scale": 0.50,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L3_STORE_S_UTILITY_LIGHT",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L3_STORE_S",
+      "position": [0.0, 11.28, -15.65], "yawDeg": 0, "scale": 0.50,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
       "id": "NB_CAR_01",
       "asset": "MODEL_PARKED_CAR_BLUE",
       "cell": "EXT_ROAD",

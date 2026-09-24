@@ -61,6 +61,7 @@ FITTED_WINDOW_PIECES = {"kitchen-service-run", "kitchen-sink-run", "counter-kitc
                         "kitchen-cooking-wall"}
 SURFACE_DRESSING = {"console-decor", "kitchen-counter-decor", "tabletop-decor",
                     "table-setting", "table-lamp", "houseplant"}
+MOUNTED_FIXTURE_CATEGORIES = {"fixture", "fixture-small", "ceiling-light", "wall-light"}
 
 
 @dataclass(frozen=True)
@@ -227,6 +228,19 @@ def _place(row: dict, index: int, assets: dict[str, Asset]) -> Placed:
     collision = _collision_parts(asset, row)
     return Placed(index, row, asset, _rectangle(asset.bounds, row), bottom, top,
                   collision)
+
+
+def _linked_mounted_fixture(identifier: str, category: str, collision: str,
+                            fixture_props: set[str]) -> bool:
+    """A switched physical fitting may mount to a ceiling, rafter or wall, not only a floor.
+
+    The light-to-prop reference is the authored mounting contract.  Keep this narrow: ordinary
+    furniture cannot opt out of support validation, nor can a fitting retain a rigid proxy in the
+    walking volume.
+    """
+    return (identifier in fixture_props
+            and category in MOUNTED_FIXTURE_CATEGORIES
+            and collision == "none")
 
 
 def _cell_contains(cell: dict, point: tuple[float, float], margin: float = 0.0) -> bool:
@@ -433,13 +447,17 @@ def _route_exists(cell: dict, obstacles, goals, *, require_all: bool = True) -> 
 
 
 def validate(world_dir: Path, manifest_path: Path, zones_path: Path) -> list[str]:
-    layout = layout_io.load_layout(world_dir, ["levels", "cells", "portals", "openings", "props"])
+    layout = layout_io.load_layout(
+        world_dir, ["levels", "cells", "portals", "openings", "props", "lights"])
     prop_rows = layout_io.rows(layout, "props")
     assets = _load_assets(manifest_path, {str(row.get("asset")) for row in prop_rows})
     cells = {str(row["id"]): row for row in layout_io.rows(layout, "cells")}
     levels = {str(row["id"]): row for row in layout_io.rows(layout, "levels")}
     portals = layout_io.rows(layout, "portals")
     openings = {str(row.get("portal")): row for row in layout_io.rows(layout, "openings")}
+    fixture_props = {str(row["fixtureProp"])
+                     for row in layout_io.rows(layout, "lights")
+                     if row.get("fixtureProp")}
     props = [_place(row, index, assets) for index, row in enumerate(prop_rows)]
     by_cell: dict[str, list[Placed]] = {}
     for prop in props:
@@ -483,7 +501,11 @@ def validate(world_dir: Path, manifest_path: Path, zones_path: Path) -> list[str
         ceiling_mounted = (prop.asset.category in {"fixture", "fixture-small"}
                            and abs(prop.top - ceiling) <= SUPPORT_TOLERANCE)
         supported = any(_supported_by(prop, other) for other in by_cell.get(prop.cell, []))
-        if not (grounded or ceiling_mounted or ceiling_fixture or wall_mounted or supported):
+        linked_fixture = _linked_mounted_fixture(
+            prop.identifier, prop.asset.category, str(prop.row.get("collision", "proxy")),
+            fixture_props)
+        if not (grounded or ceiling_mounted or ceiling_fixture or wall_mounted or supported
+                or linked_fixture):
             problems.append(f"{prefix}: bottom y={prop.bottom:.3f} is not on floor/terrain "
                             f"y={ground:.3f} or another support within {SUPPORT_TOLERANCE:.2f} m")
 
@@ -617,6 +639,14 @@ def selftest() -> int:
     require(abs(1.0 - 1.005) <= SUPPORT_TOLERANCE
             and abs(1.0 - 1.02) > SUPPORT_TOLERANCE,
             "support contact accepts 5 mm and rejects 20 mm")
+    require(_linked_mounted_fixture("PROP_LIGHT", "ceiling-light", "none", {"PROP_LIGHT"})
+            and not _linked_mounted_fixture(
+                "PROP_LIGHT", "storage-furniture", "none", {"PROP_LIGHT"})
+            and not _linked_mounted_fixture(
+                "PROP_LIGHT", "ceiling-light", "proxy", {"PROP_LIGHT"})
+            and not _linked_mounted_fixture(
+                "PROP_UNLINKED", "ceiling-light", "none", {"PROP_LIGHT"}),
+            "only linked non-colliding mounted fixture categories may omit floor support")
     varied_row = {"id": "PROP_PROBE", "position": [1.0, 2.0, 3.0], "yawDeg": 0.0,
                   "scale": [2.0, 3.0, 4.0],
                   "jitter": {"seed": 971, "yawDeg": 0.0, "offset": 0.1}}

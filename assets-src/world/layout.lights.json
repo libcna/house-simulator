@@ -179,18 +179,18 @@
       "id": "LIGHT_B1_STAIR_MAIN_1", "cell": "B1_STAIR", "group": "LG_B1_STAIR_MAIN",
       "type": "point", "position": [3.55, 0.55, -17.25],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 4.82,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 4800.0, "range": 4.82,
+      "fixtureProp": "PROP_B1_STAIR_UTILITY_LIGHT", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
     // ---- LG_B1_HALL_MAIN_S x1 -- the spine, switched in three sections over 12.8 m
     {
       "id": "LIGHT_B1_HALL_MAIN_S_1", "cell": "B1_HALL", "group": "LG_B1_HALL_MAIN_S",
-      "type": "point", "position": [0.00, 0.20, -20.70],
+      "type": "point", "position": [0.00, 0.20, -24.97],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 7.71,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 3200.0, "range": 7.71,
+      "fixtureProp": "PROP_B1_HALL_UTILITY_LIGHT_S", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -199,18 +199,18 @@
       "id": "LIGHT_B1_HALL_MAIN_C_1", "cell": "B1_HALL", "group": "LG_B1_HALL_MAIN_C",
       "type": "point", "position": [0.00, 0.20, -20.70],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 7.71,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 3200.0, "range": 7.71,
+      "fixtureProp": "PROP_B1_HALL_UTILITY_LIGHT_C", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
     // ---- LG_B1_HALL_MAIN_N x1
     {
       "id": "LIGHT_B1_HALL_MAIN_N_1", "cell": "B1_HALL", "group": "LG_B1_HALL_MAIN_N",
-      "type": "point", "position": [0.00, 0.20, -20.70],
+      "type": "point", "position": [0.00, 0.20, -16.43],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 7.71,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 3200.0, "range": 7.71,
+      "fixtureProp": "PROP_B1_HALL_UTILITY_LIGHT_N", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -220,7 +220,7 @@
       "type": "point", "position": [6.80, 0.20, -16.97],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 4.62,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "fixtureProp": "PROP_B1_MECHANICAL_UTILITY_LIGHT_1", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
     {
@@ -228,7 +228,7 @@
       "type": "point", "position": [6.80, 0.20, -15.63],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 4.62,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "fixtureProp": "PROP_B1_MECHANICAL_UTILITY_LIGHT_2", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -238,7 +238,7 @@
       "type": "point", "position": [6.80, 0.20, -19.45],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 3.84,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "fixtureProp": "PROP_B1_ELECTRICAL_UTILITY_LIGHT", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -248,7 +248,7 @@
       "type": "point", "position": [6.80, 0.20, -21.80],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 3.86,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "fixtureProp": "PROP_B1_UTILITY_CEILING_LIGHT", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -257,32 +257,32 @@
       "id": "LIGHT_B1_CINEMA_MAIN_1", "cell": "B1_CINEMA", "group": "LG_B1_CINEMA_MAIN",
       "type": "point", "position": [4.37, 0.23, -25.73],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 700.0, "range": 6.21,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "colorK": 2700, "intensityLm": 1100.0, "range": 6.21,
+      "fixtureProp": "PROP_B1_CINEMA_CEILING_1", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
     {
       "id": "LIGHT_B1_CINEMA_MAIN_2", "cell": "B1_CINEMA", "group": "LG_B1_CINEMA_MAIN",
       "type": "point", "position": [6.53, 0.23, -25.73],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 700.0, "range": 6.21,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "colorK": 2700, "intensityLm": 1100.0, "range": 6.21,
+      "fixtureProp": "PROP_B1_CINEMA_CEILING_2", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
     {
       "id": "LIGHT_B1_CINEMA_MAIN_3", "cell": "B1_CINEMA", "group": "LG_B1_CINEMA_MAIN",
       "type": "point", "position": [4.37, 0.23, -24.37],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 700.0, "range": 6.21,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "colorK": 2700, "intensityLm": 1100.0, "range": 6.21,
+      "fixtureProp": "PROP_B1_CINEMA_CEILING_3", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
     {
       "id": "LIGHT_B1_CINEMA_MAIN_4", "cell": "B1_CINEMA", "group": "LG_B1_CINEMA_MAIN",
       "type": "point", "position": [6.53, 0.23, -24.37],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 700.0, "range": 6.21,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "colorK": 2700, "intensityLm": 1100.0, "range": 6.21,
+      "fixtureProp": "PROP_B1_CINEMA_CEILING_4", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -291,16 +291,16 @@
       "id": "LIGHT_B1_CINEMA_AISLE_1", "cell": "B1_CINEMA", "group": "LG_B1_CINEMA_AISLE",
       "type": "point", "position": [5.45, -1.95, -25.73],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 90.0, "range": 4.76,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "colorK": 2700, "intensityLm": 120.0, "range": 4.76,
+      "fixtureProp": "PROP_B1_CINEMA_AISLE_PUCK_1", "emissiveMaterialSlot": "PuckDiffuser",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
     {
       "id": "LIGHT_B1_CINEMA_AISLE_2", "cell": "B1_CINEMA", "group": "LG_B1_CINEMA_AISLE",
       "type": "point", "position": [5.45, -1.95, -24.37],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 90.0, "range": 4.76,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "colorK": 2700, "intensityLm": 120.0, "range": 4.76,
+      "fixtureProp": "PROP_B1_CINEMA_AISLE_PUCK_2", "emissiveMaterialSlot": "PuckDiffuser",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -309,8 +309,8 @@
       "id": "LIGHT_B1_WC7_MAIN_1", "cell": "B1_WC7", "group": "LG_B1_WC7_MAIN",
       "type": "point", "position": [3.00, 0.23, -22.10],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 800.0, "range": 3.30,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "colorK": 2700, "intensityLm": 1200.0, "range": 3.30,
+      "fixtureProp": "PROP_B1_WC7_CEILING_LIGHT", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -319,32 +319,32 @@
       "id": "LIGHT_B1_GYM_MAIN_1", "cell": "B1_GYM", "group": "LG_B1_GYM_MAIN",
       "type": "point", "position": [-6.20, 0.20, -16.97],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 5.92,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 3000.0, "range": 5.92,
+      "fixtureProp": "PROP_B1_GYM_UTILITY_LIGHT_W", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
     {
       "id": "LIGHT_B1_GYM_MAIN_2", "cell": "B1_GYM", "group": "LG_B1_GYM_MAIN",
       "type": "point", "position": [-4.20, 0.20, -16.97],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 5.92,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 3000.0, "range": 5.92,
+      "fixtureProp": "PROP_B1_GYM_UTILITY_LIGHT_E", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
     {
       "id": "LIGHT_B1_GYM_MAIN_3", "cell": "B1_GYM", "group": "LG_B1_GYM_MAIN",
       "type": "point", "position": [-6.20, 0.20, -15.63],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 5.92,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 3000.0, "range": 5.92,
+      "fixtureProp": "PROP_B1_GYM_UTILITY_LIGHT_W", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
     {
       "id": "LIGHT_B1_GYM_MAIN_4", "cell": "B1_GYM", "group": "LG_B1_GYM_MAIN",
       "type": "point", "position": [-4.20, 0.20, -15.63],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 5.92,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 3000.0, "range": 5.92,
+      "fixtureProp": "PROP_B1_GYM_UTILITY_LIGHT_E", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -353,8 +353,8 @@
       "id": "LIGHT_B1_GYM_MIRROR_1", "cell": "B1_GYM", "group": "LG_B1_GYM_MIRROR",
       "type": "point", "position": [-5.20, 0.15, -16.30],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 4.86,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 600.0, "range": 4.86,
+      "fixtureProp": "PROP_B1_GYM_MIRROR_PUCK", "emissiveMaterialSlot": "PuckDiffuser",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -363,16 +363,16 @@
       "id": "LIGHT_B1_WORKSHOP_MAIN_1", "cell": "B1_WORKSHOP", "group": "LG_B1_WORKSHOP_MAIN",
       "type": "point", "position": [-10.45, 0.20, -16.97],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 4.79,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 3200.0, "range": 4.79,
+      "fixtureProp": "PROP_B1_WORKSHOP_UTILITY_LIGHT_1", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
     {
       "id": "LIGHT_B1_WORKSHOP_MAIN_2", "cell": "B1_WORKSHOP", "group": "LG_B1_WORKSHOP_MAIN",
       "type": "point", "position": [-10.45, 0.20, -15.63],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 4.79,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 3200.0, "range": 4.79,
+      "fixtureProp": "PROP_B1_WORKSHOP_UTILITY_LIGHT_2", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -381,8 +381,8 @@
       "id": "LIGHT_B1_WORKSHOP_BENCH_1", "cell": "B1_WORKSHOP", "group": "LG_B1_WORKSHOP_BENCH",
       "type": "spot", "position": [-10.45, -0.05, -16.30],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 30.0, "coneOuterDeg": 55.0,
-      "colorK": 3500, "bulbClass": "led", "intensityLm": 500.0, "range": 4.26,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "colorK": 3500, "bulbClass": "led", "intensityLm": 750.0, "range": 4.26,
+      "fixtureProp": "PROP_B1_WORKSHOP_BENCH_PUCK", "emissiveMaterialSlot": "PuckDiffuser",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -392,7 +392,7 @@
       "type": "point", "position": [-10.45, 0.23, -20.15],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 4.36,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "fixtureProp": "PROP_B1_STOR1_UTILITY_LIGHT", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -402,7 +402,7 @@
       "type": "point", "position": [-10.45, 0.23, -24.55],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 4.74,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "fixtureProp": "PROP_B1_STOR2_UTILITY_LIGHT", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -411,34 +411,34 @@
       "id": "LIGHT_B1_HOBBY_MAIN_1", "cell": "B1_HOBBY", "group": "LG_B1_HOBBY_MAIN",
       "type": "point", "position": [-5.20, 0.20, -22.57],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 6.29,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 3000.0, "range": 6.29,
+      "fixtureProp": "PROP_B1_HOBBY_UTILITY_LIGHT_1", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
     {
       "id": "LIGHT_B1_HOBBY_MAIN_2", "cell": "B1_HOBBY", "group": "LG_B1_HOBBY_MAIN",
       "type": "point", "position": [-5.20, 0.20, -21.15],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 5.33,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 3000.0, "range": 5.33,
+      "fixtureProp": "PROP_B1_HOBBY_UTILITY_LIGHT_2", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
     {
       "id": "LIGHT_B1_HOBBY_MAIN_3", "cell": "B1_HOBBY", "group": "LG_B1_HOBBY_MAIN",
       "type": "point", "position": [-5.20, 0.20, -19.73],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 6.29,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 3000.0, "range": 6.29,
+      "fixtureProp": "PROP_B1_HOBBY_UTILITY_LIGHT_3", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
     // ---- LG_B1_HOBBY_TABLE x1 -- over the model railway board
     {
       "id": "LIGHT_B1_HOBBY_TABLE_1", "cell": "B1_HOBBY", "group": "LG_B1_HOBBY_TABLE",
-      "type": "spot", "position": [-5.20, -0.05, -21.15],
+      "type": "spot", "position": [-5.05, -1.05, -18.70],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 30.0, "coneOuterDeg": 55.0,
-      "colorK": 3500, "bulbClass": "led", "intensityLm": 500.0, "range": 5.21,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "colorK": 3500, "bulbClass": "led", "intensityLm": 750.0, "range": 5.21,
+      "fixtureProp": "PROP_B1_HOBBY_TASK_LAMP", "emissiveMaterialSlot": "DiningSideShade",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -448,7 +448,7 @@
       "type": "point", "position": [-6.40, 0.23, -25.55],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 3.97,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "fixtureProp": "PROP_B1_CELLAR_UTILITY_LIGHT", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -458,7 +458,7 @@
       "type": "point", "position": [-3.40, 0.23, -25.55],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 3.70,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "fixtureProp": "PROP_B1_LAUNDRY2_UTILITY_LIGHT", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -468,7 +468,7 @@
       "type": "point", "position": [4.35, -0.57, -21.60],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 3.59,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "fixtureProp": "PROP_B1_UNDERSTAIR_UTILITY_LIGHT", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -552,8 +552,8 @@
       "id": "LIGHT_L0_STAIR_MAIN_MAIN_1", "cell": "L0_STAIR_MAIN", "group": "LG_L0_STAIR_MAIN_MAIN",
       "type": "point", "position": [3.55, 2.80, -17.25],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 1100.0, "range": 4.42,
-      "fixtureProp": null, "emissiveMaterialSlot": "shade",
+      "colorK": 2700, "intensityLm": 2200.0, "range": 4.42,
+      "fixtureProp": "PROP_L0_STAIR_MAIN_CEILING_LIGHT", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -562,16 +562,16 @@
       "id": "LIGHT_L0_STAIR_MAIN_STEP_1", "cell": "L0_STAIR_MAIN", "group": "LG_L0_STAIR_MAIN_STEP",
       "type": "point", "position": [3.55, 1.45, -18.23],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 90.0, "range": 4.74,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "colorK": 2700, "intensityLm": 180.0, "range": 4.74,
+      "fixtureProp": "PROP_L0_STAIR_MAIN_STEP_PUCK_1", "emissiveMaterialSlot": "PuckDiffuser",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
     {
       "id": "LIGHT_L0_STAIR_MAIN_STEP_2", "cell": "L0_STAIR_MAIN", "group": "LG_L0_STAIR_MAIN_STEP",
       "type": "point", "position": [3.55, 1.45, -16.27],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 90.0, "range": 4.74,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "colorK": 2700, "intensityLm": 180.0, "range": 4.74,
+      "fixtureProp": "PROP_L0_STAIR_MAIN_STEP_PUCK_2", "emissiveMaterialSlot": "PuckDiffuser",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -1124,8 +1124,8 @@
       "id": "LIGHT_L1_STAIR_MAIN_MAIN_1", "cell": "L1_STAIR_MAIN", "group": "LG_L1_STAIR_MAIN_MAIN",
       "type": "point", "position": [3.55, 5.70, -17.25],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 1100.0, "range": 4.34,
-      "fixtureProp": null, "emissiveMaterialSlot": "shade",
+      "colorK": 2700, "intensityLm": 2200.0, "range": 4.34,
+      "fixtureProp": "PROP_L1_STAIR_MAIN_CEILING_LIGHT", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -1707,8 +1707,8 @@
       "id": "LIGHT_L2_STAIR_MAIN_MAIN_1", "cell": "L2_STAIR_MAIN", "group": "LG_L2_STAIR_MAIN_MAIN",
       "type": "point", "position": [3.55, 8.15, -17.25],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 1100.0, "range": 4.12,
-      "fixtureProp": null, "emissiveMaterialSlot": "shade",
+      "colorK": 2700, "intensityLm": 2200.0, "range": 4.12,
+      "fixtureProp": "PROP_L2_STAIR_MAIN_CEILING_LIGHT", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -1717,8 +1717,8 @@
       "id": "LIGHT_L2_STAIR_ATTIC_MAIN_1", "cell": "L2_STAIR_ATTIC", "group": "LG_L2_STAIR_ATTIC_MAIN",
       "type": "point", "position": [6.80, 9.28, -16.30],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 800.0, "range": 4.38,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "colorK": 2700, "intensityLm": 2400.0, "range": 4.38,
+      "fixtureProp": "PROP_L2_STAIR_ATTIC_UTILITY_LIGHT", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -2155,8 +2155,8 @@
       // maximum. 11.60 m leaves the emitter 75 mm below the generated rafter underside.
       "type": "point", "position": [6.80, 11.60, -16.30],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 800.0, "range": 4.86,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "colorK": 2700, "intensityLm": 2400.0, "range": 4.86,
+      "fixtureProp": "PROP_L3_STAIR_HEAD_UTILITY_LIGHT", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -2165,26 +2165,29 @@
       "id": "LIGHT_L3_ROOM_MAIN_1", "cell": "L3_ROOM", "group": "LG_L3_ROOM_MAIN",
       "type": "point", "position": [-0.55, 11.75, -21.67],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 1100.0, "range": 9.99,
-      "fixtureProp": null, "emissiveMaterialSlot": "shade",
+      "colorK": 2700, "intensityLm": 2200.0, "range": 9.99,
+      "bakeLumensPerRadiantWatt": 100.0,
+      "fixtureProp": "PROP_L3_ROOM_CEILING_LIGHT_1", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
     {
       "id": "LIGHT_L3_ROOM_MAIN_2", "cell": "L3_ROOM", "group": "LG_L3_ROOM_MAIN",
       "type": "point", "position": [-0.55, 11.75, -19.33],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 1100.0, "range": 8.31,
-      "fixtureProp": null, "emissiveMaterialSlot": "shade",
+      "colorK": 2700, "intensityLm": 2200.0, "range": 8.31,
+      "bakeLumensPerRadiantWatt": 100.0,
+      "fixtureProp": "PROP_L3_ROOM_CEILING_LIGHT_2", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
     // ---- LG_L3_ROOM_DESK x1
     {
       "id": "LIGHT_L3_ROOM_DESK_1", "cell": "L3_ROOM", "group": "LG_L3_ROOM_DESK",
-      "type": "spot", "position": [-0.55, 12.30, -20.50],
+      "type": "spot", "position": [4.40, 10.55, -21.65],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 30.0, "coneOuterDeg": 55.0,
-      "colorK": 3500, "bulbClass": "led", "intensityLm": 500.0, "range": 9.28,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "colorK": 3500, "bulbClass": "led", "intensityLm": 750.0, "range": 9.28,
+      "bakeLumensPerRadiantWatt": 100.0,
+      "fixtureProp": "PROP_L3_ROOM_TASK_LAMP", "emissiveMaterialSlot": "DiningSideShade",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -2194,7 +2197,7 @@
       "type": "point", "position": [-9.35, 12.45, -20.70],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 9.05,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "fixtureProp": "PROP_L3_STORE_W_UTILITY_LIGHT", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -2205,7 +2208,7 @@
       "type": "point", "position": [6.80, 11.60, -22.70],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 6.86,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "fixtureProp": "PROP_L3_STORE_E_UTILITY_LIGHT", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -2215,7 +2218,7 @@
       "type": "point", "position": [-0.55, 11.40, -25.55],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 7.00,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "fixtureProp": "PROP_L3_STORE_N_UTILITY_LIGHT", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
@@ -2225,7 +2228,7 @@
       "type": "point", "position": [0.00, 11.28, -15.65],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 5.36,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "fixtureProp": "PROP_L3_STORE_S_UTILITY_LIGHT", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
     // ================================================================== the exterior lights

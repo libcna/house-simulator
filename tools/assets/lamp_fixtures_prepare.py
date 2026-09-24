@@ -74,8 +74,11 @@ SOURCES = (
          "paint": "MAT_DOOR_PAINTED",
          "charcoal": "MAT_FURNITURE_PIANO_EBONITE",
          "cream": "MAT_FIXTURE_EMISSIVE_NEUTRAL"},
-        ("B1_ELECTRICAL", "B1_MECHANICAL", "B1_UTILITY", "B1_STOR1", "B1_STOR2",
-         "L0_GARAGE", "L3_STORE_E", "L3_STORE_W", "EXT_SHED"),
+        ("B1_CELLAR", "B1_ELECTRICAL", "B1_GYM", "B1_HALL", "B1_HOBBY",
+         "B1_LAUNDRY2", "B1_MECHANICAL", "B1_STAIR", "B1_STOR1", "B1_STOR2",
+         "B1_UNDERSTAIR", "B1_UTILITY", "B1_WORKSHOP", "EXT_SHED", "L0_GARAGE",
+         "L2_STAIR_ATTIC", "L3_STAIR_HEAD", "L3_STORE_E", "L3_STORE_N", "L3_STORE_S",
+         "L3_STORE_W"),
     ),
 )
 

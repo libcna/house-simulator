@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **91 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 119 / 140 / 172 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **M4 dressing checkpoint passed; M5 baseline lighting is in progress.** Next: light the basement, attic and stairwells in `HOUSE-03403` |
+| Active plan | **90 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 118 / 138 / 170 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **M4 dressing checkpoint passed; M5 baseline lighting is in progress.** Next: light the two upper floors in `HOUSE-03404` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -283,14 +283,14 @@ proved all 90 intended-accessible cells and the tight-space traversal. G1 clears
 
 | Zone | C3 floor | Main at C4 | Hero cells at C5 | Evidence | Largest gaps |
 |---|---|---|---|---|---|
-| `Z-B1` | **C2** (C3 dressing 14 / 14 cells) | 0 / 1 | 0 / 1 | Round 132; all fourteen cells have static tiered dressing and clear routes (`HOUSE-01020`–`01025`) | Final day/night readability belongs to M5 |
+| `Z-B1` | **C3** | 0 / 1 | 0 / 1 | Round 147; all fourteen cells have physical fixtures and readable day/scheduled-night lighting (`HOUSE-03403`) | No zone-specific S2 |
 | `Z-L0M` | **C2** (dressing of C3 done; lighting S2 open) | 0 / 3 | 0 / 5 | Round 103 plus 102 prior rounds. Primary furniture in all 9 cells (`HOUSE-01037`–`01076`) | S2: Basic-lit furniture much darker than the baked receivers (piano, sofas); service-room night depth. **Goes last by R4** |
 | `Z-L0S` | **C2** (C3 dressing 8 / 8 cells) | — | — | Round 138; all eight service cells have complete tiered compositions and clear routes (`HOUSE-00991`, `HOUSE-00994`–`00996`) | Final day/night readability belongs to M5 |
 | `Z-GAR` | **C2** (C3 dressing 1 / 1) | 0 / 1 | — | Round 140; the main bay and utility loft have their bounded recipes (`HOUSE-00998`) | Night readability belongs to M5 |
 | `Z-L1` | **C2** (C3 dressing 20 / 20 cells) | 0 / 1 | — | Round 128; every accessible cell has its tiered essential composition and clear route (`HOUSE-00999`–`01007`) | Final day/night readability belongs to M5 |
 | `Z-L2` | **C3** (C3 dressing 15 / 15 cells) | — | 0 / 1 | Round 137; every accessible cell has its tiered essential composition and clear route (`HOUSE-01009`–`01015`) | Final day/night readability belongs to M5 |
-| `Z-L3` | **C2** (C3 dressing 5 / 5 cells) | 0 / 1 | — | Round 141; every attic cell has its bounded tier recipe and clear route (`HOUSE-01016`–`01018`) | Final day/night readability belongs to M5 |
-| `Z-STAIR` | **C3** (C3 dressing 6 / 6 cells) | 0 / 3 | — | Round 136; all 8 flights retain complete joinery, all 6 stair cells have their tiered landing dressing, and `L3_STAIR_HEAD` also carries bounded long-term storage clear of its opening (`HOUSE-01017`, `HOUSE-01020`, `HOUSE-03343`) | Final day/night readability belongs to M5 |
+| `Z-L3` | **C3** | 0 / 1 | — | Round 147; all five attic cells have physical fixtures and readable dormer daylight; the room is readable under its scheduled lights (`HOUSE-03403`) | No zone-specific S2 |
+| `Z-STAIR` | **C3** | 0 / 3 | — | Round 147; all 8 flights retain complete joinery and have physical fixtures with readable day/night transitions (`HOUSE-03403`) | No zone-specific S2; main-stair-foot darkness closed |
 | `Z-EXF` | **C3** (C4-level content in place) | — | 0 / 4 | Round 143; the finished facade/roof/entry/approach includes the bounded mailbox and exterior-service recipe (`HOUSE-00770`); property bot walk (`HOUSE-00782`) | No zone-specific S2 |
 | `Z-EXR` | **C2** (C3 dressing 7 / 7 cells) | 0 / 2 | — | Round 143; all rear/side cells retain their bounded terrace, garden, orchard, shed and service-side compositions (`HOUSE-03342`) | Final day/night readability belongs to M5 |
 | `Z-STR` | **C2** (C3 scenery dressing done) | — | — | Round 139; N1–N60, street furniture, barriers and the three parked estates plus delivery van (`HOUSE-00841`–`00849`, `00856`, `00857`) | S3: plain road foreground and repeated vegetation band; logged for M11 |
@@ -301,14 +301,14 @@ visually complete. C4 and C5 are target counts from the tier classification, not
 
 | Zone | Cells | Accessible | Props | Props/access. | Zero-prop accessible | Lit accessible | Review poses | C4 main targets | C5 hero targets |
 |---|---:|---:|---:|---:|---|---|---:|---|---|
-| `Z-B1` | 14 | 14 | 54 | 3.86 | 0 | 14 / 14 | 4 | 1 | 1 |
+| `Z-B1` | 14 | 14 | 83 | 5.93 | 0 | 14 / 14 | 4 | 1 | 1 |
 | `Z-L0M` | 9 | 9 | 106 | 11.78 | 0 | 9 / 9 | 23 | 3 | 5 |
 | `Z-L0S` | 8 | 8 | 24 | 3.00 | 0 | 8 / 8 | 2 | 0 | 0 |
 | `Z-GAR` | 2 | 1 | 8 | 8.00 | 0 | 1 / 1 | 2 | 1 | 0 |
 | `Z-L1` | 20 | 20 | 70 | 3.50 | 0 | 20 / 20 | 6 | 1 | 0 |
 | `Z-L2` | 16 | 15 | 62 | 4.13 | 0 | 15 / 15 | 6 | 0 | 1 |
-| `Z-L3` | 5 | 5 | 31 | 6.20 | 0 | 5 / 5 | 4 | 1 | 0 |
-| `Z-STAIR` | 6 | 6 | 14 | 2.33 | 0 | 6 / 6 | 9 | 3 | 0 |
+| `Z-L3` | 5 | 5 | 38 | 7.60 | 0 | 5 / 5 | 4 | 1 | 0 |
+| `Z-STAIR` | 6 | 6 | 22 | 3.67 | 0 | 6 / 6 | 9 | 3 | 0 |
 | `Z-EXF` | 5 | 5 | 17 | 3.40 | 0 | 5 / 5 | 4 | 0 | 4 |
 | `Z-EXR` | 7 | 7 | 43 | 6.14 | 0 | 3 / 7 | 7 | 2 | 0 |
 | `Z-STR` | 2 | 0 | 0 | — | 0 | 0 / 0 | 1 | 0 | 0 |
@@ -951,10 +951,11 @@ light, nothing more. No new lighting system is added for polish (rule R9).
       trace: absorbs `HOUSE-01029` (chunk rebuild) and `HOUSE-00913` (seams)
       note: (2026-09-24) Round 145 rebuilds the final furnished world at 1,114 chunks / 3,010,601 vertices / 79,744,552 packed vertex bytes. All 79 cells above the six-chunk target exactly match their measured existing exceptions; there are 8 16-bit-cap splits, 15 Reach-cap splits and no 32-bit chunk. The existing deterministic baker now imports only the 252 solid static `collision: proxy` props in the 78 receiver cells as caster-only geometry (2,585 visible mesh objects), excluding `_COL`, lower LOD and thin dressing nodes. It records a per-cell hash of the exact prop rows and GLB bytes so resume cannot reuse a stale furnished bake. The 256-sample full runs produced 78 daylight and 138 artificial atlases in 206.455 s and 477.534 s; every receiver mean is positive, both families bind the same 78 current shell/prop signatures, and a full resume reuses all 78 cells. The refreshed receiver means continue to light furniture through `HOUSE-03402` while the imported solid furniture casts into the shell atlases. Round 145 inspected one fixed clear-day view per zone against Round 144: interior changes are the expected furnishing/contact-shadow response, exterior controls are unchanged apart from HUD timing, and there is no black atlas, S1/S2 seam, gutter bleed, clipping or z-fighting. The unwrap report covers 78 cells/atlases with no problem or attention row. Full evidence is in `docs/visual-review/house-01030-furnished-rebake.md`; the build, schema/world/manifest/licence/budget/deployment gates, 1,420 unit tests and 49 runnable render tests pass. Integration has 140/141 passes under load; the sole weather-clock timing miss passes on its exact focused retry and is unrelated to the bake
 
-- [ ] HOUSE-03403 — Light the basement, the attic and the stairwells to the C3 baseline
+- [x] HOUSE-03403 — Light the basement, the attic and the stairwells to the C3 baseline
       dep: HOUSE-03402, HOUSE-01030, HOUSE-03401 · sys: lighting · plat: TOOL · pri: MUST · zone: Z-B1, Z-L3, Z-STAIR · adv: G3, D6 · est: 2
       accept: every room and flight in `Z-B1`, `Z-L3` and `Z-STAIR` has physical fixtures on its authored groups, set by its recipe's preset; windowless rooms are readable under their scheduled lights and never black; the attic reads by dormer daylight plus bare-bulb fixtures; the main stair foot's S2 darkness (Rounds 98, 102) is closed
       verify: zone captures day and night (utility rooms by day only); lighting tests
+      note: (2026-09-24) Round 147 closes the first C3 lighting band with 44 physical fixture props backing all 46 authored sources across the exact 25 cells of `Z-B1`, `Z-L3` and `Z-STAIR`. Four existing fixture families, the existing schedule, bake path and prop path are reused; no runtime code, exposure constant, material family, asset or subsystem was added. The basement hall's three sources now span its length, scheduled working spaces are readable without a global lift, attic stores read by dormer daylight and retain their intentional `SC-OFF` night state, and the finished attic room plus all eight flights are readable under their scheduled groups. Night mean linear RGB rises 1.37–6.46x in the measured basement views, 5.11x in the attic room and 1.25–3.31x at the measured stair transitions; the main-stair-foot S2 is closed. The targeted 256-sample promotion refreshed 25 daylight and 37 artificial products. The 1,209-chunk / 3,032,941-vertex / 80,459,432-byte world retains 8 16-bit splits, 15 Reach splits and zero 32-bit chunks; every exception exactly matches its measured ceiling. Schema/world/scoreboard/chunk gates, 39 focused lighting tests and all 1,424 unit tests pass. Integration is 140/141 under load only because the known weather-clock threshold misses at 137.688 versus 138; its exact retry plus `world-content-current` passes 2/2. Strict XNA compiles all 325 translation units clean with six workers; the complete static gate exits nonzero only for the known user-owned root `.claude` layout entry. Full visual and numeric evidence is in `docs/visual-review/house-03403-basement-attic-stairs-lighting.md`
 
 - [ ] HOUSE-03404 — Light the two upper floors to the C3 baseline
       dep: HOUSE-03402, HOUSE-01030, HOUSE-03401 · sys: lighting · plat: TOOL · pri: MUST · zone: Z-L1, Z-L2 · adv: G3, D6 · est: 2
@@ -1891,7 +1892,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M2 Architectural completion | 8 | 18 | **0** | 0 | **0** | 0 | — |
 | M3 The reusable furnishing kit | 16 | 33 | **0** | 0 | **0** | 0 | — |
 | M4 Dressing everywhere | 40 | 48.75 | **0** | 0 | **0** | 0 | R-D +3 |
-| M5 Baseline lighting everywhere | 12 | 24.5 | **7** | 8.5 | **9.75** | 10.5 | — |
+| M5 Baseline lighting everywhere | 12 | 24.5 | **6** | 6.75 | **7.75** | 8.25 | — |
 | M6 Main cells and hero areas | 20 | 32.5 | **15** | 16.75 | **19.75** | 21.75 | — |
 | M7 A compact environment | 13 | 21 | **8** | 11.25 | **13.25** | 14.5 | — |
 | M8 Atmospheric audio essentials | 11 | 14.5 | **6** | 7.75 | **9** | 10 | — |
@@ -1903,12 +1904,12 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **91** | **119.25** | **140.25** | **172** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **90** | **117.5** | **138.25** | **169.75** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-108 h. Adding the 86 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-258 h, 22 h under the limit. That margin is
+110.25 h. Adding the 88 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+257.75 h, 22.25 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |
