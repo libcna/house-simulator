@@ -4932,3 +4932,25 @@ screenshot. No plumbing behaviour, clutter or bespoke variants were added.
 Rule R2 now ties `Z-B1` and `Z-L2` at nine accessible cells still below target and selects the
 least-recently worked `Z-B1` (Round 120 versus Round 122). Next: `HOUSE-01023`, furnishing
 `B1_CINEMA` and `B1_WC7`.
+
+## Round 124 — basement cinema and WC dressing
+
+Commit: `HOUSE-01023` working tree (`2026-09-24`). The local, Git-ignored
+[`clear-day`](captures/house-01023-b1-day) and final
+[`forced-light`](captures/house-01023-b1-lit-final) sets retain all four fixed `Z-B1` controls.
+Supplemental reciprocal cinema and hall-side WC views in
+[`detail`](captures/house-01023-b1-lit) expose both seating rows, the screen/projector pair and the
+compact fixture group; forced light is placement evidence, not a claim that M5's normal day/night
+balance is complete.
+
+The cinema stops at its required main-tier set: one static screen, one static projector, two
+four-seat rows and four reused upholstered wall panels. The WC reuses the established toilet,
+vanity, mirror and towel rail. Initial renders exposed the thin screen and panels buried within the
+15 cm structural wall thickness; placing them on the measured interior faces makes every required
+piece readable without adding an asset or runtime system. The final fixed and reciprocal views
+show grounded, separated seats, a clear side aisle, correctly supported wall pieces and visible WC
+fixtures without clipping, floating geometry, z-fighting or a blocked route. Playback, posters,
+clutter and C5 hero dressing remain outside this task.
+
+Rule R2 now selects `Z-L2`, with nine accessible cells still below target versus seven in `Z-B1`
+and six in `Z-L1`. Next: `HOUSE-01013`, furnishing `L2_BED6` and `L2_BED7`.

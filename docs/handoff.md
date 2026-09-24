@@ -1,3 +1,34 @@
+# Basement cinema and WC dressing handoff — 2026-09-24 (`HOUSE-01023`)
+
+The basement cinema now has its bounded main-tier composition: a static light-faced screen and
+generated projector, two acquired four-seat rows, and four reused upholstered wall panels. The
+compact WC reuses the established toilet, vanity, mirror and towel rail. Eleven new rows are all
+static; solid floor pieces and the projector retain their existing proxies, while the screen and
+thin wall panels rely on the wall collision already in front of them. No playback, interaction,
+new asset/material family, runtime system, poster or optional clutter was added.
+
+All 253 production props pass exact support, overlap, wall-plane, opening, door-sweep and 0.70 m
+route validation. The 90-cell grand tour and `world-content-current` pass. Moving the screen onto
+the measured interior wall face initially created a redundant wall/screen collision sliver;
+dropping only that unreachable proxy restored the wider inside-geometry result to the two older
+`L1_LANDING west` bodies beside `HOUSE-00999`'s bench, with no B1 failure. Measured chunk totals
+are exactly `B1_CINEMA` 13/13 and `B1_WC7` 10/10, with no vertex or Reach-cap split.
+
+Clear-day, final forced-light, reciprocal cinema and hall-side WC renders were inspected at full
+resolution. They expose both seat rows, the screen/projector pair, the acoustic panels and grounded
+WC fixtures without clipping, floating geometry, z-fighting or a blocked route. The first render
+also caught the screen and panels buried in the 15 cm structural wall thickness; their final
+positions use the measured interior faces. Normal-light balance remains M5 scope.
+
+The remaining forecast is 168 realistic / 205.5 pessimistic hours. With 58.25 task-hours spent
+since the final reduction, the R14 projection is 263.75 h, 16.25 h below the hard ceiling. Rule R2
+now selects `Z-L2`, with nine accessible cells still below target versus seven in `Z-B1` and six in
+`Z-L1`. The exact next unblocked MUST task is `HOUSE-01013`, furnishing `L2_BED6` and `L2_BED7`.
+Every compilation/test invocation must remain at no more than four workers and pinned to CPUs
+4,5,7,9; strict-XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # First-floor family/guest wet-room dressing handoff — 2026-09-24 (`HOUSE-01006`)
 
 All four secondary wet-room recipes are complete with eighteen ordinary static rows from the

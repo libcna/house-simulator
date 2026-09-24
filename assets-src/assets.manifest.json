@@ -1123,7 +1123,8 @@
         "FAMILY_ART": "MAT_FAMILY_ART_CANVAS"
       },
       "usedIn": [
-        "L0_FAMILY"
+        "L0_FAMILY",
+        "B1_CINEMA"
       ]
     },
     {

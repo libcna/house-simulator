@@ -433,6 +433,15 @@ CHUNK_BUDGET_EXCEPTIONS["L3_STORE_W"] = (
 # room surface. These are the measured counts with only those examples present.
 CHUNK_BUDGET_EXCEPTIONS["B1_WC7"] = (
     7, "six room/shell roles plus HOUSE-00985's reusable mirror glass example")
+CHUNK_BUDGET_EXCEPTIONS["B1_CINEMA"] = (
+    13, "six measured shell finish chunks plus HOUSE-01023's seven distinct static cinema "
+        "screen, projector, seating and acoustic-panel finish groups; no vertex or Reach-cap "
+        "split")
+_wc7_limit, _wc7_reason = CHUNK_BUDGET_EXCEPTIONS["B1_WC7"]
+CHUNK_BUDGET_EXCEPTIONS["B1_WC7"] = (
+    _wc7_limit + 3,
+    _wc7_reason + "; HOUSE-01023 adds three measured shared WC fixture finish groups; no "
+                  "vertex or Reach-cap split")
 _workshop_limit, _workshop_reason = CHUNK_BUDGET_EXCEPTIONS["B1_WORKSHOP"]
 CHUNK_BUDGET_EXCEPTIONS["B1_WORKSHOP"] = (
     _workshop_limit + 1,
