@@ -1,3 +1,34 @@
+# Representative day/night render-set handoff — 2026-09-24 (`HOUSE-01275`)
+
+The M5 implementation band is complete. `RepresentativeInteriorRenderTests` now owns exactly 32
+versioned Tier-S/High Mesa frames: one existing fixed review pose for each of the eleven zones and
+five retained hero areas at clear 10:30 and scheduled 22:00. It forces no light group and contains
+no lights-on/off matrix. The coverage test pins the exact eleven-zone/five-hero sets; the active
+test captures every scene and compares software pixels outside the named frame-time region at
+channel tolerance 2 and a <0.2% differing-pixel ceiling.
+
+Both final 4x4 contact sheets were inspected at full resolution. They show the authored day/night
+hierarchy with correct material sampling and no clipping, floating prop, z-fighting, missing
+texture, broken shadow, blocked route or impossible placement. `main-stair-foot` replaces the
+initially considered near-blank basement-stair wall view. Frame two is the measured deterministic
+warm-up: frame one retains CNA's initial sampler state; frame three varied the darkest cinema frame
+by 15.55–16.38% between processes; two fresh frame-two cinema captures were bit-identical. The
+disabled regeneration run passes in 140.934 s and the fresh two-test active run passes in 145.105 s.
+All 1,424 unit tests pass with four workers. The complete static gate passes every project-owned
+check, including all 326 strict-XNA translation units with four workers; it exits nonzero only for
+the known user-owned root `.claude` layout entry. Exact evidence is in
+`docs/visual-review/house-01275-representative-render-set.md`.
+
+Rule R2 and the final M5 dependency now select `HOUSE-03420`, the G3 all-zone review. It must capture
+one all-zone day/night round (utility rooms by day only), confirm no S1/S2 in accessible rooms and
+re-run the scoreboard. The remaining forecast is 131.5 realistic / 162.25 pessimistic hours. With
+94.75 task-hours spent since the final reduction, the R14 projection remains 257 h, 23 h below the
+ceiling. Every compilation must use at most four CPU cores: pin the process tree to CPUs 4,5,7,9,
+set build and test parallelism to 4, set `HOUSE_XNA_STRICT_JOBS=4`, and retain `/rv/cnaccache`.
+Do not modify or stage the user-owned root `.claude` entry.
+
+---
+
 # Ground-floor route lighting closure handoff — 2026-09-24 (`HOUSE-03407`)
 
 `Z-L0M` is at C3 and Round 102's ranked S2 list is closed. This task required no new runtime or

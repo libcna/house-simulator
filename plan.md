@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **86 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 113 / 133 / 163 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **M4 dressing checkpoint passed; M5 baseline lighting is in progress.** Next: freeze the representative day/night render set in `HOUSE-01275` |
+| Active plan | **85 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 112 / 132 / 162 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **M4 dressing checkpoint passed; M5 baseline lighting implementation is complete.** Next: gate G3 review in `HOUSE-03420` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -317,7 +317,7 @@ visually complete. C4 and C5 are target counts from the tier classification, not
 no accessible cells.** Every accessible cell has its tier's essential props, readable day/night
 lighting and no open S1/S2. Round 151 closes the last ground-floor lighting findings while
 `zone_scoreboard.py` continues to report zero zero-prop accessible rooms and assigns all 96 cells
-exactly once. M5's representative render set and G3 review remain open.
+exactly once. M5's representative render set passes; only the G3 review remains open.
 
 ---
 
@@ -394,7 +394,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M2](#m2--architectural-completion-c2-everywhere--gate-g2) — Architectural completion | A | 03261–03300 | 0 | **G2 passed** · `HOUSE-03280` | D1 | 0 |
 | [M3](#m3--the-reusable-furnishing-kit) — The reusable furnishing kit | A (support) | 03301–03340 | 0 | **kit ready for M4** | D3 | 0 |
 | [M4](#m4--dressing-everywhere-the-furnishing-half-of-c3--checkpoint) — Dressing everywhere | A | 03341–03400 | 0 | **checkpoint passed** · `HOUSE-03380` | D3 | 0 |
-| [M5](#m5--baseline-lighting-everywhere-the-lighting-half-of-c3--gate-g3) — Baseline lighting everywhere | A | 03401–03440 | 5 | **G3** · `HOUSE-03420` | D3, D6 | 5.75 |
+| [M5](#m5--baseline-lighting-everywhere-the-lighting-half-of-c3--gate-g3) — Baseline lighting everywhere | A | 03401–03440 | 1 | **G3** · `HOUSE-03420` | D3, D6 | 1 |
 | [M6](#m6--main-cells-and-hero-areas-c4-c5--gates-g4-and-g5) — Main cells and hero areas | A | 03441–03500 | 15 | **G4** · `HOUSE-03452`, **G5** · `HOUSE-03480` | D4 | 19.75 |
 | [M7](#m7--a-compact-environment) — A compact environment | B | 03501–03540 | 8 | `HOUSE-03520` | D5 | 13.25 |
 | [M8](#m8--atmospheric-audio-essentials) — Atmospheric audio essentials | B | 03541–03570 | 6 | `HOUSE-01939` | D7 | 9 |
@@ -982,11 +982,12 @@ light, nothing more. No new lighting system is added for polish (rule R9).
       note: deliberately **last** in M5. It is the only permitted `Z-L0M` work before G3 (rule R4)
       note: (2026-09-24) Round 151 closes all three ranked Round 102 findings without a ground-floor-only constant or new implementation. `HOUSE-03402`'s bounded per-cell receiver sample already brings the measured `Z-L0M` furniture/receiver ratios into its 0.25–3.50 acceptance band (family-media 0.334 day / 0.283 night), `HOUSE-03403` closes the main-stair-foot darkness with physical scheduled fixtures, and `HOUSE-03405` closes service-room night depth. Fresh 10:30 clear and 22:00 scheduled captures cover all 23 fixed `Z-L0M` poses without light overrides. Full-resolution inspection shows the piano body, keys, score and physical picture light; separates the living/family furniture from adjacent receivers; and keeps foyer, hall, kitchen, dining, butler's pantry and sunroom readable with no clipping, floating fixtures, z-fighting, missing texture or blocked route. Cropping the HUD, aggregate mean linear luminance is 0.043056 by day and 0.024087 at night; the darkest individual frames remain non-black at 0.013928 and 0.008296. No source, schedule, exposure, renderer, material, asset or lightmap changed. Full evidence is in `docs/visual-review/house-03407-ground-route-lighting.md`
 
-- [ ] HOUSE-01275 — Representative interior render set: one pose per zone and per hero area, by day and at night
+- [x] HOUSE-01275 — Representative interior render set: one pose per zone and per hero area, by day and at night
       dep: HOUSE-03403, HOUSE-03404, HOUSE-03405, HOUSE-03406, HOUSE-03407 · sys: ci · plat: CI · pri: MUST · zone: all · adv: G3, D11 · est: 1
       accept: the existing review poses reused as render tests: one per zone plus one per hero area, at 10:30 clear and at 22:00 under the schedule (about 32 scenes), within the render-test tolerance; no lights-on/lights-off matrix
       verify: the render suite
       trace: was *20 rooms, lights on and off, at noon and at midnight*; absorbs `HOUSE-00917`, `HOUSE-01032`, `HOUSE-02590` and `HOUSE-02592`
+      note: (2026-09-24) The versioned Tier-S/High Mesa set contains exactly 32 640x360 frames: one unchanged review pose for all eleven zones and all five retained hero areas at clear 10:30 and scheduled 22:00, with no light override. A coverage test pins those exact sets; a fresh software-renderer run passes all 32 comparisons with the existing per-channel tolerance 2 and <0.2% differing-pixel limit. Full-resolution inspection accepts both contact sheets and replaces the initially near-blank basement-stair candidate with the existing `main-stair-foot` pose. Capture frame two is measured: frame one retains CNA's initial sampler state, while frame three made the darkest cinema frame vary by 15.55–16.38% between processes; two independent frame-two cinema renders were bit-identical. No tolerance was widened and no runtime/content/asset changed. Full evidence is in `docs/visual-review/house-01275-representative-render-set.md`
 
 - [ ] HOUSE-03420 — **Gate G3 review: every accessible room at C3 (dressed and lit baseline)**
       dep: HOUSE-03402, HOUSE-03403, HOUSE-03404, HOUSE-03405, HOUSE-03406, HOUSE-03407, HOUSE-01030, HOUSE-01275 · sys: — · plat: ALL · pri: MUST · zone: all · adv: G3, D3, D6 · est: 1
@@ -1896,7 +1897,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M2 Architectural completion | 8 | 18 | **0** | 0 | **0** | 0 | — |
 | M3 The reusable furnishing kit | 16 | 33 | **0** | 0 | **0** | 0 | — |
 | M4 Dressing everywhere | 40 | 48.75 | **0** | 0 | **0** | 0 | R-D +3 |
-| M5 Baseline lighting everywhere | 12 | 24.5 | **2** | 1.75 | **2** | 2 | — |
+| M5 Baseline lighting everywhere | 12 | 24.5 | **1** | 0.75 | **1** | 1 | — |
 | M6 Main cells and hero areas | 20 | 32.5 | **15** | 16.75 | **19.75** | 21.75 | — |
 | M7 A compact environment | 13 | 21 | **8** | 11.25 | **13.25** | 14.5 | — |
 | M8 Atmospheric audio essentials | 11 | 14.5 | **6** | 7.75 | **9** | 10 | — |
@@ -1908,11 +1909,11 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **86** | **112.75** | **132.5** | **163.25** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **85** | **111.75** | **131.5** | **162.25** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-116.75 h. Adding the 93.75 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+117.75 h. Adding the 94.75 task-hours completed since `HOUSE-03206` gives a ceiling projection of
 257 h, 23 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 

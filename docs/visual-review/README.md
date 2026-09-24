@@ -5341,3 +5341,25 @@ changed. Exact evidence is in
 
 Rule R2 and M5's dependency order next select `HOUSE-01275`, freezing the representative interior
 day/night render set before gate G3.
+
+## Round 152 — representative day/night render set
+
+Commit: `HOUSE-01275` working tree (`2026-09-24`). The strict golden set contains 32 versioned
+640x360 frames: one existing review pose for each of the eleven zones and each of the five retained
+hero areas, under clear 10:30 daylight and the unmodified 22:00 schedule. No light override or
+lights-on/off matrix is present.
+
+Both final contact sheets were inspected at full resolution. The selected `main-stair-foot` view
+shows a useful complete flight; the day set communicates every room/exterior purpose; and the
+night set shows the intended occupied-house hierarchy, including the deliberately dark attic store
+and its lit adjoining doorway. No clipping, floating prop, z-fighting, missing texture, broken
+shadow, blocked route or impossible placement is visible.
+
+The test fixes Tier S/High, clear weather, frozen clock, seed and frame two. Frame two is the
+measured deterministic warm-up: frame one retained CNA's initial sampler state, while frame three
+varied the darkest cinema exposure between processes. A fresh software-renderer run passes exact
+eleven-zone/five-hero coverage and all 32 pixel comparisons at the existing two-channel/0.2%
+tolerance. Exact poses and the deterministic-capture evidence are in
+[`house-01275-representative-render-set.md`](house-01275-representative-render-set.md).
+
+Rule R2 now selects `HOUSE-03420`, the G3 all-zone dressed-and-lit baseline review.

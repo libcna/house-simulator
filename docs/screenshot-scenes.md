@@ -33,6 +33,7 @@ rather than letting a later scene inherit it.
 | `content` | The content pipeline itself: one of each asset type, loaded and shown | `content-smoke-01` |
 | `fp` | First-person: twelve places a body can stand, seen through §44's camera at head height | `fp-l0-hall`, `fp-l3-room` |
 | `sun-season` | Longest/shortest-day edges at matched local clock times | `sun-season-01`, `sun-season-04` |
+| `representative` | One existing pose per planning zone and retained hero area, day and scheduled night | `representative-day-library`, `representative-night-basement-cinema` |
 
 A qualifier is only added where it distinguishes scenes within a family, and it always reads
 left-to-right from coarse to fine: family, place, state, ordinal.
@@ -84,6 +85,18 @@ clock before capture. The second HUD row therefore reads
 the vernal-equinox boundary, not an enum
 switch. The test captures the same frame with `showEnvironmentReadout` disabled and requires the
 readout band to change, as well as comparing the visible frame with the accepted reference.
+
+## The `representative` set
+
+`HOUSE-01275` owns 32 frames: the exact eleven planning zones and five retained hero areas at clear
+10:30 and scheduled 22:00. Their coordinates are existing fixed review poses copied into
+`RepresentativeInteriorRenderTests.cpp`; the test invents no parallel scene format and forces no
+light group. Like the `fp` family, these ids use the meaningful condition and place instead of an
+ordinal; changing either would change the scene rather than create another state of one place. All
+use Tier S/High, 640x360, the fixed session seed and capture frame two. Frame two
+is deliberate: frame one retains CNA's initial sampler state, while frame three made the darkest
+cinema exposure depend on variable elapsed time. The complete pose map and measured investigation
+are in [`visual-review/house-01275-representative-render-set.md`](visual-review/house-01275-representative-render-set.md).
 
 ## The `fp` family is named for its PLACE, not numbered
 
