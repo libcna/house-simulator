@@ -1079,6 +1079,8 @@
       },
       "usedIn": [
         "L0_FAMILY",
+        "L1_BALCONY_FRONT",
+        "L1_BALCONY_REAR",
         "L2_LIBRARY",
         "L2_GAMES",
         "L2_SITTING"
@@ -3141,7 +3143,9 @@
         "GARDEN_WOOD": "MAT_OUTDOOR_GARDEN_WOOD"
       },
       "usedIn": [
-        "EXT_TERRACE"
+        "EXT_TERRACE",
+        "L1_BALCONY_FRONT",
+        "L1_BALCONY_REAR"
       ]
     },
     {
@@ -4413,6 +4417,10 @@
         "B1_GYM",
         "B1_UNDERSTAIR",
         "B1_WORKSHOP",
+        "L1_CLOSET_2",
+        "L1_CLOSET_3",
+        "L1_LINEN",
+        "L1_STOR",
         "L3_STORE_W"
       ]
     },
@@ -4600,6 +4608,7 @@
       "usedIn": [
         "B1_GYM",
         "B1_UNDERSTAIR",
+        "L1_STOR",
         "L3_STORE_W"
       ]
     },

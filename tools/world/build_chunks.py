@@ -529,6 +529,20 @@ for wc_cell in ("L1_WC3", "L1_WC4"):
         9, "six measured room/shell finish chunks plus HOUSE-01006's three shared WC fixture "
            "finish groups; no vertex or Reach-cap split")
 
+# `HOUSE-01007` stops the utility closets at one scaled kit shelf, gives the store its required
+# shelf and box, and reuses one outdoor lounger plus one side table on each balcony.  The closet
+# pieces batch into their existing six room roles.  Only the store and outdoor compositions cross
+# the target, by the exact truthful finish groups measured below; no geometry-cap split is added.
+CHUNK_BUDGET_EXCEPTIONS["L1_STOR"] = (
+    9, "six measured store shell finish chunks plus HOUSE-01007's three shared shelf/box kit "
+       "finish groups; no vertex or Reach-cap split")
+CHUNK_BUDGET_EXCEPTIONS["L1_BALCONY_FRONT"] = (
+    9, "five measured balcony and lantern finish chunks plus HOUSE-01007's four reused "
+       "lounger/side-table finish groups; no vertex or Reach-cap split")
+CHUNK_BUDGET_EXCEPTIONS["L1_BALCONY_REAR"] = (
+    7, "two measured balcony finish chunks plus HOUSE-01007's five reused lounger/side-table "
+       "finish groups; no vertex or Reach-cap split")
+
 # `HOUSE-01014` applies the same bounded secondary wet-room recipes on L2.  BATH4's shower set
 # adds five truthful shared fixture finishes to its existing window/joinery exception; BATH5's
 # bath set adds four after its painted carcass and steel batch with resident room roles.  Each WC

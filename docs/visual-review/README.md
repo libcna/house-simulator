@@ -5012,3 +5012,22 @@ behaviour, clutter or bespoke variant was added.
 
 Rule R2 now selects `Z-L1`, with six accessible cells below target versus five in `Z-B1` and three
 in `Z-L2`. Next: `HOUSE-01007`, dressing the first-floor stores and balconies.
+
+## Round 128 — first-floor utility and balcony dressing
+
+Commit: `HOUSE-01007` working tree (`2026-09-24`). The local, Git-ignored
+[`clear-day`](captures/house-01007-l1-day) set retains all six fixed `Z-L1` controls. Reciprocal
+forced-light and clear-day views in [`detail`](captures/house-01007-l1-detail) inspect both
+balcony compositions and both hall-closet shelves. Forced groups are placement evidence, not a
+claim that M5's normal day/night balance is complete.
+
+Each secondary balcony stops at one reused outdoor lounger and side table, with a clear door and
+standing route. Each utility closet stops at its essential shelf, while the store adds one box.
+The balcony pieces and closet shelves are grounded and separated without clipping, floating
+geometry or z-fighting. The linen/store pair is only 0.90 m deep and its open leaves occlude useful
+room-wide camera views; their placement therefore relies on the exact support, overlap,
+door-sweep and route validator plus the grand tour, rather than claiming more from the partial
+frames. No optional planter, clutter or unique variant was added.
+
+Rule R2 now selects `Z-L0S`, with eight accessible cells below target versus five each in `Z-B1`
+and `Z-STAIR`. Next: `HOUSE-00991`, stocking `L0_PANTRY`.

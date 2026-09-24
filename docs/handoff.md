@@ -1,3 +1,37 @@
+# First-floor utility and balcony dressing handoff — 2026-09-24 (`HOUSE-01007`)
+
+The four remaining utility cells and both balconies now meet their bounded recipes with nine
+static rows from the existing kit. Each closet has one scaled open shelf, `L1_STOR` adds one box,
+and each balcony stops at one reused outdoor lounger plus one reused side table. No new model,
+material, interaction or runtime system was added; the secondary balcony planter tier and utility
+clutter remain deliberately unimplemented.
+
+All 303 production props pass exact support, overlap, opening, door-sweep and 0.70 m route
+validation. Four first placements intersected the wider inside-geometry probe's cardinal starts;
+moving each shelf to a north-wall corner removed those regressions without weakening a test. The
+remaining probe output is the pre-existing `L1_LANDING west` and `L2_LIBRARY north` locations
+(four bodies total). The authored-world validator, 90-cell grand tour and
+`world-content-current` pass. The final build is 983 chunks / 2,700,047 vertices / 69,831,688
+packed bytes, with 8 16-bit splits, 15 Reach splits and no 32-bit chunk. Exact target counts are
+6/6 for the linen and two closets, 9/9 for the store and front balcony, and 7/7 for the rear
+balcony; this task adds no vertex- or Reach-cap split.
+
+The six fixed clear-day `Z-L1` controls and reciprocal balcony/closet views were inspected at full
+resolution. Both balcony groups are grounded, separated and clear of their doors and standing
+routes; the closet shelves are grounded and do not narrow their openings. The 0.90 m linen/store
+depth and open leaves prevent a useful room-wide camera view, so those two placements are supported
+by exact geometry and traversal evidence rather than an overstated visual claim. Normal-light
+balance remains M5 scope.
+
+The remaining forecast is 164 realistic / 200.5 pessimistic hours. With 62.25 task-hours spent
+since the final reduction, the R14 projection is 262.75 h, 17.25 h below the hard ceiling. Rule R2
+selects `Z-L0S`, whose eight accessible cells below target exceed the five in `Z-B1` and
+`Z-STAIR`; the exact next unblocked MUST task is `HOUSE-00991`, stocking `L0_PANTRY`. Every
+compilation/test invocation remains limited to four workers and pinned to CPUs 4,5,7,9;
+strict-XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Second-floor wet-room dressing handoff — 2026-09-24 (`HOUSE-01014`)
 
 All four secondary wet-room recipes are complete with eighteen static rows from the existing
