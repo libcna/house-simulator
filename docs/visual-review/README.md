@@ -5402,3 +5402,21 @@ The local evidence is in `captures/house-03447-main-stair-{day,night}-r154/`.
 
 Rule R2 next selects `HOUSE-03448`: `Z-EXR` has two remaining main cells at C4, more than any
 non-ground-floor tied zone. Rule R4 keeps `Z-L0M` last.
+
+## Round 155 — rear terrace and back garden C4
+
+Commit: `HOUSE-03448` working tree (`2026-09-24`). Fresh fixed `Z-EXR` sets cover all seven views
+at clear 10:30 and scheduled 22:00 without light overrides. `EXT_TERRACE` retains its dining group,
+two loungers and four planters; `EXT_BACKYARD` retains its swing bench, cold fire pit and birdbath;
+and the authored shrub bands layer both compositions against the fences.
+
+Full-resolution inspection shows deliberate, grounded compositions and clear routes without
+S1/S2, floating/intersecting furnishing, z-fighting or missing textures. Night remains intentionally
+exterior-dark rather than globally lifted, with the route, primary silhouettes, fence planting,
+terrace lanterns and scheduled windows readable. HUD-cropped mean linear luminance is 0.004025
+from the terrace and 0.005336 looking toward the house. The prop validator, scoreboard and 90-cell
+controller grand tour pass. No runtime, content, asset, material, light, schedule or lightmap change
+was needed. Local evidence is in `captures/house-03448-rear-main-{day,night}-r155/`.
+
+Rule R2 next selects `HOUSE-03441`: the one-cell `Z-B1`, `Z-L1`, `Z-L3` and `Z-GAR` targets tie,
+and the basement is least recently worked after applying the prior zone-only round tie-break.

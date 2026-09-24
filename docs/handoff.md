@@ -1,3 +1,30 @@
+# Rear terrace and back garden C4 handoff — 2026-09-24 (`HOUSE-03448`)
+
+`EXT_TERRACE` and `EXT_BACKYARD` meet C4 without new content. Their bounded existing kit provides
+the four-seat dining group, two loungers, four terrace planters, swing bench, cold fire pit and
+birdbath; authored shrub bands complete the compositions against the fences. No extra asset,
+variant, light or runtime mechanism was justified.
+
+Round 155 captured all seven fixed `Z-EXR` views at clear 10:30 and scheduled 22:00 without light
+overrides. Full-resolution inspection finds no S1/S2, floating/intersecting furnishing, z-fighting,
+missing texture or blocked route. Night remains intentionally exterior-dark, while the route,
+primary silhouettes, fence planting, terrace lanterns and scheduled windows remain readable.
+HUD-cropped mean linear luminance is 0.004025 from the terrace and 0.005336 looking toward the
+house. All 612 props pass placement/route validation, the scoreboard assigns all 96 cells exactly
+once and the 90-cell controller grand tour passes with 558 stops, 90,469 controller steps, 27
+collision detours and 11.84 s. Captures remain Git-ignored under
+`house-03448-rear-main-{day,night}-r155`.
+
+Rule R2 selects `HOUSE-03441` next. `Z-B1`, `Z-L1`, `Z-L3` and `Z-GAR` each have one remaining main
+cell and therefore tie on completion; the basement and attic were both last touched in Round 147,
+and the basement's prior zone-only round was 132 versus the attic's 142. `Z-B1` is therefore least
+recently worked. Rule R4 keeps `Z-L0M` last. The remaining forecast is 128.5 realistic / 158.75
+pessimistic hours. With 97.75 task-hours spent since the final reduction, the R14 projection is
+256.5 h, 23.5 h below the ceiling. Every build/test/render remains limited to four workers and
+pinned to CPUs 4,5,7,9; strict-XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Main-stair C4 handoff — 2026-09-24 (`HOUSE-03447`)
 
 The three main-stair cells meet C4 without new content. Their existing `R-STAIR-LANDING`
