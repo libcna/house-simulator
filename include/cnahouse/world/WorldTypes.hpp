@@ -153,6 +153,18 @@ namespace cnahouse::world
         Fluorescent,
     };
 
+    /// @brief The bounded automatic switch schedule assigned to one authored light group.
+    enum class LightScheduleClass : std::uint8_t
+    {
+        Off,
+        Living,
+        Bedroom,
+        Wet,
+        Task,
+        Circulation,
+        Dusk,
+    };
+
     /// @brief §22.2's closed class vocabulary.
     ///
     /// Closed and parsed once, because the class is what the effect tier, the footstep sound and
@@ -276,6 +288,7 @@ namespace cnahouse::world
     [[nodiscard]] std::string_view ToStringView(HingeSide value) noexcept;
     [[nodiscard]] std::string_view ToStringView(LightType value) noexcept;
     [[nodiscard]] std::string_view ToStringView(BulbClass value) noexcept;
+    [[nodiscard]] std::string_view ToStringView(LightScheduleClass value) noexcept;
     [[nodiscard]] std::string_view ToStringView(AlphaMode value) noexcept;
     [[nodiscard]] std::string_view ToStringView(EffectTier value) noexcept;
     [[nodiscard]] std::string_view ToStringView(PropCollision value) noexcept;
@@ -291,6 +304,7 @@ namespace cnahouse::world
     [[nodiscard]] util::Result<HingeSide> ParseHingeSide(std::string_view text);
     [[nodiscard]] util::Result<LightType> ParseLightType(std::string_view text);
     [[nodiscard]] util::Result<BulbClass> ParseBulbClass(std::string_view text);
+    [[nodiscard]] util::Result<LightScheduleClass> ParseLightScheduleClass(std::string_view text);
     [[nodiscard]] util::Result<AlphaMode> ParseAlphaMode(std::string_view text);
     [[nodiscard]] util::Result<EffectTier> ParseEffectTier(std::string_view text);
     [[nodiscard]] util::Result<PropCollision> ParsePropCollision(std::string_view text);
@@ -640,6 +654,13 @@ namespace cnahouse::world
         bool defaultOn = false;
         /// @brief §35.3's clock-driven exterior control; never a player switch.
         bool duskSensor = false;
+    };
+
+    /// @brief `layout.lights.json`: one automatic schedule assignment per light group.
+    struct LightSchedule
+    {
+        util::Id group;
+        LightScheduleClass scheduleClass = LightScheduleClass::Off;
     };
 
     struct WetResponse

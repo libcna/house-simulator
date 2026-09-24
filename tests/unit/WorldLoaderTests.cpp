@@ -410,6 +410,11 @@ namespace
         {
             return R"({
               "schema": "cna-house/lights/1",
+              "schedules": [
+                {"group": "LG_L0_KITCHEN_MAIN", "class": "SC-TASK"},
+                {"group": "LG_L0_KITCHEN_SINK", "class": "SC-TASK"},
+                {"group": "LG_L0_STAIR", "class": "SC-CIRC"}
+              ],
               "lights": [
                 { "id": "LIGHT_L0_KITCHEN_MAIN", "cell": "L0_KITCHEN",
                   "group": "LG_L0_KITCHEN_MAIN", "type": "point",
@@ -2085,6 +2090,9 @@ namespace
         ASSERT_TRUE(lights) << lights.Error().ToString();
 
         ASSERT_EQ(contents.lights.size(), 4U);
+        ASSERT_EQ(contents.lightSchedules.size(), 3U);
+        EXPECT_EQ(contents.lightSchedules[0].group, Intern("LG_L0_KITCHEN_MAIN"));
+        EXPECT_EQ(contents.lightSchedules[0].scheduleClass, world::LightScheduleClass::Task);
         const world::Light& spot = contents.lights[1];
         EXPECT_EQ(spot.id, Intern("LIGHT_L0_KITCHEN_SINK"));
         EXPECT_EQ(spot.cell, Intern("L0_KITCHEN"));

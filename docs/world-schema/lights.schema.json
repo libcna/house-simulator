@@ -193,6 +193,33 @@
       },
       "type": "array"
     },
+    "schedules": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "class": {
+            "enum": [
+              "SC-OFF",
+              "SC-LIVING",
+              "SC-BED",
+              "SC-WET",
+              "SC-TASK",
+              "SC-CIRC",
+              "SC-DUSK"
+            ]
+          },
+          "group": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "required": [
+          "group",
+          "class"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
     "schema": {
       "pattern": "^cna-house/lights/\\d+$",
       "type": "string"
@@ -200,6 +227,7 @@
   },
   "required": [
     "schema",
+    "schedules",
     "lights"
   ],
   "title": "layout.lights.json",

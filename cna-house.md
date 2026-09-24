@@ -3635,6 +3635,12 @@ rather than by fixture count. This is `HOUSE-01255`'s boundary: paint tint, sky 
 assemble `ambientColor` later, but they consume this one artificial-light colour rather than
 converting `colorK` again.
 
+`HOUSE-03401` adds one data row per existing light group to the same file; it selects one of the
+seven bounded schedule classes documented in `docs/furnishing-kit.md`. `LightingSystem` evaluates
+that row from the shared sun and civil clock with a stable group-id offset, then feeds the existing
+switch-group state and baked-atlas path. The command-line light flags set a persistent override.
+No switch interaction, prompt, second clock or schedule manager is introduced.
+
 ### 28.3 Baked lighting (static)
 
 Per cell, per light group, a diffuse+indirect lightmap; plus one `LM_DAY` lightmap lit by a
@@ -4466,6 +4472,12 @@ deterministically to one of the seventeen whole-minute offsets from -8 to +8. Ti
 one combined artificial-light state/atlas per group, so the short stagger is represented by the
 lumen-weighted active-fixture fraction. Full night is exactly one and daylight exactly zero; this
 does not add a second per-fixture dynamic-light renderer (`HOUSE-01269`).
+
+Interior groups use the same sun model through their authored schedule class. Living, bedroom,
+wet/task and circulation classes add the small civil-time windows in `docs/furnishing-kit.md`;
+closets, stores and utility rooms use `SC-OFF`. Exterior groups without per-fixture `duskSensor`
+rows use `SC-DUSK`'s deterministic group offset, while the existing sensor groups retain their
+finer lumen-weighted fixture stagger.
 
 ---
 

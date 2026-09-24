@@ -84,6 +84,13 @@ Bathrooms use the explicitly named `SC-WET` interval; closets and stores remain 
 the deliberate exception mechanism required by `HOUSE-03401`, not an assumption that every
 interior group burns all night.
 
+The exact automatic windows are deliberately few and fixed: `SC-LIVING` is 17:00–00:30,
+`SC-BED` 18:30–23:45, `SC-WET` 18:00–23:00, `SC-TASK` 16:30–00:00 and `SC-CIRC`
+16:00–06:30. Each requires the shared sun to be below −4°; `SC-DUSK` uses that solar crossing
+without a clock window and `SC-OFF` has no interval. A stable group-id offset of −8…+8 minutes is
+applied to both the solar crossing and clock window. Command-line `--light-on` and `--light-off`
+remain persistent per-group overrides for review captures.
+
 ## Interior recipes
 
 Each row is cumulative from `U` through the cell's assigned tier. Codes in the clearance column

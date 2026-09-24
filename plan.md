@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **92 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 121 / 142 / 174 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **M4 dressing checkpoint passed; M5 baseline lighting is in progress.** Next: implement the automatic interior schedule in `HOUSE-03401` |
+| Active plan | **91 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 119 / 140 / 172 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **M4 dressing checkpoint passed; M5 baseline lighting is in progress.** Next: light the basement, attic and stairwells in `HOUSE-03403` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -394,7 +394,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M2](#m2--architectural-completion-c2-everywhere--gate-g2) — Architectural completion | A | 03261–03300 | 0 | **G2 passed** · `HOUSE-03280` | D1 | 0 |
 | [M3](#m3--the-reusable-furnishing-kit) — The reusable furnishing kit | A (support) | 03301–03340 | 0 | **kit ready for M4** | D3 | 0 |
 | [M4](#m4--dressing-everywhere-the-furnishing-half-of-c3--checkpoint) — Dressing everywhere | A | 03341–03400 | 0 | **checkpoint passed** · `HOUSE-03380` | D3 | 0 |
-| [M5](#m5--baseline-lighting-everywhere-the-lighting-half-of-c3--gate-g3) — Baseline lighting everywhere | A | 03401–03440 | 10 | **G3** · `HOUSE-03420` | D3, D6 | 19.75 |
+| [M5](#m5--baseline-lighting-everywhere-the-lighting-half-of-c3--gate-g3) — Baseline lighting everywhere | A | 03401–03440 | 7 | **G3** · `HOUSE-03420` | D3, D6 | 9.75 |
 | [M6](#m6--main-cells-and-hero-areas-c4-c5--gates-g4-and-g5) — Main cells and hero areas | A | 03441–03500 | 15 | **G4** · `HOUSE-03452`, **G5** · `HOUSE-03480` | D4 | 19.75 |
 | [M7](#m7--a-compact-environment) — A compact environment | B | 03501–03540 | 8 | `HOUSE-03520` | D5 | 13.25 |
 | [M8](#m8--atmospheric-audio-essentials) — Atmospheric audio essentials | B | 03541–03570 | 6 | `HOUSE-01939` | D7 | 9 |
@@ -928,12 +928,13 @@ from the recipes' lighting presets** (`HOUSE-03302`), not hand-tuned room by roo
 spent only where a preset leaves an S1/S2. Secondary and utility spaces need convincing functional
 light, nothing more. No new lighting system is added for polish (rule R9).
 
-- [ ] HOUSE-03401 — Automatic interior lighting schedule ("an occupied house")
+- [x] HOUSE-03401 — Automatic interior lighting schedule ("an occupied house")
       dep: HOUSE-03201 · sys: lighting · plat: ALL · pri: MUST · zone: all · adv: D6 · est: 2
       files: src/lighting/LightingSystem.cpp|hpp (or a small `LightSchedule`), assets-src/world/layout.lights.json, tests
       accept: (1) a data-driven schedule per light group, keyed to the sun and clock: living spaces on from dusk until a late hour; bedroom lamps in the evening; circulation lights on at night; bathrooms, closets and storage off unless the schedule names them; (2) seeded, deterministic per-group offsets so windows do not switch in unison; (3) `--light-on`/`--light-off` still override; (4) the review capture at night uses the schedule, not hand-picked flags; (5) no switch plate, prompt or interaction code
       verify: unit LightScheduleTests.* (times, determinism, override, and one light group per level switching and changing its room's level)
       note: until now interior lights change only through `--light-on`. A night walkthrough is dark indoors except for dusk-sensor fixtures
+      note: (2026-09-24) All 138 authored light groups now have exactly one data-driven class: 29 off, 18 living, 16 bedroom, 18 wet, 18 task, 26 circulation and 13 dusk. The existing `LightingSystem` evaluates those classes from the shared sun and civil clock with a stable group-id offset in [-8,+8] minutes; the existing per-fixture dusk staggering remains intact and CLI on/off flags become persistent overrides. Schema, C++ and Python validation reject missing, duplicate and unknown schedule groups. Four focused test cases cover the exact windows, determinism, B1/L0/L1/L2/L3 room output and override persistence. Round 146 captured all six fixed `Z-L1` views at 22:00 without a light flag and visibly shows the scheduled hall, landing, bedroom, bathroom and balcony groups; it is schedule evidence, not a premature C3 luminance claim. Full evidence is in `docs/visual-review/house-03401-light-schedule.md`
 
 - [x] HOUSE-03402 — Light static props consistently with their baked receivers, house-wide
       dep: HOUSE-03380 · sys: rendering · plat: ALL · pri: MUST · zone: all · adv: D6, G3 · est: 4
@@ -1890,7 +1891,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M2 Architectural completion | 8 | 18 | **0** | 0 | **0** | 0 | — |
 | M3 The reusable furnishing kit | 16 | 33 | **0** | 0 | **0** | 0 | — |
 | M4 Dressing everywhere | 40 | 48.75 | **0** | 0 | **0** | 0 | R-D +3 |
-| M5 Baseline lighting everywhere | 12 | 24.5 | **8** | 10.25 | **11.75** | 12.75 | — |
+| M5 Baseline lighting everywhere | 12 | 24.5 | **7** | 8.5 | **9.75** | 10.5 | — |
 | M6 Main cells and hero areas | 20 | 32.5 | **15** | 16.75 | **19.75** | 21.75 | — |
 | M7 A compact environment | 13 | 21 | **8** | 11.25 | **13.25** | 14.5 | — |
 | M8 Atmospheric audio essentials | 11 | 14.5 | **6** | 7.75 | **9** | 10 | — |
@@ -1902,12 +1903,12 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **92** | **121** | **142.25** | **174.25** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **91** | **119.25** | **140.25** | **172** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-105.75 h. Adding the 84 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-258.25 h, 21.75 h under the limit. That margin is
+108 h. Adding the 86 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+258 h, 22 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |

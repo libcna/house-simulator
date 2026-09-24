@@ -72,6 +72,7 @@ namespace cnahouse::world
             std::vector<Opening> openings;
             std::vector<StairFlight> stairs;
             std::vector<Light> lights;
+            std::vector<LightSchedule> lightSchedules;
             std::vector<MaterialDef> materials;
             std::vector<Prop> props;
             std::vector<NavNode> navNodes;
@@ -147,6 +148,11 @@ namespace cnahouse::world
         [[nodiscard]] std::span<const Light> Lights() const noexcept
         {
             return m_contents.lights;
+        }
+
+        [[nodiscard]] std::span<const LightSchedule> LightSchedules() const noexcept
+        {
+            return m_contents.lightSchedules;
         }
 
         [[nodiscard]] std::span<const MaterialDef> Materials() const noexcept

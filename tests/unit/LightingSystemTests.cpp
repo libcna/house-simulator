@@ -10,6 +10,7 @@
 // property (a kitchen's cabinet strip must not count as much as its down-lights) rather than
 // against a restatement of the formula.
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstdio>
 #include <filesystem>
@@ -44,6 +45,8 @@ namespace
     using cnahouse::lighting::kAmbientFloor;
     using cnahouse::lighting::kDaylightKeyThreshold;
     using cnahouse::lighting::LightingSystem;
+    using cnahouse::lighting::LightScheduleOffsetMinutes;
+    using cnahouse::lighting::LightScheduleOn;
     using cnahouse::lighting::ObjectLightAssignment;
     using cnahouse::lighting::OutdoorSkyIrradianceFor;
     using cnahouse::lighting::PlanckianRgb;
@@ -273,6 +276,139 @@ TEST(LightingSystemTests, OneFixtureReadsTheSameSunAsTheClockAndCrossesAtNight)
     EXPECT_TRUE(DuskSensorOn(clock, Id::Of("LIGHT_L0_PORCH_LANTERN_1")));
 }
 
+TEST(LightScheduleTests, ClassesFollowTheirBoundedSunAndClockWindows)
+{
+    cnahouse::environment::SimClock clock;
+    clock.calendarDaysPerSimDay = 1.0;
+    clock.dstRulesUS = false;
+    cnahouse::environment::CivilTime time;
+    time.year = 2031;
+    time.month = 1;
+    time.day = 15;
+    const Id group = Id::Of("LG_TEST_SCHEDULE");
+
+    time.hour = 12;
+    clock.SetStandard(time);
+    for (const world::LightScheduleClass scheduleClass : {world::LightScheduleClass::Living,
+                                                          world::LightScheduleClass::Bedroom,
+                                                          world::LightScheduleClass::Wet,
+                                                          world::LightScheduleClass::Task,
+                                                          world::LightScheduleClass::Circulation,
+                                                          world::LightScheduleClass::Dusk})
+    {
+        EXPECT_FALSE(LightScheduleOn(scheduleClass, clock, group));
+    }
+
+    time.hour = 22;
+    clock.SetStandard(time);
+    EXPECT_TRUE(LightScheduleOn(world::LightScheduleClass::Living, clock, group));
+    EXPECT_TRUE(LightScheduleOn(world::LightScheduleClass::Bedroom, clock, group));
+    EXPECT_TRUE(LightScheduleOn(world::LightScheduleClass::Wet, clock, group));
+    EXPECT_TRUE(LightScheduleOn(world::LightScheduleClass::Task, clock, group));
+    EXPECT_TRUE(LightScheduleOn(world::LightScheduleClass::Circulation, clock, group));
+    EXPECT_TRUE(LightScheduleOn(world::LightScheduleClass::Dusk, clock, group));
+    EXPECT_FALSE(LightScheduleOn(world::LightScheduleClass::Off, clock, group));
+
+    time.hour = 1;
+    clock.SetStandard(time);
+    EXPECT_FALSE(LightScheduleOn(world::LightScheduleClass::Living, clock, group));
+    EXPECT_FALSE(LightScheduleOn(world::LightScheduleClass::Bedroom, clock, group));
+    EXPECT_FALSE(LightScheduleOn(world::LightScheduleClass::Wet, clock, group));
+    EXPECT_FALSE(LightScheduleOn(world::LightScheduleClass::Task, clock, group));
+    EXPECT_TRUE(LightScheduleOn(world::LightScheduleClass::Circulation, clock, group));
+}
+
+TEST(LightScheduleTests, GroupOffsetsAreStableBoundedAndNotAllEqual)
+{
+    const std::array groups{Id::Of("LG_B1_HALL_MAIN_C"),
+                            Id::Of("LG_L0_LIVING_MAIN"),
+                            Id::Of("LG_L1_MASTER_BED_MAIN"),
+                            Id::Of("LG_L2_LIBRARY_MAIN"),
+                            Id::Of("LG_L3_ROOM_MAIN")};
+    int first = LightScheduleOffsetMinutes(groups.front());
+    bool differs = false;
+    for (const Id group : groups)
+    {
+        const int offset = LightScheduleOffsetMinutes(group);
+        EXPECT_EQ(offset, LightScheduleOffsetMinutes(group));
+        EXPECT_GE(offset, -8);
+        EXPECT_LE(offset, 8);
+        differs = differs || offset != first;
+    }
+    EXPECT_TRUE(differs);
+}
+
+TEST(LightScheduleTests, RepresentativeGroupOnEveryInteriorLevelChangesItsRoomAtNight)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    HouseLighting house;
+    house.clock.calendarDaysPerSimDay = 1.0;
+    house.clock.dstRulesUS = false;
+    cnahouse::environment::CivilTime time;
+    time.year = 2031;
+    time.month = 1;
+    time.day = 15;
+    const std::array cases{
+        std::pair{Id::Of("LG_B1_HALL_MAIN_C"), Id::Of("B1_HALL")},
+        std::pair{Id::Of("LG_L0_LIVING_MAIN"), Id::Of("L0_LIVING")},
+        std::pair{Id::Of("LG_L1_MASTER_BED_MAIN"), Id::Of("L1_MASTER_BED")},
+        std::pair{Id::Of("LG_L2_LIBRARY_MAIN"), Id::Of("L2_LIBRARY")},
+        std::pair{Id::Of("LG_L3_ROOM_MAIN"), Id::Of("L3_ROOM")},
+    };
+
+    time.hour = 12;
+    house.clock.SetStandard(time);
+    house.lighting.Update(Frame(100));
+    std::array<float, 5> dayLevels{};
+    for (std::size_t index = 0; index < cases.size(); ++index)
+    {
+        EXPECT_FALSE(house.lighting.FindGroup(cases[index].first)->on);
+        dayLevels[index] = house.lighting.FindCell(cases[index].second)->artificial;
+    }
+
+    time.hour = 22;
+    house.clock.SetStandard(time);
+    FrameContext night = Frame(101);
+    night.deltaSeconds = 0.5F;
+    house.lighting.Update(night);
+    for (std::size_t index = 0; index < cases.size(); ++index)
+    {
+        EXPECT_TRUE(house.lighting.FindGroup(cases[index].first)->on);
+        EXPECT_GT(house.lighting.FindCell(cases[index].second)->artificial, dayLevels[index]);
+    }
+}
+
+TEST(LightScheduleTests, ExplicitGroupStateOverridesTheSchedule)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    HouseLighting house;
+    house.clock.calendarDaysPerSimDay = 1.0;
+    house.clock.dstRulesUS = false;
+    cnahouse::environment::CivilTime time;
+    time.year = 2031;
+    time.month = 1;
+    time.day = 15;
+    const Id living = Id::Of("LG_L0_LIVING_MAIN");
+
+    time.hour = 12;
+    house.clock.SetStandard(time);
+    ASSERT_TRUE(house.lighting.SetGroupOn(living, true));
+    house.lighting.Update(Frame(110));
+    EXPECT_TRUE(house.lighting.FindGroup(living)->on);
+
+    time.hour = 22;
+    house.clock.SetStandard(time);
+    ASSERT_TRUE(house.lighting.SetGroupOn(living, false));
+    house.lighting.Update(Frame(111));
+    EXPECT_FALSE(house.lighting.FindGroup(living)->on);
+}
+
 TEST(LightingSystemTests, EveryGroupTheLightsNameGetsAState)
 {
     if (!ContentIsBuilt())
@@ -331,15 +467,13 @@ TEST(LightingSystemTests, EveryGroupTheLightsNameGetsAState)
                 world.Lights().size());
 }
 
-TEST(LightingSystemTests, InitialGroupsMatchAuthoredDefaultsAndEntryLightsCanBeSwitchedOff)
+TEST(LightingSystemTests, FirstUpdateAppliesTheAuthoredScheduleAndEntryLightsCanBeOverridden)
 {
     if (!ContentIsBuilt())
     {
         GTEST_SKIP() << "no content/world/layout.lights.json";
     }
-    // Most groups start off; the foyer, hall, kitchen, dining and family main groups now start on
-    // to make the playable main-floor route readable. Automatic exterior groups instead read the
-    // live sun.
+    // The first update replaces fixture defaults with the one schedule row for each group.
     HouseLighting house;
     const world::WorldData& world = house.world;
     LightingSystem& lighting = house.lighting;
@@ -347,10 +481,13 @@ TEST(LightingSystemTests, InitialGroupsMatchAuthoredDefaultsAndEntryLightsCanBeS
 
     for (const SwitchGroupState& state : lighting.Groups())
     {
-        bool expectedOn = std::any_of(world.Lights().begin(),
-                                      world.Lights().end(),
-                                      [&state](const world::Light& light)
-                                      { return light.group == state.group && light.defaultOn; });
+        bool expectedOn = false;
+        const auto schedule =
+            std::find_if(world.LightSchedules().begin(),
+                         world.LightSchedules().end(),
+                         [&state](const world::LightSchedule& row) { return row.group == state.group; });
+        ASSERT_NE(schedule, world.LightSchedules().end());
+        expectedOn = LightScheduleOn(schedule->scheduleClass, house.clock, state.group);
         if (lighting.IsGroupDuskControlled(state.group))
         {
             expectedOn = std::any_of(world.Lights().begin(),
@@ -391,6 +528,8 @@ TEST(LightingSystemTests, InitialGroupsMatchAuthoredDefaultsAndEntryLightsCanBeS
     EXPECT_TRUE(lighting.FindGroup(hallMain)->on);
     EXPECT_TRUE(lighting.FindGroup(diningChandelier)->on)
         << "the windowless dining room should be readable on the new-game route";
+    const float foyerScheduled = lighting.FindCell(Id::Of("L0_FOYER"))->artificial;
+    const float hallScheduled = lighting.FindCell(Id::Of("L0_HALL"))->artificial;
     EXPECT_TRUE(lighting.SetGroupOn(foyerMain, false));
     EXPECT_TRUE(lighting.SetGroupOn(hallMain, false));
     lighting.Update(Frame(2));
@@ -398,8 +537,10 @@ TEST(LightingSystemTests, InitialGroupsMatchAuthoredDefaultsAndEntryLightsCanBeS
     const RoomLightState* hall = lighting.FindCell(Id::Of("L0_HALL"));
     ASSERT_NE(foyer, nullptr);
     ASSERT_NE(hall, nullptr);
-    EXPECT_FLOAT_EQ(foyer->artificial, 0.0F);
-    EXPECT_FLOAT_EQ(hall->artificial, 0.0F);
+    EXPECT_FALSE(lighting.FindGroup(foyerMain)->on);
+    EXPECT_FALSE(lighting.FindGroup(hallMain)->on);
+    EXPECT_LT(foyer->artificial, foyerScheduled);
+    EXPECT_LT(hall->artificial, hallScheduled);
 }
 
 TEST(LightingSystemTests, AllTwentyEightAuthoredDuskFixturesFollowDayNightWithAVisibleStagger)
@@ -494,12 +635,14 @@ TEST(LightingSystemTests, KitchenMainAndIslandDefaultOnAndTheirSwitchesRemoveBor
     // Isolate the permanent kitchen/hall cased opening from the already-on entry fixtures.
     ASSERT_TRUE(lighting.SetGroupOn(Id::Of("LG_L0_FOYER_MAIN"), false));
     ASSERT_TRUE(lighting.SetGroupOn(Id::Of("LG_L0_HALL_MAIN"), false));
-    cnahouse::environment::CivilTime midnight;
-    midnight.year = 2031;
-    midnight.month = 6;
-    midnight.day = 21;
-    midnight.hour = 0;
-    house.clock.SetStandard(midnight);
+    ASSERT_TRUE(lighting.SetGroupOn(Id::Of("LG_L0_KITCHEN_SINK"), false));
+    ASSERT_TRUE(lighting.SetGroupOn(Id::Of("LG_L0_KITCHEN_UNDERCAB"), false));
+    cnahouse::environment::CivilTime evening;
+    evening.year = 2031;
+    evening.month = 6;
+    evening.day = 21;
+    evening.hour = 22;
+    house.clock.SetStandard(evening);
     lighting.Update(Frame(3));
     const RoomLightState* litKitchen = lighting.FindCell(Id::Of("L0_KITCHEN"));
     const RoomLightState* litHall = lighting.FindCell(Id::Of("L0_HALL"));
@@ -533,16 +676,18 @@ TEST(LightingSystemTests, FamilyMainDefaultsOnAndBorrowsThroughTheKitchenOpening
     ASSERT_NE(mainGroup, nullptr);
     ASSERT_TRUE(mainGroup->on) << "the connected family practical should start on";
 
-    // Leave only the permanent kitchen/family opening as a contributor at midnight.
+    // Leave only the permanent kitchen/family opening as a contributor in the evening schedule.
     ASSERT_TRUE(lighting.SetGroupOn(Id::Of("LG_L0_FOYER_MAIN"), false));
     ASSERT_TRUE(lighting.SetGroupOn(Id::Of("LG_L0_HALL_MAIN"), false));
     ASSERT_TRUE(lighting.SetGroupOn(Id::Of("LG_L0_KITCHEN_MAIN"), false));
-    cnahouse::environment::CivilTime midnight;
-    midnight.year = 2031;
-    midnight.month = 6;
-    midnight.day = 21;
-    midnight.hour = 0;
-    house.clock.SetStandard(midnight);
+    ASSERT_TRUE(lighting.SetGroupOn(Id::Of("LG_L0_FAMILY_MEDIA"), false));
+    ASSERT_TRUE(lighting.SetGroupOn(Id::Of("LG_L0_FAMILY_READING"), false));
+    cnahouse::environment::CivilTime evening;
+    evening.year = 2031;
+    evening.month = 6;
+    evening.day = 21;
+    evening.hour = 22;
+    house.clock.SetStandard(evening);
     lighting.Update(Frame(5));
     const RoomLightState* litFamily = lighting.FindCell(Id::Of("L0_FAMILY"));
     const RoomLightState* adjacentKitchen = lighting.FindCell(Id::Of("L0_KITCHEN"));
@@ -954,6 +1099,10 @@ TEST(LightingSystemTests, ObjectsReceiveFixtureKeyFillAndSurfaceTintedBounceInSt
     night.day = 21;
     night.hour = 22;
     house.clock.SetStandard(night);
+    ASSERT_TRUE(house.lighting.SetGroupOn(Id::Of("LG_EXT_WALK_PATH"), false));
+    ASSERT_TRUE(house.lighting.SetGroupOn(Id::Of("LG_EXT_DRIVEWAY_FLOOD"), false));
+    ASSERT_TRUE(house.lighting.SetGroupOn(Id::Of("LG_L0_GARAGE_MAIN"), false));
+    ASSERT_TRUE(house.lighting.SetGroupOn(Id::Of("LG_L0_GARAGE_OPENER"), false));
     house.lighting.Update(Frame(30));
 
     const Id porch = Id::Of("L0_PORCH");
@@ -1012,9 +1161,8 @@ TEST(LightingSystemTests, ObjectsReceiveFixtureKeyFillAndSurfaceTintedBounceInSt
     EXPECT_GT(livingFacade.slots[0]->diffuseColor.X, livingFacade.slots[0]->diffuseColor.Z);
     EXPECT_GT(stairFacade.slots[0]->diffuseColor.X, stairFacade.slots[0]->diffuseColor.Z);
 
-    // The front stair is fixed Basic detail in EXT_WALK. Its own path-light switch remains off,
-    // so ordinary dynamic-object assignment is dark; the explicit static spill receives only the
-    // two range-bounded porch sources.
+    // The front stair is fixed Basic detail in EXT_WALK. Its path schedule is explicitly
+    // overridden off above so this assertion isolates the two range-bounded porch sources.
     const Id walk = Id::Of("EXT_WALK");
     const Microsoft::Xna::Framework::Vector3 stepCentre(0.0F, 0.285F, -11.1375F);
     EXPECT_FALSE(house.lighting.DirectionalLightsForObject(walk, stepCentre).slots[0].has_value());
@@ -1027,9 +1175,9 @@ TEST(LightingSystemTests, ObjectsReceiveFixtureKeyFillAndSurfaceTintedBounceInSt
     EXPECT_GT(stepLights.spillDiffuseColor.X, stepLights.spillDiffuseColor.Z);
     EXPECT_GT(stepLights.spillDiffuseColor.Z, 0.0F);
 
-    // The garage flood is deliberately manual and aims away from the wall, so it is an unbaked
-    // fixed-detail spill rather than a fake facade lightmap. It reaches the garage door only
-    // through its explicit receiver id, never through proximity or an invented foreign binding.
+    // The garage flood aims away from the wall, so it is an unbaked fixed-detail spill rather than
+    // a fake facade lightmap. Its dusk schedule is explicitly overridden off above, then on below,
+    // proving that it reaches the garage door only through its explicit receiver id.
     // The terrain tile under the driveway is resident in EXT_SIDEYARD_E by largest overlap, so
     // that exact receiver is named too; otherwise switching the flood would light the door but
     // leave the asphalt beneath its cone byte-identical to the off frame.
@@ -1060,7 +1208,7 @@ TEST(LightingSystemTests, ObjectsReceiveFixtureKeyFillAndSurfaceTintedBounceInSt
     ASSERT_TRUE(receiverWithFlood.slots[0].has_value());
     ASSERT_TRUE(receiverWithFlood.slots[1].has_value());
     EXPECT_GT(receiverWithFlood.slots[0]->diffuseColor.X, receiverWithFlood.slots[0]->diffuseColor.Z)
-        << "the unbaked manual flood must not replace the warm carriage-light receiver pass";
+        << "the unbaked work flood must not replace the warm carriage-light receiver pass";
     const ObjectLightAssignment garageSpill =
         house.lighting.StaticDetailLightsForObject(garage, garageDoorCentre);
     ASSERT_TRUE(garageSpill.slots[0].has_value());
@@ -1077,7 +1225,7 @@ TEST(LightingSystemTests, ObjectsReceiveFixtureKeyFillAndSurfaceTintedBounceInSt
     ASSERT_TRUE(house.lighting.SetGroupOn(garageFlood, false));
     house.lighting.Update(Frame(32));
     EXPECT_TRUE(house.lighting.FindGroup(garageLanterns)->on)
-        << "the automatic carriage lights are independent of the manual work flood";
+        << "the automatic carriage lights are independent of the work-flood override";
     EXPECT_TRUE(house.lighting.StaticDetailLightsForObject(garage, garageDoorCentre).slots[0].has_value());
 
     ASSERT_TRUE(house.lighting.SetGroupOn(Id::Of("LG_L0_PORCH_LANTERN"), false));

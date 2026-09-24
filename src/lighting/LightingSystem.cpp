@@ -60,6 +60,11 @@ namespace cnahouse::lighting
             }
             return Vector3(0.0F, -1.0F, 0.0F);
         }
+
+        bool MinuteInWindow(int minute, int first, int last) noexcept
+        {
+            return first <= last ? minute >= first && minute < last : minute >= first || minute < last;
+        }
     } // namespace
 
     int DuskSensorOffsetMinutes(util::Id fixture) noexcept
@@ -75,6 +80,41 @@ namespace cnahouse::lighting
         environment::SimClock shifted = clock;
         shifted.epochSeconds -= static_cast<double>(DuskSensorOffsetMinutes(fixture)) * 60.0;
         return environment::SunPositionFor(shifted).altitudeDeg <= kDuskAltitudeDeg;
+    }
+
+    int LightScheduleOffsetMinutes(util::Id group) noexcept
+    {
+        return DuskSensorOffsetMinutes(group);
+    }
+
+    bool LightScheduleOn(world::LightScheduleClass scheduleClass,
+                         const environment::SimClock& clock,
+                         util::Id group) noexcept
+    {
+        environment::SimClock shifted = clock;
+        shifted.epochSeconds -= static_cast<double>(LightScheduleOffsetMinutes(group)) * 60.0;
+        constexpr double kDuskAltitudeDeg = -4.0;
+        const bool dark = environment::SunPositionFor(shifted).altitudeDeg <= kDuskAltitudeDeg;
+        const environment::CivilTime wall = shifted.Wall();
+        const int minute = wall.hour * 60 + wall.minute;
+        switch (scheduleClass)
+        {
+            case world::LightScheduleClass::Off:
+                return false;
+            case world::LightScheduleClass::Living:
+                return dark && MinuteInWindow(minute, 17 * 60, 30);
+            case world::LightScheduleClass::Bedroom:
+                return dark && MinuteInWindow(minute, 18 * 60 + 30, 23 * 60 + 45);
+            case world::LightScheduleClass::Wet:
+                return dark && MinuteInWindow(minute, 18 * 60, 23 * 60);
+            case world::LightScheduleClass::Task:
+                return dark && MinuteInWindow(minute, 16 * 60 + 30, 24 * 60);
+            case world::LightScheduleClass::Circulation:
+                return dark && MinuteInWindow(minute, 16 * 60, 6 * 60 + 30);
+            case world::LightScheduleClass::Dusk:
+                return dark;
+        }
+        return false;
     }
 
     float BulbTransitionLevel(world::BulbClass bulbClass, float elapsedSeconds) noexcept
@@ -297,6 +337,19 @@ namespace cnahouse::lighting
                 groupColors_[index].Z /= lumens;
             }
         }
+        groupScheduleClasses_.assign(groups_.size(), world::LightScheduleClass::Off);
+        groupHasSchedule_.assign(groups_.size(), false);
+        groupOverrides_.assign(groups_.size(), -1);
+        for (const world::LightSchedule& schedule : world.LightSchedules())
+        {
+            const auto found = groupIndex_.find(schedule.group.Value());
+            if (found == groupIndex_.end())
+            {
+                continue;
+            }
+            groupScheduleClasses_[found->second] = schedule.scheduleClass;
+            groupHasSchedule_[found->second] = true;
+        }
 
         // Keep the effect-facing candidates cell-local and allocation-free at draw time. Ranking
         // uses live group output later, so switching and bulb envelopes cannot disagree with the
@@ -491,15 +544,26 @@ namespace cnahouse::lighting
         }
         for (std::size_t index = 0; index < groups_.size(); ++index)
         {
-            if (!duskControlledGroups_[index])
+            if (groupOverrides_[index] >= 0)
+            {
+                groups_[index].on = groupOverrides_[index] != 0;
+                continue;
+            }
+            if (duskControlledGroups_[index])
+            {
+                const float level = groupLumens_[index] > 0.0F
+                                        ? std::clamp(duskLitLumens_[index] / groupLumens_[index], 0.0F, 1.0F)
+                                        : 0.0F;
+                groups_[index].on = level > 0.0F;
+                groups_[index].dimmer = level;
+                continue;
+            }
+            if (!groupHasSchedule_[index])
             {
                 continue;
             }
-            const float level = groupLumens_[index] > 0.0F
-                                    ? std::clamp(duskLitLumens_[index] / groupLumens_[index], 0.0F, 1.0F)
-                                    : 0.0F;
-            groups_[index].on = level > 0.0F;
-            groups_[index].dimmer = level;
+            groups_[index].on = LightScheduleOn(groupScheduleClasses_[index], *clock_, groups_[index].group);
+            groups_[index].dimmer = 1.0F;
         }
         AdvanceBulbTransitions(frame.deltaSeconds);
 
@@ -553,12 +617,13 @@ namespace cnahouse::lighting
 
     bool LightingSystem::SetGroupOn(util::Id group, bool on) noexcept
     {
-        SwitchGroupState* state = FindGroupMutable(group);
-        if (state == nullptr)
+        const auto found = groupIndex_.find(group.Value());
+        if (found == groupIndex_.end())
         {
             return false;
         }
-        state->on = on;
+        groups_[found->second].on = on;
+        groupOverrides_[found->second] = on ? 1 : 0;
         return true;
     }
 

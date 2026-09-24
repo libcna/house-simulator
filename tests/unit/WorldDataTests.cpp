@@ -515,6 +515,16 @@ namespace
         {
             check(value, world::ParseBulbClass);
         }
+        for (const auto value : {world::LightScheduleClass::Off,
+                                 world::LightScheduleClass::Living,
+                                 world::LightScheduleClass::Bedroom,
+                                 world::LightScheduleClass::Wet,
+                                 world::LightScheduleClass::Task,
+                                 world::LightScheduleClass::Circulation,
+                                 world::LightScheduleClass::Dusk})
+        {
+            check(value, world::ParseLightScheduleClass);
+        }
         for (const auto value : {world::EffectTier::Basic,
                                  world::EffectTier::DualTexture,
                                  world::EffectTier::AlphaTest,

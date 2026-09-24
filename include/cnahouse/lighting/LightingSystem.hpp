@@ -3,6 +3,7 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <span>
@@ -29,6 +30,7 @@ namespace cnahouse::environment
 namespace cnahouse::world
 {
     enum class BulbClass : std::uint8_t;
+    enum class LightScheduleClass : std::uint8_t;
     class WorldData;
 } // namespace cnahouse::world
 
@@ -52,6 +54,14 @@ namespace cnahouse::lighting
     /// and morning-off; a negative one advances them. The shifted clock keeps season and location
     /// in the same sun model used by the rest of the frame.
     [[nodiscard]] bool DuskSensorOn(const environment::SimClock& clock, util::Id fixture) noexcept;
+
+    /// @brief Stable group offset used by the interior schedule, inclusive [-8, +8] minutes.
+    [[nodiscard]] int LightScheduleOffsetMinutes(util::Id group) noexcept;
+
+    /// @brief Evaluates one schedule class against the shared sun and civil wall clock.
+    [[nodiscard]] bool LightScheduleOn(world::LightScheduleClass scheduleClass,
+                                       const environment::SimClock& clock,
+                                       util::Id group) noexcept;
 
     /// @brief §53's deterministic switch-on envelope for one physical bulb family.
     ///
@@ -386,6 +396,10 @@ namespace cnahouse::lighting
         std::vector<float> groupLumens_;
         std::vector<Microsoft::Xna::Framework::Vector3> groupColors_;
         std::vector<world::BulbClass> groupBulbClasses_;
+        std::vector<world::LightScheduleClass> groupScheduleClasses_;
+        std::vector<bool> groupHasSchedule_;
+        /// @brief -1 follows the schedule; 0/1 is a persistent CLI/debug override.
+        std::vector<std::int8_t> groupOverrides_;
         std::vector<float> groupTransitionElapsed_;
         std::vector<float> groupTransitionLevels_;
         std::vector<bool> groupPreviousOn_;

@@ -1,3 +1,35 @@
+# Automatic-light schedule handoff — 2026-09-24 (`HOUSE-03401`)
+
+Every one of the house's 138 light groups now has exactly one authored automatic class. The compact
+vocabulary covers off, living, bedroom, wet, task, circulation and dusk behaviour; the existing
+`LightingSystem` evaluates it from the shared sun and civil clock with a deterministic group-id
+offset between -8 and +8 minutes. Existing fixture-level dusk staggering remains unchanged.
+`--light-on` and `--light-off` now establish persistent overrides instead of being replaced on the
+next update. No switch plate, prompt, interaction path or new runtime subsystem was added.
+
+Schema, C++ and Python validation enforce exact group coverage. Four focused schedule tests cover
+the time windows, stable offsets, a representative group on every interior level changing its
+room's artificial-light result, and persistent overrides. Round 146 captured all six fixed `Z-L1`
+views at 22:00 under the schedule with no light flag; it shows active hall, landing, bedroom,
+bathroom and balcony groups. That is schedule evidence only—the remaining C3 room brightness work
+belongs to the zone tasks. Exact evidence is in
+`docs/visual-review/house-03401-light-schedule.md`; local captures remain under
+`docs/visual-review/captures/house-03401-schedule-r146/`.
+
+The complete 1,424-test unit label and all 141 integration registrations pass. The authored schema
+and all 15 world rules pass, both validator selftests pass, and strict XNA compiles all 325
+translation units clean with four workers. The full static gate has only the known user-owned root
+`.claude` layout failure; every project-owned gate is green.
+
+Rule R1(b) and M5's declared dependency order now select `HOUSE-03403`, lighting the basement,
+attic and stairwells to C3. The remaining forecast is 140.25 realistic / 172 pessimistic hours.
+With 86 task-hours spent since the final reduction, the R14 projection is 258 h, 22 h below the
+ceiling. Every future compilation and test invocation must use no more than four workers pinned to
+CPUs 4,5,7,9; strict XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`. The user-owned root
+`.claude` entry remains the only known layout-gate failure; do not modify or stage it.
+
+---
+
 # Furnished-house rebake handoff — 2026-09-24 (`HOUSE-01030`)
 
 The current 440-prop house has been rebuilt and both production lightmap families have been

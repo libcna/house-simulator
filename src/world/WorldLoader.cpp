@@ -2384,6 +2384,44 @@ namespace cnahouse::world
             return rows.Error().WithContext("layout.lights.json");
         }
 
+        if (document.Value().Root().Has("schedules"))
+        {
+            const Result<JsonValue> schedules = document.Value().Root().RequireArray("schedules");
+            if (!schedules)
+            {
+                return schedules.Error().WithContext("layout.lights.json");
+            }
+            const Result<std::vector<JsonValue>> scheduleRows = schedules.Value().Elements();
+            if (!scheduleRows)
+            {
+                return scheduleRows.Error().WithContext("layout.lights.json");
+            }
+            for (const JsonValue& row : scheduleRows.Value())
+            {
+                LightSchedule schedule;
+                const Result<util::Id> group = RequireId(row, "group");
+                if (!group)
+                {
+                    return group.Error().WithContext("layout.lights.json");
+                }
+                const Result<std::string> spelling = row.RequireString("class");
+                if (!spelling)
+                {
+                    return spelling.Error().WithContext("layout.lights.json");
+                }
+                const Result<LightScheduleClass> scheduleClass = ParseLightScheduleClass(spelling.Value());
+                if (!scheduleClass)
+                {
+                    return scheduleClass.Error()
+                        .WithContext(row.Path() + "/class")
+                        .WithContext("layout.lights.json");
+                }
+                schedule.group = group.Value();
+                schedule.scheduleClass = scheduleClass.Value();
+                contents.lightSchedules.push_back(schedule);
+            }
+        }
+
         for (const JsonValue& row : rows.Value())
         {
             Light light;

@@ -317,31 +317,35 @@ def build() -> dict[str, dict]:
          "collisionRamp": BOOL,
          "surface": {"anyOf": [STR, {"type": "null"}]}})))
 
-    schemas["lights"] = envelope("lights", "layout.lights.json", rows("lights", obj(
-        ["id", "cell", "group", "type", "position"],
-        {"id": ID, "cell": ID, "group": ID,
-         "type": {"enum": ["point", "spot", "directional", "area_proxy", "emissive_only"]},
-         "bulbClass": {"enum": ["filament", "led", "fluorescent"]},
-         "position": VEC3, "direction": VEC3,
-         "colorK": {"type": "number", "minimum": 1000, "maximum": 12000},
-         "intensityLm": {"type": "number", "minimum": 0},
-         "range": {"type": "number", "minimum": 0},
-         # Optional per-fixture radiometric calibration for the offline lightmap bake. This is
-         # useful when one physical source crosses receiver cells whose legacy products used
-         # different global calibrations; runtime still consumes the authored lumens unchanged.
-         "bakeLumensPerRadiantWatt": {"type": "number", "exclusiveMinimum": 0},
-         # Optional extra receiver cells for a baked spill. The light still belongs to `cell`
-         # for switching, exposure and dynamic-object assignment; this list only tells the
-         # offline baker that a fixed neighbouring shell can see it.
-         "bakeCells": {"type": "array", "items": ID, "uniqueItems": True},
-         # Optional adjacent unbaked static-detail receivers. Runtime uses the fixed source only
-         # for their stock-BasicEffect chunks; room state and dynamic objects remain cell-local.
-         "spillCells": {"type": "array", "items": ID, "uniqueItems": True},
-         "coneInnerDeg": {"type": "number", "minimum": 0, "maximum": 180},
-         "coneOuterDeg": {"type": "number", "minimum": 0, "maximum": 180},
-         "fixtureProp": ID_OR_NULL, "emissiveMaterialSlot": {"anyOf": [STR, {"type": "null"}]},
-         "castsBlobShadow": BOOL, "bakedIntoLightmap": BOOL, "defaultOn": BOOL,
-         "duskSensor": BOOL})))
+    schemas["lights"] = envelope("lights", "layout.lights.json", {
+        "required": ["schedules", "lights"],
+        "properties": {
+            "schedules": {"type": "array", "items": obj(
+                ["group", "class"],
+                {"group": ID,
+                 "class": {"enum": ["SC-OFF", "SC-LIVING", "SC-BED", "SC-WET",
+                                    "SC-TASK", "SC-CIRC", "SC-DUSK"]}})},
+            "lights": {"type": "array", "items": obj(
+                ["id", "cell", "group", "type", "position"],
+                {"id": ID, "cell": ID, "group": ID,
+                 "type": {"enum": ["point", "spot", "directional", "area_proxy", "emissive_only"]},
+                 "bulbClass": {"enum": ["filament", "led", "fluorescent"]},
+                 "position": VEC3, "direction": VEC3,
+                 "colorK": {"type": "number", "minimum": 1000, "maximum": 12000},
+                 "intensityLm": {"type": "number", "minimum": 0},
+                 "range": {"type": "number", "minimum": 0},
+                 # Optional per-fixture radiometric calibration for the offline lightmap bake.
+                 "bakeLumensPerRadiantWatt": {"type": "number", "exclusiveMinimum": 0},
+                 "bakeCells": {"type": "array", "items": ID, "uniqueItems": True},
+                 "spillCells": {"type": "array", "items": ID, "uniqueItems": True},
+                 "coneInnerDeg": {"type": "number", "minimum": 0, "maximum": 180},
+                 "coneOuterDeg": {"type": "number", "minimum": 0, "maximum": 180},
+                 "fixtureProp": ID_OR_NULL,
+                 "emissiveMaterialSlot": {"anyOf": [STR, {"type": "null"}]},
+                 "castsBlobShadow": BOOL, "bakedIntoLightmap": BOOL, "defaultOn": BOOL,
+                 "duskSensor": BOOL})},
+        },
+    })
 
     schemas["props"] = envelope("props", "layout.props.json", rows("props", obj(
         ["id", "asset", "cell", "position"],

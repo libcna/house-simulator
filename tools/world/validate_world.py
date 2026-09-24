@@ -1113,6 +1113,25 @@ def rule_6_references(world: World) -> list[Problem]:
                 f"dusk-controlled light {light.get('id')} must start off; "
                 "the live sun decides its state"))
 
+    scheduled_groups: set[str] = set()
+    schedule_rows = (world.layout.get("lights") or {}).get("schedules", [])
+    for index, schedule in enumerate(schedule_rows):
+        group = schedule.get("group")
+        if group not in dusk_by_group:
+            problems.append(Problem(
+                6, FILE_OF["lights"], f"schedules/{index}/group",
+                f"schedule names group {group}, which owns no light"))
+        if group in scheduled_groups:
+            problems.append(Problem(
+                6, FILE_OF["lights"], f"schedules/{index}/group",
+                f"group {group} has more than one automatic schedule"))
+        scheduled_groups.add(group)
+    for group in sorted(dusk_by_group):
+        if group not in scheduled_groups:
+            problems.append(Problem(
+                6, FILE_OF["lights"], "schedules",
+                f"light group {group} has no automatic schedule"))
+
     # §35.3 gives an automatic group exactly one owner: the sun. A wall plate for the same
     # group would be overwritten by the next lighting update and persist a state the player does
     # not actually control.
@@ -3275,7 +3294,9 @@ def fixture() -> dict[str, dict]:
          "collisionRamp": True, "surface": "wood"},
     ]}
 
-    lights = {"schema": "cna-house/lights/1", "lights": [
+    lights = {"schema": "cna-house/lights/1", "schedules": [
+        {"group": "LG_HALL", "class": "SC-CIRC"},
+    ], "lights": [
         {"id": "LIGHT_HALL", "cell": "L0_HALL", "group": "LG_HALL", "type": "point",
          "position": [0.0, 3.10, 7.0], "colorK": 2700, "intensityLm": 800.0},
     ]}

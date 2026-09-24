@@ -141,6 +141,8 @@ namespace
         lamp.range = 5.0F;
         contents.lights.push_back(lamp);
         contents.cells[1].lightGroups.push_back(Intern("LG_HALL"));
+        contents.lightSchedules.push_back(
+            world::LightSchedule{Intern("LG_HALL"), world::LightScheduleClass::Circulation});
 
         return contents;
     }
@@ -279,6 +281,18 @@ namespace
             auto contents = Fixture();
             contents.cells[1].lightGroups.clear();
             EXPECT_TRUE(Fired(ProblemsFor(std::move(contents)), 6)) << "a stale lightGroups index";
+        }
+
+        // Rule 6: every real group has exactly one data-driven automatic schedule.
+        {
+            auto contents = Fixture();
+            contents.lightSchedules.clear();
+            EXPECT_TRUE(Said(ProblemsFor(std::move(contents)), "has no automatic schedule"));
+        }
+        {
+            auto contents = Fixture();
+            contents.lightSchedules.push_back(contents.lightSchedules.front());
+            EXPECT_TRUE(Said(ProblemsFor(std::move(contents)), "more than one automatic schedule"));
         }
 
         // Rule 6: one combined group cannot have two different control owners.

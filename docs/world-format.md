@@ -394,6 +394,9 @@ is a rule that quietly says nothing about half the stairs in the house.
 ```jsonc
 {
   "schema": "cna-house/lights/1",
+  "schedules": [
+    {"group": "LG_L0_KITCHEN_ISLAND", "class": "SC-TASK"}
+  ],
   "lights": [
     {
       "id": "LIGHT_L0_KITCHEN_ISLAND_1",
@@ -421,6 +424,14 @@ is a rule that quietly says nothing about half the stairs in the house.
 A light belongs to exactly one **group**, and a group is what a switch toggles and what a lightmap
 is baked per. `bakedIntoLightmap` and `castsBlobShadow` are independent: a baked light still needs
 a blob shadow for the dynamic objects the bake never saw.
+
+Every group has exactly one row in `schedules`; duplicate, missing and unknown groups are errors.
+The closed classes are `SC-OFF`, `SC-LIVING`, `SC-BED`, `SC-WET`, `SC-TASK`, `SC-CIRC` and
+`SC-DUSK`. They reuse the shared sun and civil clock; each group id supplies a stable whole-minute
+offset in `[-8, +8]`, so adjacent windows do not change together. `SC-OFF` stays off unless an
+explicit command-line override names the group. The remaining class intervals are the canonical
+table in `docs/furnishing-kit.md`. This is automatic showcase dressing: there is no player switch
+interaction, prompt or persisted household state.
 
 `bakeLumensPerRadiantWatt` is an optional positive calibration used only by the deterministic
 offline lightmap baker. Runtime lighting continues to consume `intensityLm` unchanged. Normally
@@ -455,7 +466,9 @@ reliable technology detector.
 lighting system applies each fixture's deterministic ±8 simulated-minute offset and uses the
 lumen-weighted active fraction for the group's combined Tier-S lightmap while the fixtures are
 staggering. At full night that fraction is one; in daylight it is zero. A dusk-controlled group
-is automatic and is not represented by a wall-switch interactable.
+keeps this finer per-fixture stagger when its group schedule is `SC-DUSK`; other `SC-DUSK` groups
+use the group-id offset. A dusk-controlled group is automatic and is not represented by a
+wall-switch interactable.
 
 `fixtureProp` is the optional physical-emitter link. When present it must resolve to a static prop
 in the same cell, and `emissiveMaterialSlot` is the **exact source material name in that prop's

@@ -122,6 +122,16 @@ namespace cnahouse::world
             {BulbClass::Fluorescent, "fluorescent"},
         }};
 
+        constexpr std::array<std::pair<LightScheduleClass, std::string_view>, 7> kLightScheduleClasses{{
+            {LightScheduleClass::Off, "SC-OFF"},
+            {LightScheduleClass::Living, "SC-LIVING"},
+            {LightScheduleClass::Bedroom, "SC-BED"},
+            {LightScheduleClass::Wet, "SC-WET"},
+            {LightScheduleClass::Task, "SC-TASK"},
+            {LightScheduleClass::Circulation, "SC-CIRC"},
+            {LightScheduleClass::Dusk, "SC-DUSK"},
+        }};
+
         constexpr std::array<std::pair<AlphaMode, std::string_view>, 3> kAlphaModes{{
             {AlphaMode::Opaque, "opaque"},
             {AlphaMode::Mask, "mask"},
@@ -247,6 +257,11 @@ namespace cnahouse::world
         return Spell(kBulbClasses, value);
     }
 
+    std::string_view ToStringView(LightScheduleClass value) noexcept
+    {
+        return Spell(kLightScheduleClasses, value);
+    }
+
     std::string_view ToStringView(AlphaMode value) noexcept
     {
         return Spell(kAlphaModes, value);
@@ -315,6 +330,11 @@ namespace cnahouse::world
     util::Result<BulbClass> ParseBulbClass(std::string_view text)
     {
         return Read(kBulbClasses, text, "bulb class");
+    }
+
+    util::Result<LightScheduleClass> ParseLightScheduleClass(std::string_view text)
+    {
+        return Read(kLightScheduleClasses, text, "light schedule class");
     }
 
     util::Result<AlphaMode> ParseAlphaMode(std::string_view text)

@@ -5277,3 +5277,20 @@ Final normal-light balance remains M5 work.
 
 All accessible rooms now have at least one prop. M4's exact next unblocked MUST task is
 `HOUSE-00770`, placing the bounded front exterior service props before checkpoint `HOUSE-03380`.
+
+## Round 146 — automatic occupied-house light schedule
+
+Commit: `HOUSE-03401` working tree (`2026-09-24`). The local, Git-ignored
+[`Z-L1` night set](captures/house-03401-schedule-r146) contains the six established fixed views at
+22:00 in clear weather. It was captured without `--light-on` or `--light-off`: the first-floor
+hall and landing, master bedroom and bathroom, second bedroom and front balcony are visibly driven
+by their authored automatic classes and stable per-group offsets.
+
+The review demonstrates that a normal night run no longer needs hand-picked light flags. It does
+not promote the zone to the final C3 lighting baseline: the deliberately bounded room/flight
+luminance work remains in `HOUSE-03403` through `HOUSE-03407`. Exact schedule coverage, timing and
+test evidence is in
+[`house-03401-light-schedule.md`](house-03401-light-schedule.md).
+
+M5's declared dependency order next selects `HOUSE-03403`, lighting the basement, attic and
+stairwells to C3.

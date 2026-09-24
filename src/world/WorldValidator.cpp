@@ -421,6 +421,36 @@ namespace cnahouse::world
                 }
             }
 
+            std::set<Id> scheduledGroups;
+            for (const LightSchedule& schedule : world.LightSchedules())
+            {
+                if (duskByGroup.count(schedule.group) == 0)
+                {
+                    sink.Add(6,
+                             "layout.lights.json",
+                             "schedules/" + Name(schedule.group) + "/group",
+                             "schedule names group " + Name(schedule.group) + ", which owns no light");
+                }
+                if (!scheduledGroups.insert(schedule.group).second)
+                {
+                    sink.Add(6,
+                             "layout.lights.json",
+                             "schedules/" + Name(schedule.group) + "/group",
+                             "group " + Name(schedule.group) + " has more than one automatic schedule");
+                }
+            }
+            for (const auto& [group, dusk] : duskByGroup)
+            {
+                (void)dusk;
+                if (scheduledGroups.count(group) == 0)
+                {
+                    sink.Add(6,
+                             "layout.lights.json",
+                             "schedules",
+                             "light group " + Name(group) + " has no automatic schedule");
+                }
+            }
+
             // §35.3 gives an automatic group exactly one owner: the sun. A wall plate for the
             // same group would be overwritten on the next lighting update and would persist a
             // state the player does not actually control.
