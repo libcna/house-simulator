@@ -426,6 +426,11 @@ namespace cnahouse::world
         std::string contentName;
         /// @brief Multiplier that restores the HDR peak removed before the PNG was written.
         float scale = 1.0F;
+        /// @brief Mean irradiance over non-black receiver texels, before normalisation.
+        ///
+        /// Exact black is unused atlas padding rather than a receiver. Static BasicEffect detail
+        /// uses this cell-wide sample to follow the adjacent bake without acquiring UV1.
+        float receiverMean = 0.0F;
     };
 
     struct CellLightmapGroup

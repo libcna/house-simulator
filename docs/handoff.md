@@ -1,3 +1,43 @@
+# Static-prop lighting handoff — 2026-09-24 (`HOUSE-03402`)
+
+Static indoor props now follow the same existing bake products as their cell's shell without a new
+rendering path. Each daylight and artificial binding carries one pre-normalisation mean over
+non-black receiver texels (78 daylight + 138 artificial values). `StaticGeometryPass` composes the
+room daylight tint and active owned fixture groups, excludes foreign facade products, keeps the
+existing BasicEffect bounce as a floor and caps the cell-average approximation to a measured 1.40x
+component-wise lift. Outdoor, exterior-door, exterior-window and weather-facing paths are
+unchanged. This was cheaper than adding UV1 prop lightmaps or baked vertex data and preserves the
+rejected `HOUSE-01076` global-gain decision.
+
+Round 144 measured one fixed view in every zone by day and night. The eight indoor controls finish
+inside the stated 0.25–3.50 linear-luminance prop/receiver band (actual range 0.283–3.369); all
+three outdoor-zone controls are pixel-identical before/after. An uncapped first candidate was
+explicitly rejected after it drove the master-bedroom ratio to 10.834 and the library candidate to
+37.680. The final day/night frames show useful lifts in the basement, garage, upper rooms and stair
+without clipping, a new warm cast or an outdoor calibration change. Exact ROIs, values and the
+option decision are in `docs/visual-review/house-03402-prop-lighting.md`; captures remain local in
+the four `house-03402-*-r144` directories named there. No render golden failed, so none was
+replaced.
+
+The build, schema generation/check, complete 1,420-test unit suite and complete 140-test integration
+suite pass. Integration needs `SDL_VIDEODRIVER=offscreen`, `SDL_AUDIODRIVER=dummy` and an isolated
+writable `XDG_DATA_HOME`; omitting the last item reproduces eight SaveStore permission failures,
+while their exact retry is 10/10. The static pass is 7/7 and WorldLoader 139/139. The remaining
+forecast is 146.25 realistic / 178.75 pessimistic hours. With 80 task-hours spent since the final
+reduction, the R14 projection is 258.75 h, 21.25 h below the hard ceiling.
+
+Rule R1(b) selected this house-wide fix and M5's declared sequence now selects `HOUSE-01030`:
+rebuild the existing chunks and re-bake the furnished house before per-zone baseline lighting.
+`HOUSE-03401` and `HOUSE-03406` are also dependency-unblocked, but do not outrank that declared
+sequence. Reuse `build/`, the shared `/rv/cnaccache`, and at most four workers pinned to CPUs
+4,5,7,9; strict XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`. In this environment
+`capture_review.py`'s forced `LIBGL_ALWAYS_SOFTWARE=1` conflicts with the explicitly selected
+hardware API and exits 139; unsetting only that variable while retaining offscreen SDL produced
+the reviewed Mesa OpenGL ES captures. The root `.claude` entry remains user-owned and is the known
+pre-existing layout-gate failure; do not modify or stage it.
+
+---
+
 # Dressing-checkpoint handoff — 2026-09-24 (`HOUSE-03380`)
 
 M4 is complete. Round 143 captured and inspected all 68 fixed clear-day views across the eleven

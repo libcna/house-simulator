@@ -175,18 +175,21 @@ namespace
                     "shellHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
                     "daylight": {
                       "contentName": "Textures/Lightmaps/Daylight/L0_KITCHEN_LM_DAY",
-                      "scale": 1.25
+                      "scale": 1.25,
+                      "receiverMean": 0.22
                     },
                     "artificial": [
                       {
                         "group": "LG_L0_KITCHEN_MAIN",
                         "contentName": "Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_MAIN",
-                        "scale": 2.5
+                        "scale": 2.5,
+                        "receiverMean": 0.31
                       },
                       {
                         "group": "LG_L0_KITCHEN_UNDERCAB",
                         "contentName": "Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_UNDERCAB",
-                        "scale": 0.75
+                        "scale": 0.75,
+                        "receiverMean": 0.08
                       }
                     ]
                   },
@@ -1309,13 +1312,16 @@ namespace
         ASSERT_TRUE(kitchen.lightmaps.daylight.has_value());
         EXPECT_EQ(kitchen.lightmaps.daylight->contentName, "Textures/Lightmaps/Daylight/L0_KITCHEN_LM_DAY");
         EXPECT_FLOAT_EQ(kitchen.lightmaps.daylight->scale, 1.25F);
+        EXPECT_FLOAT_EQ(kitchen.lightmaps.daylight->receiverMean, 0.22F);
         ASSERT_EQ(kitchen.lightmaps.artificial.size(), 2U);
         EXPECT_EQ(kitchen.lightmaps.artificial[0].group, Intern("LG_L0_KITCHEN_MAIN"));
         EXPECT_EQ(kitchen.lightmaps.artificial[0].texture.contentName,
                   "Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_MAIN");
         EXPECT_FLOAT_EQ(kitchen.lightmaps.artificial[0].texture.scale, 2.5F);
+        EXPECT_FLOAT_EQ(kitchen.lightmaps.artificial[0].texture.receiverMean, 0.31F);
         EXPECT_EQ(kitchen.lightmaps.artificial[1].group, Intern("LG_L0_KITCHEN_UNDERCAB"));
         EXPECT_FLOAT_EQ(kitchen.lightmaps.artificial[1].texture.scale, 0.75F);
+        EXPECT_FLOAT_EQ(kitchen.lightmaps.artificial[1].texture.receiverMean, 0.08F);
         EXPECT_EQ(kitchen.residencyPack, "house-l0");
         EXPECT_EQ(kitchen.lodBias, 0);
         EXPECT_EQ(kitchen.visibilityHint, world::VisibilityHint::Opaque);
@@ -1450,9 +1456,11 @@ namespace
             std::string(R"({"shellHash":"sha256:)") + std::string(63U, '0') +
                 R"(","daylight":null,"artificial":[]})",
             std::string(R"({"shellHash":"sha256:)") + hash +
-                R"(","daylight":{"contentName":"","scale":1},"artificial":[]})",
+                R"(","daylight":{"contentName":"","scale":1,"receiverMean":0.2},"artificial":[]})",
             std::string(R"({"shellHash":"sha256:)") + hash +
-                R"(","daylight":{"contentName":"Textures/Lightmaps/test","scale":0},"artificial":[]})"};
+                R"(","daylight":{"contentName":"Textures/Lightmaps/test","scale":0,"receiverMean":0.2},"artificial":[]})",
+            std::string(R"({"shellHash":"sha256:)") + hash +
+                R"(","daylight":{"contentName":"Textures/Lightmaps/test","scale":1,"receiverMean":0},"artificial":[]})"};
         for (const std::string& lightmaps : rows)
         {
             Write(

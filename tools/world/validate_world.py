@@ -3699,7 +3699,7 @@ def selftest() -> int:
             "shellHash": "sha256:" + "0" * 64,
             "daylight": None,
             "artificial": [{"group": "LG_HALL", "contentName": "Test/Foreign",
-                            "scale": 1.0}],
+                            "scale": 1.0, "receiverMean": 1.0}],
         }
         foreign_binding_dir = workspace / "undeclared-foreign-binding"
         write_fixture(foreign_binding_dir, foreign_binding)

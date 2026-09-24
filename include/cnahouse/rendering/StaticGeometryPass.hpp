@@ -23,13 +23,15 @@ namespace Microsoft::Xna::Framework::Graphics
 namespace cnahouse::lighting
 {
     class LightingSystem;
-}
+    struct RoomLightState;
+} // namespace cnahouse::lighting
 
 namespace cnahouse::world
 {
     class CellRuntime;
     class WorldData;
     enum class CellKind : std::uint8_t;
+    struct Cell;
     struct Chunk;
     struct ChunkLibrary;
     struct Light;
@@ -57,6 +59,16 @@ namespace cnahouse::rendering
                                                bool skyOpen,
                                                float effectExposure,
                                                float roomDaylight) noexcept;
+
+    /// @brief Cell-wide irradiance sampled from the same bake as the nearby shell receiver.
+    ///
+    /// This is the low-cost HOUSE-03402 path for static detail without UV1: daylight and active
+    /// owned fixture products contribute their baked non-padding means. The ambient floor remains
+    /// present. Foreign facade bindings are excluded because they are not the interior receiver.
+    [[nodiscard]] Microsoft::Xna::Framework::Vector3
+    BakedReceiverAmbientFor(const world::Cell& cell,
+                            const lighting::RoomLightState& room,
+                            const lighting::LightingSystem& lighting) noexcept;
 
     /// @brief The one switch group shared by every linked fixture prop in @p chunk.
     ///

@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **94 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 127 / 150 / 183 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **M4 dressing checkpoint passed; M5 baseline lighting is in progress.** Next: make static props consistent with their baked receivers in `HOUSE-03402` |
+| Active plan | **93 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 124 / 146 / 179 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **M4 dressing checkpoint passed; M5 baseline lighting is in progress.** Next: rebuild and re-bake the furnished house in `HOUSE-01030` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -935,12 +935,13 @@ light, nothing more. No new lighting system is added for polish (rule R9).
       verify: unit LightScheduleTests.* (times, determinism, override, and one light group per level switching and changing its room's level)
       note: until now interior lights change only through `--light-on`. A night walkthrough is dark indoors except for dusk-sensor fixtures
 
-- [ ] HOUSE-03402 — Light static props consistently with their baked receivers, house-wide
+- [x] HOUSE-03402 — Light static props consistently with their baked receivers, house-wide
       dep: HOUSE-03380 · sys: rendering · plat: ALL · pri: MUST · zone: all · adv: D6, G3 · est: 4
       files: src/rendering/*, src/lighting/*, tools/blender/lightmap_bake.py (as chosen)
       accept: (1) choose, by matched captures, between props receiving per-cell irradiance from the bake (probe or sampled lightmap), baked prop lightmaps, or baked vertex occlusion, and record the decision with its numbers; (2) Basic-lit furniture no longer reads markedly darker or warmer than the floor and wall it stands against: measured luminance ratios within a stated band on ≥ 1 view per zone, day and night; (3) the rejected global-gain probes of `HOUSE-01076` stay rejected; outdoor props keep their calibration; (4) the cheapest option that meets (2) wins, and nothing beyond it is built
       verify: matched before/after captures of ≥ 1 view per zone; the ratio measurement; render goldens refreshed only where inspected
       note: generalises Round 102's top ground-floor defect (piano, sofas, sunroom chairs) to the whole house. With every zone dressed, this is a system fix, not a room fix (R1 exception b)
+      note: (2026-09-24) Round 144 chooses the cheapest accepted option: each existing daylight/artificial bake now records its non-padding linear receiver mean (216 scalar bindings), and indoor Basic-lit detail composes the owning cell's daylight tint plus active owned fixture groups. The established heuristic remains the floor and a measured 1.40x component-wise cap prevents a cell average from overpowering local UV2 shade; no UV1, prop atlas, vertex stream, draw, manager or global gain was added. Eight indoor fixed views measured by day/night finish inside the stated 0.25–3.50 linear-luminance ratio band (0.283–3.369); three exterior-zone controls are pixel-identical before/after. The rejected uncapped candidate reached 10.834 in the master bedroom and 37.680 in the library and was discarded. Full numbers and ROIs are in `docs/visual-review/house-03402-prop-lighting.md`. Matched captures show no clipping, new warm cast or outdoor change; no render golden failed or required replacement. The 1,420 unit tests, 140 integration tests, schema validation, authored-world validation and focused static-pass tests pass
 
 - [ ] HOUSE-01030 — Rebuild the chunks and re-bake the lightmaps over the furnished house
       dep: HOUSE-03380, HOUSE-00473, HOUSE-00909 · sys: content · plat: TOOL · pri: MUST · zone: all · adv: G3, D6 · est: 4
@@ -1888,7 +1889,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M2 Architectural completion | 8 | 18 | **0** | 0 | **0** | 0 | — |
 | M3 The reusable furnishing kit | 16 | 33 | **0** | 0 | **0** | 0 | — |
 | M4 Dressing everywhere | 40 | 48.75 | **0** | 0 | **0** | 0 | R-D +3 |
-| M5 Baseline lighting everywhere | 12 | 24.5 | **10** | 16.75 | **19.75** | 21.75 | — |
+| M5 Baseline lighting everywhere | 12 | 24.5 | **9** | 13.5 | **15.75** | 17.25 | — |
 | M6 Main cells and hero areas | 20 | 32.5 | **15** | 16.75 | **19.75** | 21.75 | — |
 | M7 A compact environment | 13 | 21 | **8** | 11.25 | **13.25** | 14.5 | — |
 | M8 Atmospheric audio essentials | 11 | 14.5 | **6** | 7.75 | **9** | 10 | — |
@@ -1900,12 +1901,12 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **94** | **127.25** | **150.25** | **183.25** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **93** | **124.25** | **146.25** | **178.75** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-96.75 h. Adding the 76 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-259.25 h, 20.75 h under the limit. That margin is
+101.25 h. Adding the 80 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+258.75 h, 21.25 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |

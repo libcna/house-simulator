@@ -215,11 +215,13 @@ def update_cell_bindings(selected_cells: set[str] | None = None) -> None:
             "daylight": ({
                 "contentName": f"Textures/Lightmaps/Daylight/{Path(day_product['image']).stem}",
                 "scale": day_product["scale"],
+                "receiverMean": day_product["receiverMean"],
             } if day_product else None),
             "artificial": [{
                 "group": group["group"],
                 "contentName": f"Textures/Lightmaps/Artificial/{Path(group['image']).stem}",
                 "scale": group["scale"],
+                "receiverMean": group["receiverMean"],
             } for group in art.get("groups", [])],
         }
         text = set_lightmap_field(text, cell, binding)

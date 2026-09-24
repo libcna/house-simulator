@@ -41,6 +41,7 @@
 namespace
 {
     namespace Gfx = Microsoft::Xna::Framework::Graphics;
+    using cnahouse::rendering::BakedReceiverAmbientFor;
     using cnahouse::rendering::Camera;
     using cnahouse::rendering::FixtureEmissiveMultiplier;
     using cnahouse::rendering::FixtureGroupForChunk;
@@ -293,6 +294,14 @@ namespace
                 frame.frameIndex = 1U;
                 lighting.Update(frame);
 
+                const cnahouse::lighting::RoomLightState* litRoom = lighting.FindCell(kitchen->id);
+                ASSERT_NE(litRoom, nullptr);
+                const Microsoft::Xna::Framework::Vector3 litReceiver =
+                    BakedReceiverAmbientFor(*kitchen, *litRoom, lighting);
+                EXPECT_GT(litReceiver.X, cnahouse::lighting::kAmbientFloor);
+                EXPECT_GT(litReceiver.Y, cnahouse::lighting::kAmbientFloor);
+                EXPECT_GT(litReceiver.Z, cnahouse::lighting::kAmbientFloor);
+
                 cnahouse::rendering::MaterialBinder binder(device);
                 ASSERT_TRUE(binder.RegisterAll(world.Materials()));
                 Gfx::Texture2D albedo(device, 2, 2);
@@ -337,6 +346,14 @@ namespace
                 ASSERT_TRUE(lighting.SetGroupOn(secondary->group, false));
                 frame.frameIndex = 2U;
                 lighting.Update(frame);
+                const cnahouse::lighting::RoomLightState* unlitRoom = lighting.FindCell(kitchen->id);
+                ASSERT_NE(unlitRoom, nullptr);
+                const Microsoft::Xna::Framework::Vector3 daylightReceiver =
+                    BakedReceiverAmbientFor(*kitchen, *unlitRoom, lighting);
+                EXPECT_LT(daylightReceiver.X, litReceiver.X)
+                    << "switching off owned fixture bakes must lower the sampled receiver";
+                EXPECT_GT(daylightReceiver.X, cnahouse::lighting::kAmbientFloor)
+                    << "the daylight bake still contributes at noon";
                 pass.Draw(context);
                 EXPECT_EQ(pass.StateChanges(), 2U)
                     << "with both switches off, only neutral ambient and live daylight remain";

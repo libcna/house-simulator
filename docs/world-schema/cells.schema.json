@@ -187,6 +187,10 @@
                     "group": {
                       "$ref": "#/$defs/id"
                     },
+                    "receiverMean": {
+                      "exclusiveMinimum": 0,
+                      "type": "number"
+                    },
                     "scale": {
                       "exclusiveMinimum": 0,
                       "type": "number"
@@ -195,7 +199,8 @@
                   "required": [
                     "group",
                     "contentName",
-                    "scale"
+                    "scale",
+                    "receiverMean"
                   ],
                   "type": "object"
                 },
@@ -209,6 +214,10 @@
                       "contentName": {
                         "type": "string"
                       },
+                      "receiverMean": {
+                        "exclusiveMinimum": 0,
+                        "type": "number"
+                      },
                       "scale": {
                         "exclusiveMinimum": 0,
                         "type": "number"
@@ -216,7 +225,8 @@
                     },
                     "required": [
                       "contentName",
-                      "scale"
+                      "scale",
+                      "receiverMean"
                     ],
                     "type": "object"
                   },

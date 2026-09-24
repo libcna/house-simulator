@@ -57,6 +57,41 @@ namespace cnahouse::rendering
         return effectExposure * (skyOpen ? 1.0F : kIndoorWindowKey * roomDaylight);
     }
 
+    Vector3 BakedReceiverAmbientFor(const world::Cell& cell,
+                                    const lighting::RoomLightState& room,
+                                    const lighting::LightingSystem& lighting) noexcept
+    {
+        Vector3 sampled(lighting::kAmbientFloor, lighting::kAmbientFloor, lighting::kAmbientFloor);
+        if (cell.lightmaps.daylight.has_value())
+        {
+            const float mean = cell.lightmaps.daylight->receiverMean;
+            sampled.X += mean * room.daylightTint.X;
+            sampled.Y += mean * room.daylightTint.Y;
+            sampled.Z += mean * room.daylightTint.Z;
+        }
+        for (const world::CellLightmapGroup& binding : cell.lightmaps.artificial)
+        {
+            if (std::find(cell.lightGroups.begin(), cell.lightGroups.end(), binding.group) ==
+                cell.lightGroups.end())
+            {
+                continue;
+            }
+            const float level = lighting.GroupLevelInCell(cell.id, binding.group);
+            if (level <= 0.0F)
+            {
+                continue;
+            }
+            const Vector3 colour = lighting.GroupColor(binding.group);
+            const float mean = binding.texture.receiverMean * level;
+            sampled.X += mean * colour.X;
+            sampled.Y += mean * colour.Y;
+            sampled.Z += mean * colour.Z;
+        }
+        return Vector3(std::clamp(sampled.X, 0.0F, 1.0F),
+                       std::clamp(sampled.Y, 0.0F, 1.0F),
+                       std::clamp(sampled.Z, 0.0F, 1.0F));
+    }
+
     util::Id FixtureGroupForChunk(const world::Chunk& chunk, std::span<const world::Light> lights) noexcept
     {
         util::Id group;
@@ -103,6 +138,11 @@ namespace cnahouse::rendering
         constexpr float kBasicFixtureAmbient = 0.20F;
         constexpr float kBasicInteriorFixtureBounce = 0.38F;
         constexpr float kBasicFixtureKey = 0.22F;
+        // A cell-wide sample cannot reproduce the receiver's local UV2 gradient. It may lift the
+        // established BasicEffect bounce, but must not turn a pale prop beside a shaded wall into
+        // the brightest object in the room. Matched HOUSE-03402 captures bound that approximation
+        // to a 40% component-wise lift; local fixture keys still provide spatial contrast.
+        constexpr float kBasicBakedReceiverMaxLift = 1.40F;
 
         /// FNV-1a over the name. A fixed, stated algorithm rather than `std::hash`, whose value is
         /// allowed to differ between standard libraries -- and a render test compares pixels.
@@ -682,6 +722,24 @@ namespace cnahouse::rendering
                         exposure *
                             std::min(1.0F,
                                      lighting::kAmbientFloor + skyScale * sky.Z + artificial * bounceTint.Z));
+                    if (indoorBounce)
+                    {
+                        // A single precomputed sample from each of this cell's baked receiver
+                        // products is cheaper than adding UV1 and a lightmap lookup to every prop.
+                        // Keep the established heuristic as a floor, but let the actual receiver
+                        // bake lift dark furniture where its average irradiance is higher.
+                        const Vector3 baked = BakedReceiverAmbientFor(*cell, *room, *lighting_);
+                        draw.ambientLight =
+                            Vector3(std::max(draw.ambientLight.X,
+                                             std::min(exposure * baked.X,
+                                                      kBasicBakedReceiverMaxLift * draw.ambientLight.X)),
+                                    std::max(draw.ambientLight.Y,
+                                             std::min(exposure * baked.Y,
+                                                      kBasicBakedReceiverMaxLift * draw.ambientLight.Y)),
+                                    std::max(draw.ambientLight.Z,
+                                             std::min(exposure * baked.Z,
+                                                      kBasicBakedReceiverMaxLift * draw.ambientLight.Z)));
+                    }
                     const bool celestial = lighting_->CelestialKeyForCell(cell->id) != nullptr;
                     const Vector3 objectCentre = (runMin + runMax) * 0.5F;
                     lighting::ObjectLightAssignment objectLights =

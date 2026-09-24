@@ -357,6 +357,13 @@ def luminance(pixels: list[float], index: int) -> float:
             + 0.0722 * pixels[index * 4 + 2])
 
 
+def receiver_mean(pixels: list[float], size: int) -> float:
+    """Mean irradiance over receivers, excluding exactly black atlas padding."""
+    samples = [luminance(pixels, index) for index in range(size * size)]
+    receivers = [value for value in samples if value > 1.0e-5]
+    return sum(receivers) / len(receivers) if receivers else 0.0
+
+
 def pack_rgb(channels: list[list[float]], size: int, path: str) -> list[float]:
     """§23.4's Tier-E texture: three groups' luminance in R, G and B of one image.
 
@@ -431,7 +438,8 @@ def bake_cell(lights: list[dict], cell: str, out_dir: str, size: int, samples: i
         entries.append({"group": group, "image": name, "scale": scale,
                         "lights": sorted(by_group[group]),
                         "peak": peak, "mean": sum(luminance(pixels, i)
-                                                   for i in range(size * size)) / (size * size)})
+                                                   for i in range(size * size)) / (size * size),
+                        "receiverMean": receiver_mean(pixels, size)})
         channels.append(pixels)
         report(f"{group}: {len(by_group[group])} light(s), peak {peak:.4f}")
 
@@ -446,7 +454,8 @@ def bake_cell(lights: list[dict], cell: str, out_dir: str, size: int, samples: i
         day_pixels = bake_once(image, size)
         day_name = f"{cell}_LM_DAY.png"
         day_scale = normalise_and_save(day_pixels, size, os.path.join(out_dir, day_name))
-        day_entry = {"image": day_name, "scale": day_scale, "skyStrength": SKY_STRENGTH}
+        day_entry = {"image": day_name, "scale": day_scale, "skyStrength": SKY_STRENGTH,
+                     "receiverMean": receiver_mean(day_pixels, size)}
         report(f"LM_DAY: sky only, peak {day_scale:.4f}")
 
     packed_scales = None

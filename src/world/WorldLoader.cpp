@@ -1329,6 +1329,11 @@ namespace cnahouse::world
                     {
                         return scale.Error();
                     }
+                    const Result<float> receiverMean = value.RequireFloat("receiverMean");
+                    if (!receiverMean)
+                    {
+                        return receiverMean.Error();
+                    }
                     if (contentName.Value().empty())
                     {
                         return Err(ErrorCode::InvalidData,
@@ -1341,8 +1346,15 @@ namespace cnahouse::world
                                    "a lightmap scale must be finite and greater than zero",
                                    "layout.cells.json/" + row.Path() + "/" + std::string(path));
                     }
+                    if (!std::isfinite(receiverMean.Value()) || !(receiverMean.Value() > 0.0F))
+                    {
+                        return Err(ErrorCode::OutOfRange,
+                                   "a lightmap receiverMean must be finite and greater than zero",
+                                   "layout.cells.json/" + row.Path() + "/" + std::string(path));
+                    }
                     texture.contentName = contentName.Value();
                     texture.scale = scale.Value();
+                    texture.receiverMean = receiverMean.Value();
                     return texture;
                 };
 

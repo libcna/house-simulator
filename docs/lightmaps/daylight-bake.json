@@ -13,6 +13,7 @@
       "cell": "B1_CELLAR",
       "daylight": {
         "image": "B1_CELLAR_LM_DAY.png",
+        "receiverMean": 0.9288297581272942,
         "scale": 1.000000238418579,
         "skyStrength": 1.0
       },
@@ -24,6 +25,7 @@
       "cell": "B1_CINEMA",
       "daylight": {
         "image": "B1_CINEMA_LM_DAY.png",
+        "receiverMean": 0.9012411648315921,
         "scale": 1.000000238418579,
         "skyStrength": 1.0
       },
@@ -35,6 +37,7 @@
       "cell": "B1_ELECTRICAL",
       "daylight": {
         "image": "B1_ELECTRICAL_LM_DAY.png",
+        "receiverMean": 0.9177241810283361,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -46,6 +49,7 @@
       "cell": "B1_GYM",
       "daylight": {
         "image": "B1_GYM_LM_DAY.png",
+        "receiverMean": 0.6616315525415281,
         "scale": 1.0005961656570435,
         "skyStrength": 1.0
       },
@@ -57,6 +61,7 @@
       "cell": "B1_HALL",
       "daylight": {
         "image": "B1_HALL_LM_DAY.png",
+        "receiverMean": 0.8768193811632707,
         "scale": 1.000000238418579,
         "skyStrength": 1.0
       },
@@ -68,6 +73,7 @@
       "cell": "B1_HOBBY",
       "daylight": {
         "image": "B1_HOBBY_LM_DAY.png",
+        "receiverMean": 0.003399910773912481,
         "scale": 0.0035758186131715775,
         "skyStrength": 1.0
       },
@@ -78,6 +84,7 @@
       "cell": "B1_LAUNDRY2",
       "daylight": {
         "image": "B1_LAUNDRY2_LM_DAY.png",
+        "receiverMean": 0.9261130745719391,
         "scale": 1.000000238418579,
         "skyStrength": 1.0
       },
@@ -89,6 +96,7 @@
       "cell": "B1_MECHANICAL",
       "daylight": {
         "image": "B1_MECHANICAL_LM_DAY.png",
+        "receiverMean": 0.7333312050309256,
         "scale": 1.0009839534759521,
         "skyStrength": 1.0
       },
@@ -100,6 +108,7 @@
       "cell": "B1_STAIR",
       "daylight": {
         "image": "B1_STAIR_LM_DAY.png",
+        "receiverMean": 0.3366569988013798,
         "scale": 1.000000238418579,
         "skyStrength": 1.0
       },
@@ -111,6 +120,7 @@
       "cell": "B1_STOR1",
       "daylight": {
         "image": "B1_STOR1_LM_DAY.png",
+        "receiverMean": 0.7307555869066256,
         "scale": 1.0003923177719116,
         "skyStrength": 1.0
       },
@@ -122,6 +132,7 @@
       "cell": "B1_STOR2",
       "daylight": {
         "image": "B1_STOR2_LM_DAY.png",
+        "receiverMean": 0.7173232510076268,
         "scale": 1.0004874467849731,
         "skyStrength": 1.0
       },
@@ -133,6 +144,7 @@
       "cell": "B1_UNDERSTAIR",
       "daylight": {
         "image": "B1_UNDERSTAIR_LM_DAY.png",
+        "receiverMean": 0.06973635637762769,
         "scale": 0.9376965761184692,
         "skyStrength": 1.0
       },
@@ -144,6 +156,7 @@
       "cell": "B1_UTILITY",
       "daylight": {
         "image": "B1_UTILITY_LM_DAY.png",
+        "receiverMean": 0.46914482049143524,
         "scale": 1.0016582012176514,
         "skyStrength": 1.0
       },
@@ -155,6 +168,7 @@
       "cell": "B1_WC7",
       "daylight": {
         "image": "B1_WC7_LM_DAY.png",
+        "receiverMean": 0.8968577456142158,
         "scale": 1.000000238418579,
         "skyStrength": 1.0
       },
@@ -166,6 +180,7 @@
       "cell": "B1_WORKSHOP",
       "daylight": {
         "image": "B1_WORKSHOP_LM_DAY.png",
+        "receiverMean": 0.7210386729265957,
         "scale": 1.0002878904342651,
         "skyStrength": 1.0
       },
@@ -177,6 +192,7 @@
       "cell": "CELL_FREEZER_INTERIOR",
       "daylight": {
         "image": "CELL_FREEZER_INTERIOR_LM_DAY.png",
+        "receiverMean": 0.49591792410835706,
         "scale": 0.7044824361801147,
         "skyStrength": 1.0
       },
@@ -188,6 +204,7 @@
       "cell": "CELL_FRIDGE_INTERIOR",
       "daylight": {
         "image": "CELL_FRIDGE_INTERIOR_LM_DAY.png",
+        "receiverMean": 0.05459097139526329,
         "scale": 0.17232680320739746,
         "skyStrength": 1.0
       },
@@ -199,6 +216,7 @@
       "cell": "L0_BUTLERS",
       "daylight": {
         "image": "L0_BUTLERS_LM_DAY.png",
+        "receiverMean": 0.2373171602245164,
         "scale": 1.000000238418579,
         "skyStrength": 1.0
       },
@@ -210,6 +228,7 @@
       "cell": "L0_CLOSET_W",
       "daylight": {
         "image": "L0_CLOSET_W_LM_DAY.png",
+        "receiverMean": 0.925728843493349,
         "scale": 1.000000238418579,
         "skyStrength": 1.0
       },
@@ -221,6 +240,7 @@
       "cell": "L0_DINING",
       "daylight": {
         "image": "L0_DINING_LM_DAY.png",
+        "receiverMean": 0.26041373624250164,
         "scale": 0.6892715692520142,
         "skyStrength": 1.0
       },
@@ -232,6 +252,7 @@
       "cell": "L0_FAMILY",
       "daylight": {
         "image": "L0_FAMILY_LM_DAY.png",
+        "receiverMean": 0.3858170996872512,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -243,6 +264,7 @@
       "cell": "L0_FOYER",
       "daylight": {
         "image": "L0_FOYER_LM_DAY.png",
+        "receiverMean": 0.4965545495783228,
         "scale": 1.000000238418579,
         "skyStrength": 1.0
       },
@@ -254,6 +276,7 @@
       "cell": "L0_GARAGE",
       "daylight": {
         "image": "L0_GARAGE_LM_DAY.png",
+        "receiverMean": 0.8696527709886562,
         "scale": 1.0009758472442627,
         "skyStrength": 1.0
       },
@@ -265,6 +288,7 @@
       "cell": "L0_GARAGE_LOFT",
       "daylight": {
         "image": "L0_GARAGE_LOFT_LM_DAY.png",
+        "receiverMean": 0.03885490549622112,
         "scale": 0.3587890565395355,
         "skyStrength": 1.0
       },
@@ -276,6 +300,7 @@
       "cell": "L0_HALL",
       "daylight": {
         "image": "L0_HALL_LM_DAY.png",
+        "receiverMean": 0.44743119319306823,
         "scale": 0.7665742039680481,
         "skyStrength": 1.0
       },
@@ -287,6 +312,7 @@
       "cell": "L0_KITCHEN",
       "daylight": {
         "image": "L0_KITCHEN_LM_DAY.png",
+        "receiverMean": 0.5224764688090494,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -298,6 +324,7 @@
       "cell": "L0_LAUNDRY",
       "daylight": {
         "image": "L0_LAUNDRY_LM_DAY.png",
+        "receiverMean": 0.07530605689532922,
         "scale": 1.000000238418579,
         "skyStrength": 1.0
       },
@@ -309,6 +336,7 @@
       "cell": "L0_LIVING",
       "daylight": {
         "image": "L0_LIVING_LM_DAY.png",
+        "receiverMean": 0.21484216898419833,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -320,6 +348,7 @@
       "cell": "L0_MUDROOM",
       "daylight": {
         "image": "L0_MUDROOM_LM_DAY.png",
+        "receiverMean": 0.19963592575923833,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -331,6 +360,7 @@
       "cell": "L0_OFFICE",
       "daylight": {
         "image": "L0_OFFICE_LM_DAY.png",
+        "receiverMean": 0.8771197518103093,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -342,6 +372,7 @@
       "cell": "L0_PANTRY",
       "daylight": {
         "image": "L0_PANTRY_LM_DAY.png",
+        "receiverMean": 0.9192754918098566,
         "scale": 1.000000238418579,
         "skyStrength": 1.0
       },
@@ -353,6 +384,7 @@
       "cell": "L0_STAIR_MAIN",
       "daylight": {
         "image": "L0_STAIR_MAIN_LM_DAY.png",
+        "receiverMean": 0.44977259245644624,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -364,6 +396,7 @@
       "cell": "L0_STOR",
       "daylight": {
         "image": "L0_STOR_LM_DAY.png",
+        "receiverMean": 0.9162645393593818,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -375,6 +408,7 @@
       "cell": "L0_SUNROOM",
       "daylight": {
         "image": "L0_SUNROOM_LM_DAY.png",
+        "receiverMean": 0.41348391230103965,
         "scale": 1.000000238418579,
         "skyStrength": 1.0
       },
@@ -386,6 +420,7 @@
       "cell": "L0_WC1",
       "daylight": {
         "image": "L0_WC1_LM_DAY.png",
+        "receiverMean": 0.0010742939770345887,
         "scale": 0.0036079538986086845,
         "skyStrength": 1.0
       },
@@ -397,6 +432,7 @@
       "cell": "L0_WC2",
       "daylight": {
         "image": "L0_WC2_LM_DAY.png",
+        "receiverMean": 0.0012673181911952353,
         "scale": 0.0038971847388893366,
         "skyStrength": 1.0
       },
@@ -407,6 +443,7 @@
       "cell": "L1_BATH2",
       "daylight": {
         "image": "L1_BATH2_LM_DAY.png",
+        "receiverMean": 0.9418348835172837,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -418,6 +455,7 @@
       "cell": "L1_BATH3",
       "daylight": {
         "image": "L1_BATH3_LM_DAY.png",
+        "receiverMean": 0.3402876433178958,
         "scale": 1.0005381107330322,
         "skyStrength": 1.0
       },
@@ -429,6 +467,7 @@
       "cell": "L1_BED2",
       "daylight": {
         "image": "L1_BED2_LM_DAY.png",
+        "receiverMean": 0.9285301765312443,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -440,6 +479,7 @@
       "cell": "L1_BED3",
       "daylight": {
         "image": "L1_BED3_LM_DAY.png",
+        "receiverMean": 0.8941514492243853,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -451,6 +491,7 @@
       "cell": "L1_BED4",
       "daylight": {
         "image": "L1_BED4_LM_DAY.png",
+        "receiverMean": 0.7847848407664861,
         "scale": 1.000000238418579,
         "skyStrength": 1.0
       },
@@ -462,6 +503,7 @@
       "cell": "L1_BED5",
       "daylight": {
         "image": "L1_BED5_LM_DAY.png",
+        "receiverMean": 0.7582461133196002,
         "scale": 1.000000238418579,
         "skyStrength": 1.0
       },
@@ -473,6 +515,7 @@
       "cell": "L1_CLOSET_2",
       "daylight": {
         "image": "L1_CLOSET_2_LM_DAY.png",
+        "receiverMean": 0.0011995336932224393,
         "scale": 0.003988554235547781,
         "skyStrength": 1.0
       },
@@ -483,6 +526,7 @@
       "cell": "L1_CLOSET_3",
       "daylight": {
         "image": "L1_CLOSET_3_LM_DAY.png",
+        "receiverMean": 0.0013128413478887572,
         "scale": 0.003926399629563093,
         "skyStrength": 1.0
       },
@@ -493,6 +537,7 @@
       "cell": "L1_HALL",
       "daylight": {
         "image": "L1_HALL_LM_DAY.png",
+        "receiverMean": 0.37723478267215504,
         "scale": 0.7425538897514343,
         "skyStrength": 1.0
       },
@@ -503,6 +548,7 @@
       "cell": "L1_HALL_W",
       "daylight": {
         "image": "L1_HALL_W_LM_DAY.png",
+        "receiverMean": 0.15561731631808784,
         "scale": 0.6427707076072693,
         "skyStrength": 1.0
       },
@@ -513,6 +559,7 @@
       "cell": "L1_LANDING",
       "daylight": {
         "image": "L1_LANDING_LM_DAY.png",
+        "receiverMean": 0.3697813180860212,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -524,6 +571,7 @@
       "cell": "L1_LINEN",
       "daylight": {
         "image": "L1_LINEN_LM_DAY.png",
+        "receiverMean": 0.0014182333928372374,
         "scale": 0.0040336716920137405,
         "skyStrength": 1.0
       },
@@ -534,6 +582,7 @@
       "cell": "L1_MASTER_BATH",
       "daylight": {
         "image": "L1_MASTER_BATH_LM_DAY.png",
+        "receiverMean": 0.9296372502931559,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -545,6 +594,7 @@
       "cell": "L1_MASTER_BED",
       "daylight": {
         "image": "L1_MASTER_BED_LM_DAY.png",
+        "receiverMean": 0.8909118424256041,
         "scale": 1.000000238418579,
         "skyStrength": 1.0
       },
@@ -556,6 +606,7 @@
       "cell": "L1_MASTER_CLOSET",
       "daylight": {
         "image": "L1_MASTER_CLOSET_LM_DAY.png",
+        "receiverMean": 0.9138147900497499,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -567,6 +618,7 @@
       "cell": "L1_STAIR_MAIN",
       "daylight": {
         "image": "L1_STAIR_MAIN_LM_DAY.png",
+        "receiverMean": 0.4007991367603219,
         "scale": 1.000000238418579,
         "skyStrength": 1.0
       },
@@ -578,6 +630,7 @@
       "cell": "L1_STOR",
       "daylight": {
         "image": "L1_STOR_LM_DAY.png",
+        "receiverMean": 0.8998203321808925,
         "scale": 1.000000238418579,
         "skyStrength": 1.0
       },
@@ -589,6 +642,7 @@
       "cell": "L1_WC3",
       "daylight": {
         "image": "L1_WC3_LM_DAY.png",
+        "receiverMean": 0.001293641471867462,
         "scale": 0.00418097386136651,
         "skyStrength": 1.0
       },
@@ -599,6 +653,7 @@
       "cell": "L1_WC4",
       "daylight": {
         "image": "L1_WC4_LM_DAY.png",
+        "receiverMean": 0.0014691132651958763,
         "scale": 0.004686655476689339,
         "skyStrength": 1.0
       },
@@ -609,6 +664,7 @@
       "cell": "L2_BATH4",
       "daylight": {
         "image": "L2_BATH4_LM_DAY.png",
+        "receiverMean": 0.9456763543230051,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -620,6 +676,7 @@
       "cell": "L2_BATH5",
       "daylight": {
         "image": "L2_BATH5_LM_DAY.png",
+        "receiverMean": 0.917630470880941,
         "scale": 1.000000238418579,
         "skyStrength": 1.0
       },
@@ -631,6 +688,7 @@
       "cell": "L2_BED6",
       "daylight": {
         "image": "L2_BED6_LM_DAY.png",
+        "receiverMean": 0.8811601713349639,
         "scale": 1.000000238418579,
         "skyStrength": 1.0
       },
@@ -642,6 +700,7 @@
       "cell": "L2_BED7",
       "daylight": {
         "image": "L2_BED7_LM_DAY.png",
+        "receiverMean": 0.9273194534737407,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -653,6 +712,7 @@
       "cell": "L2_CLOSET_4",
       "daylight": {
         "image": "L2_CLOSET_4_LM_DAY.png",
+        "receiverMean": 0.0013032271115294856,
         "scale": 0.0038901828229427338,
         "skyStrength": 1.0
       },
@@ -663,6 +723,7 @@
       "cell": "L2_GAMES",
       "daylight": {
         "image": "L2_GAMES_LM_DAY.png",
+        "receiverMean": 0.6480576369983574,
         "scale": 1.000000238418579,
         "skyStrength": 1.0
       },
@@ -674,6 +735,7 @@
       "cell": "L2_HALL",
       "daylight": {
         "image": "L2_HALL_LM_DAY.png",
+        "receiverMean": 0.36745460212813225,
         "scale": 0.7516455054283142,
         "skyStrength": 1.0
       },
@@ -684,6 +746,7 @@
       "cell": "L2_HALL_W",
       "daylight": {
         "image": "L2_HALL_W_LM_DAY.png",
+        "receiverMean": 0.1484463739824261,
         "scale": 0.6255369782447815,
         "skyStrength": 1.0
       },
@@ -694,6 +757,7 @@
       "cell": "L2_LANDING",
       "daylight": {
         "image": "L2_LANDING_LM_DAY.png",
+        "receiverMean": 0.40547971098401586,
         "scale": 1.000000238418579,
         "skyStrength": 1.0
       },
@@ -705,6 +769,7 @@
       "cell": "L2_LIBRARY",
       "daylight": {
         "image": "L2_LIBRARY_LM_DAY.png",
+        "receiverMean": 0.8041282460064543,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -716,6 +781,7 @@
       "cell": "L2_LINEN2",
       "daylight": {
         "image": "L2_LINEN2_LM_DAY.png",
+        "receiverMean": 0.0011834608681271057,
         "scale": 0.0039056572131812572,
         "skyStrength": 1.0
       },
@@ -726,6 +792,7 @@
       "cell": "L2_SITTING",
       "daylight": {
         "image": "L2_SITTING_LM_DAY.png",
+        "receiverMean": 0.9268366271792916,
         "scale": 1.000000238418579,
         "skyStrength": 1.0
       },
@@ -737,6 +804,7 @@
       "cell": "L2_STAIR_ATTIC",
       "daylight": {
         "image": "L2_STAIR_ATTIC_LM_DAY.png",
+        "receiverMean": 0.5639396972635147,
         "scale": 1.000000238418579,
         "skyStrength": 1.0
       },
@@ -748,6 +816,7 @@
       "cell": "L2_STAIR_MAIN",
       "daylight": {
         "image": "L2_STAIR_MAIN_LM_DAY.png",
+        "receiverMean": 0.5804712998870394,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -759,6 +828,7 @@
       "cell": "L2_STOR2",
       "daylight": {
         "image": "L2_STOR2_LM_DAY.png",
+        "receiverMean": 0.19182833873717103,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -770,6 +840,7 @@
       "cell": "L2_WC5",
       "daylight": {
         "image": "L2_WC5_LM_DAY.png",
+        "receiverMean": 0.0012595597212304158,
         "scale": 0.0040616183541715145,
         "skyStrength": 1.0
       },
@@ -780,6 +851,7 @@
       "cell": "L2_WC6",
       "daylight": {
         "image": "L2_WC6_LM_DAY.png",
+        "receiverMean": 0.0015110737449647244,
         "scale": 0.004160682205110788,
         "skyStrength": 1.0
       },
@@ -790,6 +862,7 @@
       "cell": "L3_ROOM",
       "daylight": {
         "image": "L3_ROOM_LM_DAY.png",
+        "receiverMean": 0.14875995023165528,
         "scale": 1.000000238418579,
         "skyStrength": 1.0
       },
@@ -801,6 +874,7 @@
       "cell": "L3_STAIR_HEAD",
       "daylight": {
         "image": "L3_STAIR_HEAD_LM_DAY.png",
+        "receiverMean": 0.5767075307226468,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -812,6 +886,7 @@
       "cell": "L3_STORE_E",
       "daylight": {
         "image": "L3_STORE_E_LM_DAY.png",
+        "receiverMean": 0.2869697207799657,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -823,6 +898,7 @@
       "cell": "L3_STORE_N",
       "daylight": {
         "image": "L3_STORE_N_LM_DAY.png",
+        "receiverMean": 0.25413109658845706,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -834,6 +910,7 @@
       "cell": "L3_STORE_S",
       "daylight": {
         "image": "L3_STORE_S_LM_DAY.png",
+        "receiverMean": 0.2136196235880934,
         "scale": 1.000000238418579,
         "skyStrength": 1.0
       },
@@ -845,6 +922,7 @@
       "cell": "L3_STORE_W",
       "daylight": {
         "image": "L3_STORE_W_LM_DAY.png",
+        "receiverMean": 0.26157006016552636,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
