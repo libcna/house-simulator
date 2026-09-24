@@ -6889,6 +6889,13 @@
       "position": [12.9, 4.28, -19.35], "yawDeg": 0, "scale": 0.75,
       "static": true, "lodGroup": null, "collision": "none", "material": null,
       "interactable": null
+    },
+    {
+      "id": "PROP_EXT_SHED_MAIN_FIXTURE",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "EXT_SHED",
+      "position": [-18.2, 2.25, -42.2], "yawDeg": 0, "scale": 0.65,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
     }
   ]
 }

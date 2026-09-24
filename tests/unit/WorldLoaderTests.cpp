@@ -4137,10 +4137,10 @@ namespace
         EXPECT_EQ(distinct.size(), 138U)
             << "§13's Lights column, the exterior groups and the neighbours' porches";
 
-        // `HOUSE-03403`--`HOUSE-03405` close the first three C3 lighting bands with existing
-        // fixture families. Every authored source in these 70 basement, upper-floor, attic,
-        // stair, ground-service and garage cells must remain attached to a physical prop and an
-        // exact independently switchable material slot.
+        // `HOUSE-03403`--`HOUSE-03406` close the first four C3 lighting bands with existing
+        // fixture families. Every authored source in these 71 basement, upper-floor, attic,
+        // stair, ground-service, garage and shed cells must remain attached to a physical prop
+        // and an exact independently switchable material slot.
         const std::set<cnahouse::util::Id> c3FixtureCells{
             Intern("B1_STAIR"),         Intern("B1_HALL"),         Intern("B1_MECHANICAL"),
             Intern("B1_ELECTRICAL"),    Intern("B1_UTILITY"),      Intern("B1_CINEMA"),
@@ -4165,7 +4165,7 @@ namespace
             Intern("L0_MUDROOM"),       Intern("L0_LAUNDRY"),      Intern("L0_WC1"),
             Intern("L0_WC2"),           Intern("L0_OFFICE"),       Intern("L0_CLOSET_W"),
             Intern("L0_STOR"),          Intern("L0_PANTRY"),       Intern("L0_GARAGE"),
-            Intern("L0_GARAGE_LOFT")};
+            Intern("L0_GARAGE_LOFT"),   Intern("EXT_SHED")};
         std::size_t physicalC3Sources = 0U;
         for (const world::Light& light : contents.lights)
         {
@@ -4177,7 +4177,7 @@ namespace
             EXPECT_TRUE(light.fixtureProp.IsValid()) << light.id.Value();
             EXPECT_FALSE(light.emissiveMaterialSlot.empty()) << light.id.Value();
         }
-        EXPECT_EQ(physicalC3Sources, 176U);
+        EXPECT_EQ(physicalC3Sources, 177U);
 
         // §15.7 rule 6's index, asserted by the other implementation: a cell's `lightGroups` is
         // exactly the groups its own lights belong to, and §28.1 walks it once per frame.

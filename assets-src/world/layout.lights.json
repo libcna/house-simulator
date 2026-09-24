@@ -2490,13 +2490,16 @@
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": true
     },
 
-    // ---- LG_EXT_SHED_MAIN x1 -- one bulb under the shed's 2.35 m roof
+    // ---- LG_EXT_SHED_MAIN x1 -- one physical utility batten under the shed's 2.35 m roof. Its
+    // ---- short, explicit garden spill represents the light visible through the east window;
+    // ---- the source's 3.30 m range keeps it local to the potting edge.
     {
       "id": "LIGHT_EXT_SHED_MAIN_1", "cell": "EXT_SHED", "group": "LG_EXT_SHED_MAIN",
       "type": "point", "position": [-18.20, 2.25, -42.20],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "bulbClass": "led", "intensityLm": 600.0, "range": 3.30,
-      "fixtureProp": null, "emissiveMaterialSlot": "bulb",
+      "spillCells": ["EXT_GARDEN"],
+      "fixtureProp": "PROP_EXT_SHED_MAIN_FIXTURE", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 

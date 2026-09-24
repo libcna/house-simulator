@@ -158,11 +158,13 @@ CHUNK_BUDGET_EXCEPTIONS = {
                         "HOUSE-00946 adds one asphalt-finish batch for narrow control joints and "
                         "one bluestone batch for the driveway's inset border/bands. HOUSE-03342 "
                         "adds one reused metal service-object role without a split"),
-    "EXT_SHED": (11,
+    "EXT_SHED": (15,
                   "HOUSE-03267's finished shed envelope uses six measured architectural roles. "
                   "HOUSE-03342 adds five shared kit roles for its bounded secondary-tier "
                   "workbench, storage and garden-tool composition; repeated tools and pots "
-                  "batch together, with no vertex or Reach-cap split"),
+                  "batch together, with no vertex or Reach-cap split. HOUSE-03406 adds the four "
+                  "existing utility-batten roles around its one physical source; no new material "
+                  "or vertex/Reach-cap split"),
     "EXT_WORLD": (30,
                    "the neighbourhood ring is not a room. HOUSE-00772's two rows of street trees "
                    "and the 2.1 m road-edge hedge add source-exact bark/cutout foliage with "
