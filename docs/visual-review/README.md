@@ -4873,3 +4873,23 @@ dressing is not revived.
 
 Rule R2 now selects `Z-L1`, with twelve accessible cells still below target versus eleven in
 `Z-L2` and nine in `Z-B1`. Next: `HOUSE-01003`, furnishing the two children's rooms.
+
+## Round 121 — first-floor single-bedroom dressing
+
+Commit: `HOUSE-01003` working tree (`2026-09-24`). The local, Git-ignored
+[`clear-day`](captures/house-01003-l1-single-day) set retains all six fixed `Z-L1` controls.
+Supplemental forced-light [`detail`](captures/house-01003-l1-single-detail) views inspect both
+rooms in reciprocal directions; forced light is placement evidence, not a claim that M5's normal
+day/night balance is complete.
+
+Both secondary rooms stop at the cumulative `R-BED-SINGLE` recipe: one single bed, nightstand,
+wardrobe, desk and reused dining chair. The child's 0.90-scale bed and compact north/south wall
+composition leave all four cardinal route probes clear. The larger teenager's room uses its
+existing cooler palette and a different arrangement rather than optional clutter. The reciprocal
+views show grounded bed, work and storage groups, clear windows and door approaches, and no
+furniture clipping, floating geometry or z-fighting. A west-facing supplemental view exposes an
+existing exterior foliage card visually beyond the glazing; this is a `Z-L1` S3 backlog item for
+M11's bounded defect pass, not a regression or reason to expand M4.
+
+Rule R2 now selects `Z-L2`, with eleven accessible cells still below target versus ten in `Z-L1`
+and nine in `Z-B1`. Next: `HOUSE-01011`, furnishing `L2_GAMES` and `L2_SITTING`.

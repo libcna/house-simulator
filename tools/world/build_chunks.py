@@ -465,6 +465,16 @@ for bedroom_cell in ("L1_BED2", "L1_BED5"):
         previous_reason + "; HOUSE-01002 adds seven measured shared double-bed/carcass finish "
                           "groups; no vertex or Reach-cap split")
 
+# `HOUSE-01003` uses the same bounded secondary single-bedroom recipe in both children's rooms.
+# The single bed, nightstand, wardrobe, desk and reused dining chair add six canonical finish
+# groups after batching against the existing shell/window roles; neither room needs a split.
+for bedroom_cell in ("L1_BED3", "L1_BED4"):
+    previous_limit, previous_reason = CHUNK_BUDGET_EXCEPTIONS[bedroom_cell]
+    CHUNK_BUDGET_EXCEPTIONS[bedroom_cell] = (
+        previous_limit + 6,
+        previous_reason + "; HOUSE-01003 adds six measured shared single-bed/desk/carcass finish "
+                          "groups; no vertex or Reach-cap split")
+
 # `HOUSE-01010` assembles the library's main-tier composition entirely from the capped kit. Five
 # repeated cases and five book clusters batch by canonical material; the two chairs also batch.
 # The measured remainder is nine established shelf, book, seating, table, desk, rug and curtain

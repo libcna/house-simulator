@@ -1,3 +1,35 @@
+# First-floor single-bedroom dressing handoff — 2026-09-24 (`HOUSE-01003`)
+
+Both secondary `R-BED-SINGLE` recipes are complete with ten ordinary static rows from the existing
+capped kit. Each room reuses the acquired single bed and writing desk, generated nightstand and
+wardrobe, and an existing dining chair. The child's bed uses the acquisition's supported 0.90
+scale. The teenager's room differs through its already-authored muted-teal/grey palette and a
+separate arrangement, not extra clutter. No asset, material family, runtime system or optional
+dressing was added.
+
+All 215 production props pass exact support, overlap, opening, door-sweep and 0.70 m route
+validation. Initial valid placements occupied the wider inside-geometry probe's east/north starts;
+the final wall compositions clear those starts without weakening a test. The 90-cell grand tour
+and `world-content-current` pass. The broader inside-geometry test again reports only the older
+two-body `L1_LANDING west` failure beside `HOUSE-00999`'s bench, with no bedroom failure. Both
+rooms build at exactly 14/14 chunks, with no vertex or Reach-cap split.
+
+The clear-day `Z-L1` controls and reciprocal direct forced-light room views were inspected at full
+resolution. The bed, work and storage groups are grounded, separated from openings and readable
+from ordinary standing positions; no furniture clipping, floating geometry, z-fighting or blocked
+route is visible. One supplemental west-facing view exposes an existing exterior foliage card
+beyond the west glazing; it is not caused by the room props and is logged as `Z-L1` S3 for the
+bounded M11 defect pass rather than expanded into M4. Normal-light balance remains M5 scope.
+
+The remaining forecast is 171.75 realistic / 209.75 pessimistic hours. With 54.5 task-hours spent
+since the final reduction, the R14 projection is 264.25 h, 15.75 h below the hard ceiling. Rule R2
+now selects `Z-L2`, which has eleven accessible cells still below target versus ten in `Z-L1` and
+nine in `Z-B1`. The exact next unblocked MUST task is `HOUSE-01011`, furnishing `L2_GAMES` and
+`L2_SITTING`. Every compilation/test invocation must remain at no more than four workers and pinned
+to CPUs 4,5,7,9; strict-XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Basement plant/service dressing handoff — 2026-09-24 (`HOUSE-01021`)
 
 The three utility-tier plant/service recipes are complete with nine new static rows plus the

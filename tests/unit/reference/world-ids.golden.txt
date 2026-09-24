@@ -1828,6 +1828,16 @@ props/props	PROP_L1_BED2_BLIND_EAST
 props/props	PROP_L1_BED2_DRESSER
 props/props	PROP_L1_BED2_NIGHTSTAND
 props/props	PROP_L1_BED2_WARDROBE
+props/props	PROP_L1_BED3_BED
+props/props	PROP_L1_BED3_DESK
+props/props	PROP_L1_BED3_DESK_CHAIR
+props/props	PROP_L1_BED3_NIGHTSTAND
+props/props	PROP_L1_BED3_WARDROBE
+props/props	PROP_L1_BED4_BED
+props/props	PROP_L1_BED4_DESK
+props/props	PROP_L1_BED4_DESK_CHAIR
+props/props	PROP_L1_BED4_NIGHTSTAND
+props/props	PROP_L1_BED4_WARDROBE
 props/props	PROP_L1_BED5_BED
 props/props	PROP_L1_BED5_DRESSER
 props/props	PROP_L1_BED5_NIGHTSTAND

@@ -2187,7 +2187,9 @@
         "DINING_FABRIC": "MAT_FURNITURE_DINING_UPHOLSTERY"
       },
       "usedIn": [
-        "L0_DINING"
+        "L0_DINING",
+        "L1_BED3",
+        "L1_BED4"
       ]
     },
     {
@@ -2319,6 +2321,8 @@
         "L0_OFFICE",
         "B1_HOBBY",
         "L1_MASTER_BED",
+        "L1_BED3",
+        "L1_BED4",
         "L2_LIBRARY",
         "L3_ROOM"
       ]
@@ -4335,6 +4339,8 @@
       "usedIn": [
         "L1_MASTER_BED",
         "L1_BED2",
+        "L1_BED3",
+        "L1_BED4",
         "L1_BED5"
       ]
     },
@@ -4711,6 +4717,8 @@
         "L1_MASTER_BED",
         "L1_MASTER_CLOSET",
         "L1_BED2",
+        "L1_BED3",
+        "L1_BED4",
         "L1_BED5"
       ]
     },
