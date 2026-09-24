@@ -1,3 +1,28 @@
+# Attic room C4 handoff — 2026-09-25 (`HOUSE-03446`)
+
+`L3_ROOM` meets C4 without restoring its retired hero depth. The bounded existing kit provides the
+sofa/side-table sitting corner, desk/chair/bookcase work corner, rug, storage chest/box, restrained
+storage/books cluster and open double-dormer curtain. Two physical ceiling fixtures and the desk
+practical already use the scheduled evening groups. No extra asset, dressing or runtime mechanism
+was added.
+
+Round 157 captured all four fixed `Z-L3` views at clear 10:30 and scheduled 22:00 without light
+overrides. The fixed room view reads as a lived-in attic under dormer daylight and warm evening
+light, with clear store openings and no S1/S2, clipping, floating furnishing, z-fighting or missing
+texture. HUD-cropped mean linear luminance is 0.010101 by day and 0.022133 at night. All 612 props
+pass placement/route validation, the scoreboard assigns all 96 cells exactly once and the 90-cell
+controller grand tour passes with 558 stops, 90,469 controller steps, 27 collision detours and
+10.32 s. Captures remain Git-ignored under `house-03446-attic-room-{day,night}-r157`.
+
+Rule R2 selects `HOUSE-03444` next. `Z-L1` and `Z-GAR` each have one remaining main cell; their
+latest rounds are 148 and 149 respectively, so the first upper floor is least recently worked.
+Rule R4 keeps `Z-L0M` last. The remaining forecast is 126.5 realistic / 156.25 pessimistic hours.
+With 99.75 task-hours spent since the final reduction, the R14 projection is 256 h, 24 h below the
+ceiling. Every build/test/render remains limited to four workers and pinned to CPUs 4,5,7,9;
+strict-XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Basement workshop C4 handoff — 2026-09-25 (`HOUSE-03441`)
 
 `B1_WORKSHOP` meets C4 without new content. Its existing bounded `R-WORKSHOP` set contains two

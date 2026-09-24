@@ -5436,3 +5436,20 @@ was needed. Local evidence is in `captures/house-03441-workshop-{day,night}-r156
 
 Rule R2 next selects `HOUSE-03446`: the attic, first floor and garage each have one incomplete main
 cell, and `Z-L3` is least recently worked by their latest review rounds.
+
+## Round 157 — attic room C4
+
+Commit: `HOUSE-03446` working tree (`2026-09-25`). Fresh fixed `Z-L3` sets cover all four views at
+clear 10:30 and scheduled 22:00 without light overrides. `L3_ROOM` retains its complete bounded
+main-tier composition: sitting and work corners, rug, storage chest/box, restrained storage/books
+cluster and the open double-dormer curtain under physical ceiling and desk fixtures.
+
+Full-resolution inspection shows the room reading as a lived-in attic under dormer daylight and
+warm evening light, with clear store openings and no S1/S2, clipping, floating furnishing,
+z-fighting or missing texture. HUD-cropped mean linear luminance is 0.010101 by day and 0.022133 at
+night. The prop validator, scoreboard and 90-cell controller grand tour pass. No runtime, content,
+asset, material, light, schedule or lightmap change was needed. Local evidence is in
+`captures/house-03446-attic-room-{day,night}-r157/`.
+
+Rule R2 next selects `HOUSE-03444`: the first floor and garage each have one incomplete main cell,
+and `Z-L1` is least recently worked by their latest review rounds.
