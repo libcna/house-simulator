@@ -4854,3 +4854,22 @@ those are the bounded H5 C5 work in `HOUSE-03454`.
 Rule R2 now ties `Z-B1` and `Z-L1` at twelve accessible cells still below target. The least-
 recently worked zone is `Z-B1`, so the next task is `HOUSE-01021`, equipping its mechanical,
 electrical and utility rooms.
+
+## Round 120 — basement plant and service dressing
+
+Commit: `HOUSE-01021` working tree (`2026-09-24`). The local, Git-ignored
+[`clear-day`](captures/house-01021-b1-plant-day) set retains all four fixed `Z-B1` controls.
+Supplemental forced-light [`detail`](captures/house-01021-b1-plant-detail) views inspect the
+mechanical, electrical and utility rooms directly; forced light is placement evidence, not a claim
+that M5's normal basement balance is complete.
+
+The mechanical view shows both grounded plant bodies, the south-entry water-main run and two
+supported duct sections without blocking the north door or window. The electrical view shows the
+bounded floor-standing panel cabinet and its two wall/ceiling cable routes outside both door arcs.
+The utility view shows both stack-landing pipe sections supported against the west/north service
+walls. There is no clipping, floating geometry, z-fighting, blocked route or other S1/S2
+furnishing defect. Utility-tier depth stops at this functional composition; cosmetic service-room
+dressing is not revived.
+
+Rule R2 now selects `Z-L1`, with twelve accessible cells still below target versus eleven in
+`Z-L2` and nine in `Z-B1`. Next: `HOUSE-01003`, furnishing the two children's rooms.

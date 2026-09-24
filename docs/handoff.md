@@ -1,3 +1,35 @@
+# Basement plant/service dressing handoff — 2026-09-24 (`HOUSE-01021`)
+
+The three utility-tier plant/service recipes are complete with nine new static rows plus the
+retained duct-kit example. Two bounded uses of the acquired boiler represent the boiler and water
+heater around the authored HVAC plant anchor. A floor-level pipe follows the documented south-
+foundation water-main entry and a second duct section completes the visible trunk. The electrical
+room reuses a scaled generated utility module as its floor-standing panel cabinet with two cable
+runs; the utility room's paired pipe runs mark the STACK-A and STACK-D landings. No asset, material
+family, runtime system or optional cosmetic dressing was added.
+
+All 205 production prop rows pass exact support, overlap, opening, door-sweep and 0.70 m route
+validation. The mechanical standing point moved into the clear west aisle. A first electrical-
+panel position created a real west-wall push-out pocket; moving the bounded cabinet to the north-
+east service wall removed it without weakening a test. The 90-cell grand tour and
+`world-content-current` pass. The broader inside-geometry test now has no B1 failure and again
+reports only the older `L1_LANDING west` start beside `HOUSE-00999`'s bench.
+
+The measured chunk totals are exactly 11/11 in `B1_MECHANICAL`, 8/8 in `B1_ELECTRICAL` and 6/6 in
+`B1_UTILITY`, with no vertex or Reach-cap split. Clear-day zone controls and direct forced-light
+views of all three rooms were inspected at full resolution. Plant and panel bodies are grounded,
+wall/ceiling/floor runs are supported, both door chains remain clear and no clipping, floating
+geometry, z-fighting or new S1/S2 defect is visible. Normal basement readability remains M5 scope.
+
+The remaining forecast is 173 realistic / 211.25 pessimistic hours. With 53.25 task-hours spent
+since the final reduction, the R14 projection is 264.5 h, 15.5 h below the hard limit. Rule R2 now
+selects `Z-L1`, with twelve accessible cells still below target versus eleven in `Z-L2` and nine
+in `Z-B1`. The exact next unblocked MUST task is `HOUSE-01003`, furnishing `L1_BED3` and
+`L1_BED4`. All compilation and test work must use at most four workers and be pinned to CPUs
+4,5,7,9; strict-XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # L2 library main-tier dressing handoff — 2026-09-24 (`HOUSE-01010`)
 
 The library's required M4 composition is complete with sixteen ordinary static rows from the

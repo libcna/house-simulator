@@ -317,6 +317,7 @@
         "metal": "MAT_KITCHEN_HARDWARE_STEEL"
       },
       "usedIn": [
+        "B1_MECHANICAL",
         "B1_UTILITY"
       ]
     },
@@ -4427,6 +4428,7 @@
         "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
+        "B1_MECHANICAL",
         "B1_UTILITY"
       ]
     },
@@ -4659,6 +4661,7 @@
         "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
+        "B1_ELECTRICAL",
         "B1_UTILITY"
       ]
     },

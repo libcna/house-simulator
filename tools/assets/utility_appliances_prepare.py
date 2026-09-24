@@ -55,7 +55,7 @@ SOURCES = (
            "https://cdn.3dassets.dev/assets/14137/v1/model.glb",
            "cd1a6132cb47560b2b4e92083b6707c33440d44ecd43cc57ad8397876820efc6",
            "Boiler_COL", "appliance-boiler", (0.445984, 1.1173, 0.373427), 1944,
-           ("B1_UTILITY",)),
+           ("B1_MECHANICAL", "B1_UTILITY")),
 )
 
 MATERIAL_MAP = {

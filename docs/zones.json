@@ -6,7 +6,7 @@
       "name": "Basement",
       "cells": [
         {"id": "B1_HALL", "accessible": true, "standingPoint": [0.0, -2.3, -20.7], "tier": "S"},
-        {"id": "B1_MECHANICAL", "accessible": true, "standingPoint": [6.8, -2.3, -16.3], "tier": "U"},
+        {"id": "B1_MECHANICAL", "accessible": true, "standingPoint": [5.55, -2.3, -16.3], "tier": "U"},
         {"id": "B1_ELECTRICAL", "accessible": true, "standingPoint": [6.8, -2.3, -19.45], "tier": "U"},
         {"id": "B1_UTILITY", "accessible": true, "standingPoint": [6.8, -2.3, -21.8], "tier": "U"},
         {"id": "B1_CINEMA", "accessible": true, "standingPoint": [5.45, -2.3, -25.05], "tier": "H", "heroArea": "H6"},

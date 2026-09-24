@@ -475,6 +475,19 @@ CHUNK_BUDGET_EXCEPTIONS["L2_LIBRARY"] = (
     _library_reason + "; HOUSE-01010 adds nine measured main-tier library finish groups; no "
                       "vertex or Reach-cap split")
 
+# `HOUSE-01021` reuses only the capped appliance and service-run families. The repeated boiler,
+# water-main pipe and two duct sections add three measured canonical finish groups in the
+# mechanical room; the electrical room's panel-like carcass and paired cable routes add two.
+# Utility-room pipes batch into its existing steel role. None is a vertex or Reach-cap split.
+_mechanical_limit, _mechanical_reason = CHUNK_BUDGET_EXCEPTIONS["B1_MECHANICAL"]
+CHUNK_BUDGET_EXCEPTIONS["B1_MECHANICAL"] = (
+    _mechanical_limit + 3,
+    _mechanical_reason + "; HOUSE-01021 adds three measured plant and service-run finish groups; "
+                         "no vertex or Reach-cap split")
+CHUNK_BUDGET_EXCEPTIONS["B1_ELECTRICAL"] = (
+    8, "six measured electrical-room shell finish groups plus HOUSE-01021's two canonical panel "
+       "and cable-run finish groups; no vertex or Reach-cap split")
+
 # `HOUSE-00999`: the first upper-floor circulation recipe deliberately reuses the established
 # runner, framed-art and piano-bench assets without flattening their physically distinct finishes.
 # These are the exact post-build counts: the two halls each add the runner's two wool roles and
