@@ -5420,3 +5420,19 @@ was needed. Local evidence is in `captures/house-03448-rear-main-{day,night}-r15
 
 Rule R2 next selects `HOUSE-03441`: the one-cell `Z-B1`, `Z-L1`, `Z-L3` and `Z-GAR` targets tie,
 and the basement is least recently worked after applying the prior zone-only round tie-break.
+
+## Round 156 — basement workshop C4
+
+Commit: `HOUSE-03441` working tree (`2026-09-25`). Fresh fixed `Z-B1` sets cover all four views at
+clear 10:30 and scheduled 22:00 without light overrides. The workshop retains its complete bounded
+main-tier composition: two workbenches, open storage, supported toolbox/tools/paint tin, wall
+service run and floor bin, under two physical utility fittings and a task puck.
+
+Full-resolution inspection finds the workshop recognizable and grounded with clear openings and no
+S1/S2, clipping, floating furnishing, z-fighting or missing texture. HUD-cropped mean linear
+luminance is 0.010331 by day and 0.073821 at night. The prop validator, scoreboard and 90-cell
+controller grand tour pass. No runtime, content, asset, material, light, schedule or lightmap change
+was needed. Local evidence is in `captures/house-03441-workshop-{day,night}-r156/`.
+
+Rule R2 next selects `HOUSE-03446`: the attic, first floor and garage each have one incomplete main
+cell, and `Z-L3` is least recently worked by their latest review rounds.

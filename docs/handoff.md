@@ -1,3 +1,27 @@
+# Basement workshop C4 handoff — 2026-09-25 (`HOUSE-03441`)
+
+`B1_WORKSHOP` meets C4 without new content. Its existing bounded `R-WORKSHOP` set contains two
+workbenches, open storage, supported toolbox/tools/paint tin, a wall service run and floor bin.
+Two physical utility fittings and the task puck already use the scheduled task groups. No optional
+clutter, asset, light or runtime mechanism was added.
+
+Round 156 captured all four fixed `Z-B1` views at clear 10:30 and scheduled 22:00 without light
+overrides. The fixed workshop view shows a recognizable, grounded composition with clear openings
+and no S1/S2, clipping, floating furnishing, z-fighting or missing texture. HUD-cropped mean linear
+luminance is 0.010331 by day and 0.073821 at night. All 612 props pass placement/route validation,
+the scoreboard assigns all 96 cells exactly once and the 90-cell controller grand tour passes with
+558 stops, 90,469 controller steps, 27 collision detours and 10.49 s. Captures remain Git-ignored
+under `house-03441-workshop-{day,night}-r156`.
+
+Rule R2 selects `HOUSE-03446` next. `Z-L3`, `Z-L1` and `Z-GAR` each have one remaining main cell;
+their latest rounds are 147, 148 and 149 respectively, so the attic is least recently worked.
+Rule R4 keeps `Z-L0M` last. The remaining forecast is 127.75 realistic / 157.75 pessimistic hours.
+With 98.5 task-hours spent since the final reduction, the R14 projection is 256.25 h, 23.75 h below
+the ceiling. Every build/test/render remains limited to four workers and pinned to CPUs 4,5,7,9;
+strict-XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Rear terrace and back garden C4 handoff — 2026-09-24 (`HOUSE-03448`)
 
 `EXT_TERRACE` and `EXT_BACKYARD` meet C4 without new content. Their bounded existing kit provides

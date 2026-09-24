@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **82 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 109 / 129 / 159 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G3 passed; five main cells are at C4.** Next: the basement-workshop C4 pass in `HOUSE-03441` |
+| Active plan | **81 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 109 / 128 / 158 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G3 passed; six main cells are at C4.** Next: the attic-room C4 pass in `HOUSE-03446` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -273,7 +273,7 @@ non-accessible appliance interiors.
 
 ## Zone scoreboard
 
-**As of 2026-09-24 (Round 155).** Levels from Round 103's whole-property day/night review
+**As of 2026-09-25 (Round 156).** Levels from Round 103's whole-property day/night review
 (`HOUSE-03203`), Round 104's traversal sweep and subsequent completed zone work; main and hero
 targets re-counted after `HOUSE-03206`'s tier change. Update per rule R10.
 
@@ -283,7 +283,7 @@ proved all 90 intended-accessible cells and the tight-space traversal. G1 clears
 
 | Zone | C3 floor | Main at C4 | Hero cells at C5 | Evidence | Largest gaps |
 |---|---|---|---|---|---|
-| `Z-B1` | **C3** | 0 / 1 | 0 / 1 | Round 147; all fourteen cells have physical fixtures and readable day/scheduled-night lighting (`HOUSE-03403`) | No zone-specific S2 |
+| `Z-B1` | **C3** | 1 / 1 | 0 / 1 | Round 156; the complete two-bench workshop composition is balanced in its fixed day/scheduled-night view (`HOUSE-03441`) | No zone-specific S2 |
 | `Z-L0M` | **C3** | 0 / 3 | 0 / 5 | Round 151; all 23 fixed route poses are readable by day and under the 22:00 schedule (`HOUSE-03407`) | No zone-specific S2 |
 | `Z-L0S` | **C3** | — | — | Round 149; all eight service cells have physical fixtures and readable day/scheduled-night lighting (`HOUSE-03405`) | No zone-specific S2 |
 | `Z-GAR` | **C3** | 0 / 1 | — | Round 149; the main bay and visible utility loft have physical fixtures and the garage's scheduled fluorescent character (`HOUSE-03405`) | No zone-specific S2 |
@@ -1013,10 +1013,11 @@ estimates (rule R7); neither is a campaign.**
 the recipe's main-tier set complete, lighting balanced by day and at night, and their fixed views,
 day and night, free of S1/S2. **Verify:** those views, day and night.
 
-- [ ] HOUSE-03441 — Bring the basement workshop to C4
+- [x] HOUSE-03441 — Bring the basement workshop to C4
       dep: HOUSE-03420 · sys: world · plat: TOOL · pri: MUST · zone: Z-B1 · adv: G4, D4 · est: 0.75
       accept: `B1_WORKSHOP`
       trace: `B1_HALL` became secondary (`HOUSE-03206`)
+      note: (2026-09-25) Round 156 confirms C4 without adding optional clutter. `HOUSE-01024` already completed the bounded `R-WORKSHOP` main-tier set with two workbenches, open storage, supported toolbox/tools/paint tin, a service run and floor bin; `HOUSE-03403` already supplied two physical utility fittings and the task puck on the existing schedule. Fresh four-view `Z-B1` sets at clear 10:30 and scheduled 22:00 include the fixed workshop view without light overrides. Full-resolution inspection finds a recognizable, grounded composition with clear openings and no S1/S2, clipping, floating furnishing, z-fighting or missing texture. HUD-cropped mean linear luminance is 0.010331 by day and 0.073821 at night. All 612 props pass placement/route validation, the scoreboard assigns all 96 cells exactly once and the 90-cell controller grand tour passes with 558 stops, 90,469 steps and 27 detours in 10.49 s. No runtime, content, asset, material, light, schedule or lightmap changed. Captures remain local under `house-03441-workshop-{day,night}-r156`
 
 - [ ] HOUSE-03442 — Bring the garage to C4
       dep: HOUSE-03420 · sys: world · plat: TOOL · pri: MUST · zone: Z-GAR · adv: G4, D4 · est: 1
@@ -1901,7 +1902,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M3 The reusable furnishing kit | 16 | 33 | **0** | 0 | **0** | 0 | — |
 | M4 Dressing everywhere | 40 | 48.75 | **0** | 0 | **0** | 0 | R-D +3 |
 | M5 Baseline lighting everywhere | 12 | 24.5 | **0** | 0 | **0** | 0 | — |
-| M6 Main cells and hero areas | 20 | 32.5 | **13** | 15.25 | **17.75** | 19.25 | — |
+| M6 Main cells and hero areas | 20 | 32.5 | **12** | 14.75 | **17** | 18.25 | — |
 | M7 A compact environment | 13 | 21 | **8** | 11.25 | **13.25** | 14.5 | — |
 | M8 Atmospheric audio essentials | 11 | 14.5 | **6** | 7.75 | **9** | 10 | — |
 | M9 Application shell | 10 | 12.5 | **6** | 7.25 | **8.5** | 9.25 | — |
@@ -1912,12 +1913,12 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **82** | **109.25** | **128.5** | **158.75** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **81** | **108.75** | **127.75** | **157.75** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-121.25 h. Adding the 97.75 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-256.5 h, 23.5 h under the limit. That margin is
+122.25 h. Adding the 98.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+256.25 h, 23.75 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |
