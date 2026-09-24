@@ -1,3 +1,31 @@
+# Garage and loft furnishing handoff — 2026-09-24 (`HOUSE-00998`)
+
+The garage main bay now keeps the household estate and adds a workbench with supported tools, one
+open shelf, a toolbox, long-handled garden tools and two bins. The non-accessible utility loft has
+four varied boxes, a seasonal suitcase, a compact spare-lumber abstraction and a three-piece stack
+of reused garden loungers. All sixteen rows reuse the capped kit and existing materials; nothing
+narrows the vehicle bay or approaches the loft hatch, ladder or perimeter guard. No asset,
+interaction, container behaviour, door mechanism or runtime system was added.
+
+All 418 production prop rows pass exact placement and route checks, all 15 authored-world rules
+pass, the 90-cell grand tour passes and the deployed world is current. The final build is 1,112
+chunks / 2,986,205 vertices / 78,963,880 packed bytes, with 8 16-bit splits, 15 Reach splits and no
+32-bit chunk. `L0_GARAGE` is exactly 16/16 chunks and `L0_GARAGE_LOFT` 6/6. Fixed clear-day views
+with both garage light groups forced on and targeted diagnostic views show grounded, separated
+workshop/storage groups, a clear vehicle bay and unobstructed loft access without clipping,
+floating geometry or z-fighting. Final normal-light readability remains M5 work.
+
+The wider inside-geometry probe retains exactly the nine pre-existing failures recorded by
+`HOUSE-00847`, first `B1_HOBBY south`; none is in `Z-GAR`. `world-content-current` and the actual
+grand tour pass. The remaining forecast is 152.5 realistic / 186.5 pessimistic hours. With 73.75
+task-hours spent since the final reduction, the R14 projection is 260.25 h, 19.75 h below the hard
+ceiling. Rule R2 now selects `Z-L3`, the only zone with a zero-prop accessible cell; the exact next
+unblocked MUST task is `HOUSE-01018`, equipping `L3_STORE_E`. Every compilation/test invocation
+must use no more than four workers and stay pinned to CPUs 4,5,7,9; strict-XNA additionally
+requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Bounded vehicle-family handoff — 2026-09-24 (`HOUSE-00847`)
 
 The project-authored low-detail family now contains one 248-triangle estate body under blue, red

@@ -3242,7 +3242,8 @@
       },
       "usedIn": [
         "EXT_TERRACE",
-        "EXT_ORCHARD"
+        "EXT_ORCHARD",
+        "L0_GARAGE_LOFT"
       ]
     },
     {
@@ -4448,6 +4449,8 @@
         "L0_MUDROOM",
         "L0_PANTRY",
         "L0_STOR",
+        "L0_GARAGE",
+        "L0_GARAGE_LOFT",
         "L1_CLOSET_2",
         "L1_CLOSET_3",
         "L1_LINEN",
@@ -4651,6 +4654,7 @@
         "B1_CELLAR",
         "B1_UNDERSTAIR",
         "L0_STOR",
+        "L0_GARAGE_LOFT",
         "L1_STOR",
         "L2_STOR2",
         "L3_ROOM",
@@ -4864,6 +4868,7 @@
       },
       "usedIn": [
         "B1_WORKSHOP",
+        "L0_GARAGE",
         "EXT_GARDEN",
         "EXT_SHED"
       ]

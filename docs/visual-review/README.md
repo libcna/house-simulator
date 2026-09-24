@@ -5243,3 +5243,20 @@ clear of the ladder and guard. Final normal-light balance remains M5 work.
 Rule R2 keeps `Z-GAR` selected: its household-car prerequisite is now complete, while its main bay
 and loft still need their bounded tier recipes. Next: `HOUSE-00998`, furnishing `L0_GARAGE` and
 `L0_GARAGE_LOFT` from the existing kit.
+
+## Round 140 — garage and loft furnishing
+
+Commit: `HOUSE-00998` working tree (`2026-09-24`). The local, Git-ignored
+[`garage`](captures/house-00998-garage-r140) set contains the two fixed `Z-GAR` controls plus
+targeted diagnostic views of the workbench wall and loft storage.
+
+The garage's existing household estate remains the main bay anchor. A reused workbench, supported
+tools, open shelf, toolbox, long-handled garden tools and paired bins now make the bay read as a
+working domestic garage while preserving the vehicle and door routes. Above it, varied boxes, a
+seasonal suitcase, spare-lumber abstraction and three reused loungers form compact long-term
+storage along the outer edges. The fixed loft-access view shows the hatch, ladder and guard remain
+clear. Full-resolution review found no clipping, floating objects, z-fighting or blocked access.
+Final normal-light balance remains M5 work.
+
+Rule R2 now selects `Z-L3`, the only zone with a zero-prop accessible cell. Next:
+`HOUSE-01018`, equipping `L3_STORE_E` with its bounded utility services from the existing kit.
