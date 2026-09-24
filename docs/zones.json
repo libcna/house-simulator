@@ -234,7 +234,8 @@
         {"id": "EXT_SIDEYARD_W", "accessible": true, "standingPoint": [-17.75, -0.04, -18.25], "tier": "U"},
         {"id": "EXT_SIDEYARD_E", "accessible": true, "standingPoint": [19.8, -0.1, -24.0], "tier": "U"}
       ],
-      "reviewPoses": ["rear-terrace", "backyard-to-house", "garden", "garden-shed-facade"]
+      "reviewPoses": ["rear-terrace", "backyard-to-house", "garden", "garden-shed-facade",
+                      "shed-interior", "garden-potting", "orchard-service"]
     },
     {
       "id": "Z-STR",

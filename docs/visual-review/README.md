@@ -5129,3 +5129,23 @@ pieces, supported small props, clear openings and no clipping, floating geometry
 Rule R2 now ties `Z-L0S` and `Z-EXR` at five accessible cells below target. Its least-recently
 worked tie-break selects `Z-EXR` (Round 111 versus Round 130). Next: `HOUSE-03342`, dressing the
 shed, side yards, orchard corner and vegetable garden.
+
+## Round 134 — rear and side exterior dressing
+
+Commit: `HOUSE-03342` working tree (`2026-09-24`). The local, Git-ignored
+[`before`](captures/43fdd77-house-03342-before),
+[`clear-day`](captures/43fdd77-house-03342-after) and
+[`forced-shed-light`](captures/43fdd77-house-03342-after-lit) sets retain the established broad
+rear controls and add direct shed, potting-area and orchard-service views. Forced shed light is
+placement evidence only; normal day/night readability remains M5 work.
+
+The shed's workbench, supported tools, shelf, long-handled tools, bin, small pots and compact
+mower abstraction are grounded and separated around a clear centre. The garden's potting group
+and tools remain clear of the beds and fence. The side-yard service objects retain their walkable
+routes, and the orchard's deliberately low-detail cart/wheelbarrow silhouette stops at the reused
+kit rather than adding a one-off asset. Full-resolution frames show no clipping, floating
+geometry, z-fighting or broad-view regression. Utility-tier side yards are covered by the zone
+walk and exact validator as required by their tier, not promoted to dedicated polish views.
+
+Rule R2 now selects `Z-L0S`, with five accessible cells below target versus four in `Z-L3` and
+three in `Z-L2`. Next: `HOUSE-00995`, furnishing `L0_MUDROOM` and `L0_LAUNDRY`.

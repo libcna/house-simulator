@@ -139,6 +139,12 @@ NEW_POSES = (
     # edge. This path-side position remains in the secondary garden cell and squarely reviews the
     # generated door, window, corner boards and eaves finish.
     ("garden-shed-facade", "-13.60,-0.35,-42.20,270.0,0.0"),
+    # HOUSE-03342: the wider garden pair cannot prove the three secondary exterior cells' bounded
+    # service compositions. These close views stay on authored routes and expose the shed bench,
+    # potting group and orchard cart; the two utility side yards remain zone-walk evidence.
+    ("shed-interior", "-17.10,0.00,-42.90,270.0,0.0"),
+    ("garden-potting", "-15.70,-0.28,-41.70,90.0,0.0"),
+    ("orchard-service", "15.50,-0.30,-43.40,315.0,0.0"),
     ("neighbourhood-street", "0.00,0.00,20.00,0.0,0.0"),
 )
 POSES = LEGACY_POSES + NEW_POSES
@@ -211,6 +217,9 @@ POSE_DETAILS = {
     "attic-stair-head": ("Z-STAIR", "L3_STAIR_HEAD", None),
     "garden": ("Z-EXR", "EXT_GARDEN", None),
     "garden-shed-facade": ("Z-EXR", "EXT_GARDEN", None),
+    "shed-interior": ("Z-EXR", "EXT_SHED", None),
+    "garden-potting": ("Z-EXR", "EXT_GARDEN", None),
+    "orchard-service": ("Z-EXR", "EXT_ORCHARD", None),
     "neighbourhood-street": ("Z-STR", "EXT_WORLD", None),
 }
 SCENARIOS = {

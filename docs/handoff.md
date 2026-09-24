@@ -1,3 +1,36 @@
+# Rear and side exterior dressing handoff — 2026-09-24 (`HOUSE-03342`)
+
+All seven rear/side exterior cells now have their bounded dressing recipes. Seventeen rows from
+the existing kit supply the shed work area, garden potting group, service-side firewood store and
+rain barrel, and orchard cart/wheelbarrow silhouette. The existing compost structure remains in
+use, and `HOUSE-00770` retains the front-service condenser and meters as the task explicitly
+allows. The mower, rain barrel and cart/wheelbarrow are intentionally low-detail abstractions from
+the retained kit; no unique model, material family or runtime system was added.
+
+All 365 production props pass exact support, overlap, opening, door-sweep and 0.70 m route
+validation. The validator's door-arc rule and snow-shell builder now use the existing shared
+prop-transform parser, so legal per-axis scale is handled consistently, and both focused
+vector-scale selftests pass. The
+authored-world validator, 90-cell grand tour and `world-content-current` pass. The wider
+inside-geometry probe still reports exactly its four pre-existing bodies, first at `L1_LANDING
+west`. The final build is 1,059 chunks / 2,874,783 vertices / 75,398,376 packed bytes, with 8
+16-bit splits, 15 Reach splits and no 32-bit chunk.
+
+Seven fixed clear-day and forced-shed-light `Z-EXR` views were inspected at full resolution. They
+show a grounded and separated shed composition, a readable potting group and orchard service
+silhouette, and unchanged broad rear views without clipping, floating geometry or z-fighting.
+Utility-tier side yards retain zone-walk coverage. Final normal day/night readability remains M5
+work.
+
+The remaining forecast is 158 realistic / 193.25 pessimistic hours. With 68.25 task-hours spent
+since the final reduction, the R14 projection is 261.5 h, 18.5 h below the hard ceiling. Rule R2
+selects `Z-L0S`, with five accessible cells below target versus four in `Z-L3` and three in
+`Z-L2`. The exact next unblocked MUST task is `HOUSE-00995`, furnishing `L0_MUDROOM` and
+`L0_LAUNDRY`. Every compilation/test invocation must use no more than four workers and stay pinned
+to CPUs 4,5,7,9; strict-XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Finished attic-room handoff — 2026-09-24 (`HOUSE-01016`)
 
 `L3_ROOM` now has its complete main-tier composition in twelve static rows from the retained

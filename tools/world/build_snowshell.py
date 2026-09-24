@@ -186,8 +186,8 @@ def open_cell_props(layout, cells_by_id, asset_paths, cache):
                 f"prop {prop['id']!r} names asset {prop['asset']!r}, not in assets.manifest.json")
         if prop["asset"] not in cache:
             cache[prop["asset"]] = bch.read_geometry(path)
-        placed = bch.place(cache[prop["asset"]], [float(c) for c in prop["position"]],
-                           float(prop.get("yawDeg", 0.0)), float(prop.get("scale", 1.0)))
+        position, yaw_deg, scale = layout_io.prop_transform(prop)
+        placed = bch.place(cache[prop["asset"]], position, yaw_deg, scale)
         out.append({
             "cell": prop["cell"],
             "material": prop.get("material") or cell.get("floorMaterial"),
@@ -497,7 +497,7 @@ def selftest() -> int:
             "schema": "cna-house/props/1",
             "props": [
                 {"id": "PROP_OUTDOOR_TABLE", "asset": "MODEL_TABLE", "cell": "L0_TERRACE",
-                 "position": [-2.0, 0.0, 1.5], "yawDeg": 0.0, "scale": 1.0,
+                 "position": [-2.0, 0.0, 1.5], "yawDeg": 0.0, "scale": [1.0, 0.8, 0.6],
                  "static": True, "material": "MAT_TABLE"},
                 {"id": "PROP_INDOOR_TABLE", "asset": "MODEL_TABLE", "cell": "L0_LOUNGE",
                  "position": [2.0, 0.0, 1.5], "yawDeg": 0.0, "scale": 1.0,
@@ -509,7 +509,7 @@ def selftest() -> int:
         require("L0_TERRACE" in sources,
                 f"the terrace deck gets a shell ({sorted(sources)})")
         require("PROP_OUTDOOR_TABLE" in sources,
-                "a garden table standing on it gets one too -- §38's 'garden furniture tops'")
+                "a per-axis-scaled garden table gets one too -- §38's 'garden furniture tops'")
         require("PROP_INDOOR_TABLE" not in sources,
                 "the identical table INDOORS gets nothing: the surface has to be exterior, and "
                 "cell kind is what says so")

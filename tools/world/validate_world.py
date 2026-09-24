@@ -2594,19 +2594,19 @@ def _arc_prop_hit(world: World, opening: dict, portal: dict,
     for prop in world.props:
         if prop.get("cell") != opening.get("swing"):
             continue
-        position = prop.get("position") or []
-        if len(position) != 3:
+        try:
+            position, yaw_degrees, scale = layout_io.prop_transform(prop)
+        except (TypeError, ValueError, layout_io.LayoutError):
             continue
-        scale = float(prop.get("scale", 1.0))
         size = dimensions.get(str(prop.get("asset")))
         # A fixture without manifest geometry still has a position, so it remains a small point
         # obstacle instead of vanishing from a test fixture or from partially authored data.
-        width, height, depth = ((value * scale for value in size)
+        width, height, depth = ((value * component for value, component in zip(size, scale))
                                 if size is not None else (0.10, 1.0, 0.10))
         px, py, pz = (float(value) for value in position)
         if py > leaf_top + 1e-9 or py + height < leaf_bottom - 1e-9:
             continue
-        yaw = math.radians(float(prop.get("yawDeg", 0.0)))
+        yaw = math.radians(yaw_degrees)
         box = (-width / 2.0, width / 2.0, -depth / 2.0, depth / 2.0)
         for hinge, closed, angle in segments:
             for turn in range(33):
@@ -4351,6 +4351,15 @@ def selftest() -> int:
         _, problems = validate(obstructed_dir, wanted=[14])
         require(any("intersects placed prop" in problem.message for problem in problems),
                 f"a swing arc through a placed prop is rejected "
+                f"({[str(problem) for problem in problems]})")
+
+        vector_scaled = copy.deepcopy(obstructed)
+        row(vector_scaled, "props", "PROP_WC1_PAN")["scale"] = [1.0, 1.0, 1.0]
+        vector_scaled_dir = workspace / "static-pose-vector-scaled-prop-arc"
+        write_fixture(vector_scaled_dir, vector_scaled)
+        _, problems = validate(vector_scaled_dir, wanted=[14])
+        require(any("intersects placed prop" in problem.message for problem in problems),
+                f"a swing arc resolves the schema's xyz prop scale through the shared transform "
                 f"({[str(problem) for problem in problems]})")
 
         # Rule 15 owns both halves of the manifest contract: a point must exist in the footprint,

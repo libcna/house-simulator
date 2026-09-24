@@ -60,7 +60,7 @@ SOURCES = (
         {"dark": "MAT_FURNITURE_PIANO_EBONITE", "metal": "MAT_APPLIANCE_STEEL",
          "accent": "MAT_PAINT_MUTED_TEAL"},
         ("B1_CINEMA", "B1_WORKSHOP", "L0_LAUNDRY", "L0_MUDROOM", "L0_GARAGE",
-         "EXT_SHED"),
+         "EXT_SHED", "EXT_SIDEYARD_E"),
     ),
     Source(
         "MODEL_CLUTTER_SUITCASE", "house-00984-suitcase.glb", "suitcase.glb",

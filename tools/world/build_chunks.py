@@ -140,18 +140,26 @@ CHUNK_BUDGET_EXCEPTIONS = {
                      "the paving and foliage as independently bounded static batches. "
                      "HOUSE-01291 adds one shared bronze fixture body and one independently "
                      "emissive warm diffuser across both rear-wall lanterns"),
-    "EXT_SIDEYARD_W": (12,
+    "EXT_SIDEYARD_W": (15,
                         "HOUSE-00772's densely planted west border: existing exterior finishes "
                         "plus measured source-exact bark and cutout foliage, including Reach-cap "
                         "splits. HOUSE-00937's foundation-mulch primitive shares the adjoining "
-                        "16 m terrain tile; per-instance sub-ranges retain BVH culling"),
-    "EXT_SIDEYARD_E": (11,
+                        "16 m terrain tile; per-instance sub-ranges retain BVH culling. "
+                        "HOUSE-03342 adds the existing wood rack and log-basket finish roles; "
+                        "there is no new vertex or Reach-cap split"),
+    "EXT_SIDEYARD_E": (12,
                         "HOUSE-00945's measured driveway border: the existing concrete, grass, "
                         "fence and street-tree roles plus one shared shrub atlas, mulch, and the "
                         "two shared bronze/emissive roles of three low bollards. The outdoor "
                         "landscape cell keeps all repeated instances in bounded sub-ranges. "
                         "HOUSE-00946 adds one asphalt-finish batch for narrow control joints and "
-                        "one bluestone batch for the driveway's inset border/bands"),
+                        "one bluestone batch for the driveway's inset border/bands. HOUSE-03342 "
+                        "adds one reused metal service-object role without a split"),
+    "EXT_SHED": (11,
+                  "HOUSE-03267's finished shed envelope uses six measured architectural roles. "
+                  "HOUSE-03342 adds five shared kit roles for its bounded secondary-tier "
+                  "workbench, storage and garden-tool composition; repeated tools and pots "
+                  "batch together, with no vertex or Reach-cap split"),
     "EXT_WORLD": (24,
                    "the neighbourhood ring is not a room. HOUSE-00772's two rows of street trees "
                    "and the 2.1 m road-edge hedge add source-exact bark/cutout foliage with "
