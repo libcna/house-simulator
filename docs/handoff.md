@@ -1,3 +1,36 @@
+# Long-term attic-storage handoff — 2026-09-24 (`HOUSE-01017`)
+
+The west, north and south attic stores and the bounded strip beyond `L3_STAIR_HEAD` now carry
+twelve static long-term-storage rows from the existing kit. The west store has the old wardrobe,
+second shelf, suitcase and box required to suggest accumulated decades; the smaller stores use low
+shelves and restrained box groups under the roof slopes. The stair-head shelf and box remain
+outside the opening and preserve the route. No asset, material family, behaviour or runtime system
+was added.
+
+All 383 production props pass exact support, overlap, opening, door-sweep and 0.70 m route
+validation. The authored-world validator and direct 90-cell grand tour pass. The wider
+inside-geometry probe remains exactly at its four pre-existing bodies, first `L1_LANDING west`.
+The ordinary `world-content-current` CTest fixture remains unavailable because stale CMake
+regeneration attempts to create CNA's sibling-tree SDL lock, which this House session cannot
+write; direct deployment comparison passes. The final build is 1,077 chunks / 2,913,983 vertices
+/ 76,652,776 packed bytes, with 8 16-bit splits, 15 Reach splits and no 32-bit chunk. Exact cell
+ceilings are `L3_STORE_W` 14/14, `L3_STORE_N` 11/11, `L3_STORE_S` 10/10 and `L3_STAIR_HEAD` 12/12.
+
+Four fixed controls and five direct forced-light views were inspected at full resolution. They
+show grounded, separated storage clusters, the old wardrobe, clear boarded walkways and an
+unobstructed stair opening without clipping, floating geometry or z-fighting. Final normal-light
+readability remains M5 scope.
+
+The remaining forecast is 156.25 realistic / 191 pessimistic hours. With 70 task-hours spent
+since the final reduction, the R14 projection is 261 h, 19 h below the hard ceiling. Rule R2 ties
+`Z-L0S` and `Z-L2` at three accessible cells below target; the least-recently worked tie-break
+selects `Z-L2` (Round 127 versus Round 135). The exact next unblocked MUST task is `HOUSE-01015`,
+dressing `L2_STOR2`, `L2_CLOSET_4`, `L2_LINEN2` and `L2_STAIR_ATTIC`. Every compilation/test
+invocation must use no more than four workers and stay pinned to CPUs 4,5,7,9; strict-XNA
+additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Mudroom and laundry furnishing handoff — 2026-09-24 (`HOUSE-00995`)
 
 `L0_MUDROOM` and `L0_LAUNDRY` now meet their bounded secondary/utility recipes with six static

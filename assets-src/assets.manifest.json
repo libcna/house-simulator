@@ -4449,6 +4449,9 @@
         "L1_CLOSET_3",
         "L1_LINEN",
         "L1_STOR",
+        "L3_STAIR_HEAD",
+        "L3_STORE_N",
+        "L3_STORE_S",
         "L3_STORE_W",
         "EXT_SHED",
         "EXT_SIDEYARD_W"
@@ -4643,6 +4646,9 @@
         "B1_UNDERSTAIR",
         "L1_STOR",
         "L3_ROOM",
+        "L3_STAIR_HEAD",
+        "L3_STORE_N",
+        "L3_STORE_S",
         "L3_STORE_W"
       ]
     },
@@ -4800,7 +4806,8 @@
         "L1_BED4",
         "L1_BED5",
         "L2_BED6",
-        "L2_BED7"
+        "L2_BED7",
+        "L3_STORE_W"
       ]
     },
     {

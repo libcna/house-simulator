@@ -531,6 +531,22 @@ CHUNK_BUDGET_EXCEPTIONS["L3_STORE_W"] = (
     11, CHUNK_BUDGET_EXCEPTIONS["L3_STORE_W"][1] + "; HOUSE-00985's shelf and storage-box "
         "examples add four truthful reusable-kit surface roles")
 
+# `HOUSE-01017`: the bounded attic-storage composition reuses the same shelf, box, wardrobe and
+# suitcase families in four cells. Existing room roles merge where available; these are the exact
+# remaining close-range kit finish groups, with no vertex or Reach-cap split.
+for _attic_cell, _added, _detail in (
+        ("L3_STAIR_HEAD", 3, "low shelf and box"),
+        ("L3_STORE_N", 3, "low shelf and two boxes"),
+        ("L3_STORE_W", 3, "second shelf, old wardrobe, suitcase and second box")):
+    _attic_limit, _attic_reason = CHUNK_BUDGET_EXCEPTIONS[_attic_cell]
+    CHUNK_BUDGET_EXCEPTIONS[_attic_cell] = (
+        _attic_limit + _added,
+        _attic_reason + f"; HOUSE-01017 adds {_added} measured shared kit finish groups for its "
+                        f"bounded {_detail} composition; no split")
+CHUNK_BUDGET_EXCEPTIONS["L3_STORE_S"] = (
+    10, "six measured unfinished-attic shell finish chunks plus HOUSE-01017's four shared kit "
+        "finish groups for one low shelf and two boxes; no vertex or Reach-cap split")
+
 # `HOUSE-02681`: one ordinary BasicEffect material is the whole cost of the fixed slatted blind;
 # it does not add a portal mode, interaction state or separate runtime draw system.
 _bed2_limit, _bed2_reason = CHUNK_BUDGET_EXCEPTIONS["L1_BED2"]

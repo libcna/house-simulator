@@ -5169,3 +5169,21 @@ grounded and separated pieces, clear openings and no clipping, floating geometry
 
 Rule R2 now selects `Z-L3`, with four accessible cells below target versus three each in `Z-L0S`
 and `Z-L2`. Next: `HOUSE-01017`, dressing the long-term attic stores.
+
+## Round 136 — long-term attic storage
+
+Commit: `HOUSE-01017` working tree (`2026-09-24`). The local, Git-ignored
+[`final`](captures/dc557d7-house-01017-final) set retains the four fixed `Z-L3` controls and adds
+direct views of the north, south and west stores plus the stair-head strip. Relevant attic groups
+were forced for placement evidence only; normal attic readability remains M5 work.
+
+The west store's old wardrobe, second low shelf, suitcase and box read as accumulated storage while
+leaving the boarded centre route open. The north and south stores stop at low shelving and small
+box groups under the roof slope. One scaled shelf and box use the narrow floor strip beyond the
+stair opening without narrowing the stair route. Full-resolution frames show grounded and
+separated pieces, low-headroom context, clear openings and no clipping, floating geometry or
+z-fighting.
+
+Rule R2 now ties `Z-L0S` and `Z-L2` at three accessible cells below target. Its least-recently
+worked tie-break selects `Z-L2` (Round 127 versus Round 135). Next: `HOUSE-01015`, dressing the
+second-floor stores and attic-stair landing.
