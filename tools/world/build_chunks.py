@@ -475,6 +475,23 @@ for bedroom_cell in ("L1_BED3", "L1_BED4"):
         previous_reason + "; HOUSE-01003 adds six measured shared single-bed/desk/carcass finish "
                           "groups; no vertex or Reach-cap split")
 
+# `HOUSE-01006` reuses the bounded wet-room set across two bathrooms and two compact WCs. The
+# windowed family bathroom already owns the shared steel door-hardware role, so its five-piece set
+# adds four finish groups; the guest bathroom adds five. Each WC's four-piece set adds three after
+# batching steel and paint against the room. No cell needs a vertex- or Reach-cap split.
+_bath2_limit, _bath2_reason = CHUNK_BUDGET_EXCEPTIONS["L1_BATH2"]
+CHUNK_BUDGET_EXCEPTIONS["L1_BATH2"] = (
+    _bath2_limit + 4,
+    _bath2_reason + "; HOUSE-01006 adds four measured shared wet-room fixture finish groups; "
+                    "no vertex or Reach-cap split")
+CHUNK_BUDGET_EXCEPTIONS["L1_BATH3"] = (
+    11, "six measured shell finish chunks plus HOUSE-01006's five shared wet-room fixture "
+        "finish groups; no vertex or Reach-cap split")
+for wc_cell in ("L1_WC3", "L1_WC4"):
+    CHUNK_BUDGET_EXCEPTIONS[wc_cell] = (
+        9, "six measured room/shell finish chunks plus HOUSE-01006's three shared WC fixture "
+           "finish groups; no vertex or Reach-cap split")
+
 # `HOUSE-01011` completes both secondary leisure rooms with the bounded kit recipes. The games
 # room's pool table, two chairs and side table add seven canonical finish groups after batching;
 # the sitting room's two chairs, table, lamp and rug add the same measured seven groups. Neither

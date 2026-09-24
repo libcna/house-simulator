@@ -4914,3 +4914,21 @@ record player and extra clutter remain outside the reduced secondary-room requir
 Rule R2 now selects `Z-L1`, with ten accessible cells still below target versus nine each in
 `Z-L2` and `Z-B1`. Next: `HOUSE-01006`, furnishing `L1_BATH2`, `L1_BATH3`, `L1_WC3` and
 `L1_WC4`.
+
+## Round 123 — first-floor family/guest wet-room dressing
+
+Commit: `HOUSE-01006` working tree (`2026-09-24`). The local, Git-ignored
+[`clear-day`](captures/house-01006-day) set retains all six fixed `Z-L1` controls. Supplemental
+forced-light [`detail`](captures/house-01006-detail) views inspect the four compact rooms directly;
+forced light is placement evidence, not a claim that M5's normal day/night balance is complete.
+
+The two bathrooms stop at bath/shower, vanity, toilet, mirror and towel rail; the two WCs reuse the
+same vanity, toilet, mirror and rail family. Direct and reciprocal views show grounded fixture
+groups, supported wall pieces and clear required routes without clipping, floating geometry or
+z-fighting. The open WC3 door occludes part of its toilet from the central pose, so its reciprocal
+view is read together with the exact door-sweep validator rather than moving a valid fixture for a
+screenshot. No plumbing behaviour, clutter or bespoke variants were added.
+
+Rule R2 now ties `Z-B1` and `Z-L2` at nine accessible cells still below target and selects the
+least-recently worked `Z-B1` (Round 120 versus Round 122). Next: `HOUSE-01023`, furnishing
+`B1_CINEMA` and `B1_WC7`.

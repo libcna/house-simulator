@@ -4297,7 +4297,11 @@
       },
       "usedIn": [
         "B1_WC7",
-        "L1_MASTER_BATH"
+        "L1_MASTER_BATH",
+        "L1_BATH2",
+        "L1_BATH3",
+        "L1_WC3",
+        "L1_WC4"
       ]
     },
     {
@@ -4627,7 +4631,11 @@
       },
       "usedIn": [
         "B1_WC7",
-        "L1_MASTER_BATH"
+        "L1_MASTER_BATH",
+        "L1_BATH2",
+        "L1_BATH3",
+        "L1_WC3",
+        "L1_WC4"
       ]
     },
     {

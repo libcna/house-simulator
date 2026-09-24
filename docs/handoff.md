@@ -1,3 +1,36 @@
+# First-floor family/guest wet-room dressing handoff — 2026-09-24 (`HOUSE-01006`)
+
+All four secondary wet-room recipes are complete with eighteen ordinary static rows from the
+existing capped kit. `L1_BATH2` reuses the acquired bath; `L1_BATH3` reuses the acquired shower;
+both bathrooms and both WCs use the established generated vanity, toilet, mirror and towel-rail
+families. Solid and wall-mounted pieces retain their existing proxies. No new asset, material
+family, runtime system, interaction or optional decorative content was added.
+
+All 242 production props pass exact support, overlap, wall-plane, opening, door-sweep and 0.70 m
+route validation. Three first arrangements occupied wider inside-geometry cardinal starts; moving
+the bath and spreading the compact fixture groups cleared them without weakening a test. The final
+result is again only the two older `L1_LANDING west` bodies beside `HOUSE-00999`'s bench, with no
+wet-room failure. The 90-cell grand tour and `world-content-current` pass. Measured chunk totals
+are exactly 12/12 in `L1_BATH2`, 11/11 in `L1_BATH3`, and 9/9 in each WC, with no vertex or
+Reach-cap split.
+
+The clear-day `Z-L1` controls and direct forced-light room views were inspected at full resolution.
+The bath, shower, vanity and WC groups are grounded and separated, wall pieces stay on their
+support planes, and required routes remain clear without clipping, floating geometry or
+z-fighting. The open WC3 door deliberately occludes part of its toilet from the central view; a
+reciprocal view and the exact door-sweep validator cover that compact arrangement. Normal-light
+balance remains M5 scope.
+
+The remaining forecast is 169.5 realistic / 207 pessimistic hours. With 56.75 task-hours spent
+since the final reduction, the R14 projection is 263.75 h, 16.25 h below the hard ceiling. Rule R2
+now ties `Z-B1` and `Z-L2` at nine accessible cells still below target and selects the least-
+recently worked `Z-B1` (Round 120 versus Round 122). The exact next unblocked MUST task is
+`HOUSE-01023`, furnishing `B1_CINEMA` and `B1_WC7`. Every compilation/test invocation must remain
+at no more than four workers and pinned to CPUs 4,5,7,9; strict-XNA additionally requires
+`HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Second-floor leisure-room dressing handoff — 2026-09-24 (`HOUSE-01011`)
 
 Both secondary leisure recipes are complete with nine ordinary static rows from the existing
