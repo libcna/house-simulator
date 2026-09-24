@@ -4138,7 +4138,8 @@
       },
       "usedIn": [
         "B1_ELECTRICAL",
-        "B1_WORKSHOP"
+        "B1_WORKSHOP",
+        "L3_STORE_E"
       ]
     },
     {
@@ -4282,7 +4283,8 @@
         "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
-        "B1_MECHANICAL"
+        "B1_MECHANICAL",
+        "L3_STORE_E"
       ]
     },
     {
@@ -4340,7 +4342,8 @@
         "L2_BATH4",
         "L2_BATH5",
         "L2_WC5",
-        "L2_WC6"
+        "L2_WC6",
+        "L3_STORE_E"
       ]
     },
     {
@@ -4766,7 +4769,8 @@
       "usedIn": [
         "B1_ELECTRICAL",
         "B1_UTILITY",
-        "L0_MUDROOM"
+        "L0_MUDROOM",
+        "L3_STORE_E"
       ]
     },
     {

@@ -5260,3 +5260,20 @@ Final normal-light balance remains M5 work.
 
 Rule R2 now selects `Z-L3`, the only zone with a zero-prop accessible cell. Next:
 `HOUSE-01018`, equipping `L3_STORE_E` with its bounded utility services from the existing kit.
+
+## Round 141 — east attic services
+
+Commit: `HOUSE-01018` working tree (`2026-09-24`). The local, Git-ignored
+[`attic-services`](captures/house-01018-attic-services-r141) set contains a direct normal-light
+view and targeted diagnostic views down the room and across both service walls.
+
+The low header tank sits under the east eaves; two joined duct sections use the high west side;
+two cable sections form one continuous wall run; and the slender internal aerial mast stays outside
+the walking strip. The first diagnostic side view exposed both cable rows inside the wall thickness;
+moving their mounting plane 110 mm to the measured inner face makes the run physically visible
+without floating it. Full-resolution review shows every piece grounded or mounted beneath the roof,
+both openings and the middle route clear, and no clipping, z-fighting or unintended intersections.
+Final normal-light balance remains M5 work.
+
+All accessible rooms now have at least one prop. M4's exact next unblocked MUST task is
+`HOUSE-00770`, placing the bounded front exterior service props before checkpoint `HOUSE-03380`.

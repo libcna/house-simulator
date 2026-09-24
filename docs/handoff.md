@@ -1,3 +1,31 @@
+# East attic services handoff — 2026-09-24 (`HOUSE-01018`)
+
+`L3_STORE_E` now has its complete bounded utility recipe from the existing kit: a low header-tank
+abstraction under the east eaves, two joined high-side duct sections, two joined cable sections on
+the measured east inner wall face and a slender internal aerial mast with one crossarm. All seven
+rows share the established steel role. Only the tank retains a proxy; the thin wall/overhead pieces
+rely on the enclosing shell collision and leave the central route and north-store turn clear. No
+asset, material family, interaction or runtime system was added.
+
+All 425 production prop rows pass exact placement and route checks, all 15 authored-world rules
+pass, the 90-cell grand tour passes and the deployed world is current. The final build is 1,113
+chunks / 2,993,877 vertices / 79,209,384 packed bytes, with 8 16-bit splits, 15 Reach splits and no
+32-bit chunk. `L3_STORE_E` is exactly 6/6 chunks without an exception. One direct normal-light view
+and four targeted diagnostic views show the tank, ducts, cables and mast grounded or mounted under
+the roof, separated and clear of both openings, without clipping, floating geometry or z-fighting.
+Final normal-light readability remains M5 work.
+
+The wider inside-geometry probe retains exactly the nine pre-existing failures recorded by
+`HOUSE-00847`, first `B1_HOBBY south`; none is in `Z-L3`. `world-content-current` and the actual
+grand tour pass. The scoreboard now reports zero zero-prop accessible rooms in every zone. The
+remaining forecast is 151.75 realistic / 185.5 pessimistic hours. With 74.5 task-hours spent since
+the final reduction, the R14 projection is 260 h, 20 h below the hard ceiling. M4's exact next
+unblocked MUST task is `HOUSE-00770`, placing the front exterior service props; `HOUSE-03380`
+follows it. Every compilation/test invocation must use no more than four workers and stay pinned
+to CPUs 4,5,7,9; strict-XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Garage and loft furnishing handoff — 2026-09-24 (`HOUSE-00998`)
 
 The garage main bay now keeps the household estate and adds a workbench with supported tools, one
