@@ -465,6 +465,16 @@ for bedroom_cell in ("L1_BED2", "L1_BED5"):
         previous_reason + "; HOUSE-01002 adds seven measured shared double-bed/carcass finish "
                           "groups; no vertex or Reach-cap split")
 
+# `HOUSE-01010` assembles the library's main-tier composition entirely from the capped kit. Five
+# repeated cases and five book clusters batch by canonical material; the two chairs also batch.
+# The measured remainder is nine established shelf, book, seating, table, desk, rug and curtain
+# finish groups, with no vertex or Reach-cap split.
+_library_limit, _library_reason = CHUNK_BUDGET_EXCEPTIONS["L2_LIBRARY"]
+CHUNK_BUDGET_EXCEPTIONS["L2_LIBRARY"] = (
+    _library_limit + 9,
+    _library_reason + "; HOUSE-01010 adds nine measured main-tier library finish groups; no "
+                      "vertex or Reach-cap split")
+
 # `HOUSE-00999`: the first upper-floor circulation recipe deliberately reuses the established
 # runner, framed-art and piano-bench assets without flattening their physically distinct finishes.
 # These are the exact post-build counts: the two halls each add the runner's two wool roles and

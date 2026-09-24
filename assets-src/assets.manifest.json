@@ -1077,7 +1077,8 @@
         "FAMILY_BOOK": "MAT_FAMILY_BOOK_SPINES"
       },
       "usedIn": [
-        "L0_FAMILY"
+        "L0_FAMILY",
+        "L2_LIBRARY"
       ]
     },
     {
@@ -1159,7 +1160,8 @@
         "CURTAIN_HARDWARE": "MAT_KITCHEN_HARDWARE_STEEL"
       },
       "usedIn": [
-        "L0_FAMILY"
+        "L0_FAMILY",
+        "L2_LIBRARY"
       ]
     },
     {
@@ -2456,7 +2458,8 @@
       },
       "usedIn": [
         "L0_FOYER",
-        "L1_MASTER_BED"
+        "L1_MASTER_BED",
+        "L2_LIBRARY"
       ]
     },
     {
@@ -2863,7 +2866,8 @@
         "L0_LIVING",
         "L0_FAMILY",
         "L0_DINING",
-        "L1_MASTER_BED"
+        "L1_MASTER_BED",
+        "L2_LIBRARY"
       ]
     },
     {

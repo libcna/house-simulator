@@ -4834,3 +4834,23 @@ other S1/S2 furnishing defect is visible. The dark normal daytime interiors rema
 
 Rule R2 now ties `Z-L1`, `Z-L2` and `Z-B1` at twelve accessible cells still below target. The
 least-recently worked zone is `Z-L2`, so the next task is `HOUSE-01010`, furnishing `L2_LIBRARY`.
+
+## Round 119 — second-floor library main-tier dressing
+
+Commit: `HOUSE-01010` working tree (`2026-09-24`). The local, Git-ignored
+[`clear-day`](captures/house-01010-l2-library-day) and
+[`forced-light`](captures/house-01010-l2-library-lit) sets cover all six fixed `Z-L2` views. A
+supplemental reciprocal forced-light view from the clear east aisle directly inspects the complete
+reading group and both shelving walls; forced light is placement evidence, not a claim that M5's
+normal day/night balance is complete.
+
+Five repeated cases and five bounded book clusters make the south/east shelving composition. The
+paired armchairs and side table sit wholly on the rug with a clear route around them, while the
+desk and open curtain keep the north-window bay readable. The fixed and reciprocal views show all
+pieces grounded, separated from doors and trim, and visibly free of clipping, floating geometry
+and z-fighting. Sparse shelf dressing, lamps, plants and art are deliberately not added in M4;
+those are the bounded H5 C5 work in `HOUSE-03454`.
+
+Rule R2 now ties `Z-B1` and `Z-L1` at twelve accessible cells still below target. The least-
+recently worked zone is `Z-B1`, so the next task is `HOUSE-01021`, equipping its mechanical,
+electrical and utility rooms.

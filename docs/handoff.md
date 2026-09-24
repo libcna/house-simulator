@@ -1,3 +1,35 @@
+# L2 library main-tier dressing handoff — 2026-09-24 (`HOUSE-01010`)
+
+The library's required M4 composition is complete with sixteen ordinary static rows from the
+existing capped kit. Five cases and five shelf-height book clusters make an L-shaped south/east
+shelving wall; paired armchairs, a side table, desk, rug and open north-window treatment establish
+the reading and work zones without blocking either portal or the central aisle. The book clusters
+use the existing `MAT_FAMILY_BOOK_SPINES` BasicEffect material: their reusable source model has no
+UV1, so its unrelated paint-class mappings cannot legally select DualTexture. This is a placement-
+level reuse decision, not a new asset, material family or subsystem. H5's lamps, plants, art and
+denser shelf dressing remain deferred to `HOUSE-03454`.
+
+All 196 production prop rows pass exact support, overlap, opening, door-sweep and 0.70 m route
+validation. The standing point moved from behind the west reading chair into the clear east aisle.
+The 90-cell grand tour and `world-content-current` pass. The broader inside-geometry test reports no
+L2 failure; its sole failure remains the older `L1_LANDING west` start beside `HOUSE-00999`'s
+bench. The measured library output is exactly 17/17 chunks, with no vertex or Reach-cap split.
+
+The clear-day and forced-light fixed sets plus a reciprocal forced-light room view were inspected
+at full resolution. Furniture is grounded, the room purpose reads from both directions, both
+portals and the window remain clear, and no clipping, floating geometry, z-fighting or new S1/S2
+defect is visible. Normal daytime readability remains deliberately assigned to M5.
+
+The remaining forecast is 174.25 realistic / 212.75 pessimistic hours. With 52 task-hours spent
+since the final reduction, the R14 projection is 264.75 h, 15.25 h below the hard limit. Rule R2
+ties `Z-B1` and `Z-L1` at twelve accessible cells still below target and selects the least-
+recently worked `Z-B1` (Round 117 versus Round 118); `Z-L2` now has eleven. The exact next
+unblocked MUST task is `HOUSE-01021`, equipping `B1_MECHANICAL`, `B1_ELECTRICAL` and `B1_UTILITY`.
+All compilation and test work must use at most four workers and be pinned to CPUs 4,5,7,9;
+strict-XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # L1 double-bedroom dressing handoff — 2026-09-24 (`HOUSE-01002`)
 
 The cumulative secondary `R-BED-DOUBLE` recipe is complete in `L1_BED2` and `L1_BED5`. Each room
