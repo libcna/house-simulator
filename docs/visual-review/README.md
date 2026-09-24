@@ -5385,3 +5385,20 @@ G3 passes. Exact evidence is in [`house-03420-g3-review.md`](house-03420-g3-revi
 Rule R2 next selects `HOUSE-03447`: all M6a zones start with zero main cells at C4, and
 `Z-STAIR` has the largest remaining main-tier target (three cells). Rule R4 keeps ground-floor C4
 work last.
+
+## Round 154 — main stair C4
+
+Commit: `HOUSE-03447` working tree (`2026-09-24`). Fresh fixed `Z-STAIR` sets cover all nine
+foot/head controls at clear 10:30 and scheduled 22:00 without light overrides. Full-resolution
+inspection confirms that `L0_STAIR_MAIN`, `L1_STAIR_MAIN` and `L2_STAIR_MAIN` retain their complete
+bounded main-tier composition: continuous wool runners on both principal flights, scaled landing
+runners, wall art and a bench only on the broad L0 landing. Narrow transitions remain unobstructed.
+
+Day and night views retain readable joinery, landing pieces, wall art and fixture hierarchy. There
+is no S1/S2, clipping, floating furnishing, z-fighting, missing texture or narrowed route. The prop
+validator, both stair-traversal tests, all three stairwell tests and the 90-cell controller grand
+tour pass. No runtime, content, asset, material, light, schedule or lightmap change was needed.
+The local evidence is in `captures/house-03447-main-stair-{day,night}-r154/`.
+
+Rule R2 next selects `HOUSE-03448`: `Z-EXR` has two remaining main cells at C4, more than any
+non-ground-floor tied zone. Rule R4 keeps `Z-L0M` last.

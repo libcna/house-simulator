@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **84 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 111 / 131 / 161 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G3 passed: every accessible room is at C3.** Next: the main-stair C4 pass in `HOUSE-03447` |
+| Active plan | **83 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 110 / 130 / 160 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G3 passed; the three main-stair cells are at C4.** Next: the rear-terrace/back-garden C4 pass in `HOUSE-03448` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -273,7 +273,7 @@ non-accessible appliance interiors.
 
 ## Zone scoreboard
 
-**As of 2026-09-24 (Round 153).** Levels from Round 103's whole-property day/night review
+**As of 2026-09-24 (Round 154).** Levels from Round 103's whole-property day/night review
 (`HOUSE-03203`), Round 104's traversal sweep and subsequent completed zone work; main and hero
 targets re-counted after `HOUSE-03206`'s tier change. Update per rule R10.
 
@@ -290,7 +290,7 @@ proved all 90 intended-accessible cells and the tight-space traversal. G1 clears
 | `Z-L1` | **C3** | 0 / 1 | — | Round 148; all 20 accessible cells have physical fixtures and readable day/scheduled-night lighting (`HOUSE-03404`) | No zone-specific S2 |
 | `Z-L2` | **C3** | — | 0 / 1 | Round 148; all 15 accessible cells have physical fixtures and readable day/scheduled-night lighting (`HOUSE-03404`) | No zone-specific S2 |
 | `Z-L3` | **C3** | 0 / 1 | — | Round 147; all five attic cells have physical fixtures and readable dormer daylight; the room is readable under its scheduled lights (`HOUSE-03403`) | No zone-specific S2 |
-| `Z-STAIR` | **C3** | 0 / 3 | — | Round 147; all 8 flights retain complete joinery and have physical fixtures with readable day/night transitions (`HOUSE-03403`) | No zone-specific S2; main-stair-foot darkness closed |
+| `Z-STAIR` | **C3** | 3 / 3 | — | Round 154; the three main-stair cells retain their complete main-tier composition and are balanced in every fixed foot/head view by day and scheduled night (`HOUSE-03447`) | No zone-specific S2; main-stair-foot darkness closed |
 | `Z-EXF` | **C3** (C4-level content in place) | — | 0 / 4 | Round 143; the finished facade/roof/entry/approach includes the bounded mailbox and exterior-service recipe (`HOUSE-00770`); property bot walk (`HOUSE-00782`) | No zone-specific S2 |
 | `Z-EXR` | **C3** | 0 / 2 | — | Round 150; lanterns, scheduled windows and one physical shed batten provide bounded night readability across all rear/side cells (`HOUSE-03406`) | No zone-specific S2 |
 | `Z-STR` | **C2** (C3 scenery dressing done) | — | — | Round 139; N1–N60, street furniture, barriers and the three parked estates plus delivery van (`HOUSE-00841`–`00849`, `00856`, `00857`) | S3: plain road foreground and repeated vegetation band; logged for M11 |
@@ -1033,9 +1033,10 @@ day and night, free of S1/S2. **Verify:** those views, day and night.
       accept: `L3_ROOM`, reading as a lived-in attic room under dormer daylight and its evening lights
       trace: was the C5 pass of hero area H7, retired by `HOUSE-03206`
 
-- [ ] HOUSE-03447 — Bring the main stair to C4
+- [x] HOUSE-03447 — Bring the main stair to C4
       dep: HOUSE-03420 · sys: world · plat: TOOL · pri: MUST · zone: Z-STAIR · adv: G4, D4 · est: 0.75
       accept: `L0_STAIR_MAIN`, `L1_STAIR_MAIN` and `L2_STAIR_MAIN`, seen from every foot and head
+      note: (2026-09-24) Round 154 confirms C4 without adding optional density. `HOUSE-03343` already completed the bounded `R-STAIR-LANDING` main-tier treatment: a continuous 760 mm wool runner on both principal flights, scaled landing runners, wall art in every stair cell and a bench where the broad L0 landing permits one; narrower landings remain clear as the recipe requires. `HOUSE-03403` already supplied physical scheduled fixtures and readable transitions. Fresh fixed `Z-STAIR` sets inspect all nine foot/head controls at clear 10:30 and scheduled 22:00 with no light override. Full-resolution review finds the runner, joinery, landing pieces and wall art grounded and readable, with no S1/S2, clipping, z-fighting, missing texture or narrowed route. The prop validator, both stair-traversal tests, all three stairwell tests and the 90-cell controller grand tour pass; the latter records 558 stops, 90,469 steps and 27 collision detours in 12.60 s. No runtime, content, asset, material, light, schedule or lightmap changed. Captures remain local under `house-03447-main-stair-{day,night}-r154`
 
 - [ ] HOUSE-03448 — Bring the rear terrace and back garden to C4
       dep: HOUSE-03420 · sys: world · plat: TOOL · pri: MUST · zone: Z-EXR · adv: G4, D4 · est: 1.25
@@ -1899,7 +1900,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M3 The reusable furnishing kit | 16 | 33 | **0** | 0 | **0** | 0 | — |
 | M4 Dressing everywhere | 40 | 48.75 | **0** | 0 | **0** | 0 | R-D +3 |
 | M5 Baseline lighting everywhere | 12 | 24.5 | **0** | 0 | **0** | 0 | — |
-| M6 Main cells and hero areas | 20 | 32.5 | **15** | 16.75 | **19.75** | 21.75 | — |
+| M6 Main cells and hero areas | 20 | 32.5 | **14** | 16.25 | **19** | 20.75 | — |
 | M7 A compact environment | 13 | 21 | **8** | 11.25 | **13.25** | 14.5 | — |
 | M8 Atmospheric audio essentials | 11 | 14.5 | **6** | 7.75 | **9** | 10 | — |
 | M9 Application shell | 10 | 12.5 | **6** | 7.25 | **8.5** | 9.25 | — |
@@ -1910,12 +1911,12 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **84** | **110.75** | **130.5** | **161.25** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **83** | **110.25** | **129.75** | **160.25** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-118.75 h. Adding the 95.75 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-257 h, 23 h under the limit. That margin is
+119.75 h. Adding the 96.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+256.75 h, 23.25 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |

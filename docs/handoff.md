@@ -1,3 +1,28 @@
+# Main-stair C4 handoff — 2026-09-24 (`HOUSE-03447`)
+
+The three main-stair cells meet C4 without new content. Their existing `R-STAIR-LANDING`
+composition already contains the bounded main-tier set: continuous 760 mm wool runners on the two
+principal flights, scaled landing runners, wall art in every stair cell and a bench on the broad L0
+landing. The narrower L1/L2 transitions deliberately stay clear. Existing scheduled physical
+fixtures balance the composition at clear 10:30 and 22:00.
+
+Round 154 captured all nine fixed `Z-STAIR` foot/head controls under both conditions without a
+light override. Full-resolution inspection finds no S1/S2, clipping, z-fighting, missing texture,
+floating furnishing or narrowed route. The prop validator, two stair-traversal tests, three
+stairwell tests and the 90-cell controller grand tour pass; the tour records 558 stops, 90,469
+controller steps, 27 collision detours and 12.60 s. The Git-ignored evidence is under
+`house-03447-main-stair-{day,night}-r154`. No runtime, content, asset, material, light, schedule or
+lightmap changed.
+
+Rule R2 selects `HOUSE-03448` next: among zones still at zero completed C4 cells, `Z-EXR` has the
+largest remaining main-tier target with two cells. Rule R4 keeps the three-cell `Z-L0M` task last.
+The remaining forecast is 129.75 realistic / 160.25 pessimistic hours. With 96.5 task-hours spent
+since the final reduction, the R14 projection is 256.75 h, 23.25 h below the ceiling. Every build,
+test and render remains limited to four workers and pinned to CPUs 4,5,7,9; strict-XNA additionally
+requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # G3 baseline-complete handoff — 2026-09-24 (`HOUSE-03420`)
 
 Gate G3 passes. Round 153 captured all 68 fixed Tier-S/High views at clear 10:30 and scheduled
