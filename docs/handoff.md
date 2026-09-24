@@ -1,3 +1,32 @@
+# Second-floor utility-storage handoff — 2026-09-24 (`HOUSE-01015`)
+
+The two remaining second-floor utility closets now each have one scaled open shelf, and the long
+three-door store has one low shelf plus one box from the existing kit. Its 0.70 m route between the
+games room, sitting room and bathroom remains clear. `L2_STAIR_ATTIC` retains the slim bench and
+wall art already supplied by `HOUSE-03343`; those pieces satisfy its secondary landing recipe, so
+no extra decoration was added. No asset, material family or runtime system was added.
+
+All 387 production props pass exact support, overlap, opening, door-sweep and route validation.
+The authored-world validator and direct 90-cell grand tour pass. The wider inside-geometry probe
+remains exactly at its four pre-existing bodies, first `L1_LANDING west`. Direct deployment
+comparison passes. The final build is 1,083 chunks / 2,920,463 vertices / 76,860,136 packed bytes,
+with 8 16-bit splits, 15 Reach splits and no 32-bit chunk. `L2_CLOSET_4` and `L2_LINEN2` remain
+6/6 chunks; `L2_STOR2` is exactly 9/9.
+
+Six fixed `Z-L2` controls and four direct forced-light views were inspected at full resolution.
+They show grounded shelves and box, clear doors and through-route, and no clipping, floating
+geometry, z-fighting or broad-view regression. Final normal-light readability remains M5 scope.
+
+The remaining forecast is 155.75 realistic / 190.5 pessimistic hours. With 70.5 task-hours spent
+since the final reduction, the R14 projection is 261 h, 19 h below the hard ceiling. Rule R2
+selects `Z-L0S`, with three accessible cells below target versus one each in `Z-L3` and `Z-GAR`.
+The exact next unblocked MUST task is `HOUSE-00996`, furnishing `L0_WC1` and `L0_WC2` and dressing
+`L0_STOR` and `L0_STAIR_MAIN`. Every compilation/test invocation must use no more than four
+workers and stay pinned to CPUs 4,5,7,9; strict-XNA additionally requires
+`HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Long-term attic-storage handoff — 2026-09-24 (`HOUSE-01017`)
 
 The west, north and south attic stores and the bounded strip beyond `L3_STAIR_HEAD` now carry

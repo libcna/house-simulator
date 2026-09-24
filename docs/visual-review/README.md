@@ -5187,3 +5187,21 @@ z-fighting.
 Rule R2 now ties `Z-L0S` and `Z-L2` at three accessible cells below target. Its least-recently
 worked tie-break selects `Z-L2` (Round 127 versus Round 135). Next: `HOUSE-01015`, dressing the
 second-floor stores and attic-stair landing.
+
+## Round 137 — second-floor utility storage
+
+Commit: `HOUSE-01015` working tree (`2026-09-24`). The local, Git-ignored
+[`final`](captures/2c9c3e5-house-01015-final) set retains all six fixed `Z-L2` views and adds
+direct views of the two hall closets and both ends of the long store. Relevant service groups were
+forced for placement evidence only; normal readability remains M5 work.
+
+Each utility closet stops at one grounded open shelf, mirroring the already accepted first-floor
+recipe. The three-door store keeps its required through-route between the games room, sitting room
+and bathroom while placing one low shelf along the south edge and one box at the closed east end.
+The existing attic-stair bench and wall art remain its complete secondary-tier landing set. Full-
+resolution frames and exact placement checks show clear openings and no clipping, floating
+geometry or z-fighting; the fixed zone views show no broad regression.
+
+Rule R2 now selects `Z-L0S`, with three accessible cells below target versus one each in `Z-L3`
+and `Z-GAR`. Next: `HOUSE-00996`, furnishing the two ground-floor WCs and dressing `L0_STOR` and
+`L0_STAIR_MAIN`.

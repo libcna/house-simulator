@@ -4950,6 +4950,58 @@
       "collision": "proxy",
       "material": null,
       "interactable": null
+    },
+    {
+      "id": "PROP_L2_CLOSET_4_SHELF",
+      "asset": "MODEL_PROP_KIT_OPEN_SHELF",
+      "cell": "L2_CLOSET_4",
+      "position": [-9.18, 6.55, -21.79],
+      "yawDeg": 0,
+      "scale": 0.85,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_LINEN2_SHELF",
+      "asset": "MODEL_PROP_KIT_OPEN_SHELF",
+      "cell": "L2_LINEN2",
+      "position": [-3.88, 6.55, -21.79],
+      "yawDeg": 0,
+      "scale": 0.85,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_STOR2_SHELF",
+      "asset": "MODEL_PROP_KIT_OPEN_SHELF",
+      "cell": "L2_STOR2",
+      "position": [3.20, 6.55, -22.95],
+      "yawDeg": 0,
+      "scale": 0.70,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_STOR2_BOX",
+      "asset": "MODEL_PROP_KIT_STORAGE_BOX",
+      "cell": "L2_STOR2",
+      "position": [8.48, 6.55, -22.55],
+      "yawDeg": 90,
+      "scale": 0.70,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
     }
   ]
 }

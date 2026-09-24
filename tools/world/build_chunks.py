@@ -611,6 +611,12 @@ for wc_cell in ("L1_WC3", "L1_WC4"):
 CHUNK_BUDGET_EXCEPTIONS["L1_STOR"] = (
     9, "six measured store shell finish chunks plus HOUSE-01007's three shared shelf/box kit "
        "finish groups; no vertex or Reach-cap split")
+# `HOUSE-01015` mirrors that same utility store recipe on L2. The two closet shelves batch into
+# their existing room roles, while the long connector store keeps the three truthful shared
+# shelf/box kit finishes distinct; no geometry-cap split is added.
+CHUNK_BUDGET_EXCEPTIONS["L2_STOR2"] = (
+    9, "six measured store shell finish chunks plus HOUSE-01015's three shared shelf/box kit "
+       "finish groups; no vertex or Reach-cap split")
 CHUNK_BUDGET_EXCEPTIONS["L1_BALCONY_FRONT"] = (
     9, "five measured balcony and lantern finish chunks plus HOUSE-01007's four reused "
        "lounger/side-table finish groups; no vertex or Reach-cap split")
