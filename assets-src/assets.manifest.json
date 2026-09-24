@@ -1356,6 +1356,7 @@
       "usedIn": [
         "L0_GARAGE",
         "B1_WORKSHOP",
+        "B1_HOBBY",
         "EXT_SHED"
       ]
     },
@@ -2194,6 +2195,7 @@
       "usedIn": [
         "L0_DINING",
         "L0_OFFICE",
+        "B1_HOBBY",
         "L1_BED3",
         "L1_BED4",
         "L2_GAMES",
@@ -4422,6 +4424,10 @@
       },
       "usedIn": [
         "B1_GYM",
+        "B1_STOR1",
+        "B1_STOR2",
+        "B1_CELLAR",
+        "B1_HOBBY",
         "B1_UNDERSTAIR",
         "B1_WORKSHOP",
         "L0_CLOSET_W",
@@ -4616,6 +4622,9 @@
       },
       "usedIn": [
         "B1_GYM",
+        "B1_STOR1",
+        "B1_STOR2",
+        "B1_CELLAR",
         "B1_UNDERSTAIR",
         "L1_STOR",
         "L3_STORE_W"

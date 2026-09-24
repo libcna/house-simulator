@@ -5089,3 +5089,24 @@ misreported as complete lighting.
 Rule R2 now ties `Z-B1` and `Z-L0S` at five accessible cells below target. `Z-B1` was worked less
 recently (Round 126 versus Round 130), so the exact next unblocked MUST task is `HOUSE-01025`,
 dressing the remaining basement storage, cellar, laundry and hobby rooms.
+
+## Round 132 — remaining basement rooms
+
+Commit: `HOUSE-01025` working tree (`2026-09-24`). The local, Git-ignored
+[`clear-day`](captures/aae385e-house-01025-day) set retains all four fixed `Z-B1` controls, and
+its [`details`](captures/aae385e-house-01025-day/details) inspect every changed cell with the six
+relevant light groups forced. Forced light is placement evidence, not a claim that M5's normal
+day/night balance is complete.
+
+The two stores stop at one open shelf and one box each. The cellar's two shelf runs support its
+crockery fill and leave its crate and doorway clear. The narrow laundry shows distinct light and
+dark static bodies without appliance behaviour. The hobby room's desk/chair and tool shelf occupy
+opposite wall bays around a clear central route. Full-resolution views show grounded, separated
+pieces, supported fills, clear openings and no clipping, floating geometry or z-fighting. The
+first detail capture exposed that the measured `chunks.bin` had not yet been copied into the build
+content root; the existing `cnahouse_world_content` target deployed it and all views plus traversal
+checks were repeated against the corrected content.
+
+Rule R2 now ties `Z-L3`, `Z-L0S` and `Z-EXR` at five accessible cells below target. Its
+least-recently worked tie-break selects `Z-L3` (Round 110). Next: `HOUSE-01016`, furnishing the
+finished attic room.

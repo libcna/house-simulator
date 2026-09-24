@@ -678,6 +678,27 @@ CHUNK_BUDGET_EXCEPTIONS["B1_UNDERSTAIR"] = (
     9, "five measured shell finish chunks plus HOUSE-01020's four shared low-shelf and storage-box "
        "kit roles; no vertex or Reach-cap split")
 
+# `HOUSE-01025` completes the five remaining basement support rooms from the existing bounded kit.
+# The paired store pieces each add two finish batches to their established architectural counts.
+# The cellar and hobby compositions each add three shared finish groups; two instances of the
+# laundry body retain five truthful appliance roles and batch across both variants. No cell gains
+# a vertex- or Reach-cap split.
+for _basement_store in ("B1_STOR1", "B1_STOR2"):
+    _store_limit, _store_reason = CHUNK_BUDGET_EXCEPTIONS[_basement_store]
+    CHUNK_BUDGET_EXCEPTIONS[_basement_store] = (
+        _store_limit + 2,
+        _store_reason + "; HOUSE-01025 adds two measured shared shelf/box finish groups; no "
+                        "vertex or Reach-cap split")
+CHUNK_BUDGET_EXCEPTIONS["B1_CELLAR"] = (
+    9, "six measured cellar shell finish groups plus HOUSE-01025's three shared shelf, crockery "
+       "and crate finish groups; no vertex or Reach-cap split")
+CHUNK_BUDGET_EXCEPTIONS["B1_HOBBY"] = (
+    9, "six measured hobby-room shell finish groups plus HOUSE-01025's three shared desk, chair, "
+       "shelf and tool-fill finish groups; no vertex or Reach-cap split")
+CHUNK_BUDGET_EXCEPTIONS["B1_LAUNDRY2"] = (
+    11, "six measured laundry-room shell finish groups plus HOUSE-01025's five truthful shared "
+        "appliance-body finish groups across both static variants; no vertex or Reach-cap split")
+
 # HOUSE-01069 is a measured room-wide furnishing/lighting step, not a generic budget increase.
 # The new walnut/brass cabinet shares both established dining roles. Its ceramic serving set is
 # one new finish, and the two sideboard lamps' exact independently switched shade group needs

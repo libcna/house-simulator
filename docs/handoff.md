@@ -1,3 +1,36 @@
+# Remaining basement rooms handoff — 2026-09-24 (`HOUSE-01025`)
+
+All fourteen basement cells now have their bounded tier recipe. The two stores each receive one
+open shelf and one box; the cellar has two rack runs, supported crockery and one crate; the laundry
+has two static material variants of the existing laundry body; and the hobby room has a desk,
+reused chair, open shelf and supported tool fill. These fourteen rows reuse the capped kit. No new
+asset, material family, interaction, appliance behaviour or runtime system was added.
+
+All 336 production props pass exact support, overlap, opening, door-sweep and 0.70 m route
+validation. The authored-world validator, 90-cell grand tour and `world-content-current` pass.
+The wider inside-geometry probe still reports exactly its four pre-existing bodies, first at
+`L1_LANDING west`. The final build is 1,032 chunks / 2,796,371 vertices / 72,914,056 packed bytes,
+with 8 16-bit splits, 15 Reach splits and no 32-bit chunk. Exact cell ceilings are `B1_STOR1`
+10/10, `B1_STOR2` 10/10, `B1_CELLAR` 9/9, `B1_LAUNDRY2` 11/11 and `B1_HOBBY` 9/9.
+
+The four fixed clear-day `Z-B1` controls and direct forced-light views of all five changed cells
+were inspected at full resolution. They show grounded and separated furniture, shelf-supported
+fills, clear windows and doorways, and no clipping, floating geometry or z-fighting. The first
+direct capture accidentally used the previous deployed `chunks.bin`; the mismatch was caught
+visually, the new measured content was deployed through the existing CMake world-content target,
+and every direct view and traversal check was then repeated. Dark normal basement lighting remains
+M5 scope.
+
+The remaining forecast is 160.5 realistic / 196.25 pessimistic hours. With 65.75 task-hours spent
+since the final reduction, the R14 projection is 262 h, 18 h below the hard ceiling. Rule R2 now
+ties `Z-L3`, `Z-L0S` and `Z-EXR` at five accessible cells below target; its least-recently worked
+tie-break selects `Z-L3` (Round 110 versus Rounds 130 and 111). The exact next unblocked MUST task
+is `HOUSE-01016`, furnishing the finished attic room. Every compilation/test invocation must use
+no more than four workers and stay pinned to CPUs 4,5,7,9; strict-XNA additionally requires
+`HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Stair halls and landings handoff — 2026-09-24 (`HOUSE-03343`)
 
 All six stair cells now meet their tiered `R-STAIR-LANDING` recipe with eleven static rows from
