@@ -641,6 +641,18 @@ for wc_cell in ("L2_WC5", "L2_WC6"):
         9, "six measured room/shell finish chunks plus HOUSE-01014's three shared WC fixture "
            "finish groups; no vertex or Reach-cap split")
 
+# `HOUSE-00996` applies the established compact-WC recipe on L0 and stops the hall store at its
+# utility-tier shelf and box. Each WC adds the same three truthful fixture groups as its upper-floor
+# counterparts. The store's two reused pieces add three shared kit finishes; no geometry-cap split
+# is introduced.
+for wc_cell in ("L0_WC1", "L0_WC2"):
+    CHUNK_BUDGET_EXCEPTIONS[wc_cell] = (
+        9, "six measured room/shell finish chunks plus HOUSE-00996's three shared WC fixture "
+           "finish groups; no vertex or Reach-cap split")
+CHUNK_BUDGET_EXCEPTIONS["L0_STOR"] = (
+    9, "six measured store shell finish chunks plus HOUSE-00996's three shared shelf/box kit "
+       "finish groups; no vertex or Reach-cap split")
+
 # `HOUSE-01011` completes both secondary leisure rooms with the bounded kit recipes. The games
 # room's pool table, two chairs and side table add seven canonical finish groups after batching;
 # the sitting room's two chairs, table, lamp and rug add the same measured seven groups. Neither

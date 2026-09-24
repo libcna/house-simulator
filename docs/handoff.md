@@ -1,3 +1,33 @@
+# Ground-floor WC and hall-storage handoff — 2026-09-24 (`HOUSE-00996`)
+
+Both ground-floor WCs now use the established four-piece toilet, vanity, mirror and towel-rail
+recipe, and the hall store has one open shelf plus one storage box from the existing kit.
+`L0_STAIR_MAIN` retains the bench, runner and wall art already supplied by `HOUSE-03343`; these
+already satisfy its landing recipe. Ten new static rows reuse existing assets and proxies, with no
+new asset, material family, behaviour or runtime system.
+
+All 397 production props pass exact support, overlap, opening, door-sweep and 0.70 m route
+validation. The authored-world validator, 90-cell grand tour and `world-content-current` pass.
+The wider inside-geometry probe remains exactly at its four pre-existing bodies, first
+`L1_LANDING west`. The final build is 1,094 chunks / 2,945,831 vertices / 77,671,912 packed bytes,
+with 8 16-bit splits, 15 Reach splits and no 32-bit chunk. `L0_WC1`, `L0_WC2` and `L0_STOR` are
+each exactly 9/9 chunks.
+
+Two fixed `Z-L0S` controls and four direct forced-light views were inspected at full resolution.
+They show grounded, separated bathroom fixtures and storage, the retained stair composition,
+clear openings and no clipping, floating geometry or z-fighting. Final normal-light readability
+remains M5 scope.
+
+The remaining forecast is 155 realistic / 189.5 pessimistic hours. With 71.25 task-hours spent
+since the final reduction, the R14 projection is 260.75 h, 19.25 h below the hard ceiling. Rule R2
+ties `Z-GAR` and `Z-L3` at one accessible cell below target and selects the least-recently worked
+`Z-GAR` (Round 108 versus Round 136). Its furnishing task depends on the shared car family, so the
+exact next unblocked MUST task is `HOUSE-00847`. Every compilation/test invocation must use no
+more than four workers and stay pinned to CPUs 4,5,7,9; strict-XNA additionally requires
+`HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Second-floor utility-storage handoff — 2026-09-24 (`HOUSE-01015`)
 
 The two remaining second-floor utility closets now each have one scaled open shelf, and the long

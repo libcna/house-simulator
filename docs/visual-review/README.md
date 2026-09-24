@@ -5205,3 +5205,22 @@ geometry or z-fighting; the fixed zone views show no broad regression.
 Rule R2 now selects `Z-L0S`, with three accessible cells below target versus one each in `Z-L3`
 and `Z-GAR`. Next: `HOUSE-00996`, furnishing the two ground-floor WCs and dressing `L0_STOR` and
 `L0_STAIR_MAIN`.
+
+## Round 138 — ground-floor WCs and hall storage
+
+Commit: `HOUSE-00996` working tree (`2026-09-24`). The local, Git-ignored
+[`fixed`](captures/house00996-round138) set retains both fixed `Z-L0S` controls; the
+[`direct`](captures/house00996-round138-direct) set covers both WCs, the hall store and the retained
+stair landing. Relevant room groups were forced for placement evidence only; normal readability
+remains M5 work.
+
+Both compact WCs reuse the established toilet, vanity, mirror and towel rail without variants or
+behaviour. The hall store stops at the utility recipe's open shelf and box. The main stair keeps
+the already accepted bench, runner and wall art rather than receiving another polish pass.
+Full-resolution frames and exact placement checks show grounded, separated pieces, clear doors and
+routes, and no clipping, floating geometry or z-fighting. The fixed zone views show no broad
+regression.
+
+Rule R2 ties `Z-GAR` and `Z-L3` at one accessible cell below target and selects the least-recently
+worked `Z-GAR` (Round 108 versus Round 136). `HOUSE-00998` depends on the car family, so next is
+`HOUSE-00847`, building and placing that bounded family for the garage and street.

@@ -4329,6 +4329,8 @@
       "usedIn": [
         "B1_GYM",
         "B1_WC7",
+        "L0_WC1",
+        "L0_WC2",
         "L1_MASTER_BATH",
         "L1_BATH2",
         "L1_BATH3",
@@ -4445,6 +4447,7 @@
         "L0_CLOSET_W",
         "L0_MUDROOM",
         "L0_PANTRY",
+        "L0_STOR",
         "L1_CLOSET_2",
         "L1_CLOSET_3",
         "L1_LINEN",
@@ -4647,6 +4650,7 @@
         "B1_STOR2",
         "B1_CELLAR",
         "B1_UNDERSTAIR",
+        "L0_STOR",
         "L1_STOR",
         "L2_STOR2",
         "L3_ROOM",
@@ -4700,6 +4704,8 @@
       },
       "usedIn": [
         "B1_WC7",
+        "L0_WC1",
+        "L0_WC2",
         "L1_MASTER_BATH",
         "L1_BATH2",
         "L1_BATH3",
