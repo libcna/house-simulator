@@ -1,3 +1,32 @@
+# Second-floor wet-room dressing handoff — 2026-09-24 (`HOUSE-01014`)
+
+All four secondary wet-room recipes are complete with eighteen static rows from the existing
+capped kit. `L2_BATH4` uses the acquired shower, `L2_BATH5` uses the acquired bath, and both
+bathrooms and both compact WCs reuse the established toilet, vanity, mirror and towel-rail
+families. No asset, material, interaction or runtime system was added.
+
+All 294 production props pass exact support, overlap, wall-plane, opening, door-sweep and 0.70 m
+route validation. The first bath arrangement created a `L2_BATH5` cardinal push-out pocket;
+moving its fixtures away from the affected axes removed it without weakening a test. The wider
+probe is back to the two pre-existing `L1_LANDING west` and `L2_LIBRARY north` results. The
+90-cell grand tour and `world-content-current` pass. Measured chunks are exactly `L2_BATH4`
+13/13, `L2_BATH5` 10/10 and both WCs 9/9, with no vertex or Reach-cap split.
+
+The six fixed clear-day `Z-L2` controls and direct forced-light room views were inspected at full
+resolution. They show grounded and separated bath/shower/vanity/WC groups, supported wall pieces,
+clear doorways and no clipping, floating geometry or z-fighting. Open leaves occlude parts of the
+compact fixtures in individual views, so reciprocal views and the exact door-sweep validator were
+reviewed together. The dark normal-light balance is retained for M5 rather than changed here.
+
+The remaining forecast is 164.75 realistic / 201.5 pessimistic hours. With 61.5 task-hours spent
+since the final reduction, the R14 projection is 263 h, 17 h below the hard ceiling. Rule R2 now
+selects `Z-L1`, with six accessible cells below target versus five in `Z-B1` and three in `Z-L2`;
+the exact next unblocked MUST task is `HOUSE-01007`, dressing the first-floor linen/store/closets
+and two balconies. Every compilation/test invocation remains limited to four workers and pinned
+to CPUs 4,5,7,9; strict-XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Basement gym and workshop dressing handoff — 2026-09-24 (`HOUSE-01024`)
 
 The secondary gym and main-tier workshop now meet their bounded recipes with thirteen new static

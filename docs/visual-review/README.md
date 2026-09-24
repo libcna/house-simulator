@@ -4994,3 +4994,21 @@ bespoke workshop pieces and cosmetic hero dressing were not added.
 
 Rule R2 now selects `Z-L2`, with seven accessible cells below target versus six in `Z-L1` and five
 in `Z-B1`. Next: `HOUSE-01014`, furnishing `L2_BATH4`, `L2_BATH5`, `L2_WC5` and `L2_WC6`.
+
+## Round 127 — second-floor wet-room dressing
+
+Commit: `HOUSE-01014` working tree (`2026-09-24`). The local, Git-ignored
+[`clear-day`](captures/house-01014-l2-day) set retains all six fixed `Z-L2` controls. Direct
+forced-light views in [`detail`](captures/house-01014-l2-detail) inspect the shower, bath and both
+compact WC arrangements; forced light is placement evidence, not a claim that M5's normal
+day/night balance is complete.
+
+Both bathrooms stop at the secondary recipe's bath-or-shower, vanity, toilet, mirror and towel
+rail; both WCs stop at the corresponding four-piece set. Direct and reciprocal views show the
+grounded fixture bodies, clear central floor and separated wall groups without clipping, floating
+geometry or z-fighting. Open leaves deliberately occlude parts of the small rooms in individual
+frames, so the views were reviewed together with the exact door-sweep validator. No plumbing
+behaviour, clutter or bespoke variant was added.
+
+Rule R2 now selects `Z-L1`, with six accessible cells below target versus five in `Z-B1` and three
+in `Z-L2`. Next: `HOUSE-01007`, dressing the first-floor stores and balconies.

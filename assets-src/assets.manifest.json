@@ -4308,7 +4308,11 @@
         "L1_BATH2",
         "L1_BATH3",
         "L1_WC3",
-        "L1_WC4"
+        "L1_WC4",
+        "L2_BATH4",
+        "L2_BATH5",
+        "L2_WC5",
+        "L2_WC6"
       ]
     },
     {
@@ -4647,7 +4651,11 @@
         "L1_BATH2",
         "L1_BATH3",
         "L1_WC3",
-        "L1_WC4"
+        "L1_WC4",
+        "L2_BATH4",
+        "L2_BATH5",
+        "L2_WC5",
+        "L2_WC6"
       ]
     },
     {
