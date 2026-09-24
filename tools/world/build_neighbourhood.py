@@ -13,7 +13,7 @@ neighbourhood cannot take that route, for the reason this file exists.
 geometry or they are nowhere"*. That is right for a prop, which stands in one place for ever, and
 wrong for a neighbour:
 
-* §11.4 places **122 instances of 34 assets**. Baking the placement writes the same house out once
+* The retained neighbourhood places **118 instances of 34 assets**. Baking the placement writes the same house out once
   per instance -- twenty-four houses where there are nineteen meshes, thirty-six impostor cards
   where there are four.
 * §26.1 selects an instance's LOD **by its projected height**, and §26.2's impostor takes over at
@@ -431,12 +431,11 @@ def selftest() -> int:
                                  if neighbourhood.is_ours(str(row["asset"]))} - held)
             require(not unresolved,
                     f"and every row this grammar owns resolves to a mesh in it ({unresolved})")
-            # ...and the ones it does NOT own are somebody else's to deliver, which is a
-            # different statement from "the file is complete".
+            # Every row now belongs to the neighbourhood grammar. `HOUSE-00847` places its
+            # visible/collidable vehicle family through the ordinary static-prop path instead.
             theirs = sorted({str(row["asset"]) for row in rows
                              if not neighbourhood.is_ours(str(row["asset"]))})
-            require(theirs == ["MODEL_DELIVERY_VAN", "MODEL_PARKED_CAR"],
-                    f"§11.4's vehicles are still `HOUSE-00847`'s and are not in here ({theirs})")
+            require(not theirs, f"all neighbourhood rows are owned and packaged ({theirs})")
 
     if failures:
         print(f"\nbuild_neighbourhood: {len(failures)} claim(s) FAILED")

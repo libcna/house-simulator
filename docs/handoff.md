@@ -1,3 +1,36 @@
+# Bounded vehicle-family handoff — 2026-09-24 (`HOUSE-00847`)
+
+The project-authored low-detail family now contains one 248-triangle estate body under blue, red
+and silver paint tints and one 212-triangle white delivery-van body sharing the same construction.
+All four committed GLBs are deterministic and carry one enclosing `_COL` proxy. The household blue
+estate anchors the garage; the three parked estates and delivery van retain the four permanent
+`NB_*` ids while using the existing static-prop/chunk path. That local correction makes the MUST
+vehicles visible and collidable without depending on the optional neighbourhood renderer or
+adding a runtime system.
+
+All 402 prop rows pass exact placement and route checks, all 15 authored-world rules pass, the
+90-cell grand tour passes and the deployed world is current. The final build is 1,110 chunks /
+2,948,439 vertices / 77,755,368 packed bytes, with 8 16-bit splits, 15 Reach splits and no 32-bit
+chunk. Collision contains 1,989 pooled shapes, including 311 prop OBBs and three prop meshes.
+Fixed and direct runtime views show the four street variants and garage estate grounded,
+recognizable and separated without clipping, floating geometry or z-fighting.
+
+The full-content refresh exposes nine wider inside-geometry push-out failures, first
+`B1_HOBBY south`: `B1_HOBBY south`, `B1_LAUNDRY2 west`, `EXT_SHED north`, `L0_LAUNDRY west`,
+`L0_WC2 west`, `L1_LANDING west`, `L1_LINEN west`, `L1_STOR west` and `L2_LIBRARY north`. None is
+in `Z-GAR`/`Z-STR` or geometrically affected by this task; the actual 90-cell controller tour stays
+green. Preserve this exact evidence for the next bounded collision cleanup instead of calling the
+test green.
+
+The remaining forecast is 154 realistic / 188.5 pessimistic hours. With 72.25 task-hours spent
+since the final reduction, the R14 projection remains 260.75 h, 19.25 h below the hard ceiling.
+Rule R2 continues with `Z-GAR` now that its car prerequisite is closed, so the exact next unblocked
+MUST task is `HOUSE-00998`, furnishing `L0_GARAGE` and `L0_GARAGE_LOFT`. Every compilation/test
+invocation must use no more than four workers and stay pinned to CPUs 4,5,7,9; strict-XNA also
+requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Ground-floor WC and hall-storage handoff — 2026-09-24 (`HOUSE-00996`)
 
 Both ground-floor WCs now use the established four-piece toilet, vanity, mirror and towel-rail

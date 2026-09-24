@@ -1059,6 +1059,10 @@ materials/materials	MAT_VEGETATION_TREE_FOLIAGE
 materials/materials	MAT_VEGETATION_TREE_SMALL_02_BRANCHES
 materials/materials	MAT_VEGETATION_TREE_SMALL_02_LEAVES
 materials/materials	MAT_VEGETATION_TREE_SMALL_02_TRUNK
+materials/materials	MAT_VEHICLE_BODY_BLUE
+materials/materials	MAT_VEHICLE_BODY_RED
+materials/materials	MAT_VEHICLE_BODY_SILVER
+materials/materials	MAT_VEHICLE_BODY_WHITE
 materials/materials	MAT_WATER_BASIN
 materials/materials	MAT_WATER_FLOW
 materials/materials	MAT_WATER_PUDDLE
@@ -1094,6 +1098,7 @@ assets	MODEL_DECOR_WALL_ART_14
 assets	MODEL_DECOR_WALL_ART_15
 assets	MODEL_DECOR_WALL_ART_16
 assets	MODEL_DECOR_WALL_CLOCK
+assets	MODEL_DELIVERY_VAN_WHITE
 assets	MODEL_DINING_TABLE_SETTING
 assets	MODEL_FALLBACK_BOX
 assets	MODEL_FAMILY_BOOKCASE
@@ -1167,6 +1172,9 @@ assets	MODEL_LIVING_PIANO_ART
 assets	MODEL_LIVING_SOFA_THROW
 assets	MODEL_LIVING_TABLE_DRESSING
 assets	MODEL_LIVING_WALL_ART_PAIR
+assets	MODEL_PARKED_CAR_BLUE
+assets	MODEL_PARKED_CAR_RED
+assets	MODEL_PARKED_CAR_SILVER
 assets	MODEL_PROP_KITCHEN_CANISTERS
 assets	MODEL_PROP_KITCHEN_ISLAND_DRESSING
 assets	MODEL_PROP_KITCHEN_KETTLE
@@ -1560,9 +1568,9 @@ nav/nodes	NAV_L3_STORE_W_14
 nav/nodes	NAV_L3_STORE_W_15
 exterior/neighbourhood	NB_BINS_01
 exterior/neighbourhood	NB_BINS_02
-exterior/neighbourhood	NB_CAR_01
-exterior/neighbourhood	NB_CAR_02
-exterior/neighbourhood	NB_CAR_03
+props/props	NB_CAR_01
+props/props	NB_CAR_02
+props/props	NB_CAR_03
 exterior/neighbourhood	NB_HOOP_01
 exterior/neighbourhood	NB_HOUSE_N1
 exterior/neighbourhood	NB_HOUSE_N10
@@ -1654,7 +1662,7 @@ exterior/neighbourhood	NB_SPAN_01
 exterior/neighbourhood	NB_SPAN_02
 exterior/neighbourhood	NB_SPAN_03
 exterior/neighbourhood	NB_SPAN_04
-exterior/neighbourhood	NB_VAN_ROADEND_E
+props/props	NB_VAN_ROADEND_E
 exterior/paths	PATH_APRON
 exterior/paths	PATH_CONNECT
 exterior/paths	PATH_DRIVEWAY
@@ -1837,6 +1845,7 @@ props/props	PROP_L0_FAMILY_CEILING_2
 props/props	PROP_L0_FAMILY_CEILING_3
 props/props	PROP_L0_FAMILY_CEILING_4
 props/props	PROP_L0_FOYER_CEILING_1
+props/props	PROP_L0_GARAGE_HOUSEHOLD_CAR
 props/props	PROP_L0_HALL_CEILING_1
 props/props	PROP_L0_HALL_CEILING_2
 props/props	PROP_L0_KITCHEN_CANISTERS

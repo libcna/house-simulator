@@ -1157,21 +1157,12 @@ TRUNKS = {
 #: and 0.5 m is what an extruded 1 m strip is thick. A hedge is not a tree -- it is a barrier, and
 #: `HOUSE-00775` is where the road's ends became ones.
 HEDGES = {"MODEL_VEGETATION_SHRUB_01": (0.5, 2.1)}
-#: §70.5's car, which §49.2 lists: 4.4 m long, 1.80 m across and 1.50 m tall, and written the way
-#: the MODEL is -- `(across, tall, along)`. §14 puts a model's forward at -Z and yaws it about +Y,
-#: so a car's length runs along its own Z and the two cars parked at this east-west kerb are
-#: authored at 90 and 270 degrees. Writing the length along X instead parked them ACROSS the road,
-#: and `HOUSE-00775`'s walk to the end of it stopped 24 m early against a car's flank.
-CAR_SIZE = (1.8, 1.5, 4.4)
-#: The assets that are ones. §10.4's delivery van at the east end of the road is the second.
-CAR_ASSETS = ("MODEL_PARKED_CAR", "MODEL_DELIVERY_VAN")
-#: §10.4's van, which is bigger than a car: 5.4 m long, 2.10 m across and 2.40 m tall.
-VAN_SIZE = (2.1, 2.4, 5.4)
 #: §11.4's street furniture, and what a BODY meets of each: `(across, tall, along)` like the car.
-#: `HOUSE-00857`. `HOUSE-00846` drew all of it and this file took only the vehicles from the
-#: `neighbourhood` array, so sixteen solid objects inside §10.4's walkable +/-35 m had no collision
-#: at all -- `NB_POLE_03` stands 0.80 m outside §11.2's pedestrian gate, which is the first thing a
-#: player walks at on leaving the property, and they walked through it.
+#: `HOUSE-00857`. `HOUSE-00846` drew all of it, but sixteen solid objects inside §10.4's walkable
+#: +/-35 m had no collision at all -- `NB_POLE_03` stands 0.80 m outside §11.2's pedestrian gate,
+#: which is the first thing a player walks at on leaving the property, and they walked through it.
+#: `HOUSE-00847` later moved vehicles to the ordinary static-prop path; this table now covers only
+#: the furniture that remains in the neighbourhood pack.
 #:
 #: This is the SOLID part and not the asset's bounding box, which is why it is written here rather
 #: than measured: a lamp's box reaches 1.76 m out to the lantern 8 m up, and a body colliding with
@@ -1425,20 +1416,6 @@ def build_exterior(layout, shapes: Shapes, per_cell: dict[str, list[int]], stats
             # The strip runs along its own local X, so a section turned 90 degrees runs along Z.
             place((x, base + height / 2.0, z), (0.5, height / 2.0, depth / 2.0), yaw,
                   "hedge", KIND_EXTERIOR, "hedges")
-
-    # §11.4's parked cars, which are §49.2's "vehicles". They carry a yaw, and an OBB is the one
-    # shape in this file that can.
-    for row in exterior.get("neighbourhood", []):
-        if row.get("asset") not in CAR_ASSETS:
-            continue
-        size = VAN_SIZE if row.get("asset") == "MODEL_DELIVERY_VAN" else CAR_SIZE
-        position = row.get("position") or [0.0, 0.0, 0.0]
-        x, z = float(position[0]), float(position[2])
-        yaw = math.radians(float(row.get("yawDeg") or 0.0))
-        base = ground(x, z)
-        place((x, base + size[1] / 2.0, z),
-              (size[0] / 2.0, size[1] / 2.0, size[2] / 2.0),
-              yaw, "vehicle", KIND_EXTERIOR, "vehicles")
 
     # ...and §11.4's street furniture, which is the same rule applied to the rest of the array
     # (`HOUSE-00857`). `place` drops anything no open cell can reach, so the poles 100 m down the

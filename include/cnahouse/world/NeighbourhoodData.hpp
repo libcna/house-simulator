@@ -34,11 +34,11 @@ namespace cnahouse::world
     /// @brief One asset of §11.4's neighbourhood, in ITS OWN SPACE.
     ///
     /// **Not in world space, which is the difference from a `Chunk` and the reason this format
-    /// exists.** §11.4 places 122 instances of 34 assets; §26.1 picks an instance's LOD by its
-    /// projected height and §26.2's impostor takes over at `impostorFrom`. A mesh with the
-    /// placement baked into it can be neither shared between instances nor swapped for another
-    /// band. The transform is applied at draw time from the `neighbourhood` row:
-    /// `Matrix::CreateRotationY(yaw) * Matrix::CreateTranslation(position)`.
+    /// exists.** The retained neighbourhood places 118 instances of 34 assets; §26.1 picks an instance's LOD
+    /// by its projected height and §26.2's impostor takes over at `impostorFrom`. A mesh with the placement
+    /// baked into it can be neither shared between instances nor swapped for another band. The transform is
+    /// applied at draw time from the `neighbourhood` row: `Matrix::CreateRotationY(yaw) *
+    /// Matrix::CreateTranslation(position)`.
     struct NeighbourAsset
     {
         /// @brief The id a `layout.exterior.json` row's `asset` names.

@@ -254,7 +254,7 @@ def default_stages() -> list[Stage]:
               description="§11.4's neighbour houses, impostor cards and street furniture"),
         # `HOUSE-00856`. The meshes the runtime opens. `neighbourhood` writes the `.glb`; this
         # turns them into one `content/world/neighbourhood.bin` keyed by asset id, because §11.4's
-        # 122 instances of 34 assets cannot be chunked -- a chunk bakes its placement and an
+        # 118 instances of 34 assets cannot be chunked -- a chunk bakes its placement and an
         # instance has to keep its own so §26 can swap its LOD.
         Stage("neighbourhood-bin", "world",
               ["python3", "tools/world/build_neighbourhood.py"],

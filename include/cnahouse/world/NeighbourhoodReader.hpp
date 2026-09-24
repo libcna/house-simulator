@@ -66,11 +66,10 @@ namespace cnahouse::world
     /// format exists to make visible: before `HOUSE-00856` the meshes were written into
     /// `build/neighbourhood` and no code anywhere opened that directory.
     ///
-    /// **Nothing is excluded, deliberately.** §11.4's vehicles share the array and are
-    /// `HOUSE-00847`'s to deliver, so today they come back in this list -- and the test asserts
-    /// they are the ONLY two, which is a statement about who owes what. Teaching this function
-    /// which prefixes belong to which task would put `neighbourhood_gen.is_ours` in a second
-    /// place, and the second copy is the one that goes stale.
+    /// **Nothing is excluded, deliberately.** `HOUSE-00847`'s vehicles are ordinary static props,
+    /// not neighbourhood rows, so every row in this array must resolve in this library. Teaching
+    /// this function which prefixes belong to which task would put `neighbourhood_gen.is_ours` in
+    /// a second place, and the second copy is the one that goes stale.
     ///
     /// A row whose asset was never interned comes back as `id:0x…`, which is the honest answer:
     /// the name is not in this process.

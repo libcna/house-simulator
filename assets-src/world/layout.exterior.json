@@ -377,8 +377,10 @@
 
     // ---- street furniture x33 -- 5 lamp-carrying utility poles, 4 catenary spans, 4 standalone
     // lamp columns, 5 signs, 12 mailboxes, 2 bin clusters and a basketball hoop; §11.4's four
-    // vehicles are interleaved below and are `HOUSE-00847`'s. `HOUSE-00846` is the geometry for
-    // all of it, and it is what finally puts posts under the nine street lights: they were
+    // vehicles use ordinary static-prop rows in `layout.props.json`; `HOUSE-00847` supplies their
+    // one estate/van family. `HOUSE-00846` is the geometry for all the street furniture and
+    // finally puts
+    // posts under the nine street lights: they were
     // lights and nothing else until now, and a lantern at +8.00 with no post under it is a light
     // shining out of the air. `layout.lights.json`'s `LIGHT_EXT_STREET_1`…`_9` hang at
     // [x, 8.00, 1.50] for x = -100…100 every 25 m, and the geometry below puts a lantern at
@@ -450,12 +452,6 @@
       "yawDeg": 0.0, "lodGroup": "LODG_STREET_FURNITURE", "impostorFrom": 35.0 },
     { "id": "NB_MAILBOX_12", "asset": "MODEL_MAILBOX", "position": [62.00, 0.00, 12.30],
       "yawDeg": 180.0, "lodGroup": "LODG_STREET_FURNITURE", "impostorFrom": 35.0 },
-    { "id": "NB_CAR_01", "asset": "MODEL_PARKED_CAR", "position": [-19.00, 0.00, 8.40],
-      "yawDeg": 90.0, "lodGroup": "LODG_VEHICLE", "impostorFrom": 55.0 },
-    { "id": "NB_CAR_02", "asset": "MODEL_PARKED_CAR", "position": [11.50, 0.00, 4.60],
-      "yawDeg": 270.0, "lodGroup": "LODG_VEHICLE", "impostorFrom": 55.0 },
-    { "id": "NB_CAR_03", "asset": "MODEL_PARKED_CAR", "position": [28.00, 0.00, 8.40],
-      "yawDeg": 90.0, "lodGroup": "LODG_VEHICLE", "impostorFrom": 55.0 },
     { "id": "NB_BINS_01", "asset": "MODEL_BIN_CLUSTER", "position": [-24.00, 0.00, 2.00],
       "yawDeg": 0.0, "lodGroup": "LODG_STREET_FURNITURE", "impostorFrom": 30.0 },
     { "id": "NB_BINS_02", "asset": "MODEL_BIN_CLUSTER", "position": [20.00, 0.00, 2.00],
@@ -465,8 +461,6 @@
 
     // §10.4's road termination (`HOUSE-00775`): what you SEE at each end of the accessible road.
     // The barrier itself is the hedge across the corridor behind them.
-    { "id": "NB_VAN_ROADEND_E", "asset": "MODEL_DELIVERY_VAN", "position": [33.20, 0.00, 8.60],
-      "yawDeg": 90.0, "lodGroup": "LODG_VEHICLE", "impostorFrom": 55.0 },
     { "id": "NB_SIGN_PRIVATE_W", "asset": "MODEL_STREET_SIGN", "position": [-34.70, 0.00, 1.70],
       "yawDeg": 90.0, "lodGroup": "LODG_STREET_FURNITURE", "impostorFrom": 35.0 }
   ],

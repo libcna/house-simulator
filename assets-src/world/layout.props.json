@@ -5132,6 +5132,71 @@
       "collision": "proxy",
       "material": null,
       "interactable": null
+    },
+    {
+      "id": "PROP_L0_GARAGE_HOUSEHOLD_CAR",
+      "asset": "MODEL_PARKED_CAR_BLUE",
+      "cell": "L0_GARAGE",
+      "position": [14.40, 0.15, -15.65],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "NB_CAR_01",
+      "asset": "MODEL_PARKED_CAR_BLUE",
+      "cell": "EXT_ROAD",
+      "position": [-19.00, 0.00, 8.40],
+      "yawDeg": 90,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "NB_CAR_02",
+      "asset": "MODEL_PARKED_CAR_RED",
+      "cell": "EXT_ROAD",
+      "position": [11.50, 0.00, 4.60],
+      "yawDeg": 270,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "NB_CAR_03",
+      "asset": "MODEL_PARKED_CAR_SILVER",
+      "cell": "EXT_WORLD",
+      "position": [28.00, 0.00, 8.40],
+      "yawDeg": 90,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "NB_VAN_ROADEND_E",
+      "asset": "MODEL_DELIVERY_VAN_WHITE",
+      "cell": "EXT_WORLD",
+      "position": [33.20, 0.00, 8.60],
+      "yawDeg": 90,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
     }
   ]
 }

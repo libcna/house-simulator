@@ -32111,6 +32111,150 @@
       "usedIn": ["B1_WORKSHOP", "L0_GARAGE", "EXT_SHED"]
     },
     {
+      "id": "MODEL_PARKED_CAR_BLUE",
+      "category": "car",
+      "sourceFile": "assets-src/Models/Furniture/Vehicles/estate_blue.glb",
+      "sourceSha256": "32fffa42f40ebaaa447b485dd4f549e73475970b7033e4e1bf44dab3b1d67ce6",
+      "contentName": "Models/Furniture/Vehicles/estate_blue",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Low-detail estate vehicle family, blue tint",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored deterministic box/prism geometry from tools/world/neighbourhood_gen.py for HOUSE-00847. The household car reuses the same estate body as the three street tint variants and adds only the model-owned 12-triangle collision proxy; no third-party mesh or texture is used."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [1.96, 1.5, 4.424],
+        "triangles": {"LOD0": 248},
+        "collision": "MODEL_PARKED_CAR_BLUE_COL"
+      },
+      "materialMap": {
+        "MAT_FURNITURE_PIANO_EBONITE": "MAT_FURNITURE_PIANO_EBONITE",
+        "MAT_KITCHEN_HARDWARE_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "MAT_KITCHEN_OVEN_GLASS": "MAT_KITCHEN_OVEN_GLASS",
+        "MAT_VEHICLE_BODY_BLUE": "MAT_VEHICLE_BODY_BLUE",
+        "MAT_WINDOW_FRAME_WHITE": "MAT_WINDOW_FRAME_WHITE"
+      },
+      "usedIn": ["L0_GARAGE", "EXT_ROAD"]
+    },
+    {
+      "id": "MODEL_PARKED_CAR_RED",
+      "category": "car",
+      "sourceFile": "assets-src/Models/Furniture/Vehicles/estate_red.glb",
+      "sourceSha256": "82bc5258d2957c611eccc24d623292a25747785fbfb7da352e2aeb8d3beb07cd",
+      "contentName": "Models/Furniture/Vehicles/estate_red",
+      "kind": "model",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "generated",
+        "name": "Low-detail estate vehicle family, red tint",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored deterministic geometry from tools/world/neighbourhood_gen.py for HOUSE-00847. This is the shared estate body under a red paint material; no third-party mesh or texture is used."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [1.96, 1.5, 4.424],
+        "triangles": {"LOD0": 248},
+        "collision": "MODEL_PARKED_CAR_RED_COL"
+      },
+      "materialMap": {
+        "MAT_FURNITURE_PIANO_EBONITE": "MAT_FURNITURE_PIANO_EBONITE",
+        "MAT_KITCHEN_HARDWARE_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "MAT_KITCHEN_OVEN_GLASS": "MAT_KITCHEN_OVEN_GLASS",
+        "MAT_VEHICLE_BODY_RED": "MAT_VEHICLE_BODY_RED",
+        "MAT_WINDOW_FRAME_WHITE": "MAT_WINDOW_FRAME_WHITE"
+      },
+      "usedIn": ["EXT_ROAD"]
+    },
+    {
+      "id": "MODEL_PARKED_CAR_SILVER",
+      "category": "car",
+      "sourceFile": "assets-src/Models/Furniture/Vehicles/estate_silver.glb",
+      "sourceSha256": "4e63b6d5ac66f283ac1ace6f3cdd34e600929d0d8548d55247f2d50eb0429430",
+      "contentName": "Models/Furniture/Vehicles/estate_silver",
+      "kind": "model",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "generated",
+        "name": "Low-detail estate vehicle family, silver tint",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored deterministic geometry from tools/world/neighbourhood_gen.py for HOUSE-00847. This is the shared estate body under a silver paint material; no third-party mesh or texture is used."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [1.96, 1.5, 4.424],
+        "triangles": {"LOD0": 248},
+        "collision": "MODEL_PARKED_CAR_SILVER_COL"
+      },
+      "materialMap": {
+        "MAT_FURNITURE_PIANO_EBONITE": "MAT_FURNITURE_PIANO_EBONITE",
+        "MAT_KITCHEN_HARDWARE_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "MAT_KITCHEN_OVEN_GLASS": "MAT_KITCHEN_OVEN_GLASS",
+        "MAT_VEHICLE_BODY_SILVER": "MAT_VEHICLE_BODY_SILVER",
+        "MAT_WINDOW_FRAME_WHITE": "MAT_WINDOW_FRAME_WHITE"
+      },
+      "usedIn": ["EXT_WORLD"]
+    },
+    {
+      "id": "MODEL_DELIVERY_VAN_WHITE",
+      "category": "delivery-van",
+      "sourceFile": "assets-src/Models/Furniture/Vehicles/delivery_van_white.glb",
+      "sourceSha256": "3b73ffc45b5227137cc5f96a3f1e93ac1209c449305cc30278f25432d4adfbdf",
+      "contentName": "Models/Furniture/Vehicles/delivery_van_white",
+      "kind": "model",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "generated",
+        "name": "Low-detail delivery van family, white tint",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored deterministic box/prism geometry from tools/world/neighbourhood_gen.py for HOUSE-00847. The van shares the estate family's wheels, glazing, lamps and construction; no third-party mesh or texture is used."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [2.26, 2.4, 5.424],
+        "triangles": {"LOD0": 212},
+        "collision": "MODEL_DELIVERY_VAN_WHITE_COL"
+      },
+      "materialMap": {
+        "MAT_FURNITURE_PIANO_EBONITE": "MAT_FURNITURE_PIANO_EBONITE",
+        "MAT_KITCHEN_HARDWARE_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "MAT_KITCHEN_OVEN_GLASS": "MAT_KITCHEN_OVEN_GLASS",
+        "MAT_VEHICLE_BODY_WHITE": "MAT_VEHICLE_BODY_WHITE",
+        "MAT_WINDOW_FRAME_WHITE": "MAT_WINDOW_FRAME_WHITE"
+      },
+      "usedIn": ["EXT_WORLD"]
+    },
+    {
       "id": "VIDEO_SMOKE_CLIP",
       "category": "fixture",
       "sourceFile": "assets-src/Media/Video/smoke_clip.ogv",

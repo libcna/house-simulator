@@ -156,9 +156,9 @@ TEST(NeighbourhoodRoundTripTests, TheIndicesAndTheBoxesSurvive)
 
 TEST(NeighbourhoodRoundTripTests, TheMeshIsInItsOwnSpaceAndNotTheWorlds)
 {
-    // The whole reason this format is not `chunks.bin`: §11.4 places 122 instances of 34 assets,
-    // and a mesh with the placement baked in can be neither shared nor swapped for another LOD.
-    // A fixture house sitting at x 90 would say the writer had baked a position.
+    // The whole reason this format is not `chunks.bin`: the retained street places 118 instances of 34
+    // assets, and a mesh with the placement baked in can be neither shared nor swapped for another LOD. A
+    // fixture house sitting at x 90 would say the writer had baked a position.
     const NeighbourhoodLibrary library = Load();
     for (const NeighbourAsset& asset : library.assets)
     {

@@ -2948,6 +2948,57 @@
       "footstepSurface": "glass", "audioAbsorption": 0.02,
       "effectTierS": "Basic", "effectTierE": "Emissive"
     },
+    // HOUSE-00847: one low-detail estate/van family, varied only by these four baked paint tints.
+    // Identical stock-XNA parameters let the existing authoring-time tint resolver reuse them;
+    // no per-instance shader path or vehicle runtime system is introduced.
+    {
+      "id": "MAT_VEHICLE_BODY_BLUE", "class": "paint",
+      "albedo": "Textures/Materials/paint_white_fine_albedo",
+      "normal": "Textures/Materials/paint_white_fine_normal", "lightmapChannel": 0,
+      "tint": [0.18, 0.34, 0.58], "specularColor": [0.34, 0.40, 0.52],
+      "specularPower": 56.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.10, "specularBoost": 1.5, "powerBoost": 1.4 },
+      "snowResponse": { "coverable": true, "slopeLimitDeg": 30.0 },
+      "footstepSurface": "metal", "audioAbsorption": 0.03,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    {
+      "id": "MAT_VEHICLE_BODY_RED", "class": "paint",
+      "albedo": "Textures/Materials/paint_white_fine_albedo",
+      "normal": "Textures/Materials/paint_white_fine_normal", "lightmapChannel": 0,
+      "tint": [0.58, 0.16, 0.11], "specularColor": [0.34, 0.40, 0.52],
+      "specularPower": 56.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.10, "specularBoost": 1.5, "powerBoost": 1.4 },
+      "snowResponse": { "coverable": true, "slopeLimitDeg": 30.0 },
+      "footstepSurface": "metal", "audioAbsorption": 0.03,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    {
+      "id": "MAT_VEHICLE_BODY_SILVER", "class": "paint",
+      "albedo": "Textures/Materials/paint_white_fine_albedo",
+      "normal": "Textures/Materials/paint_white_fine_normal", "lightmapChannel": 0,
+      "tint": [0.62, 0.65, 0.69], "specularColor": [0.34, 0.40, 0.52],
+      "specularPower": 56.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.10, "specularBoost": 1.5, "powerBoost": 1.4 },
+      "snowResponse": { "coverable": true, "slopeLimitDeg": 30.0 },
+      "footstepSurface": "metal", "audioAbsorption": 0.03,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    {
+      "id": "MAT_VEHICLE_BODY_WHITE", "class": "paint",
+      "albedo": "Textures/Materials/paint_white_fine_albedo",
+      "normal": "Textures/Materials/paint_white_fine_normal", "lightmapChannel": 0,
+      "tint": [0.88, 0.89, 0.86], "specularColor": [0.34, 0.40, 0.52],
+      "specularPower": 56.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.10, "specularBoost": 1.5, "powerBoost": 1.4 },
+      "snowResponse": { "coverable": true, "slopeLimitDeg": 30.0 },
+      "footstepSurface": "metal", "audioAbsorption": 0.03,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
     {
       "id": "MAT_SOIL_GARDEN", "class": "soil",
       "albedo": "Textures/Materials/soil_garden_albedo",

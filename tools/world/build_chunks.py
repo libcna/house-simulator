@@ -110,14 +110,17 @@ MAX_PRIMITIVES_REACH = 0xFFFF
 #: Every maximum below is the measured count on 2026-09-10, not a round number with room in it.
 #: §71's frame budget is what may tighten or restructure them later.
 CHUNK_BUDGET_EXCEPTIONS = {
-    "EXT_ROAD": (18,
+    "EXT_ROAD": (24,
                  "not a room: the residency key for the property's outdoors. The carriageway's "
                  "own six ground and marking materials, the ornamental fence and gate that stand "
                  "on it, and -- since `HOUSE-00494` -- the house's two roofs and its chimney, "
                  "which have to load with the exterior rather than with the neighbourhood. "
                  "HOUSE-00772 adds AlphaTest foliage, BasicEffect bark and measured Reach-cap "
                  "splits for the street trees and the far road-edge hedge. HOUSE-00945 adds one "
-                 "mulch role where the front terrain tile contains the driveway-border bed"),
+                 "mulch role where the front terrain tile contains the driveway-border bed. "
+                 "HOUSE-00847 adds the shared estate family's measured body, tyre, glazing, "
+                 "steel and lamp roles through the ordinary static-prop path; the two road-cell "
+                 "placements retain bounded sub-ranges"),
     "EXT_FRONTYARD_E": (15,
                          "HOUSE-00772's planted east lawn: its existing ground/building finishes "
                          "plus measured source-exact bark, branch, leaf, flower and grass atlases. "
@@ -160,11 +163,13 @@ CHUNK_BUDGET_EXCEPTIONS = {
                   "HOUSE-03342 adds five shared kit roles for its bounded secondary-tier "
                   "workbench, storage and garden-tool composition; repeated tools and pots "
                   "batch together, with no vertex or Reach-cap split"),
-    "EXT_WORLD": (24,
+    "EXT_WORLD": (30,
                    "the neighbourhood ring is not a room. HOUSE-00772's two rows of street trees "
                    "and the 2.1 m road-edge hedge add source-exact bark/cutout foliage with "
                    "measured vertex/Reach-cap splits; every placement remains a separately "
-                   "bounded sub-range in the exterior BVH"),
+                   "bounded sub-range in the exterior BVH. HOUSE-00847 adds the same bounded "
+                   "vehicle family for the east parked estate and delivery van through the "
+                   "existing static-prop path"),
     "L0_GARAGE": (11,
                   "a garage is a room and stays one (`HOUSE-00487`). The four receiver classes, "
                   "plus the stair to the loft, glazing, trim and an outside window-frame chunk; "
@@ -474,6 +479,16 @@ for concrete_stair_cell in ("B1_STAIR", "L0_GARAGE"):
     CHUNK_BUDGET_EXCEPTIONS[concrete_stair_cell] = (
         previous_limit + 1,
         previous_reason + "; HOUSE-03266 adds one measured metal stair-detail role")
+
+# `HOUSE-00847`: the household estate is the garage's C3 anchor. Its blue body, dark tyre,
+# glazing and steel roles are four truthful low-detail finishes; the lamp role reuses the garage's
+# existing white exterior-frame batch. The car is 248 triangles and introduces no cap split.
+_garage_limit, _garage_reason = CHUNK_BUDGET_EXCEPTIONS["L0_GARAGE"]
+CHUNK_BUDGET_EXCEPTIONS["L0_GARAGE"] = (
+    _garage_limit + 4,
+    _garage_reason + "; HOUSE-00847 adds four measured body, tyre, glazing and steel finish "
+                      "groups for the shared low-detail household estate; its lamp finish is "
+                      "already resident and there is no vertex or Reach-cap split")
 
 # `HOUSE-03265`: the north store already owns a weather-facing dormer-frame role, while the west
 # store starts at the six-chunk room target. Their shared roof-bay insulation finish raises each

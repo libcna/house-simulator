@@ -5224,3 +5224,22 @@ regression.
 Rule R2 ties `Z-GAR` and `Z-L3` at one accessible cell below target and selects the least-recently
 worked `Z-GAR` (Round 108 versus Round 136). `HOUSE-00998` depends on the car family, so next is
 `HOUSE-00847`, building and placing that bounded family for the garage and street.
+
+## Round 139 — bounded vehicle family
+
+Commit: `HOUSE-00847` working tree (`2026-09-24`). The local, Git-ignored
+[`garage`](captures/house-00847-garage-r139) set covers the household estate in the right bay and
+the retained loft access; the [`street`](captures/house-00847-street-r139) set contains the fixed
+`Z-STR` view plus direct runtime views of all three estate tints and the delivery van.
+
+The family is deliberately low-detail: one five-door estate body reused under blue, red and silver
+paint, plus one boxy white van that shares its wheels, glazing, lamps and construction. Runtime
+inspection shows every body grounded and recognizable with separated tyre/glass silhouettes and
+no clipping, floating pieces or z-fighting. The fixed street view reads the red parked estate
+through the retained vegetation band; direct views prove the other variants without pretending
+that the existing hedge is transparent. The garage pair proves the blue household car remains
+clear of the ladder and guard. Final normal-light balance remains M5 work.
+
+Rule R2 keeps `Z-GAR` selected: its household-car prerequisite is now complete, while its main bay
+and loft still need their bounded tier recipes. Next: `HOUSE-00998`, furnishing `L0_GARAGE` and
+`L0_GARAGE_LOFT` from the existing kit.

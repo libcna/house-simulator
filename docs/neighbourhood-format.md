@@ -21,7 +21,7 @@ writes it. This file is what reads it: one mesh per asset the layout names, in a
 prop's position and yaw are in the geometry or they are nowhere"*. That is right for a prop, which
 stands in one place for ever. It is wrong for a neighbour, three times over:
 
-* §11.4 places **122 instances of 34 assets**. Baking the placement writes the same house out once
+* The retained neighbourhood places **118 instances of 34 assets**. Baking the placement writes the same house out once
   per instance — twenty-four houses where there are nineteen meshes, thirty-six impostor cards
   where there are four.
 * §26.1 selects an instance's LOD **by its projected height** and §26.2's impostor takes over at
@@ -42,10 +42,11 @@ a house stands, and two answers disagree eventually. A reader resolves a row by 
 against this file's asset table; `NeighbourhoodLibrary::UnresolvedAssets` is that lookup done for
 every row at once, so a row naming a mesh nobody drew is a named error and not an invisible gap.
 
-**§11.4's vehicles.** `MODEL_PARKED_CAR` and `MODEL_DELIVERY_VAN` are in the same array and are
-`HOUSE-00847`'s to deliver. `neighbourhood_gen.is_ours` is the test, and the writer's selftest
-asserts those two are the only rows it does not hold — a statement about who owes what, which is
-different from "the file is complete".
+**Vehicles.** `HOUSE-00847` deliberately keeps its generated estate/van family out of this
+render-only instance library. All five placements are ordinary static props in
+`layout.props.json`, so the already-shipped chunk renderer draws them and their model-owned `_COL`
+nodes enter the ordinary collision build. The future optional neighbourhood renderer therefore
+cannot be a hidden prerequisite for the MUST vehicle family.
 
 **Textures.** An asset names its materials and `layout.materials.json` names a material's albedo.
 Duplicating the path would be a second place for it to be wrong.

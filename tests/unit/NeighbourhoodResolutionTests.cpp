@@ -74,7 +74,7 @@ TEST(NeighbourhoodResolutionTests, TheDeployedBinaryReads)
     }
 }
 
-TEST(NeighbourhoodResolutionTests, EveryRowExceptTheVehiclesResolvesToAMesh)
+TEST(NeighbourhoodResolutionTests, EveryRowResolvesToAMesh)
 {
     if (!ContentIsBuilt())
     {
@@ -85,11 +85,9 @@ TEST(NeighbourhoodResolutionTests, EveryRowExceptTheVehiclesResolvesToAMesh)
     ASSERT_FALSE(rows.empty());
 
     const std::vector<std::string> missing = UnresolvedAssets(library, rows);
-    // §11.4's vehicles are `HOUSE-00847`'s to deliver and share this array. They are named here
-    // rather than filtered out, so the day that task lands this list becomes empty and the test
-    // says so instead of quietly continuing to accept a gap.
-    const std::vector<std::string> expected{"MODEL_DELIVERY_VAN", "MODEL_PARKED_CAR"};
-    EXPECT_EQ(missing, expected) << "a row naming a mesh nobody drew is a house that is simply not there";
+    EXPECT_TRUE(missing.empty())
+        << "a row naming a mesh nobody drew is a street object that is simply not there; first: "
+        << (missing.empty() ? std::string() : missing.front());
 }
 
 TEST(NeighbourhoodResolutionTests, EveryMeshTheBinaryHoldsIsActuallyPlaced)

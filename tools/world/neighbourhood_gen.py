@@ -39,9 +39,11 @@ Offline tooling: not runtime code, not subject to the XNA-only rule.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import math
 import struct
 import sys
+import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -622,6 +624,108 @@ FURNITURE_KINDS = (STREET_LIGHT_ASSET, UTILITY_POLE_ASSET, UTILITY_POLE_LAMP_ASS
                    UTILITY_SPAN_ASSET, "MODEL_STREET_SIGN", "MODEL_MAILBOX", "MODEL_BIN_CLUSTER",
                    "MODEL_BASKETBALL_HOOP")
 
+#: `HOUSE-00847`'s bounded vehicle family.  The three estate ids are one mesh with three body
+#: finishes, not three bespoke cars; the van shares the wheels, glazing, lamps and construction.
+#: Asset-level colour variants keep the existing neighbourhood instance format unchanged.
+ESTATE_ASSETS = {
+    "MODEL_PARKED_CAR_BLUE": "MAT_VEHICLE_BODY_BLUE",
+    "MODEL_PARKED_CAR_RED": "MAT_VEHICLE_BODY_RED",
+    "MODEL_PARKED_CAR_SILVER": "MAT_VEHICLE_BODY_SILVER",
+}
+VAN_ASSETS = {"MODEL_DELIVERY_VAN_WHITE": "MAT_VEHICLE_BODY_WHITE"}
+VEHICLE_KINDS = tuple(sorted((*ESTATE_ASSETS, *VAN_ASSETS)))
+VEHICLE_SOURCE_DIR = REPO / "assets-src" / "Models" / "Furniture" / "Vehicles"
+VEHICLE_SOURCES = {
+    "MODEL_PARKED_CAR_BLUE": VEHICLE_SOURCE_DIR / "estate_blue.glb",
+    "MODEL_PARKED_CAR_RED": VEHICLE_SOURCE_DIR / "estate_red.glb",
+    "MODEL_PARKED_CAR_SILVER": VEHICLE_SOURCE_DIR / "estate_silver.glb",
+    "MODEL_DELIVERY_VAN_WHITE": VEHICLE_SOURCE_DIR / "delivery_van_white.glb",
+}
+
+
+def _wheel_faces(z: float, half_width: float, radius: float = 0.34, sides: int = 10) -> list:
+    """One deliberately low-poly wheel, its axle along X."""
+    tyre = "MAT_FURNITURE_PIANO_EBONITE"
+    metal = "MAT_KITCHEN_HARDWARE_STEEL"
+    faces = []
+    for side in range(sides):
+        a0 = 2.0 * math.pi * side / sides
+        a1 = 2.0 * math.pi * (side + 1) / sides
+        y0, z0 = radius + radius * math.cos(a0), z + radius * math.sin(a0)
+        y1, z1 = radius + radius * math.cos(a1), z + radius * math.sin(a1)
+        faces.append(([(-half_width, y0, z0), (half_width, y0, z0),
+                       (half_width, y1, z1), (-half_width, y1, z1)],
+                      (0.0, math.cos((a0 + a1) * 0.5), math.sin((a0 + a1) * 0.5)), tyre))
+    ring = [(radius + radius * math.cos(2.0 * math.pi * side / sides),
+             z + radius * math.sin(2.0 * math.pi * side / sides)) for side in range(sides)]
+    for x, normal in ((-half_width, (-1.0, 0.0, 0.0)), (half_width, (1.0, 0.0, 0.0))):
+        for side in range(sides):
+            y0, z0 = ring[side]
+            y1, z1 = ring[(side + 1) % sides]
+            corners = [(x, radius, z), (x, y0, z0), (x, y1, z1)]
+            if x < 0.0:
+                corners[1], corners[2] = corners[2], corners[1]
+            faces.append((corners, normal, metal))
+    return faces
+
+
+def _estate_faces(body: str) -> list:
+    """The 1.8 x 4.4 m estate body: massing, glazing, wheels and lamps only."""
+    glass = "MAT_KITCHEN_OVEN_GLASS"
+    metal = "MAT_KITCHEN_HARDWARE_STEEL"
+    light = "MAT_WINDOW_FRAME_WHITE"
+    dark = "MAT_FURNITURE_PIANO_EBONITE"
+    faces = box((-0.90, 0.34, -2.20), (0.90, 0.88, 2.20), body)
+    faces += box((-0.76, 0.88, -1.42), (0.76, 1.42, 1.34), body)
+    # Large dark cards break up the deliberately simple cabin into front/rear/side glazing.
+    for x in (-0.766, 0.766):
+        faces += box((x - 0.008, 0.98, -1.14), (x + 0.008, 1.34, -0.12), glass)
+        faces += box((x - 0.008, 0.98, 0.02), (x + 0.008, 1.34, 1.08), glass)
+    faces += box((-0.65, 0.98, -1.428), (0.65, 1.34, -1.412), glass)
+    faces += box((-0.65, 0.98, 1.332), (0.65, 1.34, 1.348), glass)
+    # Rails distinguish the estate silhouette from a saloon without close-detail modelling.
+    for x in (-0.56, 0.56):
+        faces += box((x - 0.025, 1.42, -1.10), (x + 0.025, 1.48, 1.10), metal)
+    for z in (-1.48, 1.48):
+        faces += _wheel_faces(z, 0.98)
+    faces += box((-0.72, 0.54, -2.212), (-0.18, 0.72, -2.196), light)
+    faces += box((0.18, 0.54, -2.212), (0.72, 0.72, -2.196), light)
+    faces += box((-0.72, 0.54, 2.196), (-0.18, 0.72, 2.212), dark)
+    faces += box((0.18, 0.54, 2.196), (0.72, 0.72, 2.212), dark)
+    return faces
+
+
+def _van_faces(body: str) -> list:
+    """The same family's 2.1 x 5.4 m delivery body, kept intentionally boxy."""
+    glass = "MAT_KITCHEN_OVEN_GLASS"
+    metal = "MAT_KITCHEN_HARDWARE_STEEL"
+    light = "MAT_WINDOW_FRAME_WHITE"
+    dark = "MAT_FURNITURE_PIANO_EBONITE"
+    faces = box((-1.05, 0.38, -2.70), (1.05, 1.02, 2.70), body)
+    faces += box((-0.98, 1.02, -1.62), (0.98, 2.40, 2.55), body)
+    faces += box((-0.99, 1.38, -1.58), (0.99, 2.20, -0.72), glass)
+    for x in (-0.986, 0.986):
+        faces += box((x - 0.008, 1.36, -1.48), (x + 0.008, 2.18, -0.68), glass)
+    # Twin rear doors and a waist strip make the cargo body readable at street distance.
+    faces += box((-0.035, 0.72, 2.552), (0.035, 2.28, 2.568), metal)
+    faces += box((-0.99, 1.00, 2.552), (0.99, 1.08, 2.568), metal)
+    for z in (-1.72, 1.72):
+        faces += _wheel_faces(z, 1.13, radius=0.38)
+    faces += box((-0.82, 0.62, -2.712), (-0.24, 0.84, -2.696), light)
+    faces += box((0.24, 0.62, -2.712), (0.82, 0.84, -2.696), light)
+    faces += box((-0.82, 0.62, 2.696), (-0.24, 0.84, 2.712), dark)
+    faces += box((0.24, 0.62, 2.696), (0.82, 0.84, 2.712), dark)
+    return faces
+
+
+def vehicle_faces(asset: str) -> list:
+    """A vehicle variant from the one estate/van family named by @p asset."""
+    if asset in ESTATE_ASSETS:
+        return _estate_faces(ESTATE_ASSETS[asset])
+    if asset in VAN_ASSETS:
+        return _van_faces(VAN_ASSETS[asset])
+    raise layout_io.LayoutError(f"{asset!r} is not one of the vehicle family: {list(VEHICLE_KINDS)}")
+
 
 def _lantern_faces() -> list:
     """The outreach arm and the lantern, from a post whose base is the origin.
@@ -772,7 +876,7 @@ def impostor_of(asset: str) -> str:
     return kind
 
 
-def _document(name: str, faces: list) -> tuple[dict, bytes]:
+def _document(name: str, faces: list, collision_size=None) -> tuple[dict, bytes]:
     """@p faces as one glTF document, one primitive per material.
 
     `read_shell_geometry`'s shape (`HOUSE-00473`), so `build_chunks.py` reads a neighbour the way
@@ -781,7 +885,6 @@ def _document(name: str, faces: list) -> tuple[dict, bytes]:
     blob = bytearray()
     accessors: list[dict] = []
     views: list[dict] = []
-    primitives: list[dict] = []
     materials: list[dict] = []
 
     def store(values: list[tuple], kind: str) -> int:
@@ -796,49 +899,61 @@ def _document(name: str, faces: list) -> tuple[dict, bytes]:
                           "max": [max(v[i] for v in values) for i in range(count)]})
         return len(accessors) - 1
 
-    by_material: dict[str, list] = {}
-    for corners, normal, material in faces:
-        by_material.setdefault(material, []).append((corners, normal))
+    def mesh_of(mesh_faces: list) -> dict:
+        primitives: list[dict] = []
+        by_material: dict[str, list] = {}
+        for corners, normal, material in mesh_faces:
+            by_material.setdefault(material, []).append((corners, normal))
 
-    for material, group in sorted(by_material.items()):
-        positions: list[tuple[float, float, float]] = []
-        normals: list[tuple[float, float, float]] = []
-        uvs: list[tuple[float, float]] = []
-        indices: list[int] = []
-        for corners, normal in group:
-            base = len(positions)
-            for point in corners:
-                positions.append(point)
-                normals.append(normal)
-                # World metres, like the fence's and the ground's: cladding is the same size on
-                # every house, which is what makes a row of them a street.
-                uvs.append((point[0] + point[2], point[1]))
-            indices += ([base, base + 1, base + 2] if len(corners) == 3
-                        else [base, base + 1, base + 2, base, base + 2, base + 3])
-        position = store(positions, "VEC3")
-        normal_at = store(normals, "VEC3")
-        uv0 = store(uvs, "VEC2")
-        offset = len(blob)
-        for index in indices:
-            blob.extend(struct.pack("<I", index))
-        views.append({"buffer": 0, "byteOffset": offset, "byteLength": len(indices) * 4})
-        accessors.append({"bufferView": len(views) - 1, "componentType": 5125,
-                          "count": len(indices), "type": "SCALAR"})
-        primitives.append({"attributes": {"POSITION": position, "NORMAL": normal_at,
-                                          "TEXCOORD_0": uv0},
-                           "indices": len(accessors) - 1, "material": len(materials), "mode": 4})
-        materials.append({"name": material,
-                          "extras": {"surfaceClass": "exterior",
-                                     # §18.3 bakes the ROOMS; a neighbour is lit by the sun and
-                                     # the sky, and there is no inside of it to bake.
-                                     "lightmapReceiver": False}})
+        for material, group in sorted(by_material.items()):
+            positions: list[tuple[float, float, float]] = []
+            normals: list[tuple[float, float, float]] = []
+            uvs: list[tuple[float, float]] = []
+            indices: list[int] = []
+            for corners, normal in group:
+                base = len(positions)
+                for point in corners:
+                    positions.append(point)
+                    normals.append(normal)
+                    # World metres, like the fence's and the ground's: cladding is the same size
+                    # on every house, which makes a row of them a street.
+                    uvs.append((point[0] + point[2], point[1]))
+                indices += ([base, base + 1, base + 2] if len(corners) == 3
+                            else [base, base + 1, base + 2, base, base + 2, base + 3])
+            position = store(positions, "VEC3")
+            normal_at = store(normals, "VEC3")
+            uv0 = store(uvs, "VEC2")
+            offset = len(blob)
+            for index in indices:
+                blob.extend(struct.pack("<I", index))
+            views.append({"buffer": 0, "byteOffset": offset, "byteLength": len(indices) * 4})
+            accessors.append({"bufferView": len(views) - 1, "componentType": 5125,
+                              "count": len(indices), "type": "SCALAR"})
+            primitives.append({"attributes": {"POSITION": position, "NORMAL": normal_at,
+                                              "TEXCOORD_0": uv0},
+                               "indices": len(accessors) - 1, "material": len(materials),
+                               "mode": 4})
+            materials.append({"name": material,
+                              "extras": {"surfaceClass": "exterior",
+                                         # §18.3 bakes ROOMS; a neighbour has no inside to bake.
+                                         "lightmapReceiver": False}})
+        return {"name": name, "primitives": primitives}
+
+    meshes = [mesh_of(faces)]
+    nodes = [{"name": name, "mesh": 0}]
+    if collision_size is not None:
+        width, height, depth = collision_size
+        collision = box((-width / 2.0, 0.0, -depth / 2.0),
+                        (width / 2.0, height, depth / 2.0), "VEHICLE_COLLISION")
+        meshes.append(dict(mesh_of(collision), name=f"{name}_COL"))
+        nodes.append({"name": f"{name}_COL", "mesh": 1})
 
     document = {
         "asset": {"version": "2.0", "generator": "cna-house neighbourhood_gen.py"},
         "scene": 0,
-        "scenes": [{"nodes": [0]}],
-        "nodes": [{"name": name, "mesh": 0}],
-        "meshes": [{"name": name, "primitives": primitives}],
+        "scenes": [{"nodes": list(range(len(nodes)))}],
+        "nodes": nodes,
+        "meshes": meshes,
         "materials": materials,
         "accessors": accessors,
         "bufferViews": views,
@@ -850,9 +965,10 @@ def _document(name: str, faces: list) -> tuple[dict, bytes]:
 def is_ours(asset: str) -> bool:
     """Whether @p asset is one THIS tool draws.
 
-    The neighbourhood also names §11.4's vehicles (`HOUSE-00847`), which are not this grammar's;
-    the test is used both to pick what to build and to decide what a stale file in the output
-    directory is, so a file another tool wrote is never swept away by this one.
+    `HOUSE-00847` authors its bounded vehicle sources beside this grammar because they reuse the
+    same deterministic boxes and material grouping. Their placements use the existing static-prop
+    chunk path, so they do not belong to the neighbourhood instance library. The test is also the
+    stale-file ownership boundary.
     """
     return (asset.startswith((HOUSE_PREFIX, IMPOSTOR_PREFIX, HORIZON_PREFIX))
             or asset in FURNITURE_KINDS or asset == WATER_TOWER_ASSET)
@@ -1215,11 +1331,28 @@ def selftest() -> int:
         #    a lamp under it, at the point the LIGHT is at and not near it.
         furniture = [row for row in rows if is_ours(str(row.get("asset", "")))
                      and str(row["asset"]) in FURNITURE_KINDS]
-        # §11.4's vehicles share the `neighbourhood` array and are `HOUSE-00847`'s, not this
-        # grammar's. `is_ours` is what keeps this tool's stale sweep from deleting them.
+        # Every row in this array belongs to this library. `HOUSE-00847` deliberately uses the
+        # ordinary static-prop path for its four visible/collidable street vehicles instead.
         theirs = sorted({str(row["asset"]) for row in rows if not is_ours(str(row["asset"]))})
-        require(theirs == ["MODEL_DELIVERY_VAN", "MODEL_PARKED_CAR"],
-                f"the vehicles in the array are somebody else's to draw ({theirs})")
+        require(not theirs, f"every neighbourhood row now has generated geometry ({theirs})")
+        prop_rows = layout_io.rows(layout_io.load_layout(SOURCE, kinds=["props"]), "props")
+        vehicles = [row for row in prop_rows if str(row.get("asset", "")) in VEHICLE_KINDS]
+        require(len(vehicles) == 5,
+                f"one household estate, three parked estates and one delivery van are placed "
+                f"({len(vehicles)})")
+        street = [row for row in vehicles if row.get("cell") in {"EXT_ROAD", "EXT_WORLD"}]
+        require(len(street) == 4 and {row["asset"] for row in street} == set(VEHICLE_KINDS),
+                "the street has all three tint variants and the delivery van")
+        vehicle_materials = {asset: {material for _c, _n, material in vehicle_faces(asset)}
+                             for asset in VEHICLE_KINDS}
+        require({ESTATE_ASSETS[row["asset"]] for row in street
+                 if row["asset"] in ESTATE_ASSETS} == set(ESTATE_ASSETS.values()),
+                f"the repeated estate body is visibly varied by tint "
+                f"({sorted(ESTATE_ASSETS.values())})")
+        require(all("MAT_FURNITURE_PIANO_EBONITE" in materials
+                    and "MAT_KITCHEN_OVEN_GLASS" in materials
+                    for materials in vehicle_materials.values()),
+                "every vehicle has wheels and glazing, not only an anonymous body box")
         lanterns = sorted(lantern_world(row["position"], float(row.get("yawDeg", 0.0)))
                           for row in furniture if carries_lantern(str(row["asset"])))
         street_lights = sorted(tuple(float(c) for c in light["position"])
@@ -1292,8 +1425,7 @@ def selftest() -> int:
                 f"{wire_height(SPAN_LENGTH / 2.0):.2f} m in the middle")
 
         # §11.4's carriageway is 7.0 m between kerbs at Z +3.2 and +10.2. A bin in it is a bin a
-        # car drives through; the vehicles that ARE parked there are `HOUSE-00847`'s and are not
-        # this grammar's.
+        # car drives through; parked vehicles are intentionally excluded from this furniture list.
         in_road = [row["id"] for row in furniture if 3.2 < row["position"][2] < 10.2]
         require(not in_road, f"no street furniture stands in the carriageway ({in_road})")
 
@@ -1416,6 +1548,26 @@ def selftest() -> int:
         require(len(blob) > 0 and document["buffers"][0]["byteLength"] == len(blob),
                 "the buffer's declared length is the buffer")
 
+        # Each committed family member is a byte-reproducible visible model plus one enclosing
+        # `_COL` proxy for the existing static-prop collision path.
+        with tempfile.TemporaryDirectory(prefix="house00847-vehicle-", dir="/tmp") as scratch:
+            for asset, source in sorted(VEHICLE_SOURCES.items()):
+                size = (1.8, 1.5, 4.4) if asset in ESTATE_ASSETS else (2.1, 2.4, 5.4)
+                source_document, source_blob = _document(
+                    asset, vehicle_faces(asset), collision_size=size)
+                require([node["name"] for node in source_document["nodes"]]
+                        == [asset, asset + "_COL"],
+                        f"{asset} has one visible node and one `_COL` proxy")
+                generated = Path(scratch) / source.name
+                gltf_io.write_glb(generated, source_document, source_blob)
+                if source.is_file():
+                    actual = hashlib.sha256(source.read_bytes()).hexdigest()
+                    expected = hashlib.sha256(generated.read_bytes()).hexdigest()
+                    require(actual == expected,
+                            f"{source.name} is byte-reproducible ({actual[:16]})")
+                else:
+                    require(False, f"vehicle source exists at {source.relative_to(REPO)}")
+
     if failures:
         print(f"\nneighbourhood_gen: {len(failures)} claim(s) FAILED")
         return 1
@@ -1429,6 +1581,8 @@ def main() -> int:
     parser.add_argument("--output", type=Path, default=OUTPUT)
     parser.add_argument("--report", action="store_true")
     parser.add_argument("--selftest", action="store_true")
+    parser.add_argument("--sync-vehicle-sources", action="store_true",
+                        help="write the four collision-bearing vehicle variants into assets-src")
     args = parser.parse_args()
 
     if args.selftest:
@@ -1443,6 +1597,12 @@ def main() -> int:
     for asset, faces in sorted(built.items()):
         document, blob = _document(asset, faces)
         gltf_io.write_glb(args.output / f"{asset}.glb", document, blob)
+    if args.sync_vehicle_sources:
+        VEHICLE_SOURCE_DIR.mkdir(parents=True, exist_ok=True)
+        for asset, source in sorted(VEHICLE_SOURCES.items()):
+            size = (1.8, 1.5, 4.4) if asset in ESTATE_ASSETS else (2.1, 2.4, 5.4)
+            document, blob = _document(asset, vehicle_faces(asset), collision_size=size)
+            gltf_io.write_glb(source, document, blob)
     # A variant the layout no longer names is a file nothing draws, and a stale tree is how
     # `HOUSE-00785` had every fence in the world one task out of date. Only this tool's own
     # output is removed, and only from its own directory.

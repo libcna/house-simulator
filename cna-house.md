@@ -7042,6 +7042,7 @@ Run by `validate_world.py` over the layout and by `scale_check.py` over every as
 | Dog withers height | 0.50–0.70 m |
 | Cat shoulder height | 0.20–0.32 m |
 | Car length / width / height | 4.2–5.2 / 1.7–2.0 / 1.4–1.9 m |
+| Delivery van length / width / height | 4.8–7.5 / 1.8–2.6 / 1.9–3.0 m |
 | Tree height, sapling / young / mature | 3.40–3.60 / 6.85–7.15 / 11.75–12.25 m |
 | Shrub / flower / grass-card height | 0.45–1.85 / 0.20–0.50 / 0.20–0.60 m |
 | Player capsule clearance through every portal | ≥ 0.62 m width, ≥ 1.95 m height (or the portal is marked `crouch`) |

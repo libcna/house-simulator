@@ -154,6 +154,9 @@ CATEGORIES: dict[str, list[tuple[str, float, float, str]]] = {
     "car": [("z", 4.2, 5.2, "car length"),
             ("x", 1.7, 2.0, "car width"),
             ("y", 1.4, 1.9, "car height")],
+    "delivery-van": [("z", 4.8, 7.5, "delivery van length"),
+                     ("x", 1.8, 2.6, "delivery van width"),
+                     ("y", 1.9, 3.0, "delivery van height")],
     # HOUSE-00297's age bands are deliberately disjoint. A mature tree accidentally registered
     # as a sapling is a layout collision bug as well as an art bug, and the three rows make that
     # mistake measurable instead of relying on the filename.

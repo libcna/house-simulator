@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **99 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 131 / 155 / 190 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G2 passed; M4 dressing is in progress.** Next: build and place the bounded car family in `HOUSE-00847` |
+| Active plan | **98 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 131 / 154 / 189 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G2 passed; M4 dressing is in progress.** Next: furnish the garage and its loft in `HOUSE-00998` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -273,7 +273,7 @@ non-accessible appliance interiors.
 
 ## Zone scoreboard
 
-**As of 2026-09-24 (Round 138).** Levels from Round 103's whole-property day/night review
+**As of 2026-09-24 (Round 139).** Levels from Round 103's whole-property day/night review
 (`HOUSE-03203`), Round 104's traversal sweep and subsequent completed zone work; main and hero
 targets re-counted after `HOUSE-03206`'s tier change. Update per rule R10.
 
@@ -286,14 +286,14 @@ proved all 90 intended-accessible cells and the tight-space traversal. G1 clears
 | `Z-B1` | **C2** (C3 dressing 14 / 14 cells) | 0 / 1 | 0 / 1 | Round 132; all fourteen cells have static tiered dressing and clear routes (`HOUSE-01020`–`01025`) | Final day/night readability belongs to M5 |
 | `Z-L0M` | **C2** (dressing of C3 done; lighting S2 open) | 0 / 3 | 0 / 5 | Round 103 plus 102 prior rounds. Primary furniture in all 9 cells (`HOUSE-01037`–`01076`) | S2: Basic-lit furniture much darker than the baked receivers (piano, sofas); service-room night depth. **Goes last by R4** |
 | `Z-L0S` | **C2** (C3 dressing 8 / 8 cells) | — | — | Round 138; all eight service cells have complete tiered compositions and clear routes (`HOUSE-00991`, `HOUSE-00994`–`00996`) | Final day/night readability belongs to M5 |
-| `Z-GAR` | **C2** | 0 / 1 | — | Round 108; finished envelope/sectional, fixed loft ladder and complete timber guard (`HOUSE-03262`) | Furnishing and night readability belong to M4/M5 |
+| `Z-GAR` | **C2** (C3 anchor placed) | 0 / 1 | — | Round 139; the grounded household estate anchors the main bay (`HOUSE-00847`) | Remaining garage/loft furnishing and night readability belong to M4/M5 |
 | `Z-L1` | **C2** (C3 dressing 20 / 20 cells) | 0 / 1 | — | Round 128; every accessible cell has its tiered essential composition and clear route (`HOUSE-00999`–`01007`) | Final day/night readability belongs to M5 |
 | `Z-L2` | **C3** (C3 dressing 15 / 15 cells) | — | 0 / 1 | Round 137; every accessible cell has its tiered essential composition and clear route (`HOUSE-01009`–`01015`) | Final day/night readability belongs to M5 |
 | `Z-L3` | **C2** (C3 dressing 4 / 5 cells) | 0 / 1 | — | Round 136; the finished room and west, north and south stores have complete tiered compositions and clear routes (`HOUSE-01016`, `HOUSE-01017`) | The east service store's furnishing and all final night readability belong to M4/M5 |
 | `Z-STAIR` | **C3** (C3 dressing 6 / 6 cells) | 0 / 3 | — | Round 136; all 8 flights retain complete joinery, all 6 stair cells have their tiered landing dressing, and `L3_STAIR_HEAD` also carries bounded long-term storage clear of its opening (`HOUSE-01017`, `HOUSE-01020`, `HOUSE-03343`) | Final day/night readability belongs to M5 |
 | `Z-EXF` | **C3** (C4-level content in place) | — | 0 / 4 | Round 103 day/night/overcast; ≈ 25 facade, roof, entry and approach tasks; property bot walk (`HOUSE-00782`) | No zone-specific S2 |
 | `Z-EXR` | **C2** (C3 dressing 7 / 7 cells) | 0 / 2 | — | Round 134; all rear/side cells have their bounded terrace, garden, orchard, shed and service-side compositions (`HOUSE-03342`) | Final day/night readability belongs to M5 |
-| `Z-STR` | **C2** (C3 partial) | — | — | Round 103; N1–N60, street furniture, barriers (`HOUSE-00841`–`00849`, `00856`, `00857`) | S3: plain road foreground and repeated vegetation band; logged for M11 |
+| `Z-STR` | **C2** (C3 scenery dressing done) | — | — | Round 139; N1–N60, street furniture, barriers and the three parked estates plus delivery van (`HOUSE-00841`–`00849`, `00856`, `00857`) | S3: plain road foreground and repeated vegetation band; logged for M11 |
 
 Objective inputs, generated by `python3 tools/world/zone_scoreboard.py`. `Lit accessible` counts
 cells with at least one authored light group; it does not claim that their baseline lighting is
@@ -304,12 +304,12 @@ visually complete. C4 and C5 are target counts from the tier classification, not
 | `Z-B1` | 14 | 14 | 54 | 3.86 | 0 | 14 / 14 | 4 | 1 | 1 |
 | `Z-L0M` | 9 | 9 | 106 | 11.78 | 0 | 9 / 9 | 23 | 3 | 5 |
 | `Z-L0S` | 8 | 8 | 24 | 3.00 | 0 | 8 / 8 | 2 | 0 | 0 |
-| `Z-GAR` | 2 | 1 | 0 | 0.00 | 1 | 1 / 1 | 2 | 1 | 0 |
+| `Z-GAR` | 2 | 1 | 1 | 1.00 | 0 | 1 / 1 | 2 | 1 | 0 |
 | `Z-L1` | 20 | 20 | 70 | 3.50 | 0 | 20 / 20 | 6 | 1 | 0 |
 | `Z-L2` | 16 | 15 | 62 | 4.13 | 0 | 15 / 15 | 6 | 0 | 1 |
 | `Z-L3` | 5 | 5 | 24 | 4.80 | 1 | 5 / 5 | 4 | 1 | 0 |
 | `Z-STAIR` | 6 | 6 | 14 | 2.33 | 0 | 6 / 6 | 9 | 3 | 0 |
-| `Z-EXF` | 5 | 5 | 11 | 2.20 | 1 | 5 / 5 | 4 | 0 | 4 |
+| `Z-EXF` | 5 | 5 | 13 | 2.60 | 0 | 5 / 5 | 4 | 0 | 4 |
 | `Z-EXR` | 7 | 7 | 32 | 4.57 | 0 | 3 / 7 | 7 | 2 | 0 |
 | `Z-STR` | 2 | 0 | 0 | — | 0 | 0 / 0 | 1 | 0 | 0 |
 
@@ -898,10 +898,11 @@ groups on its `dep:` line.
       dep: HOUSE-00764, HOUSE-03280, HOUSE-03303 · sys: world · plat: TOOL · pri: MUST · zone: Z-EXF · adv: G3, D3 · est: 0.75
       accept: all static props with collision proxies
 
-- [ ] HOUSE-00847 — One low-detail car family, placed: the household car, three parked neighbour cars and a delivery van
+- [x] HOUSE-00847 — One low-detail car family, placed: the household car, three parked neighbour cars and a delivery van
       dep: HOUSE-00293, HOUSE-03280, HOUSE-03303 · sys: world · plat: TOOL · pri: MUST · zone: Z-STR, Z-GAR · adv: G3, D3 · est: 1
       accept: one car family (an estate and a van body), cleanly licensed or generated, varied by tint; static props with collision proxies; readable at street distance, and in the garage at C3
       trace: absorbs the cancelled `HOUSE-01035`/`01036` (the household car)
+      note: (2026-09-24) Round 139 adds one project-authored deterministic low-detail vehicle family: a 248-triangle estate body reused under blue, red and silver paint tints, and a 212-triangle boxy white delivery van sharing its wheels, glazing, lamps and construction. All four committed GLBs are byte-reproducible, clean under the glTF validator and carry one enclosing 12-triangle `_COL` proxy. One blue estate anchors the garage and the three street estates plus van retain the four permanent `NB_*` placement ids. The street placements were moved from the not-yet-rendered neighbourhood instance array into the existing static-prop/chunk path, so this MUST task has no hidden dependency on the optional neighbourhood renderer and adds no runtime system. All 402 props pass exact placement/support/opening/door-sweep/route validation; all 15 authored-world rules, the 90-cell grand tour, collision/neighbourhood round trips, row resolution and direct deployment comparison pass. The rebuilt world measures 1,110 chunks / 2,948,439 vertices / 77,755,368 packed bytes, with 8 16-bit splits, 15 Reach splits and no 32-bit chunk. Fixed garage and street views plus direct runtime views of all four variants show grounded, separated, recognizable silhouettes without clipping, floating geometry or z-fighting. The wider inside-geometry probe currently reports nine unrelated previously placed room props (first `B1_HOBBY south`) after the full content refresh; none is in `Z-GAR` or `Z-STR`, and the grand tour remains clear
 
 ### Checkpoint
 
@@ -1881,7 +1882,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M1 Whole-property traversal | 4 | 9 | **0** | 0 | **0** | 0 | — |
 | M2 Architectural completion | 8 | 18 | **0** | 0 | **0** | 0 | — |
 | M3 The reusable furnishing kit | 16 | 33 | **0** | 0 | **0** | 0 | — |
-| M4 Dressing everywhere | 40 | 48.75 | **5** | 4 | **4.75** | 6.25 | R-D +3 |
+| M4 Dressing everywhere | 40 | 48.75 | **4** | 3.25 | **3.75** | 5.25 | R-D +3 |
 | M5 Baseline lighting everywhere | 12 | 24.5 | **10** | 16.75 | **19.75** | 21.75 | — |
 | M6 Main cells and hero areas | 20 | 32.5 | **15** | 16.75 | **19.75** | 21.75 | — |
 | M7 A compact environment | 13 | 21 | **8** | 11.25 | **13.25** | 14.5 | — |
@@ -1894,11 +1895,11 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **99** | **131.25** | **155** | **189.5** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **98** | **130.5** | **154** | **188.5** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-90.5 h. Adding the 71.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+91.5 h. Adding the 72.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
 260.75 h, 19.25 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
