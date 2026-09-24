@@ -4893,3 +4893,24 @@ M11's bounded defect pass, not a regression or reason to expand M4.
 
 Rule R2 now selects `Z-L2`, with eleven accessible cells still below target versus ten in `Z-L1`
 and nine in `Z-B1`. Next: `HOUSE-01011`, furnishing `L2_GAMES` and `L2_SITTING`.
+
+## Round 122 — second-floor leisure-room dressing
+
+Commit: `HOUSE-01011` working tree (`2026-09-24`). The local, Git-ignored
+[`clear-day`](captures/house-01011-day) and
+[`forced-light`](captures/house-01011-lit) sets retain all six fixed `Z-L2` controls. Supplemental
+forced-light [`reciprocal`](captures/house-01011-detail) views inspect the games and sitting
+compositions from their clear east-side standing points; forced light is placement evidence, not
+a claim that M5's normal day/night balance is complete.
+
+Both secondary rooms stop at their bounded cumulative recipes. The games room reuses the acquired
+pool table, two dining chairs and a side table; the sitting room reuses two dining chairs, a side
+table, floor lamp and rug. The fixed and reciprocal views show grounded, separated furniture,
+clear doors and windows, and no clipping, floating geometry or z-fighting. One reciprocal sitting
+view also exposes existing exterior foliage cards beyond the glazing; this is a `Z-L2` S3 item for
+M11's bounded defect pass, not a furnishing regression. Arcade machines, a dartboard, jigsaw,
+record player and extra clutter remain outside the reduced secondary-room requirement.
+
+Rule R2 now selects `Z-L1`, with ten accessible cells still below target versus nine each in
+`Z-L2` and `Z-B1`. Next: `HOUSE-01006`, furnishing `L1_BATH2`, `L1_BATH3`, `L1_WC3` and
+`L1_WC4`.

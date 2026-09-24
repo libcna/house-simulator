@@ -1,3 +1,33 @@
+# Second-floor leisure-room dressing handoff — 2026-09-24 (`HOUSE-01011`)
+
+Both secondary leisure recipes are complete with nine ordinary static rows from the existing
+capped kit. The games room reuses the acquired pool table, two dining chairs and a side table. The
+sitting room reuses two dining chairs, a side table, floor lamp and rug. Solid pieces retain their
+existing proxies; the lamp and thin floor textile are intentionally non-colliding. No new asset,
+material family, runtime system or optional arcade/decorative content was added.
+
+All 224 production props pass exact support, overlap, opening, door-sweep and 0.70 m route
+validation. A first wider inside-geometry run found one new inaccessible pocket between the games
+room's west wall and seating group; moving the group into the clear bay removed it without
+weakening a test. The final result is back to the two older `L1_LANDING west` bodies beside
+`HOUSE-00999`'s bench, with no L2 failure. The 90-cell grand tour and `world-content-current` pass.
+Both rooms build at exactly 14/14 chunks, with no vertex or Reach-cap split.
+
+The clear-day and forced-light `Z-L2` controls plus reciprocal forced-light room views were
+inspected at full resolution. Furniture is grounded and separated, both room purposes read at a
+glance, and doors/windows remain clear with no clipping, floating geometry or z-fighting. Existing
+exterior foliage cards visible beyond the sitting-room glazing are logged as `Z-L2` S3 for M11's
+bounded defect pass. Normal-light balance remains M5 scope.
+
+The remaining forecast is 170.5 realistic / 208.25 pessimistic hours. With 55.75 task-hours spent
+since the final reduction, the R14 projection is 264 h, 16 h below the hard ceiling. Rule R2 now
+selects `Z-L1`, which has ten accessible cells still below target versus nine each in `Z-L2` and
+`Z-B1`. The exact next unblocked MUST task is `HOUSE-01006`, furnishing `L1_BATH2`, `L1_BATH3`,
+`L1_WC3` and `L1_WC4`. Every compilation/test invocation must remain at no more than four workers
+and pinned to CPUs 4,5,7,9; strict-XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # First-floor single-bedroom dressing handoff — 2026-09-24 (`HOUSE-01003`)
 
 Both secondary `R-BED-SINGLE` recipes are complete with ten ordinary static rows from the existing

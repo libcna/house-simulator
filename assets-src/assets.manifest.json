@@ -1079,7 +1079,9 @@
       },
       "usedIn": [
         "L0_FAMILY",
-        "L2_LIBRARY"
+        "L2_LIBRARY",
+        "L2_GAMES",
+        "L2_SITTING"
       ]
     },
     {
@@ -2189,7 +2191,9 @@
       "usedIn": [
         "L0_DINING",
         "L1_BED3",
-        "L1_BED4"
+        "L1_BED4",
+        "L2_GAMES",
+        "L2_SITTING"
       ]
     },
     {
@@ -2368,7 +2372,8 @@
       },
       "usedIn": [
         "L0_LIVING",
-        "L0_FAMILY"
+        "L0_FAMILY",
+        "L2_SITTING"
       ]
     },
     {
@@ -2872,7 +2877,8 @@
         "L0_FAMILY",
         "L0_DINING",
         "L1_MASTER_BED",
-        "L2_LIBRARY"
+        "L2_LIBRARY",
+        "L2_SITTING"
       ]
     },
     {
