@@ -4137,31 +4137,43 @@ namespace
         EXPECT_EQ(distinct.size(), 138U)
             << "§13's Lights column, the exterior groups and the neighbours' porches";
 
-        // `HOUSE-03403` closes the first C3 lighting band with existing fixture families. Every
-        // authored source in these 25 basement, attic and stair cells must remain attached to a
-        // physical prop and an exact independently switchable material slot.
-        const std::set<cnahouse::util::Id> baselineFixtureCells{
-            Intern("B1_STAIR"),       Intern("B1_HALL"),       Intern("B1_MECHANICAL"),
-            Intern("B1_ELECTRICAL"),  Intern("B1_UTILITY"),    Intern("B1_CINEMA"),
-            Intern("B1_WC7"),         Intern("B1_GYM"),        Intern("B1_WORKSHOP"),
-            Intern("B1_STOR1"),       Intern("B1_STOR2"),      Intern("B1_HOBBY"),
-            Intern("B1_CELLAR"),      Intern("B1_LAUNDRY2"),   Intern("B1_UNDERSTAIR"),
-            Intern("L0_STAIR_MAIN"),  Intern("L1_STAIR_MAIN"), Intern("L2_STAIR_MAIN"),
-            Intern("L2_STAIR_ATTIC"), Intern("L3_STAIR_HEAD"), Intern("L3_ROOM"),
-            Intern("L3_STORE_W"),     Intern("L3_STORE_E"),    Intern("L3_STORE_N"),
-            Intern("L3_STORE_S")};
-        std::size_t physicalBaselineSources = 0U;
+        // `HOUSE-03403` and `HOUSE-03404` close the first two C3 lighting bands with existing
+        // fixture families. Every authored source in these 60 basement, upper-floor, attic and
+        // stair cells must remain attached to a physical prop and an exact independently
+        // switchable material slot.
+        const std::set<cnahouse::util::Id> c3FixtureCells{
+            Intern("B1_STAIR"),         Intern("B1_HALL"),         Intern("B1_MECHANICAL"),
+            Intern("B1_ELECTRICAL"),    Intern("B1_UTILITY"),      Intern("B1_CINEMA"),
+            Intern("B1_WC7"),           Intern("B1_GYM"),          Intern("B1_WORKSHOP"),
+            Intern("B1_STOR1"),         Intern("B1_STOR2"),        Intern("B1_HOBBY"),
+            Intern("B1_CELLAR"),        Intern("B1_LAUNDRY2"),     Intern("B1_UNDERSTAIR"),
+            Intern("L0_STAIR_MAIN"),    Intern("L1_STAIR_MAIN"),   Intern("L2_STAIR_MAIN"),
+            Intern("L2_STAIR_ATTIC"),   Intern("L3_STAIR_HEAD"),   Intern("L3_ROOM"),
+            Intern("L3_STORE_W"),       Intern("L3_STORE_E"),      Intern("L3_STORE_N"),
+            Intern("L3_STORE_S"),       Intern("L1_LANDING"),      Intern("L1_HALL"),
+            Intern("L1_HALL_W"),        Intern("L1_MASTER_BED"),   Intern("L1_MASTER_BATH"),
+            Intern("L1_MASTER_CLOSET"), Intern("L1_BED2"),         Intern("L1_BED3"),
+            Intern("L1_BED4"),          Intern("L1_BED5"),         Intern("L1_BATH2"),
+            Intern("L1_BATH3"),         Intern("L1_WC3"),          Intern("L1_WC4"),
+            Intern("L1_LINEN"),         Intern("L1_STOR"),         Intern("L1_CLOSET_2"),
+            Intern("L1_CLOSET_3"),      Intern("L1_BALCONY_REAR"), Intern("L1_BALCONY_FRONT"),
+            Intern("L2_LANDING"),       Intern("L2_HALL"),         Intern("L2_HALL_W"),
+            Intern("L2_LIBRARY"),       Intern("L2_GAMES"),        Intern("L2_SITTING"),
+            Intern("L2_BED6"),          Intern("L2_BED7"),         Intern("L2_BATH4"),
+            Intern("L2_BATH5"),         Intern("L2_WC5"),          Intern("L2_WC6"),
+            Intern("L2_CLOSET_4"),      Intern("L2_LINEN2"),       Intern("L2_STOR2")};
+        std::size_t physicalC3Sources = 0U;
         for (const world::Light& light : contents.lights)
         {
-            if (!baselineFixtureCells.contains(light.cell))
+            if (!c3FixtureCells.contains(light.cell))
             {
                 continue;
             }
-            ++physicalBaselineSources;
+            ++physicalC3Sources;
             EXPECT_TRUE(light.fixtureProp.IsValid()) << light.id.Value();
             EXPECT_FALSE(light.emissiveMaterialSlot.empty()) << light.id.Value();
         }
-        EXPECT_EQ(physicalBaselineSources, 46U);
+        EXPECT_EQ(physicalC3Sources, 158U);
 
         // §15.7 rule 6's index, asserted by the other implementation: a cell's `lightGroups` is
         // exactly the groups its own lights belong to, and §28.1 walks it once per frame.

@@ -2860,7 +2860,7 @@
     },
     {
       "id": "PROP_L2_SITTING_FLOOR_LAMP",
-      "asset": "MODEL_FURNITURE_FLOOR_LAMP",
+      "asset": "MODEL_FAMILY_FLOOR_LAMP_LIT",
       "cell": "L2_SITTING",
       "position": [2.70, 6.55, -26.55],
       "yawDeg": 0,
@@ -5998,6 +5998,777 @@
       "lodGroup": null,
       "collision": "proxy",
       "material": null,
+      "interactable": null
+    }
+,
+    {
+      "id": "PROP_L1_LANDING_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_LANDING",
+      "position": [0, 6.18, -16.97], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_LANDING_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_LANDING",
+      "position": [0, 6.18, -15.63], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_LANDING_SEAT_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_DESK_LAMP", "cell": "L1_LANDING",
+      "position": [-1.98, 4.136, -16.3], "yawDeg": 90, "scale": 0.85,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_HALL_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_HALL",
+      "position": [0, 6.18, -20.77], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_HALL_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_HALL",
+      "position": [0, 6.18, -19.53], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_HALL_ART_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L1_HALL",
+      "position": [-0.8, 6.05, -20.77], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_HALL_ART_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L1_HALL",
+      "position": [0.8, 6.05, -19.53], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_HALL_W_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_HALL_W",
+      "position": [-5.95, 6.18, -20.03], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_HALL_W_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_HALL_W",
+      "position": [-5.95, 6.18, -19.45], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_HALL_W_MAIN_3_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_HALL_W",
+      "position": [-5.95, 6.18, -18.88], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_HALL_W_NIGHT_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L1_HALL_W",
+      "position": [-6.7, 6.05, -19.83], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_HALL_W_NIGHT_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L1_HALL_W",
+      "position": [-6.7, 6.05, -19.07], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_MASTER_BED_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_MASTER_BED",
+      "position": [-3.93, 6.18, -25.4], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_MASTER_BED_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_MASTER_BED",
+      "position": [-0.87, 6.18, -25.4], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_MASTER_BED_MAIN_3_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_MASTER_BED",
+      "position": [-3.93, 6.18, -23.7], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_MASTER_BED_MAIN_4_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_MASTER_BED",
+      "position": [-0.87, 6.18, -23.7], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_MASTER_BED_BEDSIDE_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_DESK_LAMP", "cell": "L1_MASTER_BED",
+      "position": [-5.12, 4.23, -22.36], "yawDeg": 180, "scale": 0.85,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_MASTER_BED_BEDSIDE_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_DESK_LAMP", "cell": "L1_MASTER_BED",
+      "position": [-2.68, 4.23, -22.36], "yawDeg": 180, "scale": 0.85,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_MASTER_BED_DRESSER_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_DESK_LAMP", "cell": "L1_MASTER_BED",
+      "position": [-6.71, 4.47, -26.18], "yawDeg": 270, "scale": 0.85,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_MASTER_BED_SEATING_1_FIXTURE",
+      "asset": "MODEL_FAMILY_FLOOR_LAMP_LIT", "cell": "L1_MASTER_BED",
+      "position": [0.2, 3.65, -25.7], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_MASTER_BATH_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_MASTER_BATH",
+      "position": [-11.05, 6.18, -25.83], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_MASTER_BATH_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_MASTER_BATH",
+      "position": [-11.8, 6.05, -24.55], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_MASTER_BATH_MAIN_3_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_MASTER_BATH",
+      "position": [-11.05, 6.18, -23.27], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_MASTER_BATH_VANITY_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L1_MASTER_BATH",
+      "position": [-11.05, 6.1, -25.4], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_MASTER_BATH_VANITY_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L1_MASTER_BATH",
+      "position": [-11.05, 6.1, -23.7], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_MASTER_BATH_BATH_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L1_MASTER_BATH",
+      "position": [-11.05, 6.18, -24.55], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_MASTER_CLOSET_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L1_MASTER_CLOSET",
+      "position": [-8.2, 6.1, -25.4], "yawDeg": 90, "scale": 0.55,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_MASTER_CLOSET_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L1_MASTER_CLOSET",
+      "position": [-8.2, 6.1, -23.7], "yawDeg": 90, "scale": 0.55,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_MASTER_CLOSET_MIRROR_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L1_MASTER_CLOSET",
+      "position": [-8.2, 6.1, -24.55], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BED2_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_BED2",
+      "position": [5.45, 6.18, -26.05], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BED2_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_BED2",
+      "position": [5.45, 6.18, -25], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BED2_MAIN_3_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_BED2",
+      "position": [5.45, 6.18, -23.95], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BED2_DESK_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_DESK_LAMP", "cell": "L1_BED2",
+      "position": [8.4, 4.47, -26.4], "yawDeg": 270, "scale": 0.85,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_LINEN_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L1_LINEN",
+      "position": [3.55, 6.18, -22.45], "yawDeg": 0, "scale": 0.4,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_STOR_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L1_STOR",
+      "position": [6.8, 6.18, -22.45], "yawDeg": 0, "scale": 0.4,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BED3_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_BED3",
+      "position": [-10.45, 6.18, -16.97], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BED3_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_BED3",
+      "position": [-10.45, 6.18, -15.63], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BED3_BEDSIDE_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_DESK_LAMP", "cell": "L1_BED3",
+      "position": [-10.55, 4.23, -17], "yawDeg": 0, "scale": 0.85,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BED4_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_BED4",
+      "position": [-5.2, 6.18, -17.3], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BED4_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_BED4",
+      "position": [-5.2, 6.18, -16.3], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BED4_MAIN_3_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_BED4",
+      "position": [-5.2, 6.18, -15.3], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BED4_DESK_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_DESK_LAMP", "cell": "L1_BED4",
+      "position": [-3.25, 4.395, -17.9], "yawDeg": 0, "scale": 0.85,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BATH2_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_BATH2",
+      "position": [-11.2, 6.18, -20.77], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BATH2_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_BATH2",
+      "position": [-11.2, 6.18, -19.53], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BATH2_VANITY_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L1_BATH2",
+      "position": [-11.2, 6.1, -20.15], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_WC3_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_WC3",
+      "position": [-5.7, 6.18, -21.3], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_CLOSET_2_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L1_CLOSET_2",
+      "position": [-8.35, 6.18, -21.3], "yawDeg": 0, "scale": 0.4,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_CLOSET_3_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L1_CLOSET_3",
+      "position": [-3.3, 6.18, -21.3], "yawDeg": 0, "scale": 0.4,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BED5_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_BED5",
+      "position": [6.8, 6.18, -16.97], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BED5_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_BED5",
+      "position": [6.8, 6.18, -15.63], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BED5_BEDSIDE_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_DESK_LAMP", "cell": "L1_BED5",
+      "position": [5.3, 4.23, -16], "yawDeg": 180, "scale": 0.85,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BATH3_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_BATH3",
+      "position": [6.8, 6.18, -20.77], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BATH3_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_BATH3",
+      "position": [6.8, 6.18, -19.53], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BATH3_VANITY_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L1_BATH3",
+      "position": [6.8, 6.1, -20.15], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_WC4_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L1_WC4",
+      "position": [3.55, 6.18, -21.1], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BALCONY_REAR_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_PORCH_LANTERN", "cell": "L1_BALCONY_REAR",
+      "position": [-4, 5.8, -27.1], "yawDeg": 180, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BALCONY_REAR_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_PORCH_LANTERN", "cell": "L1_BALCONY_REAR",
+      "position": [0, 5.8, -27.1], "yawDeg": 180, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BALCONY_REAR_STRING_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L1_BALCONY_REAR",
+      "position": [-3.57, 6.8, -30.43], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BALCONY_REAR_STRING_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L1_BALCONY_REAR",
+      "position": [-0.43, 6.8, -30.43], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BALCONY_REAR_STRING_3_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L1_BALCONY_REAR",
+      "position": [-3.57, 6.8, -28.77], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L1_BALCONY_REAR_STRING_4_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L1_BALCONY_REAR",
+      "position": [-0.43, 6.8, -28.77], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_LANDING_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_LANDING",
+      "position": [0, 8.98, -16.97], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_LANDING_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_LANDING",
+      "position": [0, 8.98, -15.63], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_LANDING_JULIET_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L2_LANDING",
+      "position": [0.8, 8.85, -16.3], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_HALL_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_HALL",
+      "position": [0, 8.98, -20.77], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_HALL_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_HALL",
+      "position": [0, 8.98, -19.53], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_HALL_NIGHT_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L2_HALL",
+      "position": [-0.8, 8.85, -20.77], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_HALL_NIGHT_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L2_HALL",
+      "position": [0.8, 8.85, -19.53], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_HALL_W_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_HALL_W",
+      "position": [-5.95, 8.98, -20.03], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_HALL_W_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_HALL_W",
+      "position": [-5.95, 8.98, -19.45], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_HALL_W_MAIN_3_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_HALL_W",
+      "position": [-5.95, 8.98, -18.88], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_HALL_W_ART_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L2_HALL_W",
+      "position": [-5.95, 8.85, -19.83], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_HALL_W_ART_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L2_HALL_W",
+      "position": [-5.95, 8.85, -19.07], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_LIBRARY_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_LIBRARY",
+      "position": [-5.2, 8.98, -17.3], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_LIBRARY_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_LIBRARY",
+      "position": [-5.2, 8.98, -16.3], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_LIBRARY_MAIN_3_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_LIBRARY",
+      "position": [-5.2, 8.98, -15.3], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_LIBRARY_SHELVES_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L2_LIBRARY",
+      "position": [-6.2, 8.9, -16.97], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_LIBRARY_SHELVES_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L2_LIBRARY",
+      "position": [-4.2, 8.9, -16.97], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_LIBRARY_SHELVES_3_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L2_LIBRARY",
+      "position": [-6.2, 8.9, -15.63], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_LIBRARY_SHELVES_4_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L2_LIBRARY",
+      "position": [-4.2, 8.9, -15.63], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_LIBRARY_READING_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_DESK_LAMP", "cell": "L2_LIBRARY",
+      "position": [-6.15, 7.1445, -15.45], "yawDeg": 0, "scale": 0.85,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_LIBRARY_READING_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_DESK_LAMP", "cell": "L2_LIBRARY",
+      "position": [-2.58, 7.295, -15.05], "yawDeg": 90, "scale": 0.85,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_BED6_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_BED6",
+      "position": [-10.45, 8.98, -16.97], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_BED6_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_BED6",
+      "position": [-10.45, 8.98, -15.63], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_BED6_SEWING_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_DESK_LAMP", "cell": "L2_BED6",
+      "position": [-11.75, 7.295, -14.68], "yawDeg": 180, "scale": 0.85,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_BATH4_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_BATH4",
+      "position": [-11.2, 8.98, -20.77], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_BATH4_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_BATH4",
+      "position": [-11.2, 8.98, -19.53], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_BATH4_VANITY_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L2_BATH4",
+      "position": [-11.2, 8.9, -20.15], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_CLOSET_4_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L2_CLOSET_4",
+      "position": [-8.35, 8.98, -21.3], "yawDeg": 0, "scale": 0.4,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_WC5_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_WC5",
+      "position": [-5.7, 8.98, -21.3], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_LINEN2_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L2_LINEN2",
+      "position": [-3.3, 8.98, -21.3], "yawDeg": 0, "scale": 0.4,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_BED7_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_BED7",
+      "position": [-9.85, 8.98, -25.83], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_BED7_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_BED7",
+      "position": [-9.85, 8.98, -24.55], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_BED7_MAIN_3_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_BED7",
+      "position": [-9.85, 8.98, -23.27], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_BED7_BEDSIDE_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_DESK_LAMP", "cell": "L2_BED7",
+      "position": [-9.55, 7.13, -25.95], "yawDeg": 180, "scale": 0.85,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_GAMES_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_GAMES",
+      "position": [-3.93, 8.98, -25.4], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_GAMES_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_GAMES",
+      "position": [-0.87, 8.98, -25.4], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_GAMES_MAIN_3_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_GAMES",
+      "position": [-3.93, 8.98, -23.7], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_GAMES_MAIN_4_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_GAMES",
+      "position": [-0.87, 8.98, -23.7], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_GAMES_TABLE_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_PENDANT", "cell": "L2_GAMES",
+      "position": [-2.4, 8.15, -25.4], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_GAMES_TABLE_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_PENDANT", "cell": "L2_GAMES",
+      "position": [-2.4, 8.15, -23.7], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_GAMES_ARCADE_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L2_GAMES",
+      "position": [-2.4, 8.9, -24.55], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_SITTING_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_SITTING",
+      "position": [5.45, 8.98, -26.05], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_SITTING_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_SITTING",
+      "position": [5.45, 8.98, -25], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_SITTING_MAIN_3_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_SITTING",
+      "position": [5.45, 8.98, -23.95], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_STOR2_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L2_STOR2",
+      "position": [5.45, 8.98, -22.45], "yawDeg": 0, "scale": 0.4,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_BATH5_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_BATH5",
+      "position": [6.8, 8.98, -20.77], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_BATH5_MAIN_2_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_BATH5",
+      "position": [6.8, 8.98, -19.53], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_BATH5_VANITY_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK", "cell": "L2_BATH5",
+      "position": [6.8, 8.9, -20.15], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L2_WC6_MAIN_1_FIXTURE",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_WC6",
+      "position": [3.55, 8.98, -21.1], "yawDeg": 0, "scale": 1,
+      "static": true, "lodGroup": null, "collision": "none", "material": null,
       "interactable": null
     }
   ]

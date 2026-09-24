@@ -60,9 +60,11 @@ SOURCES = (
         "DeskLamp_COL", "desk-lamp", (0.200026, 0.598535, 0.346816), 736,
         {"black": "MAT_FURNITURE_PIANO_EBONITE",
          "metal": "MAT_KITCHEN_HARDWARE_STEEL",
-         "sage": "MAT_PAINT_SAGE",
+         "sage": "MAT_DOOR_PAINTED",
          "linen": "MAT_FIXTURE_EMISSIVE_WARM"},
-        ("B1_HOBBY", "L0_OFFICE", "L1_BED3", "L1_BED4", "L2_LIBRARY", "L3_ROOM"),
+        ("B1_HOBBY", "L0_OFFICE", "L1_BED2", "L1_BED3", "L1_BED4", "L1_BED5",
+         "L1_LANDING", "L1_MASTER_BED", "L2_BED6", "L2_BED7", "L2_LIBRARY",
+         "L3_ROOM"),
     ),
     Source(
         "MODEL_FIXTURE_UTILITY_CEILING", "house-00981-utility-light.glb",
@@ -77,8 +79,9 @@ SOURCES = (
         ("B1_CELLAR", "B1_ELECTRICAL", "B1_GYM", "B1_HALL", "B1_HOBBY",
          "B1_LAUNDRY2", "B1_MECHANICAL", "B1_STAIR", "B1_STOR1", "B1_STOR2",
          "B1_UNDERSTAIR", "B1_UTILITY", "B1_WORKSHOP", "EXT_SHED", "L0_GARAGE",
-         "L2_STAIR_ATTIC", "L3_STAIR_HEAD", "L3_STORE_E", "L3_STORE_N", "L3_STORE_S",
-         "L3_STORE_W"),
+         "L1_CLOSET_2", "L1_CLOSET_3", "L1_LINEN", "L1_MASTER_CLOSET", "L1_STOR",
+         "L2_CLOSET_4", "L2_LINEN2", "L2_STAIR_ATTIC", "L2_STOR2", "L3_STAIR_HEAD",
+         "L3_STORE_E", "L3_STORE_N", "L3_STORE_S", "L3_STORE_W"),
     ),
 )
 

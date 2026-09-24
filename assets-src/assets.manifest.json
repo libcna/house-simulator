@@ -1578,7 +1578,9 @@
         "FAMILY_PIPING": "MAT_FAMILY_ART_CANVAS"
       },
       "usedIn": [
-        "L0_FAMILY"
+        "L0_FAMILY",
+        "L1_MASTER_BED",
+        "L2_SITTING"
       ]
     },
     {
@@ -2075,14 +2077,20 @@
       "materialMap": {
         "black": "MAT_FURNITURE_PIANO_EBONITE",
         "metal": "MAT_KITCHEN_HARDWARE_STEEL",
-        "sage": "MAT_PAINT_SAGE",
+        "sage": "MAT_DOOR_PAINTED",
         "linen": "MAT_FIXTURE_EMISSIVE_WARM"
       },
       "usedIn": [
         "B1_HOBBY",
         "L0_OFFICE",
+        "L1_BED2",
         "L1_BED3",
         "L1_BED4",
+        "L1_BED5",
+        "L1_LANDING",
+        "L1_MASTER_BED",
+        "L2_BED6",
+        "L2_BED7",
         "L2_LIBRARY",
         "L3_ROOM"
       ]
@@ -2259,8 +2267,33 @@
         "L0_PORCH",
         "L0_STAIR_MAIN",
         "L0_SUNROOM",
+        "L1_BATH2",
+        "L1_BATH3",
+        "L1_BED2",
+        "L1_BED3",
+        "L1_BED4",
+        "L1_BED5",
+        "L1_HALL",
+        "L1_HALL_W",
+        "L1_LANDING",
+        "L1_MASTER_BATH",
+        "L1_MASTER_BED",
         "L1_STAIR_MAIN",
+        "L1_WC3",
+        "L1_WC4",
+        "L2_BATH4",
+        "L2_BATH5",
+        "L2_BED6",
+        "L2_BED7",
+        "L2_GAMES",
+        "L2_HALL",
+        "L2_HALL_W",
+        "L2_LANDING",
+        "L2_LIBRARY",
+        "L2_SITTING",
         "L2_STAIR_MAIN",
+        "L2_WC5",
+        "L2_WC6",
         "L3_ROOM"
       ]
     },
@@ -2341,7 +2374,8 @@
         "PendantShade": "MAT_FIXTURE_EMISSIVE_WARM"
       },
       "usedIn": [
-        "L0_KITCHEN"
+        "L0_KITCHEN",
+        "L2_GAMES"
       ]
     },
     {
@@ -2386,7 +2420,21 @@
         "B1_WORKSHOP",
         "L0_KITCHEN",
         "L0_STAIR_MAIN",
-        "L0_SUNROOM"
+        "L0_SUNROOM",
+        "L1_BALCONY_REAR",
+        "L1_BATH2",
+        "L1_BATH3",
+        "L1_HALL",
+        "L1_HALL_W",
+        "L1_MASTER_BATH",
+        "L1_MASTER_CLOSET",
+        "L2_BATH4",
+        "L2_BATH5",
+        "L2_GAMES",
+        "L2_HALL",
+        "L2_HALL_W",
+        "L2_LANDING",
+        "L2_LIBRARY"
       ]
     },
     {
@@ -2508,7 +2556,8 @@
       "usedIn": [
         "EXT_DRIVEWAY",
         "L0_PORCH",
-        "L1_BALCONY_FRONT"
+        "L1_BALCONY_FRONT",
+        "L1_BALCONY_REAR"
       ]
     },
     {
@@ -2569,7 +2618,15 @@
         "B1_WORKSHOP",
         "EXT_SHED",
         "L0_GARAGE",
+        "L1_CLOSET_2",
+        "L1_CLOSET_3",
+        "L1_LINEN",
+        "L1_MASTER_CLOSET",
+        "L1_STOR",
+        "L2_CLOSET_4",
+        "L2_LINEN2",
         "L2_STAIR_ATTIC",
+        "L2_STOR2",
         "L3_STAIR_HEAD",
         "L3_STORE_E",
         "L3_STORE_N",
@@ -25701,7 +25758,7 @@
       "id": "TEXTURE_L1_BED2_LM_LG_L1_BED2_DESK",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED2_LM_LG_L1_BED2_DESK.png",
-      "sourceSha256": "82e0031554fe5837c6ed98659e7e32fb3559e4326106a8b70e0f9db849256875",
+      "sourceSha256": "b6a9fda51bf09d4e35e1ddbf9872c7f7fb6876c0bebb217bfce62302546b312a",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25809,7 +25866,7 @@
       "id": "TEXTURE_L1_BED3_LM_LG_L1_BED3_BEDSIDE",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED3_LM_LG_L1_BED3_BEDSIDE.png",
-      "sourceSha256": "157d3f3997af214faddd35bb0f2b1768382d69657ff58ea6bb52d74f600e4288",
+      "sourceSha256": "f02c09f35d58f1fa1f6ea14cf3006661684cd3fb7b77ca7b6a808870ad31b19b",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25917,7 +25974,7 @@
       "id": "TEXTURE_L1_BED4_LM_LG_L1_BED4_DESK",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED4_LM_LG_L1_BED4_DESK.png",
-      "sourceSha256": "55881acd5d8eab5dd85bc2dd09c3eca7d46c31420b691064dc9113c9b254f0d6",
+      "sourceSha256": "04dc203c2370d32f4933df91c65f37129c48ce6f38a76169750fdd5c687851c2",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26025,7 +26082,7 @@
       "id": "TEXTURE_L1_BED5_LM_LG_L1_BED5_BEDSIDE",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED5_LM_LG_L1_BED5_BEDSIDE.png",
-      "sourceSha256": "a1310357078a9636752e050a540f776fffbf7d6f89d3e60f46f677167db3b15f",
+      "sourceSha256": "d0854c2de8e597e5d960299241723a9c078b0f92a60eca69fdd2f46d75ba2a3f",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26214,7 +26271,7 @@
       "id": "TEXTURE_L1_HALL_LM_LG_L1_HALL_ART",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_HALL_LM_LG_L1_HALL_ART.png",
-      "sourceSha256": "90df1cbc060a70e340be34c4e0b26bf4f5db7ff5e9f9bb5445793eedebe5791e",
+      "sourceSha256": "ee1b5451fcdc588014f71f5483a4455bf54ddb945d256df99f665daacf8bc4aa",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26322,7 +26379,7 @@
       "id": "TEXTURE_L1_HALL_W_LM_LG_L1_HALL_W_NIGHT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_HALL_W_LM_LG_L1_HALL_W_NIGHT.png",
-      "sourceSha256": "c11d5ced139233831e5cb89db4ea65fd5c91dc4a11f5b8dcbfec26b9ce224acc",
+      "sourceSha256": "1abee8f04eb0134a64da18b37f58569409fdcc2546fb2ad6776301beccffb589",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26430,7 +26487,7 @@
       "id": "TEXTURE_L1_LANDING_LM_LG_L1_LANDING_SEAT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_LANDING_LM_LG_L1_LANDING_SEAT.png",
-      "sourceSha256": "e49ad420b5e4c2693e121e23bbd4bae05df75c38b8e3ef78e409714ada144b03",
+      "sourceSha256": "af1520c6404efc8be5662cf622158c71bf7d31abd037d88b79114f6eb9f5f0df",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26565,7 +26622,7 @@
       "id": "TEXTURE_L1_MASTER_BATH_LM_LG_L1_MASTER_BATH_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_MASTER_BATH_LM_LG_L1_MASTER_BATH_MAIN.png",
-      "sourceSha256": "e9604c72fb56ee5bd437d04591c4fe99163e155b1d22d5046503060a24581c79",
+      "sourceSha256": "de8c55d6c1426aaef0e136e3c4ccf13a2d67fd30d158410d8ad477f5d276f7e5",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26646,7 +26703,7 @@
       "id": "TEXTURE_L1_MASTER_BED_LM_LG_L1_MASTER_BED_BEDSIDE",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_MASTER_BED_LM_LG_L1_MASTER_BED_BEDSIDE.png",
-      "sourceSha256": "675cef1dd52793485b103eadadc46b4b0d354a496996dcfecd1a56a3ae036c13",
+      "sourceSha256": "b125686028ad4ea79929204e6786c11df64c3ec02b97aa4243a93696ec6ff1c2",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26673,7 +26730,7 @@
       "id": "TEXTURE_L1_MASTER_BED_LM_LG_L1_MASTER_BED_DRESSER",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_MASTER_BED_LM_LG_L1_MASTER_BED_DRESSER.png",
-      "sourceSha256": "8d3be9dc8b4e040f71ea368486936dfe2c03091ba17a6fa003e0141bd39f5ffa",
+      "sourceSha256": "ba628675ebf9f0ef28409ea47795a09396184100800296e838f6d32c9c013026",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26727,7 +26784,7 @@
       "id": "TEXTURE_L1_MASTER_BED_LM_LG_L1_MASTER_BED_SEATING",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_MASTER_BED_LM_LG_L1_MASTER_BED_SEATING.png",
-      "sourceSha256": "4471065f75d67f92779a9ce1d79466762d4a08e1df3528010215d292df9bb682",
+      "sourceSha256": "aea7d0cb83cdc3618d822efa22bc010d34f94acc1cdfcdd186e5a27e7adb994a",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27321,7 +27378,7 @@
       "id": "TEXTURE_L2_BED6_LM_LG_L2_BED6_SEWING",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_BED6_LM_LG_L2_BED6_SEWING.png",
-      "sourceSha256": "c500d1f92f122780ea6ac1346f0813b24bde150152b0ba24bed8282332bcd475",
+      "sourceSha256": "8b40fd074d5b39f7d02c3789f48c298c345661262b2c498e77739145867ef0c1",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27375,7 +27432,7 @@
       "id": "TEXTURE_L2_BED7_LM_LG_L2_BED7_BEDSIDE",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_BED7_LM_LG_L2_BED7_BEDSIDE.png",
-      "sourceSha256": "15ff089ecc658ebf4245cd12a9a0b574bad987da88ce19a01e167051b9e21139",
+      "sourceSha256": "8b48abea387e2e127237735c3a575076c243fcf70bd78eeacaad3c8168688a3c",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27645,7 +27702,7 @@
       "id": "TEXTURE_L2_HALL_LM_LG_L2_HALL_NIGHT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_HALL_LM_LG_L2_HALL_NIGHT.png",
-      "sourceSha256": "88065187a44a0c66a8e89c515dfee0eaf8d3c32a6a4c9adc8fcfa3e06a15bc6e",
+      "sourceSha256": "f34dfb1e2241bddc48d68eeeb4323ce7a26e50722fc0617b6693438a96880b4a",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27780,7 +27837,7 @@
       "id": "TEXTURE_L2_LANDING_LM_LG_L2_LANDING_JULIET",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_LANDING_LM_LG_L2_LANDING_JULIET.png",
-      "sourceSha256": "ce8fe345c0a838af0b25c0290c0bf3b3ae877c2c9801bca7eb8b96e19fd8f4d8",
+      "sourceSha256": "c9282cabc54b92b0241c4a3d0f973f485fbbc39c4dc6576cdc69d7e3c3e73417",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27915,7 +27972,7 @@
       "id": "TEXTURE_L2_LIBRARY_LM_LG_L2_LIBRARY_READING",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_LIBRARY_LM_LG_L2_LIBRARY_READING.png",
-      "sourceSha256": "1ae8b3d83db9652a9deac17ebd3dfa6e719fe47c058dd17184e40c7753f7df5d",
+      "sourceSha256": "47401bfb0a1ef7ee117c18eef0f596ba93c8f0d23d248d8016b2a1c11a5c89e5",
       "texture": {
         "width": 128,
         "height": 128,
@@ -28077,7 +28134,7 @@
       "id": "TEXTURE_L2_SITTING_LM_LG_L2_SITTING_READING",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_SITTING_LM_LG_L2_SITTING_READING.png",
-      "sourceSha256": "40046ee613e82491a96837bb41a47c3be9410eafb5ac88f3df8044b075bd5a01",
+      "sourceSha256": "c3ebc54d0926bf7850ed67834059331f66560a62524dff51e1c5241f44e5d45a",
       "texture": {
         "width": 128,
         "height": 128,

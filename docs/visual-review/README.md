@@ -5294,3 +5294,24 @@ test evidence is in
 
 M5's declared dependency order next selects `HOUSE-03403`, lighting the basement, attic and
 stairwells to C3.
+
+## Round 148 — first and second upper-floor baseline lighting
+
+Commit: `HOUSE-03404` working tree (`2026-09-24`). Fixed before/after sets cover all six `Z-L1`
+and all six `Z-L2` review poses under clear 10:30 daylight and the unmodified 22:00 occupied-house
+schedule. No `--light-on` or `--light-off` flag was used.
+
+All 112 authored sources in the 35 accessible upper-floor cells now resolve to physical fixtures
+with independently switched emissive slots. The implementation adds no runtime system or asset:
+it reuses seven existing ceiling, utility, puck, pendant, desk, floor-lamp and porch-lantern
+families. Desk, bedside and reading lamps are supported by the existing recipe furniture, while
+ceiling fittings are separated and contained in their rooms. Full-resolution inspection found no
+clipping, floating or overlapping fixture, z-fighting, missing texture or blocked route.
+
+Across the six fixed views per zone, day mean linear RGB stays within 0.03% of the baseline while
+night changes cover 3,463,305 pixels on L1 and 4,148,483 on L2. Every reviewed room is readable
+under daylight and the normal evening schedule; secondary spaces stop at functional C3. Exact
+measurements and capture paths are in
+[`house-03404-upper-floor-lighting.md`](house-03404-upper-floor-lighting.md).
+
+Rule R2 and M5's dependency order next select `HOUSE-03405`, lighting `Z-L0S` and `Z-GAR` to C3.

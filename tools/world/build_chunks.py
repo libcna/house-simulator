@@ -836,6 +836,52 @@ for _fixture_cell, _fixture_limit, _fixture_detail in (
         _fixture_limit,
         _fixture_reason + f"; HOUSE-03403 adds {_fixture_detail}; no split")
 
+# `HOUSE-03404`: the two occupied upper floors use the same bounded fixture catalogue. Repeated
+# fittings batch by their existing material roles while each independently switched emitter stays
+# separate. These are the exact post-build counts; none is a vertex- or Reach-cap split.
+for _fixture_cell, _fixture_limit, _fixture_detail in (
+        ("L1_BALCONY_REAR", 11, "four shared lantern/string-fixture roles"),
+        ("L1_BATH2", 16, "four shared ceiling and vanity-fixture roles"),
+        ("L1_BATH3", 15, "four shared ceiling and vanity-fixture roles"),
+        ("L1_BED2", 20, "five shared ceiling and task-lamp roles"),
+        ("L1_BED3", 18, "four shared ceiling and bedside-lamp roles"),
+        ("L1_BED4", 18, "four shared ceiling and task-lamp roles"),
+        ("L1_BED5", 20, "five shared ceiling and bedside-lamp roles"),
+        ("L1_CLOSET_2", 9, "three shared utility-fixture roles"),
+        ("L1_CLOSET_3", 9, "three shared utility-fixture roles"),
+        ("L1_HALL", 14, "four shared ceiling and art-fixture roles"),
+        ("L1_HALL_W", 14, "four shared ceiling and night-fixture roles"),
+        ("L1_LANDING", 20, "six shared ceiling and seat-lamp roles"),
+        ("L1_LINEN", 9, "three shared utility-fixture roles"),
+        ("L1_MASTER_BATH", 17, "five shared ceiling, vanity and bath-fixture roles"),
+        ("L1_MASTER_BED", 26, "seven shared ceiling, bedside, dresser and seating-lamp roles"),
+        ("L1_MASTER_CLOSET", 12, "four shared utility and mirror-fixture roles"),
+        ("L1_STOR", 12, "three shared utility-fixture roles"),
+        ("L1_WC3", 12, "three shared ceiling-fixture roles"),
+        ("L1_WC4", 12, "three shared ceiling-fixture roles"),
+        ("L2_BATH4", 17, "four shared ceiling and vanity-fixture roles"),
+        ("L2_BATH5", 14, "four shared ceiling and vanity-fixture roles"),
+        ("L2_BED6", 21, "four shared ceiling and sewing-lamp roles"),
+        ("L2_BED7", 19, "five shared ceiling and bedside-lamp roles"),
+        ("L2_CLOSET_4", 9, "three shared utility-fixture roles"),
+        ("L2_GAMES", 19, "five shared ceiling, table-pendant and arcade-fixture roles"),
+        ("L2_HALL", 14, "four shared ceiling and night-fixture roles"),
+        ("L2_HALL_W", 14, "five shared ceiling and art-fixture roles"),
+        ("L2_LANDING", 18, "four shared ceiling and Juliet-fixture roles"),
+        ("L2_LIBRARY", 22, "five shared ceiling, shelf and reading-lamp roles"),
+        ("L2_LINEN2", 9, "three shared utility-fixture roles"),
+        ("L2_SITTING", 17, "three shared ceiling-fixture roles; the existing floor lamp changes "
+                           "only its shade material"),
+        ("L2_STOR2", 12, "three shared utility-fixture roles"),
+        ("L2_WC5", 12, "three shared ceiling-fixture roles"),
+        ("L2_WC6", 12, "three shared ceiling-fixture roles")):
+    _previous = CHUNK_BUDGET_EXCEPTIONS.get(_fixture_cell)
+    _fixture_reason = (_previous[1] if _previous is not None
+                       else "§17.4's six-chunk target")
+    CHUNK_BUDGET_EXCEPTIONS[_fixture_cell] = (
+        _fixture_limit,
+        _fixture_reason + f"; HOUSE-03404 adds {_fixture_detail}; no split")
+
 #: The vertex layouts, one per stock effect, with the attributes that effect actually reads.
 #: `MaterialBinder`'s `MaterialKind` is the same closed list of four; `Skinned` never appears here
 #: because a skinned prop is an animated one and animated props are not batched (§17.4).

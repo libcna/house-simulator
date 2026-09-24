@@ -543,7 +543,8 @@
       "furnishedMeshes": 21,
       "furnishedProps": 5,
       "groups": [],
-      "shellHash": "sha256:fd4aec23b848d4d31bbadbbbdffb15e3ffb89e16c73651c7c44bb4b0468701a0"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:1ee88d02ed9436f2ccb4df864dcfbd273a5724f4e8fd025fb2a34d92320e972b"
     },
     {
       "cell": "L1_BATH3",
@@ -557,7 +558,8 @@
       "furnishedMeshes": 24,
       "furnishedProps": 5,
       "groups": [],
-      "shellHash": "sha256:b33411ca641ab6cfdf0317e7a880a07c524884bd857e7d7f61aab6f4f6d6588f"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:7bc5697367811fb4e253d15ddf7061ef3a2e599ffd5b6173c03c1e13792753c0"
     },
     {
       "cell": "L1_BED2",
@@ -571,7 +573,8 @@
       "furnishedMeshes": 35,
       "furnishedProps": 4,
       "groups": [],
-      "shellHash": "sha256:7e93596b4e5c38d3e41e86f54d852522e08a834b508ff7fbe44277428727d872"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:3e1e9072a8cf1f8a12e0a94b0e6aef52f3ab36489b52241e2e8166dae94c317d"
     },
     {
       "cell": "L1_BED3",
@@ -585,7 +588,8 @@
       "furnishedMeshes": 45,
       "furnishedProps": 5,
       "groups": [],
-      "shellHash": "sha256:9c6473985af9b45ef24808adfc713b23f1d83783dbbcfb99229b037256459038"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:d36954eced9344f0cd378072d6b36c3e7ca4e0790007a5de2374a94b7dfe9f91"
     },
     {
       "cell": "L1_BED4",
@@ -599,7 +603,8 @@
       "furnishedMeshes": 45,
       "furnishedProps": 5,
       "groups": [],
-      "shellHash": "sha256:c44f757753d3baca1613956e8ae0e797f71e9d98ad1bdf0d134f1556f7e192aa"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:ebef6feb4efa474c5a79b78d82d7478ae81cf01725fdbf62f09103fdee2ab7c1"
     },
     {
       "cell": "L1_BED5",
@@ -613,7 +618,8 @@
       "furnishedMeshes": 35,
       "furnishedProps": 4,
       "groups": [],
-      "shellHash": "sha256:ac32c4a4dd4aa779ae39cd85eb24fcd86f0a1f2b818cf7325e7abf54c002158a"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:7d5fcd531e441a2bde26c4105fb4f3c4cde455babbafee59379838a638571118"
     },
     {
       "cell": "L1_CLOSET_2",
@@ -627,7 +633,8 @@
       "furnishedMeshes": 9,
       "furnishedProps": 1,
       "groups": [],
-      "shellHash": "sha256:8b03d608e9386eaec46f9e9100fc35f5615d0a2f443db63a8d8833475e0cc0ad"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:9c1bbaf885b7506210256969d86e358f6c663e7879fedb82e96b6123135cc1a2"
     },
     {
       "cell": "L1_CLOSET_3",
@@ -641,7 +648,8 @@
       "furnishedMeshes": 9,
       "furnishedProps": 1,
       "groups": [],
-      "shellHash": "sha256:b61eff5816f91a38c2cc10b9148fd9f1851911eae485faf0f39e155d6e499490"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:f5848ddcfebd8b49bb1dcddd05d2be19f908841fe1fa111c2a0417c766176443"
     },
     {
       "cell": "L1_HALL",
@@ -655,7 +663,8 @@
       "furnishedMeshes": 6,
       "furnishedProps": 1,
       "groups": [],
-      "shellHash": "sha256:25c215c2123c4ba5db16555b114fe95cc9f969870d8c6a72c92229bfdca441f3"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:c8ccded52b236c123ce4e1e5a2bb1bcd4f580f656a6da09e40906ff2f9af6879"
     },
     {
       "cell": "L1_HALL_W",
@@ -669,7 +678,8 @@
       "furnishedMeshes": 6,
       "furnishedProps": 1,
       "groups": [],
-      "shellHash": "sha256:f0c00c065cac8e4938d3ed976ab7e3750a0e8d2fa2a88e9aae6369ed83432a76"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:8010187a822b80e94b00a47c2b86426767730f9fc2b424f9c696f9d1433910a4"
     },
     {
       "cell": "L1_LANDING",
@@ -683,7 +693,8 @@
       "furnishedMeshes": 16,
       "furnishedProps": 1,
       "groups": [],
-      "shellHash": "sha256:2e24ea25d8fb2e0586b04cdd13de5874765c5a1987f1a2d6a00d7dd4cde8435c"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:32aefc9626ec615cbae40b1d2c9930fc98edb164f9327efcc55f170788e635ba"
     },
     {
       "cell": "L1_LINEN",
@@ -697,7 +708,8 @@
       "furnishedMeshes": 9,
       "furnishedProps": 1,
       "groups": [],
-      "shellHash": "sha256:6b638208c5c2d834dd5ac0e56ab3221f3e763d3c9dc6d2aa97372f216837e341"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:0d0cb72bbaac685133d3ae91cdcfe9b28c3b1f7b49d6d955c142e989a38dc4ff"
     },
     {
       "cell": "L1_MASTER_BATH",
@@ -711,7 +723,8 @@
       "furnishedMeshes": 21,
       "furnishedProps": 5,
       "groups": [],
-      "shellHash": "sha256:8efeb2d13b76e4f24c85633562263915d8791e839972f7b8a4c6aa2dcd48722e"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:bfb24cdbe636c0d08ae3a9ed9695171e299ead8baeb49491fdf88addb69f6c31"
     },
     {
       "cell": "L1_MASTER_BED",
@@ -725,7 +738,8 @@
       "furnishedMeshes": 68,
       "furnishedProps": 8,
       "groups": [],
-      "shellHash": "sha256:1025a527ceb0e622f25dc6c63941887d133e7014f9ccfd9f01521edc902dc48a"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:20f7a6ac100dae1ae5ecd82dd6f866a670ccd7511834db81e6669f69b4e7d4d2"
     },
     {
       "cell": "L1_MASTER_CLOSET",
@@ -739,7 +753,8 @@
       "furnishedMeshes": 22,
       "furnishedProps": 2,
       "groups": [],
-      "shellHash": "sha256:ec40949ed18d3e2948ec3863b5efe5e05f0dc95abc1f630d0784ef9678c27a2c"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:e4a68b663197421ff0bd53051429c1ed9001a519630549bd03f4844b8e4d5be4"
     },
     {
       "cell": "L1_STAIR_MAIN",
@@ -768,7 +783,8 @@
       "furnishedMeshes": 12,
       "furnishedProps": 2,
       "groups": [],
-      "shellHash": "sha256:b8db4fced5810e3d26465c128a6e2526d738c53a1ef5c9c816ea7b8be0ddccad"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:a290b46f9c3882c8d4ae8ea9c13b7b3802cb34b5b99b52ccfe466046364c8ef0"
     },
     {
       "cell": "L1_WC3",
@@ -782,7 +798,8 @@
       "furnishedMeshes": 19,
       "furnishedProps": 4,
       "groups": [],
-      "shellHash": "sha256:f5788326329af75588640959c7cd2a798786d94a10595e640de0a91bedbfedb0"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:dc7944613536ad541b269192130a931dc4d5af766c17a64f98314e99185c422b"
     },
     {
       "cell": "L1_WC4",
@@ -796,7 +813,8 @@
       "furnishedMeshes": 19,
       "furnishedProps": 4,
       "groups": [],
-      "shellHash": "sha256:f0dd76333142ac8d96a23cfb31b7facc6155a78a79e685e72188034112890ba5"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:3b79ac6adeaac5826349135e3608cea965aa92f85a13130ebd4a9e58df1bce03"
     },
     {
       "cell": "L2_BATH4",
@@ -810,7 +828,8 @@
       "furnishedMeshes": 24,
       "furnishedProps": 5,
       "groups": [],
-      "shellHash": "sha256:e09bfa3ff35b9efea6884f7a250fb697b4794df14349950df30b36c7f09b0e9f"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:2c0d7e91f8ab07b6047546b71d51c3bdb72da39d9410e7aa72da8706af354500"
     },
     {
       "cell": "L2_BATH5",
@@ -824,7 +843,8 @@
       "furnishedMeshes": 21,
       "furnishedProps": 5,
       "groups": [],
-      "shellHash": "sha256:4f6b18d25ced775d6a9403a903a0c2721b6b379794b83b78864dae444fc5e0ab"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:830b6889610cb9e1fe1a9dacec6692390cbb1b8ef75b499d834e00fb9c04fcda"
     },
     {
       "cell": "L2_BED6",
@@ -838,7 +858,8 @@
       "furnishedMeshes": 53,
       "furnishedProps": 6,
       "groups": [],
-      "shellHash": "sha256:05a7db5e3bb1f6e11857b300faec29741a0935181bc7d5d355553304d791f005"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:239c01875e7e3b51e4f9cca42f9cc7c3de9a816b15d1d28d44d17a4a75713d8e"
     },
     {
       "cell": "L2_BED7",
@@ -852,7 +873,8 @@
       "furnishedMeshes": 35,
       "furnishedProps": 4,
       "groups": [],
-      "shellHash": "sha256:2e76d08231ca04d74f9dc56b55eb3a83f3f593bd4de2a054ae73237d7f608dfd"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:cc3705d2a20cf99f7566aa1055b3a785960b907ce88d6e4257639407355fdbc6"
     },
     {
       "cell": "L2_CLOSET_4",
@@ -866,7 +888,8 @@
       "furnishedMeshes": 9,
       "furnishedProps": 1,
       "groups": [],
-      "shellHash": "sha256:d8c59e45fcd1ecbf401122005236d6e50ea0cf1b6d79e1899af506129700fc87"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:1b2c94b33a57b171acb72c2909ecd2024c64e64e0d0a0bec280ad0f6d3045760"
     },
     {
       "cell": "L2_GAMES",
@@ -880,7 +903,8 @@
       "furnishedMeshes": 42,
       "furnishedProps": 4,
       "groups": [],
-      "shellHash": "sha256:7c3c76a37826182b9b54ad8ab2550925284c2feadffeb05515713505335e4a40"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:21afb1141f7f527fc1cb83db19d566ef3c5d0bd5422489b12013e916f51d7a7c"
     },
     {
       "cell": "L2_HALL",
@@ -894,7 +918,8 @@
       "furnishedMeshes": 6,
       "furnishedProps": 1,
       "groups": [],
-      "shellHash": "sha256:4cdac5fab67c4da329ebad19c0486d5f5f9aa195d98da32bc328fcbd499c4bc7"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:356578094f501548e5568d53cd16e830ea839382452c2a79f92c6f18a4b10010"
     },
     {
       "cell": "L2_HALL_W",
@@ -908,7 +933,8 @@
       "furnishedMeshes": 6,
       "furnishedProps": 1,
       "groups": [],
-      "shellHash": "sha256:7ff87dc58f834523d3d56f9b309e6243ecc3c9f549b373ef8c92ce6f6b9fd703"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:546b7b49fef1cc481725f7501eb5131a3959f43c8e13ab5527afbd407f73ee98"
     },
     {
       "cell": "L2_LANDING",
@@ -922,7 +948,8 @@
       "furnishedMeshes": 16,
       "furnishedProps": 1,
       "groups": [],
-      "shellHash": "sha256:f2b2ae6d385ac640cdbf1a1072ae85739c67f75e72f24e216aed42d164b348cf"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:9c8926711f051e03ab5687939b68907cd90df714186d2e001af6d572499cfd47"
     },
     {
       "cell": "L2_LIBRARY",
@@ -936,7 +963,8 @@
       "furnishedMeshes": 63,
       "furnishedProps": 9,
       "groups": [],
-      "shellHash": "sha256:e4c75e99f7885411d236ac94070dbbd276badf02b757dee7f6a5f65c4439417f"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:fb98431320d725025d298f995f1267c0aade605d644ef15e46a2433ef092ee1b"
     },
     {
       "cell": "L2_LINEN2",
@@ -950,7 +978,8 @@
       "furnishedMeshes": 9,
       "furnishedProps": 1,
       "groups": [],
-      "shellHash": "sha256:746e263dba2989bef24345b57bbc85938fabf3d7696f20a8a7bcb1ba9bccf2f5"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:a67c13e69cac22a1c02e35eb48b0b702afd506d82a2737727aea473b131f18db"
     },
     {
       "cell": "L2_SITTING",
@@ -964,7 +993,8 @@
       "furnishedMeshes": 37,
       "furnishedProps": 3,
       "groups": [],
-      "shellHash": "sha256:d446056b42272c94e705a8353fc5c176023fb48226ee0202ecca3ddc4451311a"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:880fceb3e0191821602cf71e538a8e65b84f89c78088df3dee5fa9e8dd5878ab"
     },
     {
       "cell": "L2_STAIR_ATTIC",
@@ -1008,7 +1038,8 @@
       "furnishedMeshes": 12,
       "furnishedProps": 2,
       "groups": [],
-      "shellHash": "sha256:8ef7af24c978ac88d46f26ec71eec382aef7eb592e24fb2b35eec764d4c50b43"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:f48090a19be59c23d13d48c97cfc4c6039b2f7a9521f70e44a0a9879d110ce4f"
     },
     {
       "cell": "L2_WC5",
@@ -1022,7 +1053,8 @@
       "furnishedMeshes": 19,
       "furnishedProps": 4,
       "groups": [],
-      "shellHash": "sha256:325da9e3a7b6b01ef2a372adc6e6c958479119085d962c1a7b507c477b56d52a"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:fc01501278b3f665b07a9442d0d24eb5010120642537d6039b5df9b5521db470"
     },
     {
       "cell": "L2_WC6",
@@ -1036,7 +1068,8 @@
       "furnishedMeshes": 19,
       "furnishedProps": 4,
       "groups": [],
-      "shellHash": "sha256:2ef16d7881b4685abfb2fe006ba5e1d5694313d3bce6be61b7a03e93a1ad26e7"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:bcda8cce3a1c00258a198defa46f80f53c67200489102d85ae1f386570c444b2"
     },
     {
       "cell": "L3_ROOM",
@@ -1130,7 +1163,11 @@
     }
   ],
   "promotedSubsetCells": [
-    "L3_ROOM"
+    "L1_HALL",
+    "L1_HALL_W",
+    "L1_MASTER_BATH",
+    "L2_HALL",
+    "L2_LANDING"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 5111808,
