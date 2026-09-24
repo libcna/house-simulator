@@ -1,3 +1,33 @@
+# Second-floor bedroom dressing handoff — 2026-09-24 (`HOUSE-01013`)
+
+Both second-floor bedrooms now meet their secondary recipes with ten static rows. `L2_BED6` uses
+the existing double frame at a plausible small-double scale, nightstand and wardrobe, with the
+existing writing desk, reused chair and generated chest forming the bounded sewing/guest group.
+`L2_BED7` uses the established bed, nightstand, wardrobe and dresser set. No bespoke dress form,
+asset family, interaction or runtime system was added.
+
+All 263 production props pass exact support, overlap, opening, door-sweep and 0.70 m route
+validation. The 90-cell grand tour and `world-content-current` pass. The first BED6 placement put
+the bed across the north-wall push-out probe; scaling and shifting it into a plausible small-double
+arrangement removed that new dead end. The wider inside-geometry test is back to the two
+pre-existing `L1_LANDING west` and `L2_LIBRARY north` results. Measured chunk totals are exactly
+`L2_BED6` 17/17 and `L2_BED7` 14/14, with no vertex or Reach-cap split.
+
+Clear-day fixed controls and forced-light fixed/reciprocal captures were inspected at full
+resolution. They show the BED6 bed/storage/sewing groups and BED7 bed/storage group grounded and
+separated, with readable doors and windows, clear routes and no clipping, floating geometry or
+z-fighting. Normal-light balance remains M5 scope.
+
+The remaining forecast is 167 realistic / 204.25 pessimistic hours. With 59.25 task-hours spent
+since the final reduction, the R14 projection is 263.5 h, 16.5 h below the hard ceiling. Rule R2
+now ties `Z-B1` and `Z-L2` at seven accessible cells still below target; `Z-B1` was worked less
+recently (Round 124 versus Round 125), so the exact next unblocked MUST task is `HOUSE-01024`,
+furnishing `B1_GYM` and `B1_WORKSHOP`. Every compilation/test invocation must remain at no more
+than four workers and pinned to CPUs 4,5,7,9; strict-XNA additionally requires
+`HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Basement cinema and WC dressing handoff — 2026-09-24 (`HOUSE-01023`)
 
 The basement cinema now has its bounded main-tier composition: a static light-faced screen and

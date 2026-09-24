@@ -474,6 +474,19 @@ for bedroom_cell in ("L1_BED2", "L1_BED5"):
         previous_reason + "; HOUSE-01002 adds seven measured shared double-bed/carcass finish "
                           "groups; no vertex or Reach-cap split")
 
+# `HOUSE-01013` keeps both second-floor bedrooms at their bounded secondary depth.  BED7's
+# ordinary four-piece double-bedroom recipe adds the same seven canonical finishes measured in
+# HOUSE-01002.  BED6 adds nine: its chest, writing desk and reused chair make the existing bedroom
+# recognisable as the named sewing room without a bespoke asset or runtime system.
+for bedroom_cell, added_groups, detail in (
+        ("L2_BED6", 9, "sewing-bedroom"),
+        ("L2_BED7", 7, "double-bedroom")):
+    previous_limit, previous_reason = CHUNK_BUDGET_EXCEPTIONS[bedroom_cell]
+    CHUNK_BUDGET_EXCEPTIONS[bedroom_cell] = (
+        previous_limit + added_groups,
+        previous_reason + f"; HOUSE-01013 adds {added_groups} measured shared {detail} finish "
+                          "groups; no vertex or Reach-cap split")
+
 # `HOUSE-01003` uses the same bounded secondary single-bedroom recipe in both children's rooms.
 # The single bed, nightstand, wardrobe, desk and reused dining chair add six canonical finish
 # groups after batching against the existing shell/window roles; neither room needs a split.

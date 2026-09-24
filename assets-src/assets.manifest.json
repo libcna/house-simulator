@@ -2194,7 +2194,8 @@
         "L1_BED3",
         "L1_BED4",
         "L2_GAMES",
-        "L2_SITTING"
+        "L2_SITTING",
+        "L2_BED6"
       ]
     },
     {
@@ -2329,6 +2330,7 @@
         "L1_BED3",
         "L1_BED4",
         "L2_LIBRARY",
+        "L2_BED6",
         "L3_ROOM"
       ]
     },
@@ -4205,7 +4207,8 @@
         "L1_MASTER_BED",
         "L1_MASTER_CLOSET",
         "L1_BED2",
-        "L1_BED5"
+        "L1_BED5",
+        "L2_BED7"
       ]
     },
     {
@@ -4352,7 +4355,9 @@
         "L1_BED2",
         "L1_BED3",
         "L1_BED4",
-        "L1_BED5"
+        "L1_BED5",
+        "L2_BED6",
+        "L2_BED7"
       ]
     },
     {
@@ -4734,7 +4739,9 @@
         "L1_BED2",
         "L1_BED3",
         "L1_BED4",
-        "L1_BED5"
+        "L1_BED5",
+        "L2_BED6",
+        "L2_BED7"
       ]
     },
     {

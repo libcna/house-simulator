@@ -140,7 +140,7 @@
         {"id": "L2_LIBRARY", "accessible": true, "standingPoint": [-3.6, 6.55, -16.3], "tier": "H", "heroArea": "H5"},
         {"id": "L2_GAMES", "accessible": true, "standingPoint": [0.80, 6.55, -24.55], "tier": "S"},
         {"id": "L2_SITTING", "accessible": true, "standingPoint": [7.20, 6.55, -26.20], "tier": "S"},
-        {"id": "L2_BED6", "accessible": true, "standingPoint": [-10.45, 6.55, -16.3], "tier": "S"},
+        {"id": "L2_BED6", "accessible": true, "standingPoint": [-10.45, 6.55, -15.35], "tier": "S"},
         {"id": "L2_BED7", "accessible": true, "standingPoint": [-9.85, 6.55, -24.55], "tier": "S"},
         {"id": "L2_BATH4", "accessible": true, "standingPoint": [-11.2, 6.55, -20.15], "tier": "S"},
         {"id": "L2_BATH5", "accessible": true, "standingPoint": [6.8, 6.55, -20.15], "tier": "S"},

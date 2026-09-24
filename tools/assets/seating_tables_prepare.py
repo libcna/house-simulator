@@ -76,7 +76,7 @@ SOURCES = (
         {"black": "MAT_FURNITURE_PIANO_EBONITE", "carcass": "MAT_DOOR_PAINTED",
          "oak": "MAT_FURNITURE_DINING_WALNUT"},
         ("L0_OFFICE", "B1_HOBBY", "L1_MASTER_BED", "L1_BED3", "L1_BED4",
-         "L2_LIBRARY", "L3_ROOM"),
+         "L2_LIBRARY", "L2_BED6", "L3_ROOM"),
     ),
     Source(
         "MODEL_FURNITURE_POOL_TABLE", "house-00977-pool.glb", "pool_table.glb",

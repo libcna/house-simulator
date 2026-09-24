@@ -4954,3 +4954,22 @@ clutter and C5 hero dressing remain outside this task.
 
 Rule R2 now selects `Z-L2`, with nine accessible cells still below target versus seven in `Z-B1`
 and six in `Z-L1`. Next: `HOUSE-01013`, furnishing `L2_BED6` and `L2_BED7`.
+
+## Round 125 — second-floor bedroom dressing
+
+Commit: `HOUSE-01013` working tree (`2026-09-24`). The local, Git-ignored
+[`clear-day`](captures/house-01013-l2-bedrooms-day) and
+[`forced-light`](captures/house-01013-l2-bedrooms-lit) sets retain the six fixed `Z-L2` controls.
+The latter also contains reciprocal BED6 and paired BED7 views; forced light is placement evidence,
+not a claim that M5's normal day/night balance is complete.
+
+`L2_BED6` reads as a compact guest/sewing room through the reused small-double frame,
+nightstand/wardrobe, writing desk, chair and sewing-storage chest. `L2_BED7` has the bounded
+four-piece double-bedroom recipe. The fixed and reciprocal views show grounded, separated pieces,
+open doors/windows and continuous standing routes without clipping, floating geometry or
+z-fighting. The small-double arrangement also keeps the north-wall collision push-out clear. A
+bespoke dress form, optional decoration and deeper bedroom polish were not added.
+
+Rule R2 now ties `Z-B1` and `Z-L2` at seven accessible cells below target and selects the
+less-recently worked `Z-B1` (Round 124 versus Round 125). Next: `HOUSE-01024`, furnishing
+`B1_GYM` and `B1_WORKSHOP`.
