@@ -5031,3 +5031,20 @@ frames. No optional planter, clutter or unique variant was added.
 
 Rule R2 now selects `Z-L0S`, with eight accessible cells below target versus five each in `Z-B1`
 and `Z-STAIR`. Next: `HOUSE-00991`, stocking `L0_PANTRY`.
+
+## Round 129 — ground-floor pantry stocking
+
+Commit: `HOUSE-00991` working tree (`2026-09-24`). The local, Git-ignored
+[`clear-day`](captures/house-00991-l0s-day) set retains both fixed `Z-L0S` controls, and the
+reciprocal [`detail`](captures/house-00991-l0s-detail) views inspect the compact pantry directly.
+The authored pantry light was forced for the direct pair as placement evidence, not as a claim
+that M5's normal day/night balance is complete.
+
+Two repeated open shelves form the bounded utility composition, with the existing generated
+crockery-and-jars fill supported on the south shelf. The direct pair shows grounded and separated
+shelves, supported fill, clear openings and no clipping, floating geometry or z-fighting. The
+room remains notably dark even with its group forced on; that is retained as M5 work. No extra
+clutter, bespoke variant, material family or butler's-pantry rework was added.
+
+Rule R2 keeps `Z-L0S` selected, with seven accessible cells below target versus five each in
+`Z-B1` and `Z-STAIR`. Next: `HOUSE-00994`, furnishing the office and west closet.

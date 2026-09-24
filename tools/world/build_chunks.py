@@ -366,6 +366,15 @@ for single_door_cell in ("L0_DINING", "L0_HALL", "L0_PANTRY"):
         previous_limit + 1,
         previous_reason + "; HOUSE-00942 adds one shared steel single-door hardware role")
 
+# `HOUSE-00991`: the two repeated open shelves batch into their existing shared finish groups.
+# The supported crockery fill uses one established ceramic override, so the stocked pantry adds
+# exactly two measured resident groups without a vertex or Reach-cap split.
+_pantry_limit, _pantry_reason = CHUNK_BUDGET_EXCEPTIONS["L0_PANTRY"]
+CHUNK_BUDGET_EXCEPTIONS["L0_PANTRY"] = (
+    _pantry_limit + 2,
+    _pantry_reason + "; HOUSE-00991 adds two measured shared shelf/crockery finish groups; no "
+                      "vertex or Reach-cap split")
+
 # `HOUSE-03263`: the L1 circulation doors reuse `HOUSE-00942`'s exact joinery grammar and steel
 # finish. Most affected cells stay at or below their existing measured ceiling; the windowed
 # shared bathroom is the one owner cell whose physical lever adds a distinct seventh shell role

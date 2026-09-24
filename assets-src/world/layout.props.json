@@ -3910,6 +3910,45 @@
       "collision": "proxy",
       "material": null,
       "interactable": null
+    },
+    {
+      "id": "PROP_L0_PANTRY_SHELF_SOUTH",
+      "asset": "MODEL_PROP_KIT_OPEN_SHELF",
+      "cell": "L0_PANTRY",
+      "position": [-11.80, 0.60, -26.88],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_PANTRY_CROCKERY",
+      "asset": "MODEL_FILL_CROCKERY",
+      "cell": "L0_PANTRY",
+      "position": [-11.80, 1.52, -26.88],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": "MAT_FOYER_CERAMIC",
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_PANTRY_SHELF_NORTH",
+      "asset": "MODEL_PROP_KIT_OPEN_SHELF",
+      "cell": "L0_PANTRY",
+      "position": [-8.90, 0.60, -25.22],
+      "yawDeg": 180,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
     }
   ]
 }

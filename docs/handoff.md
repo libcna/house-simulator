@@ -1,3 +1,32 @@
+# Ground-floor pantry stocking handoff — 2026-09-24 (`HOUSE-00991`)
+
+The compact pantry now meets its utility-tier recipe with two repeated generated open shelves and
+one supported crockery-and-jars fill instance. `L0_BUTLERS` remains untouched as required. The
+composition adds no model, material family, interaction, optional clutter variant or runtime
+system.
+
+All 306 production props pass exact support, overlap, opening, door-sweep and 0.70 m route
+validation. The authored-world validator, 90-cell grand tour and `world-content-current` pass.
+The wider inside-geometry probe still reports only its pre-existing `L1_LANDING west` and
+`L2_LIBRARY north` locations (four bodies total). The final build is 985 chunks / 2,705,195
+vertices / 69,996,424 packed bytes, with 8 16-bit splits, 15 Reach splits and no 32-bit chunk;
+`L0_PANTRY` is exactly 10/10 chunks.
+
+The two fixed clear-day `Z-L0S` controls plus reciprocal direct pantry views were inspected at
+full resolution. The shelves are grounded and separated, the fill rests on its shelf, both
+openings remain clear, and there is no clipping, floating geometry or z-fighting. The normal
+room lighting is still dark even with the authored group forced on; correcting final day/night
+readability remains M5 scope rather than being hidden inside this furnishing task.
+
+The remaining forecast is 163.5 realistic / 200 pessimistic hours. With 62.75 task-hours spent
+since the final reduction, the R14 projection remains 262.75 h, 17.25 h below the hard ceiling.
+Rule R2 keeps `Z-L0S` selected because its seven accessible cells below target exceed the five in
+`Z-B1` and `Z-STAIR`; the exact next unblocked MUST task is `HOUSE-00994`, furnishing `L0_OFFICE`
+and `L0_CLOSET_W`. Every compilation/test invocation remains limited to four workers and pinned
+to CPUs 4,5,7,9; strict-XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # First-floor utility and balcony dressing handoff — 2026-09-24 (`HOUSE-01007`)
 
 The four remaining utility cells and both balconies now meet their bounded recipes with nine
