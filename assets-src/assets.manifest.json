@@ -4443,6 +4443,7 @@
         "B1_UNDERSTAIR",
         "B1_WORKSHOP",
         "L0_CLOSET_W",
+        "L0_MUDROOM",
         "L0_PANTRY",
         "L1_CLOSET_2",
         "L1_CLOSET_3",
@@ -4744,7 +4745,8 @@
       },
       "usedIn": [
         "B1_ELECTRICAL",
-        "B1_UTILITY"
+        "B1_UTILITY",
+        "L0_MUDROOM"
       ]
     },
     {
@@ -4790,6 +4792,7 @@
         "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
+        "L0_MUDROOM",
         "L1_MASTER_BED",
         "L1_MASTER_CLOSET",
         "L1_BED2",

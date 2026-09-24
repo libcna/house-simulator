@@ -453,6 +453,19 @@ CHUNK_BUDGET_EXCEPTIONS["L0_MUDROOM"] = (
     _mudroom_limit + 1,
     _mudroom_reason + "; HOUSE-03262 adds the shared steel service-door hardware role")
 
+# `HOUSE-00995`: the secondary mudroom's four-piece storage composition reuses its established
+# paint and steel roles and adds only one truthful kit wood finish. The utility laundry's two
+# static appliance variants keep the source body's visible finish separation while their existing
+# steel-hardware variant batches with a resident room role.
+_mudroom_limit, _mudroom_reason = CHUNK_BUDGET_EXCEPTIONS["L0_MUDROOM"]
+CHUNK_BUDGET_EXCEPTIONS["L0_MUDROOM"] = (
+    _mudroom_limit + 1,
+    _mudroom_reason + "; HOUSE-00995 adds one measured shared kit finish across its bounded "
+                       "bench, cubbies, tall storage and bin composition; no split")
+CHUNK_BUDGET_EXCEPTIONS["L0_LAUNDRY"] = (
+    10, "six measured laundry-room shell finish groups plus HOUSE-00995's four resident shared "
+        "appliance-body finish groups across both static variants; no vertex or Reach-cap split")
+
 # `HOUSE-03266`: completed timber-flight details reuse the resident trim role. The concrete
 # basement and garage flights instead gain exactly one established metal carriage/guard role;
 # exterior stone steps already share that role with their zones' existing architecture.

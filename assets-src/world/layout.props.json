@@ -4716,6 +4716,84 @@
       "collision": "proxy",
       "material": "MAT_OUTDOOR_GARDEN_WOOD",
       "interactable": null
+    },
+    {
+      "id": "PROP_L0_MUDROOM_BENCH_CARCASS",
+      "asset": "MODEL_PROP_KIT_UTILITY_MODULE",
+      "cell": "L0_MUDROOM",
+      "position": [8.38, 0.60, -14.95],
+      "yawDeg": 90,
+      "scale": [1.0, 0.55, 1.0],
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_MUDROOM_BENCH_CUBBIES",
+      "asset": "MODEL_PROP_KIT_OPEN_SHELF",
+      "cell": "L0_MUDROOM",
+      "position": [8.38, 1.106, -14.95],
+      "yawDeg": 90,
+      "scale": [0.75, 0.40, 0.80],
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_MUDROOM_TALL_STORAGE",
+      "asset": "MODEL_PROP_KIT_WARDROBE",
+      "cell": "L0_MUDROOM",
+      "position": [8.38, 0.60, -17.50],
+      "yawDeg": 90,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_MUDROOM_BIN",
+      "asset": "MODEL_CLUTTER_BIN",
+      "cell": "L0_MUDROOM",
+      "position": [7.60, 0.60, -17.92],
+      "yawDeg": 8,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": "MAT_KITCHEN_HARDWARE_STEEL",
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_LAUNDRY_WASHER",
+      "asset": "MODEL_APPLIANCE_LAUNDRY_BODY",
+      "cell": "L0_LAUNDRY",
+      "position": [5.28, 0.60, -19.65],
+      "yawDeg": 90,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_LAUNDRY_DRYER",
+      "asset": "MODEL_APPLIANCE_LAUNDRY_BODY",
+      "cell": "L0_LAUNDRY",
+      "position": [5.28, 0.60, -20.45],
+      "yawDeg": 90,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": "MAT_KITCHEN_HARDWARE_STEEL",
+      "interactable": null
     }
   ]
 }

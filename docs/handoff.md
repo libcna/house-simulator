@@ -1,3 +1,36 @@
+# Mudroom and laundry furnishing handoff — 2026-09-24 (`HOUSE-00995`)
+
+`L0_MUDROOM` and `L0_LAUNDRY` now meet their bounded secondary/utility recipes with six static
+rows from the existing kit. The mudroom has a scaled utility-module bench, supported open cubbies,
+tall storage and a bin arranged around the garage opening. The laundry has two static material
+variants of the acquired front-loading body. Existing painted, wood and visible steel roles supply
+all finishes; no asset, material family, behaviour, interaction or runtime system was added.
+
+All 371 production props pass exact support, overlap, opening, door-sweep and 0.70 m route
+validation. The authored-world validator and direct 90-cell grand tour pass. The wider
+inside-geometry probe remains exactly at its four pre-existing bodies, first `L1_LANDING west`.
+The ordinary `world-content-current` CTest fixture could not run because stale CMake regeneration
+attempted to create CNA's sibling-tree SDL lock, which this House session correctly cannot write;
+the declared copy operation was performed directly and `diff -qr content/world build/content/world`
+passes. The final build is 1,064 chunks / 2,898,207 vertices / 76,147,944 packed bytes, with 8
+16-bit splits, 15 Reach splits and no 32-bit chunk; both changed cells are exactly 10/10.
+
+The two fixed `Z-L0S` controls and a direct forced-light laundry view were inspected at full
+resolution. They show grounded and separated storage, two recognizable laundry bodies and clear
+doors without clipping, floating geometry or z-fighting. The initial captures correctly exposed
+stale deployed content and the inherited zero-tint appliance override; evidence was repeated after
+a real chunks write/deployment and both new affected props now reuse the existing visible steel
+hardware material. Final normal-light readability remains M5 scope.
+
+The remaining forecast is 157.25 realistic / 192.25 pessimistic hours. With 69 task-hours spent
+since the final reduction, the R14 projection is 261.25 h, 18.75 h below the hard ceiling. Rule R2
+selects `Z-L3`, with four accessible cells below target versus three each in `Z-L0S` and `Z-L2`.
+The exact next unblocked MUST task is `HOUSE-01017`, dressing the long-term attic stores. Every
+compilation/test invocation must use no more than four workers and stay pinned to CPUs 4,5,7,9;
+strict-XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Rear and side exterior dressing handoff — 2026-09-24 (`HOUSE-03342`)
 
 All seven rear/side exterior cells now have their bounded dressing recipes. Seventeen rows from

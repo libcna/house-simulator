@@ -5149,3 +5149,23 @@ walk and exact validator as required by their tier, not promoted to dedicated po
 
 Rule R2 now selects `Z-L0S`, with five accessible cells below target versus four in `Z-L3` and
 three in `Z-L2`. Next: `HOUSE-00995`, furnishing `L0_MUDROOM` and `L0_LAUNDRY`.
+
+## Round 135 — mudroom and laundry furnishing
+
+Commit: `HOUSE-00995` working tree (`2026-09-24`). The local, Git-ignored
+[`final`](captures/9cab730-house-00995-final) set retains both fixed `Z-L0S` controls and adds a
+direct laundry view. The mudroom and laundry groups were forced for placement evidence, not as a
+claim that M5's normal day/night balance is complete.
+
+The mudroom's scaled bench and supported cubbies occupy the short north bay, while its tall
+storage and bin occupy the south bay without blocking the garage door. The laundry stops at two
+static material variants of the acquired front-loading body. The first review exposed two stale
+evidence problems rather than content defects: the runtime content copy predated the source JSON,
+and `build_chunks.py --report` intentionally does not write its output. The final set was repeated
+after a real write and deployment; the runtime then reported the measured 1,064 chunks. It also
+exposed the inherited zero-tint `MAT_APPLIANCE_STEEL` as an unreadable black override, so the two
+new affected props now reuse the existing visible steel-hardware Basic material. Final frames show
+grounded and separated pieces, clear openings and no clipping, floating geometry or z-fighting.
+
+Rule R2 now selects `Z-L3`, with four accessible cells below target versus three each in `Z-L0S`
+and `Z-L2`. Next: `HOUSE-01017`, dressing the long-term attic stores.
