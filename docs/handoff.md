@@ -1,3 +1,33 @@
+# Ground-floor study and closet handoff — 2026-09-24 (`HOUSE-00994`)
+
+The secondary study now has its complete bounded desk/chair, bookcase and desk-lamp composition,
+and the utility-tier west closet has one physically scaled open shelf. Every piece comes from the
+existing capped kit. The lamp uses an existing painted BasicEffect role because the acquired mesh
+has no UV1; no asset, material family, interaction or runtime system was added.
+
+All 311 production props pass exact support, overlap, window-front, opening, door-sweep and
+0.70 m route validation. A first centred bookcase and larger closet shelf created two new
+cardinal push-out pockets; moving both into clear corners returned the wider inside-geometry
+result to the four pre-existing bodies at `L1_LANDING west` and `L2_LIBRARY north`. The
+authored-world validator, 90-cell grand tour and `world-content-current` pass. The final build is
+989 chunks / 2,716,860 vertices / 70,369,704 packed bytes, with 8 16-bit splits, 15 Reach splits
+and no 32-bit chunk. Exact target counts are `L0_OFFICE` 14/14 and `L0_CLOSET_W` 6/6.
+
+The two fixed clear-day `Z-L0S` controls and direct reciprocal views were inspected at full
+resolution. They show the grounded study group, supported lamp and closet shelf, clear windows
+and openings, and no clipping, floating geometry or z-fighting. Basic-lit furniture and the
+closet remain dark under the current normal/forced-light balance; final readability is M5 work.
+
+The remaining forecast is 162.75 realistic / 199 pessimistic hours. With 63.5 task-hours spent
+since the final reduction, the R14 projection is 262.5 h, 17.5 h below the hard ceiling. Rule R2
+now ties `Z-L0S`, `Z-B1` and `Z-STAIR` at five accessible cells below target; its least-recently
+worked tie-break selects `Z-STAIR` (Round 117 versus Rounds 126 and 130). The exact next
+unblocked MUST task is `HOUSE-03343`, dressing the stair halls and landings. Every
+compilation/test invocation remains limited to four workers and pinned to CPUs 4,5,7,9;
+strict-XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Ground-floor pantry stocking handoff — 2026-09-24 (`HOUSE-00991`)
 
 The compact pantry now meets its utility-tier recipe with two repeated generated open shelves and

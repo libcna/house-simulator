@@ -5048,3 +5048,23 @@ clutter, bespoke variant, material family or butler's-pantry rework was added.
 
 Rule R2 keeps `Z-L0S` selected, with seven accessible cells below target versus five each in
 `Z-B1` and `Z-STAIR`. Next: `HOUSE-00994`, furnishing the office and west closet.
+
+## Round 130 — ground-floor study and west closet
+
+Commit: `HOUSE-00994` working tree (`2026-09-24`). The local, Git-ignored
+[`clear-day`](captures/house-00994-l0s-day) set retains both fixed `Z-L0S` controls, while the
+direct reciprocal [`detail`](captures/house-00994-l0s-detail) views inspect the complete study
+group and compact closet shelf. The relevant groups were forced for placement evidence, not as a
+claim that M5's normal day/night balance is complete.
+
+The study's acquired desk, reused dining chair, generated bookcase and desk-lamp form are
+grounded, separated and clear of both tall windows and the two doorways. The utility closet stops
+at one scaled shelf in a clear corner. The first centred bookcase and larger closet shelf exposed
+two cardinal push-out pockets; the final corner placements remove both without weakening a test.
+The renders and exact validator show no clipping, floating geometry, z-fighting or blocked route.
+Dark Basic-lit furniture and closet readability remain M5 work; no decorative study tier or
+closet clutter was pulled forward.
+
+Rule R2 now ties `Z-L0S`, `Z-B1` and `Z-STAIR` at five accessible cells below target. Its
+least-recently worked tie-break selects `Z-STAIR` (Round 117). Next: `HOUSE-03343`, dressing the
+stair halls and landings.

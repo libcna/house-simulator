@@ -2193,6 +2193,7 @@
       },
       "usedIn": [
         "L0_DINING",
+        "L0_OFFICE",
         "L1_BED3",
         "L1_BED4",
         "L2_GAMES",
@@ -4071,6 +4072,7 @@
         "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
+        "L0_OFFICE",
         "L2_LIBRARY"
       ]
     },
@@ -4417,6 +4419,7 @@
         "B1_GYM",
         "B1_UNDERSTAIR",
         "B1_WORKSHOP",
+        "L0_CLOSET_W",
         "L0_PANTRY",
         "L1_CLOSET_2",
         "L1_CLOSET_3",
