@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **87 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 114 / 134 / 165 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **M4 dressing checkpoint passed; M5 baseline lighting is in progress.** Next: close the ground-floor route lighting list in `HOUSE-03407` |
+| Active plan | **86 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 113 / 133 / 163 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **M4 dressing checkpoint passed; M5 baseline lighting is in progress.** Next: freeze the representative day/night render set in `HOUSE-01275` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -273,7 +273,7 @@ non-accessible appliance interiors.
 
 ## Zone scoreboard
 
-**As of 2026-09-24 (Round 150).** Levels from Round 103's whole-property day/night review
+**As of 2026-09-24 (Round 151).** Levels from Round 103's whole-property day/night review
 (`HOUSE-03203`), Round 104's traversal sweep and subsequent completed zone work; main and hero
 targets re-counted after `HOUSE-03206`'s tier change. Update per rule R10.
 
@@ -284,7 +284,7 @@ proved all 90 intended-accessible cells and the tight-space traversal. G1 clears
 | Zone | C3 floor | Main at C4 | Hero cells at C5 | Evidence | Largest gaps |
 |---|---|---|---|---|---|
 | `Z-B1` | **C3** | 0 / 1 | 0 / 1 | Round 147; all fourteen cells have physical fixtures and readable day/scheduled-night lighting (`HOUSE-03403`) | No zone-specific S2 |
-| `Z-L0M` | **C2** (dressing of C3 done; lighting S2 open) | 0 / 3 | 0 / 5 | Round 103 plus 102 prior rounds. Primary furniture in all 9 cells (`HOUSE-01037`–`01076`) | S2: Basic-lit furniture much darker than the baked receivers (piano, sofas); service-room night depth. **Goes last by R4** |
+| `Z-L0M` | **C3** | 0 / 3 | 0 / 5 | Round 151; all 23 fixed route poses are readable by day and under the 22:00 schedule (`HOUSE-03407`) | No zone-specific S2 |
 | `Z-L0S` | **C3** | — | — | Round 149; all eight service cells have physical fixtures and readable day/scheduled-night lighting (`HOUSE-03405`) | No zone-specific S2 |
 | `Z-GAR` | **C3** | 0 / 1 | — | Round 149; the main bay and visible utility loft have physical fixtures and the garage's scheduled fluorescent character (`HOUSE-03405`) | No zone-specific S2 |
 | `Z-L1` | **C3** | 0 / 1 | — | Round 148; all 20 accessible cells have physical fixtures and readable day/scheduled-night lighting (`HOUSE-03404`) | No zone-specific S2 |
@@ -313,11 +313,11 @@ visually complete. C4 and C5 are target counts from the tier classification, not
 | `Z-EXR` | 7 | 7 | 44 | 6.29 | 0 | 3 / 7 | 7 | 2 | 0 |
 | `Z-STR` | 2 | 0 | 0 | — | 0 | 0 / 0 | 1 | 0 | 0 |
 
-**Minimum level today: C2; the dressing half of C3 is complete.** Every accessible cell has its
-tier's essential props and the open S1/S2 dressing list is empty. Round 143 inspected all 68 fixed
-clear-day views across all eleven zones; `zone_scoreboard.py` reports zero zero-prop accessible
-rooms and assigns all 96 cells exactly once. The dark unlit secondary rooms remain M5
-baseline-lighting work, not dressing defects.
+**Every zone containing accessible rooms is now at C3; `Z-STR` remains a C2 scenery-only zone with
+no accessible cells.** Every accessible cell has its tier's essential props, readable day/night
+lighting and no open S1/S2. Round 151 closes the last ground-floor lighting findings while
+`zone_scoreboard.py` continues to report zero zero-prop accessible rooms and assigns all 96 cells
+exactly once. M5's representative render set and G3 review remain open.
 
 ---
 
@@ -975,11 +975,12 @@ light, nothing more. No new lighting system is added for polish (rule R9).
       verify: `Z-EXR` and `Z-EXF` night captures
       note: (2026-09-24) Round 150 brings `Z-EXR` to C3 using only existing lighting mechanisms. The terrace lanterns, driveway-edge dusk fixtures and scheduled room windows already provide the broad rear/side cues; the sole bare source was the shed. One reused utility batten now backs `LIGHT_EXT_SHED_MAIN_1` with its exact neutral emitter, and its unchanged 3.30 m source explicitly spills only to `EXT_GARDEN` as the narrow east-window pool. No intensity, schedule, exposure, runtime path, material family or acquired asset changed. Seven fixed rear poses, four unchanged front controls and direct utility-side-yard views were inspected at 22:00 without overrides. `Z-EXR` mean linear RGB moves 0.007644→0.008158; the intended local changes cover 71,654 shed-interior and 122,464 shed-facade pixels. The front controls change only 2,433/5,760,000 HUD/timing pixels and were not re-worked. The rebuilt 612-prop world is 1,384 chunks / 3,119,926 vertices / 83,242,952 packed bytes, with 8 16-bit splits, 15 Reach splits and no 32-bit chunk; all 88 exceptions exactly match their ceilings. All fifteen world rules, exact prop placement, fixture/id/chunk gates, the focused physical-source regression and all 1,424 unit tests pass; `world-content-current` plus the 90-cell grand tour pass 2/2. All 325 strict-XNA translation units pass with four workers; the complete static suite exits nonzero only for the known user-owned root `.claude` layout entry. Full evidence is in `docs/visual-review/house-03406-rear-side-exterior-lighting.md`
 
-- [ ] HOUSE-03407 — Close the ground-floor route's lighting S2 list
+- [x] HOUSE-03407 — Close the ground-floor route's lighting S2 list
       dep: HOUSE-03402, HOUSE-01030, HOUSE-03401, HOUSE-03403, HOUSE-03404, HOUSE-03405 · sys: lighting · plat: TOOL · pri: MUST · zone: Z-L0M · adv: G3 · est: 1.25
       accept: Round 102's ranked S2 list is closed on the fixed route views by day and night under the schedule; no new ground-floor-only lighting constant is introduced unless the house-wide solution fails there, and then it is recorded
       verify: `Z-L0M` captures day and night
       note: deliberately **last** in M5. It is the only permitted `Z-L0M` work before G3 (rule R4)
+      note: (2026-09-24) Round 151 closes all three ranked Round 102 findings without a ground-floor-only constant or new implementation. `HOUSE-03402`'s bounded per-cell receiver sample already brings the measured `Z-L0M` furniture/receiver ratios into its 0.25–3.50 acceptance band (family-media 0.334 day / 0.283 night), `HOUSE-03403` closes the main-stair-foot darkness with physical scheduled fixtures, and `HOUSE-03405` closes service-room night depth. Fresh 10:30 clear and 22:00 scheduled captures cover all 23 fixed `Z-L0M` poses without light overrides. Full-resolution inspection shows the piano body, keys, score and physical picture light; separates the living/family furniture from adjacent receivers; and keeps foyer, hall, kitchen, dining, butler's pantry and sunroom readable with no clipping, floating fixtures, z-fighting, missing texture or blocked route. Cropping the HUD, aggregate mean linear luminance is 0.043056 by day and 0.024087 at night; the darkest individual frames remain non-black at 0.013928 and 0.008296. No source, schedule, exposure, renderer, material, asset or lightmap changed. Full evidence is in `docs/visual-review/house-03407-ground-route-lighting.md`
 
 - [ ] HOUSE-01275 — Representative interior render set: one pose per zone and per hero area, by day and at night
       dep: HOUSE-03403, HOUSE-03404, HOUSE-03405, HOUSE-03406, HOUSE-03407 · sys: ci · plat: CI · pri: MUST · zone: all · adv: G3, D11 · est: 1
@@ -1895,7 +1896,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M2 Architectural completion | 8 | 18 | **0** | 0 | **0** | 0 | — |
 | M3 The reusable furnishing kit | 16 | 33 | **0** | 0 | **0** | 0 | — |
 | M4 Dressing everywhere | 40 | 48.75 | **0** | 0 | **0** | 0 | R-D +3 |
-| M5 Baseline lighting everywhere | 12 | 24.5 | **3** | 2.75 | **3.25** | 3.5 | — |
+| M5 Baseline lighting everywhere | 12 | 24.5 | **2** | 1.75 | **2** | 2 | — |
 | M6 Main cells and hero areas | 20 | 32.5 | **15** | 16.75 | **19.75** | 21.75 | — |
 | M7 A compact environment | 13 | 21 | **8** | 11.25 | **13.25** | 14.5 | — |
 | M8 Atmospheric audio essentials | 11 | 14.5 | **6** | 7.75 | **9** | 10 | — |
@@ -1907,12 +1908,12 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **87** | **113.75** | **133.75** | **164.75** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **86** | **112.75** | **132.5** | **163.25** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-115.25 h. Adding the 92.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-257.25 h, 22.75 h under the limit. That margin is
+116.75 h. Adding the 93.75 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+257 h, 23 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |

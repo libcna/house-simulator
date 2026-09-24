@@ -1,3 +1,35 @@
+# Ground-floor route lighting closure handoff — 2026-09-24 (`HOUSE-03407`)
+
+`Z-L0M` is at C3 and Round 102's ranked S2 list is closed. This task required no new runtime or
+content change: `HOUSE-03402` already supplies the bounded house-wide prop/receiver correction,
+`HOUSE-03403` closes main-stair-foot darkness with physical scheduled fixtures, and `HOUSE-03405`
+closes service-room night depth. Adding an L0-only lighting constant would have duplicated those
+accepted mechanisms and was therefore not justified.
+
+Round 151 contains fresh clear-day and scheduled-night captures for all 23 fixed `Z-L0M` poses,
+with no light override. Full-resolution inspection shows the piano body, keyboard, score and
+physical picture light; readable dark primary furniture; and coherent foyer, hall, kitchen,
+dining, butler's-pantry, family and sunroom depth. No clipping, floating fixture, z-fighting,
+missing texture or blocked route is visible. With the HUD cropped, aggregate mean linear luminance
+is 0.043056 by day and 0.024087 at night; the darkest frames remain non-black at 0.013928 and
+0.008296. Exact evidence is in `docs/visual-review/house-03407-ground-route-lighting.md`.
+
+The review-pose gate covers 68 poses / 11 zones / 12 main cells / 5 hero areas; the scoreboard
+assigns all 96 cells exactly once; all 15 world rules and all 612 prop placements pass. All 39
+targeted lighting, schedule and content-current tests pass. The complete static suite passes every
+project-owned gate, including all 325 strict-XNA translation units with four workers; it exits
+nonzero only for the known user-owned root `.claude` layout entry.
+
+Rule R4 and M5's dependency order selected this deliberately-last ground-floor baseline pass. R2
+now selects `HOUSE-01275`, freezing one representative day/night render per zone and hero area
+before gate G3. The remaining forecast is 132.5 realistic / 163.25 pessimistic hours. With 93.75
+task-hours spent since the final reduction, the R14 projection is 257 h, 23 h below the ceiling.
+Every compilation must use at most four CPU cores: pin the process tree to CPUs 4,5,7,9, set build
+and test parallelism to 4, set `HOUSE_XNA_STRICT_JOBS=4`, and retain `/rv/cnaccache`. Do not modify
+or stage the user-owned root `.claude` entry.
+
+---
+
 # Rear and side exterior baseline lighting handoff — 2026-09-24 (`HOUSE-03406`)
 
 `Z-EXR` is at C3. The existing terrace lanterns, driveway-edge dusk fixtures and scheduled room

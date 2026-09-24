@@ -9,9 +9,10 @@
 > 103 on, a round follows [`plan.md`](../../plan.md): it captures per-zone fixed view sets
 > (`HOUSE-03202`); it classifies every defect by **severity S1–S4** and by **zone**; it updates the
 > zone scoreboard; and it names the next task together with the **scheduling rule (R1–R11)** that
-> chose it. Round 102's open ground-floor list is **frozen by rule R4 until gate G4**; after G3
-> it is taken up by the house-wide `HOUSE-03402` and by `HOUSE-03407`. Log S3/S4 findings under a
-> zone's heading as backlog; do not schedule them.
+> chose it. Rule R4 froze Round 102's ground-floor list until the deliberately last M5 task:
+> house-wide `HOUSE-03402`, zone tasks `HOUSE-03403`/`HOUSE-03405` and Round 151's
+> `HOUSE-03407` have now closed it. Log S3/S4 findings under a zone's heading as backlog; do not
+> schedule them.
 
 These captures answer “does the playable house look good?”, not “did a pixel change?”. Run
 `python3 tools/visual/capture_review.py <short-head>-<round>` from the repository root. The tool
@@ -5315,3 +5316,28 @@ measurements and capture paths are in
 [`house-03404-upper-floor-lighting.md`](house-03404-upper-floor-lighting.md).
 
 Rule R2 and M5's dependency order next select `HOUSE-03405`, lighting `Z-L0S` and `Z-GAR` to C3.
+
+## Round 151 — ground-floor route lighting closure
+
+Commit: `HOUSE-03407` working tree (`2026-09-24`). Fresh local, Git-ignored
+[`day`](captures/house-03407-current-day-r151) and
+[`scheduled night`](captures/house-03407-current-night-r151) sets cover all 23 fixed `Z-L0M`
+poses at 10:30 and 22:00. No light override was used.
+
+Round 102's three ranked S2 findings are closed by the implementation deliberately sequenced
+before this review: `HOUSE-03402` supplies the bounded house-wide prop/receiver correction,
+`HOUSE-03403` supplies the physical scheduled main-stair fixtures, and `HOUSE-03405` supplies the
+service-room night depth. The fresh frames show the piano body, keyboard, score and picture light;
+separate the dark living/family furniture from the adjacent receivers; and keep the foyer, hall,
+kitchen, dining room, butler's pantry and sunroom readable under the normal schedule. Inspection at
+full resolution found no clipping, floating fixture, z-fighting, missing texture or blocked route.
+
+With the HUD excluded, aggregate mean linear luminance is 0.043056 by day and 0.024087 at night;
+the darkest individual frames remain non-black at 0.013928 and 0.008296. The existing measured
+`Z-L0M` furniture/receiver ratios remain inside `HOUSE-03402`'s 0.25–3.50 acceptance band. No
+ground-floor-only constant, light, schedule entry, material, asset, renderer path or lightmap was
+changed. Exact evidence is in
+[`house-03407-ground-route-lighting.md`](house-03407-ground-route-lighting.md).
+
+Rule R2 and M5's dependency order next select `HOUSE-01275`, freezing the representative interior
+day/night render set before gate G3.
