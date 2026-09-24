@@ -1,3 +1,30 @@
+# Ground-floor main-cell C4 handoff — 2026-09-25 (`HOUSE-00989`)
+
+`L0_FAMILY`, `L0_DINING` and `L0_SUNROOM` meet C4 without new content. Their retained
+`HOUSE-01037`–`HOUSE-01076` compositions exactly match the bounded main-tier recipes: family
+seating/media, storage, side table, textiles, lamp, plant, art and curtains; dining table/eight
+chairs, sideboard/practical lamps, rug and eight-place dressing; sunroom breakfast, lounge and wet
+bar groups, plants and physical fixtures. The television remains a static screen and the dog bed
+static dressing.
+
+Round 160 captured all 23 fixed `Z-L0M` route views at clear 10:30 and scheduled 22:00 without
+light overrides. The eighteen views through the three named cells and their route thresholds were
+inspected individually at full resolution in addition to both contact sheets. They show complete,
+readable compositions with no S1/S2, clipping, floating/intersecting furnishing, z-fighting,
+missing texture or blocked route. All 613 props pass placement/route validation, the scoreboard
+assigns all 96 cells exactly once and the 90-cell controller grand tour passes with 558 stops,
+90,469 controller steps, 27 collision detours and 10.43 s. No runtime, content, asset, material,
+light, schedule, chunk or lightmap changed. Captures remain Git-ignored under
+`house-00989-ground-main-{day,night}-r160`.
+
+Dependency order now selects `HOUSE-03452`, the G4 all-main gate review: all twelve main cells are
+at C4 and every hero cell remains at least C3. The remaining forecast is 122.5 realistic / 151.5
+pessimistic hours. With 103.75 task-hours spent since the final reduction, the R14 projection is
+255.25 h, 24.75 h below the ceiling. Every build/test/render remains limited to four workers and
+pinned to CPUs 4,5,7,9; strict-XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Garage C4 handoff — 2026-09-25 (`HOUSE-03442`)
 
 `L0_GARAGE` meets C4 without new content. Its existing bounded composition supplies the household

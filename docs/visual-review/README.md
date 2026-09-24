@@ -5489,3 +5489,20 @@ accessible cells in 10.35 s. No content or runtime change was needed. Local evid
 
 Rule R4 next selects `HOUSE-00989`: every other zone's C4 task is complete, so the deliberately-last
 ground-floor family, dining and sunroom pass is now unblocked.
+
+## Round 160 — ground-floor main cells C4
+
+Commit: `HOUSE-00989` working tree (`2026-09-25`). Fresh fixed `Z-L0M` sets cover all 23 route
+views at clear 10:30 and scheduled 22:00 without light overrides. The family, dining and sunroom
+compositions retain their complete bounded main-tier recipes; the television remains a static
+screen and the dog bed static dressing. No optional content was added.
+
+Both full contact sheets and all eighteen individual views through the three named cells and their
+thresholds were inspected at full resolution. They show deliberate, readable day/night
+compositions with no S1/S2, clipping, floating/intersecting furnishing, z-fighting, missing texture
+or blocked route. The prop validator reports 613/613 rows, the scoreboard assigns all 96 cells
+exactly once and the controller grand tour reaches all 90 accessible cells in 10.43 s. Local
+evidence is in `captures/house-00989-ground-main-{day,night}-r160/`.
+
+All twelve main cells are now C4. Dependency order next selects `HOUSE-03452`, the G4 all-main gate
+review.
