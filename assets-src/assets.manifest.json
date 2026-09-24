@@ -1083,7 +1083,8 @@
         "L1_BALCONY_REAR",
         "L2_LIBRARY",
         "L2_GAMES",
-        "L2_SITTING"
+        "L2_SITTING",
+        "L3_ROOM"
       ]
     },
     {
@@ -1167,7 +1168,8 @@
       },
       "usedIn": [
         "L0_FAMILY",
-        "L2_LIBRARY"
+        "L2_LIBRARY",
+        "L3_ROOM"
       ]
     },
     {
@@ -2200,7 +2202,8 @@
         "L1_BED4",
         "L2_GAMES",
         "L2_SITTING",
-        "L2_BED6"
+        "L2_BED6",
+        "L3_ROOM"
       ]
     },
     {
@@ -2700,7 +2703,8 @@
       },
       "usedIn": [
         "L0_LIVING",
-        "L0_FAMILY"
+        "L0_FAMILY",
+        "L3_ROOM"
       ]
     },
     {
@@ -2889,7 +2893,8 @@
         "L0_DINING",
         "L1_MASTER_BED",
         "L2_LIBRARY",
-        "L2_SITTING"
+        "L2_SITTING",
+        "L3_ROOM"
       ]
     },
     {
@@ -4080,7 +4085,8 @@
       },
       "usedIn": [
         "L0_OFFICE",
-        "L2_LIBRARY"
+        "L2_LIBRARY",
+        "L3_ROOM"
       ]
     },
     {
@@ -4173,7 +4179,8 @@
         "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
-        "L2_BED6"
+        "L2_BED6",
+        "L3_ROOM"
       ]
     },
     {
@@ -4627,6 +4634,7 @@
         "B1_CELLAR",
         "B1_UNDERSTAIR",
         "L1_STOR",
+        "L3_ROOM",
         "L3_STORE_W"
       ]
     },

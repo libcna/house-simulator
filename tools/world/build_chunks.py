@@ -245,10 +245,13 @@ CHUNK_BUDGET_EXCEPTIONS = {
                       "a stair hall: the four receiver classes plus a STAIR class, glazing and "
                       "trim, plus the outside window frame. The stair is the room's purpose"),
     "L1_STAIR_MAIN": (8, "the same hall a storey up, plus an outside window-frame chunk"),
-    "L3_ROOM": (9,
+    "L3_ROOM": (21,
                 "a rafter-bounded attic room draws the ROOF it looks up at as well as its collar "
                 "ceiling (`HOUSE-00496`), and since `HOUSE-00488` the RAFTERS under that roof as "
-                "well -- two classes no room below it has, plus an outside window-frame chunk"),
+                "well -- two classes no room below it has, plus an outside window-frame chunk. "
+                "HOUSE-01016 adds twelve measured, shared kit finish groups for the main-tier "
+                "sofa, desk, seating, storage, rug, curtain and bounded children's cluster; "
+                "repeated boxes batch together and there is no vertex or Reach-cap split"),
     "L0_KITCHEN": (22,
                    "HOUSE-01049's measured fitted and dressed kitchen: HOUSE-01044's thirteen "
                    "shell/window/joinery/appliance roles plus walnut stool/board wood, sage "

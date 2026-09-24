@@ -1,3 +1,36 @@
+# Finished attic-room handoff — 2026-09-24 (`HOUSE-01016`)
+
+`L3_ROOM` now has its complete main-tier composition in twelve static rows from the retained
+catalogue. A reused leather sofa and side table make the old sitting corner; the acquired desk,
+reused dining chair and generated bookcase make the work corner; and the rug, storage chest,
+full-size box, two small toy boxes, children's-book cluster and scaled open curtain across the
+double dormer give the room its lived-in attic character. ADR-0016 removed the separate toys fill
+kit, so this task used the existing storage/book families rather than reviving it. No model,
+material family, behaviour or runtime system was added.
+
+All 348 production props pass exact support, overlap, window-front, opening, door-sweep and 0.70 m
+route validation. The authored-world validator, 90-cell grand tour and `world-content-current`
+pass. The wider inside-geometry probe still reports exactly its four pre-existing bodies, first at
+`L1_LANDING west`. The final build is 1,044 chunks / 2,834,069 vertices / 74,120,392 packed bytes,
+with 8 16-bit splits, 15 Reach splits and no 32-bit chunk. `L3_ROOM` is exactly 21/21 chunks with
+no new split.
+
+The four fixed `Z-L3` controls and five reciprocal/direct forced-light views were inspected at
+full resolution. They show grounded and separated furniture, clear north/south/west store routes,
+a supported children's cluster and correctly mounted open double-dormer curtain without clipping,
+floating geometry or z-fighting. The normal attic balance remains intentionally dark and belongs
+to M5 rather than this furnishing task.
+
+The remaining forecast is 159.5 realistic / 195 pessimistic hours. With 66.75 task-hours spent
+since the final reduction, the R14 projection is 261.75 h, 18.25 h below the hard ceiling. Rule R2
+now ties `Z-L0S` and `Z-EXR` at five accessible cells below target; its least-recently worked
+tie-break selects `Z-EXR` (Round 111 versus Round 130). The exact next unblocked MUST task is
+`HOUSE-03342`, dressing the shed, side yards, orchard corner and vegetable garden. Every
+compilation/test invocation must use no more than four workers and stay pinned to CPUs 4,5,7,9;
+strict-XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Remaining basement rooms handoff — 2026-09-24 (`HOUSE-01025`)
 
 All fourteen basement cells now have their bounded tier recipe. The two stores each receive one

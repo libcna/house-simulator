@@ -5110,3 +5110,22 @@ checks were repeated against the corrected content.
 Rule R2 now ties `Z-L3`, `Z-L0S` and `Z-EXR` at five accessible cells below target. Its
 least-recently worked tie-break selects `Z-L3` (Round 110). Next: `HOUSE-01016`, furnishing the
 finished attic room.
+
+## Round 133 — finished attic room
+
+Commit: `HOUSE-01016` working tree (`2026-09-24`). The local, Git-ignored
+[`before`](captures/fac98be-house-01016-before) and
+[`forced-light`](captures/fac98be-house-01016-after-lit) sets retain all four fixed `Z-L3`
+controls and add reciprocal/direct room views plus a double-dormer curtain detail. Forced light is
+placement evidence only; normal attic readability remains M5 work.
+
+The old leather sofa and side table form a grounded sitting corner on the rug, while the desk,
+chair and bookcase make a separate work corner without narrowing the three store routes. A chest,
+full-size box and bounded small toy-box/children's-book cluster provide the reduced plan's signs of
+habitation without reviving its removed toys fill kit. The scaled open treatment fits the two west
+dormer windows and keeps their glazing exposed. Full-resolution views show grounded and separated
+pieces, supported small props, clear openings and no clipping, floating geometry or z-fighting.
+
+Rule R2 now ties `Z-L0S` and `Z-EXR` at five accessible cells below target. Its least-recently
+worked tie-break selects `Z-EXR` (Round 111 versus Round 130). Next: `HOUSE-03342`, dressing the
+shed, side yards, orchard corner and vegetable garden.
