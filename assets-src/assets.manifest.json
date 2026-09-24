@@ -2745,8 +2745,10 @@
         "B1_HALL",
         "B1_STAIR",
         "L0_LIVING",
+        "L0_STAIR_MAIN",
         "L1_LANDING",
-        "L2_LANDING"
+        "L2_LANDING",
+        "L2_STAIR_ATTIC"
       ]
     },
     {
@@ -3482,10 +3484,13 @@
       },
       "usedIn": [
         "L0_HALL",
+        "L0_STAIR_MAIN",
         "L1_HALL",
         "L1_HALL_W",
+        "L1_STAIR_MAIN",
         "L2_HALL",
-        "L2_HALL_W"
+        "L2_HALL_W",
+        "L2_STAIR_MAIN"
       ]
     },
     {
@@ -31816,7 +31821,7 @@
       },
       "geometry": {"unitScale": 1, "upAxis": "Y", "boundsMetres": [0.994, 0.714, 0.05], "triangles": {"LOD0": 446}, "collision": "WallArt_COL"},
       "materialMap": {"ART_FRAME_DARK": "MAT_FURNITURE_PIANO_WOOD", "ART_MAT": "MAT_LIVING_ART_PAPER", "ART_IMAGE_13": "MAT_DECOR_WALL_ART_13"},
-      "usedIn": ["L1_SITTING", "L2_LIBRARY"]
+      "usedIn": ["B1_STAIR", "L1_SITTING", "L1_STAIR_MAIN", "L2_LIBRARY"]
     },
     {
       "id": "MODEL_DECOR_WALL_ART_14",
@@ -31838,7 +31843,7 @@
       },
       "geometry": {"unitScale": 1, "upAxis": "Y", "boundsMetres": [1.084, 0.764, 0.05], "triangles": {"LOD0": 446}, "collision": "WallArt_COL"},
       "materialMap": {"ART_FRAME_BRASS": "MAT_FURNITURE_PIANO_BRASS", "ART_MAT": "MAT_LIVING_ART_PAPER", "ART_IMAGE_14": "MAT_DECOR_WALL_ART_14"},
-      "usedIn": ["L1_MASTER_BED", "L2_BED5"]
+      "usedIn": ["L0_STAIR_MAIN", "L1_MASTER_BED", "L2_BED5", "L2_STAIR_ATTIC"]
     },
     {
       "id": "MODEL_DECOR_WALL_ART_15",
@@ -31860,7 +31865,7 @@
       },
       "geometry": {"unitScale": 1, "upAxis": "Y", "boundsMetres": [0.694, 0.894, 0.05], "triangles": {"LOD0": 446}, "collision": "WallArt_COL"},
       "materialMap": {"ART_FRAME_DARK": "MAT_FURNITURE_PIANO_WOOD", "ART_MAT": "MAT_LIVING_ART_PAPER", "ART_IMAGE_15": "MAT_DECOR_WALL_ART_15"},
-      "usedIn": ["B1_CINEMA", "L1_HALL", "L1_HALL_W", "L2_HALL", "L2_HALL_W"]
+      "usedIn": ["B1_CINEMA", "L1_HALL", "L1_HALL_W", "L2_HALL", "L2_HALL_W", "L2_STAIR_MAIN"]
     },
     {
       "id": "MODEL_DECOR_WALL_ART_16",
@@ -31882,7 +31887,7 @@
       },
       "geometry": {"unitScale": 1, "upAxis": "Y", "boundsMetres": [0.774, 0.774, 0.05], "triangles": {"LOD0": 446}, "collision": "WallArt_COL"},
       "materialMap": {"ART_FRAME_DARK": "MAT_FURNITURE_PIANO_WOOD", "ART_MAT": "MAT_LIVING_ART_PAPER", "ART_IMAGE_16": "MAT_DECOR_WALL_ART_16"},
-      "usedIn": ["B1_HOBBY", "L3_ROOM"]
+      "usedIn": ["B1_HOBBY", "L3_ROOM", "L3_STAIR_HEAD"]
     },
     {
       "id": "TEXTURE_DECOR_WALL_ART_13",

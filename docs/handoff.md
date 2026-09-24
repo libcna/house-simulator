@@ -1,3 +1,36 @@
+# Stair halls and landings handoff — 2026-09-24 (`HOUSE-03343`)
+
+All six stair cells now meet their tiered `R-STAIR-LANDING` recipe with eleven static rows from
+the existing kit: one wall frame in each cell, benches on the broad L0 and attic landings, and
+three scaled flat landing runners. The two principal flights also use the finish schedule's
+`stair_carpet` surface. The existing shell generator emits a continuous 760 mm wool runner across
+every tread and riser, retaining 170 mm exposed oak on each side. Collision remains the existing
+full-width ramp, so the authored 1.10 m walking width is unchanged. No new asset, material family,
+runtime subsystem or collision shape was added.
+
+All 322 props pass the exact placement/support/opening/door-sweep/0.70 m route validator. The
+shell generator selftest, both stair-traversal tests, all three stairwell tests, the authored-world
+validator, 90-cell grand tour and `world-content-current` pass. The wider inside-geometry probe
+still reports exactly its four pre-existing bodies, first at `L1_LANDING west`. The final content
+build is 1,016 chunks / 2,760,492 vertices / 71,765,928 packed bytes, with 8 16-bit splits, 15
+Reach splits and no 32-bit chunk; all six stair cells equal their declared exact ceilings.
+
+Nine fixed clear-day and forced-light `Z-STAIR` views plus direct landing views were inspected at
+full resolution. They show grounded landing pieces, clear openings and unobstructed flights; the
+generated GLBs independently confirm the runner's separate wool surface and exact bounds. The
+normal-light basement and attic views remain dark, correctly deferred to M5 rather than hidden in
+this furnishing task.
+
+The remaining forecast is 162 realistic / 198 pessimistic hours. With 64.25 task-hours spent
+since the final reduction, the R14 projection is 262.25 h, 17.75 h below the hard ceiling. Rule
+R2 now ties `Z-B1` and `Z-L0S` at five accessible cells below target; its least-recently worked
+tie-break selects `Z-B1` (Round 126 versus Round 130). The exact next unblocked MUST task is
+`HOUSE-01025`, dressing the remaining basement storage, cellar, laundry and hobby rooms. Every
+compilation/test invocation must use no more than four workers and stay pinned to CPUs 4,5,7,9;
+strict-XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Ground-floor study and closet handoff — 2026-09-24 (`HOUSE-00994`)
 
 The secondary study now has its complete bounded desk/chair, bookcase and desk-lamp composition,

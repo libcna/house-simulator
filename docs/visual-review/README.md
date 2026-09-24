@@ -5068,3 +5068,24 @@ closet clutter was pulled forward.
 Rule R2 now ties `Z-L0S`, `Z-B1` and `Z-STAIR` at five accessible cells below target. Its
 least-recently worked tie-break selects `Z-STAIR` (Round 117). Next: `HOUSE-03343`, dressing the
 stair halls and landings.
+
+## Round 131 — stair halls and landings
+
+Commit: `HOUSE-03343` working tree (`2026-09-24`). The local, Git-ignored final
+[`clear-day`](captures/house-03343-stairs-day-final) and
+[`forced-light`](captures/house-03343-stairs-lit-final) sets retain all nine fixed `Z-STAIR`
+views. Supplemental direct landing views inspect the two benches and three flat runners. Forced
+groups are placement evidence only; normal day/night readability remains M5 work.
+
+All six stair cells now have their recipe's reused framed art, and the broad L0 and attic
+landings add one grounded bench each. The main landing surfaces use bounded non-colliding runner
+props. The two principal flights also receive the finish schedule's continuous 760 mm wool
+runner over every tread and riser, with 170 mm of oak exposed at each side. Generated-geometry
+checks confirm the runner is a separate physical render surface while collision remains the
+unchanged full-width ramp. The fixed and direct views show clear flights, openings and landing
+routes without a new clipping or floating defect. The known dark basement/attic views are not
+misreported as complete lighting.
+
+Rule R2 now ties `Z-B1` and `Z-L0S` at five accessible cells below target. `Z-B1` was worked less
+recently (Round 126 versus Round 130), so the exact next unblocked MUST task is `HOUSE-01025`,
+dressing the remaining basement storage, cellar, laundry and hobby rooms.

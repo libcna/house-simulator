@@ -23,7 +23,7 @@
       "footprint": { "x": [2.20, 4.90], "z": [-20.20, -14.30] },
       "run": "-Z", "shape": "u", "firstRunAt": "cross_hi", "topLandingToFoot": true,
       "landings": [{ "at": 9, "depth": 1.10 }],
-      "collisionRamp": true, "surface": "stair_wood"
+      "collisionRamp": true, "surface": "stair_carpet"
     },
     {
       // 2.90 m / 16. The landing is riser 12, +2.175 above L1's FFL; §12.4 said +2.16.
@@ -34,7 +34,7 @@
       "run": "-Z", "shape": "u", "firstRunAt": "cross_hi", "topLandingToFoot": true,
       "topCrossLandingDepth": 1.10,
       "landings": [{ "at": 12, "depth": 1.10 }],
-      "collisionRamp": true, "surface": "stair_wood"
+      "collisionRamp": true, "surface": "stair_carpet"
     },
     {
       // 2.75 m / 15, straight, north-running, and narrower because it serves the attic.

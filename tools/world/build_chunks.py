@@ -384,6 +384,23 @@ CHUNK_BUDGET_EXCEPTIONS["L0_OFFICE"] = (
     _office_reason + "; HOUSE-00994 adds four measured shared desk/chair/bookcase finish groups; "
                       "no vertex or Reach-cap split")
 
+# `HOUSE-03343`: six stair-wall frames reuse the four-art family, the three main cells reuse the
+# established two-role hall runner on their flat landing surfaces, and two measured broad landings
+# reuse the three-role piano bench. These exact resident counts retain the visible frame image/mat,
+# runner border and bench upholstery instead of flattening unlike close-range finishes.
+for stair_cell, added, detail in (
+        ("L0_STAIR_MAIN", 7, "one wall frame, a landing runner and one bench"),
+        ("L1_STAIR_MAIN", 5, "one wall frame and a landing runner"),
+        ("L2_STAIR_MAIN", 5, "one wall frame and a landing runner")):
+    previous_limit, previous_reason = CHUNK_BUDGET_EXCEPTIONS[stair_cell]
+    CHUNK_BUDGET_EXCEPTIONS[stair_cell] = (
+        previous_limit + added,
+        previous_reason + f"; HOUSE-03343 adds {added} measured shared finish groups for {detail}")
+CHUNK_BUDGET_EXCEPTIONS["L2_STAIR_ATTIC"] = (
+    10, "six measured stair-shell finish chunks plus HOUSE-03343's four shared bench/frame groups")
+CHUNK_BUDGET_EXCEPTIONS["L3_STAIR_HEAD"] = (
+    9, "six measured stair-head shell chunks plus HOUSE-03343's three shared wall-frame groups")
+
 # `HOUSE-03263`: the L1 circulation doors reuse `HOUSE-00942`'s exact joinery grammar and steel
 # finish. Most affected cells stay at or below their existing measured ceiling; the windowed
 # shared bathroom is the one owner cell whose physical lever adds a distinct seventh shell role
@@ -653,6 +670,10 @@ _b1_stair_limit, _b1_stair_reason = CHUNK_BUDGET_EXCEPTIONS["B1_STAIR"]
 CHUNK_BUDGET_EXCEPTIONS["B1_STAIR"] = (
     _b1_stair_limit + 3,
     _b1_stair_reason + "; HOUSE-01020 adds the reused bench's three measured finish groups")
+_b1_stair_limit, _b1_stair_reason = CHUNK_BUDGET_EXCEPTIONS["B1_STAIR"]
+CHUNK_BUDGET_EXCEPTIONS["B1_STAIR"] = (
+    _b1_stair_limit + 2,
+    _b1_stair_reason + "; HOUSE-03343 adds two measured shared wall-frame finish groups")
 CHUNK_BUDGET_EXCEPTIONS["B1_UNDERSTAIR"] = (
     9, "five measured shell finish chunks plus HOUSE-01020's four shared low-shelf and storage-box "
        "kit roles; no vertex or Reach-cap split")

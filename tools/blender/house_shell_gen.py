@@ -712,6 +712,8 @@ STAIR_BALUSTER_SECTION = 0.040
 STAIR_BALUSTER_MAX_PITCH = 0.140
 STAIR_STRINGER_SECTION = 0.120
 STAIR_LANDING_TRIM_HEIGHT = 0.065
+STAIR_RUNNER_WIDTH = 0.760
+STAIR_RUNNER_THICKNESS = 0.008
 
 
 def flight_steps(flight: dict, bottom: float, portals=()):
@@ -1324,6 +1326,16 @@ def build_flight(flight: dict, solid, bottom: float, *, add=None, construction=N
     def with_along(box, low, high):
         return (low, high, box[2], box[3]) if along_axis_x else (box[0], box[1], low, high)
 
+    def runner_box(box):
+        """Centre a fixed-width runner across a tread while leaving its oak edges exposed."""
+        if along_axis_x:
+            centre = (box[2] + box[3]) / 2.0
+            return (box[0], box[1], centre - STAIR_RUNNER_WIDTH / 2.0,
+                    centre + STAIR_RUNNER_WIDTH / 2.0)
+        centre = (box[0] + box[1]) / 2.0
+        return (centre - STAIR_RUNNER_WIDTH / 2.0,
+                centre + STAIR_RUNNER_WIDTH / 2.0, box[2], box[3])
+
     for tread in treads:
         emit(tread["box"], bottom, tread["y1"])
         # The nosing overhangs the riser below it: it projects from the tread's FRONT edge, which
@@ -1333,6 +1345,24 @@ def build_flight(flight: dict, solid, bottom: float, *, add=None, construction=N
         edge = sorted((front - tread["up"] * NOSING_PROJECT, front))
         emit(with_along(tread["box"], edge[0], edge[1]),
              tread["y1"] - NOSING_THICK, tread["y1"])
+
+    # The two principal flights retain oak beneath a narrow wool runner. Each tread receives a
+    # thin horizontal strip and each riser a matching return, so the runner reads as continuous
+    # from either landing instead of as disconnected mats. Collision remains the existing ramp;
+    # these are visual shell faces and therefore cannot narrow the authored 1.10 m clear width.
+    if flight.get("surface") == "stair_carpet":
+        if set_surface is not None:
+            set_surface("stair_runner")
+        for tread in treads:
+            carpet = runner_box(tread["box"])
+            emit(carpet, tread["y1"], tread["y1"] + STAIR_RUNNER_THICKNESS)
+            low, high = along_of(carpet)
+            front = low if tread["up"] > 0 else high
+            return_edge = sorted((front - tread["up"] * STAIR_RUNNER_THICKNESS, front))
+            emit(with_along(carpet, return_edge[0], return_edge[1]),
+                 tread["y1"] - rise, tread["y1"])
+        if set_surface is not None:
+            set_surface("stair")
 
     # `HOUSE-00460`: a handrail up every side of a run that is not against a wall, and a newel at
     # each end of it. "Against a wall" is the run's across edge lying on the CELL's own boundary --
@@ -1346,7 +1376,7 @@ def build_flight(flight: dict, solid, bottom: float, *, add=None, construction=N
             # painted joinery for their carriage; concrete and stone flights use the established
             # exterior metal role rather than improbable concrete or mossy-stone balusters.
             set_surface("trim" if flight.get("surface") in (
-                "stair_wood", "stair_wood_open") else "metal")
+                "stair_wood", "stair_carpet", "stair_wood_open") else "metal")
         # "Against a wall" is the run's across edge lying on whatever BOUNDS the flight. Since
         # `HOUSE-00480` that is the stairwell the flight comes up -- `frame`'s cross range -- and
         # not the cell's box, whose edges are wall centre lines and which the flight no longer
@@ -1537,6 +1567,7 @@ SURFACE_COLOURS = {
     "window_glass": (0.55, 0.72, 0.80, 0.35),
     "slider_frame": (0.38, 0.40, 0.43, 1.0),
     "stair":     (0.55, 0.42, 0.30, 1.0),
+    "stair_runner": (0.48, 0.30, 0.24, 1.0),
     "roof":      (0.32, 0.30, 0.30, 1.0),
     "structure": (0.68, 0.58, 0.44, 1.0),
     "metal":     (0.45, 0.46, 0.48, 1.0),
@@ -1564,6 +1595,7 @@ SHELL_MATERIALS = {
     "window_glass": "MAT_WINDOW_GLASS_CLEAR",
     "slider_frame": "MAT_FRAME_ALUMINIUM",
     "stair": "MAT_DOOR_HARDWOOD",
+    "stair_runner": "MAT_HALL_RUNNER_WOOL",
     "roof": "MAT_ROOF_SHINGLE",
     "structure": "MAT_HATCH_PLY",
     "metal": "MAT_METAL_BALCONY",
@@ -1571,6 +1603,7 @@ SHELL_MATERIALS = {
 
 STAIR_MATERIALS = {
     "stair_wood": "MAT_DOOR_HARDWOOD",
+    "stair_carpet": "MAT_DOOR_HARDWOOD",
     "stair_wood_open": "MAT_HATCH_PLY",
     "concrete": "MAT_CONCRETE_BROOM",
     "bluestone": "MAT_BLUESTONE_PAVER",
@@ -4699,13 +4732,32 @@ def selftest(output: Path) -> int:
             f"every one of the {len(boxes)} boxes of the main stair is inside its footprint, but "
             f"for the bottom nosing's {NOSING_PROJECT * 1000:.0f} mm overhang")
     landing_trim_boxes = 4 * 2
-    require(len(boxes) == 2 * int(main["risers"]) + 2 + landing_trim_boxes,
-            f"a step and nosing per riser, the turn and exit bridge, and four landing-edge "
-            f"trims apiece ({len(boxes)})")
+    runner_boxes = [box for box in boxes
+                    if abs((box[1] - box[0]) - STAIR_RUNNER_WIDTH) < 1e-9]
+    runner_treads = [box for box in runner_boxes
+                     if abs((box[3] - box[2]) - STAIR_RUNNER_THICKNESS) < 1e-9]
+    runner_risers = [box for box in runner_boxes
+                     if abs((box[5] - box[4]) - STAIR_RUNNER_THICKNESS) < 1e-9]
+    runner_count = 2 * int(main["risers"])
+    require(len(boxes) == 2 * int(main["risers"]) + runner_count + 2
+            + landing_trim_boxes,
+            f"a step, nosing, runner tread and runner riser per rise, the turn and exit bridge, "
+            f"and four landing-edge trims apiece ({len(boxes)})")
+    require(len(runner_treads) == int(main["risers"])
+            and len(runner_risers) == int(main["risers"]),
+            f"the main flight's wool runner is continuous over all treads and risers "
+            f"({len(runner_treads)} tread, {len(runner_risers)} riser strips)")
+    exposed_edge = (float(main["width"]) - STAIR_RUNNER_WIDTH) / 2.0
+    lane_centres = {(tread["box"][0] + tread["box"][1]) / 2.0 for tread in steps}
+    require(abs(exposed_edge - 0.170) < 1e-9
+            and all(any(abs((box[0] + box[1]) / 2.0 - centre) < 1e-9
+                        for centre in lane_centres)
+                    for box in runner_boxes),
+            f"and it is centred with {exposed_edge * 1000:.0f} mm of oak exposed at each edge")
     require(min(by0 for _a, _b, by0, _c, _d, _e in boxes) >= 0.60 - 1e-6
             and abs(max(by1 for _a, _b, _c, by1, _d, _e in boxes)
-                    - float(levels["L1"]["ffl"])) < 1e-6,
-            "and none of it is below the floor it starts on or above the floor it reaches")
+                    - float(levels["L1"]["ffl"]) - STAIR_RUNNER_THICKNESS) < 1e-6,
+            "and none of it is below the start floor or above the runner on the arrival tread")
     # A nosing overhangs the tread BELOW it, so it must sit outside its own tread on the side the
     # run descends. Winding this the wrong way round for the second run of a `u` puts the nosing
     # inside the step, where it is invisible and does nothing.
@@ -4970,7 +5022,8 @@ def selftest(output: Path) -> int:
     # ---- `HOUSE-00471`: the receivers are welded, so a wall is one surface ----------------------
     require(set(LIGHTMAP_RECEIVERS) == {"floor", "ceiling", "wall", "exterior"},
             f"the receivers are the room-scale classes, named once ({LIGHTMAP_RECEIVERS})")
-    require(not (set(LIGHTMAP_RECEIVERS) & {"trim", "glass", "metal", "stair", "structure",
+    require(not (set(LIGHTMAP_RECEIVERS) & {"trim", "glass", "metal", "stair", "stair_runner",
+                                            "structure",
                                             "roof", "dormer_siding", "window_frame",
                                             "window_shutter", "window_glass",
                                             "slider_frame",
