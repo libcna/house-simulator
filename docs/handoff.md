@@ -1,3 +1,29 @@
+# Garage C4 handoff — 2026-09-25 (`HOUSE-03442`)
+
+`L0_GARAGE` meets C4 without new content. Its existing bounded composition supplies the household
+estate, workbench with supported tools, open shelf, toolbox, garden tools and two bins while
+retaining a clear vehicle bay and loft ladder. The visible utility loft keeps its boxes, seasonal
+case, spare-lumber abstraction and stacked garden furniture. Four physical utility fittings and
+the opener puck already provide the scheduled fluorescent character.
+
+Round 159 captured both fixed `Z-GAR` views at clear 10:30 and scheduled 22:00 without light
+overrides. Full-resolution inspection shows the main bay, open sectional leaf and loft access
+readable in both conditions, with no S1/S2, clipping, floating/intersecting furnishing, z-fighting,
+missing texture or blocked route. All 613 props pass placement/route validation, the scoreboard
+assigns all 96 cells exactly once and the 90-cell controller grand tour passes with 558 stops,
+90,469 controller steps, 27 collision detours and 10.35 s. No runtime, content, asset, material,
+light, schedule, chunk or lightmap changed. Captures remain Git-ignored under
+`house-03442-garage-{day,night}-r159`.
+
+Rule R4 now selects `HOUSE-00989`: every non-ground-floor main cell is C4, so the deliberately-last
+ground-floor family, dining and sunroom pass is unblocked. The remaining forecast is 124 realistic
+/ 153.25 pessimistic hours. With 102.25 task-hours spent since the final reduction, the R14
+projection is 255.5 h, 24.5 h below the ceiling. Every build/test/render remains limited to four
+workers and pinned to CPUs 4,5,7,9; strict-XNA additionally requires
+`HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Master-bedroom C4 handoff — 2026-09-25 (`HOUSE-03444`)
 
 `L1_MASTER_BED` meets C4. The existing bounded set already supplied the double bed and authored

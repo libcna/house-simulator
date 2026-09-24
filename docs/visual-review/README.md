@@ -5472,3 +5472,20 @@ Local evidence is in `captures/house-03444-master-{before,after}-{day,night}-r15
 
 Rule R2 next selects `HOUSE-03442`: the garage is the only non-ground-floor zone whose main cell
 has not reached C4. Rule R4 keeps the ground-floor main cells last.
+
+## Round 159 — garage C4
+
+Commit: `HOUSE-03442` working tree (`2026-09-25`). Fresh fixed `Z-GAR` sets cover the garage
+interior and loft-access views at clear 10:30 and scheduled 22:00 without light overrides. The
+existing bounded set retains the household estate, workbench/tools, shelf, toolbox, garden tools,
+bins and loft storage while keeping the vehicle bay, open sectional leaf and ladder clear.
+
+Full-resolution inspection shows a complete, readable workshop/vehicle/storage composition under
+daylight and the scheduled utility fixtures, with no S1/S2, clipping, floating/intersecting
+furnishing, z-fighting, missing texture or blocked route. The prop validator reports 613/613 rows,
+the scoreboard assigns all 96 cells exactly once and the controller grand tour reaches all 90
+accessible cells in 10.35 s. No content or runtime change was needed. Local evidence is in
+`captures/house-03442-garage-{day,night}-r159/`.
+
+Rule R4 next selects `HOUSE-00989`: every other zone's C4 task is complete, so the deliberately-last
+ground-floor family, dining and sunroom pass is now unblocked.
