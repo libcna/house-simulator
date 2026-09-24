@@ -5453,3 +5453,22 @@ asset, material, light, schedule or lightmap change was needed. Local evidence i
 
 Rule R2 next selects `HOUSE-03444`: the first floor and garage each have one incomplete main cell,
 and `Z-L1` is least recently worked by their latest review rounds.
+
+## Round 158 — master bedroom C4
+
+Commit: `HOUSE-03444` working tree (`2026-09-25`). Fresh fixed `Z-L1` sets cover all six views at
+clear 10:30 and scheduled 22:00 before and after the change, without light overrides. The existing
+master-bedroom composition already contains the double bed and authored bedding, paired
+nightstands and physical bedside lamps, south curtain, rug, storage, work and sitting pieces. The
+only missing main-tier item was wall art, now supplied by one reused capped-family piece centred
+over the headboard.
+
+Full-resolution inspection shows the artwork grounded against the wall and readable in both
+lighting conditions, with no S1/S2, clipping, floating furnishing, z-fighting, missing texture or
+blocked route. The prop validator reports 613/613 rows, all fifteen world rules pass, the
+inside-geometry route passes and the controller grand tour reaches all 90 cells in 10.81 s. The
+cell's exact 29 chunks add only the art's three truthful material roles and require no Reach split.
+Local evidence is in `captures/house-03444-master-{before,after}-{day,night}-r158/`.
+
+Rule R2 next selects `HOUSE-03442`: the garage is the only non-ground-floor zone whose main cell
+has not reached C4. Rule R4 keeps the ground-floor main cells last.

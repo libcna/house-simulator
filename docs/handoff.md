@@ -1,3 +1,31 @@
+# Master-bedroom C4 handoff — 2026-09-25 (`HOUSE-03444`)
+
+`L1_MASTER_BED` meets C4. The existing bounded set already supplied the double bed and authored
+bedding, paired nightstands with physical bedside lamps, south curtain, rug, wardrobe, dresser,
+desk/chair and sitting corner. Round 158 adds only the missing wall item: one reused
+`MODEL_DECOR_WALL_ART_14` from the capped family, centred over the headboard. No new asset,
+material family, light, schedule or runtime mechanism was added.
+
+Fresh six-view `Z-L1` sets at clear 10:30 and scheduled 22:00 were captured before and after the
+change without light overrides. Full-resolution inspection confirms a grounded, deliberate
+composition with readable bedding, textiles, practicals and wall treatment, and no S1/S2,
+clipping, floating furnishing, z-fighting, missing texture or blocked route. All 613 props pass
+placement/route validation, all fifteen world rules pass, the inside-geometry route passes and the
+90-cell controller grand tour passes with 558 stops, 90,469 controller steps, 27 collision detours
+and 10.81 s. The exact measured cell grows from 26 to 29 chunks for the art's truthful frame, paper
+and image roles, with no vertex-cap or Reach split. The deployed and build world trees compare
+identically. Captures remain Git-ignored under
+`house-03444-master-{before,after}-{day,night}-r158`.
+
+Rule R2 selects `HOUSE-03442` next: `Z-GAR` is the only remaining non-ground-floor zone with an
+incomplete C4 main cell. Rule R4 continues to keep `Z-L0M` last. The remaining forecast is 125
+realistic / 154.5 pessimistic hours. With 101.25 task-hours spent since the final reduction, the
+R14 projection is 255.75 h, 24.25 h below the ceiling. Every build/test/render remains limited to
+four workers and pinned to CPUs 4,5,7,9; strict-XNA additionally requires
+`HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Attic room C4 handoff — 2026-09-25 (`HOUSE-03446`)
 
 `L3_ROOM` meets C4 without restoring its retired hero depth. The bounded existing kit provides the

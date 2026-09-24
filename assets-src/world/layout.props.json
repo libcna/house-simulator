@@ -1975,6 +1975,19 @@
       "interactable": null
     },
     {
+      "id": "PROP_L1_MASTER_BED_WALL_ART",
+      "asset": "MODEL_DECOR_WALL_ART_14",
+      "cell": "L1_MASTER_BED",
+      "position": [-3.90, 5.25, -22.08],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
       "id": "PROP_L1_MASTER_BATH_BATH",
       "asset": "MODEL_BATHROOM_BATH",
       "cell": "L1_MASTER_BATH",

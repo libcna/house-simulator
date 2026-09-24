@@ -884,6 +884,15 @@ for _fixture_cell, _fixture_limit, _fixture_detail in (
         _fixture_limit,
         _fixture_reason + f"; HOUSE-03404 adds {_fixture_detail}; no split")
 
+# `HOUSE-03444`: the master-bedroom C4 composition completes its required wall treatment with one
+# member of the already capped wall-art family. Its frame, paper and image are three truthful
+# material roles; the measured result remains below every vertex cap and requires no Reach split.
+_master_bed_reason = CHUNK_BUDGET_EXCEPTIONS["L1_MASTER_BED"][1]
+CHUNK_BUDGET_EXCEPTIONS["L1_MASTER_BED"] = (
+    29,
+    _master_bed_reason +
+    "; HOUSE-03444 adds three wall-art material roles from the capped family; no split")
+
 # `HOUSE-03405`: ground-floor service rooms and the garage reuse the same bounded fixture
 # catalogue. Repeated fittings batch by their truthful source roles and independently switched
 # emitters remain separate. These are the exact post-build counts; none is a vertex- or Reach-cap
