@@ -87,7 +87,8 @@ namespace
                      PlayerState& state,
                      const std::vector<Vector3>& waypoints,
                      int& steps,
-                     bool& fellHard)
+                     bool& fellHard,
+                     float arrived = kArrived)
     {
         BroadPhase broad;
         InputState input;
@@ -108,7 +109,7 @@ namespace
             fellHard = fellHard || report.landing == Landing::Hard;
 
             const float distance = Flat(state.position, target);
-            if (distance < kArrived)
+            if (distance < arrived)
             {
                 ++next;
                 sinceProgress = 0;
@@ -346,15 +347,24 @@ TEST(StairTraversalTests, FoyerApproachReachesTheFirstFloorHall)
     state.position = Vector3(1.55F, 0.60F + kRise + 0.05F, -16.0F);
     int steps = 0;
     bool fellHard = false;
-    const auto leg = [&](const CollisionCell& cell, const std::vector<Vector3>& points)
+    const auto leg =
+        [&](const CollisionCell& cell, const std::vector<Vector3>& points, float arrived = kArrived)
     {
-        const std::size_t reached = Walk(statics, cell, state, points, steps, fellHard);
+        const std::size_t reached = Walk(statics, cell, state, points, steps, fellHard, arrived);
         EXPECT_EQ(reached, points.size()) << "stuck at (" << state.position.X << ", " << state.position.Y
                                           << ", " << state.position.Z << ")";
         EXPECT_FALSE(fellHard);
     };
-    leg(*foyer, {Vector3(2.85F, 0.60F, -16.0F)});
-    leg(*lower, {Vector3(3.0F, 0.60F, -14.7F), Vector3(4.10F, 0.60F, -14.7F)});
+    // Reach the stair-room side of the opening, not merely the old 0.60 m arrival radius around
+    // it. The latter accepted x=2.25 -- just five centimetres over the wall centre -- while the
+    // returning flight still blocked the player's full standing capsule.
+    // Stop while still inside the 0.40 m cross-cell collision-sharing band. The real tracker
+    // switches cells at the opening plane; driving the old foyer cell further into the stair room
+    // would intentionally leave its borrowed floor coverage and test a state the game cannot use.
+    leg(*foyer, {Vector3(2.55F, 0.60F, -14.80F)}, 0.12F);
+    // Stay in the clear strip north of the returning run until the body is fully past it; the
+    // ordinary 0.60 m waypoint radius turns east too early for a 0.60 m-wide capsule.
+    leg(*lower, {Vector3(2.75F, 0.60F, -14.70F), Vector3(4.10F, 0.60F, -14.70F)}, 0.12F);
     leg(*lower, PathUp(segments));
     EXPECT_GT(state.position.Y - state.Rise(), 3.25F) << "the body never reached the first floor";
     leg(*upper, {Vector3(2.95F, 3.65F, -14.45F), Vector3(1.90F, 3.65F, -14.85F)});

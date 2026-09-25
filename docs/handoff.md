@@ -1,3 +1,45 @@
+# Traversal-regression handoff — 2026-09-25 (`HOUSE-03632`)
+
+Manual exploration after G5 exposed two S1 traversal defects, so R1(a), R10 and R15 selected this
+bounded correction before the dependency-order Web task. The powder-room controller physically
+crossed its doorway but kept `L0_HALL` active: after movement the game passed the grounded soles to
+`CellTracker`, while spawn passed the capsule centre. A grounded capsule can settle a few floating
+point ulps below FFL, making the adjacent cell's exact vertical containment fail. Both update paths
+now track the centre. The new two-direction integration finishes in `L0_HALL` at x=0.935 and in
+`L0_WC1` at x=3.604; the existing camera/body boundary regression also passes. This is the likely
+cause of the reported half-in-wall state and room-transition flashes.
+
+The main-stair entrance combined three authored obstructions: half of the 1.60 m cased opening was
+inside the solid return support, the lower run was flush enough to the north edge to lack a usable
+approach, and the foyer console's proxy occupied the remaining line. The opening is now a wholly
+clear 1.00 m route, the L0 flight starts at z=-15.30 so it retains an approach while still opening
+the basement-well rail, and the existing console/dressing are mirrored to the other side of the
+foyer. The L1→L2 flight remains at its prior placement: applying the same shift there obstructed
+the `L1_BED5` door and the open-door control caught it before commit. The final focused set passes
+10/10; all 62 doors retain a valid open control, all eight flights walk both ways, and the tightened
+foyer route crosses the opening and reaches L1. The offscreen day capture
+`/tmp/l0-stair-entrance-final.png` was inspected; it confirms that the console is gone from the
+route, while also confirming the user's separate complaint that the interior is too dark.
+
+The full 1,472-test unit run initially passed 1,469 and found only three task-owned exact-world
+expectations: the corrected foyer/stair visibility sets, the deliberately occupied L0 stair-cell
+midpoint, and the accidental L1 shift above. After those corrections the failed set plus every
+stair, stair-well and opening regression passes 10/10. The two-direction offscreen runtime test
+passes, world content rebuilt cleanly, and the complete repository gate passes every task-owned
+check including strict XNA compilation of 341 translation units. Its sole remaining failure is the
+pre-existing user-owned root `.claude` entry in `check_layout`; it was neither changed nor staged.
+
+This correction consumes 2 h of the existing M11 bounded-fix allowance. `HOUSE-03633` consumes the
+next 1 h and is selected now by the same S2/D6 evidence: fixed captures show the ground-floor hall,
+WC1 and stair approach nearly black because Wet and Circulation schedules are off during bright
+clock hours despite inadequate baked daylight. It must reuse the schedule/lightmap path and must
+not globally raise exposure. After it, dependency order returns to `HOUSE-02843`. The plan has 51
+open MUST tasks and 78 realistic / 103.75 pessimistic hours remaining; 148.25 completed hours plus
+the pessimistic remainder project 252 h, 28 h below the 280 h ceiling. Every compilation and
+content build in this correction was pinned to CPUs 0–3 and at most four workers.
+
+---
+
 # Menu-Escape regression handoff — 2026-09-25 (`HOUSE-02523` correction)
 
 A manual play report exposed a concrete integration defect that the screen-level menu tests could

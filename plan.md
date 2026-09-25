@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **50 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 68 / 80 / 106 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5, M7, M9 and M12 passed; M8 listening and M10 baseline work are environment-blocked.** Next: `HOUSE-02843` |
+| Active plan | **51 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 66 / 78 / 104 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5, M7, M9 and M12 passed; M8 listening and M10 baseline work are environment-blocked.** Next: `HOUSE-03633`, then `HOUSE-02843` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -108,11 +108,11 @@ the [optional backlog](#optional-and-conditional-backlog) is required.
 | # | Area | Criterion | Proved by |
 |---|---|---|---|
 | **D1** | Architecture | The intended property exists: the basement, the ground floor, the garage, both upper floors, the attic, the stairs, the front and rear exterior with the garden, and the street. Every zone is at C2 or better with no S1/S2 architecture defect open | G2 `HOUSE-03280`, G3 `HOUSE-03420` |
-| **D2** | Traversal | Every intended-accessible area can be reliably visited. The grand tour walks the real controller from the street through the property and the house, basement to attic, through the exterior areas and back, with no inaccessible room, blocked door, broken stair, trap or clipping through critical geometry. The random walk and the inside-geometry guarantees pass. No S1/S2 traversal or collision defect is open | `HOUSE-03226`, `HOUSE-03227`, `HOUSE-03240`, `HOUSE-03631` |
+| **D2** | Traversal | Every intended-accessible area can be reliably visited. The grand tour walks the real controller from the street through the property and the house, basement to attic, through the exterior areas and back, with no inaccessible room, blocked door, broken stair, trap or clipping through critical geometry. The random walk and the inside-geometry guarantees pass. No S1/S2 traversal or collision defect is open | `HOUSE-03226`, `HOUSE-03227`, `HOUSE-03240`, `HOUSE-03632`, `HOUSE-03631` |
 | **D3** | Furnishing | Every accessible room has enough static content to communicate its purpose (C3). Secondary and utility rooms are complete without hero polish. No room looks like an unfinished placeholder | checkpoint `HOUSE-03380`, G3 `HOUSE-03420` |
 | **D4** | Visual quality | Every accessible room is at C3, the twelve main cells at C4, and the five hero areas at C5. No higher level is required anywhere | G3, G4 `HOUSE-03452`, G5 `HOUSE-03480` |
 | **D5** | Environment | Time of day runs automatically and can be set; day and night show the sun, moon and stars; the sky shows clear, overcast and rain; rain stays out of covered areas; surfaces are wet in rain; fog follows the weather. A snow weather state shows its overcast sky and fog without particles (falling snow is optional). Detailed weather simulation is not required | `HOUSE-03520`, `HOUSE-02521` |
-| **D6** | Lighting | Interior lights follow the automatic schedule; furniture is consistent with the baked lighting; every accessible room is readable by day and at night; exterior night lighting is readable | `HOUSE-03401`, `HOUSE-03402`, G3 |
+| **D6** | Lighting | Interior lights follow the automatic schedule; furniture is consistent with the baked lighting; every accessible room is readable by day and at night; exterior night lighting is readable | `HOUSE-03401`, `HOUSE-03402`, `HOUSE-03633`, G3 |
 | **D7** | Audio | Footsteps on six broad surface categories; one interior tone; exterior day and night beds; rain and wind layers, quieter indoors by sky exposure; volume settings | `HOUSE-01939`, `HOUSE-02516` |
 | **D8** | Application | *Start*, pause, one settings screen (graphics, audio, controls, environment), credits and quit; a controls hint; Web controls; Android touch controls | `HOUSE-02523`, `HOUSE-02528`, `HOUSE-03721`, `HOUSE-03039` |
 | **D9** | Performance | The representative scenarios meet the documented target on the reference desktop; the Web and Android presets meet their targets in their representative scenes; no major memory or performance defect remains | `HOUSE-02404`, `HOUSE-02898`, `HOUSE-03037`, `HOUSE-03071` |
@@ -121,7 +121,7 @@ the [optional backlog](#optional-and-conditional-backlog) is required.
 | **D10c** | Android | It builds, installs and runs on one representative device (or the best available emulator, recorded as such); touch controls suffice for the walk; the representative traversal completes without major corruption and with acceptable performance. **Only a working device path satisfies D10c.** If CNA's Android graphics path is still blocked upstream (BL-13) when everything else is done, the blocker is re-verified with evidence, every desktop-side Android task passes, and the device tasks stay open until CNA lands the fix: House Simulator is then **not DONE**, it waits | `HOUSE-03038`. `HOUSE-02951` may establish an upstream blocker, but **a blocker does not satisfy D10c**, and House Simulator does not reach DONE until the Android device path succeeds |
 | **D11** | Testing | The existing gates and suites pass; the grand tour passes; the representative render sets pass; the XNA-only and strict-XNA gates pass; ASAN and UBSAN are clean once; the 20-minute stability run and the one final 2-hour run pass; the Web smoke test and the Android checklist pass | `HOUSE-02783`, `HOUSE-02784`, `HOUSE-03076` |
 | **D12** | Documentation | `plan.md`, `cna-house.md`, `README.md` and `docs/*` describe the shipped scope; every asset is manifested and licensed | `HOUSE-02788`, `HOUSE-03075` |
-| **D13** | Defects | No known S1 or S2 defect; every open issue is S3/S4 | `HOUSE-03631`, `HOUSE-03078` |
+| **D13** | Defects | No known S1 or S2 defect; every open issue is S3/S4 | `HOUSE-03632`, `HOUSE-03633`, `HOUSE-03631`, `HOUSE-03078` |
 | **D14** | Bounded polish | M11's one final review and its bounded fix pass are complete, within the budget of rule R12 | `HOUSE-02714`, `HOUSE-03631` |
 
 Tier E (compiled effects) is optional. DONE requires Tier S to be complete on every platform.
@@ -400,7 +400,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M8](#m8--atmospheric-audio-essentials) — Atmospheric audio essentials | B | 03541–03570 | 6 | `HOUSE-01939` | D7 | 9 |
 | [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 0 | `HOUSE-02528` | D8 | — |
 | [M10](#m10--performance-measurement-driven) — Performance, measurement-driven | B | 03601–03630 | 4 | `HOUSE-02405` | D9 | 9.5 |
-| [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 3 | `HOUSE-02713` | D2, D4, D13, D14 | 7 |
+| [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 5 | `HOUSE-02713` | D2, D4, D13, D14 | 7 |
 | [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 0 | **done** · `HOUSE-02598` | D11 | 0 |
 | [M13](#m13--linux-desktop-release) — Linux desktop release | after M11 | 03701–03720 | 8 | `HOUSE-02797` | D9–D13 | 10.25 |
 | [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 12 | `HOUSE-02904` | D10b | 19.5 |
@@ -1324,11 +1324,23 @@ There is no zone rotation, no "polish everything" pass and no screenshot → twe
       verify: the ledger round
       trace: absorbs `HOUSE-01033` (the furnishing review); was *Phase-45 review: a full walkthrough with fresh eyes*
 
+- [x] HOUSE-03632 — Restore reliable room-boundary tracking and the main-stair approach
+      dep: HOUSE-03480 · sys: player, world-content · plat: ALL · pri: MUST · zone: Z-L0M, Z-L0S, Z-STAIR · adv: D2, D13 · est: 2
+      accept: (1) a grounded player crosses the L0 powder-room doorway in both directions and the tracked cell follows the body instead of remaining on the old side; (2) the foyer-to-main-stair opening contains no stair support, furnishing or rail obstruction and a standing capsule crosses it; (3) the real controller walks from the foyer through that approach and reaches L1; (4) all eight flights remain walkable up and down
+      verify: `HeadlessRunTests.PowderRoomDoorwayIsTraversableInBothDirections`, `OpeningReachTests.*`, `StairTraversalTests.*`, `PosedLeafCollisionTests.*`, and an inspected fixed-pose stair-entrance capture
+      note: (2026-09-25, targeted R15 correction) Manual exploration found an S1 trap at `L0_WC1` and an inaccessible main-stair entrance after G5. Grounded soles settle a few ulps below FFL, so exact vertical cell containment left the old room active after the body crossed a doorway; tracking the capsule centre restores the invariant already used at spawn. The stair opening's southern half was authored into the solid return support, the lower run had no approach landing, and the foyer console occupied the only remaining path. The cased opening is now a clear 1.00 m passage, the L0 flight leaves its real approach strip while still opening the basement-well guard, and the existing console/dressing are mirrored away from the route. The final focused set passes 10/10 plus the two-direction offscreen runtime test: every door retains its open control, all eight flights traverse both ways, and the foyer route reaches L1. A trial shift of the L1→L2 flight was rejected before commit when the open-door control proved it obstructed `L1_BED5`; that flight remains unchanged. The inspected day capture shows the furniture removed from the opening; lighting remains too dark and is `HOUSE-03633`. The complete gate passes every task-owned check, including 341 strict-XNA translation units; only the pre-existing user-owned root `.claude` layout entry fails. This S1 work consumes 2 h of `HOUSE-03631`'s original 5 h allowance rather than expanding M11
+
+- [ ] HOUSE-03633 — Restore automatic light coverage in dark circulation and wet rooms
+      dep: HOUSE-03632 · sys: lighting · plat: ALL · pri: MUST · zone: all · adv: D6, D13 · est: 1
+      accept: (1) the retained automatic schedule makes the ground-floor hall, WC1 and the main-stair approach readable by day and night without player interaction; (2) the authored fixtures visibly contribute light in those fixed views; (3) the fix uses the existing schedule/lightmap path and does not globally raise exposure or add light interaction
+      verify: focused lighting tests plus inspected fixed-pose before/after captures of WC1/hall and the stair approach
+      note: (2026-09-25, targeted R15 correction) Manual exploration and fixed captures found an S2 D6 failure: Wet and Circulation schedules switch all fixtures off during bright clock hours even where baked daylight is insufficient. This consumes 1 h of `HOUSE-03631`'s original allowance; no new lighting system or weather depth is authorised
+
 - [ ] HOUSE-03631 — The bounded fix pass
-      dep: HOUSE-02714 · sys: — · plat: LNX · pri: MUST · zone: all · adv: D2, D4, D13, D14 · est: 5
+      dep: HOUSE-02714, HOUSE-03633 · sys: — · plat: LNX · pri: MUST · zone: all · adv: D2, D4, D13, D14 · est: 2
       accept: (1) every S1 and S2 from `HOUSE-02714` and the zone backlogs is fixed; (2) S3 only where the severity table allows it (cheap, repeatedly visible, in a hero area or in a release capture); (3) S4 is never scheduled; (4) **hard budget: 4.5 agent-hours of S2/S3 work**, plus whatever S1 fixes need; when it is spent, the remaining S3 items are waived with a reason; (5) no area gets more than two fix rounds (rule R6)
       verify: one ledger round over the fixed items
-      note: split into ≤ 4 h slices when scheduled (R7). This replaces the zone polish rotation and the eleven legacy polish passes
+      note: split into ≤ 4 h slices when scheduled (R7). This replaces the zone polish rotation and the eleven legacy polish passes. `HOUSE-03632` and `HOUSE-03633` consume 3 h of the original 5 h estimate after manual S1/S2 findings, leaving 2 h here; M11 does not expand
 
 - [ ] HOUSE-02713 — Refresh the representative render sets whose images changed on purpose
       dep: HOUSE-03631 · sys: ci · plat: CI · pri: MUST · zone: all · adv: D11 · est: 0.5
@@ -1941,18 +1953,18 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M8 Atmospheric audio essentials | 11 | 14.5 | **4** | 4.25 | **5** | 5.5 | — |
 | M9 Application shell | 10 | 12.5 | **0** | 0 | **0** | 0 | — |
 | M10 Performance | 6 | 13 | **3** | 6.75 | **8** | 12.75 | R-C +4 |
-| M11 Final defect pass | 3 | 11 | **3** | 6 | **7** | 7.75 | — |
+| M11 Final defect pass | 3 | 11 | **4** | 4.25 | **5** | 5.5 | — |
 | M12 Representative tests | 4 | 5 | **0** | 0 | **0** | 0 | — |
 | M13 Linux desktop release | 10 | 13.25 | **8** | 8.75 | **10.25** | 11.25 | — |
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **50** | **68** | **80** | **106** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **51** | **66.25** | **78** | **103.75** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-174 h. Adding the 146.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-252.25 h, 27.75 h under the limit. That margin is
+176.25 h. Adding the 148.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+252 h, 28 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |

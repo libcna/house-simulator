@@ -69,7 +69,7 @@ namespace cnahouse::testsupport
          -16.30f,
          180.0f,
          false,
-         {"EXT_FRONTYARD_E", "EXT_FRONTYARD_W", "EXT_ROAD", "L0_FOYER", "L0_PORCH"},
+         {"EXT_FRONTYARD_E", "EXT_FRONTYARD_W", "EXT_ROAD", "L0_FOYER", "L0_PORCH", "L0_STAIR_MAIN"},
          true},
         // the same pose with the front door open: the walk and EXT_WORLD arrive, which the sidelights'
         // narrower cones could not reach
@@ -80,7 +80,14 @@ namespace cnahouse::testsupport
          -16.30f,
          180.0f,
          true,
-         {"EXT_FRONTYARD_E", "EXT_FRONTYARD_W", "EXT_ROAD", "EXT_WALK", "EXT_WORLD", "L0_FOYER", "L0_PORCH"}},
+         {"EXT_FRONTYARD_E",
+          "EXT_FRONTYARD_W",
+          "EXT_ROAD",
+          "EXT_WALK",
+          "EXT_WORLD",
+          "L0_FOYER",
+          "L0_PORCH",
+          "L0_STAIR_MAIN"}},
         // north through the kitchen's cased opening and on through the open plan to the sunroom's glazing
         {"l0-hall",
          "L0_HALL",
@@ -187,7 +194,7 @@ namespace cnahouse::testsupport
          -14.70f,
          0.0f,
          false,
-         {"B1_STAIR", "L0_FOYER", "L0_HALL", "L0_STAIR_MAIN", "L1_STAIR_MAIN"},
+         {"B1_STAIR", "L0_STAIR_MAIN", "L1_STAIR_MAIN"},
          true},
         // the fire door to the mudroom and the sectional door are both shut
         {"l0-garage", "L0_GARAGE", 12.90f, 0.60f, -17.50f, 270.0f, false, {"L0_GARAGE"}},

@@ -197,12 +197,11 @@ TEST(OpeningReachTests, BothSidesOfEveryHoleAgreeAboutWhatIsBehindIt)
         << (disagreements.empty() ? std::string() : disagreements.front());
 }
 
-TEST(OpeningReachTests, TheFoyerKnowsTheStaircaseBehindItsOwnOpening)
+TEST(OpeningReachTests, TheFoyerOpeningHasStandingHeadroomBelowTheReturningFlight)
 {
-    // The regression, named. `HOUSE-00618`'s bot walked east out of `L0_FOYER` through
-    // `P_L0_FOYER__L0_STAIR` and was 0.151 m inside the main stair's first run before anything
-    // stopped it, because the flight was in `L0_STAIR_MAIN`'s list alone. The pose below is the
-    // one it was in on step 118 848.
+    // The cased opening must meet the clear north end of the stair room, not the solid support
+    // below its returning flight. A grounded capsule can overlap the floor by contact tolerance;
+    // anything materially deeper is the old blocked entrance.
     IdRegistry::ResetForTesting();
     const std::string collisionPath = "content/world/collision.bin";
     if (!std::filesystem::exists(collisionPath))
@@ -221,14 +220,16 @@ TEST(OpeningReachTests, TheFoyerKnowsTheStaircaseBehindItsOwnOpening)
     ASSERT_NE(stair, nullptr);
 
     BroadPhase broad;
-    const Capsule body{Vector3(2.251F, 1.496F, -16.259F), kPlayerHalfHeight, kPlayerRadius};
+    const Capsule body{Vector3(2.251F, 1.496F, -14.80F), kPlayerHalfHeight, kPlayerRadius};
     const CellOverlap inFoyer = OverlapCell(statics, *foyer, broad, body);
     const CellOverlap inStair = OverlapCell(statics, *stair, broad, body);
 
-    std::printf("  the bot's own pose: L0_FOYER says %.4f m, L0_STAIR_MAIN says %.4f m\n",
+    std::printf("  foyer opening standing pose: L0_FOYER says %.4f m shape %u, "
+                "L0_STAIR_MAIN says %.4f m shape %u\n",
                 static_cast<double>(inFoyer.depth),
-                static_cast<double>(inStair.depth));
-    EXPECT_GT(inStair.depth, 0.10F) << "the pose is meant to be inside the flight";
-    EXPECT_NEAR(inFoyer.depth, inStair.depth, kAgree)
-        << "the foyer does not know about the staircase 0.20 m past its own opening";
+                inFoyer.shape,
+                static_cast<double>(inStair.depth),
+                inStair.shape);
+    EXPECT_LT(inFoyer.depth, 0.01F) << "the foyer side of the stair entrance is blocked";
+    EXPECT_LT(inStair.depth, 0.01F) << "the stair side of the foyer entrance is blocked";
 }

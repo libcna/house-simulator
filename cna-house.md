@@ -1184,8 +1184,8 @@ Every flight satisfies `2·rise + going ∈ [600, 650] mm` and a consistent rise
 
 | Stair | From → To | Total rise | Risers × rise | Going | Width | Shape | Footprint |
 |---|---|---|---|---|---|---|---|
-| `STAIR_MAIN_L0_L1` | L0 +0.60 → L1 +3.65 | 3.050 m | 17 × 179.4 mm | 280 mm | 1.10 m | U, half-landing at riser 9, **+2.2147** | X +2.20…+4.90, Z −20.20…−14.30 |
-| `STAIR_MAIN_L1_L2` | L1 +3.65 → L2 +6.55 | 2.900 m | 16 × 181.3 mm | 280 mm | 1.10 m | U, landing at riser 12, **+2.175 rel.** | same footprint |
+| `STAIR_MAIN_L0_L1` | L0 +0.60 → L1 +3.65 | 3.050 m | 17 × 179.4 mm | 280 mm | 1.10 m | U, half-landing at riser 9, **+2.2147** | X +2.20…+4.90, Z −20.20…−15.30; a 1.00 m clear foyer approach remains to the north wall |
+| `STAIR_MAIN_L1_L2` | L1 +3.65 → L2 +6.55 | 2.900 m | 16 × 181.3 mm | 280 mm | 1.10 m | U, landing at riser 12, **+2.175 rel.** | X +2.20…+4.90, Z −20.20…−14.30 |
 | `STAIR_ATTIC_L2_L3` | L2 +6.55 → L3 +9.30 | 2.750 m | 15 × 183.3 mm | 235 mm | 0.90 m | straight, north-running | X +5.40…+8.20, Z −18.30…−14.30 |
 | `STAIR_BASEMENT_L0_B1` | L0 +0.60 → B1 −2.30 | 2.900 m | 16 × 181.3 mm | 275 mm | 1.00 m | straight, north-running, **directly beneath the main stair** | X +2.20…+4.90, Z −20.20…−14.30 |
 | `STEPS_PORCH` | grade 0.00 → porch +0.57 | 0.570 m | 3 × 190 mm | 300 mm | 3.00 m | straight | Z −11.60…−10.70 |

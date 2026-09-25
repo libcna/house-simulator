@@ -837,7 +837,12 @@ namespace cnahouse::app
             player_.cellId = cell->id;
             const player::PlayerStepReport report =
                 player::PlayerStep(*collision_, *cell, broad_, player_, still, player::kFixedStepSeconds);
-            tracker_.Update(*world_, *index_, player_.Feet());
+            // Track the body centre, not the soles. A grounded capsule can settle a few floating-
+            // point ulps below the authored FFL; asking the next cell to contain that foot point
+            // then fails its exact vertical extent test and leaves the old cell sticky after the
+            // whole body has crossed a doorway. The initial spawn already uses the centre for the
+            // same reason, and X/Z (the portal crossing) are identical for centre and feet.
+            tracker_.Update(*world_, *index_, player_.position);
             view_.Update(player_, report, look_.pitch, player::kFixedStepSeconds);
         }
         view_.Snap(player_, look_.pitch);
@@ -891,7 +896,7 @@ namespace cnahouse::app
                 // controller keeping a second copy of it.
                 settings_.fastWalk = player_.fastWalk;
             }
-            tracker_.Update(*world_, *index_, player_.Feet());
+            tracker_.Update(*world_, *index_, player_.position);
             view_.Update(player_, report, look_.pitch, player::kFixedStepSeconds);
             if (const physics::CollisionCell* now =
                     collision_->Cell(util::IdRegistry::NameOf(tracker_.Current()));

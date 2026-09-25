@@ -20,7 +20,9 @@
       "id": "STAIR_MAIN_L0_L1",
       "fromCell": "L0_STAIR_MAIN", "toCell": "L1_STAIR_MAIN",
       "risers": 17, "rise": 0.1794118, "going": 0.280, "width": 1.10,
-      "footprint": { "x": [2.20, 4.90], "z": [-20.20, -14.30] },
+      // Leave a real approach landing between the north wall and the first tread. With the flight
+      // flush to z=-14.30 a standing capsule could only meet the ramp from its 0.28 m-high side.
+      "footprint": { "x": [2.20, 4.90], "z": [-20.20, -15.30] },
       "run": "-Z", "shape": "u", "firstRunAt": "cross_hi", "topLandingToFoot": true,
       "landings": [{ "at": 9, "depth": 1.10 }],
       "collisionRamp": true, "surface": "stair_carpet"

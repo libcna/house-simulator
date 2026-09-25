@@ -46,7 +46,10 @@
     {
       "id": "P_L0_FOYER__L0_STAIR", "cellA": "L0_FOYER", "cellB": "L0_STAIR_MAIN",
       "plane": { "axis": "x", "value": 2.2 },
-      "rect": { "u": [-17.1, -15.5], "v": [0.6, 2.8] },
+      // Keep the foyer entrance wholly north of the returning stair run. The former 1.60 m cased
+      // opening put its southern half straight into the solid stair support; this clear 1.00 m
+      // passage retains 0.20 m around the 0.60 m player capsule.
+      "rect": { "u": [-15.3, -14.3], "v": [0.6, 2.8] },
       "kind": "cased_opening", "aperture": null, "opacity": "open",
       "soundLoss": { "open": 0.000, "closed": 0.000 }
     },

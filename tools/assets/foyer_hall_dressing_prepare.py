@@ -138,7 +138,7 @@ def validate_world(rows: dict[str, dict]) -> None:
     props = layout_io.by_id(layout_io.rows(layout, "props"), "prop")
     expected = {
         "PROP_FOYER_CONSOLE_DRESSING": (ASSETS["console"][0], "L0_FOYER",
-                                          [1.39, 1.207883, -14.52], 0),
+                                          [-1.39, 1.207883, -14.52], 0),
         "PROP_HALL_RUNNER": (ASSETS["runner"][0], "L0_HALL", [0.0, 0.602, -20.65], 0),
         "PROP_FOYER_ENTRY_RUG": (ASSETS["entry"][0], "L0_FOYER",
                                    [0.0, 0.602, -16.55], 0),

@@ -1162,6 +1162,60 @@ namespace
         cnahouse::player::InputState state_;
     };
 
+    TEST(HeadlessRunTests, PowderRoomDoorwayIsTraversableInBothDirections)
+    {
+        struct WalkResult
+        {
+            std::string cell;
+            Microsoft::Xna::Framework::Vector3 feet;
+            int exitCode = 0;
+        };
+
+        const auto walk = [](const std::array<float, 5>& start)
+        {
+            cnahouse::player::InputState forward;
+            forward.move.Y = 1.0F;
+            ScriptedInput input(forward);
+            Options options;
+            options.headless = true;
+            options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+            options.noAudio = true;
+            options.scene = "walk";
+            options.player = start;
+            Settings settings = Settings::Defaults();
+            settings.backBufferWidth = 320;
+            settings.backBufferHeight = 180;
+            settings.verticalSync = false;
+            CnaHouseGame game(options, settings);
+            game.SetInputSourceForTesting(&input);
+            game.SetFixedStepLimit(240);
+            game.SetFrameLimit(4000);
+            game.Run();
+            return WalkResult{std::string(cnahouse::util::IdRegistry::NameOf(game.CellForTesting())),
+                              game.PlayerForTesting().Feet(),
+                              game.ExitCode()};
+        };
+
+        cnahouse::util::Log::ResetForTesting();
+        const auto out = walk({3.55F, 0.60F, -21.10F, 270.0F, 0.0F});
+        std::printf("  powder-room exit ended in %s at x %.3f z %.3f\n",
+                    out.cell.c_str(),
+                    static_cast<double>(out.feet.X),
+                    static_cast<double>(out.feet.Z));
+        EXPECT_EQ(out.exitCode, 0);
+        EXPECT_EQ(out.cell, "L0_HALL");
+        EXPECT_LT(out.feet.X, 2.0F);
+
+        const auto in = walk({1.00F, 0.60F, -21.10F, 90.0F, 0.0F});
+        std::printf("  powder-room entry ended in %s at x %.3f z %.3f\n",
+                    in.cell.c_str(),
+                    static_cast<double>(in.feet.X),
+                    static_cast<double>(in.feet.Z));
+        EXPECT_EQ(in.exitCode, 0);
+        EXPECT_EQ(in.cell, "L0_WC1");
+        EXPECT_GT(in.feet.X, 2.40F);
+    }
+
     TEST(HeadlessRunTests, TheWalkSceneLoadsTheSunBakeAndPublishesDaylight)
     {
         // `HOUSE-01564`, end to end: the walk loader reads openings, interactables, initial state

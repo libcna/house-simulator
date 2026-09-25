@@ -299,8 +299,8 @@ def selftest() -> int:
     require(walk[0]["lane"] == 0 and walk[2]["lane"] == 1,
             "and the second run is on the other side of the well")
     actual = flight_runs(main, foot, portals)
-    require(all(abs(a - b) < 1e-6 for a, b in zip(actual[0]["box"], (3.6, 4.7, -16.82, -14.3)))
-            and all(abs(a - b) < 1e-6 for a, b in zip(actual[2]["box"], (2.4, 3.5, -17.92, -15.68))),
+    require(all(abs(a - b) < 1e-6 for a, b in zip(actual[0]["box"], (3.6, 4.7, -17.82, -15.3)))
+            and all(abs(a - b) < 1e-6 for a, b in zip(actual[2]["box"], (2.4, 3.5, -18.92, -16.68))),
             f"the foyer has the west floor lane and the first run is east ({actual[0]['box']}, "
             f"{actual[2]['box']})")
     basement = flights["STAIR_BASEMENT_L0_B1"]
