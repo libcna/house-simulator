@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **51 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 69.75 / 82 / 108.25 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5, M7 and M9 passed; M8 listening and M10 baseline work are environment-blocked; M12 is active.** Next: `HOUSE-02598` |
+| Active plan | **50 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 68 / 80 / 106 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5, M7, M9 and M12 passed; M8 listening and M10 baseline work are environment-blocked.** Next: `HOUSE-02843` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -401,7 +401,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 0 | `HOUSE-02528` | D8 | — |
 | [M10](#m10--performance-measurement-driven) — Performance, measurement-driven | B | 03601–03630 | 4 | `HOUSE-02405` | D9 | 9.5 |
 | [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 3 | `HOUSE-02713` | D2, D4, D13, D14 | 7 |
-| [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 1 | `HOUSE-02598` | D11 | 2 |
+| [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 0 | **done** · `HOUSE-02598` | D11 | 0 |
 | [M13](#m13--linux-desktop-release) — Linux desktop release | after M11 | 03701–03720 | 8 | `HOUSE-02797` | D9–D13 | 10.25 |
 | [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 12 | `HOUSE-02904` | D10b | 19.5 |
 | [M15](#m15--android) — Android | readiness: B · device: after M13 | 03751–03780 | 14 | `HOUSE-03041` (a BL-13 record does not close it) | D10c | 23.75 |
@@ -1352,11 +1352,12 @@ R16): the representative render sets live with their features (`HOUSE-01275`, `H
       note: (2026-09-25) The shared `tools/ci/run_tests.sh` makes `--output-on-failure` unconditional and all CI ctest entries use it. A deliberately mismatched `ext-road`/`ext-east` comparison reported `ext-road`, 137551/230400 pixels, mean absolute channel difference 31.194 against the 0.2000%/tolerance-2 budget, and wrote a visually inspected 640x360 RGBA difference PNG. The audio gate passed 10/10 targeted repetitions and the historical transient blockout failure did not reproduce; the former now adds exit/frame/audio-state/reason context and every blockout mismatch writes the same counted-pixel diagnostic. A separate load-sensitive weather assertion reproduced at 137.650 minutes remaining, passed alone, and was fixed to assert the behaviour rather than host speed; the complete correctly isolated integration label then passed 147/147. Unit passed 1472/1472 and strict XNA passed 341 translation units with four workers. The only full-gate failure is the pre-existing user-owned root `.claude` entry.
       trace: absorbs `HOUSE-02594` (the tolerance policy and the difference image)
 
-- [ ] HOUSE-02598 — The 20-minute automated stability run
+- [x] HOUSE-02598 — The 20-minute automated stability run
       dep: HOUSE-03226 · sys: ci · plat: CI · pri: MUST · zone: all · adv: D11 · est: 2
       accept: the grand tour looped plus the seeded random walk, the clock at 60× and the weather cycling clear → overcast → rain; RSS growth below 20 MB/hour extrapolated; no crash; no audio starvation; ≥ 200 settings writes; runnable locally and in CI. The single 2-hour run is `HOUSE-02784`
       verify: the run's report
       trace: was *the 2-hour soak test at 60 FPS with 200 autosaves*
+      note: (2026-09-25) `tools/ci/run_stability.py` reuses the production-collision grand tour and seed-618 random walk in two long-lived repeated GoogleTest processes, measures their Linux RSS from `/proc`, and writes a machine-readable report; the nightly headless CI job runs it and uploads the report and logs. The control slice advances the existing clock at 60x through clear → overcast → rain, performs and reads back 200 real atomic `DesktopSaveStore` settings writes, and runs the no-audio full-session gate. The required local run completed in 1,363.512 s: 54 grand tours in 639.985 s and seven six-start random walks in 630.642 s, with 0 crashes, 0 audio-starvation/underrun records and worst extrapolated RSS growth 4.991 MiB/hour against the <20 limit (grand tour 0.717, random walk 4.991). The focused control passed 3/3 and the complete integration label passed 149/149. The same runner accepts a longer duration for the one two-hour run in `HOUSE-02784`; no runtime subsystem was added.
 
 ---
 
@@ -1941,17 +1942,17 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M9 Application shell | 10 | 12.5 | **0** | 0 | **0** | 0 | — |
 | M10 Performance | 6 | 13 | **3** | 6.75 | **8** | 12.75 | R-C +4 |
 | M11 Final defect pass | 3 | 11 | **3** | 6 | **7** | 7.75 | — |
-| M12 Representative tests | 4 | 5 | **1** | 1.75 | **2** | 2.25 | — |
+| M12 Representative tests | 4 | 5 | **0** | 0 | **0** | 0 | — |
 | M13 Linux desktop release | 10 | 13.25 | **8** | 8.75 | **10.25** | 11.25 | — |
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **51** | **69.75** | **82** | **108.25** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **50** | **68** | **80** | **106** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-171.75 h. Adding the 144.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-252.5 h, 27.5 h under the limit. That margin is
+174 h. Adding the 146.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+252.25 h, 27.75 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |

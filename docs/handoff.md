@@ -1,3 +1,34 @@
+# Stability-run handoff — 2026-09-25 (`HOUSE-02598`)
+
+The bounded stability runner now composes existing test and runtime mechanisms instead of adding a
+soak subsystem. `tools/ci/run_stability.py` calibrates and repeats the production-collision grand
+tour and seed-618 six-start random walk in long-lived GoogleTest processes, samples their Linux RSS
+from `/proc`, rejects an extrapolated growth of 20 MiB/hour or more, scans every process log for
+audio starvation/underrun reports, and emits `build/test-output/stability-report.json` plus per-run
+logs. The scheduled headless CI job runs the same command and uploads those artefacts.
+
+The control slice uses the existing `SimClock`, `WeatherSystem`, `Settings` and
+`DesktopSaveStore`: it proves the clock advances at 60x while weather settles through clear →
+overcast → rain, writes 200 changing settings generations through the real atomic store, reads and
+parses the final generation, and runs the existing complete `--no-audio` session. No production
+runtime source or new framework changed.
+
+The required local run passed in 1,363.512 s. It completed 54 grand tours in one 639.985 s process
+and seven complete six-start random walks in one 630.642 s process. Grand-tour RSS growth was
+0.717 MiB/hour and random-walk growth was 4.991 MiB/hour, both below the 20 MiB/hour limit; maximum
+observed RSS was 54.512 and 60.047 MiB respectively. The report records 200 settings writes, the
+60x clear/overcast/rain cycle, zero crashes and zero audio-starvation events. The focused control
+passes 3/3 and the complete four-way integration label passes 149/149. All compilation was pinned
+to CPUs 0–3 and four jobs with the shared `/rv/cnaccache`.
+
+M12 is complete. There are 50 open MUST tasks. The remaining forecast is 80 realistic / 106
+pessimistic hours; 146.25 completed task-hours plus the pessimistic remainder projects 252.25 h,
+27.75 h below the R14 ceiling. M8's listening checks and M10's current Release baseline remain
+environment-blocked. M14 explicitly allows its bring-up block as Track B after G1, so milestone
+dependency order plus R11/R13 selects `HOUSE-02843` next: audit the desktop code for Web blockers.
+
+---
+
 # Gate-diagnostics handoff — 2026-09-25 (`HOUSE-00493`)
 
 The repository now has one ctest entry point, `tools/ci/run_tests.sh`, which unconditionally adds

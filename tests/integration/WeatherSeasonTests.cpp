@@ -149,6 +149,64 @@ namespace
             << "the claimed history never consumed its persisted random stream";
     }
 
+    TEST(WeatherSeasonTests, StabilityCycleUsesSixtyTimesClockAndClearOvercastRain)
+    {
+        cnahouse::world::WorldData::Contents contents;
+        const std::string directory = std::string(CNAHOUSE_TEST_CONTENT_ROOT) + "/world";
+        const auto weather = WorldLoader::LoadWeather(directory, contents);
+        ASSERT_TRUE(weather) << weather.Error().ToString();
+        const auto initial = WorldLoader::LoadInitialState(directory, contents);
+        ASSERT_TRUE(initial) << initial.Error().ToString();
+
+        const auto& start = contents.initialState.weather;
+        auto made = WeatherSystem::Create(contents.weatherArchetypes,
+                                          contents.weatherTransitions,
+                                          contents.weatherRates,
+                                          start.state,
+                                          start.target,
+                                          start.targetExpiryMinutes);
+        ASSERT_TRUE(made) << made.Error().ToString();
+        WeatherSystem system = std::move(made.Value());
+        system.SetAutomaticTransitions(false);
+
+        SimClock clock;
+        clock.SetCalendar(cnahouse::environment::kNewGameCalendarDays);
+        ASSERT_DOUBLE_EQ(clock.timeScale, 60.0);
+        std::vector<std::string> reached;
+        for (const std::string_view name : {"W_CLEAR", "W_OVERCAST", "W_RAIN"})
+        {
+            const Id requested = Intern(name);
+            ASSERT_NE(std::ranges::find(
+                          contents.weatherArchetypes, requested, &cnahouse::weather::WeatherArchetype::id),
+                      contents.weatherArchetypes.end())
+                << name;
+            system.TargetArchetypeControl() = requested;
+
+            bool settled = false;
+            for (int realSecond = 0; realSecond < 180; ++realSecond)
+            {
+                const double before = clock.epochSeconds;
+                clock.Advance(1.0);
+                ASSERT_DOUBLE_EQ(clock.epochSeconds - before, 60.0);
+                const float sunlight = DirectSunlight(clock, system.State().cloudCover);
+                ASSERT_TRUE(system.Advance(
+                    1.0F, clock.Season(), static_cast<float>(clock.OutdoorBaseTemperatureC()), sunlight));
+                if (system.TargetArchetype() == requested && system.TransitionRemainingMinutes() == 0.0F)
+                {
+                    settled = true;
+                    break;
+                }
+            }
+            ASSERT_TRUE(settled) << name << " did not settle within three simulated hours";
+            reached.emplace_back(name);
+        }
+
+        EXPECT_EQ(reached, (std::vector<std::string>{"W_CLEAR", "W_OVERCAST", "W_RAIN"}));
+        EXPECT_EQ(system.State().precipType, PrecipType::Rain);
+        EXPECT_GT(system.State().precipIntensity, 0.0F);
+        std::printf("  stability clock: 60x; weather: clear -> overcast -> rain\n");
+    }
+
     TEST(WeatherSeasonTests, ThirtyDaysAreVariedAndNeverContradictTheWeatherRules)
     {
         cnahouse::world::WorldData::Contents contents;

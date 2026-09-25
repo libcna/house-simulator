@@ -514,6 +514,25 @@ jobs:
         # nothing about CI.
         run: env -u DISPLAY -u WAYLAND_DISPLAY tools/ci/run_tests.sh --preset integration
 
+      - name: Twenty-minute stability run
+        if: github.event_name == 'schedule'
+        working-directory: cna-house
+        # HOUSE-02598. The two production-collision walks repeat in long-lived processes so RSS
+        # growth is meaningful; the report also proves the 60x weather cycle, settings writes and
+        # absence of crashes/audio starvation. HOUSE-02784 reuses this runner for two hours once.
+        run: |
+          env -u DISPLAY -u WAYLAND_DISPLAY \
+            tools/ci/run_stability.py --build-dir build-consumer \
+              --report build-consumer/test-output/stability-report.json
+      - name: Upload the stability report
+        if: always() && github.event_name == 'schedule'
+        uses: actions/upload-artifact@v4
+        with:
+          name: stability-report
+          path: |
+            cna-house/build-consumer/test-output/stability-report.json
+            cna-house/build-consumer/test-output/stability-*.log
+
   # --- HOUSE-00136 -------------------------------------------------------------------------------
   symbol-check:
     name: "no CNA::Graphics:: symbol is linked"

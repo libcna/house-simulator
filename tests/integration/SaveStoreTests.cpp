@@ -3,11 +3,13 @@
 // `HOUSE-00152`. An integration test, because `StorageDevice` touches the real filesystem and a
 // stub would test the stub -- and because the behaviour under test IS the atomic sequence, which
 // only exists on a real filesystem.
+#include <cstdio>
 #include <random>
 #include <string>
 
 #include <gtest/gtest.h>
 
+#include "cnahouse/app/Settings.hpp"
 #include "cnahouse/persistence/DesktopSaveStore.hpp"
 
 namespace
@@ -163,6 +165,31 @@ namespace
         auto read = store_->Read(SaveName());
         ASSERT_TRUE(read);
         EXPECT_TRUE(read->empty());
+    }
+
+    TEST_F(SaveStoreTest, TwoHundredSettingsWritesRemainReadable)
+    {
+        // HOUSE-02598's stability run writes the real settings payload through the shipping
+        // atomic store. Re-serialising and reading the final generation matters: counting calls
+        // to a fake store would miss both backup churn and a truncated final file.
+        constexpr int kWrites = 200;
+        cnahouse::app::Settings settings = cnahouse::app::Settings::Defaults();
+        for (int generation = 0; generation < kWrites; ++generation)
+        {
+            settings.invertY = (generation % 2) != 0;
+            settings.mouseSensitivity = 0.5F + static_cast<float>(generation % 10) * 0.1F;
+            const auto written = store_->Write(SaveName(), settings.ToJson());
+            ASSERT_TRUE(written) << "settings generation " << generation << ": "
+                                 << written.Error().ToString();
+        }
+
+        const auto text = store_->Read(SaveName());
+        ASSERT_TRUE(text) << text.Error().ToString();
+        const auto reread = cnahouse::app::Settings::FromJson(*text, SaveName());
+        ASSERT_TRUE(reread) << reread.Error().ToString();
+        EXPECT_EQ(reread->invertY, settings.invertY);
+        EXPECT_FLOAT_EQ(reread->mouseSensitivity, settings.mouseSensitivity);
+        std::printf("  stability settings writes: %d; final payload: %zu bytes\n", kWrites, text->size());
     }
 
     TEST_F(SaveStoreTest, ALargePayloadSurvivesTheChunkedRead)
