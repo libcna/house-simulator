@@ -2,9 +2,14 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
+#include <functional>
 #include <memory>
+#include <string>
 #include <string_view>
 #include <vector>
+
+#include "cnahouse/app/Settings.hpp"
 
 namespace Microsoft::Xna::Framework::Graphics
 {
@@ -137,6 +142,64 @@ namespace cnahouse::ui
         [[nodiscard]] std::size_t FirstVisible() const noexcept;
 
         std::vector<std::unique_ptr<IScreen>> screens_;
+    };
+
+    /// @brief The controls populated by HOUSE-02516 on the one retained settings page.
+    enum class SettingsControl : std::uint8_t
+    {
+        Master,
+        Footsteps,
+        Ambience,
+        Weather,
+        LookSensitivity,
+        InvertY,
+        WalkSpeed,
+        Count,
+    };
+
+    [[nodiscard]] std::string_view SettingsControlName(SettingsControl control) noexcept;
+
+    /// @brief One settings page, using the existing screen stack and device-independent input.
+    ///
+    /// Graphics and Environment deliberately have headings only here: their exact rows belong to
+    /// HOUSE-02518 and HOUSE-02521. Audio and Controls are complete and applied through @p onChanged
+    /// after every edit; the screen neither owns a second settings copy nor invents a widget system.
+    class SettingsScreen final : public IScreen
+    {
+    public:
+        using Changed = std::function<void()>;
+
+        explicit SettingsScreen(app::Settings& settings, Changed onChanged = {});
+
+        [[nodiscard]] ScreenId Id() const override
+        {
+            return ScreenId::SettingsMenu;
+        }
+
+        ScreenAction Update(const player::InputState& input, float deltaSeconds) override;
+
+        void Draw(Microsoft::Xna::Framework::Graphics::SpriteBatch& batch,
+                  const TextRenderer& text) const override;
+
+        [[nodiscard]] SettingsControl Selected() const noexcept
+        {
+            return selected_;
+        }
+
+        static constexpr std::size_t ControlCount() noexcept
+        {
+            return static_cast<std::size_t>(SettingsControl::Count);
+        }
+
+    private:
+        [[nodiscard]] bool ChangeSelected(int direction);
+        [[nodiscard]] bool ActivateSelected();
+        [[nodiscard]] bool SelectPointer(float x, float y);
+        [[nodiscard]] std::string ValueText(SettingsControl control) const;
+
+        app::Settings* settings_;
+        Changed onChanged_;
+        SettingsControl selected_ = SettingsControl::Master;
     };
 
 } // namespace cnahouse::ui

@@ -8,6 +8,8 @@
 #include "Microsoft/Xna/Framework/Input/Keyboard.hpp"
 #include "Microsoft/Xna/Framework/Input/Keys.hpp"
 #include "Microsoft/Xna/Framework/Input/Mouse.hpp"
+#include "Microsoft/Xna/Framework/Input/Touch/TouchLocationState.hpp"
+#include "Microsoft/Xna/Framework/Input/Touch/TouchPanel.hpp"
 
 namespace cnahouse::player
 {
@@ -52,6 +54,7 @@ namespace cnahouse::player
     {
         Apply(Microsoft::Xna::Framework::Input::Keyboard::GetState(),
               Microsoft::Xna::Framework::Input::Mouse::GetState(),
+              Microsoft::Xna::Framework::Input::Touch::TouchPanel::GetState(),
               deltaSeconds);
 
         if (captured_)
@@ -68,6 +71,23 @@ namespace cnahouse::player
     void KeyboardMouseSource::Apply(const KeyboardState& keyboard,
                                     const Microsoft::Xna::Framework::Input::MouseState& mouse,
                                     float deltaSeconds)
+    {
+        ApplyDevices(keyboard, mouse, nullptr, deltaSeconds);
+    }
+
+    void KeyboardMouseSource::Apply(const KeyboardState& keyboard,
+                                    const Microsoft::Xna::Framework::Input::MouseState& mouse,
+                                    const Microsoft::Xna::Framework::Input::Touch::TouchCollection& touches,
+                                    float deltaSeconds)
+    {
+        ApplyDevices(keyboard, mouse, &touches, deltaSeconds);
+    }
+
+    void
+    KeyboardMouseSource::ApplyDevices(const KeyboardState& keyboard,
+                                      const Microsoft::Xna::Framework::Input::MouseState& mouse,
+                                      const Microsoft::Xna::Framework::Input::Touch::TouchCollection* touches,
+                                      float deltaSeconds)
     {
         (void)deltaSeconds;
         state_ = InputState{};
@@ -93,29 +113,68 @@ namespace cnahouse::player
 
         // An edge: down now and up before. Computed here so no consumer keeps its own history --
         // two systems each tracking "was it down last frame" is two chances to disagree about the frame.
-        auto edge = [&](Edge slot, Keys key)
+        auto edge = [&](Edge slot, bool down)
         {
             const auto index = static_cast<std::size_t>(slot);
-            const bool down = keyboard.IsKeyDown(key);
             const bool pressed = down && !previousEdges_[index];
             previousEdges_[index] = down;
             return pressed;
         };
-        state_.interactPressed = edge(Edge::Interact, Keys::E);
+        state_.interactPressed = edge(Edge::Interact, keyboard.IsKeyDown(Keys::E));
         // §43.2's toggle. `LeftShift` is the one that toggles; the right one is the level's
         // second binding and repeating it here would make the two shifts fight over the edge.
-        state_.runPressed = edge(Edge::WalkMode, Keys::LeftShift);
-        state_.cancelPressed = edge(Edge::Cancel, Keys::Escape);
-        state_.menuPressed = edge(Edge::Menu, Keys::Tab);
-        state_.toggleFullscreenPressed = edge(Edge::ToggleFullscreen, Keys::Enter) && state_.freeCursorHeld;
-        state_.toggleOverlayPressed = edge(Edge::ToggleOverlay, Keys::F1);
-        state_.toggleWorldOverlayPressed = edge(Edge::ToggleWorldOverlay, Keys::F2);
-        state_.toggleVisibilityOverlayPressed = edge(Edge::ToggleVisibilityOverlay, Keys::F3);
-        state_.toggleVisibilityGeometryPressed = edge(Edge::ToggleVisibilityGeometry, Keys::F4);
-        state_.toggleFreezeVisibilityPressed = edge(Edge::ToggleFreezeVisibility, Keys::F5);
-        state_.toggleEnvironmentOverlayPressed = edge(Edge::ToggleEnvironmentOverlay, Keys::F8);
-        state_.togglePhysicsOverlayPressed = edge(Edge::TogglePhysicsOverlay, Keys::F9);
-        state_.screenshotPressed = edge(Edge::Screenshot, Keys::F12);
+        state_.runPressed = edge(Edge::WalkMode, keyboard.IsKeyDown(Keys::LeftShift));
+        state_.cancelPressed = edge(Edge::Cancel, keyboard.IsKeyDown(Keys::Escape));
+        state_.menuPressed = edge(Edge::Menu, keyboard.IsKeyDown(Keys::Tab));
+        state_.toggleFullscreenPressed =
+            edge(Edge::ToggleFullscreen, keyboard.IsKeyDown(Keys::Enter)) && state_.freeCursorHeld;
+        state_.toggleOverlayPressed = edge(Edge::ToggleOverlay, keyboard.IsKeyDown(Keys::F1));
+        state_.toggleWorldOverlayPressed = edge(Edge::ToggleWorldOverlay, keyboard.IsKeyDown(Keys::F2));
+        state_.toggleVisibilityOverlayPressed =
+            edge(Edge::ToggleVisibilityOverlay, keyboard.IsKeyDown(Keys::F3));
+        state_.toggleVisibilityGeometryPressed =
+            edge(Edge::ToggleVisibilityGeometry, keyboard.IsKeyDown(Keys::F4));
+        state_.toggleFreezeVisibilityPressed =
+            edge(Edge::ToggleFreezeVisibility, keyboard.IsKeyDown(Keys::F5));
+        state_.toggleEnvironmentOverlayPressed =
+            edge(Edge::ToggleEnvironmentOverlay, keyboard.IsKeyDown(Keys::F8));
+        state_.togglePhysicsOverlayPressed = edge(Edge::TogglePhysicsOverlay, keyboard.IsKeyDown(Keys::F9));
+        state_.screenshotPressed = edge(Edge::Screenshot, keyboard.IsKeyDown(Keys::F12));
+
+        state_.uiUpPressed = edge(Edge::UiUp, keyboard.IsKeyDown(Keys::Up) || keyboard.IsKeyDown(Keys::W));
+        state_.uiDownPressed =
+            edge(Edge::UiDown, keyboard.IsKeyDown(Keys::Down) || keyboard.IsKeyDown(Keys::S));
+        state_.uiLeftPressed =
+            edge(Edge::UiLeft, keyboard.IsKeyDown(Keys::Left) || keyboard.IsKeyDown(Keys::A));
+        state_.uiRightPressed =
+            edge(Edge::UiRight, keyboard.IsKeyDown(Keys::Right) || keyboard.IsKeyDown(Keys::D));
+        state_.uiAcceptPressed =
+            edge(Edge::UiAccept, keyboard.IsKeyDown(Keys::Enter) || keyboard.IsKeyDown(Keys::Space));
+
+        const float width = static_cast<float>(std::max(config_.viewportWidth, 1));
+        const float height = static_cast<float>(std::max(config_.viewportHeight, 1));
+        const bool mousePrimary =
+            mouse.getLeftButtonProperty() == Microsoft::Xna::Framework::Input::ButtonState::Pressed;
+        state_.pointerKind = PointerKind::Mouse;
+        state_.pointerX = std::clamp(static_cast<float>(mouse.getXProperty()) / width, 0.0F, 1.0F);
+        state_.pointerY = std::clamp(static_cast<float>(mouse.getYProperty()) / height, 0.0F, 1.0F);
+        state_.pointerPressed = mousePrimary && !primaryDownPreviously_;
+        primaryDownPreviously_ = mousePrimary;
+
+        bool touchDown = false;
+        if (touches != nullptr && touches->getCountProperty() > 0)
+        {
+            const auto& touch = (*touches)[0];
+            const auto position = touch.getPositionProperty();
+            const auto touchState = touch.getStateProperty();
+            touchDown = touchState == Microsoft::Xna::Framework::Input::Touch::TouchLocationState::Pressed ||
+                        touchState == Microsoft::Xna::Framework::Input::Touch::TouchLocationState::Moved;
+            state_.pointerKind = PointerKind::Touch;
+            state_.pointerX = std::clamp(position.X / width, 0.0F, 1.0F);
+            state_.pointerY = std::clamp(position.Y / height, 0.0F, 1.0F);
+            state_.pointerPressed =
+                touchState == Microsoft::Xna::Framework::Input::Touch::TouchLocationState::Pressed;
+        }
 
         // ANY input, as one edge. `GetPressedKeys()` is plain XNA 4.0 -- the CNAEXT markings on
         // `KeyboardState` are on its default and set constructors and on `ToString`, not on this.
@@ -124,7 +183,8 @@ namespace cnahouse::player
             !keyboard.GetPressedKeys().empty() ||
             mouse.getLeftButtonProperty() == Microsoft::Xna::Framework::Input::ButtonState::Pressed ||
             mouse.getRightButtonProperty() == Microsoft::Xna::Framework::Input::ButtonState::Pressed ||
-            mouse.getMiddleButtonProperty() == Microsoft::Xna::Framework::Input::ButtonState::Pressed;
+            mouse.getMiddleButtonProperty() == Microsoft::Xna::Framework::Input::ButtonState::Pressed ||
+            touchDown;
         state_.anyPressed = anyDown && !anyDownPreviously_;
         anyDownPreviously_ = anyDown;
 

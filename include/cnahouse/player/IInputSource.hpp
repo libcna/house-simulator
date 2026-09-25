@@ -8,6 +8,13 @@
 namespace cnahouse::player
 {
 
+    enum class PointerKind : std::uint8_t
+    {
+        None,
+        Mouse,
+        Touch,
+    };
+
     /// @brief One frame of player intent, in game terms rather than device terms.
     ///
     /// Nothing here mentions a key, a button or a pixel. `move` is a direction the player wants to go,
@@ -43,6 +50,25 @@ namespace cnahouse::player
         bool interactPressed = false;
         bool cancelPressed = false;
         bool menuPressed = false;
+
+        /// @brief Device-independent one-frame UI navigation edges.
+        ///
+        /// The settings screen consumes these rather than polling keys, keeping the project's one
+        /// input boundary intact and giving keyboard, pointer and touch the same route.
+        bool uiUpPressed = false;
+        bool uiDownPressed = false;
+        bool uiLeftPressed = false;
+        bool uiRightPressed = false;
+        bool uiAcceptPressed = false;
+
+        /// @brief A primary pointer press in normalised back-buffer coordinates.
+        ///
+        /// Mouse and touch share hit testing after the source records which device produced it.
+        /// `pointerPressed` is an edge; dragging or holding cannot change a setting every frame.
+        PointerKind pointerKind = PointerKind::None;
+        float pointerX = 0.0F;
+        float pointerY = 0.0F;
+        bool pointerPressed = false;
 
         /// @brief ANY key or mouse button went down this frame. The user-gesture signal.
         ///

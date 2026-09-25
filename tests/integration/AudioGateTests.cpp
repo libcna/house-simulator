@@ -71,6 +71,29 @@ namespace
         EXPECT_FLOAT_EQ(game.Audio().EffectiveVolume(cnahouse::audio::Category::Footsteps), 0.0f);
     }
 
+    TEST(AudioGateTests, SavedMixIsAppliedBeforeTheAudioGestureGateOpens)
+    {
+        Options options;
+        options.headless = true;
+        options.noAudio = true;
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+
+        Settings settings = SmallSettings();
+        settings.masterVolume = 0.40F;
+        settings.footstepsVolume = 0.30F;
+        settings.ambienceVolume = 0.20F;
+        settings.weatherVolume = 0.10F;
+
+        CnaHouseGame game(options, settings);
+
+        EXPECT_FLOAT_EQ(game.Audio().MasterVolume(), 0.40F);
+        EXPECT_FLOAT_EQ(game.Audio().CategoryVolume(cnahouse::audio::Category::Footsteps), 0.30F);
+        EXPECT_FLOAT_EQ(game.Audio().CategoryVolume(cnahouse::audio::Category::Ambience), 0.20F);
+        EXPECT_FLOAT_EQ(game.Audio().CategoryVolume(cnahouse::audio::Category::Weather), 0.10F);
+        EXPECT_EQ(game.Audio().State(), AudioState::Silent)
+            << "applying persisted settings must not open an audio device";
+    }
+
     TEST(AudioGateTests, TheTitleScreenIsUpForTheWholeSessionUntilSomethingIsPressed)
     {
         // `HOUSE-00155` / `HOUSE-00156` end to end. No input arrives in a headless run, so the

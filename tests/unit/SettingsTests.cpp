@@ -22,7 +22,10 @@ namespace
         EXPECT_EQ(settings.backBufferWidth, 1600);
         EXPECT_EQ(settings.backBufferHeight, 900);
         EXPECT_EQ(settings.quality, QualityPreset::High);
-        EXPECT_FLOAT_EQ(settings.masterVolume, 1.0f);
+        EXPECT_FLOAT_EQ(settings.masterVolume, 0.80f);
+        EXPECT_FLOAT_EQ(settings.footstepsVolume, 0.85f);
+        EXPECT_FLOAT_EQ(settings.ambienceVolume, 0.75f);
+        EXPECT_FLOAT_EQ(settings.weatherVolume, 0.75f);
         EXPECT_TRUE(settings.showEnvironmentReadout);
         EXPECT_FLOAT_EQ(settings.moonPhaseSpeedMultiplier, 1.0F);
         EXPECT_EQ(settings.weatherMode, WeatherMode::On);
@@ -37,6 +40,9 @@ namespace
         written.fullscreen = true;
         written.quality = QualityPreset::Medium;
         written.masterVolume = 0.75f;
+        written.footstepsVolume = 0.65f;
+        written.ambienceVolume = 0.55f;
+        written.weatherVolume = 0.45f;
         written.mouseSensitivity = 1.5f;
         written.invertY = true;
         written.fieldOfView = 90.0f;
@@ -53,6 +59,9 @@ namespace
         EXPECT_TRUE(read->fullscreen);
         EXPECT_EQ(read->quality, QualityPreset::Medium);
         EXPECT_FLOAT_EQ(read->masterVolume, 0.75f);
+        EXPECT_FLOAT_EQ(read->footstepsVolume, 0.65f);
+        EXPECT_FLOAT_EQ(read->ambienceVolume, 0.55f);
+        EXPECT_FLOAT_EQ(read->weatherVolume, 0.45f);
         EXPECT_FLOAT_EQ(read->mouseSensitivity, 1.5f);
         EXPECT_TRUE(read->invertY);
         EXPECT_FLOAT_EQ(read->fieldOfView, 90.0f);
@@ -139,10 +148,13 @@ namespace
         EXPECT_EQ(settings->backBufferWidth, 1280) << "the user's own values survive";
         EXPECT_EQ(settings->quality, QualityPreset::Low);
         EXPECT_FLOAT_EQ(settings->masterVolume, 0.5f);
-        EXPECT_FLOAT_EQ(settings->effectsVolume, 0.25f);
+        EXPECT_FLOAT_EQ(settings->footstepsVolume, 0.25f)
+            << "the old effects category migrates to the retained footsteps category";
         EXPECT_TRUE(settings->invertY);
-        EXPECT_FLOAT_EQ(settings->ambienceVolume, 1.0f)
+        EXPECT_FLOAT_EQ(settings->ambienceVolume, 0.75f)
             << "the field v1 did not have takes its default rather than zero";
+        EXPECT_FLOAT_EQ(settings->weatherVolume, 0.75f)
+            << "the weather category added in v9 takes the compact-mix default";
         // v3 -> v4 added §68's head bob, and §44 says the motion is on by default: a player who
         // has never seen the setting has not turned it off.
         EXPECT_EQ(settings->headBob, cnahouse::player::HeadBobLevel::Subtle);

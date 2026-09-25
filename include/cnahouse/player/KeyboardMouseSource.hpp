@@ -6,6 +6,7 @@
 
 #include "Microsoft/Xna/Framework/Input/KeyboardState.hpp"
 #include "Microsoft/Xna/Framework/Input/MouseState.hpp"
+#include "Microsoft/Xna/Framework/Input/Touch/TouchCollection.hpp"
 
 #include "cnahouse/player/IInputSource.hpp"
 
@@ -27,6 +28,8 @@ namespace cnahouse::player
 
         int recentreX = 0;
         int recentreY = 0;
+        int viewportWidth = 1600;
+        int viewportHeight = 900;
 
         /// @brief §44's *"optional raw-ish smoothing over 2 frames, default off"*.
         ///
@@ -95,6 +98,12 @@ namespace cnahouse::player
                    const Microsoft::Xna::Framework::Input::MouseState& mouse,
                    float deltaSeconds);
 
+        /// @brief The production device sample including XNA touch input.
+        void Apply(const Microsoft::Xna::Framework::Input::KeyboardState& keyboard,
+                   const Microsoft::Xna::Framework::Input::MouseState& mouse,
+                   const Microsoft::Xna::Framework::Input::Touch::TouchCollection& touches,
+                   float deltaSeconds);
+
     private:
         /// The keys whose EDGES this source reports. Storing six booleans rather than a whole
         /// `KeyboardState` is not a micro-optimisation: `KeyboardState`'s default constructor is
@@ -116,8 +125,18 @@ namespace cnahouse::player
             ToggleEnvironmentOverlay,
             TogglePhysicsOverlay,
             Screenshot,
+            UiUp,
+            UiDown,
+            UiLeft,
+            UiRight,
+            UiAccept,
             Count,
         };
+
+        void ApplyDevices(const Microsoft::Xna::Framework::Input::KeyboardState& keyboard,
+                          const Microsoft::Xna::Framework::Input::MouseState& mouse,
+                          const Microsoft::Xna::Framework::Input::Touch::TouchCollection* touches,
+                          float deltaSeconds);
 
         InputConfig config_;
         InputState state_;
@@ -125,6 +144,7 @@ namespace cnahouse::player
         /// Not one of the `Edge` slots: this is "was ANYTHING down", not one named action, and
         /// giving it a slot would put it in a table whose entries are all bound keys.
         bool anyDownPreviously_ = false;
+        bool primaryDownPreviously_ = false;
         int previousMouseX_ = 0;
         int previousMouseY_ = 0;
         bool hasPreviousMouse_ = false;

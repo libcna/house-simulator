@@ -6792,11 +6792,10 @@ All UI is laid out in **virtual units** on a 1600 × 900 design canvas and scale
 
 ### 67.3 Menus
 
-A simple stack: `MainMenu`, `PauseMenu`, `SettingsMenu` (5 tabs), `CustomiseAvatar`, `Confirm`,
-`Credits`. Keyboard and mouse navigable; every control is reachable by keyboard alone. The pause
-menu **does not freeze the world** — the clock keeps running (visible through the blurred backdrop
-being a live frame), because a house that stops when you look away is less convincing. A settings
-option pauses it for players who prefer that.
+A simple stack: `MainMenu`, `PauseMenu`, one-page `SettingsMenu`, `Confirm` and `Credits`. Keyboard,
+mouse and touch navigate the settings page through the same input boundary, and every control is
+reachable by keyboard alone. The active requirements for the remaining main/pause flow are in M9
+of `plan.md`; historical avatar and pause-on-menu behavior are not part of the final scope.
 
 ### 67.4 First run
 
@@ -6811,6 +6810,11 @@ and movement in one gesture. A single unobtrusive hint line appears once, at the
 
 Stored in `settings.json` beside the save, versioned and migrated the same way. Never reset by
 *Reset House*.
+
+> **Final scope (ADR-0016 / `plan.md` M9):** one page with Graphics, Audio, Controls and
+> Environment sections. Only the rows named by `HOUSE-02516`, `HOUSE-02518` and `HOUSE-02521` are
+> active requirements. The larger historical table below records the original design; it does not
+> authorise extra pages, key remapping, gameplay simulation or other removed scope.
 
 | Tab | Setting | Values | Default |
 |---|---|---|---|

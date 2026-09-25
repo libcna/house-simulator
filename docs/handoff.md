@@ -1,3 +1,32 @@
+# One-page settings handoff — 2026-09-25 (`HOUSE-02516`)
+
+`SettingsScreen` now supplies the retained one-page shell through the existing `MenuStack` and
+`TextRenderer`. Audio has master, footsteps, ambience and weather rows; Controls has look
+sensitivity, invert-Y and the existing normal/fast walk toggle. Every row is reachable with
+keyboard navigation, and the same bounded hit targets accept mouse or XNA touch presses. Values
+apply live to `AudioSystem`, `KeyboardMouseSource` and the active player controller. Opening the
+screen suspends player/free-fly input without creating a second UI, input or settings system.
+
+Settings format v9 persists the four compact-mix volumes. Older `effectsVolume` values migrate to
+the retained footsteps category, while ambience and weather take their compact M8 defaults. The
+screen intentionally draws Graphics and Environment headings without rows: `HOUSE-02518` and
+`HOUSE-02521` own those exact controls. It also exposes no key remapping and adds no generic widget
+framework. Until `HOUSE-02523` supplies the final main/pause menus, the existing Tab menu action
+opens this usable page directly.
+
+All 48 focused settings/navigation/input/audio unit tests and all six offscreen audio-gate
+integration tests pass. The complete unit label passes 1,458/1,458. A first direct integration run
+without the CTest SDL environment failed before test code because no video device was selected;
+the required `SDL_VIDEODRIVER=offscreen` rerun passed. Strict-XNA compiles all 342 translation
+units clean. The complete static gate reports only the known user-owned root `.claude` layout
+entry, which remains untouched. Every build, test and check was pinned to CPUs 4,5,7,9 with no
+more than four workers. M9 dependency order plus R11/R13 selects
+`HOUSE-02518` next, followed by `HOUSE-02521`. The remaining forecast is 90 realistic / 117
+pessimistic hours. With 136.25 task-hours completed since the final reduction, the R14 projection
+is 253.25 h, 26.75 h below the ceiling.
+
+---
+
 # Ambience listening blocker — 2026-09-25 (`HOUSE-01922`, still open)
 
 The bounded implementation is locally ready but deliberately not marked complete. A small

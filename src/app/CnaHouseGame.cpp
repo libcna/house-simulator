@@ -119,6 +119,10 @@ namespace cnahouse::app
         , renderer_(tier_)
         , audio_(!options_.noAudio)
     {
+        audio_.SetMasterVolume(settings_.masterVolume);
+        audio_.SetCategoryVolume(audio::Category::Footsteps, settings_.footstepsVolume);
+        audio_.SetCategoryVolume(audio::Category::Ambience, settings_.ambienceVolume);
+        audio_.SetCategoryVolume(audio::Category::Weather, settings_.weatherVolume);
         graphics_.setPreferredBackBufferWidthProperty(settings_.backBufferWidth);
         graphics_.setPreferredBackBufferHeightProperty(settings_.backBufferHeight);
         graphics_.setIsFullScreenProperty(settings_.fullscreen);
@@ -280,6 +284,8 @@ namespace cnahouse::app
         inputConfig.smoothing = settings_.lookSmoothing;
         inputConfig.recentreX = settings_.backBufferWidth / 2;
         inputConfig.recentreY = settings_.backBufferHeight / 2;
+        inputConfig.viewportWidth = settings_.backBufferWidth;
+        inputConfig.viewportHeight = settings_.backBufferHeight;
         input_.SetConfig(inputConfig);
 
         if (options_.screenshot.has_value())
@@ -891,6 +897,29 @@ namespace cnahouse::app
         blockoutCamera_.farPlane = player::kFarPlane;
     }
 
+    void CnaHouseGame::ApplyAudioAndControlSettings()
+    {
+        audio_.SetMasterVolume(settings_.masterVolume);
+        audio_.SetCategoryVolume(audio::Category::Footsteps, settings_.footstepsVolume);
+        audio_.SetCategoryVolume(audio::Category::Ambience, settings_.ambienceVolume);
+        audio_.SetCategoryVolume(audio::Category::Weather, settings_.weatherVolume);
+
+        player::InputConfig inputConfig = input_.Config();
+        inputConfig.sensitivity = settings_.mouseSensitivity;
+        inputConfig.invertY = settings_.invertY;
+        input_.SetConfig(inputConfig);
+        if (walking_)
+        {
+            player_.fastWalk = settings_.fastWalk;
+        }
+    }
+
+    void CnaHouseGame::OpenSettings()
+    {
+        menus_.Push(
+            std::make_unique<ui::SettingsScreen>(settings_, [this] { ApplyAudioAndControlSettings(); }));
+    }
+
     debug::WorldSnapshot CnaHouseGame::WalkSnapshot() const
     {
         debug::WorldSnapshot snapshot;
@@ -1161,6 +1190,13 @@ namespace cnahouse::app
                 settings_.fullscreen = graphics_.getIsFullScreenProperty();
                 Log::Info(LogCat::App, "display {}", settings_.fullscreen ? "fullscreen" : "windowed");
             }
+            if (menus_.Empty() && Input().Current().menuPressed)
+            {
+                // The final main/pause menu flow belongs to HOUSE-02523. Until then this existing
+                // menu action opens the completed settings page directly, so HOUSE-02516 is usable
+                // rather than a screen reachable only from a unit test.
+                OpenSettings();
+            }
 
             if (weather_.has_value())
             {
@@ -1183,7 +1219,7 @@ namespace cnahouse::app
                 }
             }
 
-            if (walking_ && !visibilityFrozen_)
+            if (walking_ && !visibilityFrozen_ && menus_.Empty())
             {
                 // §49.3's fixed steps, then §44's view over them. The free-fly camera is NOT
                 // updated here: two things steering one camera is a fight, and in this scene the
@@ -1192,7 +1228,7 @@ namespace cnahouse::app
                 const debug::Timing::Scope scope(timing_, UpdateStage::Physics);
                 UpdateWalk(frame.deltaSeconds);
             }
-            else if (walking_)
+            else if (walking_ && menus_.Empty())
             {
                 // §25.8's `F5`. The body stands still and the camera flies: the input that walked
                 // it now steers the inspection camera, which is what lets a reader leave the room
@@ -1252,7 +1288,7 @@ namespace cnahouse::app
                 const debug::Timing::Scope scope(timing_, UpdateStage::Visibility);
                 UpdateVisibility(frame);
             }
-            else if (blockoutCells_ != nullptr)
+            else if (blockoutCells_ != nullptr && menus_.Empty())
             {
                 // `HOUSE-00476`. The debug camera flies; nothing else in this scene moves. Driven
                 // from `Update` so its speed is in metres per SECOND and does not change with the

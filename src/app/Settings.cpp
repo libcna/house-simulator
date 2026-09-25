@@ -113,12 +113,20 @@ namespace cnahouse::app
         }
         settings.masterVolume = *master;
 
-        auto effects = root.OptionalFloat("effectsVolume", settings.effectsVolume);
-        if (!effects)
+        // Version 8 and older called this broad category `effectsVolume`. Read it first as the
+        // fallback for the retained, accurately named footsteps category, so old files preserve
+        // the user's level without keeping the obsolete name in newly written files.
+        auto legacyEffects = root.OptionalFloat("effectsVolume", settings.footstepsVolume);
+        if (!legacyEffects)
         {
-            return effects.Error();
+            return legacyEffects.Error();
         }
-        settings.effectsVolume = *effects;
+        auto footsteps = root.OptionalFloat("footstepsVolume", *legacyEffects);
+        if (!footsteps)
+        {
+            return footsteps.Error();
+        }
+        settings.footstepsVolume = *footsteps;
 
         auto ambience = root.OptionalFloat("ambienceVolume", settings.ambienceVolume);
         if (!ambience)
@@ -126,6 +134,13 @@ namespace cnahouse::app
             return ambience.Error();
         }
         settings.ambienceVolume = *ambience;
+
+        auto weather = root.OptionalFloat("weatherVolume", settings.weatherVolume);
+        if (!weather)
+        {
+            return weather.Error();
+        }
+        settings.weatherVolume = *weather;
 
         auto sensitivity = root.OptionalFloat("mouseSensitivity", settings.mouseSensitivity);
         if (!sensitivity)
@@ -272,6 +287,14 @@ namespace cnahouse::app
                 static_cast<float>(environment::kDefaultMoonPhaseSpeedMultiplier);
             settings.version = 8;
         }
+        if (settings.version < 9)
+        {
+            // Version 9 split the historical effects slider into the only two retained categories
+            // that need names of their own. `FromJson` has already carried `effectsVolume` into
+            // footsteps; weather takes the compact-mix default because an older file had no value.
+            settings.weatherVolume = 0.75F;
+            settings.version = 9;
+        }
         settings.version = kCurrentVersion;
     }
 
@@ -300,7 +323,7 @@ namespace cnahouse::app
             backBufferHeight = std::clamp(backBufferHeight, 480, 4320);
             note("backBufferHeight");
         }
-        for (auto* volume : {&masterVolume, &effectsVolume, &ambienceVolume})
+        for (auto* volume : {&masterVolume, &footstepsVolume, &ambienceVolume, &weatherVolume})
         {
             if (*volume < 0.0f || *volume > 1.0f)
             {
@@ -372,8 +395,9 @@ namespace cnahouse::app
                            "  \"verticalSync\": {},\n"
                            "  \"quality\": \"{}\",\n"
                            "  \"masterVolume\": {},\n"
-                           "  \"effectsVolume\": {},\n"
+                           "  \"footstepsVolume\": {},\n"
                            "  \"ambienceVolume\": {},\n"
+                           "  \"weatherVolume\": {},\n"
                            "  \"mouseSensitivity\": {},\n"
                            "  \"invertY\": {},\n"
                            "  \"lookSmoothing\": {},\n"
@@ -393,8 +417,9 @@ namespace cnahouse::app
                            verticalSync ? "true" : "false",
                            QualityPresetName(quality),
                            masterVolume,
-                           effectsVolume,
+                           footstepsVolume,
                            ambienceVolume,
+                           weatherVolume,
                            mouseSensitivity,
                            invertY ? "true" : "false",
                            lookSmoothing ? "true" : "false",

@@ -3,23 +3,34 @@
 // `HOUSE-00156`. Everything the stack decides -- who updates, who draws, whether the world runs --
 // is decided without a `GraphicsDevice`, so it is tested without one. `Draw` is the single method
 // that needs a batch, and it is exercised for real by the integration tests instead of being mocked.
+#include <array>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <gtest/gtest.h>
 
+#include "cnahouse/app/Settings.hpp"
+#include "cnahouse/audio/AudioSystem.hpp"
 #include "cnahouse/player/IInputSource.hpp"
 #include "cnahouse/ui/LoadingScreen.hpp"
 #include "cnahouse/ui/MenuStack.hpp"
 
 namespace
 {
+    using cnahouse::app::Settings;
+    using cnahouse::audio::AudioSystem;
+    using cnahouse::audio::Category;
     using cnahouse::player::InputState;
+    using cnahouse::player::PointerKind;
     using cnahouse::ui::IScreen;
     using cnahouse::ui::LoadingScreen;
     using cnahouse::ui::MenuStack;
     using cnahouse::ui::ScreenAction;
     using cnahouse::ui::ScreenId;
+    using cnahouse::ui::SettingsControl;
+    using cnahouse::ui::SettingsControlName;
+    using cnahouse::ui::SettingsScreen;
 
     /// Records that it was updated, and answers whatever the test told it to.
     class FakeScreen final : public IScreen
@@ -282,5 +293,116 @@ namespace
         screen.Update(InputState{}, 0.5f);
         screen.Update(InputState{}, 0.25f);
         EXPECT_FLOAT_EQ(screen.Elapsed(), 0.75f);
+    }
+
+    TEST(SettingsScreenTests, KeyboardNavigationReachesEveryControlAndWraps)
+    {
+        Settings settings = Settings::Defaults();
+        SettingsScreen screen(settings);
+        constexpr std::array expected = {SettingsControl::Master,
+                                         SettingsControl::Footsteps,
+                                         SettingsControl::Ambience,
+                                         SettingsControl::Weather,
+                                         SettingsControl::LookSensitivity,
+                                         SettingsControl::InvertY,
+                                         SettingsControl::WalkSpeed};
+
+        for (const SettingsControl control : expected)
+        {
+            EXPECT_EQ(screen.Selected(), control);
+            EXPECT_NE(SettingsControlName(control), std::string_view{"?"});
+            InputState down;
+            down.uiDownPressed = true;
+            EXPECT_EQ(screen.Update(down, 0.016F), ScreenAction::None);
+        }
+        EXPECT_EQ(screen.Selected(), SettingsControl::Master);
+
+        InputState up;
+        up.uiUpPressed = true;
+        screen.Update(up, 0.016F);
+        EXPECT_EQ(screen.Selected(), SettingsControl::WalkSpeed);
+    }
+
+    TEST(SettingsScreenTests, KeyboardEditsAudioAndControlsAndAppliesEachChangeLive)
+    {
+        Settings settings = Settings::Defaults();
+        AudioSystem audio(false);
+        int applied = 0;
+        SettingsScreen screen(settings,
+                              [&]
+                              {
+                                  ++applied;
+                                  audio.SetMasterVolume(settings.masterVolume);
+                                  audio.SetCategoryVolume(Category::Footsteps, settings.footstepsVolume);
+                                  audio.SetCategoryVolume(Category::Ambience, settings.ambienceVolume);
+                                  audio.SetCategoryVolume(Category::Weather, settings.weatherVolume);
+                              });
+
+        InputState right;
+        right.uiRightPressed = true;
+        screen.Update(right, 0.016F);
+        EXPECT_FLOAT_EQ(settings.masterVolume, 0.85F);
+        EXPECT_FLOAT_EQ(audio.MasterVolume(), 0.85F);
+
+        InputState down;
+        down.uiDownPressed = true;
+        screen.Update(down, 0.016F);
+        screen.Update(right, 0.016F);
+        EXPECT_FLOAT_EQ(settings.footstepsVolume, 0.90F);
+        EXPECT_FLOAT_EQ(audio.CategoryVolume(Category::Footsteps), 0.90F);
+
+        for (int row = 0; row < 4; ++row)
+        {
+            screen.Update(down, 0.016F);
+        }
+        ASSERT_EQ(screen.Selected(), SettingsControl::InvertY);
+        InputState accept;
+        accept.uiAcceptPressed = true;
+        screen.Update(accept, 0.016F);
+        EXPECT_TRUE(settings.invertY);
+
+        screen.Update(down, 0.016F);
+        screen.Update(accept, 0.016F);
+        EXPECT_TRUE(settings.fastWalk);
+        EXPECT_EQ(applied, 4);
+    }
+
+    TEST(SettingsScreenTests, MouseAndTouchUseTheSameBoundedHitTargets)
+    {
+        for (const PointerKind kind : {PointerKind::Mouse, PointerKind::Touch})
+        {
+            Settings settings = Settings::Defaults();
+            int applied = 0;
+            SettingsScreen screen(settings, [&] { ++applied; });
+
+            InputState pointer;
+            pointer.pointerKind = kind;
+            pointer.pointerPressed = true;
+            pointer.pointerX = 0.6125F; // one quarter of the 0.55..0.80 slider track
+            pointer.pointerY = 0.294F;  // footsteps row
+            screen.Update(pointer, 0.016F);
+
+            EXPECT_EQ(screen.Selected(), SettingsControl::Footsteps);
+            EXPECT_NEAR(settings.footstepsVolume, 0.25F, 1e-6F);
+            EXPECT_EQ(applied, 1);
+        }
+    }
+
+    TEST(SettingsScreenTests, AClickOutsideThePageChangesNothingAndEscapeClosesIt)
+    {
+        Settings settings = Settings::Defaults();
+        int applied = 0;
+        SettingsScreen screen(settings, [&] { ++applied; });
+
+        InputState outside;
+        outside.pointerPressed = true;
+        outside.pointerX = 0.99F;
+        outside.pointerY = 0.99F;
+        EXPECT_EQ(screen.Update(outside, 0.016F), ScreenAction::None);
+        EXPECT_EQ(applied, 0);
+
+        InputState cancel;
+        cancel.cancelPressed = true;
+        EXPECT_EQ(screen.Update(cancel, 0.016F), ScreenAction::Pop);
     }
 } // namespace

@@ -46,7 +46,7 @@ namespace cnahouse::app
     struct Settings
     {
         /// @brief Bumped whenever a field changes meaning. `Migrate` handles every older value.
-        static constexpr std::int32_t kCurrentVersion = 8;
+        static constexpr std::int32_t kCurrentVersion = 9;
 
         std::int32_t version = kCurrentVersion;
 
@@ -57,9 +57,11 @@ namespace cnahouse::app
 
         QualityPreset quality = QualityPreset::High;
 
-        float masterVolume = 1.0f;
-        float effectsVolume = 1.0f;
-        float ambienceVolume = 1.0f;
+        /// @brief M8's retained compact mix, persisted with the same category names the UI shows.
+        float masterVolume = 0.80f;
+        float footstepsVolume = 0.85f;
+        float ambienceVolume = 0.75f;
+        float weatherVolume = 0.75f;
 
         /// @brief §44's mouse sensitivity multiplier, 0.2x to 4x.
         ///

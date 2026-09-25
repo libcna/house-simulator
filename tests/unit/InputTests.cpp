@@ -10,6 +10,9 @@
 #include "Microsoft/Xna/Framework/Input/KeyboardState.hpp"
 #include "Microsoft/Xna/Framework/Input/Keys.hpp"
 #include "Microsoft/Xna/Framework/Input/MouseState.hpp"
+#include "Microsoft/Xna/Framework/Input/Touch/TouchCollection.hpp"
+#include "Microsoft/Xna/Framework/Input/Touch/TouchLocation.hpp"
+#include "Microsoft/Xna/Framework/Input/Touch/TouchLocationState.hpp"
 
 #include "cnahouse/player/KeyboardMouseSource.hpp"
 
@@ -21,6 +24,9 @@ namespace
     using Microsoft::Xna::Framework::Input::KeyboardState;
     using Microsoft::Xna::Framework::Input::Keys;
     using Microsoft::Xna::Framework::Input::MouseState;
+    using Microsoft::Xna::Framework::Input::Touch::TouchCollection;
+    using Microsoft::Xna::Framework::Input::Touch::TouchLocation;
+    using Microsoft::Xna::Framework::Input::Touch::TouchLocationState;
 
     // `KeyboardState`'s only plain-XNA constructor takes an `initializer_list`; the default and the
     // set-taking ones are `CNAEXT` in CNA, so `KeyboardState{...}` is what both these tests and the
@@ -44,6 +50,60 @@ namespace
                           ButtonState::Released,
                           ButtonState::Released,
                           ButtonState::Released);
+    }
+
+    MouseState PressedAt(int x, int y)
+    {
+        return MouseState(x,
+                          y,
+                          0,
+                          ButtonState::Pressed,
+                          ButtonState::Released,
+                          ButtonState::Released,
+                          ButtonState::Released,
+                          ButtonState::Released);
+    }
+
+    TEST(InputTests, KeyboardUiNavigationIsReportedAsEdges)
+    {
+        KeyboardMouseSource source;
+        source.Apply(KeyboardState{Keys::Down, Keys::Right, Keys::Enter}, At(0, 0), 0.016F);
+        EXPECT_TRUE(source.Current().uiDownPressed);
+        EXPECT_TRUE(source.Current().uiRightPressed);
+        EXPECT_TRUE(source.Current().uiAcceptPressed);
+
+        source.Apply(KeyboardState{Keys::Down, Keys::Right, Keys::Enter}, At(0, 0), 0.016F);
+        EXPECT_FALSE(source.Current().uiDownPressed);
+        EXPECT_FALSE(source.Current().uiRightPressed);
+        EXPECT_FALSE(source.Current().uiAcceptPressed);
+    }
+
+    TEST(InputTests, MouseAndTouchBecomeTheSameNormalisedPointerPress)
+    {
+        InputConfig config;
+        config.viewportWidth = 1600;
+        config.viewportHeight = 900;
+        KeyboardMouseSource source(config);
+
+        source.Apply(KeyboardState({}), PressedAt(800, 450), 0.016F);
+        EXPECT_EQ(source.Current().pointerKind, cnahouse::player::PointerKind::Mouse);
+        EXPECT_TRUE(source.Current().pointerPressed);
+        EXPECT_FLOAT_EQ(source.Current().pointerX, 0.5F);
+        EXPECT_FLOAT_EQ(source.Current().pointerY, 0.5F);
+
+        // Release the mouse before the independent touch gesture. `anyPressed` is deliberately one
+        // edge across every device, so overlapping presses are one continuous user interaction.
+        source.Apply(KeyboardState({}), At(800, 450), 0.016F);
+
+        const std::vector<TouchLocation> locations{TouchLocation(
+            7, TouchLocationState::Pressed, Microsoft::Xna::Framework::Vector2(400.0F, 225.0F))};
+        const TouchCollection touches(locations);
+        source.Apply(KeyboardState({}), At(0, 0), touches, 0.016F);
+        EXPECT_EQ(source.Current().pointerKind, cnahouse::player::PointerKind::Touch);
+        EXPECT_TRUE(source.Current().pointerPressed);
+        EXPECT_FLOAT_EQ(source.Current().pointerX, 0.25F);
+        EXPECT_FLOAT_EQ(source.Current().pointerY, 0.25F);
+        EXPECT_TRUE(source.Current().anyPressed) << "a touch also opens the uniform audio gesture gate";
     }
 
     TEST(InputTests, MovementIsExpressedAsADirectionNotAsKeys)
