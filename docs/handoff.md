@@ -1,3 +1,27 @@
+# Living-room C5 handoff — 2026-09-25 (`HOUSE-00988`)
+
+`L0_LIVING` meets C5 without extra content. Its retained bounded recipe already supplies the
+fireplace and focal art/light, piano/bench/folio, sofa/chair/coffee-table/rug composition, floor
+lamp, plant, throw, table dressing, wall art and bay-window seating. Three fresh fixed views from
+Round 165 cover clear day and scheduled night; Round 166 adds the overcast H2 composition view.
+Full-resolution inspection found the complete room readable with an open route and no S1/S2,
+clipping, floating/intersecting furnishing, z-fighting or missing texture. Evidence remains ignored
+under `docs/visual-review/captures/house-00986-foyer-hall-{day,night}-r165/` and
+`house-00988-living-overcast-r166/`.
+
+A task-local Release probe used the unchanged `HOUSE-02402` path on the §71.1 AMD Radeon 780M at
+1920×1080, Tier S / High and vsync off: 129 draw calls, 792,239 triangles, 1.547 ms CPU total and
+3.604 ms GPU-completion median / 4.051 ms p95. The source and binary were restored to the standard
+eight scenarios immediately afterwards; no probe code remains.
+
+Rule R4 now selects `HOUSE-00990`, the last hero-cell pass, followed by gate `HOUSE-03480`. The
+remaining forecast is 111.75 realistic / 140.75 pessimistic hours. With 114.5 task-hours spent
+since the final reduction, the R14 projection is 255.25 h, 24.75 h below the ceiling. Every build,
+test, capture and check is limited to four workers and pinned to CPUs 4,5,7,9; strict-XNA
+additionally uses `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Foyer, porch and central-hall C5 handoff — 2026-09-25 (`HOUSE-00986`)
 
 The three named hero cells meet C5 without extra content. Their retained bounded recipes already

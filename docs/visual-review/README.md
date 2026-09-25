@@ -5603,3 +5603,22 @@ Tier S / High and vsync off reports 57 draw calls, 24,214 triangles, 1.166 ms CP
 3.044 ms GPU-completion median / 3.524 ms p95. Together with Round 164's `StreetApproach` result,
 both sides of the arrival are below the desktop High hard limits. Rule R4 next selects
 `HOUSE-00988`, the living-room C5 pass.
+
+## Round 166 — living-room C5
+
+Commit: `HOUSE-00988` working tree (`2026-09-25`). The retained bounded recipe already contains
+the fireplace and focal art/light, piano/bench/folio, sofa/chair/coffee-table/rug composition,
+floor lamp, plant, throw, table dressing, wall art and bay-window seating. No extra content was
+justified.
+
+Three fresh fixed views from Round 165 cover clear day and scheduled night; a fresh H2 composition
+view covers overcast. Full-resolution inspection finds the room readable with an open route and no
+S1/S2, clipping, floating/intersecting furnishing, z-fighting or missing texture. Local evidence
+is in `captures/house-00986-foyer-hall-{day,night}-r165/` and
+`captures/house-00988-living-overcast-r166/`.
+
+A task-local Release probe through the unchanged `HOUSE-02402` path on the §71.1 AMD Radeon 780M
+at 1920×1080, Tier S / High and vsync off reports 129 draw calls, 792,239 triangles, 1.547 ms CPU
+total and 3.604 ms GPU-completion median / 4.051 ms p95, below the desktop High hard limits. The
+authoritative eight scenarios were restored immediately afterwards. Rule R4 next selects
+`HOUSE-00990`, the kitchen C5 pass.
