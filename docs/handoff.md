@@ -1,3 +1,31 @@
+# Library C5 handoff — 2026-09-25 (`HOUSE-03454`)
+
+`L2_LIBRARY` now meets C5. Its retained composition already supplied paired reading chairs and
+table, a desk and lamp, rug, curtains and scheduled physical fixtures. Round 162 fills each of the
+five bookcases with three transform-varied clusters from the existing book family, adds a reused
+plant and wall-art piece, and uses the task's one permitted bespoke piece for a leaning library
+ladder. The ladder is generated through the existing prop-kit path: 1,296 visible triangles, a
+narrow 12-triangle collision proxy and measured 0.618×2.124×0.448 m bounds.
+
+All 626 static prop rows pass support, overlap, opening and route validation. Fixed clear-day,
+scheduled-night and overcast views plus reciprocal detail views were inspected at full resolution:
+the room reads as a complete library, the ladder and shelf density are legible, circulation stays
+open, and no S1/S2, clipping, floating/intersecting furnishing, z-fighting or missing texture is
+present. Local evidence remains Git-ignored under
+`docs/visual-review/captures/house-03454-library-{before,after}-*-r162/` and
+`house-03454-library-after-detail-r162/`.
+
+The Release `Library` scenario on the §71.1 AMD Radeon 780M at 1920×1080, Tier S / High and vsync
+off passes the High budget: 89 draw calls, 555,264 triangles, 1.256 ms CPU total and 3.034 ms GPU
+completion median / 3.539 ms p95. Rule R2 now selects `HOUSE-03455`: `Z-B1` has fourteen accessible
+cells versus five in `Z-EXF`, while rule R4 continues to defer ground-floor hero work. The remaining
+forecast is 118.25 realistic / 146.5 pessimistic hours. With 108 task-hours spent since the final
+reduction, the R14 projection is 254.5 h, 25.5 h below the ceiling. Every build/test/render remains
+limited to four workers and pinned to CPUs 4,5,7,9; strict-XNA additionally requires
+`HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Representative performance-harness handoff — 2026-09-25 (`HOUSE-02402`)
 
 The reduced plan's eight fixed scenarios now run as a Release CTest harness: kitchen, library,

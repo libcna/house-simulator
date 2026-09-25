@@ -5529,3 +5529,24 @@ the fixed-view set. G4 passes. Local evidence is in
 
 Rule R2 next selects `HOUSE-03454`: among the three newly unblocked hero levels, `Z-L2` has the
 most accessible cells still below the hero target. Rule R4 keeps the ground-floor hero tasks last.
+
+## Round 162 — library C5
+
+Commit: `HOUSE-03454` working tree (`2026-09-25`). The retained paired reading chairs/table, desk
+and lamp, rug, curtains and scheduled physical fixtures are joined by three transform-varied book
+clusters on each of the five cases, a reused plant and wall-art piece, and the task's one permitted
+bespoke piece: a leaning 1,296-triangle library ladder from the existing prop-kit generator.
+
+Fresh fixed views cover clear 10:30, scheduled 22:00 and overcast 10:30. Reciprocal detail views
+make the shelf density, ladder and reading composition visible. Full-resolution inspection finds
+the room readable in all three conditions with a clear route and no S1/S2, clipping,
+floating/intersecting furnishing, z-fighting or missing texture. All 626 static props pass exact
+placement and route validation. Local evidence is in
+`captures/house-03454-library-{before,after}-*-r162/` and
+`captures/house-03454-library-after-detail-r162/`.
+
+The Release library performance scenario on the §71.1 AMD Radeon 780M at 1920×1080, Tier S / High
+and vsync off reports 89 draw calls, 555,264 triangles, 1.256 ms CPU total and 3.034 ms GPU
+completion median / 3.539 ms p95, all within the High budgets. Rule R2 next selects
+`HOUSE-03455`: `Z-B1` has more accessible cells below the hero target than `Z-EXF`; ground-floor
+hero work remains last under R4.

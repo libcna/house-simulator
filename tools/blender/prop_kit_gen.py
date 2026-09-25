@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -83,6 +84,27 @@ def carcass(spec: dict) -> None:
 
 def shelving(spec: dict) -> None:
     width, height, depth = spec["size"]
+    if spec["variant"] == "ladder":
+        rail = 0.05
+        lean = 0.32
+        rail_length = math.hypot(height, lean)
+        rail_angle = -math.atan2(lean, height)
+        rail_y = height * 0.5 + depth * abs(math.sin(rail_angle)) * 0.5
+        for x in (-width * 0.5 + rail * 0.5, width * 0.5 - rail * 0.5):
+            ladder_rail = box(
+                "rail", (x, rail_y, 0), (rail, rail_length, depth), "KIT_WOOD")
+            ladder_rail.rotation_euler[0] = rail_angle
+        for index in range(8):
+            y = 0.24 + index * (height - 0.48) / 7
+            z = lean * (0.5 - y / height)
+            rung = box(f"rung_{index}", (0, y, z - depth * 0.08),
+                       (width - rail, rail, depth * 0.72), "KIT_WOOD")
+            rung.rotation_euler[0] = rail_angle
+        for x in (-width * 0.5 + rail * 0.5, width * 0.5 - rail * 0.5):
+            box("hook", (x, height - rail * 0.75, -lean * 0.5 - depth * 0.62),
+                (rail * 1.35, rail * 1.5, depth * 0.55), "KIT_METAL", 0.002)
+        collision((width, height, lean), "floor")
+        return
     post = 0.045
     for x in (-width * 0.5 + post * 0.5, width * 0.5 - post * 0.5):
         for z in (-depth * 0.5 + post * 0.5, depth * 0.5 - post * 0.5):

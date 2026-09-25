@@ -893,6 +893,16 @@ CHUNK_BUDGET_EXCEPTIONS["L1_MASTER_BED"] = (
     _master_bed_reason +
     "; HOUSE-03444 adds three wall-art material roles from the capped family; no split")
 
+# `HOUSE-03454`: the library's hero finish keeps the main-tier material batches and adds only the
+# truthful new roles from one reused plant and one capped wall-art member. The bespoke ladder reuses
+# the room's established timber/metal roles and the denser book clusters reuse its existing spine
+# role, so the measured 22 -> 26 growth is exactly four chunks with no vertex- or Reach-cap split.
+_library_hero_reason = CHUNK_BUDGET_EXCEPTIONS["L2_LIBRARY"][1]
+CHUNK_BUDGET_EXCEPTIONS["L2_LIBRARY"] = (
+    26,
+    _library_hero_reason +
+    "; HOUSE-03454 adds four measured plant and wall-art roles; ladder and books batch; no split")
+
 # `HOUSE-03405`: ground-floor service rooms and the garage reuse the same bounded fixture
 # catalogue. Repeated fittings batch by their truthful source roles and independently switched
 # emitters remain separate. These are the exact post-build counts; none is a vertex- or Reach-cap

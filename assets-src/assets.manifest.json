@@ -3611,7 +3611,8 @@
       "usedIn": [
         "L0_LIVING",
         "L0_FAMILY",
-        "L0_FOYER"
+        "L0_FOYER",
+        "L2_LIBRARY"
       ]
     },
     {
@@ -5183,6 +5184,52 @@
       "usedIn": [
         "B1_MECHANICAL",
         "L3_STORE_E"
+      ]
+    },
+    {
+      "id": "MODEL_PROP_KIT_LIBRARY_LADDER",
+      "category": "library-ladder",
+      "sourceFile": "assets-src/Models/Furniture/Generated/library_ladder.glb",
+      "sourceSha256": "60e71f459d4f557fd6c41a3716d61c1eeaaebacda15afe6b0aacff1b5a1b4ce0",
+      "contentName": "Models/Furniture/Generated/library_ladder",
+      "kind": "model",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Library ladder prop-kit piece",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically from tools/blender/prop_kit_data.json by tools/blender/prop_kit_gen.py as HOUSE-03454's one bounded hero-area bespoke piece; project-authored primitives and approved canonical material roles only."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.6175,
+          2.1242,
+          0.4479
+        ],
+        "triangles": {
+          "LOD0": 1296
+        },
+        "collision": "propkit_library_ladder_COL"
+      },
+      "materialMap": {
+        "KIT_PAINT": "MAT_DOOR_PAINTED",
+        "KIT_WOOD": "MAT_DOOR_HARDWOOD",
+        "KIT_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "KIT_GLASS": "MAT_GLASS_CABINET",
+        "KIT_SCREEN": "MAT_KITCHEN_OVEN_GLASS",
+        "KIT_CARDBOARD": "MAT_LIVING_ART_PAPER",
+        "KIT_WHITE": "MAT_WINDOW_FRAME_WHITE"
+      },
+      "usedIn": [
+        "L2_LIBRARY"
       ]
     },
     {

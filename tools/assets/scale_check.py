@@ -268,6 +268,7 @@ UNSIZED_CATEGORIES = {
     "fill-kit": "seeded shelf and surface clusters; the HOUSE-00973 group gate owns their measured envelopes",
     "storage-furniture": "the HOUSE-00985 data and group gate own the reusable carcass envelopes",
     "open-shelving": "the HOUSE-00985 data and group gate own the shelving envelope",
+    "library-ladder": "the HOUSE-03454 prop-kit recipe and group gate own its measured envelope",
     "workbench": "the HOUSE-00985 data and group gate own the workbench envelope",
     "storage-box": "the HOUSE-00985 data and group gate own the reusable box envelope",
     "mirror": "the HOUSE-00985 data and wall-plane check own the mirror envelope",

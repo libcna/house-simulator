@@ -6,6 +6,7 @@
   "bookcase": {"family": "carcass", "variant": "open", "size": [0.92, 1.82, 0.34], "category": "storage-furniture"},
   "utility_module": {"family": "carcass", "variant": "doors", "size": [0.90, 0.92, 0.58], "category": "storage-furniture"},
   "open_shelf": {"family": "shelving", "variant": "open", "size": [1.20, 1.80, 0.42], "category": "open-shelving"},
+  "library_ladder": {"family": "shelving", "variant": "ladder", "size": [0.60, 2.10, 0.14], "category": "library-ladder"},
   "workbench": {"family": "worktop", "variant": "bench", "size": [1.60, 0.90, 0.68], "category": "workbench"},
   "storage_box": {"family": "box", "variant": "lidded", "size": [0.58, 0.38, 0.42], "category": "storage-box"},
   "mirror": {"family": "fixture", "variant": "mirror", "size": [0.62, 0.82, 0.035], "category": "mirror", "mount": "wall"},
