@@ -1,3 +1,29 @@
+# Shared fixed-pool particle renderer handoff — 2026-09-25 (`HOUSE-01741`)
+
+`ParticleRenderer` is the one retained CPU-to-XNA stream for the compact weather work. It owns
+fixed storage for 2,000 particle records and their 8,000 camera-facing
+`VertexPositionColorTexture` vertices. `BeginFrame` resets that storage in place and applies the
+existing graphics-preset ceilings: 500 Low, 1,000 Medium/High and 2,000 Ultra. Six fixed borrowed
+texture slots bound the material count; the implementation groups interleaved submissions without
+allocating, performs one `DynamicVertexBuffer::SetData(..., Discard)` upload, and issues one indexed
+`BasicEffect` draw per used material with alpha blend and read-only depth.
+
+Two pure tests prove every preset, hard-cap rejection, stable pool storage, invalid-input rejection
+and camera-facing dimensions. The real OPENGLES3 integration test submits five quads interleaved
+across two 1 px materials and measures one upload, two draws and ten triangles; an empty following
+frame performs neither another upload nor a draw. The four-worker build passes and strict-XNA
+compiled all 330 translation units clean with `--jobs 4`; all pre-commit gates pass except the
+known layout report for the user-owned root `.claude` entry, which was not touched. No screenshot
+is applicable because the dependency deliberately has no weather producer or retained texture
+until `HOUSE-01743`; adding a placeholder effect here would violate the task boundary.
+
+M7 dependency order now selects `HOUSE-01742`, the camera-relative precipitation volume and wind
+offset. The remaining forecast is 104.25 realistic / 132.75 pessimistic hours. With 122 task-hours
+spent since the final reduction, the R14 projection is 254.75 h, 25.25 h below the ceiling. Every
+build, test and check remains limited to four workers and pinned to CPUs 4,5,7,9.
+
+---
+
 # Weather-driven exterior fog handoff — 2026-09-25 (`HOUSE-01650`)
 
 The existing stock-XNA `MaterialBinder` fog boundary is now fed each frame by the one live weather

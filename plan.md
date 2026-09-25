@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **66 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 90 / 106 / 135 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5 passed; compact-environment work is active.** Next: the shared particle renderer in `HOUSE-01741` |
+| Active plan | **65 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 89 / 104 / 133 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5 passed; compact-environment work is active.** Next: the camera-relative precipitation volume in `HOUSE-01742` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -1134,10 +1134,11 @@ a simulation of its own.
       verify: unit tests of the parameters; the environment captures
       note: (2026-09-25) The game now derives one live `FogParams` value each frame from the rendered sky's horizon colour in the horizontal camera direction, authored `fogDensity`, precipitation intensity and the camera far plane. The retained stock-XNA binder path consumes it only for `EXT_WORLD`, alpha-tested exterior vegetation and explicitly weather-facing shell/window/door batches; ordinary interior batches continue to pass null and therefore clear the shared effect's fog state. The mapping is continuous, bounded and non-degenerate: at the canonical 400 m far plane representative clear/overcast/rain samples progressively pull both ramp endpoints inward, with rain beginning inside the retained front-approach distance. Unit/integration tests cover monotonic parameters, invalid inputs, directional sky colour, overcast uniformity, every stock-effect fog setter/reset and the exterior-cell boundary. Full-resolution Round 173 front views and Round 174 100 m views show stable clear/overcast/rain separation without bands; the Round 174 centre-crop linear-grey standard deviation falls 0.052706 → 0.022241 → 0.020789 as distant contrast is progressively lost to the matching horizon. No second sky/weather system was added
 
-- [ ] HOUSE-01741 — Shared particle renderer: pooled camera-facing quads in a `DynamicVertexBuffer`, one draw per material
+- [x] HOUSE-01741 — Shared particle renderer: pooled camera-facing quads in a `DynamicVertexBuffer`, one draw per material
       dep: HOUSE-00092 · sys: weather · plat: ALL · pri: MUST · zone: all · adv: D5 · est: 2
       accept: (1) a fixed pool, no per-frame allocation; (2) one draw call per material, at most a few materials; (3) XNA 4.0 API only; works under every quality preset
       verify: unit tests of the pool; a draw-count check
+      note: (2026-09-25) `ParticleRenderer` owns fixed arrays for 2,000 particle records and 8,000 `VertexPositionColorTexture` vertices, plus one retained `DynamicVertexBuffer`/index buffer pair created on first use. `BeginFrame` only resets counters and selects the existing preset ceiling (500 Low, 1,000 Medium/High, 2,000 Ultra); it never grows a container. Valid submissions are regrouped into at most six borrowed texture slots without allocation, uploaded once with `SetDataOptions::Discard`, and drawn once per used material through stock XNA `BasicEffect`, alpha blend and read-only depth. Pure tests cover all four presets, capacity rejection, stable pool storage, invalid records and the camera-facing dimensions; the real OPENGLES3 test interleaves five quads across two materials and proves one upload, exactly two draws and no empty-frame upload. Strict-XNA compiled all 330 translation units clean with four workers. The renderer deliberately has no visible weather consumer until dependent `HOUSE-01742`/`HOUSE-01743`; no placeholder texture or optional particle effect was added
 
 - [ ] HOUSE-01742 — Camera-relative precipitation volume with wrap-around and a wind offset
       dep: HOUSE-01741 · sys: weather · plat: ALL · pri: MUST · zone: all · adv: D5 · est: 1.5
@@ -1918,7 +1919,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M4 Dressing everywhere | 40 | 48.75 | **0** | 0 | **0** | 0 | R-D +3 |
 | M5 Baseline lighting everywhere | 12 | 24.5 | **0** | 0 | **0** | 0 | — |
 | M6 Main cells and hero areas | 20 | 32.5 | **0** | 0 | **0** | 0 | — |
-| M7 A compact environment | 13 | 21 | **6** | 8.75 | **10.25** | 11.5 | — |
+| M7 A compact environment | 13 | 21 | **5** | 7 | **8.25** | 9.25 | — |
 | M8 Atmospheric audio essentials | 11 | 14.5 | **6** | 7.75 | **9** | 10 | — |
 | M9 Application shell | 10 | 12.5 | **6** | 7.25 | **8.5** | 9.25 | — |
 | M10 Performance | 6 | 13 | **3** | 6.75 | **8** | 12.75 | R-C +4 |
@@ -1928,12 +1929,12 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **66** | **90.25** | **106.25** | **135** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **65** | **88.5** | **104.25** | **132.75** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-145 h. Adding the 120 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-255 h, 25 h under the limit. That margin is
+147.25 h. Adding the 122 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+254.75 h, 25.25 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |
@@ -1946,7 +1947,7 @@ small on purpose: the ceiling is a limit, not a budget to fill.
 
 **By area,** against the owner's sanity reference for this pass: traversal 0 h (complete); architecture
 4 h (≈ 18); furnishing kit 19 h (18–22); whole-house furnishing 31 h (30–38); lighting 19.75 h
-(18–22); C4/C5 polish 19.75 h (18–24); environment 13.25 h (10–15); audio 9 h (8–10); shell 8.5 h
+(18–22); C4/C5 polish 19.75 h (18–24); environment 8.25 h; audio 9 h (8–10); shell 8.5 h
 (8–10); performance 9.5 h (≈ 10); final polish 7 h (6–8); tests 3.5 h (≈ 5); Linux 10.25 h
 (11–13); Web 19.5 h (18–22); Android 23.75 h (23–27); release 6.5 h (6–8).
 
