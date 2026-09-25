@@ -1,3 +1,30 @@
+# Camera-relative precipitation volume handoff — 2026-09-25 (`HOUSE-01742`)
+
+`PrecipitationVolume` is a small allocation-free geometry boundary over caller-owned fixed particle
+positions. It follows the camera eye with the retained 12 m radius / 14 m height cylinder and
+offsets its centre exactly 3 m in the direction the air travels. The input comes directly from the
+already rate-limited `WeatherState::windSpeed` and meteorological `windDirectionDeg`; north/east
+“from” bearings are converted to the project's +X-east/-Z-north travel vector. `gustFactor` is not
+read, and there is no second smoothing, gust oscillator or RNG.
+
+Every follow wraps the supplied `std::span<Vector3>` in place through opposite vertical and radial
+boundaries, including a camera relocation larger than the cylinder. Invalid camera/wind input is
+transactional: neither centre nor positions change. Four unit tests cover cardinal/calm wind,
+gust independence, the exact downwind offset, both boundary types, large relocation and invalid
+input. The four-worker build and focused suite pass; strict-XNA compiled all 332 translation units
+clean with `--jobs 4`. All other pre-commit gates pass; the only remaining report is the known
+layout failure for the user-owned root `.claude` entry, which was not touched. No visible capture
+applies because this task neither emits nor draws rain.
+
+M7 dependency order selects `HOUSE-01743` next: rain motion, intensity count, velocity-elongated
+quads and the single manifested streak texture/material, including rain rendering for sleet/hail/
+storm archetypes and none for snow. The remaining forecast is 102.75 realistic / 131 pessimistic
+hours. With 123.5 task-hours spent since the final reduction, the R14 projection is 254.5 h, 25.5 h
+below the ceiling. Every build, test and check remains limited to four workers and pinned to CPUs
+4,5,7,9.
+
+---
+
 # Shared fixed-pool particle renderer handoff — 2026-09-25 (`HOUSE-01741`)
 
 `ParticleRenderer` is the one retained CPU-to-XNA stream for the compact weather work. It owns

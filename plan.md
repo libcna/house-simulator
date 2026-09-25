@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **65 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 89 / 104 / 133 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5 passed; compact-environment work is active.** Next: the camera-relative precipitation volume in `HOUSE-01742` |
+| Active plan | **64 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 87 / 103 / 131 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5 passed; compact-environment work is active.** Next: retained rain motion/materials in `HOUSE-01743` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -1140,10 +1140,11 @@ a simulation of its own.
       verify: unit tests of the pool; a draw-count check
       note: (2026-09-25) `ParticleRenderer` owns fixed arrays for 2,000 particle records and 8,000 `VertexPositionColorTexture` vertices, plus one retained `DynamicVertexBuffer`/index buffer pair created on first use. `BeginFrame` only resets counters and selects the existing preset ceiling (500 Low, 1,000 Medium/High, 2,000 Ultra); it never grows a container. Valid submissions are regrouped into at most six borrowed texture slots without allocation, uploaded once with `SetDataOptions::Discard`, and drawn once per used material through stock XNA `BasicEffect`, alpha blend and read-only depth. Pure tests cover all four presets, capacity rejection, stable pool storage, invalid records and the camera-facing dimensions; the real OPENGLES3 test interleaves five quads across two materials and proves one upload, exactly two draws and no empty-frame upload. Strict-XNA compiled all 330 translation units clean with four workers. The renderer deliberately has no visible weather consumer until dependent `HOUSE-01742`/`HOUSE-01743`; no placeholder texture or optional particle effect was added
 
-- [ ] HOUSE-01742 — Camera-relative precipitation volume with wrap-around and a wind offset
+- [x] HOUSE-01742 — Camera-relative precipitation volume with wrap-around and a wind offset
       dep: HOUSE-01741 · sys: weather · plat: ALL · pri: MUST · zone: all · adv: D5 · est: 1.5
       accept: the volume follows the camera with wrap-around, and its wind offset reads the weather state's smoothed wind vector; there is no gust model
       verify: unit tests of the wrap and the offset
+      note: (2026-09-25) `PrecipitationVolume` is the allocation-free geometry boundary for dependent rain work: a 12 m radius, 14 m high cylinder follows the camera eye and shifts exactly 3 m downwind using the already rate-limited `WeatherState::windSpeed`/`windDirectionDeg`. Meteorological “from” direction is converted once to the project's +X-east/-Z-north travel vector; `gustFactor` is not read and no oscillator/RNG was introduced. `Follow` wraps a caller-owned fixed position span in place after every camera/wind update, using opposite-side periodic vertical and radial boundaries; non-finite input leaves both centre and positions untouched. Four unit tests cover cardinal wind, calm and gust independence, the exact offset, both cylinder boundaries, large camera relocation, stable in-place storage and transactional invalid-input rejection. Strict-XNA compiled all 332 translation units clean with four workers. No rain is emitted or drawn yet; that is the immediate dependent `HOUSE-01743`
 
 - [ ] HOUSE-01743 — Rain: particle motion and the rain streak texture and material
       dep: HOUSE-01742 · sys: weather · plat: ALL · pri: MUST · zone: all · adv: D5 · est: 1.75
@@ -1919,7 +1920,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M4 Dressing everywhere | 40 | 48.75 | **0** | 0 | **0** | 0 | R-D +3 |
 | M5 Baseline lighting everywhere | 12 | 24.5 | **0** | 0 | **0** | 0 | — |
 | M6 Main cells and hero areas | 20 | 32.5 | **0** | 0 | **0** | 0 | — |
-| M7 A compact environment | 13 | 21 | **5** | 7 | **8.25** | 9.25 | — |
+| M7 A compact environment | 13 | 21 | **4** | 5.75 | **6.75** | 7.5 | — |
 | M8 Atmospheric audio essentials | 11 | 14.5 | **6** | 7.75 | **9** | 10 | — |
 | M9 Application shell | 10 | 12.5 | **6** | 7.25 | **8.5** | 9.25 | — |
 | M10 Performance | 6 | 13 | **3** | 6.75 | **8** | 12.75 | R-C +4 |
@@ -1929,12 +1930,12 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **65** | **88.5** | **104.25** | **132.75** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **64** | **87.25** | **102.75** | **131** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-147.25 h. Adding the 122 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-254.75 h, 25.25 h under the limit. That margin is
+149 h. Adding the 123.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+254.5 h, 25.5 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |
@@ -1947,7 +1948,7 @@ small on purpose: the ceiling is a limit, not a budget to fill.
 
 **By area,** against the owner's sanity reference for this pass: traversal 0 h (complete); architecture
 4 h (≈ 18); furnishing kit 19 h (18–22); whole-house furnishing 31 h (30–38); lighting 19.75 h
-(18–22); C4/C5 polish 19.75 h (18–24); environment 8.25 h; audio 9 h (8–10); shell 8.5 h
+(18–22); C4/C5 polish 19.75 h (18–24); environment 6.75 h; audio 9 h (8–10); shell 8.5 h
 (8–10); performance 9.5 h (≈ 10); final polish 7 h (6–8); tests 3.5 h (≈ 5); Linux 10.25 h
 (11–13); Web 19.5 h (18–22); Android 23.75 h (23–27); release 6.5 h (6–8).
 
