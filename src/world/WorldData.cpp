@@ -435,8 +435,8 @@ namespace cnahouse::world
                m_contents.openings.size() + m_contents.stairs.size() + m_contents.lights.size() +
                m_contents.materials.size() + m_contents.props.size() + m_contents.navNodes.size() +
                m_contents.navEdges.size() + m_contents.navMarkers.size() + m_contents.audioZones.size() +
-               m_contents.audioEmitters.size() + m_contents.weatherArchetypes.size() +
-               m_contents.weatherTransitions.size();
+               m_contents.audioBanks.size() + m_contents.audioEmitters.size() +
+               m_contents.weatherArchetypes.size() + m_contents.weatherTransitions.size();
     }
 
 } // namespace cnahouse::world

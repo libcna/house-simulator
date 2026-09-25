@@ -305,7 +305,9 @@ namespace cnahouse::content
                 // `CNAEXT`-marked, and a prvalue argument selects it -- a forbidden call in which
                 // no forbidden identifier appears (ADR-0001, `check_xna_strict.py`). This exact
                 // line was caught by that gate rather than by review.
-                float volume = audio_.EffectiveVolume(audio::Category::Ui);
+                // The retained M8 mix has only footsteps, ambience and weather. The smoke-scene
+                // chime is diagnostic content, so it follows the general ambience level.
+                float volume = audio_.EffectiveVolume(audio::Category::Ambience);
                 soundInstance_->setVolumeProperty(volume);
                 soundAttempted_ = true;
                 soundInstance_->Play();

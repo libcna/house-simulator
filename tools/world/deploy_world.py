@@ -64,6 +64,7 @@ TARGET = REPO / "content" / "world"
 #: file. So the manifest describes the deployed copy, is generated rather than authored, and lives
 #: only beside the files it describes.
 DEPLOYED_KINDS = [k for k in layout_io.FILES if k not in ("assets", "manifest")]
+ASSET_MANIFEST = "assets.manifest.json"
 
 
 def rendered(document: dict) -> str:
@@ -122,6 +123,25 @@ def deploy(source: Path, target: Path, *, dry_run: bool = False) -> tuple[list[s
             out.parent.mkdir(parents=True, exist_ok=True)
             out.write_bytes(data)
 
+    # The audio banks name asset ids and resolve them through the same authoritative manifest as
+    # every offline content check. Deploy that manifest beside the world so Linux, Web and Android
+    # do not need an `assets-src/` tree at runtime. It is deliberately excluded from worldHash:
+    # `world_manifest.py` owns world layout bytes, while the asset manifest has its own provenance
+    # and packaging gate.
+    asset_manifest = source.parent / ASSET_MANIFEST
+    if asset_manifest.is_file():
+        try:
+            text = rendered(json.loads(asset_manifest.read_text(encoding="utf-8")))
+        except (OSError, json.JSONDecodeError) as error:
+            problems.append(f"{ASSET_MANIFEST}: {error}")
+        else:
+            out = target / ASSET_MANIFEST
+            if not out.is_file() or out.read_text(encoding="utf-8") != text:
+                written.append(ASSET_MANIFEST)
+                if not dry_run:
+                    out.parent.mkdir(parents=True, exist_ok=True)
+                    out.write_text(text, encoding="utf-8")
+
     # The manifest, over what was just written. Last, because it hashes the deployed bytes; and
     # here rather than in a separate stage, because a manifest that described a different set of
     # bytes than the one beside it is the exact failure this whole step exists to avoid.
@@ -142,6 +162,8 @@ def deploy(source: Path, target: Path, *, dry_run: bool = False) -> tuple[list[s
         manifest_name = layout_io.FILES["manifest"][0]
         expected = {layout_io.FILES[k][0] for k in DEPLOYED_KINDS}
         expected.update(world_manifest.COMPANION_FILES)
+        if asset_manifest.is_file():
+            expected.add(ASSET_MANIFEST)
         stale_candidates = sorted(target.glob("*.json")) + [
             target / name for name in world_manifest.COMPANION_FILES if (target / name).is_file()]
         for stale in stale_candidates:
@@ -155,6 +177,8 @@ def deploy(source: Path, target: Path, *, dry_run: bool = False) -> tuple[list[s
             # broken the very stage that wrote it, and the two stages would have taken turns
             # undoing each other on every build.
             if stale.name.startswith("."):
+                continue
+            if stale.name == ASSET_MANIFEST and asset_manifest.is_file():
                 continue
             if stale.name in expected and (source / stale.name).is_file():
                 continue
@@ -183,6 +207,8 @@ def selftest() -> int:
         source = workspace / "src"
         target = workspace / "out"
         source.mkdir()
+        (workspace / ASSET_MANIFEST).write_text(
+            '{"schema":"cna-house/assets/1","assets":[]}\n', encoding="utf-8")
 
         authored = (
             "{\n"
@@ -196,8 +222,9 @@ def selftest() -> int:
         (source / "layout.levels.json").write_text(authored, encoding="utf-8")
 
         written, problems = deploy(source, target)
-        require(written == ["layout.levels.json", "world.manifest.json"] and not problems,
-                f"the authored file is deployed, and a manifest written beside it "
+        require(written == ["layout.levels.json", ASSET_MANIFEST, "world.manifest.json"]
+                and not problems,
+                f"the authored file and asset manifest are deployed, and a world manifest written beside them "
                 f"({written}, {problems})")
 
         deployed = (target / "layout.levels.json").read_text(encoding="utf-8")
@@ -215,6 +242,8 @@ def selftest() -> int:
         require(strict, "the deployed file is strict JSON, which is what the runtime parses")
         require(parsed == layout_io.load_file(source / "layout.levels.json", "levels"),
                 "and its parsed content is identical to the authored file's")
+        require(json.loads((target / ASSET_MANIFEST).read_text(encoding="utf-8"))["assets"] == [],
+                "the runtime asset manifest is deployed beside the world")
 
         # 2. Stable: a second deploy of an unchanged world writes nothing. A deploy that rewrote
         #    every file every time would make `--check` useless and every build dirty.

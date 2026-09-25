@@ -766,6 +766,18 @@ namespace cnahouse::world
         float gain = 1.0F;
     };
 
+    /// @brief A named group of interchangeable sounds from `layout.audio.json`.
+    ///
+    /// Samples are asset ids rather than content paths.  The audio system resolves them through
+    /// `assets.manifest.json`, keeping file names out of the authored world and letting a missing
+    /// or non-sound asset make this bank silent without stopping the walkthrough.
+    struct AudioBank
+    {
+        util::Id id;
+        std::vector<util::Id> samples;
+        float gain = 1.0F;
+    };
+
     struct AudioEmitter
     {
         util::Id id;

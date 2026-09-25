@@ -3,20 +3,34 @@
 
 #include <array>
 #include <cstdint>
+#include <span>
 #include <string>
 #include <string_view>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+
+#include "cnahouse/util/Ids.hpp"
+
+namespace cnahouse::content
+{
+    class ContentRegistry;
+}
+
+namespace cnahouse::world
+{
+    struct AudioBank;
+}
 
 namespace cnahouse::audio
 {
 
-    /// @brief The mix categories of `cna-house.md` §68's Audio tab.
+    /// @brief The three retained mix categories in `plan.md` milestone M8.
     enum class Category : std::uint8_t
     {
+        Footsteps,
         Ambience,
-        World,
-        Animals,
-        Media,
-        Ui,
+        Weather,
         Count,
     };
 
@@ -54,8 +68,7 @@ namespace cnahouse::audio
     class AudioSystem
     {
     public:
-        /// @brief §68's defaults: master 80 %, ambience 75 %, world 100 %, animals 90 %, media 70 %,
-        ///        UI 60 %.
+        /// @brief M8's compact mix: master 80 %, footsteps 85 %, ambience/weather 75 %.
         explicit AudioSystem(bool enabled) noexcept;
 
         /// @brief Records that the user has interacted, and opens the device if it can be opened.
@@ -94,6 +107,14 @@ namespace cnahouse::audio
             return master_;
         }
 
+        /// @brief Mutes the global mix without destroying the configured master volume.
+        void SetMuted(bool muted) noexcept;
+
+        [[nodiscard]] bool IsMuted() const noexcept
+        {
+            return muted_;
+        }
+
         void SetCategoryVolume(Category category, float volume) noexcept;
         [[nodiscard]] float CategoryVolume(Category category) const noexcept;
 
@@ -102,12 +123,39 @@ namespace cnahouse::audio
         ///        device that is not there.
         [[nodiscard]] float EffectiveVolume(Category category) const noexcept;
 
+        /// @brief Resolves authored bank sample ids through the asset manifest.
+        ///
+        /// A bad bank is omitted, reported and therefore silent. Other banks remain available.
+        void LoadBanks(std::span<const world::AudioBank> banks, const content::ContentRegistry& registry);
+
+        /// @brief Resolved content names for a bank, or an empty span for a missing/silent bank.
+        [[nodiscard]] std::span<const std::string> Bank(util::Id id) const noexcept;
+
+        [[nodiscard]] float BankGain(util::Id id) const noexcept;
+
+        [[nodiscard]] std::size_t BankCount() const noexcept
+        {
+            return banks_.size();
+        }
+
+        [[nodiscard]] const std::vector<std::string>& BankProblems() const noexcept
+        {
+            return bankProblems_;
+        }
+
         /// @brief One line for the log header and the bug-report footer.
         [[nodiscard]] std::string Summary() const;
 
     private:
         /// @brief Opens the mixer, or records why it could not be opened. Called once, on gesture.
         void OpenDevice();
+        void ApplyDeviceVolume() noexcept;
+
+        struct ResolvedBank
+        {
+            float gain = 1.0F;
+            std::vector<std::string> samples;
+        };
 
         static constexpr std::size_t kCategoryCount = static_cast<std::size_t>(Category::Count);
 
@@ -115,7 +163,11 @@ namespace cnahouse::audio
         AudioState state_ = AudioState::Waiting;
         std::string silentReason_;
         float master_ = 0.80f;
+        bool muted_ = false;
         std::array<float, kCategoryCount> categories_{};
+        std::unordered_map<util::Id, ResolvedBank> banks_;
+        std::vector<std::string> bankProblems_;
+        mutable std::unordered_set<util::Id> missingBanksReported_;
     };
 
 } // namespace cnahouse::audio

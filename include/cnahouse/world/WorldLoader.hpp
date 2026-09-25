@@ -163,7 +163,7 @@ namespace cnahouse::world
 
         /// @brief Reads `layout.audio.json` into @p contents.
         ///
-        /// Zones, emitters and §64.3's named transmission table.
+        /// Sound banks, zones, emitters and §64.3's named transmission table.
         [[nodiscard]] static util::Result<void> LoadAudio(std::string_view directory,
                                                           WorldData::Contents& contents);
 

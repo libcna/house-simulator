@@ -4,11 +4,14 @@
 #include <algorithm>
 #include <exception>
 #include <format>
+#include <unordered_set>
 
 #include "Microsoft/Xna/Framework/Audio/NoAudioHardwareException.hpp"
 #include "Microsoft/Xna/Framework/Audio/SoundEffect.hpp"
 
+#include "cnahouse/content/ContentRegistry.hpp"
 #include "cnahouse/util/Log.hpp"
+#include "cnahouse/world/WorldTypes.hpp"
 
 namespace cnahouse::audio
 {
@@ -19,16 +22,12 @@ namespace cnahouse::audio
     {
         switch (category)
         {
+            case Category::Footsteps:
+                return "footsteps";
             case Category::Ambience:
                 return "ambience";
-            case Category::World:
-                return "world";
-            case Category::Animals:
-                return "animals";
-            case Category::Media:
-                return "media";
-            case Category::Ui:
-                return "ui";
+            case Category::Weather:
+                return "weather";
             case Category::Count:
                 break;
         }
@@ -52,12 +51,10 @@ namespace cnahouse::audio
     AudioSystem::AudioSystem(bool enabled) noexcept
         : enabled_(enabled)
     {
-        // `cna-house.md` §68's Audio tab defaults, in the enum's order.
+        // The compact M8 mix defaults, in enum order.
+        categories_[static_cast<std::size_t>(Category::Footsteps)] = 0.85f;
         categories_[static_cast<std::size_t>(Category::Ambience)] = 0.75f;
-        categories_[static_cast<std::size_t>(Category::World)] = 1.00f;
-        categories_[static_cast<std::size_t>(Category::Animals)] = 0.90f;
-        categories_[static_cast<std::size_t>(Category::Media)] = 0.70f;
-        categories_[static_cast<std::size_t>(Category::Ui)] = 0.60f;
+        categories_[static_cast<std::size_t>(Category::Weather)] = 0.75f;
 
         if (!enabled_)
         {
@@ -92,7 +89,7 @@ namespace cnahouse::audio
             // is marked `CNAEXT`: passing a literal or a temporary would bind to it and violate
             // ADR-0001. `check_xna_only.py` cannot see this -- it is an overload-resolution
             // outcome, not a name -- so it is written out here and in `docs/conventions.md` §5a.
-            const float volume = master_;
+            const float volume = muted_ ? 0.0F : master_;
             Microsoft::Xna::Framework::Audio::SoundEffect::setMasterVolumeProperty(volume);
             state_ = AudioState::Ready;
             silentReason_.clear();
@@ -122,13 +119,24 @@ namespace cnahouse::audio
     void AudioSystem::SetMasterVolume(float volume) noexcept
     {
         master_ = std::clamp(volume, 0.0f, 1.0f);
+        ApplyDeviceVolume();
+    }
+
+    void AudioSystem::SetMuted(bool muted) noexcept
+    {
+        muted_ = muted;
+        ApplyDeviceVolume();
+    }
+
+    void AudioSystem::ApplyDeviceVolume() noexcept
+    {
         if (state_ != AudioState::Ready)
         {
             return;
         }
         try
         {
-            const float value = master_; // lvalue: see OpenDevice
+            const float value = muted_ ? 0.0F : master_; // lvalue: see OpenDevice
             Microsoft::Xna::Framework::Audio::SoundEffect::setMasterVolumeProperty(value);
         }
         catch (const std::exception& e)
@@ -160,7 +168,7 @@ namespace cnahouse::audio
 
     float AudioSystem::EffectiveVolume(Category category) const noexcept
     {
-        if (!IsReady())
+        if (!IsReady() || muted_)
         {
             // 0 rather than the mix, so that a caller which forgot to check cannot play into a
             // device that is not there. Silence is the supported behaviour, not a failure.
@@ -169,11 +177,103 @@ namespace cnahouse::audio
         return master_ * CategoryVolume(category);
     }
 
+    void AudioSystem::LoadBanks(std::span<const world::AudioBank> banks,
+                                const content::ContentRegistry& registry)
+    {
+        banks_.clear();
+        bankProblems_.clear();
+        missingBanksReported_.clear();
+
+        for (const world::AudioBank& authored : banks)
+        {
+            ResolvedBank resolved;
+            resolved.gain = authored.gain;
+            bool valid = true;
+            std::unordered_set<util::Id> seen;
+            for (const util::Id sample : authored.samples)
+            {
+                if (!seen.insert(sample).second)
+                {
+                    const std::string problem = std::format("audio bank '{}' repeats sample '{}'",
+                                                            util::IdRegistry::NameOf(authored.id),
+                                                            util::IdRegistry::NameOf(sample));
+                    bankProblems_.push_back(problem);
+                    Log::Warn(LogCat::Audio, "{}; the bank is silent", problem);
+                    valid = false;
+                    break;
+                }
+
+                const content::AssetEntry* asset = registry.Find(sample);
+                if (asset == nullptr || asset->kind != content::AssetKind::Sound)
+                {
+                    const std::string_view sampleName = util::IdRegistry::NameOf(sample);
+                    const std::string problem = std::format(
+                        "audio bank '{}' names {}, which is not a sound in assets.manifest.json",
+                        util::IdRegistry::NameOf(authored.id),
+                        sampleName.empty() ? "an unknown asset" : std::format("'{}'", sampleName));
+                    bankProblems_.push_back(problem);
+                    Log::Warn(LogCat::Audio, "{}; the bank is silent", problem);
+                    valid = false;
+                    break;
+                }
+                resolved.samples.push_back(asset->contentName);
+            }
+
+            if (!valid || resolved.samples.empty())
+            {
+                if (valid)
+                {
+                    const std::string problem =
+                        std::format("audio bank '{}' has no samples", util::IdRegistry::NameOf(authored.id));
+                    bankProblems_.push_back(problem);
+                    Log::Warn(LogCat::Audio, "{}; the bank is silent", problem);
+                }
+                continue;
+            }
+            if (!banks_.emplace(authored.id, std::move(resolved)).second)
+            {
+                const std::string problem =
+                    std::format("audio bank '{}' appears twice", util::IdRegistry::NameOf(authored.id));
+                bankProblems_.push_back(problem);
+                Log::Warn(LogCat::Audio, "{}; the duplicate is ignored", problem);
+            }
+        }
+
+        Log::Info(LogCat::Audio,
+                  "resolved {} audio bank(s); {} bank problem(s)",
+                  banks_.size(),
+                  bankProblems_.size());
+    }
+
+    std::span<const std::string> AudioSystem::Bank(util::Id id) const noexcept
+    {
+        const auto found = banks_.find(id);
+        if (found != banks_.end())
+        {
+            return found->second.samples;
+        }
+        if (missingBanksReported_.insert(id).second)
+        {
+            Log::Warn(LogCat::Audio,
+                      "audio bank '{}' is missing; playback remains silent",
+                      util::IdRegistry::NameOf(id));
+        }
+        return {};
+    }
+
+    float AudioSystem::BankGain(util::Id id) const noexcept
+    {
+        const auto found = banks_.find(id);
+        return found == banks_.end() ? 0.0F : found->second.gain;
+    }
+
     std::string AudioSystem::Summary() const
     {
         if (state_ == AudioState::Ready)
         {
-            return std::format("audio ready, master {:.0f}%", static_cast<double>(master_) * 100.0);
+            return std::format("audio ready, master {:.0f}%{}",
+                               static_cast<double>(master_) * 100.0,
+                               muted_ ? ", muted" : "");
         }
         return std::format(
             "audio {}{}{}", AudioStateName(state_), silentReason_.empty() ? "" : ": ", silentReason_);

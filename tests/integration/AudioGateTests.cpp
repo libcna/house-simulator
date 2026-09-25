@@ -5,12 +5,18 @@
 // drawing frames and exiting cleanly with no sound anywhere in it.
 #include <gtest/gtest.h>
 
+#include <fstream>
+#include <sstream>
+
 #include "cnahouse/app/CnaHouseGame.hpp"
 #include "cnahouse/app/CommandLine.hpp"
 #include "cnahouse/app/Settings.hpp"
 #include "cnahouse/audio/AudioSystem.hpp"
+#include "cnahouse/content/ContentRegistry.hpp"
 #include "cnahouse/ui/MenuStack.hpp"
 #include "cnahouse/util/Log.hpp"
+#include "cnahouse/world/WorldData.hpp"
+#include "cnahouse/world/WorldLoader.hpp"
 
 namespace
 {
@@ -62,7 +68,7 @@ namespace
         EXPECT_GE(game.FramesDrawn(), 30u);
         EXPECT_EQ(game.Audio().State(), AudioState::Waiting)
             << "the device must not be opened by anything other than a user gesture";
-        EXPECT_FLOAT_EQ(game.Audio().EffectiveVolume(cnahouse::audio::Category::World), 0.0f);
+        EXPECT_FLOAT_EQ(game.Audio().EffectiveVolume(cnahouse::audio::Category::Footsteps), 0.0f);
     }
 
     TEST(AudioGateTests, TheTitleScreenIsUpForTheWholeSessionUntilSomethingIsPressed)
@@ -113,5 +119,30 @@ namespace
             }
         }
         EXPECT_TRUE(found) << "no line in the startup log mentions audio at all";
+    }
+
+    TEST(AudioGateTests, EveryDeployedBankResolvesAgainstTheDeployedManifest)
+    {
+        const std::string worldDirectory = std::string(CNAHOUSE_TEST_CONTENT_ROOT) + "/world";
+        cnahouse::world::WorldData::Contents contents;
+        const auto layout = cnahouse::world::WorldLoader::LoadAudio(worldDirectory, contents);
+        ASSERT_TRUE(layout) << layout.Error().ToString();
+
+        const std::string manifestPath = worldDirectory + "/assets.manifest.json";
+        std::ifstream file(manifestPath);
+        ASSERT_TRUE(file.is_open()) << manifestPath;
+        std::ostringstream text;
+        text << file.rdbuf();
+
+        cnahouse::content::ContentRegistry registry;
+        const auto manifest = registry.LoadFromJson(text.str(), manifestPath);
+        ASSERT_TRUE(manifest) << manifest.Error().ToString();
+
+        cnahouse::audio::AudioSystem audio(false);
+        audio.LoadBanks(contents.audioBanks, registry);
+        EXPECT_EQ(audio.BankCount(), 13U);
+        EXPECT_TRUE(audio.BankProblems().empty());
+        EXPECT_EQ(audio.State(), AudioState::Silent)
+            << "resolving bank metadata must not open the audio device";
     }
 } // namespace

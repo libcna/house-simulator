@@ -506,6 +506,10 @@ namespace
         {
             return R"({
               "schema": "cna-house/audio/1",
+              "banks": [
+                { "id": "BANK_STEPS", "samples": ["SOUND_STEP_A", "SOUND_STEP_B"],
+                  "gain": 0.65 }
+              ],
               "zones": [
                 { "id": "AZ_L0_KITCHEN", "cell": "L0_KITCHEN", "bed": "AMB_KITCHEN",
                   "gain": 0.55 },
@@ -2487,6 +2491,12 @@ namespace
         world::WorldData::Contents contents;
         const auto audio = world::WorldLoader::LoadAudio(directory_, contents);
         ASSERT_TRUE(audio) << audio.Error().ToString();
+
+        ASSERT_EQ(contents.audioBanks.size(), 1U);
+        EXPECT_EQ(contents.audioBanks[0].id, Intern("BANK_STEPS"));
+        ASSERT_EQ(contents.audioBanks[0].samples.size(), 2U);
+        EXPECT_EQ(contents.audioBanks[0].samples[0], Intern("SOUND_STEP_A"));
+        EXPECT_FLOAT_EQ(contents.audioBanks[0].gain, 0.65F);
 
         ASSERT_EQ(contents.audioZones.size(), 2U);
         EXPECT_EQ(contents.audioZones[0].id, Intern("AZ_L0_KITCHEN"));

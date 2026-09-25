@@ -413,6 +413,10 @@ def build() -> dict[str, dict]:
     schemas["audio"] = envelope("audio", "layout.audio.json", {
         "required": ["zones"],
         "properties": {
+            "banks": {"type": "array", "items": obj(
+                ["id", "samples"],
+                {"id": ID, "samples": {"type": "array", "items": ID, "minItems": 1},
+                 "gain": UNIT})},
             "zones": {"type": "array", "items": obj(
                 ["id", "cell"], {"id": ID, "cell": ID, "bed": ID_OR_NULL, "gain": UNIT})},
             "emitters": {"type": "array", "items": obj(

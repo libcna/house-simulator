@@ -80,6 +80,32 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
+    "banks": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "gain": {
+            "$ref": "#/$defs/unit"
+          },
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "samples": {
+            "items": {
+              "$ref": "#/$defs/id"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "samples"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
     "emitters": {
       "items": {
         "additionalProperties": false,

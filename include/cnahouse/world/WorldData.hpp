@@ -79,6 +79,7 @@ namespace cnahouse::world
             std::vector<NavEdge> navEdges;
             std::vector<NavMarker> navMarkers;
             std::vector<NavForbidden> navForbidden;
+            std::vector<AudioBank> audioBanks;
             std::vector<AudioZone> audioZones;
             std::vector<AudioEmitter> audioEmitters;
             std::vector<AudioTransmission> audioTransmission;
@@ -191,6 +192,11 @@ namespace cnahouse::world
         [[nodiscard]] std::span<const AudioZone> AudioZones() const noexcept
         {
             return m_contents.audioZones;
+        }
+
+        [[nodiscard]] std::span<const AudioBank> AudioBanks() const noexcept
+        {
+            return m_contents.audioBanks;
         }
 
         [[nodiscard]] std::span<const AudioEmitter> AudioEmitters() const noexcept

@@ -202,7 +202,8 @@ def default_stages() -> list[Stage]:
         # deploying a layout that fails §15.7 would put a broken house where the game reads.
         Stage("world-deploy", "world",
               ["python3", "tools/world/deploy_world.py"],
-              inputs=["assets-src/world/*.json"], outputs=["content/world/*.json"],
+              inputs=["assets-src/world/*.json", "assets-src/assets.manifest.json"],
+              outputs=["content/world/*.json"],
               needs=["world-rules"],
               description="strip the comments, deploy as plain JSON, and hash what was written"),
         Stage("collision", "world",

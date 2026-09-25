@@ -6,6 +6,8 @@
 #include <gtest/gtest.h>
 
 #include "cnahouse/audio/AudioSystem.hpp"
+#include "cnahouse/content/ContentRegistry.hpp"
+#include "cnahouse/world/WorldTypes.hpp"
 
 namespace
 {
@@ -48,22 +50,20 @@ namespace
         // 0 rather than the mix, so a caller that forgot to check cannot play into a device that is
         // not there. Silence is the supported behaviour, not a failure to be worked around.
         const AudioSystem waiting(true);
-        EXPECT_FLOAT_EQ(waiting.EffectiveVolume(Category::World), 0.0f);
+        EXPECT_FLOAT_EQ(waiting.EffectiveVolume(Category::Footsteps), 0.0f);
 
         const AudioSystem off(false);
-        EXPECT_FLOAT_EQ(off.EffectiveVolume(Category::World), 0.0f);
-        EXPECT_FLOAT_EQ(off.EffectiveVolume(Category::Ui), 0.0f);
+        EXPECT_FLOAT_EQ(off.EffectiveVolume(Category::Footsteps), 0.0f);
+        EXPECT_FLOAT_EQ(off.EffectiveVolume(Category::Weather), 0.0f);
     }
 
-    TEST(AudioSystemTests, TheCategoryDefaultsAreTheOnesSectionSixtyEightNames)
+    TEST(AudioSystemTests, TheCategoryDefaultsAreTheCompactM8Mix)
     {
         const AudioSystem audio(true);
         EXPECT_FLOAT_EQ(audio.MasterVolume(), 0.80f);
+        EXPECT_FLOAT_EQ(audio.CategoryVolume(Category::Footsteps), 0.85f);
         EXPECT_FLOAT_EQ(audio.CategoryVolume(Category::Ambience), 0.75f);
-        EXPECT_FLOAT_EQ(audio.CategoryVolume(Category::World), 1.00f);
-        EXPECT_FLOAT_EQ(audio.CategoryVolume(Category::Animals), 0.90f);
-        EXPECT_FLOAT_EQ(audio.CategoryVolume(Category::Media), 0.70f);
-        EXPECT_FLOAT_EQ(audio.CategoryVolume(Category::Ui), 0.60f);
+        EXPECT_FLOAT_EQ(audio.CategoryVolume(Category::Weather), 0.75f);
     }
 
     TEST(AudioSystemTests, VolumesAreClampedRatherThanTrusted)
@@ -76,10 +76,75 @@ namespace
         audio.SetMasterVolume(-1.0f);
         EXPECT_FLOAT_EQ(audio.MasterVolume(), 0.0f);
 
-        audio.SetCategoryVolume(Category::Ui, 9.0f);
-        EXPECT_FLOAT_EQ(audio.CategoryVolume(Category::Ui), 1.0f);
-        audio.SetCategoryVolume(Category::Ui, -9.0f);
-        EXPECT_FLOAT_EQ(audio.CategoryVolume(Category::Ui), 0.0f);
+        audio.SetCategoryVolume(Category::Weather, 9.0f);
+        EXPECT_FLOAT_EQ(audio.CategoryVolume(Category::Weather), 1.0f);
+        audio.SetCategoryVolume(Category::Weather, -9.0f);
+        EXPECT_FLOAT_EQ(audio.CategoryVolume(Category::Weather), 0.0f);
+    }
+
+    TEST(AudioSystemTests, MutePreservesTheConfiguredMasterAndCanBeChangedLive)
+    {
+        AudioSystem audio(true);
+        audio.SetMasterVolume(0.42F);
+        audio.SetMuted(true);
+        EXPECT_TRUE(audio.IsMuted());
+        EXPECT_FLOAT_EQ(audio.MasterVolume(), 0.42F);
+
+        audio.SetMuted(false);
+        EXPECT_FALSE(audio.IsMuted());
+        EXPECT_FLOAT_EQ(audio.MasterVolume(), 0.42F);
+    }
+
+    TEST(AudioSystemTests, BanksResolveSoundIdsThroughTheManifest)
+    {
+        cnahouse::content::ContentRegistry registry;
+        ASSERT_TRUE(registry.LoadFromJson(
+            R"({"schema":"cna-house/assets/1","assets":[
+              {"id":"SOUND_STEP_A","contentName":"Audio/step-a","kind":"sound","residencyPack":"audio-core"},
+              {"id":"SOUND_STEP_B","contentName":"Audio/step-b","kind":"sound","residencyPack":"audio-core"}
+            ]})",
+            "assets.manifest.json"));
+
+        cnahouse::world::AudioBank authored;
+        authored.id = cnahouse::util::Intern("BANK_STEPS");
+        authored.samples = {cnahouse::util::Intern("SOUND_STEP_A"), cnahouse::util::Intern("SOUND_STEP_B")};
+        authored.gain = 0.65F;
+
+        AudioSystem audio(false);
+        audio.LoadBanks(std::span<const cnahouse::world::AudioBank>(&authored, 1U), registry);
+
+        ASSERT_EQ(audio.BankCount(), 1U);
+        EXPECT_TRUE(audio.BankProblems().empty());
+        const auto samples = audio.Bank(authored.id);
+        ASSERT_EQ(samples.size(), 2U);
+        EXPECT_EQ(samples[0], "Audio/step-a");
+        EXPECT_EQ(samples[1], "Audio/step-b");
+        EXPECT_FLOAT_EQ(audio.BankGain(authored.id), 0.65F);
+    }
+
+    TEST(AudioSystemTests, AMissingOrNonSoundBankIsReportedAndSilent)
+    {
+        cnahouse::content::ContentRegistry registry;
+        ASSERT_TRUE(registry.LoadFromJson(
+            R"({"schema":"cna-house/assets/1","assets":[
+              {"id":"TEXTURE_NOT_SOUND","contentName":"Textures/nope","kind":"texture","residencyPack":"core"}
+            ]})",
+            "assets.manifest.json"));
+
+        cnahouse::world::AudioBank bad;
+        bad.id = cnahouse::util::Intern("BANK_BAD");
+        bad.samples = {cnahouse::util::Intern("TEXTURE_NOT_SOUND")};
+
+        AudioSystem audio(false);
+        audio.LoadBanks(std::span<const cnahouse::world::AudioBank>(&bad, 1U), registry);
+
+        EXPECT_EQ(audio.BankCount(), 0U);
+        ASSERT_EQ(audio.BankProblems().size(), 1U);
+        EXPECT_NE(audio.BankProblems()[0].find("not a sound"), std::string::npos);
+        EXPECT_TRUE(audio.Bank(bad.id).empty());
+        EXPECT_TRUE(audio.Bank(cnahouse::util::Intern("BANK_MISSING")).empty());
+        EXPECT_FLOAT_EQ(audio.BankGain(bad.id), 0.0F);
+        EXPECT_EQ(audio.State(), AudioState::Silent) << "bad content must not re-open audio";
     }
 
     TEST(AudioSystemTests, TheCountSentinelIsNotAUsableCategory)

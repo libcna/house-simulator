@@ -3067,6 +3067,80 @@ namespace cnahouse::world
             return value.Value();
         };
 
+        if (root.Has("banks") && !root.IsNull("banks"))
+        {
+            const Result<JsonValue> banks = root.RequireArray("banks");
+            if (!banks)
+            {
+                return banks.Error().WithContext("layout.audio.json");
+            }
+            const Result<std::vector<JsonValue>> rows = banks.Value().Elements();
+            if (!rows)
+            {
+                return rows.Error().WithContext("layout.audio.json");
+            }
+
+            std::unordered_set<util::Id> bankIds;
+            for (const JsonValue& row : rows.Value())
+            {
+                AudioBank bank;
+                const Result<util::Id> id = RequireId(row, "id");
+                if (!id)
+                {
+                    return id.Error().WithContext("layout.audio.json");
+                }
+                bank.id = id.Value();
+                if (!bankIds.insert(bank.id).second)
+                {
+                    return Err(ErrorCode::Duplicate,
+                               "audio bank " + Name(bank.id) + " appears twice",
+                               "layout.audio.json/" + row.Path() + "/id");
+                }
+
+                const Result<JsonValue> samples = row.RequireArray("samples");
+                if (!samples)
+                {
+                    return samples.Error().WithContext("layout.audio.json");
+                }
+                const Result<std::vector<JsonValue>> sampleRows = samples.Value().Elements();
+                if (!sampleRows)
+                {
+                    return sampleRows.Error().WithContext("layout.audio.json");
+                }
+                if (sampleRows.Value().empty())
+                {
+                    return Err(ErrorCode::InvalidData,
+                               "an audio bank needs at least one sample",
+                               "layout.audio.json/" + row.Path() + "/samples");
+                }
+                std::unordered_set<util::Id> seenSamples;
+                for (const JsonValue& sample : sampleRows.Value())
+                {
+                    const Result<std::string> name = sample.AsString();
+                    if (!name)
+                    {
+                        return name.Error().WithContext("layout.audio.json");
+                    }
+                    const util::Id sampleId = util::Intern(name.Value());
+                    if (!seenSamples.insert(sampleId).second)
+                    {
+                        return Err(ErrorCode::Duplicate,
+                                   "sample " + name.Value() + " appears twice in " + Name(bank.id),
+                                   "layout.audio.json/" + sample.Path());
+                    }
+                    bank.samples.push_back(sampleId);
+                }
+
+                const Result<float> bankGain = gain(row, row.Path());
+                if (!bankGain)
+                {
+                    return bankGain.Error().WithContext("layout.audio.json");
+                }
+                bank.gain = bankGain.Value();
+                contents.audioBanks.push_back(std::move(bank));
+            }
+        }
+
         const Result<JsonValue> zones = root.RequireArray("zones");
         if (!zones)
         {

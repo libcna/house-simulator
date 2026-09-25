@@ -622,6 +622,8 @@ no edge at all: a person can climb through a hatch and a pet cannot.
 ```jsonc
 {
   "schema": "cna-house/audio/1",
+  "banks": [ { "id": "BANK_FOOTSTEP_WOOD", "gain": 0.85,
+               "samples": ["SOUND_NOX_FOOTSTEP_WOOD_WALK_FOOTSTEPS_WOOD_WALK_02"] } ],
   "zones":    [ { "id": "AZ_L0_KITCHEN", "cell": "L0_KITCHEN", "bed": "AMB_KITCHEN",
                   "gain": 0.55 } ],
   "emitters": [ { "id": "EM_FRIDGE_HUM", "cell": "L0_KITCHEN", "position": [1.20, 0.90, -26.70],
@@ -631,6 +633,10 @@ no edge at all: a person can climb through a hatch and a pet cannot.
                     "door_solid":  { "open": 0.05, "closed": 0.78 } }
 }
 ```
+
+Each bank is a bounded set of interchangeable sound asset ids. The ids resolve through
+`assets.manifest.json`; `gain` is the bank's authored linear gain. A missing bank or a row whose
+sample cannot be resolved is reported and remains silent rather than making the world unloadable.
 
 Every emitter carries a cell id, because the portal-path solver
 ([ADR-0010](decisions/ADR-0010-room-aware-audio.md)) starts from cells, not from positions.

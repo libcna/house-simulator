@@ -5,6 +5,7 @@
 
 #include "cnahouse/app/CnaHouseGame.hpp"
 
+#include "System/IO/File.hpp"
 #include "System/IO/FileAccess.hpp"
 #include "System/IO/FileMode.hpp"
 #include "System/IO/FileStream.hpp"
@@ -34,6 +35,7 @@
 #include "Microsoft/Xna/Framework/Vector2.hpp"
 
 #include "cnahouse/content/Caches.hpp"
+#include "cnahouse/content/ContentRegistry.hpp"
 #include "cnahouse/debug/PlayerCommands.hpp"
 #include "cnahouse/debug/Screenshot.hpp"
 #include "cnahouse/debug/TimeCommands.hpp"
@@ -379,14 +381,15 @@ namespace cnahouse::app
         const auto cells = world::WorldLoader::LoadCells("content/world", contents);
         const auto portals = world::WorldLoader::LoadPortals("content/world", contents);
         const auto openings = world::WorldLoader::LoadOpenings("content/world", contents);
+        const auto audioLayout = world::WorldLoader::LoadAudio("content/world", contents);
         const auto interactables = world::WorldLoader::LoadInteractables("content/world", contents);
         const auto initialState = world::WorldLoader::LoadInitialState("content/world", contents);
         const auto weather = world::WorldLoader::LoadWeather("content/world", contents);
         // §28's fixtures, for `LightingSystem` (`HOUSE-01251`). 243 rows; the loader is the same
         // one the tests use, so a lights file that would fail CI fails here too.
         const auto lights = world::WorldLoader::LoadLights("content/world", contents);
-        if (!levels || !materials || !cells || !portals || !openings || !interactables || !initialState ||
-            !lights || !weather)
+        if (!levels || !materials || !cells || !portals || !openings || !audioLayout || !interactables ||
+            !initialState || !lights || !weather)
         {
             Log::Error(LogCat::Content,
                        "--scene=walk: the world did not load; drawing from the fixed camera");
@@ -399,6 +402,30 @@ namespace cnahouse::app
             return;
         }
         world_.emplace(std::move(built.Value()));
+
+        // Audio banks keep asset ids in the world and resolve content names through the deployed
+        // authoritative manifest. Resolution is metadata-only and safe even under `--no-audio`;
+        // actual SoundEffects remain lazy in the existing sound cache.
+        content::ContentRegistry registry;
+        try
+        {
+            const std::string manifestText =
+                System::IO::File::ReadAllText("content/world/assets.manifest.json");
+            const util::Result<void> loaded =
+                registry.LoadFromJson(manifestText, "content/world/assets.manifest.json");
+            if (!loaded)
+            {
+                Log::Warn(LogCat::Audio,
+                          "audio asset manifest did not load; banks remain silent: {}",
+                          loaded.Error().ToString());
+            }
+        }
+        catch (const std::exception& error)
+        {
+            Log::Warn(
+                LogCat::Audio, "audio asset manifest is unavailable; banks remain silent: {}", error.what());
+        }
+        audio_.LoadBanks(world_->AudioBanks(), registry);
 
         // Establish the one shared clock before weather is sampled: a forced clear review at 10:30
         // must derive its temperature and daylight from 10:30, not from the zero-initialised epoch.

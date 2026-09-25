@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **60 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 82 / 96 / 124 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5 and M7 passed; atmospheric-audio work is active.** Next: `AudioSystem` categories and bank loading in `HOUSE-01911` |
+| Active plan | **59 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 80 / 94 / 121 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5 and M7 passed; atmospheric-audio work is active.** Next: footstep cadence and selection in `HOUSE-01919` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -1184,11 +1184,12 @@ sky exposure, and volume settings. Everything comes from the imported NOX collec
 derivative set, no positional source, no special zone loop and no room-aware routing.
 `src/audio/AudioSystem.cpp` already exists and is extended, not replaced.
 
-- [ ] HOUSE-01911 — `AudioSystem`: master and three category volumes, mute, device-loss handling and the sound-bank loader
+- [x] HOUSE-01911 — `AudioSystem`: master and three category volumes, mute, device-loss handling and the sound-bank loader
       dep: HOUSE-00154, HOUSE-00279 · sys: audio · plat: ALL · pri: MUST · zone: all · adv: D7 · est: 2
       accept: (1) categories master, footsteps, ambience and weather, applied live; (2) mute, and no crash or stall when no audio device exists or it is lost; (3) the sound banks load from `layout.audio.json` and the manifest; a missing bank is reported and silent, not fatal
       verify: unit tests of volumes and bank loading; the no-audio-device run
       trace: absorbs `HOUSE-01917` (the bank loader)
+      note: (2026-09-25) The existing `AudioSystem` now owns the retained master/footsteps/ambience/weather mix, clamps live changes, preserves the configured master across mute and moves to supported silent state if opening or updating the XNA device throws. `layout.audio.json` authors thirteen reusable NOX banks: six broad footstep families, one interior bed, exterior day/night beds and calm/strong rain and wind. The loader resolves their sound ids through the deployed authoritative manifest without opening a device; an invalid or missing bank is logged once and remains silent while valid banks survive. The existing world loader/data path carries the rows, and the existing content deploy copies the normalized manifest beside the normalized world files; no player, routing, positional-source or generalized audio framework was added. Twelve focused `AudioSystem` unit tests, the loader case and five `AudioGateTests` pass, including all thirteen deployed banks against the deployed manifest and a complete `--no-audio` session. The complete 1,443-test unit label and serial 144-test integration label pass. An initial four-worker integration run exposed two unrelated test issues: the HOUSE-01748 wet split had made the stable alpha-test batch count 51 while the assertion still said 50, and the real-time weather bound exceeded two simulated minutes only while four software render sessions contended. The corrected count and unchanged weather behavior both pass in the final serial label. The full static gate compiles 338 strict-XNA translation units clean with four workers; after regenerating the content-stage document and world-id golden, only the user-owned root `.claude` layout entry remains outside this task
 
 - [ ] HOUSE-01919 — `FootstepDirector`: stride accumulator, surface lookup, round-robin sample selection and one step per stair riser
       dep: HOUSE-01911, HOUSE-00560, HOUSE-00027 · sys: audio · plat: ALL · pri: MUST · zone: all · adv: D7, D11 · est: 2
@@ -1925,7 +1926,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M5 Baseline lighting everywhere | 12 | 24.5 | **0** | 0 | **0** | 0 | — |
 | M6 Main cells and hero areas | 20 | 32.5 | **0** | 0 | **0** | 0 | — |
 | M7 A compact environment | 13 | 21 | **0** | 0 | **0** | 0 | — |
-| M8 Atmospheric audio essentials | 11 | 14.5 | **6** | 7.75 | **9** | 10 | — |
+| M8 Atmospheric audio essentials | 11 | 14.5 | **5** | 6 | **7** | 7.75 | — |
 | M9 Application shell | 10 | 12.5 | **6** | 7.25 | **8.5** | 9.25 | — |
 | M10 Performance | 6 | 13 | **3** | 6.75 | **8** | 12.75 | R-C +4 |
 | M11 Final defect pass | 3 | 11 | **3** | 6 | **7** | 7.75 | — |
@@ -1934,12 +1935,12 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **60** | **81.5** | **96** | **123.5** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **59** | **79.75** | **94** | **121.25** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-156.5 h. Adding the 130.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-253.75 h, 26.25 h under the limit. That margin is
+158.75 h. Adding the 132.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+253.5 h, 26.5 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |

@@ -1,3 +1,41 @@
+# Audio foundation handoff — 2026-09-25 (`HOUSE-01911`)
+
+`AudioSystem` now extends the retained user-gesture/device gate with the final compact mix: master,
+footsteps, ambience and weather, plus mute that preserves the configured master. Values clamp at
+the settings boundary and apply immediately; an exception while opening or updating XNA's master
+volume records the device as silent and leaves the walkthrough running. The existing `--no-audio`
+path still never opens the device. No CNA/CNAEXT API, positional-source layer, routing framework or
+new audio manager was added.
+
+`layout.audio.json` now authors thirteen reusable banks entirely from the existing manifested NOX
+collection: wood, carpet/soft, tile, stone/concrete, gravel and grass footsteps; one interior bed;
+exterior day and night beds; and calm/strong rain and wind. `WorldLoader` carries those rows through
+`WorldData`; `AudioSystem` resolves them against `ContentRegistry` without loading a `SoundEffect`,
+so metadata resolution remains safe in silent mode. A bad bank is omitted, reported and silent,
+without disabling valid banks. The existing world-deploy stage now puts the normalized asset
+manifest beside the normalized world data and tracks it as an input; its selftest covers the copy
+and stale-output behavior. The schema, format guide, content-stage document and permanent-id golden
+were updated with the same format.
+
+Twelve focused audio unit tests, the audio loader test, all five audio-gate integration tests and
+`world-content-current` pass. The real deployed layout resolves all thirteen banks against the real
+deployed manifest under `--no-audio`. The complete unit label passes 1,443/1,443 and the final
+serial integration label passes 144/144. Its initial four-worker run exposed a stale count left by
+HOUSE-01748 (the wet-material split has 51 stable alpha-test batches, not 50) and made a wall-clock
+weather bound measure four contending software render sessions; the corrected count and unchanged
+weather behavior both pass in the final serial label. The complete static gate compiled 338
+strict-XNA translation units clean with four workers. Its only remaining report is the known
+user-owned root `.claude` layout entry, which was not touched.
+
+M8 dependency order and R11/R13 select `HOUSE-01919` next, then `HOUSE-01920`; `HOUSE-01922` and
+M9's `HOUSE-02516` are also dependency-unblocked but do not outrank finishing the footstep branch.
+The remaining forecast is 94 realistic / 121.25 pessimistic hours. With 132.25 task-hours completed
+since the final reduction, the R14 projection is 253.5 h, 26.5 h below the ceiling. Validation for
+this checkpoint was pinned to CPUs 4,5,7,9 and used at most four workers; strict-XNA used
+`HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Representative environment handoff — 2026-09-25 (`HOUSE-03520`)
 
 The existing visual-review tool now has `--environment-set`, a bounded thirteen-scene matrix shared
