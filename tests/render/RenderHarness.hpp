@@ -45,6 +45,13 @@ namespace cnahouse::testsupport
                                                                           int channelTolerance,
                                                                           const std::vector<Region>& ignore);
 
+        /// @brief Writes a magenta diagnostic PNG for an already-captured comparison failure.
+        [[nodiscard]] static util::Result<void> WriteDifferenceImage(const std::string& actualPath,
+                                                                     const std::string& referencePath,
+                                                                     const std::string& differencePath,
+                                                                     int channelTolerance,
+                                                                     const std::vector<Region>& ignore);
+
         /// @brief The corner frame-time readout, which genuinely differs between two runs.
         ///
         /// Scaled from the 1600x900 design canvas of §67.2, generously, because the text's width

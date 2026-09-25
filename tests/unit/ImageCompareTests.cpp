@@ -10,7 +10,9 @@
 namespace
 {
     using cnahouse::testsupport::Compare;
+    using cnahouse::testsupport::DifferenceImage;
     using cnahouse::testsupport::Image;
+    using cnahouse::testsupport::Region;
     using Colour = Microsoft::Xna::Framework::Color;
 
     Image Solid(int width, int height, Colour colour)
@@ -109,5 +111,20 @@ namespace
         EXPECT_DOUBLE_EQ(diff.DifferingFraction(), 0.0);
         EXPECT_DOUBLE_EQ(diff.meanChannelDelta, 0.0) << "0.0/0.0 would be a NaN, which reads as "
                                                         "\"not greater than the threshold\"";
+    }
+
+    TEST(ImageCompareTests, DifferenceImageHighlightsOnlyCountedPixelsAndHidesIgnoredOnes)
+    {
+        Image actual = Solid(3, 1, Colour(40, 80, 120, 255));
+        const Image expected = actual;
+        actual.pixels[0] = Colour(41, 79, 120, 255); // tolerated
+        actual.pixels[1] = Colour::White;            // highlighted
+        actual.pixels[2] = Colour::White;            // ignored
+
+        const Image diagnostic = DifferenceImage(actual, expected, 1, {Region{2, 0, 1, 1}});
+        ASSERT_EQ(diagnostic.pixels.size(), 3U);
+        EXPECT_EQ(diagnostic.pixels[0], Colour(10, 20, 30, 255));
+        EXPECT_EQ(diagnostic.pixels[1], Colour(255, 0, 255, 255));
+        EXPECT_EQ(diagnostic.pixels[2], Colour(0, 0, 0, 0));
     }
 } // namespace

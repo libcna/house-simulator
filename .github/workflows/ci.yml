@@ -479,7 +479,7 @@ jobs:
         working-directory: cna-house
         # Unit tests need no GPU and no display by construction: anything that does belongs in
         # `integration` or `render`.
-        run: ctest --preset unit
+        run: tools/ci/run_tests.sh --preset unit
 
   # --- HOUSE-00135 -------------------------------------------------------------------------------
   headless-integration:
@@ -512,7 +512,7 @@ jobs:
         # `DISPLAY` and `WAYLAND_DISPLAY` are unset deliberately. HOUSE-00105 measured 600 frames
         # under exactly these conditions, and a run that silently found an X server would prove
         # nothing about CI.
-        run: env -u DISPLAY -u WAYLAND_DISPLAY ctest --preset integration
+        run: env -u DISPLAY -u WAYLAND_DISPLAY tools/ci/run_tests.sh --preset integration
 
   # --- HOUSE-00136 -------------------------------------------------------------------------------
   symbol-check:
@@ -597,8 +597,9 @@ jobs:
         # ADR-0003 and HOUSE-00106 both note that sanitizer binaries in these projects reach
         # 400-900 MB; only one variant is built per job for that reason.
         run: |
-          ctest --test-dir build-${{ matrix.preset == 'linux-asan' && 'asan' || 'ubsan' }} \
-                -L 'unit|integration' --output-on-failure
+          tools/ci/run_tests.sh \
+            --test-dir build-${{ matrix.preset == 'linux-asan' && 'asan' || 'ubsan' }} \
+            -L 'unit|integration'
 
   # --- HOUSE-00138 (nightly) ---------------------------------------------------------------------
   render-tests:
@@ -630,4 +631,4 @@ jobs:
         # coverage rather than exact shading -- see docs/cna-capability-report.md HOUSE-00115.
         env:
           LIBGL_ALWAYS_SOFTWARE: "1"
-        run: xvfb-run -a --server-args="-screen 0 1600x900x24" ctest --preset render
+        run: xvfb-run -a --server-args="-screen 0 1600x900x24" tools/ci/run_tests.sh --preset render

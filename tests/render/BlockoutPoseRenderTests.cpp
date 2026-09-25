@@ -15,7 +15,10 @@
 #include <algorithm>
 #include <array>
 #include <cstdio>
+#include <cstdlib>
+#include <format>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -35,6 +38,8 @@ namespace
     /// Small on purpose: see the file comment.
     constexpr int kWidth = 640;
     constexpr int kHeight = 360;
+    constexpr int kChannelTolerance = 2;
+    constexpr double kDifferingFractionLimit = 0.002;
 
     struct Pose
     {
@@ -145,19 +150,37 @@ namespace
         return seen.size();
     }
 
-    void CompareOnePose(const Pose& pose, bool interior)
+    void CompareOnePose(const Pose& pose, bool interior, std::string_view referencePose = {})
     {
         const std::string actual =
             std::string(CNAHOUSE_TEST_OUTPUT_DIR) + "/blockout-" + pose.name + "-actual.png";
-        const std::string reference = RenderHarness::ReferenceDirectory() + "/blockout-" + pose.name + ".png";
+        const std::string reference = RenderHarness::ReferenceDirectory() + "/blockout-" +
+                                      std::string(referencePose.empty() ? pose.name : referencePose) + ".png";
 
         if (RenderHarness::RenderingInSoftware())
         {
             const auto diff = RenderHarness::CompareWithReference(
-                OptionsFor(pose), kWidth, kHeight, actual, reference, 2, {});
+                OptionsFor(pose), kWidth, kHeight, actual, reference, kChannelTolerance, {});
             ASSERT_TRUE(diff.HasValue()) << pose.name << ": " << diff.Error().ToString();
             EXPECT_FALSE(diff->sizeMismatch) << pose.name << ": " << diff->ToString();
-            EXPECT_LT(diff->DifferingFraction(), 0.002) << pose.name << ": " << diff->ToString();
+            if (!diff->sizeMismatch && diff->DifferingFraction() >= kDifferingFractionLimit)
+            {
+                const std::string difference =
+                    std::string(CNAHOUSE_TEST_OUTPUT_DIR) + "/blockout-" + pose.name + "-diff.png";
+                const auto written =
+                    RenderHarness::WriteDifferenceImage(actual, reference, difference, kChannelTolerance, {});
+                EXPECT_TRUE(written) << pose.name << ": could not write " << difference << ": "
+                                     << written.Error().ToString();
+                const std::string diagnostics =
+                    std::format("{}: {}; budget < {:.4f}% pixels above channel tolerance {}; "
+                                "difference image {}",
+                                pose.name,
+                                diff->ToString(),
+                                kDifferingFractionLimit * 100.0,
+                                kChannelTolerance,
+                                difference);
+                EXPECT_LT(diff->DifferingFraction(), kDifferingFractionLimit) << diagnostics;
+            }
         }
         else
         {
@@ -215,6 +238,21 @@ namespace
             SCOPED_TRACE(pose.name);
             CompareOnePose(pose, true);
         }
+    }
+
+    TEST(RenderDiagnosticsTests, PerturbedGoldenFailsWithANamedPoseAndDifferenceImage)
+    {
+        const char* verify = std::getenv("CNAHOUSE_VERIFY_RENDER_DIAGNOSTICS");
+        if (verify == nullptr || verify[0] != '1')
+        {
+            GTEST_SKIP() << "set CNAHOUSE_VERIFY_RENDER_DIAGNOSTICS=1 to prove the failure path";
+        }
+        ASSERT_TRUE(RenderHarness::RenderingInSoftware())
+            << "the controlled diagnostic uses the committed software references";
+
+        // A real but deliberately wrong golden proves the whole capture/decode/compare/PNG path
+        // without editing a committed reference. This test is expected to fail when enabled.
+        CompareOnePose(kExterior[0], false, "ext-east");
     }
 
     /// @brief Rewrites all twenty references. DISABLED, and run by hand after a geometry change:

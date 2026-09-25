@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **52 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 71 / 83.5 / 109.75 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5, M7 and M9 passed; M8 listening work is environment-blocked and M10 is active.** Next: `HOUSE-02403` |
+| Active plan | **51 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 69.75 / 82 / 108.25 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5, M7 and M9 passed; M8 listening and M10 baseline work are environment-blocked; M12 is active.** Next: `HOUSE-02598` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -401,7 +401,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 0 | `HOUSE-02528` | D8 | — |
 | [M10](#m10--performance-measurement-driven) — Performance, measurement-driven | B | 03601–03630 | 4 | `HOUSE-02405` | D9 | 9.5 |
 | [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 3 | `HOUSE-02713` | D2, D4, D13, D14 | 7 |
-| [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 2 | `HOUSE-02598` | D11 | 3.5 |
+| [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 1 | `HOUSE-02598` | D11 | 2 |
 | [M13](#m13--linux-desktop-release) — Linux desktop release | after M11 | 03701–03720 | 8 | `HOUSE-02797` | D9–D13 | 10.25 |
 | [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 12 | `HOUSE-02904` | D10b | 19.5 |
 | [M15](#m15--android) — Android | readiness: B · device: after M13 | 03751–03780 | 14 | `HOUSE-03041` (a BL-13 record does not close it) | D10c | 23.75 |
@@ -1294,7 +1294,7 @@ numbers and no code. No speculative optimisation infrastructure is built (rule R
       accept: (1) `docs/performance-log.md` records, per scenario, draw calls, triangles, CPU and GPU milliseconds; (2) texture and lightmap memory against their budgets (300 MB textures, 60 MB lightmaps), with texture sizes or lightmap texel density reduced only where over; (3) cold-start load time and total resident footprint (GPU and RSS) with everything loaded; if cold start ≤ 4.0 s, GPU ≤ 550 MB and RSS ≤ 1.6 GB, no residency or streaming work is planned; if a limit is exceeded, a Planning corrections entry plans the minimum residency the numbers demand, under R9, R14 and with new ids
       verify: the log entry
       trace: absorbs `HOUSE-00915` (texture memory), `HOUSE-02451` (the load/footprint gate), `HOUSE-00911`, `HOUSE-01031`, `HOUSE-00853`, `HOUSE-01276`, `HOUSE-01654`, `HOUSE-01753` and `HOUSE-02463`
-      note: (2026-09-25) Current-session environment blocker, task remains open: the existing Release `build-probe/` predates the day's rain, wet-surface, audio and application changes and cannot produce an authoritative baseline. Refreshing it requires CMake regeneration after `HOUSE-02527` added a render source; CNA's configure then must acquire its existing shared SDL-cache lock inside the sibling CNA checkout, which this repository's sandbox correctly refuses. The Debug `build/` and stale 04:43 Release binary are not substitutes for the required current Release measurement. No CNA file or build artefact was changed; independent MUST work continues at `HOUSE-00493`.
+      note: (2026-09-25) Current-session environment blocker, task remains open: the existing Release `build-probe/` predates the day's rain, wet-surface, audio and application changes and cannot produce an authoritative baseline. Refreshing it requires CMake regeneration after `HOUSE-02527` added a render source; CNA's configure then must acquire its existing shared SDL-cache lock inside the sibling CNA checkout, which this repository's sandbox correctly refuses. The Debug `build/` and stale 04:43 Release binary are not substitutes for the required current Release measurement. No CNA file or build artefact was changed; independent MUST work completed `HOUSE-00493` and continues at `HOUSE-02598`.
 
 - [ ] HOUSE-02404 — Optimise the scenarios that miss their target, and only those
       dep: HOUSE-02403 · sys: rendering · plat: LNX · pri: MUST · zone: all · adv: D9 · est: 4
@@ -1344,11 +1344,12 @@ and new tests are representative, not exhaustive. Each feature task carries its 
 R16): the representative render sets live with their features (`HOUSE-01275`, `HOUSE-03520`,
 `HOUSE-02527`) and the grand tour is `HOUSE-03226`. This milestone holds only what no feature owns.
 
-- [ ] HOUSE-00493 — Make intermittent gate failures diagnosable: output on failure, the failing pose and pixel count, and a difference image
+- [x] HOUSE-00493 — Make intermittent gate failures diagnosable: output on failure, the failing pose and pixel count, and a difference image
       dep: HOUSE-00483 · sys: ci · plat: CI · pri: MUST · zone: all · adv: D11 · est: 1.5
       accept: (1) `ctest` runs with `--output-on-failure` in the wrapper; (2) a render comparison names the failing pose, the differing pixel count and the mean absolute difference against its stated budget, and writes a difference image as an artefact; (3) the two known intermittent failures (`AudioGateTests.NoAudioRunsAFullSessionAndNeverOpensTheDevice`, `BlockoutPoseRenderTests.*`) are diagnosed and fixed if they reproduce, or their next sighting is guaranteed to be diagnosable
       verify: a deliberately perturbed golden fails with a named pose, a count and a difference image
       note: four sightings on 2026-09-09/10, all in full-suite runs on a loaded machine, none reproducible alone; neither failure's output was captured
+      note: (2026-09-25) The shared `tools/ci/run_tests.sh` makes `--output-on-failure` unconditional and all CI ctest entries use it. A deliberately mismatched `ext-road`/`ext-east` comparison reported `ext-road`, 137551/230400 pixels, mean absolute channel difference 31.194 against the 0.2000%/tolerance-2 budget, and wrote a visually inspected 640x360 RGBA difference PNG. The audio gate passed 10/10 targeted repetitions and the historical transient blockout failure did not reproduce; the former now adds exit/frame/audio-state/reason context and every blockout mismatch writes the same counted-pixel diagnostic. A separate load-sensitive weather assertion reproduced at 137.650 minutes remaining, passed alone, and was fixed to assert the behaviour rather than host speed; the complete correctly isolated integration label then passed 147/147. Unit passed 1472/1472 and strict XNA passed 341 translation units with four workers. The only full-gate failure is the pre-existing user-owned root `.claude` entry.
       trace: absorbs `HOUSE-02594` (the tolerance policy and the difference image)
 
 - [ ] HOUSE-02598 — The 20-minute automated stability run
@@ -1940,16 +1941,16 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M9 Application shell | 10 | 12.5 | **0** | 0 | **0** | 0 | — |
 | M10 Performance | 6 | 13 | **3** | 6.75 | **8** | 12.75 | R-C +4 |
 | M11 Final defect pass | 3 | 11 | **3** | 6 | **7** | 7.75 | — |
-| M12 Representative tests | 4 | 5 | **2** | 3 | **3.5** | 3.75 | — |
+| M12 Representative tests | 4 | 5 | **1** | 1.75 | **2** | 2.25 | — |
 | M13 Linux desktop release | 10 | 13.25 | **8** | 8.75 | **10.25** | 11.25 | — |
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **52** | **71** | **83.5** | **109.75** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **51** | **69.75** | **82** | **108.25** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-170.25 h. Adding the 142.75 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+171.75 h. Adding the 144.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
 252.5 h, 27.5 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 

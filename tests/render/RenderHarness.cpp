@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <format>
+#include <stdexcept>
 #include <vector>
 
 #include "Microsoft/Xna/Framework/Game.hpp"
@@ -28,10 +29,17 @@ namespace cnahouse::testsupport
         class DecodeHost final : public Microsoft::Xna::Framework::Game
         {
         public:
-            DecodeHost(const std::string& first, const std::string& second)
+            DecodeHost(const std::string& first,
+                       const std::string& second,
+                       std::string difference = {},
+                       int channelTolerance = 0,
+                       std::vector<Region> ignore = {})
                 : gdm_(this)
                 , first_(first)
                 , second_(second)
+                , difference_(std::move(difference))
+                , channelTolerance_(channelTolerance)
+                , ignore_(std::move(ignore))
             {
                 gdm_.setPreferredBackBufferWidthProperty(64);
                 gdm_.setPreferredBackBufferHeightProperty(64);
@@ -58,6 +66,16 @@ namespace cnahouse::testsupport
                     if (!second_.empty())
                     {
                         secondImage = Decode(second_);
+                    }
+                    if (!difference_.empty())
+                    {
+                        const Image difference =
+                            DifferenceImage(firstImage, secondImage, channelTolerance_, ignore_);
+                        if (difference.Empty())
+                        {
+                            throw std::runtime_error("cannot write a difference image for unequal frames");
+                        }
+                        Save(difference, difference_);
                     }
                 }
                 catch (const std::exception& e)
@@ -86,9 +104,23 @@ namespace cnahouse::testsupport
                 return image;
             }
 
+            void Save(const Image& image, const std::string& path)
+            {
+                Microsoft::Xna::Framework::Graphics::Texture2D texture(
+                    getGraphicsDeviceProperty(), image.width, image.height);
+                texture.SetData(image.pixels.data(), static_cast<int>(image.pixels.size()));
+                System::IO::FileStream stream(
+                    path, System::IO::FileMode::Create, System::IO::FileAccess::Write);
+                texture.SaveAsPng(&stream, image.width, image.height);
+                stream.Flush();
+            }
+
             Microsoft::Xna::Framework::GraphicsDeviceManager gdm_;
             std::string first_;
             std::string second_;
+            std::string difference_;
+            int channelTolerance_ = 0;
+            std::vector<Region> ignore_;
             bool done_ = false;
         };
 
@@ -204,6 +236,21 @@ namespace cnahouse::testsupport
             return Err(ErrorCode::InvalidData, "one of the two frames decoded empty", referencePath);
         }
         return Compare(host.firstImage, host.secondImage, channelTolerance, ignore);
+    }
+
+    util::Result<void> RenderHarness::WriteDifferenceImage(const std::string& actualPath,
+                                                           const std::string& referencePath,
+                                                           const std::string& differencePath,
+                                                           int channelTolerance,
+                                                           const std::vector<Region>& ignore)
+    {
+        DecodeHost host(actualPath, referencePath, differencePath, channelTolerance, ignore);
+        host.Run();
+        if (!host.failure.empty())
+        {
+            return Err(ErrorCode::IoFailure, host.failure, differencePath);
+        }
+        return util::Ok();
     }
 
 } // namespace cnahouse::testsupport

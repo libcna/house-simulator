@@ -5,6 +5,7 @@
 // drawing frames and exiting cleanly with no sound anywhere in it.
 #include <gtest/gtest.h>
 
+#include <format>
 #include <fstream>
 #include <sstream>
 
@@ -45,6 +46,11 @@ namespace
         game.SetFrameLimit(30);
         game.Run();
 
+        SCOPED_TRACE(std::format("exit code {}, frames drawn {}, audio state {}, silent reason '{}'",
+                                 game.ExitCode(),
+                                 game.FramesDrawn(),
+                                 static_cast<int>(game.Audio().State()),
+                                 game.Audio().SilentReason()));
         EXPECT_EQ(game.ExitCode(), 0) << "silence is a supported way to run, not an error path";
         EXPECT_GE(game.FramesDrawn(), 30u);
         EXPECT_EQ(game.Audio().State(), AudioState::Silent);

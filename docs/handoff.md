@@ -1,3 +1,43 @@
+# Gate-diagnostics handoff — 2026-09-25 (`HOUSE-00493`)
+
+The repository now has one ctest entry point, `tools/ci/run_tests.sh`, which unconditionally adds
+`--output-on-failure`; every CI unit, integration, sanitizer and render invocation uses it. The
+blockout comparison keeps its existing tolerance policy but now reports the pose, differing pixel
+count and fraction, maximum channel delta, mean absolute channel delta and the stated budget, then
+writes a magenta-on-dim-reference PNG using the same tolerance and ignored regions as the count.
+The PNG path uses the existing XNA render harness and standard-XNA `Texture2D::SaveAsPng`; no image
+or test framework was added.
+
+The opt-in `CNAHOUSE_VERIFY_RENDER_DIAGNOSTICS=1` test deliberately compares the `ext-road` pose
+against the committed `ext-east` reference. Through the wrapper it failed as intended with
+137,551/230,400 differing pixels (59.7010%), maximum delta 241 and mean absolute difference 31.194
+against the `<0.2000%`, channel-tolerance-2 budget. It wrote a valid 640x360 RGBA difference PNG,
+which was inspected and clearly isolates the changed house silhouette. With the opt-in variable
+absent the test skips, so it cannot make the normal suite red.
+
+The historical audio failure did not reproduce in 10 targeted repetitions. Its assertion trace now
+captures exit code, frames drawn, audio state and the silent reason, while the wrapper preserves
+the complete process output. During the full four-way integration run a different existing
+wall-clock-sensitive weather assertion did reproduce (137.650 minutes remaining versus its former
+`>138` bound) and passed immediately alone. Its lower bound now checks that the initial target did
+not expire instead of benchmarking the loaded host. The correctly isolated integration label then
+passes 147/147; unit passes 1472/1472. Persistence tests require an isolated writable
+`XDG_DATA_HOME` in this sandbox. The configured `integration` preset points at stale
+`build-consumer/` and cannot regenerate because CNA's shared SDL-cache lock is outside the
+repository sandbox; the current `build/` label is the authoritative run here.
+
+All compilation was pinned with `taskset -c 0-3`, four build/test workers and the shared
+`/rv/cnaccache`. Strict XNA explicitly used four workers and passed all 341 translation units. The
+full static gate's only failure is the pre-existing user-owned root `.claude` layout entry. No CNA
+or sibling file was modified.
+
+`HOUSE-02403` remains environment-blocked as recorded below. R2/R11/R13 therefore select
+`HOUSE-02598`, the 20-minute automated stability run, next. There are 51 open MUST tasks. The
+remaining forecast is 82 realistic / 108.25 pessimistic hours; 144.25 completed task-hours plus
+the pessimistic remainder projects 252.5 h, 27.5 h below the R14 ceiling.
+
+---
+
 # Performance-baseline environment blocker — 2026-09-25 (`HOUSE-02403` open)
 
 The current Release `build-probe/` binary is timestamped 04:43 and predates the day's rain,

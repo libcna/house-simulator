@@ -86,6 +86,16 @@ namespace cnahouse::testsupport
                                            int channelTolerance,
                                            const std::vector<Region>& ignore = {});
 
+    /// @brief Builds a diagnostic frame: changed pixels are magenta, stable pixels are dimmed.
+    ///
+    /// This is an artefact, not another comparison rule. It uses the exact same channel tolerance
+    /// and ignored regions as `Compare`, so the image points at precisely the pixels counted in the
+    /// failure message. Ignored pixels are transparent.
+    [[nodiscard]] inline Image DifferenceImage(const Image& actual,
+                                               const Image& expected,
+                                               int channelTolerance,
+                                               const std::vector<Region>& ignore = {});
+
     namespace detail
     {
         inline int Delta(std::uint8_t a, std::uint8_t b) noexcept
@@ -168,6 +178,54 @@ namespace cnahouse::testsupport
         diff.meanChannelDelta =
             diff.comparedPixels == 0 ? 0.0 : total / (static_cast<double>(diff.comparedPixels) * 4.0);
         return diff;
+    }
+
+    inline Image DifferenceImage(const Image& actual,
+                                 const Image& expected,
+                                 int channelTolerance,
+                                 const std::vector<Region>& ignore)
+    {
+        Image image;
+        if (actual.width != expected.width || actual.height != expected.height ||
+            actual.pixels.size() != expected.pixels.size())
+        {
+            return image;
+        }
+
+        image.width = actual.width;
+        image.height = actual.height;
+        image.pixels.reserve(expected.pixels.size());
+        for (std::size_t i = 0; i < expected.pixels.size(); ++i)
+        {
+            const int px = static_cast<int>(i % static_cast<std::size_t>(image.width));
+            const int py = static_cast<int>(i / static_cast<std::size_t>(image.width));
+            const bool skipped = std::ranges::any_of(
+                ignore, [px, py](const Region& region) { return region.Contains(px, py); });
+            if (skipped)
+            {
+                image.pixels.emplace_back(0, 0, 0, 0);
+                continue;
+            }
+
+            const auto& a = actual.pixels[i];
+            const auto& e = expected.pixels[i];
+            const int worst = std::max({detail::Delta(a.getRProperty(), e.getRProperty()),
+                                        detail::Delta(a.getGProperty(), e.getGProperty()),
+                                        detail::Delta(a.getBProperty(), e.getBProperty()),
+                                        detail::Delta(a.getAProperty(), e.getAProperty())});
+            if (worst > channelTolerance)
+            {
+                image.pixels.emplace_back(255, 0, 255, 255);
+            }
+            else
+            {
+                image.pixels.emplace_back(static_cast<int>(e.getRProperty()) / 4,
+                                          static_cast<int>(e.getGProperty()) / 4,
+                                          static_cast<int>(e.getBProperty()) / 4,
+                                          255);
+            }
+        }
+        return image;
     }
 
 } // namespace cnahouse::testsupport
