@@ -295,6 +295,17 @@ namespace cnahouse::app
             settings.weatherVolume = 0.75F;
             settings.version = 9;
         }
+        if (settings.version < 10)
+        {
+            // The final compact settings page exposes High, Web and Android. Preserve the old
+            // command-line `Ultra` row for diagnostics, but migrate persisted UI choices to the
+            // highest retained profile so the page never labels an Ultra value as High.
+            if (settings.quality == QualityPreset::Ultra)
+            {
+                settings.quality = QualityPreset::High;
+            }
+            settings.version = 10;
+        }
         settings.version = kCurrentVersion;
     }
 

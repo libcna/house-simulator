@@ -9,7 +9,9 @@
 #include "Microsoft/Xna/Framework/Color.hpp"
 #include "Microsoft/Xna/Framework/Vector2.hpp"
 
+#include "cnahouse/player/FirstPersonCamera.hpp"
 #include "cnahouse/player/IInputSource.hpp"
+#include "cnahouse/rendering/RenderTier.hpp"
 #include "cnahouse/ui/TextRenderer.hpp"
 
 namespace cnahouse::ui
@@ -148,10 +150,12 @@ namespace cnahouse::ui
         using Microsoft::Xna::Framework::Vector2;
 
         constexpr std::array<float, SettingsScreen::ControlCount()> kSettingsRowY = {
-            0.244F, 0.294F, 0.344F, 0.394F, 0.539F, 0.589F, 0.639F};
-        constexpr float kSettingsHitHalfHeight = 0.022F;
+            0.111F, 0.149F, 0.187F, 0.224F, 0.262F, 0.344F, 0.382F, 0.420F, 0.458F, 0.540F, 0.578F, 0.616F};
+        constexpr float kSettingsHitHalfHeight = 0.017F;
         constexpr float kSettingsSliderStart = 0.55F;
         constexpr float kSettingsSliderEnd = 0.80F;
+        constexpr std::array kVisibleQualityPresets = {
+            app::QualityPreset::Low, app::QualityPreset::Medium, app::QualityPreset::High};
 
         [[nodiscard]] std::size_t SettingsIndex(SettingsControl control) noexcept
         {
@@ -174,12 +178,35 @@ namespace cnahouse::ui
             value = changed;
             return true;
         }
+
+        [[nodiscard]] std::size_t QualityIndex(app::QualityPreset preset) noexcept
+        {
+            if (preset == app::QualityPreset::Low)
+            {
+                return 0;
+            }
+            if (preset == app::QualityPreset::Medium)
+            {
+                return 1;
+            }
+            return 2;
+        }
     } // namespace
 
     std::string_view SettingsControlName(SettingsControl control) noexcept
     {
         switch (control)
         {
+            case SettingsControl::Quality:
+                return "Quality preset";
+            case SettingsControl::DisplaySize:
+                return "Resolution";
+            case SettingsControl::Fullscreen:
+                return "Fullscreen";
+            case SettingsControl::VerticalSync:
+                return "V-sync";
+            case SettingsControl::FieldOfView:
+                return "Field of view";
             case SettingsControl::Master:
                 return "Master";
             case SettingsControl::Footsteps:
@@ -200,10 +227,81 @@ namespace cnahouse::ui
         return "?";
     }
 
-    SettingsScreen::SettingsScreen(app::Settings& settings, Changed onChanged)
+    SettingsFeatures SettingsFeatures::Resolve(const app::Platform& platform,
+                                               const rendering::RenderTier& tier,
+                                               const app::Settings& settings)
+    {
+        SettingsFeatures features;
+        features.tierE = tier.IsTierE();
+        features.canvasSize = platform.target == app::BuildTarget::Web;
+        features.displaySize = platform.target != app::BuildTarget::Android;
+        features.fullscreen = platform.target != app::BuildTarget::Android;
+        features.verticalSync = platform.target == app::BuildTarget::Desktop;
+        features.displaySizes.clear();
+
+        if (features.displaySize)
+        {
+            for (const app::DisplaySize size : platform.displaySizes)
+            {
+                if (size.width >= 640 && size.width <= 7680 && size.height >= 480 && size.height <= 4320)
+                {
+                    features.displaySizes.push_back(size);
+                }
+            }
+            features.displaySizes.push_back({settings.backBufferWidth, settings.backBufferHeight});
+            std::sort(features.displaySizes.begin(), features.displaySizes.end());
+            features.displaySizes.erase(
+                std::unique(features.displaySizes.begin(), features.displaySizes.end()),
+                features.displaySizes.end());
+        }
+        return features;
+    }
+
+    bool SettingsFeatures::Shows(SettingsControl control) const noexcept
+    {
+        switch (control)
+        {
+            case SettingsControl::DisplaySize:
+                return displaySize && !displaySizes.empty();
+            case SettingsControl::Fullscreen:
+                return fullscreen;
+            case SettingsControl::VerticalSync:
+                return verticalSync;
+            case SettingsControl::Quality:
+            case SettingsControl::FieldOfView:
+            case SettingsControl::Master:
+            case SettingsControl::Footsteps:
+            case SettingsControl::Ambience:
+            case SettingsControl::Weather:
+            case SettingsControl::LookSensitivity:
+            case SettingsControl::InvertY:
+            case SettingsControl::WalkSpeed:
+                return true;
+            case SettingsControl::Count:
+                break;
+        }
+        return false;
+    }
+
+    SettingsScreen::SettingsScreen(app::Settings& settings, Changed onChanged, SettingsFeatures features)
         : settings_(&settings)
         , onChanged_(std::move(onChanged))
+        , features_(std::move(features))
     {
+        for (std::size_t i = 0; i < ControlCount(); ++i)
+        {
+            const auto control = static_cast<SettingsControl>(i);
+            if (features_.Shows(control))
+            {
+                controls_.push_back(control);
+            }
+        }
+        selected_ = controls_.front();
+    }
+
+    bool SettingsScreen::Shows(SettingsControl control) const noexcept
+    {
+        return std::find(controls_.begin(), controls_.end(), control) != controls_.end();
     }
 
     ScreenAction SettingsScreen::Update(const player::InputState& input, float deltaSeconds)
@@ -214,17 +312,18 @@ namespace cnahouse::ui
             return ScreenAction::Pop;
         }
 
-        const auto count = static_cast<int>(ControlCount());
-        int index = static_cast<int>(selected_);
+        const auto count = static_cast<int>(controls_.size());
+        auto selected = std::find(controls_.begin(), controls_.end(), selected_);
+        int index = static_cast<int>(std::distance(controls_.begin(), selected));
         if (input.uiUpPressed)
         {
             index = (index + count - 1) % count;
-            selected_ = static_cast<SettingsControl>(index);
+            selected_ = controls_[static_cast<std::size_t>(index)];
         }
         if (input.uiDownPressed)
         {
             index = (index + 1) % count;
-            selected_ = static_cast<SettingsControl>(index);
+            selected_ = controls_[static_cast<std::size_t>(index)];
         }
 
         bool changed = false;
@@ -247,7 +346,7 @@ namespace cnahouse::ui
 
         if (changed && onChanged_)
         {
-            onChanged_();
+            onChanged_(selected_);
         }
         return ScreenAction::None;
     }
@@ -256,6 +355,38 @@ namespace cnahouse::ui
     {
         switch (selected_)
         {
+            case SettingsControl::Quality:
+            {
+                const auto count = static_cast<int>(kVisibleQualityPresets.size());
+                int index = static_cast<int>(QualityIndex(settings_->quality));
+                index = (index + count + direction) % count;
+                return AssignChanged(settings_->quality,
+                                     kVisibleQualityPresets[static_cast<std::size_t>(index)]);
+            }
+            case SettingsControl::DisplaySize:
+            {
+                const app::DisplaySize current{settings_->backBufferWidth, settings_->backBufferHeight};
+                auto found = std::find(features_.displaySizes.begin(), features_.displaySizes.end(), current);
+                std::size_t index =
+                    static_cast<std::size_t>(std::distance(features_.displaySizes.begin(), found));
+                const auto count = static_cast<int>(features_.displaySizes.size());
+                index = static_cast<std::size_t>((static_cast<int>(index) + count + direction) % count);
+                const app::DisplaySize changed = features_.displaySizes[index];
+                const bool widthChanged = AssignChanged(settings_->backBufferWidth, changed.width);
+                const bool heightChanged = AssignChanged(settings_->backBufferHeight, changed.height);
+                return widthChanged || heightChanged;
+            }
+            case SettingsControl::Fullscreen:
+                return AssignChanged(settings_->fullscreen, direction > 0);
+            case SettingsControl::VerticalSync:
+                return AssignChanged(settings_->verticalSync, direction > 0);
+            case SettingsControl::FieldOfView:
+                return AssignChanged(settings_->fieldOfView,
+                                     StepSetting(settings_->fieldOfView,
+                                                 5.0F,
+                                                 direction,
+                                                 player::kMinFovDegrees,
+                                                 player::kMaxFovDegrees));
             case SettingsControl::Master:
                 return AssignChanged(settings_->masterVolume,
                                      StepSetting(settings_->masterVolume, 0.05F, direction, 0.0F, 1.0F));
@@ -283,6 +414,16 @@ namespace cnahouse::ui
 
     bool SettingsScreen::ActivateSelected()
     {
+        if (selected_ == SettingsControl::Fullscreen)
+        {
+            settings_->fullscreen = !settings_->fullscreen;
+            return true;
+        }
+        if (selected_ == SettingsControl::VerticalSync)
+        {
+            settings_->verticalSync = !settings_->verticalSync;
+            return true;
+        }
         if (selected_ == SettingsControl::InvertY)
         {
             settings_->invertY = !settings_->invertY;
@@ -303,17 +444,27 @@ namespace cnahouse::ui
             return false;
         }
 
-        for (std::size_t i = 0; i < kSettingsRowY.size(); ++i)
+        for (const SettingsControl control : controls_)
         {
-            if (std::abs(y - kSettingsRowY[i]) > kSettingsHitHalfHeight)
+            if (std::abs(y - kSettingsRowY[SettingsIndex(control)]) > kSettingsHitHalfHeight)
             {
                 continue;
             }
-            selected_ = static_cast<SettingsControl>(i);
-            if (i <= SettingsIndex(SettingsControl::Weather) || selected_ == SettingsControl::LookSensitivity)
+            selected_ = control;
+            const bool volumeControl =
+                control == SettingsControl::Master || control == SettingsControl::Footsteps ||
+                control == SettingsControl::Ambience || control == SettingsControl::Weather;
+            if (volumeControl || control == SettingsControl::LookSensitivity ||
+                control == SettingsControl::FieldOfView)
             {
                 const float fraction = std::clamp(
                     (x - kSettingsSliderStart) / (kSettingsSliderEnd - kSettingsSliderStart), 0.0F, 1.0F);
+                if (control == SettingsControl::FieldOfView)
+                {
+                    return AssignChanged(settings_->fieldOfView,
+                                         player::kMinFovDegrees +
+                                             fraction * (player::kMaxFovDegrees - player::kMinFovDegrees));
+                }
                 if (selected_ == SettingsControl::LookSensitivity)
                 {
                     return AssignChanged(settings_->mouseSensitivity, 0.2F + fraction * 3.8F);
@@ -343,6 +494,24 @@ namespace cnahouse::ui
     {
         switch (control)
         {
+            case SettingsControl::Quality:
+                if (settings_->quality == app::QualityPreset::Low)
+                {
+                    return "Android";
+                }
+                if (settings_->quality == app::QualityPreset::Medium)
+                {
+                    return "Web";
+                }
+                return features_.tierE ? "High" : "High (Tier S)";
+            case SettingsControl::DisplaySize:
+                return std::format("{} x {}", settings_->backBufferWidth, settings_->backBufferHeight);
+            case SettingsControl::Fullscreen:
+                return settings_->fullscreen ? "On" : "Off";
+            case SettingsControl::VerticalSync:
+                return settings_->verticalSync ? "On" : "Off";
+            case SettingsControl::FieldOfView:
+                return std::format("{:.0f} deg", static_cast<double>(settings_->fieldOfView));
             case SettingsControl::Master:
                 return std::format("{:.0f}%", static_cast<double>(settings_->masterVolume) * 100.0);
             case SettingsControl::Footsteps:
@@ -367,23 +536,26 @@ namespace cnahouse::ui
                               const TextRenderer& text) const
     {
         text.DrawShadowed(batch, "Settings", Vector2(0.0F, 55.0F), Anchor::TopCentre, Color::White);
-        text.DrawShadowed(batch, "Graphics", Vector2(0.0F, 125.0F), Anchor::TopCentre, Color::White);
-        text.DrawShadowed(batch, "Audio", Vector2(0.0F, 170.0F), Anchor::TopCentre, Color::White);
-        text.DrawShadowed(batch, "Controls", Vector2(0.0F, 435.0F), Anchor::TopCentre, Color::White);
-        text.DrawShadowed(batch, "Environment", Vector2(0.0F, 625.0F), Anchor::TopCentre, Color::White);
+        text.DrawShadowed(batch, "Graphics", Vector2(0.0F, 70.0F), Anchor::TopCentre, Color::White);
+        text.DrawShadowed(batch, "Audio", Vector2(0.0F, 280.0F), Anchor::TopCentre, Color::White);
+        text.DrawShadowed(batch, "Controls", Vector2(0.0F, 456.0F), Anchor::TopCentre, Color::White);
+        text.DrawShadowed(batch, "Environment", Vector2(0.0F, 598.0F), Anchor::TopCentre, Color::White);
 
-        for (std::size_t i = 0; i < ControlCount(); ++i)
+        for (const SettingsControl control : controls_)
         {
-            const auto control = static_cast<SettingsControl>(i);
             const bool selected = control == selected_;
-            const std::string line = std::format(
-                "{}{:18}  {}", selected ? "> " : "  ", SettingsControlName(control), ValueText(control));
+            const std::string_view name = control == SettingsControl::DisplaySize && features_.canvasSize
+                                              ? std::string_view{"Canvas size"}
+                                              : SettingsControlName(control);
+            const std::string line =
+                std::format("{}{:18}  {}", selected ? "> " : "  ", name, ValueText(control));
             const int shade = selected ? 255 : 210;
-            text.DrawShadowed(batch,
-                              line,
-                              Vector2(0.0F, kSettingsRowY[i] * TextRenderer::kVirtualHeight),
-                              Anchor::TopCentre,
-                              Color(shade, shade, shade, 255));
+            text.DrawShadowed(
+                batch,
+                line,
+                Vector2(0.0F, kSettingsRowY[SettingsIndex(control)] * TextRenderer::kVirtualHeight),
+                Anchor::TopCentre,
+                Color(shade, shade, shade, 255));
         }
 
         text.DrawShadowed(batch,

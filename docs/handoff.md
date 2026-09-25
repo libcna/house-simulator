@@ -1,3 +1,31 @@
+# Graphics settings handoff — 2026-09-25 (`HOUSE-02518`)
+
+The existing one-page `SettingsScreen` now has the final bounded Graphics section: High, Web and
+Android quality profiles; resolution (`Canvas size` on Web); fullscreen; v-sync; and field of view.
+`SettingsFeatures` derives visible rows solely from `BuildTarget`, the resolved `RenderTier` and
+standard-XNA `GraphicsAdapter` display modes. Desktop exposes all five rows. Web keeps canvas size
+and fullscreen for `HOUSE-03721` but removes its browser-fixed v-sync row; Android removes the
+fixed device display rows. Tier S identifies the effective High profile in its value text. No capability query, shadow
+toggle, post-processing toggle or new graphics-settings system exists.
+
+Edits reuse the existing application boundaries: `GraphicsDeviceManager::ApplyChanges`,
+`rendering::Restrict`, the first-person camera, `TextRenderer` and `KeyboardMouseSource` viewport.
+Settings v10 maps a persisted pre-reduction Ultra selection to retained High; the command-line
+diagnostic row remains available internally. Six settings-screen tests cover full keyboard reach,
+the three profile filters, the exact quality choices, display-size cycling and common mouse/touch
+targets. All 52 focused unit tests, 9 focused offscreen startup/tier integrations and the complete
+1,461-test unit label pass. `check_xna_only.py` is clean. Strict-XNA initially caught CNAEXT
+`DisplayModeCollection` C++ iterators; the final code uses the standard XNA format indexer and all
+342 translation units compile clean. The complete static gate reports only the known user-owned
+root `.claude` layout entry. All compilation and tests were pinned to CPUs 4,5,7,9 with at most
+four workers.
+
+M9 dependency order plus R11/R13 selects `HOUSE-02521` next. The remaining forecast is 88.75
+realistic / 115.5 pessimistic hours. With 137.5 task-hours completed since the final reduction,
+the R14 projection is 253 h, 27 h below the ceiling.
+
+---
+
 # One-page settings handoff — 2026-09-25 (`HOUSE-02516`)
 
 `SettingsScreen` now supplies the retained one-page shell through the existing `MenuStack` and

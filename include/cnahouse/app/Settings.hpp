@@ -46,7 +46,7 @@ namespace cnahouse::app
     struct Settings
     {
         /// @brief Bumped whenever a field changes meaning. `Migrate` handles every older value.
-        static constexpr std::int32_t kCurrentVersion = 9;
+        static constexpr std::int32_t kCurrentVersion = 10;
 
         std::int32_t version = kCurrentVersion;
 

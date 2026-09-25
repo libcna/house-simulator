@@ -1,11 +1,28 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
+#include <compare>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace cnahouse::app
 {
+
+    enum class BuildTarget
+    {
+        Desktop,
+        Web,
+        Android,
+    };
+
+    struct DisplaySize
+    {
+        int width = 0;
+        int height = 0;
+
+        auto operator<=>(const DisplaySize&) const = default;
+    };
 
     /// @brief What this build and this machine can do. Populated once, at startup, and never re-queried.
     ///
@@ -22,6 +39,7 @@ namespace cnahouse::app
         // --- build facts, baked in by CMake ----------------------------------------------------------
         /// @brief The renderer this binary was built for. Fixed at configure time (§7.3).
         std::string rendererName;
+        BuildTarget target = BuildTarget::Desktop;
         /// @brief Whether Tier E was compiled in. `HOUSE-00122` is the only place this is decided.
         bool tierECompiledIn = false;
         bool debugToolsCompiledIn = false;
@@ -31,6 +49,8 @@ namespace cnahouse::app
         /// @brief `GraphicsAdapter::CurrentDisplayMode`. Plain XNA 4.0, not a CNA extension.
         int displayWidth = 0;
         int displayHeight = 0;
+        /// @brief Unique standard-XNA display sizes, filled from `GraphicsAdapter` at startup.
+        std::vector<DisplaySize> displaySizes;
         /// @brief The adapter's description, for the bug-report header.
         std::string adapterDescription;
 

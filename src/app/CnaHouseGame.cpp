@@ -277,6 +277,16 @@ namespace cnahouse::app
         platform_.displayWidth = mode.getWidthProperty();
         platform_.displayHeight = mode.getHeightProperty();
         platform_.adapterDescription = adapter.getDescriptionProperty();
+        const auto supportedModes = adapter.getSupportedDisplayModesProperty()
+                                        [Microsoft::Xna::Framework::Graphics::SurfaceFormat::Color];
+        for (const auto& supported : supportedModes)
+        {
+            platform_.displaySizes.push_back({supported.getWidthProperty(), supported.getHeightProperty()});
+        }
+        std::sort(platform_.displaySizes.begin(), platform_.displaySizes.end());
+        platform_.displaySizes.erase(
+            std::unique(platform_.displaySizes.begin(), platform_.displaySizes.end()),
+            platform_.displaySizes.end());
 
         player::InputConfig inputConfig;
         inputConfig.sensitivity = settings_.mouseSensitivity;
@@ -914,10 +924,66 @@ namespace cnahouse::app
         }
     }
 
+    void CnaHouseGame::ApplyGraphicsSettings(ui::SettingsControl control)
+    {
+        if (control == ui::SettingsControl::Quality)
+        {
+            quality_ = rendering::Restrict(rendering::SettingsFor(settings_.quality), platform_, tier_);
+            Log::Info(LogCat::Rendering,
+                      "settings quality {}: shadows {}, particles {}, view {:.2f}x, lod {:+d}, "
+                      "anisotropy {}x, post-processing {}",
+                      QualityPresetName(settings_.quality),
+                      rendering::ShadowQualityName(quality_.shadows),
+                      rendering::ParticleQualityName(quality_.particles),
+                      static_cast<double>(quality_.viewDistance),
+                      quality_.lodBias,
+                      quality_.anisotropy,
+                      quality_.postProcessing ? "on" : "off");
+            return;
+        }
+
+        if (control == ui::SettingsControl::DisplaySize || control == ui::SettingsControl::Fullscreen ||
+            control == ui::SettingsControl::VerticalSync)
+        {
+            graphics_.setPreferredBackBufferWidthProperty(settings_.backBufferWidth);
+            graphics_.setPreferredBackBufferHeightProperty(settings_.backBufferHeight);
+            graphics_.setIsFullScreenProperty(settings_.fullscreen);
+            graphics_.setSynchronizeWithVerticalRetraceProperty(settings_.verticalSync);
+            graphics_.ApplyChanges();
+
+            text_.SetViewport(settings_.backBufferWidth, settings_.backBufferHeight);
+            player::InputConfig inputConfig = input_.Config();
+            inputConfig.recentreX = settings_.backBufferWidth / 2;
+            inputConfig.recentreY = settings_.backBufferHeight / 2;
+            inputConfig.viewportWidth = settings_.backBufferWidth;
+            inputConfig.viewportHeight = settings_.backBufferHeight;
+            input_.SetConfig(inputConfig);
+            view_.Camera().SetViewport(settings_.backBufferWidth, settings_.backBufferHeight);
+        }
+
+        if (control == ui::SettingsControl::FieldOfView)
+        {
+            view_.Camera().SetFieldOfView(settings_.fieldOfView);
+            blockoutCamera_.fieldOfViewDegrees = view_.Camera().EffectiveFieldOfViewDegrees();
+        }
+    }
+
+    void CnaHouseGame::ApplyChangedSetting(ui::SettingsControl control)
+    {
+        if (control <= ui::SettingsControl::FieldOfView)
+        {
+            ApplyGraphicsSettings(control);
+            return;
+        }
+        ApplyAudioAndControlSettings();
+    }
+
     void CnaHouseGame::OpenSettings()
     {
-        menus_.Push(
-            std::make_unique<ui::SettingsScreen>(settings_, [this] { ApplyAudioAndControlSettings(); }));
+        menus_.Push(std::make_unique<ui::SettingsScreen>(
+            settings_,
+            [this](ui::SettingsControl control) { ApplyChangedSetting(control); },
+            ui::SettingsFeatures::Resolve(platform_, tier_, settings_)));
     }
 
     debug::WorldSnapshot CnaHouseGame::WalkSnapshot() const

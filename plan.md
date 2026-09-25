@@ -13,7 +13,7 @@ renumbered.
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
 | Active plan | **58 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 76.5 / 90 / 117 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Estimate to DONE | **≈ 75.5 / 88.75 / 115.5 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
 | Current gate | **G5 and M7 passed; atmospheric-audio work is active.** Next: wire the six retained footstep categories in `HOUSE-01920` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
@@ -398,7 +398,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M6](#m6--main-cells-and-hero-areas-c4-c5--gates-g4-and-g5) — Main cells and hero areas | A | 03441–03500 | 15 | **G4** · `HOUSE-03452`, **G5** · `HOUSE-03480` | D4 | 19.75 |
 | [M7](#m7--a-compact-environment) — A compact environment | B | 03501–03540 | 8 | `HOUSE-03520` | D5 | 13.25 |
 | [M8](#m8--atmospheric-audio-essentials) — Atmospheric audio essentials | B | 03541–03570 | 6 | `HOUSE-01939` | D7 | 9 |
-| [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 5 | `HOUSE-02528` | D8 | 6.5 |
+| [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 4 | `HOUSE-02528` | D8 | 5.25 |
 | [M10](#m10--performance-measurement-driven) — Performance, measurement-driven | B | 03601–03630 | 4 | `HOUSE-02405` | D9 | 9.5 |
 | [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 3 | `HOUSE-02713` | D2, D4, D13, D14 | 7 |
 | [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 2 | `HOUSE-02598` | D11 | 3.5 |
@@ -1240,11 +1240,12 @@ extended.
       trace: absorbs `HOUSE-02519` (Audio), `HOUSE-02520` (Controls), `HOUSE-02529` and `HOUSE-01935`; was *the settings menu shell with the 5 tabs*
       note: (2026-09-25) `SettingsScreen` reuses `MenuStack`, `TextRenderer`, the existing settings file and the compact M8 mix. Keyboard, mouse and XNA touch feed one device-independent navigation path; all seven Audio/Controls rows are keyboard-reachable and apply live. Settings v9 migrates the old `effectsVolume` to footsteps and persists weather separately. Graphics and Environment remain headings only for their owning tasks. Focused tests pass 48/48 unit and 6/6 offscreen integration; the complete unit label passes 1458/1458. No key remapping or widget framework was added.
 
-- [ ] HOUSE-02518 — The Graphics section, filtered by the project-owned effective feature set
+- [x] HOUSE-02518 — The Graphics section, filtered by the project-owned effective feature set
       dep: HOUSE-02516, HOUSE-00160 · sys: ui · plat: ALL · pri: MUST · zone: all · adv: D8 · est: 1.25
       accept: (1) the quality preset (High, Web, Android), resolution (or canvas size on the Web), fullscreen, v-sync and field of view; (2) options come from the effective feature set of `cna-house.md` §68 (`RenderTier` + build/platform profile + validated standard-XNA behaviour), so no meaningless toggle is shown; (3) `SupportsCapability()` or any other CNA extension query is called nowhere, and `check_xna_only.py` passes on the UI sources
       verify: unit tests of the filtering; `check_xna_only.py`
       trace: absorbs `HOUSE-02517`'s display rows
+      note: (2026-09-25) The one page now exposes only quality (High/Web/Android), standard-XNA display resolution (`Canvas size` on Web), fullscreen, v-sync and FOV. `SettingsFeatures` resolves rows from `BuildTarget`, `RenderTier` and `GraphicsAdapter` display modes: Web retains canvas size/fullscreen for `HOUSE-03721` but omits browser-fixed v-sync, Android omits fixed device display controls, and Tier S labels the effective High profile honestly. Changes apply to the existing graphics manager, effective quality, camera, text and input viewports. Settings v10 migrates the removed persisted Ultra UI choice to High; the diagnostic command-line row remains internal. Focused tests pass 52/52, startup/tier integrations 9/9 and the complete unit label 1461/1461. `check_xna_only.py` is clean; strict-XNA caught and removed a first-pass CNAEXT collection iterator, then compiled all 342 translation units clean through the standard XNA format indexer.
 
 - [ ] HOUSE-02521 — The Environment section: time of day and weather
       dep: HOUSE-02516 · sys: ui · plat: ALL · pri: MUST · zone: all · adv: D5, D8 · est: 1
@@ -1931,7 +1932,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M6 Main cells and hero areas | 20 | 32.5 | **0** | 0 | **0** | 0 | — |
 | M7 A compact environment | 13 | 21 | **0** | 0 | **0** | 0 | — |
 | M8 Atmospheric audio essentials | 11 | 14.5 | **4** | 4.25 | **5** | 5.5 | — |
-| M9 Application shell | 10 | 12.5 | **5** | 5.5 | **6.5** | 7.25 | — |
+| M9 Application shell | 10 | 12.5 | **4** | 4.5 | **5.25** | 5.75 | — |
 | M10 Performance | 6 | 13 | **3** | 6.75 | **8** | 12.75 | R-C +4 |
 | M11 Final defect pass | 3 | 11 | **3** | 6 | **7** | 7.75 | — |
 | M12 Representative tests | 4 | 5 | **2** | 3 | **3.5** | 3.75 | — |
@@ -1939,12 +1940,12 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **57** | **76.5** | **90** | **117** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **56** | **75.5** | **88.75** | **115.5** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-163 h. Adding the 136.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-253.25 h, 26.75 h under the limit. That margin is
+164.5 h. Adding the 137.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+253 h, 27 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |
@@ -1957,7 +1958,7 @@ small on purpose: the ceiling is a limit, not a budget to fill.
 
 **By area,** against the owner's sanity reference for this pass: traversal 0 h (complete); architecture
 4 h (≈ 18); furnishing kit 19 h (18–22); whole-house furnishing 31 h (30–38); lighting 19.75 h
-(18–22); C4/C5 polish 19.75 h (18–24); environment 4.75 h; audio 9 h (8–10); shell 6.5 h
+(18–22); C4/C5 polish 19.75 h (18–24); environment 4.75 h; audio 9 h (8–10); shell 5.25 h
 (8–10); performance 9.5 h (≈ 10); final polish 7 h (6–8); tests 3.5 h (≈ 5); Linux 10.25 h
 (11–13); Web 19.5 h (18–22); Android 23.75 h (23–27); release 6.5 h (6–8).
 

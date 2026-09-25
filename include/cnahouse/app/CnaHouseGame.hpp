@@ -543,6 +543,8 @@ namespace cnahouse::app
         /// @brief Copies §44's camera into the renderer's, which is what the pass draws through.
         void ApplyPlayerCamera();
         void ApplyAudioAndControlSettings();
+        void ApplyGraphicsSettings(ui::SettingsControl control);
+        void ApplyChangedSetting(ui::SettingsControl control);
         void OpenSettings();
 
         /// @brief Whether this frame's draw list is built from §25's visible set.

@@ -181,6 +181,14 @@ namespace
         EXPECT_EQ(settings->backBufferWidth, 2560);
     }
 
+    TEST(SettingsTests, TheFormerUltraUiChoiceMigratesToTheRetainedHighProfile)
+    {
+        auto settings = Settings::FromJson(R"({"version": 9, "quality": "ultra"})", "settings.json");
+        ASSERT_TRUE(settings) << settings.Error().ToString();
+        EXPECT_EQ(settings->version, Settings::kCurrentVersion);
+        EXPECT_EQ(settings->quality, QualityPreset::High);
+    }
+
     TEST(SettingsTests, AWrongTypeIsStillAnErrorEvenThoughFieldsAreOptional)
     {
         // "Optional" means the field may be absent, not that a string may stand in for a number.

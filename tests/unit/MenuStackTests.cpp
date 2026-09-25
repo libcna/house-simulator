@@ -13,6 +13,7 @@
 #include "cnahouse/app/Settings.hpp"
 #include "cnahouse/audio/AudioSystem.hpp"
 #include "cnahouse/player/IInputSource.hpp"
+#include "cnahouse/rendering/RenderTier.hpp"
 #include "cnahouse/ui/LoadingScreen.hpp"
 #include "cnahouse/ui/MenuStack.hpp"
 
@@ -30,6 +31,7 @@ namespace
     using cnahouse::ui::ScreenId;
     using cnahouse::ui::SettingsControl;
     using cnahouse::ui::SettingsControlName;
+    using cnahouse::ui::SettingsFeatures;
     using cnahouse::ui::SettingsScreen;
 
     /// Records that it was updated, and answers whatever the test told it to.
@@ -299,7 +301,12 @@ namespace
     {
         Settings settings = Settings::Defaults();
         SettingsScreen screen(settings);
-        constexpr std::array expected = {SettingsControl::Master,
+        constexpr std::array expected = {SettingsControl::Quality,
+                                         SettingsControl::DisplaySize,
+                                         SettingsControl::Fullscreen,
+                                         SettingsControl::VerticalSync,
+                                         SettingsControl::FieldOfView,
+                                         SettingsControl::Master,
                                          SettingsControl::Footsteps,
                                          SettingsControl::Ambience,
                                          SettingsControl::Weather,
@@ -315,12 +322,81 @@ namespace
             down.uiDownPressed = true;
             EXPECT_EQ(screen.Update(down, 0.016F), ScreenAction::None);
         }
-        EXPECT_EQ(screen.Selected(), SettingsControl::Master);
+        EXPECT_EQ(screen.Selected(), SettingsControl::Quality);
 
         InputState up;
         up.uiUpPressed = true;
         screen.Update(up, 0.016F);
         EXPECT_EQ(screen.Selected(), SettingsControl::WalkSpeed);
+    }
+
+    TEST(SettingsScreenTests, GraphicsRowsAreFilteredByTheBuildProfileWithoutCapabilityQueries)
+    {
+        Settings settings = Settings::Defaults();
+        cnahouse::app::Platform platform;
+        platform.displaySizes = {{1280, 720}, {1600, 900}, {1920, 1080}};
+        const cnahouse::rendering::RenderTier tier(cnahouse::app::RenderTier::S);
+
+        platform.target = cnahouse::app::BuildTarget::Desktop;
+        SettingsFeatures desktop = SettingsFeatures::Resolve(platform, tier, settings);
+        SettingsScreen desktopScreen(settings, {}, desktop);
+        EXPECT_TRUE(desktopScreen.Shows(SettingsControl::DisplaySize));
+        EXPECT_TRUE(desktopScreen.Shows(SettingsControl::Fullscreen));
+        EXPECT_TRUE(desktopScreen.Shows(SettingsControl::VerticalSync));
+        EXPECT_EQ(desktopScreen.VisibleControlCount(), 12U);
+
+        platform.target = cnahouse::app::BuildTarget::Web;
+        SettingsFeatures web = SettingsFeatures::Resolve(platform, tier, settings);
+        SettingsScreen webScreen(settings, {}, web);
+        EXPECT_TRUE(web.canvasSize);
+        EXPECT_TRUE(webScreen.Shows(SettingsControl::DisplaySize));
+        EXPECT_TRUE(webScreen.Shows(SettingsControl::Fullscreen))
+            << "HOUSE-03721 owns the browser fullscreen path from this row";
+        EXPECT_FALSE(webScreen.Shows(SettingsControl::VerticalSync));
+
+        platform.target = cnahouse::app::BuildTarget::Android;
+        SettingsFeatures android = SettingsFeatures::Resolve(platform, tier, settings);
+        SettingsScreen androidScreen(settings, {}, android);
+        EXPECT_FALSE(androidScreen.Shows(SettingsControl::DisplaySize));
+        EXPECT_FALSE(androidScreen.Shows(SettingsControl::Fullscreen));
+        EXPECT_FALSE(androidScreen.Shows(SettingsControl::VerticalSync));
+        EXPECT_TRUE(androidScreen.Shows(SettingsControl::Quality));
+        EXPECT_TRUE(androidScreen.Shows(SettingsControl::FieldOfView));
+    }
+
+    TEST(SettingsScreenTests, GraphicsRowsUseOnlyHighWebAndAndroidProfiles)
+    {
+        Settings settings = Settings::Defaults();
+        cnahouse::app::Platform platform;
+        platform.displaySizes = {{1280, 720}, {1600, 900}, {1920, 1080}};
+        const cnahouse::rendering::RenderTier tier(cnahouse::app::RenderTier::S);
+        std::vector<SettingsControl> changed;
+        SettingsScreen screen(
+            settings,
+            [&](SettingsControl control) { changed.push_back(control); },
+            SettingsFeatures::Resolve(platform, tier, settings));
+
+        InputState right;
+        right.uiRightPressed = true;
+        screen.Update(right, 0.016F);
+        EXPECT_EQ(settings.quality, cnahouse::app::QualityPreset::Low)
+            << "High wraps to the retained Android profile; Ultra is not offered";
+
+        InputState left;
+        left.uiLeftPressed = true;
+        screen.Update(left, 0.016F);
+        EXPECT_EQ(settings.quality, cnahouse::app::QualityPreset::High);
+
+        InputState down;
+        down.uiDownPressed = true;
+        screen.Update(down, 0.016F);
+        ASSERT_EQ(screen.Selected(), SettingsControl::DisplaySize);
+        screen.Update(right, 0.016F);
+        EXPECT_EQ(settings.backBufferWidth, 1920);
+        EXPECT_EQ(settings.backBufferHeight, 1080);
+        EXPECT_EQ(
+            changed,
+            (std::vector{SettingsControl::Quality, SettingsControl::Quality, SettingsControl::DisplaySize}));
     }
 
     TEST(SettingsScreenTests, KeyboardEditsAudioAndControlsAndAppliesEachChangeLive)
@@ -329,7 +405,7 @@ namespace
         AudioSystem audio(false);
         int applied = 0;
         SettingsScreen screen(settings,
-                              [&]
+                              [&](SettingsControl)
                               {
                                   ++applied;
                                   audio.SetMasterVolume(settings.masterVolume);
@@ -338,14 +414,20 @@ namespace
                                   audio.SetCategoryVolume(Category::Weather, settings.weatherVolume);
                               });
 
+        InputState down;
+        down.uiDownPressed = true;
+        for (int row = 0; row < 5; ++row)
+        {
+            screen.Update(down, 0.016F);
+        }
+        ASSERT_EQ(screen.Selected(), SettingsControl::Master);
+
         InputState right;
         right.uiRightPressed = true;
         screen.Update(right, 0.016F);
         EXPECT_FLOAT_EQ(settings.masterVolume, 0.85F);
         EXPECT_FLOAT_EQ(audio.MasterVolume(), 0.85F);
 
-        InputState down;
-        down.uiDownPressed = true;
         screen.Update(down, 0.016F);
         screen.Update(right, 0.016F);
         EXPECT_FLOAT_EQ(settings.footstepsVolume, 0.90F);
@@ -373,13 +455,13 @@ namespace
         {
             Settings settings = Settings::Defaults();
             int applied = 0;
-            SettingsScreen screen(settings, [&] { ++applied; });
+            SettingsScreen screen(settings, [&](SettingsControl) { ++applied; });
 
             InputState pointer;
             pointer.pointerKind = kind;
             pointer.pointerPressed = true;
             pointer.pointerX = 0.6125F; // one quarter of the 0.55..0.80 slider track
-            pointer.pointerY = 0.294F;  // footsteps row
+            pointer.pointerY = 0.382F;  // footsteps row
             screen.Update(pointer, 0.016F);
 
             EXPECT_EQ(screen.Selected(), SettingsControl::Footsteps);
@@ -392,7 +474,7 @@ namespace
     {
         Settings settings = Settings::Defaults();
         int applied = 0;
-        SettingsScreen screen(settings, [&] { ++applied; });
+        SettingsScreen screen(settings, [&](SettingsControl) { ++applied; });
 
         InputState outside;
         outside.pointerPressed = true;

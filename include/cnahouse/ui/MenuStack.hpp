@@ -9,7 +9,13 @@
 #include <string_view>
 #include <vector>
 
+#include "cnahouse/app/Platform.hpp"
 #include "cnahouse/app/Settings.hpp"
+
+namespace cnahouse::rendering
+{
+    class RenderTier;
+}
 
 namespace Microsoft::Xna::Framework::Graphics
 {
@@ -144,9 +150,14 @@ namespace cnahouse::ui
         std::vector<std::unique_ptr<IScreen>> screens_;
     };
 
-    /// @brief The controls populated by HOUSE-02516 on the one retained settings page.
+    /// @brief The controls populated by M9 on the one retained settings page.
     enum class SettingsControl : std::uint8_t
     {
+        Quality,
+        DisplaySize,
+        Fullscreen,
+        VerticalSync,
+        FieldOfView,
         Master,
         Footsteps,
         Ambience,
@@ -159,17 +170,38 @@ namespace cnahouse::ui
 
     [[nodiscard]] std::string_view SettingsControlName(SettingsControl control) noexcept;
 
+    /// @brief The project-owned effective feature set as the settings page needs it.
+    ///
+    /// It contains build/profile facts and standard-XNA display sizes only. The UI therefore
+    /// filters rows without asking CNA or the graphics device what it supports.
+    struct SettingsFeatures
+    {
+        bool canvasSize = false;
+        bool displaySize = true;
+        bool fullscreen = true;
+        bool verticalSync = true;
+        bool tierE = false;
+        std::vector<app::DisplaySize> displaySizes{{1600, 900}};
+
+        [[nodiscard]] static SettingsFeatures Resolve(const app::Platform& platform,
+                                                      const rendering::RenderTier& tier,
+                                                      const app::Settings& settings);
+        [[nodiscard]] bool Shows(SettingsControl control) const noexcept;
+    };
+
     /// @brief One settings page, using the existing screen stack and device-independent input.
     ///
-    /// Graphics and Environment deliberately have headings only here: their exact rows belong to
-    /// HOUSE-02518 and HOUSE-02521. Audio and Controls are complete and applied through @p onChanged
-    /// after every edit; the screen neither owns a second settings copy nor invents a widget system.
+    /// Environment deliberately has a heading only here until HOUSE-02521. Every row is applied
+    /// through @p onChanged after an edit; the screen neither owns a second settings copy nor
+    /// invents a widget system.
     class SettingsScreen final : public IScreen
     {
     public:
-        using Changed = std::function<void()>;
+        using Changed = std::function<void(SettingsControl)>;
 
-        explicit SettingsScreen(app::Settings& settings, Changed onChanged = {});
+        explicit SettingsScreen(app::Settings& settings,
+                                Changed onChanged = {},
+                                SettingsFeatures features = {});
 
         [[nodiscard]] ScreenId Id() const override
         {
@@ -186,6 +218,13 @@ namespace cnahouse::ui
             return selected_;
         }
 
+        [[nodiscard]] std::size_t VisibleControlCount() const noexcept
+        {
+            return controls_.size();
+        }
+
+        [[nodiscard]] bool Shows(SettingsControl control) const noexcept;
+
         static constexpr std::size_t ControlCount() noexcept
         {
             return static_cast<std::size_t>(SettingsControl::Count);
@@ -199,7 +238,9 @@ namespace cnahouse::ui
 
         app::Settings* settings_;
         Changed onChanged_;
-        SettingsControl selected_ = SettingsControl::Master;
+        SettingsFeatures features_;
+        std::vector<SettingsControl> controls_;
+        SettingsControl selected_ = SettingsControl::Quality;
     };
 
 } // namespace cnahouse::ui

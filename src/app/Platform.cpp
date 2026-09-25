@@ -10,6 +10,13 @@ namespace cnahouse::app
     {
         Platform platform;
         platform.rendererName = CNAHOUSE_RENDERER_NAME;
+#if defined(__EMSCRIPTEN__)
+        platform.target = BuildTarget::Web;
+#elif defined(__ANDROID__)
+        platform.target = BuildTarget::Android;
+#else
+        platform.target = BuildTarget::Desktop;
+#endif
         platform.tierECompiledIn = CNAHOUSE_TIER_E != 0;
         platform.debugToolsCompiledIn = CNAHOUSE_DEBUG_TOOLS != 0;
         platform.version = CNAHOUSE_VERSION;

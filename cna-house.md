@@ -6816,6 +6816,13 @@ Stored in `settings.json` beside the save, versioned and migrated the same way. 
 > active requirements. The larger historical table below records the original design; it does not
 > authorise extra pages, key remapping, gameplay simulation or other removed scope.
 
+The retained Graphics section is exactly five rows: **High / Web / Android** quality profiles,
+resolution (**Canvas size** on Web), fullscreen, v-sync and field of view. The project-owned
+effective feature set removes display rows fixed by the platform profile: Web owns canvas size and
+fullscreen but not browser scheduling, while Android owns no desktop display switch. The aggregate
+quality row is resolved through `RenderTier` and `QualitySettings`; individual shadow,
+post-processing, texture, LOD and anisotropy toggles from the historical table are not exposed.
+
 | Tab | Setting | Values | Default |
 |---|---|---|---|
 | **Display** | Resolution | detected modes; "Canvas size" on Web | native |
