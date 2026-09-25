@@ -33,6 +33,7 @@ namespace cnahouse::lighting
 
 namespace cnahouse::rendering
 {
+    class ParticleRenderer;
 
     /// @brief Glass is a scene-referred filter, not a camera-exposure-scaled emitter.
     ///
@@ -85,7 +86,8 @@ namespace cnahouse::rendering
                         const world::WorldData& world,
                         const Camera& camera,
                         visibility::RenderList& list,
-                        const lighting::LightingSystem* lighting = nullptr);
+                        const lighting::LightingSystem* lighting = nullptr,
+                        ParticleRenderer* particles = nullptr);
         ~TransparentPass() override;
 
         void Draw(PassContext& context) override;
@@ -121,6 +123,7 @@ namespace cnahouse::rendering
         const Camera& camera_;
         visibility::RenderList& list_;
         const lighting::LightingSystem* lighting_ = nullptr;
+        ParticleRenderer* particles_ = nullptr;
         std::unique_ptr<Microsoft::Xna::Framework::Graphics::BasicEffect> effect_;
         std::unique_ptr<GlowResources> glowResources_;
         std::vector<const world::Light*> glowLights_;

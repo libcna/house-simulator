@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **64 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 87 / 103 / 131 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5 passed; compact-environment work is active.** Next: retained rain motion/materials in `HOUSE-01743` |
+| Active plan | **63 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 86 / 101 / 129 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5 passed; compact-environment work is active.** Next: retained rain coverage in `HOUSE-01744` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -1146,11 +1146,12 @@ a simulation of its own.
       verify: unit tests of the wrap and the offset
       note: (2026-09-25) `PrecipitationVolume` is the allocation-free geometry boundary for dependent rain work: a 12 m radius, 14 m high cylinder follows the camera eye and shifts exactly 3 m downwind using the already rate-limited `WeatherState::windSpeed`/`windDirectionDeg`. Meteorological “from” direction is converted once to the project's +X-east/-Z-north travel vector; `gustFactor` is not read and no oscillator/RNG was introduced. `Follow` wraps a caller-owned fixed position span in place after every camera/wind update, using opposite-side periodic vertical and radial boundaries; non-finite input leaves both centre and positions untouched. Four unit tests cover cardinal wind, calm and gust independence, the exact offset, both cylinder boundaries, large camera relocation, stable in-place storage and transactional invalid-input rejection. Strict-XNA compiled all 332 translation units clean with four workers. No rain is emitted or drawn yet; that is the immediate dependent `HOUSE-01743`
 
-- [ ] HOUSE-01743 — Rain: particle motion and the rain streak texture and material
+- [x] HOUSE-01743 — Rain: particle motion and the rain streak texture and material
       dep: HOUSE-01742 · sys: weather · plat: ALL · pri: MUST · zone: all · adv: D5 · est: 1.75
       accept: (1) gravity, wind, an intensity-driven count and velocity-elongated quads; (2) a rain streak texture and material, manifested; (3) rain, sleet and the hail and storm archetypes draw rain streaks; a snow state draws nothing
       verify: unit tests of the motion; the environment captures
       trace: absorbs `HOUSE-01745` (the streak texture)
+      note: (2026-09-25) `RainParticles` retains exactly 900 deterministic positions in the existing 12 m × 14 m camera-relative volume and advances them without allocation. The active prefix follows `round(900 · intensity^0.8 · qualityScale)` (495 Low, 720 Medium/High-preset, 900 Ultra-preset at full intensity); rain, sleet and hail submit it, while none and snow clear the shared renderer. Each step uses the already rate-limited wind at 0.55× plus §37.1's 6–9 m/s downward terminal velocity, wraps the whole fixed pool, and submits one 2 cm-class soft streak whose long edge is projected from that velocity into the camera plane. `TransparentPass` borrows the existing `ParticleRenderer`, draws its single rain material before additive fixture glows and adds no pass or effect. `tools/assets/rain_streak.py` deterministically authors the manifested 16 × 64 RGBA texture `TEX_WEATHER_RAIN_STREAK`; the content pipeline compiled and loaded it as `Textures/Weather/rain_streak`. Three rain-motion/phase tests plus the extended billboard test cover the formula, every retained liquid phase, snow clearing, gravity/wind displacement, wrapping, fixed storage, streak length and velocity alignment; the existing authored-weather test proves `W_THUNDERSTORM` is Rain, and the new Hail path consumes Hail directly. All 1,434 unit tests and eight focused integration tests pass; strict-XNA compiled all 334 translation units clean with four workers. Full-resolution OPENGLES3 Round 175 exterior rain was inspected at 1,600 × 900: the streak texture loaded, streaks are soft and velocity-slanted, and no missing-texture, clipping or blend defect was visible. The paired interior capture deliberately exposes the next task's unsheltered particles; roof/window coverage remains solely `HOUSE-01744`
 
 - [ ] HOUSE-01744 — Keep rain out of covered areas: the roof/coverage mask and the teleport-to-top of sheltered particles
       dep: HOUSE-01743, HOUSE-00777 · sys: weather · plat: ALL · pri: MUST · zone: all · adv: D5, D11 · est: 2
@@ -1920,7 +1921,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M4 Dressing everywhere | 40 | 48.75 | **0** | 0 | **0** | 0 | R-D +3 |
 | M5 Baseline lighting everywhere | 12 | 24.5 | **0** | 0 | **0** | 0 | — |
 | M6 Main cells and hero areas | 20 | 32.5 | **0** | 0 | **0** | 0 | — |
-| M7 A compact environment | 13 | 21 | **4** | 5.75 | **6.75** | 7.5 | — |
+| M7 A compact environment | 13 | 21 | **3** | 4.25 | **5** | 5.5 | — |
 | M8 Atmospheric audio essentials | 11 | 14.5 | **6** | 7.75 | **9** | 10 | — |
 | M9 Application shell | 10 | 12.5 | **6** | 7.25 | **8.5** | 9.25 | — |
 | M10 Performance | 6 | 13 | **3** | 6.75 | **8** | 12.75 | R-C +4 |
@@ -1930,12 +1931,12 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **64** | **87.25** | **102.75** | **131** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **63** | **85.75** | **101** | **129** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-149 h. Adding the 123.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-254.5 h, 25.5 h under the limit. That margin is
+151 h. Adding the 125.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+254.25 h, 25.75 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |

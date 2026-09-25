@@ -1,3 +1,39 @@
+# Rain motion and streak-material handoff — 2026-09-25 (`HOUSE-01743`)
+
+`RainParticles` is the compact consumer of the shared particle renderer and precipitation volume.
+It owns 900 deterministic positions in fixed storage, advances all of them by §37.1's rate-limited
+wind contribution plus 6–9 m/s downward terminal velocity, and wraps them through the existing
+12 m radius / 14 m height camera-relative cylinder. The submitted prefix is the documented
+`900 · intensity^0.8 · qualityScale`: full rain produces 495 Low, 720 Medium and 900 High particles.
+Rain, sleet and hail use that prefix; none and snow reset the renderer to an empty frame. The
+thunderstorm archetype already publishes Rain and therefore takes the same path.
+
+`ParticleQuad` now optionally carries a world-space elongation axis. The existing ordinary zero
+axis stays screen-up; rain supplies its velocity, which the renderer projects into the camera plane
+before building the long edge. The game borrows one `ParticleRenderer` from `TransparentPass`, so
+the retained rain material is drawn inside the existing alpha-blended pass before additive fixture
+glows. No new render pass, effect or generalized weather framework was added.
+
+`tools/assets/rain_streak.py` deterministically generates the manifested, project-authored 16 × 64
+soft RGBA streak. The normal content build produced and the game loaded
+`Textures/Weather/rain_streak.cnb`. Three rain tests and the extended billboard test cover count,
+all retained liquid phases, snow clearing, fixed storage, gravity/wind displacement, wrapping,
+streak length and velocity alignment. The complete 1,434-test unit label and eight focused
+integration tests pass. Strict-XNA compiled all 334 translation units clean with `--jobs 4`.
+
+Round 175's 1,600 × 900 OPENGLES3 `exterior-front` rain capture was inspected at full resolution:
+the streaks are soft, visible and slanted by velocity, with no missing texture, clipping or blend
+defect. The paired `indoors-heavy-rain` capture intentionally shows particles below the roof. That
+is not hidden here: roof, porch and closed-window coverage plus the below-cover invariant are the
+exact next MUST task, `HOUSE-01744`.
+
+Rule R2's environment dependency order selects `HOUSE-01744` next. The remaining forecast is 101
+realistic / 129 pessimistic hours. With 125.25 task-hours spent since the final reduction, the R14
+projection is 254.25 h, 25.75 h below the ceiling. Every build, test and check remains limited to
+four workers and pinned to CPUs 4,5,7,9.
+
+---
+
 # Camera-relative precipitation volume handoff — 2026-09-25 (`HOUSE-01742`)
 
 `PrecipitationVolume` is a small allocation-free geometry boundary over caller-owned fixed particle

@@ -3439,6 +3439,7 @@ assets	TEX_SKY_CLOUD_CIRRUS
 assets	TEX_SKY_CLOUD_CUMULUS
 assets	TEX_SKY_CLOUD_STRATUS
 assets	TEX_SKY_MOON_ALBEDO
+assets	TEX_WEATHER_RAIN_STREAK
 interactables/interactables	TV_B1_CINEMA
 interactables/interactables	TV_L0_FAMILY
 interactables/interactables	TV_L1_MASTER_BED

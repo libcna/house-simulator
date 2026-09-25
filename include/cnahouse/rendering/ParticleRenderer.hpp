@@ -33,6 +33,8 @@ namespace cnahouse::rendering
     struct ParticleQuad
     {
         Microsoft::Xna::Framework::Vector3 centre;
+        /// World-space direction of the long edge. Zero keeps the ordinary screen-up billboard.
+        Microsoft::Xna::Framework::Vector3 elongationAxis;
         Microsoft::Xna::Framework::Vector2 halfSize;
         Microsoft::Xna::Framework::Color colour;
         std::uint8_t material = 0u;

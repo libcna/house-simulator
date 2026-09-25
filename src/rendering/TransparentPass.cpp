@@ -28,6 +28,7 @@
 
 #include "cnahouse/debug/Counters.hpp"
 #include "cnahouse/lighting/LightingSystem.hpp"
+#include "cnahouse/rendering/ParticleRenderer.hpp"
 #include "cnahouse/rendering/StateTracker.hpp"
 #include "cnahouse/util/Ids.hpp"
 #include "cnahouse/world/CellRuntime.hpp"
@@ -155,13 +156,15 @@ namespace cnahouse::rendering
                                      const world::WorldData& world,
                                      const Camera& camera,
                                      visibility::RenderList& list,
-                                     const lighting::LightingSystem* lighting)
+                                     const lighting::LightingSystem* lighting,
+                                     ParticleRenderer* particles)
         : library_(library)
         , cells_(cells)
         , world_(world)
         , camera_(camera)
         , list_(list)
         , lighting_(lighting)
+        , particles_(particles)
     {
         glowLights_.reserve(world.Lights().size());
         for (const world::Light& light : world.Lights())
@@ -178,6 +181,10 @@ namespace cnahouse::rendering
     bool TransparentPass::IsActive() const
     {
         if (list_.Has(Pass::Transparent))
+        {
+            return true;
+        }
+        if (particles_ != nullptr && particles_->IsActive())
         {
             return true;
         }
@@ -282,6 +289,13 @@ namespace cnahouse::rendering
             }
         }
 
+        // Weather particles share the transparent pass and draw before additive fixture glows.
+        // Their own renderer restores alpha blend and read-only depth, while the glow path below
+        // explicitly selects its additive state if it has anything to draw.
+        if (particles_ != nullptr)
+        {
+            particles_->Draw(context);
+        }
         DrawFixtureGlows(context);
 
         if (counterOwner_ != &context.counters)

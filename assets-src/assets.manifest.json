@@ -32787,6 +32787,27 @@
       }
     },
     {
+      "id": "TEX_WEATHER_RAIN_STREAK",
+      "category": "weather",
+      "sourceFile": "assets-src/Textures/Weather/rain_streak.png",
+      "sourceSha256": "4b7a4512ee6b0195ea25842ea53fbf5577a6141b67cf267dd43828d4f995b4be",
+      "contentName": "Textures/Weather/rain_streak",
+      "kind": "texture",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Procedural rain streak opacity texture",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/assets/rain_streak.py for HOUSE-01743. A 16 x 64 soft white RGBA streak whose alpha tapers across and at both ends; live vertex colour controls rain opacity."
+      }
+    },
+    {
       "id": "VIDEO_SMOKE_CLIP",
       "category": "fixture",
       "sourceFile": "assets-src/Media/Video/smoke_clip.ogv",

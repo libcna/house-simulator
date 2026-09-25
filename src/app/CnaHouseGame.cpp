@@ -44,6 +44,7 @@
 #include "cnahouse/persistence/DesktopSaveStore.hpp"
 #include "cnahouse/rendering/AlphaTestPass.hpp"
 #include "cnahouse/rendering/MaterialBinder.hpp"
+#include "cnahouse/rendering/ParticleRenderer.hpp"
 #include "cnahouse/rendering/SkySystem.hpp"
 #include "cnahouse/rendering/StaticGeometryPass.hpp"
 #include "cnahouse/rendering/TransparentPass.hpp"
@@ -630,6 +631,12 @@ namespace cnahouse::app
         if (blockoutChunks_ != nullptr && blockoutCells_ != nullptr && materialBinder_ != nullptr &&
             materialBinder_->Count() != 0U && caches_ != nullptr)
         {
+            particleRenderer_ = std::make_unique<rendering::ParticleRenderer>(blockoutCamera_);
+            rainParticles_ = std::make_unique<weather::RainParticles>();
+            if (!particleRenderer_->SetMaterial(0u, caches_->textures.Get("Textures/Weather/rain_streak")))
+            {
+                throw std::runtime_error("rain material slot is outside the shared particle renderer");
+            }
             exteriorFog_ = std::make_unique<rendering::FogParams>();
             renderer_.Install(rendering::Pass::AlphaTest,
                               std::make_unique<rendering::AlphaTestPass>(
@@ -642,10 +649,14 @@ namespace cnahouse::app
                                   [this](std::string_view name) { return caches_->textures.Get(name); },
                                   &*lighting_,
                                   exteriorFog_.get()));
-            renderer_.Install(
-                rendering::Pass::Transparent,
-                std::make_unique<rendering::TransparentPass>(
-                    *blockoutChunks_, *blockoutCells_, *world_, blockoutCamera_, renderList_, &*lighting_));
+            renderer_.Install(rendering::Pass::Transparent,
+                              std::make_unique<rendering::TransparentPass>(*blockoutChunks_,
+                                                                           *blockoutCells_,
+                                                                           *world_,
+                                                                           blockoutCamera_,
+                                                                           renderList_,
+                                                                           &*lighting_,
+                                                                           particleRenderer_.get()));
         }
         if (!options_.debugBlockoutMaterials && blockoutChunks_ != nullptr && blockoutCells_ != nullptr &&
             materialBinder_ != nullptr && materialBinder_->Count() != 0U && caches_ != nullptr)
@@ -1199,6 +1210,19 @@ namespace cnahouse::app
                 // they read the frame timings it changes.
                 freeFly_.Update(Input().Current(), Input().LookAvailable(), frame.deltaSeconds);
                 freeFly_.ApplyTo(blockoutCamera_);
+            }
+
+            if (rainParticles_ != nullptr && particleRenderer_ != nullptr && weather_.has_value())
+            {
+                const util::Result<void> rain = rainParticles_->Update(frame.deltaSeconds,
+                                                                       blockoutCamera_.eye,
+                                                                       weather_->State(),
+                                                                       quality_.particles,
+                                                                       *particleRenderer_);
+                if (!rain)
+                {
+                    throw std::runtime_error(rain.Error().ToString());
+                }
             }
 
             if (smoke_ != nullptr)

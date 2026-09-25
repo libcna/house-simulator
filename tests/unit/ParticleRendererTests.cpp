@@ -77,4 +77,24 @@ namespace
         EXPECT_NEAR(vertices[1].Position.X - vertices[0].Position.X, 2.0F * particle.halfSize.X, 1.0e-6F);
         EXPECT_NEAR(vertices[3].Position.Y - vertices[0].Position.Y, 2.0F * particle.halfSize.Y, 1.0e-6F);
     }
+
+    TEST(ParticleRendererTests, QuadLongEdgeFollowsProjectedVelocity)
+    {
+        cnahouse::rendering::Camera camera;
+        camera.eye = Xna::Vector3(0.0F, 1.0F, 2.0F);
+        camera.target = Xna::Vector3(0.0F, 1.0F, 0.0F);
+        ParticleQuad particle = Quad();
+        particle.elongationAxis = Xna::Vector3(1.0F, -2.0F, -3.0F);
+        const auto vertices = cnahouse::rendering::ParticleBillboardVertices(particle, camera);
+
+        const Xna::Vector3 longEdge(vertices[3].Position.X - vertices[0].Position.X,
+                                    vertices[3].Position.Y - vertices[0].Position.Y,
+                                    vertices[3].Position.Z - vertices[0].Position.Z);
+        EXPECT_GT(longEdge.X, 0.0F);
+        EXPECT_LT(longEdge.Y, 0.0F);
+        EXPECT_FLOAT_EQ(longEdge.Z, 0.0F) << "camera-depth velocity must be projected out";
+        EXPECT_NEAR(std::sqrt(longEdge.X * longEdge.X + longEdge.Y * longEdge.Y),
+                    2.0F * particle.halfSize.Y,
+                    1.0e-6F);
+    }
 } // namespace

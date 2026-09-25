@@ -63,6 +63,11 @@ namespace cnahouse::rendering
             return Xna::Vector3(a.Y * b.Z - a.Z * b.Y, a.Z * b.X - a.X * b.Z, a.X * b.Y - a.Y * b.X);
         }
 
+        [[nodiscard]] float Dot(const Xna::Vector3& a, const Xna::Vector3& b) noexcept
+        {
+            return a.X * b.X + a.Y * b.Y + a.Z * b.Z;
+        }
+
         [[nodiscard]] Xna::Vector3 Normalised(const Xna::Vector3& value,
                                               const Xna::Vector3& fallback) noexcept
         {
@@ -79,7 +84,8 @@ namespace cnahouse::rendering
             return std::isfinite(particle.centre.X) && std::isfinite(particle.centre.Y) &&
                    std::isfinite(particle.centre.Z) && std::isfinite(particle.halfSize.X) &&
                    std::isfinite(particle.halfSize.Y) && particle.halfSize.X > 0.0F &&
-                   particle.halfSize.Y > 0.0F;
+                   particle.halfSize.Y > 0.0F && std::isfinite(particle.elongationAxis.X) &&
+                   std::isfinite(particle.elongationAxis.Y) && std::isfinite(particle.elongationAxis.Z);
         }
     } // namespace
 
@@ -102,9 +108,14 @@ namespace cnahouse::rendering
     {
         const Xna::Vector3 forward =
             Normalised(Subtract(camera.target, camera.eye), Xna::Vector3(0.0F, 0.0F, -1.0F));
-        const Xna::Vector3 right =
+        const Xna::Vector3 fallbackRight =
             Normalised(Cross(forward, Xna::Vector3::Up), Xna::Vector3(1.0F, 0.0F, 0.0F));
-        const Xna::Vector3 up = Normalised(Cross(right, forward), Xna::Vector3::Up);
+        const Xna::Vector3 fallbackUp = Normalised(Cross(fallbackRight, forward), Xna::Vector3::Up);
+        const Xna::Vector3 projectedAxis =
+            Subtract(particle.elongationAxis, Scaled(forward, Dot(particle.elongationAxis, forward)));
+        const Xna::Vector3 requestedUp = Normalised(projectedAxis, fallbackUp);
+        const Xna::Vector3 right = Normalised(Cross(forward, requestedUp), fallbackRight);
+        const Xna::Vector3 up = Normalised(Cross(right, forward), fallbackUp);
         const Xna::Vector3 horizontal = Scaled(right, particle.halfSize.X);
         const Xna::Vector3 vertical = Scaled(up, particle.halfSize.Y);
 

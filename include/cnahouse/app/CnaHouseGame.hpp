@@ -52,6 +52,7 @@
 #include "cnahouse/visibility/ExteriorScene.hpp"
 #include "cnahouse/visibility/RenderList.hpp"
 #include "cnahouse/visibility/VisibilitySystem.hpp"
+#include "cnahouse/weather/RainParticles.hpp"
 #include "cnahouse/weather/WeatherSystem.hpp"
 #include "cnahouse/world/CellRuntime.hpp"
 #include "cnahouse/world/ChunkData.hpp"
@@ -62,6 +63,7 @@ namespace cnahouse::rendering
 {
     struct FogParams;
     class MaterialBinder;
+    class ParticleRenderer;
     class SkySystem;
 } // namespace cnahouse::rendering
 
@@ -427,6 +429,10 @@ namespace cnahouse::app
         std::unique_ptr<rendering::MaterialBinder> materialBinder_;
         /// The one live §31.5 atmosphere value borrowed by binder-backed exterior passes.
         std::unique_ptr<rendering::FogParams> exteriorFog_;
+        /// The fixed XNA particle stream borrowed by the transparent pass.
+        std::unique_ptr<rendering::ParticleRenderer> particleRenderer_;
+        /// The retained §37.1 fixed rain positions that feed the shared stream.
+        std::unique_ptr<weather::RainParticles> rainParticles_;
 
         /// The draw side of `cna-house.md` §7.5. Constructed with the tier, so the two Tier-E-only
         /// passes are gated in ONE place rather than at each pass. Only the HUD pass is installed
