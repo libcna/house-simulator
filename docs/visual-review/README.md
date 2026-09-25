@@ -5641,3 +5641,21 @@ The existing Release `Kitchen` scenario on the §71.1 AMD Radeon 780M at 1920×1
 Tier S / High and vsync off reports 73 draw calls, 172,934 triangles, 1.173 ms CPU total and
 2.670 ms GPU-completion median / 3.224 ms p95, below the desktop High hard limits. Rule R2 next
 selects the cross-area G5 review in `HOUSE-03480`.
+
+## Round 168 — G5 all-hero showcase review
+
+Commit: `HOUSE-03480` working tree (`2026-09-25`). Six fixed views cover all five retained hero
+areas: exterior-front and front-path (H1), living-composition (H2), kitchen-facing-west (H3),
+library (H5) and basement-cinema (H6). Fresh clear-day, scheduled-night and overcast sets provide
+eighteen images, each inspected individually at full resolution.
+
+Every hero composition remains complete, readable and traversable. No S1/S2, clipping,
+floating/intersecting furnishing, z-fighting or missing texture is open. No new S3/S4 was found;
+the existing zone backlog remains deferred to M11's bounded pass. The scoreboard's hero column is
+complete in every applicable zone, and the task-level AMD Radeon 780M measurements from Rounds
+162–167 cover all five areas within the desktop High hard limits. No runtime, content, asset,
+material, light, schedule, chunk or lightmap change was needed. Local evidence is in
+`captures/house-03480-g5-{day,night,overcast}-r168/`.
+
+G5 passes. With Track A complete through the showcase gate, dependency order next selects
+`HOUSE-01696`, wiring the existing weather state into sky and lighting for M7.

@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **69 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 94 / 110 / 139 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G4 passed; all five retained hero areas are at C5.** Next: the G5 hero-area review in `HOUSE-03480` |
+| Active plan | **68 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 93 / 109 / 138 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5 passed; all five retained hero areas are at C5.** Next: the compact environment, beginning with `HOUSE-01696` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -273,7 +273,7 @@ non-accessible appliance interiors.
 
 ## Zone scoreboard
 
-**As of 2026-09-25 (Round 167; G4 passed).** Levels from Round 103's whole-property day/night review
+**As of 2026-09-25 (Round 168; G5 passed).** Levels from Round 103's whole-property day/night review
 (`HOUSE-03203`), Round 104's traversal sweep and subsequent completed zone work; main and hero
 targets re-counted after `HOUSE-03206`'s tier change. Update per rule R10.
 
@@ -1101,10 +1101,11 @@ covers it.
       trace: was *Furnish `L0_KITCHEN` (the densest room: island, run, appliances, 62 containers)*; the containers were removed by `HOUSE-03201`. Rule R4: after every other hero task
       note: (2026-09-25) Round 167 closes the deliberately-last kitchen review without reviving containers or adding decoration. The retained recipe already supplies the static closed north run, island and range wall, closed refrigerator, stools, canisters, kettle, island dressing and physical pendant/task/ceiling fixtures. Three fresh fixed views from Round 165 cover clear 10:30 and scheduled 22:00; Round 166's fresh H3 view covers overcast 10:30. Full-resolution inspection finds the complete room readable with the work aisle and through-routes open and no S1/S2, clipping, floating/intersecting furnishing, z-fighting or missing texture. No runtime, content, asset, material or lighting change was justified. On the §71.1 AMD Radeon 780M, the existing Release `Kitchen` scenario at 1920×1080 Tier S / High reports 73 draw calls, 172,934 triangles, 1.173 ms CPU total and 2.670 ms GPU-completion median (3.224 ms p95), within the desktop High hard budgets
 
-- [ ] HOUSE-03480 — **Gate G5 review: every hero area at C5**
+- [x] HOUSE-03480 — **Gate G5 review: every hero area at C5**
       dep: HOUSE-03450, HOUSE-03454, HOUSE-03455, HOUSE-00986, HOUSE-00988, HOUSE-00990 · sys: — · plat: ALL · pri: MUST · zone: all · adv: G5, D4 · est: 1
       accept: one round over the five hero areas (day, night, overcast where it applies) with no S1/S2 open anywhere; the scoreboard's *Hero cells at C5* column is complete; the S3/S4 backlog is handed to M11
       verify: ledger round; scoreboard
+      note: (2026-09-25) Gate G5 passes. Round 168 consolidates six fixed views covering all five retained hero areas: exterior-front and front-path (H1), living-composition (H2), kitchen-facing-west (H3), library (H5) and basement-cinema (H6). All eighteen clear-day, scheduled-night and overcast images were inspected individually at full resolution. Every hero composition remains complete, readable and traversable with no S1/S2, clipping, floating/intersecting furnishing, z-fighting or missing texture. The scoreboard's hero column is complete in every applicable zone. Existing task-level AMD Radeon 780M measurements cover all five areas within the desktop High hard limits. No new S3/S4 was found; the existing zone backlog remains deferred to M11. No runtime, content, asset, material, light, schedule, chunk or lightmap changed. Captures remain local under `house-03480-g5-{day,night,overcast}-r168`
 
 ---
 
@@ -1914,7 +1915,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M3 The reusable furnishing kit | 16 | 33 | **0** | 0 | **0** | 0 | — |
 | M4 Dressing everywhere | 40 | 48.75 | **0** | 0 | **0** | 0 | R-D +3 |
 | M5 Baseline lighting everywhere | 12 | 24.5 | **0** | 0 | **0** | 0 | — |
-| M6 Main cells and hero areas | 20 | 32.5 | **1** | 0.75 | **1** | 1.25 | — |
+| M6 Main cells and hero areas | 20 | 32.5 | **0** | 0 | **0** | 0 | — |
 | M7 A compact environment | 13 | 21 | **8** | 11.25 | **13.25** | 14.5 | — |
 | M8 Atmospheric audio essentials | 11 | 14.5 | **6** | 7.75 | **9** | 10 | — |
 | M9 Application shell | 10 | 12.5 | **6** | 7.25 | **8.5** | 9.25 | — |
@@ -1925,12 +1926,12 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **69** | **93.5** | **110.25** | **139.25** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **68** | **92.75** | **109.25** | **138** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-140.75 h. Adding the 116 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-255.25 h, 24.75 h under the limit. That margin is
+142 h. Adding the 117 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+255 h, 25 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |

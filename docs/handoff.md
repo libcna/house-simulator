@@ -1,3 +1,25 @@
+# G5 hero-area gate handoff — 2026-09-25 (`HOUSE-03480`)
+
+Gate G5 passes. Round 168 consolidates six fixed views over all five retained hero areas:
+exterior-front and front-path for H1, living-composition for H2, kitchen-facing-west for H3,
+library for H5 and basement-cinema for H6. The eighteen clear-day, scheduled-night and overcast
+images were inspected individually at full resolution. Every composition remains complete,
+readable and traversable with no S1/S2, clipping, floating/intersecting furnishing, z-fighting or
+missing texture. No content or runtime change was justified. Local evidence remains ignored under
+`docs/visual-review/captures/house-03480-g5-{day,night,overcast}-r168/`.
+
+The scoreboard's hero column is complete in every applicable zone. The task-level AMD Radeon 780M
+measurements from Rounds 162–167 cover all five areas within the desktop High hard limits. No new
+S3/S4 was found; the existing zone backlog remains handed to M11's bounded pass.
+
+With Track A complete through G5, dependency order selects `HOUSE-01696`, the first compact-
+environment task in M7. The remaining forecast is 109.25 realistic / 138 pessimistic hours. With
+117 task-hours spent since the final reduction, the R14 projection is 255 h, 25 h below the
+ceiling. Every build, test, capture and check is limited to four workers and pinned to CPUs
+4,5,7,9; strict-XNA additionally uses `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Kitchen C5 handoff — 2026-09-25 (`HOUSE-00990`)
 
 `L0_KITCHEN` meets C5 without revived containers or extra decoration. Its retained bounded recipe
