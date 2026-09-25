@@ -83,6 +83,7 @@ namespace cnahouse::rendering
                               float groupLevel,
                               float effectExposure) noexcept;
     class MaterialBinder;
+    struct FogParams;
 
     enum class StaticGeometryMode
     {
@@ -144,7 +145,8 @@ namespace cnahouse::rendering
                            const Camera& camera,
                            visibility::RenderList& list,
                            MaterialBinder& binder,
-                           TextureLookup textures);
+                           TextureLookup textures,
+                           const FogParams* exteriorFog = nullptr);
         ~StaticGeometryPass() override;
 
         void Draw(PassContext& context) override;
@@ -210,6 +212,7 @@ namespace cnahouse::rendering
         visibility::RenderList& list_;
         MaterialBinder* binder_ = nullptr;
         TextureLookup textures_;
+        const FogParams* exteriorFog_ = nullptr;
         std::unique_ptr<Microsoft::Xna::Framework::Graphics::BasicEffect> effect_;
         std::vector<util::Id> fixtureGroups_;
         StaticGeometryMode mode_ = StaticGeometryMode::DebugBlockout;

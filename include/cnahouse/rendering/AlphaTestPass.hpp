@@ -29,6 +29,7 @@ namespace cnahouse::lighting
 namespace cnahouse::rendering
 {
     class MaterialBinder;
+    struct FogParams;
 
     /// @brief §23.6's alpha-tested static pass, before transparency with full depth writes.
     ///
@@ -50,7 +51,8 @@ namespace cnahouse::rendering
                       visibility::RenderList& list,
                       MaterialBinder& binder,
                       TextureLookup textures,
-                      const lighting::LightingSystem* lighting = nullptr);
+                      const lighting::LightingSystem* lighting = nullptr,
+                      const FogParams* exteriorFog = nullptr);
         ~AlphaTestPass() override;
 
         void Draw(PassContext& context) override;
@@ -80,6 +82,7 @@ namespace cnahouse::rendering
         MaterialBinder& binder_;
         TextureLookup textures_;
         const lighting::LightingSystem* lighting_ = nullptr;
+        const FogParams* exteriorFog_ = nullptr;
         std::uint32_t chunksDrawn_ = 0u;
         std::uint32_t trianglesDrawn_ = 0u;
         std::uint32_t materialBinds_ = 0u;

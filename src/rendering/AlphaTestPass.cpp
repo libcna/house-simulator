@@ -38,7 +38,8 @@ namespace cnahouse::rendering
                                  visibility::RenderList& list,
                                  MaterialBinder& binder,
                                  TextureLookup textures,
-                                 const lighting::LightingSystem* lighting)
+                                 const lighting::LightingSystem* lighting,
+                                 const FogParams* exteriorFog)
         : library_(library)
         , cells_(cells)
         , world_(world)
@@ -47,6 +48,7 @@ namespace cnahouse::rendering
         , binder_(binder)
         , textures_(std::move(textures))
         , lighting_(lighting)
+        , exteriorFog_(exteriorFog)
     {
     }
 
@@ -88,9 +90,16 @@ namespace cnahouse::rendering
         while (first < items.size())
         {
             const std::uint16_t materialIndex = items[first].material;
+            if (items[first].geometry >= library_.chunks.size())
+            {
+                ++first;
+                continue;
+            }
+            const std::uint16_t cellIndex = library_.chunks[items[first].geometry].cell;
             std::size_t last = first + 1u;
             while (last < items.size() && items[last].effect == items[first].effect &&
-                   items[last].material == materialIndex)
+                   items[last].material == materialIndex && items[last].geometry < library_.chunks.size() &&
+                   library_.chunks[items[last].geometry].cell == cellIndex)
             {
                 ++last;
             }
@@ -135,6 +144,10 @@ namespace cnahouse::rendering
             draw.view = &view;
             draw.projection = &projection;
             draw.diffuse = texture;
+            if (cellIndex < library_.cells.size())
+            {
+                draw.fog = ExteriorFogFor(util::Id::Of(library_.cells[cellIndex]), exteriorFog_);
+            }
             const float exposure = lighting_ == nullptr ? 1.0F : lighting_->CameraEffectExposure();
             draw.colourMultiplier = Microsoft::Xna::Framework::Vector3(exposure, exposure, exposure);
             const util::Result<Gfx::Effect*> effectResult = binder_.Bind(material->id, draw);

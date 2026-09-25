@@ -243,6 +243,12 @@ namespace cnahouse::rendering
                     const environment::MoonPosition& moon,
                     const environment::MoonPhase& phase,
                     double cloudCover) noexcept;
+        /// @brief The currently rendered horizon colour along a horizontal world-space direction.
+        ///
+        /// Fog consumes this rather than maintaining a second sky model, so its far end meets the
+        /// dome including the directional sun glow and town light-pollution lobe.
+        [[nodiscard]] Microsoft::Xna::Framework::Vector3
+        HorizonColour(const Microsoft::Xna::Framework::Vector3& viewDirection) const noexcept;
         void Draw(PassContext& context) override;
 
         [[nodiscard]] bool DisturbsDeviceState() const override

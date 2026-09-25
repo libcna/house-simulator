@@ -104,6 +104,20 @@ namespace cnahouse::rendering
         float end = 1.0F;
     };
 
+    /// @brief Maps the live weather scalars onto XNA's linear fog ramp.
+    ///
+    /// The horizon colour is already evaluated in the camera's view direction by `SkySystem`.
+    /// Clear air reaches the camera far plane; precipitation and authored fog density pull a
+    /// continuous, non-zero-width ramp toward the camera. Inputs fail closed through clamping so a
+    /// transient bad weather sample cannot publish NaNs to a shared stock effect.
+    [[nodiscard]] FogParams FogParamsFor(const Microsoft::Xna::Framework::Vector3& horizonColour,
+                                         float fogDensity,
+                                         float precipitationIntensity,
+                                         float farPlane) noexcept;
+
+    /// @brief §31.5's one cell boundary: only `EXT_WORLD` receives atmospheric fog.
+    [[nodiscard]] const FogParams* ExteriorFogFor(util::Id cell, const FogParams* fog) noexcept;
+
     /// @brief Per-pass controls for §22.2's supplemental stock-XNA reflection pass.
     ///
     /// The cube is selected by the reflecting object's placement: four mirrors sharing one

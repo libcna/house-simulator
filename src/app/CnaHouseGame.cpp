@@ -630,6 +630,7 @@ namespace cnahouse::app
         if (blockoutChunks_ != nullptr && blockoutCells_ != nullptr && materialBinder_ != nullptr &&
             materialBinder_->Count() != 0U && caches_ != nullptr)
         {
+            exteriorFog_ = std::make_unique<rendering::FogParams>();
             renderer_.Install(rendering::Pass::AlphaTest,
                               std::make_unique<rendering::AlphaTestPass>(
                                   *blockoutChunks_,
@@ -639,7 +640,8 @@ namespace cnahouse::app
                                   renderList_,
                                   *materialBinder_,
                                   [this](std::string_view name) { return caches_->textures.Get(name); },
-                                  &*lighting_));
+                                  &*lighting_,
+                                  exteriorFog_.get()));
             renderer_.Install(
                 rendering::Pass::Transparent,
                 std::make_unique<rendering::TransparentPass>(
@@ -660,7 +662,8 @@ namespace cnahouse::app
                                   blockoutCamera_,
                                   renderList_,
                                   *materialBinder_,
-                                  [this](std::string_view name) { return caches_->textures.Get(name); }));
+                                  [this](std::string_view name) { return caches_->textures.Get(name); },
+                                  exteriorFog_.get()));
         }
         if (skyDome && skyColours && stars)
         {
@@ -1167,6 +1170,17 @@ namespace cnahouse::app
                         const weather::WeatherState& state = weather_->State();
                         skySystem_->SetWind(state.windSpeed, state.windDirectionDeg);
                         skySystem_->SetCloudState(state.cloudCover, state.thunderIntensity);
+                        if (exteriorFog_ != nullptr)
+                        {
+                            const Microsoft::Xna::Framework::Vector3 viewDirection(
+                                blockoutCamera_.target.X - blockoutCamera_.eye.X,
+                                blockoutCamera_.target.Y - blockoutCamera_.eye.Y,
+                                blockoutCamera_.target.Z - blockoutCamera_.eye.Z);
+                            *exteriorFog_ = rendering::FogParamsFor(skySystem_->HorizonColour(viewDirection),
+                                                                    state.fogDensity,
+                                                                    state.precipIntensity,
+                                                                    blockoutCamera_.farPlane);
+                        }
                     }
                 }
             }

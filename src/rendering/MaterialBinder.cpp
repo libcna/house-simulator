@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 #include "cnahouse/rendering/MaterialBinder.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <format>
 
@@ -134,6 +135,33 @@ namespace cnahouse::rendering
                 return "skinned";
         }
         return "?";
+    }
+
+    FogParams FogParamsFor(const Vector3& horizonColour,
+                           float fogDensity,
+                           float precipitationIntensity,
+                           float farPlane) noexcept
+    {
+        const auto finiteUnit = [](float value) noexcept
+        { return std::isfinite(value) ? std::clamp(value, 0.0F, 1.0F) : 0.0F; };
+        const float distance = std::isfinite(farPlane) ? std::max(farPlane, 30.0F) : 400.0F;
+        const float density = finiteUnit(fogDensity);
+        const float precipitation = finiteUnit(precipitationIntensity);
+        const float obscuration = std::clamp(density + 0.35F * precipitation, 0.0F, 1.0F);
+
+        FogParams result;
+        result.colour[0] = finiteUnit(horizonColour.X);
+        result.colour[1] = finiteUnit(horizonColour.Y);
+        result.colour[2] = finiteUnit(horizonColour.Z);
+        result.end = distance * (1.0F - 0.85F * obscuration);
+        result.start = result.end * std::max(0.05F, 0.65F - 1.2F * obscuration);
+        return result;
+    }
+
+    const FogParams* ExteriorFogFor(util::Id cell, const FogParams* fog) noexcept
+    {
+        static const util::Id kExteriorWorld = util::Id::Of("EXT_WORLD");
+        return cell == kExteriorWorld ? fog : nullptr;
     }
 
     MaterialBinder::MaterialBinder(Gfx::GraphicsDevice& device) noexcept

@@ -4,6 +4,8 @@
 // MEASURED to be impossible, turns the loaded material table into small draw-time descriptions, and
 // writes every requested value to the selected stock XNA effect. A bad table fails before a frame can
 // observe it.
+#include <cmath>
+#include <limits>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -74,6 +76,41 @@ namespace
         desc.diffuseTexture = "Textures/leaf";
         desc.twoSided = true;
         return desc;
+    }
+
+    TEST(MaterialBinderTests, WeatherFogIsContinuousBoundedAndExteriorOnly)
+    {
+        const Vector3 horizon(0.24F, 0.36F, 0.48F);
+        const FogParams clear = cnahouse::rendering::FogParamsFor(horizon, 0.03F, 0.0F, 400.0F);
+        const FogParams overcast = cnahouse::rendering::FogParamsFor(horizon, 0.12F, 0.0F, 400.0F);
+        const FogParams rain = cnahouse::rendering::FogParamsFor(horizon, 0.28F, 0.55F, 400.0F);
+
+        EXPECT_FLOAT_EQ(clear.colour[0], horizon.X);
+        EXPECT_FLOAT_EQ(clear.colour[1], horizon.Y);
+        EXPECT_FLOAT_EQ(clear.colour[2], horizon.Z);
+        EXPECT_GT(clear.start, overcast.start);
+        EXPECT_GT(overcast.start, rain.start);
+        EXPECT_GT(clear.end, overcast.end);
+        EXPECT_GT(overcast.end, rain.end);
+        EXPECT_GT(overcast.start, 100.0F);
+        EXPECT_LT(rain.start, 25.0F)
+            << "rain haze must be visible on the retained front-approach review distance";
+        EXPECT_LT(clear.start, clear.end);
+        EXPECT_LT(overcast.start, overcast.end);
+        EXPECT_LT(rain.start, rain.end);
+
+        EXPECT_EQ(cnahouse::rendering::ExteriorFogFor(Id::Of("EXT_WORLD"), &rain), &rain);
+        EXPECT_EQ(cnahouse::rendering::ExteriorFogFor(Id::Of("L0_LIVING"), &rain), nullptr);
+        EXPECT_EQ(cnahouse::rendering::ExteriorFogFor(Id::Of("EXT_WORLD"), nullptr), nullptr);
+
+        const float nan = std::numeric_limits<float>::quiet_NaN();
+        const FogParams invalid = cnahouse::rendering::FogParamsFor(Vector3(nan, -1.0F, 2.0F), nan, nan, nan);
+        EXPECT_FLOAT_EQ(invalid.colour[0], 0.0F);
+        EXPECT_FLOAT_EQ(invalid.colour[1], 0.0F);
+        EXPECT_FLOAT_EQ(invalid.colour[2], 1.0F);
+        EXPECT_TRUE(std::isfinite(invalid.start));
+        EXPECT_TRUE(std::isfinite(invalid.end));
+        EXPECT_LT(invalid.start, invalid.end);
     }
 
     MaterialDesc Pet()

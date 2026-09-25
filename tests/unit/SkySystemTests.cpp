@@ -291,6 +291,10 @@ TEST(SkySystemTests, SunGlowIsDirectionalMatchesTheAuthoredCurveAndVanishesUnder
     const float westRed = west->Color.ToVector3().X;
     EXPECT_GT(eastRed - westRed, 0.07F)
         << "the generated 0-degree sun curve's 0.45 intensity did not drive its 0.18 glow";
+    const auto eastHorizon = sky.HorizonColour(Microsoft::Xna::Framework::Vector3(1.0F, 8.0F, 0.0F));
+    const auto westHorizon = sky.HorizonColour(Microsoft::Xna::Framework::Vector3(-1.0F, -3.0F, 0.0F));
+    EXPECT_GT(eastHorizon.X - westHorizon.X, 0.07F)
+        << "fog's horizontal view sample must retain the dome's directional sun glow";
 
     sun.azimuthDeg = 91.0;
     EXPECT_FALSE(sky.SetSky(sun, moon, phase, 0.0));
@@ -299,6 +303,9 @@ TEST(SkySystemTests, SunGlowIsDirectionalMatchesTheAuthoredCurveAndVanishesUnder
 
     ASSERT_TRUE(sky.SetSky(sun, moon, phase, 1.0));
     EXPECT_EQ(east->Color, west->Color) << "(1-cloudCover)^2 did not extinguish directional glow";
+    EXPECT_EQ(sky.HorizonColour(Microsoft::Xna::Framework::Vector3(1.0F, 0.0F, 0.0F)),
+              sky.HorizonColour(Microsoft::Xna::Framework::Vector3(-1.0F, 0.0F, 0.0F)))
+        << "overcast fog must meet one uniform overcast horizon";
 }
 
 TEST(SkySystemTests, AstronomicalNightRespondsToMoonAltitudeAndPhase)

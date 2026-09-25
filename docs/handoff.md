@@ -1,3 +1,44 @@
+# Weather-driven exterior fog handoff — 2026-09-25 (`HOUSE-01650`)
+
+The existing stock-XNA `MaterialBinder` fog boundary is now fed each frame by the one live weather
+and sky path. `SkySystem::HorizonColour` evaluates the currently rendered horizon in the camera's
+horizontal view direction, including sun glow and town light pollution. `FogParamsFor` combines
+that colour with the continuous fog-density and precipitation scalars into a bounded linear ramp.
+No new runtime system or retained weather state was introduced.
+
+`EXT_WORLD`, its alpha-tested vegetation, and explicitly weather-facing shell/window/door batches
+receive the borrowed fog value. Ordinary interior batches pass null, which keeps the binder's
+tested per-draw reset authoritative. The alpha-test run is split at cell boundaries so a shared
+foliage material cannot leak fog into an interior cell. Unit/integration coverage proves monotonic
+clear/overcast/rain parameters, invalid-input clamping, directional horizon colour, overcast
+uniformity, the cell boundary, and the existing Basic/DualTexture/AlphaTest setter/reset paths.
+
+Round 173 inspected matched full-resolution front views; Round 174 inspected matched views from
+100 m, where rain visibly loses more distant contrast into the matching horizon without bands.
+The Round 174 centre crop's linear-grey standard deviation is 0.052706 clear, 0.022241 overcast and
+0.020789 rain. Captures remain ignored under `house-01650-fog-r173/` and
+`house-01650-fog-distance-r174/`.
+
+Focused SkySystem, MaterialBinder, AlphaTestPass and StaticGeometryPass coverage passes, as do the
+four-worker build and all non-layout pre-commit gates; strict XNA compiled all 327 translation
+units clean with four workers. The complete 1,635-test Linux run passed 1,614 and exposed 21
+independent or expected-baseline failures: eight SaveStore cases cannot write the sandboxed user
+data directory, the blockout/headless census still expects 50 rather than the current 51 cutout
+items, the existing debug-blockout culling pair reaches 0.2604% against its 0.2% limit, and eleven
+committed render-reference groups predate the recent visual work. In particular, both the culling
+pair and the blockout-reference failures execute without production materials, so the new fog path
+cannot cause them. Do not regenerate those references as part of this weather task; review them at
+their owning render-baseline work. The sole pre-commit failure remains the user-owned root
+`.claude` entry reported by the layout gate; it was not touched.
+
+M7 dependency order selects `HOUSE-01741` next, the retained fixed-pool shared particle renderer.
+The remaining forecast is 106.25 realistic / 135 pessimistic hours. With 120 task-hours spent
+since the final reduction, the R14 projection remains 255 h, 25 h below the ceiling. Every build,
+test, capture and check is limited to four workers and pinned to CPUs 4,5,7,9; strict-XNA also uses
+`HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Weather-to-sky/light wiring handoff — 2026-09-25 (`HOUSE-01696`)
 
 The retained runtime already contained the complete minimal wiring and needed verification rather

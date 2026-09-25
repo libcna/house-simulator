@@ -5673,3 +5673,20 @@ that order. No S1/S2 or retuning need was found. Local evidence is in
 The existing mapping and end-to-end integration tests pass. The full multi-time representative
 environment capture set remains owned by `HOUSE-03520`; no duplicate mapper or new subsystem was
 added. M7 dependency order next selects `HOUSE-01650`, weather-driven exterior fog.
+
+## Round 173/174 — weather-driven exterior fog
+
+Commit: `HOUSE-01650` working tree (`2026-09-25`). Round 173 compares matched clear, overcast and
+rain front views at 10:30. Round 174 repeats the three states from 100 m so the complete linear fog
+ramp is directly reviewable. Full-resolution inspection found distinct stable atmospheres and no
+banding: clear retains distant contrast, overcast reduces it, and rain merges the weather-facing
+house, exterior ground and foliage farther into the same view-direction horizon colour. The Round
+174 centre crop's linear-grey standard deviation is respectively 0.052706, 0.022241 and 0.020789.
+Local evidence is in `captures/house-01650-fog-r173/` and
+`captures/house-01650-fog-distance-r174/`.
+
+The implementation reuses the existing `MaterialBinder` fog path. Ordinary interior batches
+remain fog-free and reset the shared stock effect; `EXT_WORLD`, alpha-tested exterior vegetation,
+and explicitly weather-facing shell/window/door batches consume the one per-frame value. Focused
+mapping, sky-direction and live-device binder/pass tests pass. No S1/S2 was found. M7 dependency
+order next selects the fixed-pool shared particle renderer in `HOUSE-01741`.

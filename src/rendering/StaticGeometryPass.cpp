@@ -216,7 +216,8 @@ namespace cnahouse::rendering
                                            const Camera& camera,
                                            visibility::RenderList& list,
                                            MaterialBinder& binder,
-                                           TextureLookup textures)
+                                           TextureLookup textures,
+                                           const FogParams* exteriorFog)
         : library_(library)
         , cells_(cells)
         , world_(&world)
@@ -225,6 +226,7 @@ namespace cnahouse::rendering
         , list_(list)
         , binder_(&binder)
         , textures_(std::move(textures))
+        , exteriorFog_(exteriorFog)
         , mode_(StaticGeometryMode::ProductionMaterials)
     {
         fixtureGroups_.reserve(library_.chunks.size());
@@ -459,6 +461,8 @@ namespace cnahouse::rendering
             common.world = &worldMatrix;
             common.view = &view;
             common.projection = &projection;
+            common.fog =
+                exteriorSkin || weatherFacingDetail ? exteriorFog_ : ExteriorFogFor(cell->id, exteriorFog_);
             if (!material->albedo.empty())
             {
                 common.diffuse = textures_(material->albedo);

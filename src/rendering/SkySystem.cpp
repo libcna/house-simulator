@@ -1065,6 +1065,48 @@ namespace cnahouse::rendering
         return true;
     }
 
+    Xna::Vector3 SkySystem::HorizonColour(const Xna::Vector3& viewDirection) const noexcept
+    {
+        Xna::Vector3 direction(viewDirection.X, 0.0F, viewDirection.Z);
+        const double x = static_cast<double>(direction.X);
+        const double z = static_cast<double>(direction.Z);
+        const double length = std::sqrt(x * x + z * z);
+        if (!std::isfinite(length) || length <= 0.0)
+        {
+            direction = Xna::Vector3(0.0F, 0.0F, -1.0F);
+        }
+        else
+        {
+            const float inverseLength = static_cast<float>(1.0 / length);
+            direction.X *= inverseLength;
+            direction.Z *= inverseLength;
+        }
+
+        environment::SunPosition sun;
+        sun.altitudeDeg = lastSunAltitudeDeg_;
+        sun.azimuthDeg = lastSunAzimuthDeg_;
+        environment::MoonPosition moon;
+        moon.altitudeDeg = lastMoonAltitudeDeg_;
+        environment::MoonPhase phase;
+        phase.illuminatedFraction = lastMoonIllumination_;
+
+        Xna::Vector3 colour = SkyBaseColourAt(colourModel_, sun, moon, phase, lastCloudCover_, 0.0F);
+        const float clearSky = static_cast<float>((1.0 - lastCloudCover_) * (1.0 - lastCloudCover_));
+        const float nightWeight =
+            static_cast<float>(1.0 - environment::TwilightAmbientFactor(sun.altitudeDeg));
+        const Xna::Vector3 directionToSun = environment::DirectionToSun(sun);
+        const float dot = direction.X * directionToSun.X + direction.Z * directionToSun.Z;
+        const float lobe = std::pow(std::max(dot, 0.0F), colourModel_.sunGlowExponent);
+        const float glow = colourModel_.sunGlowStrength * SunIntensityAt(colourModel_, sun.altitudeDeg) *
+                           lobe * clearSky * (1.0F - nightWeight);
+        colour = AddScaled(colour, colourModel_.sunGlowColor, glow);
+
+        const float pollution = colourModel_.lightPollution.strength *
+                                StarLightPollutionFactor(direction, colourModel_.lightPollution) * clearSky *
+                                nightWeight;
+        return AddScaled(colour, colourModel_.lightPollution.colour, pollution);
+    }
+
     void SkySystem::RecomputeColours(const environment::SunPosition& sun,
                                      const environment::MoonPosition& moon,
                                      const environment::MoonPhase& phase,

@@ -60,6 +60,7 @@
 
 namespace cnahouse::rendering
 {
+    struct FogParams;
     class MaterialBinder;
     class SkySystem;
 } // namespace cnahouse::rendering
@@ -424,6 +425,8 @@ namespace cnahouse::app
         /// The shared stock-effect pool for binder-backed material passes (`HOUSE-00897`). It
         /// outlives the renderer-owned passes that borrow it because it is declared first.
         std::unique_ptr<rendering::MaterialBinder> materialBinder_;
+        /// The one live §31.5 atmosphere value borrowed by binder-backed exterior passes.
+        std::unique_ptr<rendering::FogParams> exteriorFog_;
 
         /// The draw side of `cna-house.md` §7.5. Constructed with the tier, so the two Tier-E-only
         /// passes are gated in ONE place rather than at each pass. Only the HUD pass is installed
