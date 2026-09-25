@@ -23,6 +23,7 @@ add_library(cnahouse_core STATIC
     app/FrameTimer.cpp
     app/Platform.cpp
     audio/AudioSystem.cpp
+    audio/FootstepDirector.cpp
 
     # environment -- §35's clock, which everything time-dependent reads and nothing duplicates
     # lighting -- §28's per-room state, the one answer everything downstream reads

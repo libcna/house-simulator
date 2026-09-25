@@ -1,3 +1,31 @@
+# Footstep cadence handoff — 2026-09-25 (`HOUSE-01919`)
+
+`FootstepDirector` is the bounded consumer of facts the player controller already knows: fixed-step
+travel distance, grounded state, collision-surface spelling and, on stairs, vertical travel plus
+authored riser height. Flat travel accumulates against the retained 0.75 m walk or 0.95 m fast-walk
+stride. Entering or leaving a stair resets the flat phase, while vertical travel emits exactly one
+event for each crossed riser. Airborne, unknown-surface and non-finite samples stay silent and reset
+the phase, so distance cannot leak into a sound for a different material.
+
+Each surface binds to one of the already resolved `AudioSystem` banks. Selection advances through
+that bank deterministically, which guarantees no repeat within four for the retained six-sample
+footstep banks; the existing project RNG supplies bounded ±4 % pitch and ±10 % volume variation.
+The director neither probes collision nor loads/plays XNA sounds, leaving the six real-world
+bindings and playback to dependent `HOUSE-01920`. No generic bag, mixer or second movement system
+was added.
+
+Five focused tests prove two speeds across wood and tile within 5 %, correct bank lookup, ten
+round-robin selections without a repeat in the preceding four, the exact variation bounds,
+seventeen events for seventeen risers, and silent/reset behavior. The complete unit label passes
+1,448/1,448 with four workers. Strict-XNA compiles all 340 translation units clean; the complete
+static gate reports only the known user-owned root `.claude` layout entry, which remains untouched.
+M8 dependency order plus R11/R13 selects `HOUSE-01920` next; then `HOUSE-01922` is the next
+unfinished audio branch. The remaining forecast is 92 realistic / 119 pessimistic hours. With
+134.25 task-hours completed since the final reduction, the R14 projection is 253.25 h, 26.75 h
+below the ceiling. Validation was pinned to CPUs 4,5,7,9 and used at most four workers.
+
+---
+
 # Audio foundation handoff — 2026-09-25 (`HOUSE-01911`)
 
 `AudioSystem` now extends the retained user-gesture/device gate with the final compact mix: master,
