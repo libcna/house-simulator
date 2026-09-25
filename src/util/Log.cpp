@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <array>
 #include <cstdio>
-#include <memory>
 #include <unordered_map>
 
 namespace cnahouse::util
@@ -41,21 +40,6 @@ namespace cnahouse::util
                                                                               "debug",
                                                                               "util"};
 
-        /// One file handle, closed by the destructor rather than by an explicit shutdown call, so an
-        /// abnormal exit still flushes what the C runtime has.
-        struct FileSink
-        {
-            ~FileSink()
-            {
-                if (handle != nullptr)
-                {
-                    std::fclose(handle);
-                }
-            }
-
-            std::FILE* handle = nullptr;
-        };
-
         struct State
         {
             LogLevel minimumLevel = LogLevel::Info;
@@ -65,7 +49,6 @@ namespace cnahouse::util
             std::uint64_t suppressed = 0;
             /// Message text -> index in `ring`, for the current frame only. Cleared by `BeginFrame`.
             std::unordered_map<std::string, std::size_t> seenThisFrame;
-            FileSink file;
 
             State()
             {
@@ -227,20 +210,6 @@ namespace cnahouse::util
         return Get().suppressed;
     }
 
-    void Log::SetFileSink(std::string path)
-    {
-        State& state = Get();
-        if (state.file.handle != nullptr)
-        {
-            std::fclose(state.file.handle);
-            state.file.handle = nullptr;
-        }
-        if (!path.empty())
-        {
-            state.file.handle = std::fopen(path.c_str(), "w");
-        }
-    }
-
     void Log::Emit(LogLevel level, LogCat category, std::string message)
     {
         if (!WouldLog(level, category))
@@ -285,16 +254,6 @@ namespace cnahouse::util
                      LevelInitial(level),
                      std::string(LogCatName(category)).c_str(),
                      record.message.c_str());
-        if (state.file.handle != nullptr)
-        {
-            std::fprintf(state.file.handle,
-                         "%llu [%s][%s] %s\n",
-                         static_cast<unsigned long long>(record.frame),
-                         std::string(LogLevelName(level)).c_str(),
-                         std::string(LogCatName(category)).c_str(),
-                         record.message.c_str());
-            std::fflush(state.file.handle);
-        }
     }
 
     void Log::ResetForTesting()
@@ -306,11 +265,6 @@ namespace cnahouse::util
         state.ring.clear();
         state.seenThisFrame.clear();
         state.suppressed = 0;
-        if (state.file.handle != nullptr)
-        {
-            std::fclose(state.file.handle);
-            state.file.handle = nullptr;
-        }
     }
 
 } // namespace cnahouse::util

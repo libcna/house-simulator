@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **50 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 65.5 / 77 / 103 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5, M7, M9 and M12 passed; M8 listening and M10 baseline work are environment-blocked.** Next: `HOUSE-02843` |
+| Active plan | **49 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 65 / 76 / 102 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5, M7, M9 and M12 passed; M8 listening and M10 baseline work are environment-blocked.** Next: `HOUSE-02891` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -1427,9 +1427,16 @@ limitation (reload the page), recorded by `HOUSE-02904`.
 
 ### Bring-up (Track B, any time after G1)
 
-- [ ] HOUSE-02843 — Audit and fix Web blockers in the desktop code: custom loops, `Game::Run` misuse, filesystem access outside `DesktopSaveStore`
+- [x] HOUSE-02843 — Audit and fix Web blockers in the desktop code: custom loops, `Game::Run` misuse, filesystem access outside `DesktopSaveStore`
       dep: HOUSE-00127, HOUSE-02841 · sys: app · plat: ALL · pri: MUST · zone: all · adv: D10b · est: 1
       trace: absorbs `HOUSE-02842` (filesystem access)
+      done: the sole POSIX-file exemption was an unused `Log::SetFileSink`; the API and its
+            `std::fopen` handle are removed. Runtime review finds exactly one `CnaHouseGame`
+            construction and one `game.Run()` call, both in `Main.cpp`; all ordinary loops in the
+            app/player/UI path are bounded parsers or fixed-step drains. The existing XNA gate now
+            rejects direct browser-loop ownership (`emscripten_set_main_loop`, the Emscripten RAF
+            loop and `requestAnimationFrame`) with a planted regression, and has no path exemption.
+      verify: XNA-only self-test 17/17; XNA-only repository scan clean; debug build; unit 1473/1473
 
 - [ ] HOUSE-02891 — The Emscripten preset, proved on a minimal scene
       dep: HOUSE-02843 · sys: app · plat: WEB · pri: MUST · zone: all · adv: D10b · est: 2.5
@@ -1956,15 +1963,15 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M11 Final defect pass | 3 | 11 | **3** | 3.5 | **4** | 4.4 | — |
 | M12 Representative tests | 4 | 5 | **0** | 0 | **0** | 0 | — |
 | M13 Linux desktop release | 10 | 13.25 | **8** | 8.75 | **10.25** | 11.25 | — |
-| M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
+| M14 Web | 17 | 24.75 | **11** | 15.75 | **18.5** | 26.35 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **50** | **65.5** | **77** | **102.65** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **49** | **64.75** | **76** | **101.5** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-177.35 h. Adding the 149.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-251.9 h, 28.1 h under the limit. That margin is
+178.5 h. Adding the 150.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+251.75 h, 28.25 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |
@@ -1979,7 +1986,7 @@ small on purpose: the ceiling is a limit, not a budget to fill.
 4 h (≈ 18); furnishing kit 19 h (18–22); whole-house furnishing 31 h (30–38); lighting 19.75 h
 (18–22); C4/C5 polish 19.75 h (18–24); environment 4.75 h; audio 9 h (8–10); shell 5.25 h
 (8–10); performance 9.5 h (≈ 10); final polish 7 h (6–8); tests 3.5 h (≈ 5); Linux 10.25 h
-(11–13); Web 19.5 h (18–22); Android 23.75 h (23–27); release 6.5 h (6–8).
+(11–13); Web 18.5 h (18–22); Android 23.75 h (23–27); release 6.5 h (6–8).
 
 **Where the 92.5 h came from** (realistic, before → now):
 

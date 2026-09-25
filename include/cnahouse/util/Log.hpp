@@ -106,9 +106,6 @@ namespace cnahouse::util
         /// @brief How many messages were suppressed by the rate limiter since the last `ClearRing`.
         [[nodiscard]] static std::uint64_t SuppressedCount() noexcept;
 
-        /// @brief Directs output at a file in addition to stderr. Empty disables the file sink.
-        static void SetFileSink(std::string path);
-
         /// @brief Emits one already-formatted message. Prefer the `Trace`…`Fatal` helpers.
         static void Emit(LogLevel level, LogCat category, std::string message);
 

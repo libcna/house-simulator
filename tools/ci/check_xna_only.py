@@ -12,7 +12,7 @@ grants permission to call nothing. A violation therefore cannot be argued into t
 only be rewritten as `cnahouse::` code, which is what an XNA 4.0 developer would have had to do
 anyway.
 
-Fourteen rejected classes, each with a planted-violation fixture in --selftest:
+Seventeen rejected classes, each with a planted-violation fixture in --selftest:
 
     forbidden-include     a #include of a CNA/ or native-graphics header
     cna-namespace         any CNA:: reference
@@ -28,6 +28,7 @@ Fourteen rejected classes, each with a planted-violation fixture in --selftest:
     std-filesystem        std::filesystem outside SaveStore
     posix-file            fopen / opendir / unlink and friends outside SaveStore
     std-thread            std::thread / std::async: v1 is single-threaded
+    custom-main-loop      a browser/native loop that bypasses XNA Game::Run
     shader-source         GLSL / SPIR-V / WGSL / Metal shader source anywhere in the tree
     fx-placement          a .fx / .fxh outside assets-src/Effects/
 
@@ -122,6 +123,8 @@ RULE_HELP = {
     "std-thread": "v1 is single-threaded; Emscripten threading changes the module ABI and needs "
                   "COOP/COEP headers, and HOUSE-02451 measures before anyone pays that "
                   "(cna-house.md section 8.4).",
+    "custom-main-loop": "XNA Game::Run owns the loop on every platform; browser/native loop APIs "
+                        "would bypass CNA's Asyncify integration (cna-house.md section 80.1).",
     "shader-source": "GLSL/SPIR-V source would mean CNA::Graphics::ShaderEffect, which is Tier C. "
                      "Author .fx under assets-src/Effects/ instead.",
     "fx-placement": "Effect sources live in assets-src/Effects/ so the content build and this "
@@ -171,6 +174,13 @@ CODE_PATTERNS = [
     # and needs COOP/COEP headers, and `HOUSE-02451` has to MEASURE the load time before anyone
     # pays that. A thread that appears before that measurement is a Web port nobody can ship.
     ("std-thread", re.compile(r"\bstd\s*::\s*(?:thread|jthread|async)\b")),
+    # `HOUSE-02843`. CNA's `Game::Run` owns the loop and integrates with requestAnimationFrame
+    # through Asyncify. Calling either browser loop API directly creates a second owner and hangs
+    # or recurses on Web. Ordinary finite `while`/`for` loops are not frame loops and deliberately
+    # are not linted.
+    ("custom-main-loop", re.compile(r"\b(?:emscripten_set_main_loop|"
+                                    r"emscripten_request_animation_frame_loop|"
+                                    r"requestAnimationFrame)\b")),
 ]
 
 INCLUDE_RE = re.compile(r"^\s*#\s*include\s*[<\"]([^>\"]+)[>\"]")
@@ -457,20 +467,9 @@ def scan(root: Path) -> list[Violation]:
     return violations
 
 
-#: Path -> the rules it may break, and WHY. One entry, and it is a finding rather than a comfort.
-#:
-#: `HOUSE-02841` added the `posix-file` rule and it found exactly one call in game code on its
-#: first run: `Log::SetFileSink` opens the debug log with `std::fopen`. §8.3 allows POSIX file
-#: access only inside `SaveStore`'s desktop implementation, and a log sink is not that. Removing
-#: it is `HOUSE-02842`, which exists to audit precisely this; the exemption names that task and
-#: has to disappear with it, which is what the stale-exemption check below is for.
 REPO = Path(__file__).resolve().parents[2]
 
-PATH_EXEMPTIONS: dict[str, tuple[frozenset, str]] = {
-    "src/util/Log.cpp": (frozenset({"posix-file"}),
-                         "Log::SetFileSink opens the debug log with std::fopen; HOUSE-02842 "
-                         "audits every filesystem access outside DesktopSaveStore and removes it"),
-}
+PATH_EXEMPTIONS: dict[str, tuple[frozenset, str]] = {}
 
 
 def exempt_rules_for(rel: str, top: str, stem: str) -> frozenset:
@@ -579,6 +578,9 @@ FIXTURES: dict[str, tuple[str, str]] = {
     "std-thread": (
         "src/app/PlantedThread.cpp",
         "#include <thread>\nvoid f()\n{\n    std::thread worker;\n}\n"),
+    "custom-main-loop": (
+        "src/app/PlantedMainLoop.cpp",
+        "void f()\n{\n    emscripten_set_main_loop(nullptr, 0, true);\n}\n"),
     "shader-source": (
         "assets-src/Effects/planted.frag",
         "void main() {}\n"),
@@ -685,8 +687,8 @@ def selftest() -> int:
     if planted != expected:
         failures.append(f"fixture set does not cover every rejected class: "
                         f"missing {sorted(expected - planted)}, extra {sorted(planted - expected)}")
-    if len(FIXTURES) != 16:
-        failures.append(f"expected 16 planted-violation fixtures, found {len(FIXTURES)}")
+    if len(FIXTURES) != 17:
+        failures.append(f"expected 17 planted-violation fixtures, found {len(FIXTURES)}")
 
     # `HOUSE-02841`. The exemptions, both directions.
     #

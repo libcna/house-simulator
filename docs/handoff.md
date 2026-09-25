@@ -1,3 +1,30 @@
+# Web-readiness audit handoff — 2026-09-25 (`HOUSE-02843`)
+
+R11/R13 and M14's explicitly dependency-unblocked Track B selected `HOUSE-02843` after the bounded
+S2 corrections. The runtime audit found one real filesystem blocker: the unused
+`Log::SetFileSink` API owned a raw `std::fopen` handle outside `DesktopSaveStore`. The API and
+handle are removed rather than replaced by another file-writing abstraction; console output and
+the retained ring are unchanged. The `posix-file` gate consequently has no path exemption.
+`System::IO` content reads and the screenshot tool are portable XNA/System paths, not POSIX file
+access, and remain unchanged.
+
+There is exactly one runtime `CnaHouseGame` construction and one `game.Run()` call, adjacent in
+`src/app/Main.cpp`. No runtime source calls an Emscripten or browser frame-loop API. The reviewed
+app/player/UI loops are bounded command-line/parser, menu-stack or fixed-step drains; the save
+store's `for (;;)` terminates on stream EOF. The existing XNA-only gate now rejects
+`emscripten_set_main_loop`, `emscripten_request_animation_frame_loop` and
+`requestAnimationFrame`; its self-test plants and catches the new seventeenth violation class.
+
+The pinned four-core debug build passes, the complete unit suite passes 1,473/1,473, and both the
+XNA-only self-test and repository scan are clean. A first sandboxed build attempt could not write
+the shared `/rv/cnaccache`; rerunning the identical command with its existing approved access
+passed. No new build directory or cache was created. The plan now has 49 open MUST tasks and
+76 realistic / 101.5 pessimistic hours remaining. 150.25 completed task-hours plus the
+pessimistic remainder project 251.75 h, 28.25 h below the 280 h ceiling. `HOUSE-02891` is the exact
+next unblocked MUST task: prove the Emscripten preset with the required minimal scene.
+
+---
+
 # Automatic interior-light handoff — 2026-09-25 (`HOUSE-03633`)
 
 The user's dark-room report was real in two separate layers. `SC-WET` and `SC-CIRC` switched their
