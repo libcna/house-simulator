@@ -466,6 +466,10 @@ namespace cnahouse::app
         /// The screen stack of §67.3. The loading/title screen is pushed onto it at `LoadContent`
         /// and pops itself once the player has pressed something AND content is ready.
         ui::MenuStack menus_;
+        ui::MenuCommand pendingMenuCommand_ = ui::MenuCommand::None;
+        ui::ControlScheme pendingControlScheme_ = ui::ControlScheme::KeyboardMouse;
+        ui::ControlsHint controlsHint_;
+        bool controlsHintShown_ = false;
         /// Non-owning, valid only while the loading screen is on the stack. Cleared the frame the
         /// stack empties, which is the only frame it can dangle in.
         ui::LoadingScreen* loading_ = nullptr;
@@ -547,6 +551,12 @@ namespace cnahouse::app
         void ApplyEnvironmentSettings(ui::SettingsControl control);
         void ApplyChangedSetting(ui::SettingsControl control);
         void OpenSettings();
+        void OpenMainMenu();
+        void OpenPauseMenu();
+        void OpenCredits();
+        void QueueMenuCommand(ui::MenuCommand command, ui::ControlScheme scheme) noexcept;
+        void HandleMenuCommand();
+        void StartHouse(ui::ControlScheme scheme);
 
         /// @brief Whether this frame's draw list is built from §25's visible set.
         ///

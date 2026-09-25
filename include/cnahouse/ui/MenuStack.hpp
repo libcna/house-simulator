@@ -150,6 +150,131 @@ namespace cnahouse::ui
         std::vector<std::unique_ptr<IScreen>> screens_;
     };
 
+    enum class MenuCommand : std::uint8_t
+    {
+        None,
+        Start,
+        Settings,
+        Credits,
+        MainMenu,
+    };
+
+    enum class ControlScheme : std::uint8_t
+    {
+        KeyboardMouse,
+        Touch,
+    };
+
+    using MenuRequested = std::function<void(MenuCommand, ControlScheme)>;
+
+    class MainMenuScreen final : public IScreen
+    {
+    public:
+        explicit MainMenuScreen(MenuRequested requested);
+
+        [[nodiscard]] ScreenId Id() const override
+        {
+            return ScreenId::MainMenu;
+        }
+
+        ScreenAction Update(const player::InputState& input, float deltaSeconds) override;
+        void Draw(Microsoft::Xna::Framework::Graphics::SpriteBatch& batch,
+                  const TextRenderer& text) const override;
+
+        [[nodiscard]] std::size_t SelectedIndex() const noexcept
+        {
+            return selected_;
+        }
+
+        [[nodiscard]] bool PausesWorld() const override
+        {
+            return true;
+        }
+
+    private:
+        MenuRequested requested_;
+        std::size_t selected_ = 0;
+    };
+
+    class PauseMenuScreen final : public IScreen
+    {
+    public:
+        explicit PauseMenuScreen(MenuRequested requested);
+
+        [[nodiscard]] ScreenId Id() const override
+        {
+            return ScreenId::PauseMenu;
+        }
+
+        ScreenAction Update(const player::InputState& input, float deltaSeconds) override;
+        void Draw(Microsoft::Xna::Framework::Graphics::SpriteBatch& batch,
+                  const TextRenderer& text) const override;
+
+        [[nodiscard]] std::size_t SelectedIndex() const noexcept
+        {
+            return selected_;
+        }
+
+    private:
+        MenuRequested requested_;
+        std::size_t selected_ = 0;
+    };
+
+    /// @brief Scrollable view of the generated third-party asset document.
+    class CreditsScreen final : public IScreen
+    {
+    public:
+        explicit CreditsScreen(std::string document);
+
+        [[nodiscard]] ScreenId Id() const override
+        {
+            return ScreenId::Credits;
+        }
+
+        ScreenAction Update(const player::InputState& input, float deltaSeconds) override;
+        void Draw(Microsoft::Xna::Framework::Graphics::SpriteBatch& batch,
+                  const TextRenderer& text) const override;
+
+        [[nodiscard]] std::size_t LineCount() const noexcept
+        {
+            return lines_.size();
+        }
+
+        [[nodiscard]] std::size_t ScrollOffset() const noexcept
+        {
+            return scroll_;
+        }
+
+    private:
+        std::vector<std::string> lines_;
+        std::size_t scroll_ = 0;
+    };
+
+    /// @brief The one first-run line retained by the reduced roadmap.
+    class ControlsHint
+    {
+    public:
+        static constexpr float kDurationSeconds = 12.0F;
+        static constexpr float kFadeSeconds = 3.0F;
+
+        void Start(ControlScheme scheme) noexcept;
+        void Update(float deltaSeconds) noexcept;
+        void Draw(Microsoft::Xna::Framework::Graphics::SpriteBatch& batch, const TextRenderer& text) const;
+
+        [[nodiscard]] bool Visible() const noexcept
+        {
+            return started_ && elapsed_ < kDurationSeconds;
+        }
+
+        [[nodiscard]] float Alpha() const noexcept;
+        [[nodiscard]] std::string_view Text() const noexcept;
+
+    private:
+        ControlScheme scheme_ = ControlScheme::KeyboardMouse;
+        float elapsed_ = 0.0F;
+        bool started_ = false;
+    };
+
     /// @brief The controls populated by M9 on the one retained settings page.
     enum class SettingsControl : std::uint8_t
     {

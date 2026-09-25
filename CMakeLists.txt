@@ -211,6 +211,21 @@ else()
         "configuration. The application starts without it and logs what it could not load.")
 endif()
 
+# The generated attribution document is runtime UI data, not compiled content. Keep it under the
+# same title-relative content tree as the rest of the read-only payload so Linux, Web and Android
+# all reach it through XNA's TitleContainer rather than a process-working-directory filesystem path.
+set(CNAHOUSE_CREDITS_DOCUMENT "${CMAKE_BINARY_DIR}/content/Credits/THIRD-PARTY-ASSETS.md")
+add_custom_command(
+    OUTPUT "${CNAHOUSE_CREDITS_DOCUMENT}"
+    COMMAND "${CMAKE_COMMAND}" -E make_directory "${CMAKE_BINARY_DIR}/content/Credits"
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+            "${CMAKE_SOURCE_DIR}/licenses/THIRD-PARTY-ASSETS.md" "${CNAHOUSE_CREDITS_DOCUMENT}"
+    DEPENDS "${CMAKE_SOURCE_DIR}/licenses/THIRD-PARTY-ASSETS.md"
+    COMMENT "Copying the generated in-game credits document"
+    VERBATIM)
+add_custom_target(cnahouse_credits DEPENDS "${CNAHOUSE_CREDITS_DOCUMENT}")
+add_dependencies(cnahouse_core cnahouse_credits)
+
 # --- the generated world binaries ----------------------------------------------------------------
 #
 # `HOUSE-00475`. `deploy_world.py` and the five generators after it write into the REPOSITORY's

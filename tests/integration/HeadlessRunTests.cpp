@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstdint>
 #include <cstdio>
 #include <thread>
 
@@ -199,6 +200,114 @@ namespace
         bool cnahouse::player::InputState::* edge_;
         bool fired_ = false;
     };
+
+    /// Dismisses the loading/audio gate, then chooses Start on the main menu.
+    class StartMenuDriver final : public cnahouse::player::IInputSource
+    {
+    public:
+        void Update(float) override
+        {
+            state_ = {};
+            if (frame_ == 0U)
+            {
+                state_.anyPressed = true;
+            }
+            else if (frame_ == 1U)
+            {
+                state_.uiAcceptPressed = true;
+            }
+            ++frame_;
+        }
+
+        [[nodiscard]] const cnahouse::player::InputState& Current() const noexcept override
+        {
+            return state_;
+        }
+
+        [[nodiscard]] bool LookAvailable() const noexcept override
+        {
+            return false;
+        }
+
+    private:
+        cnahouse::player::InputState state_;
+        std::uint64_t frame_ = 0;
+    };
+
+    /// Dismisses loading, moves from Start to Credits, and opens the generated document.
+    class CreditsMenuDriver final : public cnahouse::player::IInputSource
+    {
+    public:
+        void Update(float) override
+        {
+            state_ = {};
+            state_.anyPressed = frame_ == 0U;
+            state_.uiDownPressed = frame_ == 1U || frame_ == 2U;
+            state_.uiAcceptPressed = frame_ == 3U;
+            ++frame_;
+        }
+
+        [[nodiscard]] const cnahouse::player::InputState& Current() const noexcept override
+        {
+            return state_;
+        }
+
+        [[nodiscard]] bool LookAvailable() const noexcept override
+        {
+            return false;
+        }
+
+    private:
+        cnahouse::player::InputState state_;
+        std::uint64_t frame_ = 0;
+    };
+
+    TEST(HeadlessRunTests, LoadingHandsOffToMainMenuAndStartEntersTheHouse)
+    {
+        Options options;
+        options.headless = true;
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+        options.noAudio = true;
+        Settings settings = Settings::Defaults();
+        settings.backBufferWidth = 320;
+        settings.backBufferHeight = 180;
+        settings.verticalSync = false;
+
+        StartMenuDriver input;
+        CnaHouseGame game(options, settings);
+        game.SetInputSourceForTesting(&input);
+        game.SetFrameLimit(4);
+        game.Run();
+
+        ASSERT_EQ(game.ExitCode(), 0);
+        EXPECT_TRUE(game.Menus().Empty());
+        EXPECT_FALSE(cnahouse::util::IdRegistry::NameOf(game.CellForTesting()).empty());
+    }
+
+    TEST(HeadlessRunTests, CreditsLoadsTheGeneratedAttributionDocumentThroughTitleContainer)
+    {
+        Options options;
+        options.headless = true;
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+        options.noAudio = true;
+        Settings settings = Settings::Defaults();
+        settings.backBufferWidth = 320;
+        settings.backBufferHeight = 180;
+        settings.verticalSync = false;
+
+        CreditsMenuDriver input;
+        CnaHouseGame game(options, settings);
+        game.SetInputSourceForTesting(&input);
+        game.SetFrameLimit(5);
+        game.Run();
+
+        ASSERT_EQ(game.ExitCode(), 0);
+        ASSERT_NE(game.Menus().Top(), nullptr);
+        ASSERT_EQ(game.Menus().Top()->Id(), cnahouse::ui::ScreenId::Credits);
+        const auto* credits = dynamic_cast<const cnahouse::ui::CreditsScreen*>(game.Menus().Top());
+        ASSERT_NE(credits, nullptr);
+        EXPECT_GT(credits->LineCount(), 700U);
+    }
 
     TEST(HeadlessRunTests, AltEnterSwitchesTheGraphicsManagerInBothDirections)
     {

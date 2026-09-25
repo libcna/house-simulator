@@ -214,7 +214,239 @@ namespace cnahouse::ui
             const auto found = std::find(choices.begin(), choices.end(), value);
             return found == choices.end() ? 0U : static_cast<std::size_t>(found - choices.begin());
         }
+
+        constexpr std::array<std::string_view, 4> kMainMenuItems = {"Start", "Settings", "Credits", "Quit"};
+        constexpr std::array<std::string_view, 4> kPauseMenuItems = {
+            "Resume", "Settings", "Main menu", "Quit"};
+        constexpr std::array<float, 4> kMenuRowY = {0.40F, 0.48F, 0.56F, 0.64F};
+
+        [[nodiscard]] ControlScheme SchemeFor(const player::InputState& input) noexcept
+        {
+            return input.pointerPressed && input.pointerKind == player::PointerKind::Touch
+                       ? ControlScheme::Touch
+                       : ControlScheme::KeyboardMouse;
+        }
+
+        [[nodiscard]] bool SelectMenuPointer(const player::InputState& input, std::size_t& selected)
+        {
+            if (!input.pointerPressed || input.pointerX < 0.30F || input.pointerX > 0.70F)
+            {
+                return false;
+            }
+            for (std::size_t i = 0; i < kMenuRowY.size(); ++i)
+            {
+                if (std::abs(input.pointerY - kMenuRowY[i]) <= 0.035F)
+                {
+                    selected = i;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        template<std::size_t Size>
+        void DrawMenu(Microsoft::Xna::Framework::Graphics::SpriteBatch& batch,
+                      const TextRenderer& text,
+                      std::string_view title,
+                      const std::array<std::string_view, Size>& items,
+                      std::size_t selected)
+        {
+            text.DrawShadowed(batch, title, Vector2(0.0F, 220.0F), Anchor::TopCentre, Color::White);
+            for (std::size_t i = 0; i < items.size(); ++i)
+            {
+                const std::string line = std::format("{}{}", i == selected ? "> " : "  ", items[i]);
+                const int shade = i == selected ? 255 : 210;
+                text.DrawShadowed(batch,
+                                  line,
+                                  Vector2(0.0F, kMenuRowY[i] * TextRenderer::kVirtualHeight),
+                                  Anchor::TopCentre,
+                                  Color(shade, shade, shade, 255));
+            }
+        }
     } // namespace
+
+    MainMenuScreen::MainMenuScreen(MenuRequested requested)
+        : requested_(std::move(requested))
+    {
+    }
+
+    ScreenAction MainMenuScreen::Update(const player::InputState& input, float deltaSeconds)
+    {
+        (void)deltaSeconds;
+        if (input.uiUpPressed)
+        {
+            selected_ = (selected_ + kMainMenuItems.size() - 1U) % kMainMenuItems.size();
+        }
+        if (input.uiDownPressed)
+        {
+            selected_ = (selected_ + 1U) % kMainMenuItems.size();
+        }
+        const bool pointerSelected = SelectMenuPointer(input, selected_);
+        if (!input.uiAcceptPressed && !pointerSelected)
+        {
+            return ScreenAction::None;
+        }
+        if (selected_ == 3U)
+        {
+            return ScreenAction::Quit;
+        }
+        if (requested_)
+        {
+            constexpr std::array commands = {MenuCommand::Start, MenuCommand::Settings, MenuCommand::Credits};
+            requested_(commands[selected_], SchemeFor(input));
+        }
+        return ScreenAction::None;
+    }
+
+    void MainMenuScreen::Draw(Microsoft::Xna::Framework::Graphics::SpriteBatch& batch,
+                              const TextRenderer& text) const
+    {
+        DrawMenu(batch, text, "House Simulator", kMainMenuItems, selected_);
+    }
+
+    PauseMenuScreen::PauseMenuScreen(MenuRequested requested)
+        : requested_(std::move(requested))
+    {
+    }
+
+    ScreenAction PauseMenuScreen::Update(const player::InputState& input, float deltaSeconds)
+    {
+        (void)deltaSeconds;
+        if (input.cancelPressed)
+        {
+            return ScreenAction::PopAll;
+        }
+        if (input.uiUpPressed)
+        {
+            selected_ = (selected_ + kPauseMenuItems.size() - 1U) % kPauseMenuItems.size();
+        }
+        if (input.uiDownPressed)
+        {
+            selected_ = (selected_ + 1U) % kPauseMenuItems.size();
+        }
+        const bool pointerSelected = SelectMenuPointer(input, selected_);
+        if (!input.uiAcceptPressed && !pointerSelected)
+        {
+            return ScreenAction::None;
+        }
+        if (selected_ == 0U)
+        {
+            return ScreenAction::PopAll;
+        }
+        if (selected_ == 3U)
+        {
+            return ScreenAction::Quit;
+        }
+        if (requested_)
+        {
+            requested_(selected_ == 1U ? MenuCommand::Settings : MenuCommand::MainMenu, SchemeFor(input));
+        }
+        return ScreenAction::None;
+    }
+
+    void PauseMenuScreen::Draw(Microsoft::Xna::Framework::Graphics::SpriteBatch& batch,
+                               const TextRenderer& text) const
+    {
+        DrawMenu(batch, text, "Paused", kPauseMenuItems, selected_);
+    }
+
+    CreditsScreen::CreditsScreen(std::string document)
+    {
+        std::size_t begin = 0;
+        while (begin <= document.size())
+        {
+            const std::size_t end = document.find('\n', begin);
+            lines_.push_back(document.substr(begin, end == std::string::npos ? end : end - begin));
+            if (end == std::string::npos)
+            {
+                break;
+            }
+            begin = end + 1U;
+        }
+    }
+
+    ScreenAction CreditsScreen::Update(const player::InputState& input, float deltaSeconds)
+    {
+        (void)deltaSeconds;
+        if (input.cancelPressed || (input.pointerPressed && input.pointerY >= 0.84F))
+        {
+            return ScreenAction::Pop;
+        }
+        constexpr std::size_t page = 25U;
+        if (input.uiUpPressed || (input.pointerPressed && input.pointerY < 0.5F))
+        {
+            scroll_ = scroll_ == 0U ? 0U : scroll_ - 1U;
+        }
+        if (input.uiDownPressed || (input.pointerPressed && input.pointerY >= 0.5F))
+        {
+            const std::size_t maximum = lines_.size() > page ? lines_.size() - page : 0U;
+            scroll_ = std::min(scroll_ + 1U, maximum);
+        }
+        return ScreenAction::None;
+    }
+
+    void CreditsScreen::Draw(Microsoft::Xna::Framework::Graphics::SpriteBatch& batch,
+                             const TextRenderer& text) const
+    {
+        text.DrawShadowed(batch, "Credits", Vector2(0.0F, 45.0F), Anchor::TopCentre, Color::White);
+        constexpr std::size_t page = 25U;
+        const std::size_t end = std::min(lines_.size(), scroll_ + page);
+        for (std::size_t i = scroll_; i < end; ++i)
+        {
+            text.DrawShadowed(batch,
+                              lines_[i],
+                              Vector2(60.0F, 90.0F + static_cast<float>(i - scroll_) * 28.0F),
+                              Anchor::TopLeft,
+                              Color(225, 225, 225, 255));
+        }
+        text.DrawShadowed(batch,
+                          "Up/Down scroll  Esc back  Tap bottom to back",
+                          Vector2(0.0F, 835.0F),
+                          Anchor::TopCentre,
+                          Color::White);
+    }
+
+    void ControlsHint::Start(ControlScheme scheme) noexcept
+    {
+        scheme_ = scheme;
+        elapsed_ = 0.0F;
+        started_ = true;
+    }
+
+    void ControlsHint::Update(float deltaSeconds) noexcept
+    {
+        if (started_ && std::isfinite(deltaSeconds) && deltaSeconds > 0.0F)
+        {
+            elapsed_ = std::min(kDurationSeconds, elapsed_ + deltaSeconds);
+        }
+    }
+
+    float ControlsHint::Alpha() const noexcept
+    {
+        if (!Visible())
+        {
+            return 0.0F;
+        }
+        return std::clamp((kDurationSeconds - elapsed_) / kFadeSeconds, 0.0F, 1.0F);
+    }
+
+    std::string_view ControlsHint::Text() const noexcept
+    {
+        return scheme_ == ControlScheme::Touch ? "Touch: move stick · drag to look · pause button"
+                                               : "WASD move · mouse look · Shift walk speed · Esc pause";
+    }
+
+    void ControlsHint::Draw(Microsoft::Xna::Framework::Graphics::SpriteBatch& batch,
+                            const TextRenderer& text) const
+    {
+        const int alpha = static_cast<int>(Alpha() * 255.0F);
+        if (alpha == 0)
+        {
+            return;
+        }
+        text.DrawShadowed(
+            batch, Text(), Vector2(0.0F, 835.0F), Anchor::TopCentre, Color(alpha, alpha, alpha, alpha));
+    }
 
     std::string_view SettingsControlName(SettingsControl control) noexcept
     {

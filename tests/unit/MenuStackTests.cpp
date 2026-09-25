@@ -25,9 +25,15 @@ namespace
     using cnahouse::audio::Category;
     using cnahouse::player::InputState;
     using cnahouse::player::PointerKind;
+    using cnahouse::ui::ControlScheme;
+    using cnahouse::ui::ControlsHint;
+    using cnahouse::ui::CreditsScreen;
     using cnahouse::ui::IScreen;
     using cnahouse::ui::LoadingScreen;
+    using cnahouse::ui::MainMenuScreen;
+    using cnahouse::ui::MenuCommand;
     using cnahouse::ui::MenuStack;
+    using cnahouse::ui::PauseMenuScreen;
     using cnahouse::ui::ScreenAction;
     using cnahouse::ui::ScreenId;
     using cnahouse::ui::SettingsControl;
@@ -296,6 +302,117 @@ namespace
         screen.Update(InputState{}, 0.5f);
         screen.Update(InputState{}, 0.25f);
         EXPECT_FLOAT_EQ(screen.Elapsed(), 0.75f);
+    }
+
+    // --- retained application menu flow ----------------------------------------------------------
+
+    TEST(ApplicationMenuTests, MainMenuOffersStartSettingsCreditsAndQuitWithoutContinue)
+    {
+        std::vector<MenuCommand> requested;
+        MainMenuScreen screen([&](MenuCommand command, ControlScheme) { requested.push_back(command); });
+        InputState accept;
+        accept.uiAcceptPressed = true;
+        InputState down;
+        down.uiDownPressed = true;
+
+        EXPECT_EQ(screen.Update(accept, 0.016F), ScreenAction::None);
+        ASSERT_EQ(requested, std::vector<MenuCommand>{MenuCommand::Start});
+        screen.Update(down, 0.016F);
+        screen.Update(accept, 0.016F);
+        screen.Update(down, 0.016F);
+        screen.Update(accept, 0.016F);
+        EXPECT_EQ(
+            requested,
+            (std::vector<MenuCommand>{MenuCommand::Start, MenuCommand::Settings, MenuCommand::Credits}));
+        screen.Update(down, 0.016F);
+        EXPECT_EQ(screen.Update(accept, 0.016F), ScreenAction::Quit);
+        EXPECT_TRUE(screen.PausesWorld());
+    }
+
+    TEST(ApplicationMenuTests, MainMenuPointerRecordsTheActiveTouchScheme)
+    {
+        MenuCommand command = MenuCommand::None;
+        ControlScheme scheme = ControlScheme::KeyboardMouse;
+        MainMenuScreen screen(
+            [&](MenuCommand value, ControlScheme active)
+            {
+                command = value;
+                scheme = active;
+            });
+        InputState touch;
+        touch.pointerKind = PointerKind::Touch;
+        touch.pointerPressed = true;
+        touch.pointerX = 0.5F;
+        touch.pointerY = 0.48F;
+
+        EXPECT_EQ(screen.Update(touch, 0.016F), ScreenAction::None);
+        EXPECT_EQ(command, MenuCommand::Settings);
+        EXPECT_EQ(scheme, ControlScheme::Touch);
+    }
+
+    TEST(ApplicationMenuTests, PauseMenuCanResumeOpenSettingsReturnHomeAndQuit)
+    {
+        std::vector<MenuCommand> requested;
+        PauseMenuScreen screen([&](MenuCommand command, ControlScheme) { requested.push_back(command); });
+        InputState accept;
+        accept.uiAcceptPressed = true;
+        InputState down;
+        down.uiDownPressed = true;
+
+        EXPECT_EQ(screen.Update(accept, 0.016F), ScreenAction::PopAll);
+        screen.Update(down, 0.016F);
+        EXPECT_EQ(screen.Update(accept, 0.016F), ScreenAction::None);
+        screen.Update(down, 0.016F);
+        EXPECT_EQ(screen.Update(accept, 0.016F), ScreenAction::None);
+        EXPECT_EQ(requested, (std::vector<MenuCommand>{MenuCommand::Settings, MenuCommand::MainMenu}));
+        screen.Update(down, 0.016F);
+        EXPECT_EQ(screen.Update(accept, 0.016F), ScreenAction::Quit);
+
+        InputState cancel;
+        cancel.cancelPressed = true;
+        EXPECT_EQ(screen.Update(cancel, 0.016F), ScreenAction::PopAll);
+    }
+
+    TEST(ApplicationMenuTests, CreditsPresentTheGeneratedDocumentAndScroll)
+    {
+        std::string document;
+        for (int line = 0; line < 30; ++line)
+        {
+            document += "asset entry\n";
+        }
+        CreditsScreen screen(document);
+        EXPECT_EQ(screen.LineCount(), 31U);
+
+        InputState down;
+        down.uiDownPressed = true;
+        EXPECT_EQ(screen.Update(down, 0.016F), ScreenAction::None);
+        EXPECT_EQ(screen.ScrollOffset(), 1U);
+
+        InputState cancel;
+        cancel.cancelPressed = true;
+        EXPECT_EQ(screen.Update(cancel, 0.016F), ScreenAction::Pop);
+    }
+
+    TEST(ApplicationMenuTests, FirstRunHintNamesTheActiveSchemeAndFadesAfterTwelveSeconds)
+    {
+        ControlsHint hint;
+        EXPECT_FALSE(hint.Visible());
+        hint.Start(ControlScheme::KeyboardMouse);
+        EXPECT_TRUE(hint.Visible());
+        EXPECT_NE(hint.Text().find("WASD"), std::string_view::npos);
+        EXPECT_NE(hint.Text().find("mouse"), std::string_view::npos);
+        EXPECT_NE(hint.Text().find("Esc"), std::string_view::npos);
+        hint.Update(9.0F);
+        EXPECT_FLOAT_EQ(hint.Alpha(), 1.0F);
+        hint.Update(1.5F);
+        EXPECT_FLOAT_EQ(hint.Alpha(), 0.5F);
+        hint.Update(1.5F);
+        EXPECT_FALSE(hint.Visible());
+        EXPECT_FLOAT_EQ(hint.Alpha(), 0.0F);
+
+        hint.Start(ControlScheme::Touch);
+        EXPECT_NE(hint.Text().find("Touch"), std::string_view::npos);
+        EXPECT_NE(hint.Text().find("pause"), std::string_view::npos);
     }
 
     TEST(SettingsScreenTests, KeyboardNavigationReachesEveryControlAndWraps)

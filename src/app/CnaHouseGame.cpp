@@ -9,6 +9,7 @@
 #include "System/IO/FileAccess.hpp"
 #include "System/IO/FileMode.hpp"
 #include "System/IO/FileStream.hpp"
+#include "System/IO/StreamReader.hpp"
 
 #include "cnahouse/physics/CollisionLoader.hpp"
 #include "cnahouse/world/WorldLoader.hpp"
@@ -32,6 +33,7 @@
 #include "Microsoft/Xna/Framework/Graphics/SpriteFont.hpp"
 #include "Microsoft/Xna/Framework/Graphics/SpriteSortMode.hpp"
 #include "Microsoft/Xna/Framework/Graphics/Texture2D.hpp"
+#include "Microsoft/Xna/Framework/TitleContainer.hpp"
 #include "Microsoft/Xna/Framework/Vector2.hpp"
 
 #include "cnahouse/content/Caches.hpp"
@@ -1076,6 +1078,87 @@ namespace cnahouse::app
             ui::SettingsFeatures::Resolve(platform_, tier_, settings_)));
     }
 
+    void CnaHouseGame::QueueMenuCommand(ui::MenuCommand command, ui::ControlScheme scheme) noexcept
+    {
+        pendingMenuCommand_ = command;
+        pendingControlScheme_ = scheme;
+    }
+
+    void CnaHouseGame::OpenMainMenu()
+    {
+        menus_.Replace(
+            std::make_unique<ui::MainMenuScreen>([this](ui::MenuCommand command, ui::ControlScheme scheme)
+                                                 { QueueMenuCommand(command, scheme); }));
+    }
+
+    void CnaHouseGame::OpenPauseMenu()
+    {
+        menus_.Push(
+            std::make_unique<ui::PauseMenuScreen>([this](ui::MenuCommand command, ui::ControlScheme scheme)
+                                                  { QueueMenuCommand(command, scheme); }));
+    }
+
+    void CnaHouseGame::OpenCredits()
+    {
+        try
+        {
+            std::unique_ptr<System::IO::Stream> stream =
+                Microsoft::Xna::Framework::TitleContainer::OpenStream(
+                    "content/Credits/THIRD-PARTY-ASSETS.md");
+            if (stream == nullptr)
+            {
+                throw std::runtime_error("TitleContainer returned no credits stream");
+            }
+            System::IO::StreamReader reader(stream.get(), true);
+            menus_.Push(std::make_unique<ui::CreditsScreen>(reader.ReadToEnd()));
+        }
+        catch (const std::exception& error)
+        {
+            Log::Warn(LogCat::Content, "credits: {}", error.what());
+            menus_.Push(std::make_unique<ui::CreditsScreen>(
+                "Third-party assets\n\nlicenses/THIRD-PARTY-ASSETS.md could not be loaded."));
+        }
+    }
+
+    void CnaHouseGame::StartHouse(ui::ControlScheme scheme)
+    {
+        if (!walking_)
+        {
+            LoadBlockout();
+            LoadWalk();
+        }
+        menus_.Clear();
+        if (!controlsHintShown_)
+        {
+            controlsHint_.Start(scheme);
+            controlsHintShown_ = true;
+        }
+    }
+
+    void CnaHouseGame::HandleMenuCommand()
+    {
+        const ui::MenuCommand command = pendingMenuCommand_;
+        const ui::ControlScheme scheme = pendingControlScheme_;
+        pendingMenuCommand_ = ui::MenuCommand::None;
+        switch (command)
+        {
+            case ui::MenuCommand::None:
+                break;
+            case ui::MenuCommand::Start:
+                StartHouse(scheme);
+                break;
+            case ui::MenuCommand::Settings:
+                OpenSettings();
+                break;
+            case ui::MenuCommand::Credits:
+                OpenCredits();
+                break;
+            case ui::MenuCommand::MainMenu:
+                OpenMainMenu();
+                break;
+        }
+    }
+
     debug::WorldSnapshot CnaHouseGame::WalkSnapshot() const
     {
         debug::WorldSnapshot snapshot;
@@ -1346,12 +1429,10 @@ namespace cnahouse::app
                 settings_.fullscreen = graphics_.getIsFullScreenProperty();
                 Log::Info(LogCat::App, "display {}", settings_.fullscreen ? "fullscreen" : "windowed");
             }
-            if (menus_.Empty() && Input().Current().menuPressed)
+            if (menus_.Empty() && walking_ &&
+                (Input().Current().menuPressed || Input().Current().cancelPressed))
             {
-                // The final main/pause menu flow belongs to HOUSE-02523. Until then this existing
-                // menu action opens the completed settings page directly, so HOUSE-02516 is usable
-                // rather than a screen reachable only from a unit test.
-                OpenSettings();
+                OpenPauseMenu();
             }
 
             if (weather_.has_value())
@@ -1489,13 +1570,20 @@ namespace cnahouse::app
             // user-gesture audio gate (`HOUSE-00155`): the loading screen's own `Update` sees
             // `anyPressed` and calls back into `audio_`, so there is ONE place the gesture is
             // recognised rather than one in the game and one in the screen.
+            const bool wasLoading = loading_ != nullptr;
             if (menus_.Update(Input().Current(), frame.deltaSeconds))
             {
                 Exit();
             }
-            if (menus_.Empty())
+            if (wasLoading && menus_.Empty())
             {
                 loading_ = nullptr;
+                OpenMainMenu();
+            }
+            HandleMenuCommand();
+            if (walking_ && menus_.Empty())
+            {
+                controlsHint_.Update(frame.deltaSeconds);
             }
 
             // A short exponential average. The instantaneous delta jitters by a millisecond or two
@@ -2059,6 +2147,10 @@ namespace cnahouse::app
         if (settings_.showEnvironmentReadout && menus_.Empty())
         {
             environmentReadout_.Draw(hud_->batch, text_, clock_);
+        }
+        if (walking_ && menus_.Empty())
+        {
+            controlsHint_.Draw(hud_->batch, text_);
         }
 
         text_.DrawShadowed(hud_->batch,

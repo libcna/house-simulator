@@ -1,3 +1,34 @@
+# Application menu handoff — 2026-09-25 (`HOUSE-02523`)
+
+The existing loading/audio gesture screen now hands off to a four-item main menu. Start loads the
+existing blockout and walk presentation; Settings reuses the completed one-page settings screen;
+Credits reads the generated `licenses/THIRD-PARTY-ASSETS.md` through standard-XNA
+`TitleContainer`; and Quit follows the existing `MenuStack` exit boundary. A bounded CMake copy
+places that document in the existing read-only content tree for all three platforms. Escape or the
+menu action during the walk opens Resume, Settings, Main menu and Quit. Returning home preserves
+the loaded house, and Start resumes it without inventing session persistence or a Continue item.
+
+The first successful Start shows one control line for the input scheme that activated it: keyboard
+and mouse, or touch. It remains fully visible for nine seconds, fades for three, and cannot replay
+after a return to the main menu. The implementation adds only concrete screens and this bounded
+hint to the existing `MenuStack`/`TextRenderer`; it adds no widget framework or gameplay system.
+Five focused application-menu tests pass, as does the complete 1,464-test unit label. Two production
+offscreen integrations drive loading → main menu → Start and confirm a valid house cell, then open
+Credits and confirm the generated document has more than 700 lines. The first invocation without
+an SDL video driver failed before test code; the required `SDL_VIDEODRIVER=offscreen` rerun passed.
+XNA-only is clean, and strict-XNA compiles all 340 configured translation units clean. The complete
+static gate has no substantive failure; its only report is the known user-owned root `.claude`
+layout entry.
+
+Every compilation, test and compile-based check was pinned to CPUs 4,5,7,9 with no more than four
+workers. Strict-XNA explicitly used `--jobs 4`; this corrects the earlier session error where an
+unbounded invocation created 13 compiler processes. M9 dependency order plus R11/R13 selects
+`HOUSE-02527` next. The remaining forecast is 85.75 realistic / 112.25 pessimistic hours. With
+140.5 task-hours completed since the final reduction, the R14 projection is 252.75 h, 27.25 h
+below the ceiling.
+
+---
+
 # Environment settings handoff — 2026-09-25 (`HOUSE-02521`)
 
 The Environment section of the existing one-page `SettingsScreen` is complete. It offers only the

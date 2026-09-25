@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **58 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 75.5 / 88.75 / 115.5 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5 and M7 passed; atmospheric-audio work is active.** Next: wire the six retained footstep categories in `HOUSE-01920` |
+| Active plan | **54 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 73 / 85.75 / 112.25 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5 and M7 passed; M8 listening work is environment-blocked and M9 is active.** Next: `HOUSE-02527` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -398,7 +398,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M6](#m6--main-cells-and-hero-areas-c4-c5--gates-g4-and-g5) — Main cells and hero areas | A | 03441–03500 | 15 | **G4** · `HOUSE-03452`, **G5** · `HOUSE-03480` | D4 | 19.75 |
 | [M7](#m7--a-compact-environment) — A compact environment | B | 03501–03540 | 8 | `HOUSE-03520` | D5 | 13.25 |
 | [M8](#m8--atmospheric-audio-essentials) — Atmospheric audio essentials | B | 03541–03570 | 6 | `HOUSE-01939` | D7 | 9 |
-| [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 4 | `HOUSE-02528` | D8 | 5.25 |
+| [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 2 | `HOUSE-02528` | D8 | 2.25 |
 | [M10](#m10--performance-measurement-driven) — Performance, measurement-driven | B | 03601–03630 | 4 | `HOUSE-02405` | D9 | 9.5 |
 | [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 3 | `HOUSE-02713` | D2, D4, D13, D14 | 7 |
 | [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 2 | `HOUSE-02598` | D11 | 3.5 |
@@ -1254,11 +1254,12 @@ extended.
       trace: was *the Simulation tab (day length, weather mode, moon speed, location, pets, pause-on-menu, slots)* (`HOUSE-03206`)
       note: (2026-09-25) The existing one-page settings screen now exposes only Automatic or 06:00/12:00/18:00/22:00 time, 60x/30x/15x time speed, and Automatic/Clear/Overcast/Rain weather. Fixed time updates and freezes the existing `SimClock`; returning to Automatic resumes it at the selected speed. Weather changes rebuild only the existing `WeatherSystem` state so fixed choices apply immediately, including wet rain, while Automatic resumes authored transitions. Settings v11 persists the fixed-hour choice and narrows removed legacy fixed weather to Clear. No location, season, full archetype list or simulation UI was added. Focused tests pass 28/28 and the complete unit label passes 1463/1463; XNA-only and strict-XNA are clean.
 
-- [ ] HOUSE-02523 — The main menu, the pause menu, the credits screen and the first-run controls hint
+- [x] HOUSE-02523 — The main menu, the pause menu, the credits screen and the first-run controls hint
       dep: HOUSE-02516, HOUSE-00198 · sys: ui · plat: ALL · pri: MUST · zone: all · adv: D8 · est: 2
       accept: (1) main menu *Start* · *Settings* · *Credits* · *Quit*; (2) pause menu *Resume* · *Settings* · *Main menu* · *Quit*; (3) credits show `THIRD-PARTY-ASSETS.md`; (4) a first-run hint names the controls of the active input scheme (keyboard and mouse, or touch) and fades after about 12 s; (5) there is no *Continue* (session resume is optional)
       verify: unit tests of the menu flow; the UI render set (`HOUSE-02527`)
       trace: absorbs `HOUSE-02525` (the hint line)
+      note: (2026-09-25) The loading/audio gate now hands off to a four-item main menu, whose Start action loads the existing blockout/walk presentation. Escape or the menu action opens the four-item pause menu; settings reuse the existing one-page screen, Main menu replaces the stack without reloading the house, and Credits presents the generated `licenses/THIRD-PARTY-ASSETS.md` through standard-XNA `TitleContainer`. The first successful Start shows one input-scheme-specific control line and fades it over the final 3 s of a 12 s lifetime; returning to the main menu cannot replay it. Five focused menu/hint tests pass, the complete unit label passes 1464/1464, and two offscreen integrations prove loading → main menu → Start → traversable house and the full generated credits document. Layout/safe-area renders remain owned by `HOUSE-02527`; no Continue, session persistence, widget framework or gameplay system was added.
 
 - [ ] HOUSE-02527 — UI layout in virtual units with safe-area insets, and the UI render set
       dep: HOUSE-02523, HOUSE-00145 · sys: ui · plat: ALL · pri: MUST · zone: all · adv: D8, D10b, D10c, D11 · est: 1.5
@@ -1933,7 +1934,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M6 Main cells and hero areas | 20 | 32.5 | **0** | 0 | **0** | 0 | — |
 | M7 A compact environment | 13 | 21 | **0** | 0 | **0** | 0 | — |
 | M8 Atmospheric audio essentials | 11 | 14.5 | **4** | 4.25 | **5** | 5.5 | — |
-| M9 Application shell | 10 | 12.5 | **3** | 3.5 | **4.25** | 4.75 | — |
+| M9 Application shell | 10 | 12.5 | **2** | 2 | **2.25** | 2.5 | — |
 | M10 Performance | 6 | 13 | **3** | 6.75 | **8** | 12.75 | R-C +4 |
 | M11 Final defect pass | 3 | 11 | **3** | 6 | **7** | 7.75 | — |
 | M12 Representative tests | 4 | 5 | **2** | 3 | **3.5** | 3.75 | — |
@@ -1941,12 +1942,12 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **55** | **74.5** | **87.75** | **114.5** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **54** | **73** | **85.75** | **112.25** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-165.5 h. Adding the 138.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-253 h, 27 h under the limit. That margin is
+167.75 h. Adding the 140.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+252.75 h, 27.25 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |
