@@ -128,10 +128,11 @@ namespace
             previousOpaque = &item;
             ++opaque;
         }
-        // HOUSE-03380 measures 50 world-wide alpha-test batches in the completed C3 house,
-        // including the formal sofa fringe, indoor plants and exterior trees.
+        // HOUSE-03380 measured 50 world-wide alpha-test batches in the completed C3 house;
+        // HOUSE-01748's wet-material split adds the outdoor wet variant as one sorted batch.
+        // The set includes the formal sofa fringe, indoor plants and exterior trees.
         // Repeated plants remain sub-ranges of shared draws within each owner cell.
-        EXPECT_EQ(cutouts, 50U) << "the formal sofa fringe, indoor plant leaves and exterior foliage batches";
+        EXPECT_EQ(cutouts, 51U) << "the formal sofa fringe, indoor plant leaves and exterior foliage batches";
         EXPECT_EQ(opaque + cutouts, list.Size()) << "unexpected pass items entered the blockout list";
         // Every opaque item was drawn: nothing in that slice named a chunk the runtime could
         // not find. Alpha-tested leaves belong to AlphaTestPass, not this debug opaque pass.
