@@ -1,3 +1,27 @@
+# Kitchen C5 handoff — 2026-09-25 (`HOUSE-00990`)
+
+`L0_KITCHEN` meets C5 without revived containers or extra decoration. Its retained bounded recipe
+already supplies the static closed north run, island and range wall, closed refrigerator, stools,
+canisters, kettle, island dressing and physical pendant/task/ceiling fixtures. Three fresh fixed
+views from Round 165 cover clear day and scheduled night; Round 166 supplies the fresh overcast H3
+view. Full-resolution inspection found the room readable with work aisle and through-routes open
+and no S1/S2, clipping, floating/intersecting furnishing, z-fighting or missing texture. Evidence
+remains ignored under `docs/visual-review/captures/house-00986-foyer-hall-{day,night}-r165/` and
+`house-00988-living-overcast-r166/`.
+
+The existing Release `Kitchen` scenario ran on the §71.1 AMD Radeon 780M at 1920×1080,
+Tier S / High and vsync off: 73 draw calls, 172,934 triangles, 1.173 ms CPU total and 2.670 ms
+GPU-completion median / 3.224 ms p95, below the desktop High hard limits.
+
+All five retained hero areas now have their task-level C5 evidence. Rule R2 selects gate
+`HOUSE-03480` for the single cross-area review before M7. The remaining forecast is 110.25
+realistic / 139.25 pessimistic hours. With 116 task-hours spent since the final reduction, the R14
+projection is 255.25 h, 24.75 h below the ceiling. Every build, test, capture and check is limited
+to four workers and pinned to CPUs 4,5,7,9; strict-XNA additionally uses
+`HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Living-room C5 handoff — 2026-09-25 (`HOUSE-00988`)
 
 `L0_LIVING` meets C5 without extra content. Its retained bounded recipe already supplies the

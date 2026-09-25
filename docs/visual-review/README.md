@@ -5622,3 +5622,22 @@ at 1920×1080, Tier S / High and vsync off reports 129 draw calls, 792,239 trian
 total and 3.604 ms GPU-completion median / 4.051 ms p95, below the desktop High hard limits. The
 authoritative eight scenarios were restored immediately afterwards. Rule R4 next selects
 `HOUSE-00990`, the kitchen C5 pass.
+
+## Round 167 — kitchen C5
+
+Commit: `HOUSE-00990` working tree (`2026-09-25`). The retained bounded recipe already contains
+the static closed north run, island and range wall, closed refrigerator, stools, canisters,
+kettle, island dressing and physical pendant/task/ceiling fixtures. Containers remain removed as
+the authoritative task requires; no extra content was justified.
+
+Three fresh fixed views from Round 165 cover clear day and scheduled night; Round 166's fresh H3
+view covers overcast. Full-resolution inspection finds the complete room readable with work aisle
+and through-routes open and no S1/S2, clipping, floating/intersecting furnishing, z-fighting or
+missing texture. Local evidence is in
+`captures/house-00986-foyer-hall-{day,night}-r165/` and
+`captures/house-00988-living-overcast-r166/`.
+
+The existing Release `Kitchen` scenario on the §71.1 AMD Radeon 780M at 1920×1080,
+Tier S / High and vsync off reports 73 draw calls, 172,934 triangles, 1.173 ms CPU total and
+2.670 ms GPU-completion median / 3.224 ms p95, below the desktop High hard limits. Rule R2 next
+selects the cross-area G5 review in `HOUSE-03480`.
