@@ -7,11 +7,14 @@
 
 #include <cmath>
 
+#include "Microsoft/Xna/Framework/Rectangle.hpp"
+
 #include "cnahouse/ui/TextRenderer.hpp"
 
 namespace
 {
     using cnahouse::ui::TextRenderer;
+    using Microsoft::Xna::Framework::Rectangle;
 
     TEST(TextRendererTests, TheReferenceResolutionScalesToOne)
     {
@@ -47,6 +50,42 @@ namespace
         text.SetViewport(0, 0);
         EXPECT_GT(text.Scale(), 0.0f);
         EXPECT_TRUE(std::isfinite(text.Scale()));
+    }
+
+    TEST(TextRendererTests, FourByThreeCentresTheVirtualCanvasVerticallyInsideTheSafeArea)
+    {
+        TextRenderer text;
+        text.SetViewport(1200, 900, Rectangle(24, 30, 1152, 840));
+
+        EXPECT_FLOAT_EQ(text.Scale(), 0.72F);
+        EXPECT_EQ(text.LayoutBounds(), Rectangle(24, 126, 1152, 648));
+    }
+
+    TEST(TextRendererTests, SixteenByNineFitsInsideAsymmetricSafeAreaInsets)
+    {
+        TextRenderer text;
+        text.SetViewport(1600, 900, Rectangle(80, 36, 1440, 810));
+
+        EXPECT_FLOAT_EQ(text.Scale(), 0.9F);
+        EXPECT_EQ(text.LayoutBounds(), Rectangle(80, 36, 1440, 810));
+    }
+
+    TEST(TextRendererTests, TwentyByNineCentresTheVirtualCanvasBetweenPhoneInsets)
+    {
+        TextRenderer text;
+        text.SetViewport(2000, 900, Rectangle(120, 45, 1760, 810));
+
+        EXPECT_FLOAT_EQ(text.Scale(), 0.9F);
+        EXPECT_EQ(text.LayoutBounds(), Rectangle(280, 45, 1440, 810));
+    }
+
+    TEST(TextRendererTests, InvalidSafeAreaFallsBackToTheWholeViewport)
+    {
+        TextRenderer text;
+        text.SetViewport(1600, 900, Rectangle(-20, -20, 0, 0));
+
+        EXPECT_FLOAT_EQ(text.Scale(), 1.0F);
+        EXPECT_EQ(text.LayoutBounds(), Rectangle(0, 0, 1600, 900));
     }
 
     TEST(TextRendererTests, WithoutAFontEverythingIsANoOpRatherThanACrash)

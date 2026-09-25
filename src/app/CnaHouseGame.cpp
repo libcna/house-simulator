@@ -33,6 +33,7 @@
 #include "Microsoft/Xna/Framework/Graphics/SpriteFont.hpp"
 #include "Microsoft/Xna/Framework/Graphics/SpriteSortMode.hpp"
 #include "Microsoft/Xna/Framework/Graphics/Texture2D.hpp"
+#include "Microsoft/Xna/Framework/Graphics/Viewport.hpp"
 #include "Microsoft/Xna/Framework/TitleContainer.hpp"
 #include "Microsoft/Xna/Framework/Vector2.hpp"
 
@@ -330,7 +331,9 @@ namespace cnahouse::app
     {
         Game::LoadContent();
         hud_ = std::make_unique<Hud>(getGraphicsDeviceProperty());
-        text_.SetViewport(settings_.backBufferWidth, settings_.backBufferHeight);
+        const auto& viewport = getGraphicsDeviceProperty().getViewportProperty();
+        text_.SetViewport(
+            viewport.getWidthProperty(), viewport.getHeightProperty(), viewport.getTitleSafeAreaProperty());
         ActivateTierE();
         // AFTER `ActivateTierE`, never before: a failed Tier-E load narrows the tier, and a quality
         // resolved against the pre-narrowing tier would offer post-processing that cannot run.
@@ -958,7 +961,10 @@ namespace cnahouse::app
             graphics_.setSynchronizeWithVerticalRetraceProperty(settings_.verticalSync);
             graphics_.ApplyChanges();
 
-            text_.SetViewport(settings_.backBufferWidth, settings_.backBufferHeight);
+            const auto& viewport = getGraphicsDeviceProperty().getViewportProperty();
+            text_.SetViewport(viewport.getWidthProperty(),
+                              viewport.getHeightProperty(),
+                              viewport.getTitleSafeAreaProperty());
             player::InputConfig inputConfig = input_.Config();
             inputConfig.recentreX = settings_.backBufferWidth / 2;
             inputConfig.recentreY = settings_.backBufferHeight / 2;

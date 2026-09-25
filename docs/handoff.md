@@ -1,3 +1,32 @@
+# Safe-area UI handoff — 2026-09-25 (`HOUSE-02527`)
+
+The existing `TextRenderer` now fits its 1600x900 virtual canvas uniformly inside standard-XNA
+`Viewport.TitleSafeArea`. The transform centres unused space at 4:3 and 20:9, clamps an invalid
+safe rectangle back to the viewport, and is refreshed both at content load and after a graphics
+setting changes the device. SpriteFont glyphs retain their authored pixel size: an initial attempt
+to scale them exposed unreadable 6.4-pixel HUD text at the existing 640x360 render fixture, so the
+final implementation transforms positions and anchors while preserving the established legibility.
+No platform query, widget system or new UI subsystem was added.
+
+Four focused unit cases cover 4:3, 16:9, 20:9 and invalid inset geometry; the complete unit binary
+passes 1,468/1,468. Six new software-rendered references cover main menu, pause menu and settings at
+16:9 and 20:9 with forced non-zero insets. All six enforce zero bright pixels outside the safe area
+and pass their pixel comparisons; the generated montage and both settings frames were inspected.
+That inspection found a real overlap between the Settings and Graphics headings, which is fixed in
+the same task. The existing title render tests pass. The old `hud-season-01` behavioural assertion
+still proves the readout is legible and hideable, but its whole-world golden remains stale at
+3.8496%; crops below the HUD contain over 9,000 exact differing pixels, proving the mismatch is in
+the current world image rather than this UI-only change.
+
+Every compilation in this task was constrained by both `taskset -c 0-3` and `-j4`, with
+`CMAKE_BUILD_PARALLEL_LEVEL=4`, `MAKEFLAGS=-j4`, `OMP_NUM_THREADS=1` and the required shared
+`/rv/cnaccache`. This is the enforced correction after the earlier unbounded strict-XNA invocation.
+M9 dependency order plus R11/R13 selects `HOUSE-02528` next. The remaining forecast is 84.25
+realistic / 110.5 pessimistic hours. With 142 task-hours completed since the final reduction, the
+R14 projection is 252.5 h, 27.5 h below the ceiling.
+
+---
+
 # Application menu handoff — 2026-09-25 (`HOUSE-02523`)
 
 The existing loading/audio gesture screen now hands off to a four-item main menu. Start loads the

@@ -855,8 +855,8 @@ namespace cnahouse::ui
     void SettingsScreen::Draw(Microsoft::Xna::Framework::Graphics::SpriteBatch& batch,
                               const TextRenderer& text) const
     {
-        text.DrawShadowed(batch, "Settings", Vector2(0.0F, 55.0F), Anchor::TopCentre, Color::White);
-        text.DrawShadowed(batch, "Graphics", Vector2(0.0F, 70.0F), Anchor::TopCentre, Color::White);
+        text.DrawShadowed(batch, "Settings", Vector2(0.0F, 30.0F), Anchor::TopCentre, Color::White);
+        text.DrawShadowed(batch, "Graphics", Vector2(0.0F, 72.0F), Anchor::TopCentre, Color::White);
         text.DrawShadowed(batch, "Audio", Vector2(0.0F, 280.0F), Anchor::TopCentre, Color::White);
         text.DrawShadowed(batch, "Controls", Vector2(0.0F, 456.0F), Anchor::TopCentre, Color::White);
         text.DrawShadowed(batch, "Environment", Vector2(0.0F, 598.0F), Anchor::TopCentre, Color::White);

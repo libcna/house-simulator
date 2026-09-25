@@ -2,6 +2,7 @@
 #include "cnahouse/ui/TextRenderer.hpp"
 
 #include <algorithm>
+#include <cmath>
 
 #include "Microsoft/Xna/Framework/Graphics/SpriteBatch.hpp"
 #include "Microsoft/Xna/Framework/Graphics/SpriteFont.hpp"
@@ -28,13 +29,43 @@ namespace cnahouse::ui
 
     void TextRenderer::SetViewport(int width, int height) noexcept
     {
+        SetViewport(width, height, Microsoft::Xna::Framework::Rectangle(0, 0, width, height));
+    }
+
+    void TextRenderer::SetViewport(int width,
+                                   int height,
+                                   const Microsoft::Xna::Framework::Rectangle& safeArea) noexcept
+    {
         viewportWidth_ = std::max(1, width);
         viewportHeight_ = std::max(1, height);
-        // The SMALLER of the two ratios, so a window that is wider than the reference does not push
-        // text off the bottom and one that is taller does not push it off the side. A per-axis scale
-        // would stretch the glyphs, which is worse than either.
-        scale_ = std::min(static_cast<float>(viewportWidth_) / kVirtualWidth,
-                          static_cast<float>(viewportHeight_) / kVirtualHeight);
+
+        // Clamp an OS-provided rectangle to the real surface. A transient empty rectangle during a
+        // resize falls back to the surface rather than collapsing every label to a point.
+        const int left = std::clamp(safeArea.X, 0, viewportWidth_);
+        const int top = std::clamp(safeArea.Y, 0, viewportHeight_);
+        const int right = std::clamp(safeArea.X + std::max(0, safeArea.Width), left, viewportWidth_);
+        const int bottom = std::clamp(safeArea.Y + std::max(0, safeArea.Height), top, viewportHeight_);
+        const int safeWidth = right - left;
+        const int safeHeight = bottom - top;
+        const bool usable = safeWidth > 0 && safeHeight > 0;
+        const float availableWidth = static_cast<float>(usable ? safeWidth : viewportWidth_);
+        const float availableHeight = static_cast<float>(usable ? safeHeight : viewportHeight_);
+        const float safeLeft = static_cast<float>(usable ? left : 0);
+        const float safeTop = static_cast<float>(usable ? top : 0);
+
+        // The SMALLER ratio preserves the authored aspect. The remaining strip is letterbox space,
+        // shared equally on both sides of the safe rectangle.
+        scale_ = std::min(availableWidth / kVirtualWidth, availableHeight / kVirtualHeight);
+        originX_ = safeLeft + (availableWidth - kVirtualWidth * scale_) * 0.5F;
+        originY_ = safeTop + (availableHeight - kVirtualHeight * scale_) * 0.5F;
+    }
+
+    Microsoft::Xna::Framework::Rectangle TextRenderer::LayoutBounds() const noexcept
+    {
+        return Microsoft::Xna::Framework::Rectangle(static_cast<int>(std::lround(originX_)),
+                                                    static_cast<int>(std::lround(originY_)),
+                                                    static_cast<int>(std::lround(kVirtualWidth * scale_)),
+                                                    static_cast<int>(std::lround(kVirtualHeight * scale_)));
     }
 
     Vector2 TextRenderer::Measure(std::string_view text) const
@@ -43,9 +74,8 @@ namespace cnahouse::ui
         {
             return Vector2(0.0f, 0.0f);
         }
-        // `MeasureString` answers in FONT pixels; the caller thinks in virtual units, and the two are
-        // the same thing only when the scale is 1. Dividing here keeps every caller in one coordinate
-        // system.
+        // The face deliberately retains its authored pixel size at every viewport. Its measured box
+        // is therefore already in the physical coordinate system used to finish anchor placement.
         const Vector2 measured = font_->MeasureString(std::string(text));
         return Vector2(measured.X, measured.Y);
     }
@@ -53,35 +83,36 @@ namespace cnahouse::ui
     Vector2 TextRenderer::Resolve(std::string_view text, Vector2 virtualPosition, Anchor anchor) const
     {
         const Vector2 size = Measure(text);
-        float x = virtualPosition.X;
-        float y = virtualPosition.Y;
+        float x = originX_ + virtualPosition.X * scale_;
+        float y = originY_ + virtualPosition.Y * scale_;
+        const float right = originX_ + kVirtualWidth * scale_;
+        const float bottom = originY_ + kVirtualHeight * scale_;
+        const float centreX = originX_ + kVirtualWidth * scale_ * 0.5F;
+        const float centreY = originY_ + kVirtualHeight * scale_ * 0.5F;
 
         switch (anchor)
         {
             case Anchor::TopLeft:
                 break;
             case Anchor::TopCentre:
-                // SpriteBatch draws SpriteFont glyphs at their authored pixel size; only the HUD
-                // position is expressed in virtual units. Centre against the real viewport width
-                // so a long line remains centred (and therefore wholly visible) below 1600 px.
-                x = ((static_cast<float>(viewportWidth_) - size.X) * 0.5f) / scale_ + virtualPosition.X;
+                x = centreX - size.X * 0.5F + virtualPosition.X * scale_;
                 break;
             case Anchor::TopRight:
-                x = kVirtualWidth - virtualPosition.X - size.X;
+                x = right - virtualPosition.X * scale_ - size.X;
                 break;
             case Anchor::BottomLeft:
-                y = kVirtualHeight - virtualPosition.Y - size.Y;
+                y = bottom - virtualPosition.Y * scale_ - size.Y;
                 break;
             case Anchor::BottomRight:
-                x = kVirtualWidth - virtualPosition.X - size.X;
-                y = kVirtualHeight - virtualPosition.Y - size.Y;
+                x = right - virtualPosition.X * scale_ - size.X;
+                y = bottom - virtualPosition.Y * scale_ - size.Y;
                 break;
             case Anchor::Centre:
-                x = (kVirtualWidth - size.X) * 0.5f + virtualPosition.X;
-                y = (kVirtualHeight - size.Y) * 0.5f + virtualPosition.Y;
+                x = centreX - size.X * 0.5F + virtualPosition.X * scale_;
+                y = centreY - size.Y * 0.5F + virtualPosition.Y * scale_;
                 break;
         }
-        return Vector2(x * scale_, y * scale_);
+        return Vector2(x, y);
     }
 
     void TextRenderer::Draw(Microsoft::Xna::Framework::Graphics::SpriteBatch& batch,

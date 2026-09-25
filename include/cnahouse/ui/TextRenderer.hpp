@@ -6,6 +6,7 @@
 #include <string_view>
 
 #include "Microsoft/Xna/Framework/Color.hpp"
+#include "Microsoft/Xna/Framework/Rectangle.hpp"
 #include "Microsoft/Xna/Framework/Vector2.hpp"
 
 namespace Microsoft::Xna::Framework::Graphics
@@ -76,16 +77,33 @@ namespace cnahouse::ui
         }
 
         /// @brief Tells the renderer the real back-buffer size, so virtual units can be scaled.
+        ///
+        /// The whole viewport is considered safe. Runtime code normally uses the overload below
+        /// with XNA's `Viewport::TitleSafeArea`; this overload remains useful for tests and callers
+        /// whose surface has no excluded edges.
         void SetViewport(int width, int height) noexcept;
 
-        /// @brief The uniform scale from virtual units to pixels.
+        /// @brief Fits the 1600x900 virtual canvas inside @p safeArea without stretching it.
         ///
-        /// One scale for both axes, chosen as the SMALLER of the two ratios, so text never overflows
-        /// the window on the tighter axis. A per-axis scale would stretch the glyphs.
+        /// Insets are expressed in physical back-buffer pixels, as XNA reports them. The authored
+        /// canvas is uniformly scaled and centred in the safe rectangle, so 4:3 letterboxes
+        /// vertically and a 20:9 phone letterboxes horizontally while every menu remains clear of
+        /// a cutout or system gesture edge.
+        void
+        SetViewport(int width, int height, const Microsoft::Xna::Framework::Rectangle& safeArea) noexcept;
+
+        /// @brief The uniform scale from virtual layout units to pixels.
+        ///
+        /// One scale for both axes, chosen as the SMALLER of the two ratios. It transforms layout
+        /// positions; the SpriteFont stays at its authored pixel size so low-resolution targets do
+        /// not turn the 16-pixel UI face into unreadable six-pixel text.
         [[nodiscard]] float Scale() const noexcept
         {
             return scale_;
         }
+
+        /// @brief Physical-pixel rectangle occupied by the virtual canvas.
+        [[nodiscard]] Microsoft::Xna::Framework::Rectangle LayoutBounds() const noexcept;
 
         /// @brief The size @p text would occupy, in virtual units.
         [[nodiscard]] Microsoft::Xna::Framework::Vector2 Measure(std::string_view text) const;
@@ -114,6 +132,8 @@ namespace cnahouse::ui
 
         const Microsoft::Xna::Framework::Graphics::SpriteFont* font_ = nullptr;
         float scale_ = 1.0f;
+        float originX_ = 0.0f;
+        float originY_ = 0.0f;
         int viewportWidth_ = static_cast<int>(kVirtualWidth);
         int viewportHeight_ = static_cast<int>(kVirtualHeight);
     };
