@@ -1,3 +1,29 @@
+# Foyer, porch and central-hall C5 handoff — 2026-09-25 (`HOUSE-00986`)
+
+The three named hero cells meet C5 without extra content. Their retained bounded recipes already
+provide the foyer console/armchair, entry rug/plant and dressing; hall runner, portal art and paired
+gallery walls; and the porch's clear arrival with paired lantern/ceiling-light composition. Fresh
+full `Z-L0M` fixed sets at clear 10:30 and scheduled 22:00 plus targeted overcast captures inspect
+all seven foyer/hall cameras. Round 164's front-path views cover the porch in the same three
+conditions. Full-resolution inspection found readable compositions, open routes and no S1/S2,
+clipping, floating/intersecting furnishing, z-fighting or missing texture. Evidence remains ignored
+under `docs/visual-review/captures/house-00986-foyer-hall-{day,night,overcast}-r165/` and
+`house-03450-front-{day,night,overcast}-r164/`.
+
+The existing Release `MainStair` scenario ran on the §71.1 AMD Radeon 780M at 1920×1080,
+Tier S / High and vsync off: 57 draw calls, 24,214 triangles, 1.166 ms CPU total and 3.044 ms
+GPU-completion median / 3.524 ms p95. Round 164's `StreetApproach` result covers the porch/front
+arrival. Both are below the desktop High hard limits.
+
+Rule R4 now selects `HOUSE-00988`, followed by `HOUSE-00990` and gate `HOUSE-03480`. The remaining
+forecast is 113.25 realistic / 142.5 pessimistic hours. The M6 pessimistic row is locally corrected
+to the plan's declared 1.10× method instead of remaining below its realistic value. With 113
+task-hours spent since the final reduction, the R14 projection is 255.5 h, 24.5 h below the
+ceiling. Every build, test, capture and check is limited to four workers and pinned to CPUs
+4,5,7,9; strict-XNA additionally uses `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Front-approach C5 handoff — 2026-09-25 (`HOUSE-03450`)
 
 The exterior portion of hero area H1 meets C5 without another content campaign. Fresh fixed

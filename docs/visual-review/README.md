@@ -5583,3 +5583,23 @@ The existing Release `StreetApproach` scenario on the §71.1 AMD Radeon 780M at 
 Tier S / High and vsync off reports 479 draw calls, 1,008,132 triangles, 2.968 ms CPU total and
 4.878 ms GPU-completion median / 5.592 ms p95, below the desktop High hard limits. Rule R4 now
 selects `HOUSE-00986`, the deliberately-last ground-floor foyer/porch/hall C5 pass.
+
+## Round 165 — foyer, porch and central hall C5
+
+Commit: `HOUSE-00986` working tree (`2026-09-25`). The retained bounded recipes already provide
+the foyer console/armchair, entry rug/plant and surface dressing; the hall runner, portal art and
+paired gallery walls; and the porch's clear arrival with paired lantern/ceiling-light composition.
+No extra content was justified.
+
+Fresh full `Z-L0M` fixed sets at clear 10:30 and scheduled 22:00 plus targeted overcast captures
+inspect all seven foyer/hall cameras. Round 164's front-path views inspect the porch under the same
+three conditions. Full-resolution review finds readable compositions, open routes and no S1/S2,
+clipping, floating/intersecting furnishing, z-fighting or missing texture. Local evidence is in
+`captures/house-00986-foyer-hall-{day,night,overcast}-r165/` and
+`captures/house-03450-front-{day,night,overcast}-r164/`.
+
+The existing Release `MainStair` scenario on the §71.1 AMD Radeon 780M at 1920×1080,
+Tier S / High and vsync off reports 57 draw calls, 24,214 triangles, 1.166 ms CPU total and
+3.044 ms GPU-completion median / 3.524 ms p95. Together with Round 164's `StreetApproach` result,
+both sides of the arrival are below the desktop High hard limits. Rule R4 next selects
+`HOUSE-00988`, the living-room C5 pass.
