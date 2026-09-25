@@ -1,3 +1,28 @@
+# Basement-cinema C5 handoff — 2026-09-25 (`HOUSE-03455`)
+
+`B1_CINEMA` meets C5 without new content. `HOUSE-01023` already supplied the static screen and
+projector, two four-seat rows and four upholstered acoustic panels; `HOUSE-03403` already linked
+four ceiling fixtures and two low aisle pucks to the scheduled cinema groups. Fresh fixed day and
+scheduled-night views plus a reciprocal night view show the complete screen, both seating rows,
+projector, panels, low lights and open route. Full-resolution inspection found no S1/S2, clipping,
+floating/intersecting furnishing, z-fighting or missing texture. Evidence remains Git-ignored under
+`docs/visual-review/captures/house-03455-cinema-before-{day,night}-r163/` and
+`house-03455-cinema-detail-r163/`.
+
+A task-local Release probe used the unchanged `HOUSE-02402` measurement path on the §71.1 AMD
+Radeon 780M at 1920×1080, Tier S / High and vsync off: 27 draw calls, 28,200 triangles, 0.957 ms
+CPU total and 2.167 ms GPU completion median / 2.571 ms p95. The source and binary were restored to
+the authoritative eight scenarios immediately afterwards; no probe code remains.
+
+Rule R2 now selects `HOUSE-03450`, the remaining non-ground-floor hero check in `Z-EXF`; rule R4
+continues to defer all ground-floor hero tasks until it closes. The remaining forecast is 116.25
+realistic / 144.25 pessimistic hours. With 110 task-hours spent since the final reduction, the R14
+projection is 254.25 h, 25.75 h below the ceiling. Every build/test/render remains limited to four
+workers and pinned to CPUs 4,5,7,9; strict-XNA additionally requires
+`HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Library C5 handoff — 2026-09-25 (`HOUSE-03454`)
 
 `L2_LIBRARY` now meets C5. Its retained composition already supplied paired reading chairs and

@@ -5550,3 +5550,21 @@ and vsync off reports 89 draw calls, 555,264 triangles, 1.256 ms CPU total and 3
 completion median / 3.539 ms p95, all within the High budgets. Rule R2 next selects
 `HOUSE-03455`: `Z-B1` has more accessible cells below the hero target than `Z-EXF`; ground-floor
 hero work remains last under R4.
+
+## Round 163 — basement cinema C5
+
+Commit: `HOUSE-03455` working tree (`2026-09-25`). The existing bounded composition already meets
+the task: a static screen and projector, two four-seat rows, four upholstered acoustic panels, four
+scheduled ceiling fixtures and two low aisle pucks. No additional content was justified.
+
+Fresh fixed clear-day and scheduled-night views plus a reciprocal night view were inspected at full
+resolution. Together they show the screen, both seating rows, projector, wall panels, low lights
+and clear route, with no S1/S2, clipping, floating/intersecting furnishing, z-fighting or missing
+texture. Local evidence is in `captures/house-03455-cinema-before-{day,night}-r163/` and
+`captures/house-03455-cinema-detail-r163/`.
+
+A task-local Release probe using the unchanged `HOUSE-02402` measurement path on the §71.1 AMD
+Radeon 780M at 1920×1080, Tier S / High and vsync off reports 27 draw calls, 28,200 triangles,
+0.957 ms CPU total and 2.167 ms GPU completion median / 2.571 ms p95. The authoritative eight
+scenarios were restored immediately afterwards. Rule R2 next selects `HOUSE-03450`, the remaining
+non-ground-floor hero check; R4 keeps ground-floor hero work last.
