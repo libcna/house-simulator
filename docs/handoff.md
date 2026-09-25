@@ -1,3 +1,26 @@
+# Front-approach C5 handoff — 2026-09-25 (`HOUSE-03450`)
+
+The exterior portion of hero area H1 meets C5 without another content campaign. Fresh fixed
+clear-day and scheduled-night views cover all four `Z-EXF` cameras; the two H1 representative
+cameras were also captured overcast. Full-resolution inspection shows the facade, gate, walk,
+paired front gardens, driveway and garage elevation readable in all three conditions, with open
+routes and no S1/S2, clipping, floating/intersecting dressing, z-fighting or missing texture. No
+runtime, content, asset, material or lighting change was justified. Evidence remains Git-ignored
+under `docs/visual-review/captures/house-03450-front-{day,night,overcast}-r164/`.
+
+The existing Release `StreetApproach` scenario ran on the §71.1 AMD Radeon 780M at 1920×1080,
+Tier S / High and vsync off: 479 draw calls, 1,008,132 triangles, 2.968 ms CPU total and 4.878 ms
+GPU-completion median / 5.592 ms p95. These are below the desktop High hard limits.
+
+Rule R4 now selects `HOUSE-00986`, the deliberately-last ground-floor foyer/porch/hall C5 pass;
+`HOUSE-00988` and `HOUSE-00990` are also dependency-unblocked but follow it in plan order. The
+remaining forecast is 115.25 realistic / 143 pessimistic hours. With 111 task-hours spent since
+the final reduction, the R14 projection is 254 h, 26 h below the ceiling. Every build, test,
+capture and check is limited to four workers and pinned to CPUs 4,5,7,9; strict-XNA additionally
+uses `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Basement-cinema C5 handoff — 2026-09-25 (`HOUSE-03455`)
 
 `B1_CINEMA` meets C5 without new content. `HOUSE-01023` already supplied the static screen and

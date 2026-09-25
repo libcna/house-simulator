@@ -5568,3 +5568,18 @@ Radeon 780M at 1920×1080, Tier S / High and vsync off reports 27 draw calls, 28
 0.957 ms CPU total and 2.167 ms GPU completion median / 2.571 ms p95. The authoritative eight
 scenarios were restored immediately afterwards. Rule R2 next selects `HOUSE-03450`, the remaining
 non-ground-floor hero check; R4 keeps ground-floor hero work last.
+
+## Round 164 — front-approach C5 check
+
+Commit: `HOUSE-03450` working tree (`2026-09-25`). This is the bounded check required by the task,
+not a new content campaign. Fresh fixed clear-day and scheduled-night captures cover all four
+`Z-EXF` cameras; overcast covers the two H1 representative cameras. Full-resolution inspection
+shows the complete facade, gate, walk, paired front gardens, driveway and garage elevation
+readable in all three conditions, with open routes and no S1/S2, clipping,
+floating/intersecting dressing, z-fighting or missing texture. No content change was justified.
+Local evidence is in `captures/house-03450-front-{day,night,overcast}-r164/`.
+
+The existing Release `StreetApproach` scenario on the §71.1 AMD Radeon 780M at 1920×1080,
+Tier S / High and vsync off reports 479 draw calls, 1,008,132 triangles, 2.968 ms CPU total and
+4.878 ms GPU-completion median / 5.592 ms p95, below the desktop High hard limits. Rule R4 now
+selects `HOUSE-00986`, the deliberately-last ground-floor foyer/porch/hall C5 pass.
