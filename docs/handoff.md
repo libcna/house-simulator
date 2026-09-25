@@ -1,3 +1,28 @@
+# Settings contract handoff — 2026-09-25 (`HOUSE-02528`)
+
+The existing settings model and the existing `SettingsScreen` live-apply callback now have one
+focused contract under the required `SettingsRoundTripTests.*` label. It covers every one of the
+22 persisted fields through `ToJson`/`FromJson`, both endpoints of every bounded numeric value and
+the empty fixed-weather fallback, and every one of the 15 retained page controls. For each control,
+the test proves the settings value is committed before the callback observes it. The focused tests
+pass 3/3 and the complete unit binary passes 1,471/1,471. No production path, settings framework or
+optional control was added.
+
+An initially separate test source triggered CMake's glob regeneration. Sandbox CMake could not
+create CNA's existing SDL lock outside this repository, and permission to do so was correctly
+refused because sibling repositories are out of scope. The tests therefore live in the existing
+settings/menu test translation units; the existing `build/` metadata was restated, and CNA was not
+modified. All compilation used `taskset -c 0-3`, `--parallel 4`, the parallelism environment caps
+and `/rv/cnaccache`.
+
+M9 is complete. With M11 still dependency-blocked by the environment-only `HOUSE-01939` listening
+walk, milestone/dependency order plus R11 and R13 selects `HOUSE-02403` next: record the furnished
+house's eight-scenario performance, memory and cold-start baseline before any optimisation. The
+remaining forecast is 83.5 realistic / 109.75 pessimistic hours; 142.75 task-hours completed plus
+the pessimistic remainder projects 252.5 h, 27.5 h below the R14 ceiling.
+
+---
+
 # Safe-area UI handoff — 2026-09-25 (`HOUSE-02527`)
 
 The existing `TextRenderer` now fits its 1600x900 virtual canvas uniformly inside standard-XNA

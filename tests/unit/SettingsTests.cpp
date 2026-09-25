@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 
 #include "cnahouse/app/Settings.hpp"
+#include "cnahouse/environment/MoonModel.hpp"
 #include "cnahouse/player/FirstPersonCamera.hpp"
 #include "cnahouse/player/HeadBob.hpp"
 
@@ -299,6 +300,118 @@ namespace
         auto settings = Settings::FromJson(R"({"quality": "cinematic"})", "settings.json");
         ASSERT_TRUE(settings);
         EXPECT_EQ(settings->quality, QualityPreset::High);
+    }
+
+    TEST(SettingsRoundTripTests, EveryPersistedValueSurvivesItsOwnJson)
+    {
+        Settings written = Settings::Defaults();
+        written.backBufferWidth = 2560;
+        written.backBufferHeight = 1440;
+        written.fullscreen = true;
+        written.verticalSync = false;
+        written.quality = QualityPreset::Medium;
+        written.masterVolume = 0.11F;
+        written.footstepsVolume = 0.22F;
+        written.ambienceVolume = 0.33F;
+        written.weatherVolume = 0.44F;
+        written.mouseSensitivity = 2.3F;
+        written.invertY = true;
+        written.lookSmoothing = true;
+        written.fieldOfView = 85.0F;
+        written.headBob = cnahouse::player::HeadBobLevel::Normal;
+        written.fastWalk = true;
+        written.dayLengthRealMinutes = 96.0F;
+        written.fixedTimeOfDayHours = 22.0F;
+        written.moonPhaseSpeedMultiplier = 4.5F;
+        written.showEnvironmentReadout = false;
+        written.weatherMode = WeatherMode::Fixed;
+        written.fixedWeatherArchetype = "W_RAIN";
+
+        const auto read = Settings::FromJson(written.ToJson(), "settings-round-trip.json");
+        ASSERT_TRUE(read) << read.Error().ToString();
+        EXPECT_EQ(read->version, Settings::kCurrentVersion);
+        EXPECT_EQ(read->backBufferWidth, written.backBufferWidth);
+        EXPECT_EQ(read->backBufferHeight, written.backBufferHeight);
+        EXPECT_EQ(read->fullscreen, written.fullscreen);
+        EXPECT_EQ(read->verticalSync, written.verticalSync);
+        EXPECT_EQ(read->quality, written.quality);
+        EXPECT_FLOAT_EQ(read->masterVolume, written.masterVolume);
+        EXPECT_FLOAT_EQ(read->footstepsVolume, written.footstepsVolume);
+        EXPECT_FLOAT_EQ(read->ambienceVolume, written.ambienceVolume);
+        EXPECT_FLOAT_EQ(read->weatherVolume, written.weatherVolume);
+        EXPECT_FLOAT_EQ(read->mouseSensitivity, written.mouseSensitivity);
+        EXPECT_EQ(read->invertY, written.invertY);
+        EXPECT_EQ(read->lookSmoothing, written.lookSmoothing);
+        EXPECT_FLOAT_EQ(read->fieldOfView, written.fieldOfView);
+        EXPECT_EQ(read->headBob, written.headBob);
+        EXPECT_EQ(read->fastWalk, written.fastWalk);
+        EXPECT_FLOAT_EQ(read->dayLengthRealMinutes, written.dayLengthRealMinutes);
+        EXPECT_FLOAT_EQ(read->fixedTimeOfDayHours, written.fixedTimeOfDayHours);
+        EXPECT_FLOAT_EQ(read->moonPhaseSpeedMultiplier, written.moonPhaseSpeedMultiplier);
+        EXPECT_EQ(read->showEnvironmentReadout, written.showEnvironmentReadout);
+        EXPECT_EQ(read->weatherMode, written.weatherMode);
+        EXPECT_EQ(read->fixedWeatherArchetype, written.fixedWeatherArchetype);
+    }
+
+    TEST(SettingsRoundTripTests, EveryBoundedValueClampsAtBothEnds)
+    {
+        Settings low = Settings::Defaults();
+        low.backBufferWidth = 0;
+        low.backBufferHeight = 0;
+        low.masterVolume = -1.0F;
+        low.footstepsVolume = -1.0F;
+        low.ambienceVolume = -1.0F;
+        low.weatherVolume = -1.0F;
+        low.mouseSensitivity = 0.0F;
+        low.fieldOfView = 0.0F;
+        low.dayLengthRealMinutes = -1.0F;
+        low.fixedTimeOfDayHours = -2.0F;
+        low.moonPhaseSpeedMultiplier = 0.0F;
+        low.fixedWeatherArchetype.clear();
+
+        EXPECT_FALSE(low.ClampToSupportedRanges().empty());
+        EXPECT_EQ(low.backBufferWidth, 640);
+        EXPECT_EQ(low.backBufferHeight, 480);
+        EXPECT_FLOAT_EQ(low.masterVolume, 0.0F);
+        EXPECT_FLOAT_EQ(low.footstepsVolume, 0.0F);
+        EXPECT_FLOAT_EQ(low.ambienceVolume, 0.0F);
+        EXPECT_FLOAT_EQ(low.weatherVolume, 0.0F);
+        EXPECT_FLOAT_EQ(low.mouseSensitivity, 0.2F);
+        EXPECT_FLOAT_EQ(low.fieldOfView, cnahouse::player::kMinFovDegrees);
+        EXPECT_FLOAT_EQ(low.dayLengthRealMinutes,
+                        static_cast<float>(cnahouse::environment::kMinDayLengthRealMinutes));
+        EXPECT_FLOAT_EQ(low.fixedTimeOfDayHours, -1.0F);
+        EXPECT_FLOAT_EQ(low.moonPhaseSpeedMultiplier,
+                        static_cast<float>(cnahouse::environment::kMinMoonPhaseSpeedMultiplier));
+        EXPECT_EQ(low.fixedWeatherArchetype, "W_PARTLY");
+
+        Settings high = Settings::Defaults();
+        high.backBufferWidth = 99999;
+        high.backBufferHeight = 99999;
+        high.masterVolume = 2.0F;
+        high.footstepsVolume = 2.0F;
+        high.ambienceVolume = 2.0F;
+        high.weatherVolume = 2.0F;
+        high.mouseSensitivity = 5.0F;
+        high.fieldOfView = 180.0F;
+        high.dayLengthRealMinutes = 99999.0F;
+        high.fixedTimeOfDayHours = 24.0F;
+        high.moonPhaseSpeedMultiplier = 99.0F;
+
+        EXPECT_FALSE(high.ClampToSupportedRanges().empty());
+        EXPECT_EQ(high.backBufferWidth, 7680);
+        EXPECT_EQ(high.backBufferHeight, 4320);
+        EXPECT_FLOAT_EQ(high.masterVolume, 1.0F);
+        EXPECT_FLOAT_EQ(high.footstepsVolume, 1.0F);
+        EXPECT_FLOAT_EQ(high.ambienceVolume, 1.0F);
+        EXPECT_FLOAT_EQ(high.weatherVolume, 1.0F);
+        EXPECT_FLOAT_EQ(high.mouseSensitivity, 4.0F);
+        EXPECT_FLOAT_EQ(high.fieldOfView, cnahouse::player::kMaxFovDegrees);
+        EXPECT_FLOAT_EQ(high.dayLengthRealMinutes,
+                        static_cast<float>(cnahouse::environment::kMaxDayLengthRealMinutes));
+        EXPECT_FLOAT_EQ(high.fixedTimeOfDayHours, -1.0F);
+        EXPECT_FLOAT_EQ(high.moonPhaseSpeedMultiplier,
+                        static_cast<float>(cnahouse::environment::kMaxMoonPhaseSpeedMultiplier));
     }
 
 } // namespace

@@ -644,4 +644,62 @@ namespace
         cancel.cancelPressed = true;
         EXPECT_EQ(screen.Update(cancel, 0.016F), ScreenAction::Pop);
     }
+
+    TEST(SettingsRoundTripTests, EveryVisibleValueMutatesBeforeItsLiveApplyCallback)
+    {
+        constexpr std::array controls = {SettingsControl::Quality,
+                                         SettingsControl::DisplaySize,
+                                         SettingsControl::Fullscreen,
+                                         SettingsControl::VerticalSync,
+                                         SettingsControl::FieldOfView,
+                                         SettingsControl::Master,
+                                         SettingsControl::Footsteps,
+                                         SettingsControl::Ambience,
+                                         SettingsControl::Weather,
+                                         SettingsControl::LookSensitivity,
+                                         SettingsControl::InvertY,
+                                         SettingsControl::WalkSpeed,
+                                         SettingsControl::TimeOfDay,
+                                         SettingsControl::TimeSpeed,
+                                         SettingsControl::EnvironmentWeather};
+        static_assert(controls.size() == SettingsScreen::ControlCount());
+
+        for (std::size_t index = 0; index < controls.size(); ++index)
+        {
+            Settings settings = Settings::Defaults();
+            SettingsFeatures features;
+            features.displaySizes = {{1600, 900}, {1920, 1080}};
+            std::vector<SettingsControl> applied;
+            std::vector<std::string> liveValues;
+            SettingsScreen screen(
+                settings,
+                [&](SettingsControl control)
+                {
+                    applied.push_back(control);
+                    liveValues.push_back(settings.ToJson());
+                },
+                features);
+
+            InputState down;
+            down.uiDownPressed = true;
+            for (std::size_t row = 0; row < index; ++row)
+            {
+                screen.Update(down, 0.016F);
+            }
+            ASSERT_EQ(screen.Selected(), controls[index]);
+
+            const std::string before = settings.ToJson();
+            InputState edit;
+            edit.uiAcceptPressed = true;
+            screen.Update(edit, 0.016F);
+
+            ASSERT_EQ(applied, std::vector{controls[index]})
+                << "row " << index << " did not use its live-apply route";
+            ASSERT_EQ(liveValues.size(), 1U);
+            EXPECT_NE(liveValues.front(), before)
+                << "row " << index << " invoked apply before mutating its settings value";
+            EXPECT_EQ(liveValues.front(), settings.ToJson())
+                << "the callback did not observe the committed live value";
+        }
+    }
 } // namespace
