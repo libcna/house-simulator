@@ -110,6 +110,26 @@ namespace cnahouse::app
             frameLimit_ = frames;
         }
 
+        /// @brief Render into an offscreen target and force one-texel completion each frame.
+        ///
+        /// Performance tests opt into this before `Run`. Normal sessions never allocate the target
+        /// or pay the readback. The paired vectors separate CPU command submission from elapsed time
+        /// through GPU completion, following the phase-1 probe's measured one-texel fence.
+        void EnableGpuCompletionSamplingForTesting() noexcept
+        {
+            gpuCompletionSampling_ = true;
+        }
+
+        [[nodiscard]] const std::vector<float>& RenderSubmitTimesForTesting() const noexcept
+        {
+            return renderSubmitTimes_;
+        }
+
+        [[nodiscard]] const std::vector<float>& GpuCompletionTimesForTesting() const noexcept
+        {
+            return gpuCompletionTimes_;
+        }
+
         /// @brief Stops after this many of §49.3's fixed steps. 0 means no limit.
         ///
         /// **The limit a simulation test wants.** A frame limit measures the MACHINE: the fixed
@@ -161,6 +181,11 @@ namespace cnahouse::app
         [[nodiscard]] const debug::Counters& CountersForTesting() const noexcept
         {
             return counters_;
+        }
+
+        [[nodiscard]] const debug::Timing& TimingForTesting() const noexcept
+        {
+            return timing_;
         }
 
         /// @brief §71's console, so a test can type a command the way a person would.
@@ -454,6 +479,12 @@ namespace cnahouse::app
         std::unique_ptr<Capture> capture_;
         std::string pendingScreenshot_;
         bool exitAfterScreenshot_ = false;
+
+        /// Test-only full-frame GPU fence. Kept beside screenshot capture because both use the same
+        /// truthful XNA mechanism: render to a preserved target, then read one texel.
+        bool gpuCompletionSampling_ = false;
+        std::vector<float> renderSubmitTimes_;
+        std::vector<float> gpuCompletionTimes_;
 
         /// @brief Set when `Update` or `Draw` threw. The frame after, the game stops.
         ///

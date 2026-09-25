@@ -1,3 +1,28 @@
+# Representative performance-harness handoff — 2026-09-25 (`HOUSE-02402`)
+
+The reduced plan's eight fixed scenarios now run as a Release CTest harness: kitchen, library,
+main stair, street approach, rear garden, upper-floor window, heavy rain and night exterior. Each
+uses a fixed camera, clock, weather and seed at Tier S / High, renders 120 warm-up plus 600 measured
+frames into a 1920×1080 preserved target, and prints average draw calls and triangles together
+with CPU submission and one-texel-readback GPU-completion median/p95 milliseconds. Normal runtime
+draws are unchanged unless the test-only sampling switch is enabled.
+
+The performance tests require the current-world fixture, run serially, and use SDL offscreen video
+and dummy audio. A Release CTest run executed the fixture plus all eight scenarios in separate
+processes: 9/9 passed in 649.67 s. The library reported 89 draw calls and 555,264 triangles; the
+largest submission counts observed were 479 draw calls and 1,318,460 triangles. The available Mesa
+offscreen timing is functional evidence only, not the reference-hardware baseline; `HOUSE-02403`
+still owns that baseline and no optimisation claim has been made.
+
+Rule R5 selected this Track-B checkpoint because every newly unblocked C5 task requires its covering
+performance scenario and the authoritative harness task was still open. Rule R2 now resumes Track A
+at `HOUSE-03454`, the library C5 pass. The remaining forecast is 120.25 realistic / 148.75
+pessimistic hours. With 106 task-hours spent since the final reduction, the R14 projection is
+254.75 h, 25.25 h below the ceiling. Every build/test/render remains limited to four workers and
+pinned to CPUs 4,5,7,9; strict-XNA additionally requires `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # G4 presentation-gate handoff — 2026-09-25 (`HOUSE-03452`)
 
 Gate G4 passes. Round 161 captured all 68 fixed Tier-S/High views at clear 10:30 and scheduled

@@ -7100,23 +7100,25 @@ with them.
 
 ### 70.6 Performance tests
 
-Run nightly on the dev machine against the budgets of §71, on a fixed set of worst-case scenarios:
+Run nightly on the dev machine against the budgets of §71, on the reduced plan's fixed set of
+representative scenarios:
 
 | Scenario | What it stresses |
 |---|---|
-| All 62 doors open, camera in `L0_FOYER` looking north | Maximum portal traversal and visible-cell count |
-| All doors open, camera in `L0_STAIR_MAIN` looking up | Three floors visible at once |
-| Exterior, camera on the road at the widest view | Neighbourhood, vegetation, terrain, LOD |
-| `L0_KITCHEN` at noon with every container open | Densest interior, most sub-portals |
-| `L3_STORE_W` with the attic light on | Most dressing props, worst headroom |
-| `B1_HALL` with every basement door open | Deepest chain with no daylight |
-| Thunderstorm at 21:00 on the terrace | Maximum particles + lightning + wetness + audio voices |
-| Blizzard at 03:00 on the road | Maximum snow particles + snow shells + fog |
-| Third person with both pets, avatar in the mirror's view | Maximum skinning |
-| A 90-second scripted walk through the whole house | Residency churn, cell transitions, audio re-solves |
+| `L0_KITCHEN` | Densest retained interior composition |
+| `L2_LIBRARY` | Hero-area shelving, dressing and practical lights |
+| `L0_STAIR_MAIN` looking up | Three floors visible at once |
+| Street approach towards the house | Neighbourhood, vegetation, terrain and facade |
+| Rear garden towards the house | Garden, planting, fencing and rear elevation |
+| An upper-floor window looking out | Interior/exterior overlap through glazing |
+| Heavy rain outside | Maximum retained precipitation and wet exterior state |
+| Night outside | Exterior lights, window glow and night sky |
 
-Each scenario asserts frame time, draw calls, triangles, visible cells, voices and memory against
-the budget, and writes a row into `docs/performance-log.md` so regressions are visible over time.
+`HOUSE-02402` runs each at 1920×1080, Tier S / High, with fixed camera, clock, weather and seed. It
+prints average draw calls and triangles plus CPU submission and one-texel-readback GPU-completion
+milliseconds. The harness reports rather than gates: `HOUSE-02403` records the reference-hardware
+baseline in `docs/performance-log.md`, and `HOUSE-02404` compares it to §71 and optimises only rows
+that miss.
 
 ---
 

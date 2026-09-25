@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 #include <algorithm>
 #include <array>
+#include <chrono>
 
 #include "cnahouse/app/CnaHouseGame.hpp"
 
@@ -1364,7 +1365,39 @@ namespace cnahouse::app
                 }
             }
 
-            RenderFrame();
+            if (gpuCompletionSampling_)
+            {
+                if (capture_ == nullptr)
+                {
+                    capture_ = std::make_unique<Capture>(
+                        getGraphicsDeviceProperty(), settings_.backBufferWidth, settings_.backBufferHeight);
+                }
+
+                using Clock = std::chrono::steady_clock;
+                const auto completionStart = Clock::now();
+                getGraphicsDeviceProperty().SetRenderTarget(&capture_->target);
+                const auto submitStart = Clock::now();
+                RenderFrame();
+                const auto submitEnd = Clock::now();
+                getGraphicsDeviceProperty().SetRenderTarget(nullptr);
+
+                // A one-texel readback is the phase-1 probe's measured XNA-only GPU fence. Reading
+                // the full 1080p target would measure PCIe/unified-memory transfer rather than the
+                // frame; reading nothing would time only command submission.
+                const Microsoft::Xna::Framework::Rectangle oneTexel(0, 0, 1, 1);
+                Microsoft::Xna::Framework::Color pixel;
+                capture_->target.GetData(0, &oneTexel, &pixel, 0, 1);
+                const auto completionEnd = Clock::now();
+
+                renderSubmitTimes_.push_back(static_cast<float>(
+                    std::chrono::duration<double, std::milli>(submitEnd - submitStart).count()));
+                gpuCompletionTimes_.push_back(static_cast<float>(
+                    std::chrono::duration<double, std::milli>(completionEnd - completionStart).count()));
+            }
+            else
+            {
+                RenderFrame();
+            }
 
             ++framesDrawn_;
             if (fixedStepLimit_ != 0 && fixedSteps_ >= fixedStepLimit_)

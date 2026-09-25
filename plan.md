@@ -12,8 +12,8 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **76 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 104 / 122 / 151 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Active plan | **75 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 103 / 120 / 149 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
 | Current gate | **G4 passed; all twelve main cells are at C4.** Next: the library C5 pass in `HOUSE-03454` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
@@ -1257,11 +1257,12 @@ measurement**: optimise only a scenario that misses its documented target, stop 
 it, and keep **no headroom margin**. A task whose measurement comes back green closes with the
 numbers and no code. No speculative optimisation infrastructure is built (rule R9).
 
-- [ ] HOUSE-02402 — The eight representative performance scenarios as a runnable harness
+- [x] HOUSE-02402 — The eight representative performance scenarios as a runnable harness
       dep: HOUSE-00150, HOUSE-03202 · sys: ci · plat: CI · pri: MUST · zone: all · adv: D9 · est: 1.5
       accept: eight scenarios: three interiors (the kitchen, the library, the main stair looking up), three exteriors (the street approach towards the house and the neighbourhood, the rear garden, an upper-floor window looking out), heavy rain outside, and night outside; each runs headless with a fixed camera and prints draw calls, triangles and CPU and GPU milliseconds
       verify: the `perf` preset runs all eight
       trace: was *the 10 performance scenarios*
+      note: (2026-09-25) Added eight fixed 1920×1080 Tier-S/High scenarios with 120 warm-up and 600 measured frames each. The test-only XNA path renders once into a preserved full-size target, records CPU submission, forces GPU completion with the already-proved one-texel `GetData`, and reports average draw calls/triangles plus median/p95 timings. CTest supplies fresh-process isolation, current-world fixture, offscreen video, dummy audio and serial execution. Release CTest ran the fixture and all eight scenarios in 649.67 s with 9/9 passing. The available Mesa offscreen path is functional evidence only; its timing is not the reference-hardware baseline owned by `HOUSE-02403`
 
 - [ ] HOUSE-02403 — Measure the furnished house: the eight scenarios, memory and cold-start load, recorded as the baseline
       dep: HOUSE-02402, HOUSE-03380, HOUSE-01030, HOUSE-00203 · sys: — · plat: LNX · pri: MUST · zone: all · adv: D9 · est: 2
@@ -1911,19 +1912,19 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M7 A compact environment | 13 | 21 | **8** | 11.25 | **13.25** | 14.5 | — |
 | M8 Atmospheric audio essentials | 11 | 14.5 | **6** | 7.75 | **9** | 10 | — |
 | M9 Application shell | 10 | 12.5 | **6** | 7.25 | **8.5** | 9.25 | — |
-| M10 Performance | 6 | 13 | **4** | 8 | **9.5** | 14.5 | R-C +4 |
+| M10 Performance | 6 | 13 | **3** | 6.75 | **8** | 12.75 | R-C +4 |
 | M11 Final defect pass | 3 | 11 | **3** | 6 | **7** | 7.75 | — |
 | M12 Representative tests | 4 | 5 | **2** | 3 | **3.5** | 3.75 | — |
 | M13 Linux desktop release | 10 | 13.25 | **8** | 8.75 | **10.25** | 11.25 | — |
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **76** | **104** | **121.75** | **150.5** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **75** | **102.75** | **120.25** | **148.75** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-129.5 h. Adding the 104.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-255 h, 25 h under the limit. That margin is
+131.25 h. Adding the 106 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+254.75 h, 25.25 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |
