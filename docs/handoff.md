@@ -1,3 +1,33 @@
+# Ambience listening blocker — 2026-09-25 (`HOUSE-01922`, still open)
+
+The bounded implementation is locally ready but deliberately not marked complete. A small
+`AmbienceDirector` uses the actual listener cell kind and sun elevation to select only the retained
+interior, exterior-day and exterior-night beds. Indoor/outdoor changes cross-fade linearly over
+0.8 s; exterior day/night blends continuously from -6° to +3° sun elevation. `AudioSystem` owns
+exactly four fixed loop voices: the existing NOX calm-wind interior tone, forest-birds day bed, and
+night plus cicadas night bed. It reuses the existing user-gesture/device gate, category volume and
+content cache; no per-cell loop, special-zone loop, positional routing or new mixer exists.
+
+Four focused director tests, all 17 focused director/AudioSystem tests and all six focused
+audio-gate integration tests pass. The real `--scene=walk` path under SDL dummy audio opens exactly
+the four retained voices. The complete unit label passes 1,453/1,453. The serial integration label
+passes 137/145; all eight failures are pre-existing environment failures in `SaveStoreTest`,
+reproduced as the sandbox refusing its `.tmp` write below
+`/home/robertvokac/.local/share/game/CnaHouse`. Strict-XNA compiles 342 translation units clean; the
+complete static gate reports only the known user-owned root `.claude` layout entry.
+
+The required indoor/outdoor human listening walk remains impossible here: `/dev/snd` is absent,
+ALSA reports no soundcards, PulseAudio refuses the connection and the Codex runtime rejects audio
+input. The implementation is preserved in the named stash `house-01922-awaiting-listening`; apply
+it in an audio-capable session, perform the listening walk, rerun the broad checks and only then
+tick and commit the task. `HOUSE-01925` remains dependency-blocked by this open task. M9 dependency
+order plus R11/R13 selects `HOUSE-02516` as the exact next independent MUST task. The forecast
+remains 92 realistic / 119 pessimistic hours; the R14 projection remains 253.25 h, 26.75 h below
+the ceiling. Every heavy command was pinned to CPUs 4,5,7,9 with at most four workers; strict-XNA
+used `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # Footstep category listening blocker — 2026-09-25 (`HOUSE-01920`, still open)
 
 The implementation is locally ready but the task is deliberately not marked complete. Six existing
