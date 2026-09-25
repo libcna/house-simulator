@@ -1435,8 +1435,9 @@ namespace cnahouse::app
                 settings_.fullscreen = graphics_.getIsFullScreenProperty();
                 Log::Info(LogCat::App, "display {}", settings_.fullscreen ? "fullscreen" : "windowed");
             }
-            if (menus_.Empty() && walking_ &&
-                (Input().Current().menuPressed || Input().Current().cancelPressed))
+            const bool openedPauseMenu = menus_.Empty() && walking_ &&
+                                         (Input().Current().menuPressed || Input().Current().cancelPressed);
+            if (openedPauseMenu)
             {
                 OpenPauseMenu();
             }
@@ -1577,7 +1578,10 @@ namespace cnahouse::app
             // `anyPressed` and calls back into `audio_`, so there is ONE place the gesture is
             // recognised rather than one in the game and one in the screen.
             const bool wasLoading = loading_ != nullptr;
-            if (menus_.Update(Input().Current(), frame.deltaSeconds))
+            // Do not hand the edge that OPENED the pause menu straight to that new screen. Escape
+            // means "open pause" while walking and "resume" while pause already owns the frame;
+            // letting one edge do both made the menu appear and disappear in the same update.
+            if (!openedPauseMenu && menus_.Update(Input().Current(), frame.deltaSeconds))
             {
                 Exit();
             }
@@ -1678,7 +1682,11 @@ namespace cnahouse::app
             }
 #endif
 
-            if (Input().Current().cancelPressed)
+            // Non-interactive diagnostic scenes still use Escape as their direct exit. A menu or
+            // the walk scene has already consumed the same semantic edge above: Settings pops to
+            // its parent and the walk opens/closes pause. Falling through to this old catch-all
+            // used to terminate the application after either perfectly valid action.
+            if (Input().Current().cancelPressed && menus_.Empty() && !walking_)
             {
                 Log::Info(LogCat::App, "cancel pressed; exiting after {} frames", framesDrawn_);
                 Exit();

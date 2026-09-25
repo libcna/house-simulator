@@ -1,3 +1,21 @@
+# Menu-Escape regression handoff — 2026-09-25 (`HOUSE-02523` correction)
+
+A manual play report exposed a concrete integration defect that the screen-level menu tests could
+not see: `SettingsScreen` returned `Pop` correctly, but `CnaHouseGame::Update` then reached the old
+scene-level `cancelPressed` catch-all and called `Exit()` in the same frame. The same edge opened the
+walk's pause menu before menu dispatch, immediately closed that newly opened menu, and then exited.
+
+The existing flow now consumes Escape at exactly one level. A pause menu opened by the current edge
+is first updated on the following frame; Settings and an already-open pause menu own their Escape;
+only non-interactive diagnostic scenes with no menu and no walk retain direct Escape-to-exit. Two
+offscreen application integrations reproduce the reported changed-Settings path and the complete
+open-pause/resume path. Both reach their eight-frame limit without quitting, and return to the main
+menu or walk respectively. This restores the existing D8 acceptance; it is not new scope and does
+not change the remaining forecast. The user's traversal, wall-stuck, doorway-flash and unlit-room
+reports remain the immediate S1/S2 investigation before `HOUSE-02843`.
+
+---
+
 # Stability-run handoff — 2026-09-25 (`HOUSE-02598`)
 
 The bounded stability runner now composes existing test and runtime mechanisms instead of adding a

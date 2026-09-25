@@ -262,6 +262,64 @@ namespace
         std::uint64_t frame_ = 0;
     };
 
+    /// Opens Settings from the main menu, changes its first row, then uses Escape to go back.
+    class SettingsBackDriver final : public cnahouse::player::IInputSource
+    {
+    public:
+        void Update(float) override
+        {
+            state_ = {};
+            state_.anyPressed = frame_ == 0U;
+            state_.uiDownPressed = frame_ == 1U;
+            state_.uiAcceptPressed = frame_ == 2U;
+            state_.uiRightPressed = frame_ == 3U;
+            state_.cancelPressed = frame_ == 4U;
+            ++frame_;
+        }
+
+        [[nodiscard]] const cnahouse::player::InputState& Current() const noexcept override
+        {
+            return state_;
+        }
+
+        [[nodiscard]] bool LookAvailable() const noexcept override
+        {
+            return false;
+        }
+
+    private:
+        cnahouse::player::InputState state_;
+        std::uint64_t frame_ = 0;
+    };
+
+    /// Starts the walk, opens pause with Escape, then presses Escape again to resume.
+    class PauseBackDriver final : public cnahouse::player::IInputSource
+    {
+    public:
+        void Update(float) override
+        {
+            state_ = {};
+            state_.anyPressed = frame_ == 0U;
+            state_.uiAcceptPressed = frame_ == 1U;
+            state_.cancelPressed = frame_ == 2U || frame_ == 3U;
+            ++frame_;
+        }
+
+        [[nodiscard]] const cnahouse::player::InputState& Current() const noexcept override
+        {
+            return state_;
+        }
+
+        [[nodiscard]] bool LookAvailable() const noexcept override
+        {
+            return false;
+        }
+
+    private:
+        cnahouse::player::InputState state_;
+        std::uint64_t frame_ = 0;
+    };
+
     TEST(HeadlessRunTests, LoadingHandsOffToMainMenuAndStartEntersTheHouse)
     {
         Options options;
@@ -307,6 +365,51 @@ namespace
         const auto* credits = dynamic_cast<const cnahouse::ui::CreditsScreen*>(game.Menus().Top());
         ASSERT_NE(credits, nullptr);
         EXPECT_GT(credits->LineCount(), 700U);
+    }
+
+    TEST(HeadlessRunTests, EscapeReturnsFromChangedSettingsWithoutEndingTheSession)
+    {
+        Options options;
+        options.headless = true;
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+        options.noAudio = true;
+        Settings settings = Settings::Defaults();
+        settings.backBufferWidth = 320;
+        settings.backBufferHeight = 180;
+        settings.verticalSync = false;
+
+        SettingsBackDriver input;
+        CnaHouseGame game(options, settings);
+        game.SetInputSourceForTesting(&input);
+        game.SetFrameLimit(8);
+        game.Run();
+
+        ASSERT_EQ(game.ExitCode(), 0);
+        EXPECT_GE(game.FramesDrawn(), 8U) << "Escape in Settings terminated the application";
+        ASSERT_NE(game.Menus().Top(), nullptr);
+        EXPECT_EQ(game.Menus().Top()->Id(), cnahouse::ui::ScreenId::MainMenu);
+    }
+
+    TEST(HeadlessRunTests, EscapeOpensPauseThenASecondPressResumesWithoutEndingTheSession)
+    {
+        Options options;
+        options.headless = true;
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+        options.noAudio = true;
+        Settings settings = Settings::Defaults();
+        settings.backBufferWidth = 320;
+        settings.backBufferHeight = 180;
+        settings.verticalSync = false;
+
+        PauseBackDriver input;
+        CnaHouseGame game(options, settings);
+        game.SetInputSourceForTesting(&input);
+        game.SetFrameLimit(8);
+        game.Run();
+
+        ASSERT_EQ(game.ExitCode(), 0);
+        EXPECT_GE(game.FramesDrawn(), 8U) << "Escape in the walk or pause menu ended the application";
+        EXPECT_TRUE(game.Menus().Empty()) << "one Escape must open pause and the next must resume";
     }
 
     TEST(HeadlessRunTests, AltEnterSwitchesTheGraphicsManagerInBothDirections)
