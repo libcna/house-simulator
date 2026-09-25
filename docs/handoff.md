@@ -1,3 +1,18 @@
+# Performance-baseline environment blocker — 2026-09-25 (`HOUSE-02403` open)
+
+The current Release `build-probe/` binary is timestamped 04:43 and predates the day's rain,
+wet-surface, audio and application changes, so its numbers cannot be recorded as the current
+furnished-house baseline. Building the current source requires CMake regeneration because
+`HOUSE-02527` added a render test source. CNA's configure must then acquire the existing persistent
+SDL-cache lock under the sibling CNA checkout; the repository sandbox refuses that write, in line
+with the rule that this session does not modify sibling repositories. The Debug `build/` is not a
+valid performance substitute, and the stale Release binary was not run or misreported.
+
+`HOUSE-02403` therefore remains open with no baseline rows added. Independent milestone order
+selects `HOUSE-00493` next while this environment-only path is blocked.
+
+---
+
 # Settings contract handoff — 2026-09-25 (`HOUSE-02528`)
 
 The existing settings model and the existing `SettingsScreen` live-apply callback now have one
