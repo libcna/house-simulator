@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """build_coverage.py -- what is over your head at every point on the property.
 
-`HOUSE-00212`. `cna-house.md` §37.2: "a coverage height field on a 0.5 m grid over the property
-stores, per cell, the height of the lowest roof/soffit above it (or +INF). A particle is drawn only
-if `particle.y > coverage(x, z)`." The consequence §37.2 asks for is specific and visible --
+`HOUSE-00212`. `cna-house.md` §37.2: a coverage height field on a 0.5 m grid over the property
+stores, per cell, the highest roof/soffit underside above it (or +INF). Open sky is always exposed;
+at a finite sample a particle is drawn only if `particle.y > coverage(x, z)`. The consequence §37.2 asks for is specific and visible --
 "standing under the porch in a downpour, the rain visibly stops at the porch edge" -- and that
 sentence is what this tool is judged against.
 
@@ -20,7 +20,7 @@ ceiling. `HOUSE-00210` already derives every one of those slabs from the layout,
 rules that can drift from the first. The plan's own name for this task -- `build_world.py`'s
 sibling `build_coverage.py`, dependent on `HOUSE-00210` -- says the same thing.
 
-So: **coverage(x, z) is the lowest underside of any floor or ceiling slab above the ground at
+So: **coverage(x, z) is the highest underside of any floor or ceiling slab above the ground at
 (x, z)**, and +INF where there is none. One rule, and it covers the whole of §37.2's list -- house,
 garage, porch, balcony, sunroom and shed -- because each of those is a cell, and a cell has a
 ceiling and the thing above it has a floor.
@@ -167,7 +167,8 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
             here = ground_at(cx, cz)
             best = UNCOVERED
             for sx0, sz0, sx1, sz1, underside in covers:
-                if sx0 <= cx <= sx1 and sz0 <= cz <= sz1 and underside < best \
+                if sx0 <= cx <= sx1 and sz0 <= cz <= sz1 \
+                        and (best == UNCOVERED or underside > best) \
                         and underside > here + 1e-6:
                     best = underside
             field[j * nx + i] = best
@@ -340,21 +341,21 @@ def selftest() -> int:
         require(sample(coverage, -6.0, -6.0) == UNCOVERED,
                 "a point in the garden has no cover, and reports +INF")
         require(math.isinf(sample(coverage, -6.0, -6.0)),
-                "...an actual IEEE infinity, so `particle.y > coverage` is false for every "
-                "particle and no sentinel constant has to be agreed with the runtime")
+                "...an actual IEEE infinity, which the runtime recognises as open sky without "
+                "a sentinel constant shared with the writer")
 
-        # 2. The porch. This is §37.2's own example: the soffit is the underside of the bedroom
-        #    floor above, at 2.80 - 0.30 = 2.50 m.
-        require(abs(sample(coverage, -1.5, 1.5) - 2.50) < 1e-5,
-                f"under the porch the cover is the bedroom floor's underside, 2.50 m "
+        # 2. The porch. Rain falls from the sky, so the first barrier it reaches is the upper
+        #    room's ceiling at 5.30 m; the balcony floor at 2.50 m remains below that barrier.
+        require(abs(sample(coverage, -1.5, 1.5) - 5.30) < 1e-5,
+                f"under the porch the cover is the upper room's ceiling, 5.30 m "
                 f"(got {sample(coverage, -1.5, 1.5)})")
 
         # 3. Rain visibly stops AT the porch edge. The edge tested is the porch's OPEN one, at
         #    z = 0, facing the garden -- not its x = 0 side, which abuts the lounge and is
         #    sheltered on both sides at the same 2.50 m. An assertion written against that side
         #    passes whatever the tool does, which is how it was first written here.
-        require(abs(sample(coverage, -1.5, 0.75) - 2.50) < 1e-5,
-                f"just inside the porch is sheltered at 2.50 m "
+        require(abs(sample(coverage, -1.5, 0.75) - 5.30) < 1e-5,
+                f"just inside the porch is sheltered at 5.30 m "
                 f"(got {sample(coverage, -1.5, 0.75)})")
         require(sample(coverage, -1.5, -0.75) == UNCOVERED,
                 f"just outside its open edge is open sky "
@@ -372,8 +373,8 @@ def selftest() -> int:
         roofless = build(world_dir)
         require(sample(roofless, -1.5, 1.5) == UNCOVERED,
                 f"with nothing above it, the porch is open to the sky "
-                f"(got {sample(roofless, -1.5, 1.5)}) -- so its 2.50 m above really was the "
-                f"bedroom floor and not a lid of its own")
+                f"(got {sample(roofless, -1.5, 1.5)}) -- so its cover really came from the "
+                f"upper room and not a lid of its own")
         (world_dir / "layout.cells.json").write_text(
             json.dumps(cells_doc, indent=2) + "\n", encoding="utf-8")
 
@@ -395,10 +396,10 @@ def selftest() -> int:
         require(bc.KIND_WALL not in COVERING and bc.KIND_PROP not in COVERING,
                 "only floors and ceilings shelter; walls and props do not")
 
-        # 7. The lowest slab wins where several stack. Over the porch there are two -- the bedroom
-        #    floor at 2.50 and the bedroom ceiling at 5.30 -- and the answer must be the lower.
-        require(abs(sample(coverage, -1.5, 1.5) - 2.50) < 1e-5,
-                "where two slabs stack, the LOWER one is the cover: 2.50, not the 5.30 above it")
+        # 7. The highest slab wins where several stack. It is the first solid surface encountered
+        #    by rain falling from open sky and keeps every storey beneath it dry.
+        require(abs(sample(coverage, -1.5, 1.5) - 5.30) < 1e-5,
+                "where two slabs stack, the HIGHER one is the cover: 5.30, not 2.50 below it")
 
         # 8. §37.2's grid is 0.5 m. It is asserted against the literal, not against the constant,
         #    because a claim written as `cell == CELL_SIZE` moves with the mistake it should catch.
@@ -500,8 +501,8 @@ def selftest() -> int:
         # 13. The ascii map exists and shows the shape, because a grid of numbers in which the
         #     porch quietly extends into the garden looks exactly like one in which it does not.
         art = ascii_map(coverage)
-        require("." in art and "2" in art,
-                "the plan view distinguishes open sky from a 2.50 m soffit")
+        require("." in art and "5" in art,
+                "the plan view distinguishes open sky from a 5.30 m soffit")
 
         # 14. `HOUSE-00777`: the AUTHORED house, and §37.2's own list of what has to be covered --
         #     "house, garage, porch, balconies, sunroom and shed". The fixture above proves the

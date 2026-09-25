@@ -10,6 +10,7 @@
 #include "Microsoft/Xna/Framework/Vector2.hpp"
 
 #include "cnahouse/rendering/ParticleRenderer.hpp"
+#include "cnahouse/weather/CoverageMask.hpp"
 
 namespace cnahouse::weather
 {
@@ -109,7 +110,8 @@ namespace cnahouse::weather
                                              const Xna::Vector3& cameraEye,
                                              const WeatherState& state,
                                              rendering::ParticleQuality quality,
-                                             rendering::ParticleRenderer& renderer)
+                                             rendering::ParticleRenderer& renderer,
+                                             const CoverageMask* coverage)
     {
         renderer.BeginFrame(quality);
         activeCount_ = 0u;
@@ -138,6 +140,10 @@ namespace cnahouse::weather
             position = volume_.Wrap(Xna::Vector3(position.X + velocity.X * deltaSeconds,
                                                  position.Y + velocity.Y * deltaSeconds,
                                                  position.Z + velocity.Z * deltaSeconds));
+            if (coverage != nullptr)
+            {
+                coverage->TeleportSheltered(position, volume_.Centre().Y + 0.5F * kPrecipitationHeightMetres);
+            }
         }
 
         const std::size_t requested = RainParticleCount(state, quality);
@@ -147,6 +153,10 @@ namespace cnahouse::weather
             static_cast<int>(std::lround(105.0F + 70.0F * std::clamp(state.precipIntensity, 0.0F, 1.0F)));
         for (std::size_t index = 0u; index < count; ++index)
         {
+            if (coverage != nullptr && !coverage->IsExposed(positions_[index]))
+            {
+                continue;
+            }
             rendering::ParticleQuad quad;
             quad.centre = positions_[index];
             quad.elongationAxis = velocity;
@@ -160,7 +170,7 @@ namespace cnahouse::weather
                                  "weather/rain-particles");
             }
         }
-        activeCount_ = count;
+        activeCount_ = renderer.Particles().size();
         return util::Ok();
     }
 } // namespace cnahouse::weather

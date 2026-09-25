@@ -19,6 +19,8 @@ namespace cnahouse::rendering
 
 namespace cnahouse::weather
 {
+    class CoverageMask;
+
     inline constexpr std::size_t kRainMaximumParticleCount = 900u;
 
     /// @brief §37.1's quality- and intensity-scaled fixed-pool count.
@@ -44,7 +46,8 @@ namespace cnahouse::weather
                                                 const Microsoft::Xna::Framework::Vector3& cameraEye,
                                                 const WeatherState& state,
                                                 rendering::ParticleQuality quality,
-                                                rendering::ParticleRenderer& renderer);
+                                                rendering::ParticleRenderer& renderer,
+                                                const CoverageMask* coverage = nullptr);
 
         [[nodiscard]] std::span<const Microsoft::Xna::Framework::Vector3> Positions() const noexcept
         {

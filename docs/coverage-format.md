@@ -1,16 +1,18 @@
 # `coverage.bin` — the rain coverage height field
 
 *`HOUSE-00212`. Normative. The writer is `tools/world/build_coverage.py`; there is no other. The
-runtime reader is `HOUSE-01744`'s roof-mask test and does not exist yet — the writer's own `read_back`
-is the round trip that keeps the format honest until it does.*
+runtime reader is `cnahouse::weather::CoverageMask`; the writer's own `read_back` and the C++ tests
+independently keep the format honest.*
 
 ---
 
 ## 1. What this file is for
 
-`cna-house.md` §37.2: a 0.5 m grid over the property storing, per cell, the height of the lowest
-roof or soffit above it, or +∞. A rain particle is drawn only if `particle.y > coverage(x, z)`;
-particles below a roof are teleported to the top of the volume.
+`cna-house.md` §37.2: a 0.5 m grid over the property storing, per cell, the height of the highest
+roof or soffit above it, or +∞. Where several slabs stack, the highest underside is stored because
+it is the first barrier encountered by rain falling from the sky and keeps every storey below it
+dry. A rain particle is drawn when the sample is +∞ (open sky), or if
+`particle.y > coverage(x, z)`; particles below a roof are teleported to the top of the volume.
 
 The consequence §37.2 asks for is specific and visible, and is what the tool is judged against:
 *"standing under the porch in a downpour, the rain visibly stops at the porch edge."*
@@ -35,9 +37,9 @@ alignment, no seeking.
 | `nx`, `nz` | 2 × `u32` | |
 | `field` | `nx × nz` × `f32` | row-major, `z` outer, `x` inner |
 
-Uncovered cells hold an actual **IEEE +∞**, not a large finite sentinel. `particle.y > coverage`
-is then false for every particle with no constant that the writer and the runtime have to agree on,
-and `f32` carries infinity exactly.
+Uncovered cells hold an actual **IEEE +∞**, not a large finite sentinel. The runtime recognises
+that value as open sky before applying the finite-height comparison, with no constant that the
+writer and runtime have to agree on; `f32` carries infinity exactly.
 
 The lookup is `i = floor((x − originX) / cell)`, `j = floor((z − originZ) / cell)`, out of range
 being uncovered. There is no interpolation: a field holding +∞ cannot be interpolated, and a soffit
@@ -51,7 +53,7 @@ roof underside is the top cell's ceiling. `HOUSE-00210` derives every one of tho
 layout, so this tool asks `build_collision` for them rather than re-deriving them from the same
 JSON with a second set of rules that can drift from the first.
 
-So the whole rule is: **coverage(x, z) is the lowest underside of any floor or ceiling slab above
+So the whole rule is: **coverage(x, z) is the highest underside of any floor or ceiling slab above
 the ground at (x, z)**, +∞ where there is none. That one rule covers §37.2's entire list — house,
 garage, porch, balcony, sunroom, shed — because each of those is a cell, and a cell has a ceiling
 and the thing above it has a floor.

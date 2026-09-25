@@ -4645,10 +4645,11 @@ screen-vertical, which is what makes rain read as rain rather than as falling do
 ### 37.2 The roof mask
 
 Rain must not fall inside the house or under the porch. A **coverage height field** on a 0.5 m
-grid over the property stores, per cell, the height of the lowest roof/soffit above it (or +∞).
-A particle is drawn only if `particle.y > coverage(x,z)` — i.e. it is above whatever is over that
-spot. Particles below a roof are teleported to the top of the volume. The mask is generated
-offline by `terrain_gen.py` from the house, garage, porch, balcony, sunroom and shed geometry.
+grid over the property stores, per cell, the height of the highest roof/soffit above it (or +∞).
+A particle is drawn if the sample is +∞ (open sky), or if
+`particle.y > coverage(x,z)` — i.e. it is above whatever is over that spot. Particles below a roof
+are teleported to the top of the volume. The mask is generated
+offline by `build_coverage.py` from the house, garage, porch, balcony, sunroom and shed geometry.
 
 Consequence: standing under the porch in a downpour, the rain visibly stops at the porch edge.
 Standing at an open upstairs window, rain streaks past the opening but does not enter.

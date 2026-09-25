@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **63 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 86 / 101 / 129 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5 passed; compact-environment work is active.** Next: retained rain coverage in `HOUSE-01744` |
+| Active plan | **62 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 84 / 99 / 127 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5 passed; compact-environment work is active.** Next: retained wet surfaces in `HOUSE-01748` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -1153,11 +1153,12 @@ a simulation of its own.
       trace: absorbs `HOUSE-01745` (the streak texture)
       note: (2026-09-25) `RainParticles` retains exactly 900 deterministic positions in the existing 12 m × 14 m camera-relative volume and advances them without allocation. The active prefix follows `round(900 · intensity^0.8 · qualityScale)` (495 Low, 720 Medium/High-preset, 900 Ultra-preset at full intensity); rain, sleet and hail submit it, while none and snow clear the shared renderer. Each step uses the already rate-limited wind at 0.55× plus §37.1's 6–9 m/s downward terminal velocity, wraps the whole fixed pool, and submits one 2 cm-class soft streak whose long edge is projected from that velocity into the camera plane. `TransparentPass` borrows the existing `ParticleRenderer`, draws its single rain material before additive fixture glows and adds no pass or effect. `tools/assets/rain_streak.py` deterministically authors the manifested 16 × 64 RGBA texture `TEX_WEATHER_RAIN_STREAK`; the content pipeline compiled and loaded it as `Textures/Weather/rain_streak`. Three rain-motion/phase tests plus the extended billboard test cover the formula, every retained liquid phase, snow clearing, gravity/wind displacement, wrapping, fixed storage, streak length and velocity alignment; the existing authored-weather test proves `W_THUNDERSTORM` is Rain, and the new Hail path consumes Hail directly. All 1,434 unit tests and eight focused integration tests pass; strict-XNA compiled all 334 translation units clean with four workers. Full-resolution OPENGLES3 Round 175 exterior rain was inspected at 1,600 × 900: the streak texture loaded, streaks are soft and velocity-slanted, and no missing-texture, clipping or blend defect was visible. The paired interior capture deliberately exposes the next task's unsheltered particles; roof/window coverage remains solely `HOUSE-01744`
 
-- [ ] HOUSE-01744 — Keep rain out of covered areas: the roof/coverage mask and the teleport-to-top of sheltered particles
+- [x] HOUSE-01744 — Keep rain out of covered areas: the roof/coverage mask and the teleport-to-top of sheltered particles
       dep: HOUSE-01743, HOUSE-00777 · sys: weather · plat: ALL · pri: MUST · zone: all · adv: D5, D11 · est: 2
       accept: (1) standing under the porch, rain visibly stops at the porch edge, and likewise at the other covered outdoor areas; (2) windows are closed, so no rain particle enters through one; (3) a test proves no rain particle is ever drawn below a covered surface
       verify: the coverage test; a porch capture in rain
       trace: absorbs `HOUSE-01755` (the coverage test)
+      note: (2026-09-25) `CoverageMask` is the strict runtime reader for the existing CCOV v1 bake (160 × 128 at 0.5 m; 1,635/20,480 finite samples) and the fixed rain update teleports every drop at or below finite cover to the top of its existing camera-relative volume before submission. The writer now correctly stores the highest slab underside—the first barrier encountered by rain falling from the sky—rather than the lowest floor in a multi-storey stack; the format documentation also explicitly treats IEEE +infinity as open sky before applying the finite-height comparison. The authored-field test measures the porch at 3.30 m 0.30 m inside its edge and +infinity 0.30 m outside, the shed at 2.35 m, observes sheltered teleports, and proves every submitted drop is exposed both under the porch and from an indoor camera. Outdoor rain remains visible through the closed family-room windows while no particle position under the house roof is submitted, preserving `HOUSE-03520`'s indoor-rain view without modelling open windows. Full-resolution OPENGLES3 captures at 1,600 × 900 were inspected: rain stops at the porch edge and the indoor frame shows streaks only through the window apertures, with none in the room. The coverage selftest and six focused rain/coverage tests pass; the complete 1,437-test unit label passes. The serial offscreen integration label passes 142/143; the sole failure is the pre-existing authored-content assertion expecting 50 alpha-cutout batches while `chunks.bin` contains 51, reproduced alone and unrelated to this task. Strict-XNA compiles all 336 translation units clean with four workers
 
 - [ ] HOUSE-01748 — Wet surfaces in rain: the wet-material swap driven by `surfaceWetness` (Tier S)
       dep: HOUSE-01690, HOUSE-00905 · sys: rendering · plat: ALL · pri: MUST · zone: all · adv: D5 · est: 1.25
@@ -1921,7 +1922,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M4 Dressing everywhere | 40 | 48.75 | **0** | 0 | **0** | 0 | R-D +3 |
 | M5 Baseline lighting everywhere | 12 | 24.5 | **0** | 0 | **0** | 0 | — |
 | M6 Main cells and hero areas | 20 | 32.5 | **0** | 0 | **0** | 0 | — |
-| M7 A compact environment | 13 | 21 | **3** | 4.25 | **5** | 5.5 | — |
+| M7 A compact environment | 13 | 21 | **2** | 2.5 | **3** | 3.25 | — |
 | M8 Atmospheric audio essentials | 11 | 14.5 | **6** | 7.75 | **9** | 10 | — |
 | M9 Application shell | 10 | 12.5 | **6** | 7.25 | **8.5** | 9.25 | — |
 | M10 Performance | 6 | 13 | **3** | 6.75 | **8** | 12.75 | R-C +4 |
@@ -1931,12 +1932,12 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **63** | **85.75** | **101** | **129** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **62** | **84** | **99** | **126.75** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-151 h. Adding the 125.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-254.25 h, 25.75 h under the limit. That margin is
+153.25 h. Adding the 127.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+254 h, 26 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |
@@ -1949,7 +1950,7 @@ small on purpose: the ceiling is a limit, not a budget to fill.
 
 **By area,** against the owner's sanity reference for this pass: traversal 0 h (complete); architecture
 4 h (≈ 18); furnishing kit 19 h (18–22); whole-house furnishing 31 h (30–38); lighting 19.75 h
-(18–22); C4/C5 polish 19.75 h (18–24); environment 6.75 h; audio 9 h (8–10); shell 8.5 h
+(18–22); C4/C5 polish 19.75 h (18–24); environment 4.75 h; audio 9 h (8–10); shell 8.5 h
 (8–10); performance 9.5 h (≈ 10); final polish 7 h (6–8); tests 3.5 h (≈ 5); Linux 10.25 h
 (11–13); Web 19.5 h (18–22); Android 23.75 h (23–27); release 6.5 h (6–8).
 

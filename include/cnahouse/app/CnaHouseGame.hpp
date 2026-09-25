@@ -52,6 +52,7 @@
 #include "cnahouse/visibility/ExteriorScene.hpp"
 #include "cnahouse/visibility/RenderList.hpp"
 #include "cnahouse/visibility/VisibilitySystem.hpp"
+#include "cnahouse/weather/CoverageMask.hpp"
 #include "cnahouse/weather/RainParticles.hpp"
 #include "cnahouse/weather/WeatherSystem.hpp"
 #include "cnahouse/world/CellRuntime.hpp"
@@ -433,6 +434,8 @@ namespace cnahouse::app
         std::unique_ptr<rendering::ParticleRenderer> particleRenderer_;
         /// The retained §37.1 fixed rain positions that feed the shared stream.
         std::unique_ptr<weather::RainParticles> rainParticles_;
+        /// §37.2's offline-authored roof and soffit heights, shared by every rain update.
+        std::optional<weather::CoverageMask> coverageMask_;
 
         /// The draw side of `cna-house.md` §7.5. Constructed with the tier, so the two Tier-E-only
         /// passes are gated in ONE place rather than at each pass. Only the HUD pass is installed

@@ -522,6 +522,18 @@ namespace cnahouse::app
             return;
         }
 
+        auto coverage = weather::CoverageMask::ReadFromTitle("content/world/coverage.bin");
+        if (!coverage)
+        {
+            Log::Error(LogCat::Content, "--scene=walk: {}", coverage.Error().ToString());
+            weather_.reset();
+            world_.reset();
+            index_.reset();
+            collision_.reset();
+            return;
+        }
+        coverageMask_.emplace(std::move(coverage.Value()));
+
         // §12's front hall, unless `--player` says otherwise. The middle of a named cell rather
         // than a coordinate somebody measured off a plan: a spawn that is 20 mm inside a wall
         // spends its first frames being shoved out, and the shove is the first thing a screenshot
@@ -1214,11 +1226,13 @@ namespace cnahouse::app
 
             if (rainParticles_ != nullptr && particleRenderer_ != nullptr && weather_.has_value())
             {
-                const util::Result<void> rain = rainParticles_->Update(frame.deltaSeconds,
-                                                                       blockoutCamera_.eye,
-                                                                       weather_->State(),
-                                                                       quality_.particles,
-                                                                       *particleRenderer_);
+                const util::Result<void> rain =
+                    rainParticles_->Update(frame.deltaSeconds,
+                                           blockoutCamera_.eye,
+                                           weather_->State(),
+                                           quality_.particles,
+                                           *particleRenderer_,
+                                           coverageMask_.has_value() ? &*coverageMask_ : nullptr);
                 if (!rain)
                 {
                     throw std::runtime_error(rain.Error().ToString());

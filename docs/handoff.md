@@ -1,3 +1,38 @@
+# Rain coverage handoff — 2026-09-25 (`HOUSE-01744`)
+
+`CoverageMask` now reads the existing CCOV v1 bake through `TitleContainer`, rejects malformed or
+trailing data, and exposes the authored 0.5 m field to `RainParticles`. Each fixed-pool drop moves
+and wraps as before, then a drop at or below finite cover teleports to the volume top; only exposed
+drops enter the shared particle renderer. The retained field is 160 × 128 with 1,635 finite samples.
+
+Visual validation exposed and fixed an older writer-semantic defect: choosing the lowest stacked
+slab made the ground-floor slab the cover and admitted rain into every storey above it. The writer,
+architecture and format documentation now agree on the highest slab underside, which is the first
+barrier rain falling from open sky reaches. They also agree that IEEE +infinity means open sky,
+rather than applying a comparison that would suppress it. The real field measures the porch soffit
+at 3.30 m 0.30 m inside its edge and +infinity 0.30 m outside, and the shed cover at 2.35 m.
+
+The runtime does not blanket-disable rain for an indoor camera: the closed-window invariant is
+positional, so drops under the house roof are never submitted while open-sky drops remain visible
+through the glazing. This is required by the later `HOUSE-03520` indoor-heavy-rain view and adds no
+window interaction or new weather system. Round 176's 1,600 × 900 OPENGLES3 porch, porch-edge and
+family-window captures were inspected at full resolution. Rain stops at the porch boundary; the
+indoor frame has streaks only in the window apertures and none in the room.
+
+The Python coverage selftest passes all fixture and real-property claims. Six focused coverage/rain
+tests and the complete 1,437-test unit label pass. The serial software-offscreen integration label
+passes 142/143; the sole failure is the pre-existing `HeadlessRunTests.TheOpaquePassDrawsTheSortedListAndNotTheResidencyMap`
+content assertion (50 expected alpha-cutout batches, 51 in the current `chunks.bin`), reproduced
+alone and unaffected by this task. Strict-XNA compiles all 336 translation units clean with
+`--jobs 4`.
+
+Rule R2's M7 dependency order selects `HOUSE-01748` next, followed by `HOUSE-03520`. The remaining
+forecast is 99 realistic / 126.75 pessimistic hours. With 127.25 task-hours spent since the final
+reduction, the R14 projection is 254 h, 26 h below the ceiling. Every build, test and check is
+limited to four workers and pinned to CPUs 4,5,7,9.
+
+---
+
 # Rain motion and streak-material handoff — 2026-09-25 (`HOUSE-01743`)
 
 `RainParticles` is the compact consumer of the shared particle renderer and precipitation volume.
