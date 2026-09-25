@@ -1,3 +1,28 @@
+# Environment settings handoff — 2026-09-25 (`HOUSE-02521`)
+
+The Environment section of the existing one-page `SettingsScreen` is complete. It offers only the
+reduced roadmap's choices: Automatic or fixed 06:00/12:00/18:00/22:00 time, 60x/30x/15x time
+speed, and Automatic/Clear/Overcast/Rain weather. A fixed hour updates and freezes the existing
+`SimClock`; choosing Automatic resumes that same clock at the selected speed. Fixed weather is
+sampled into the existing `WeatherSystem` immediately (rain starts at its established wet endpoint),
+and Automatic resumes authored transitions. No location, season jump, full archetype list or new
+environment/settings subsystem was added.
+
+Settings format v11 persists the fixed-hour sentinel and migrates removed legacy fixed-weather
+choices to retained Clear. Seven settings-screen tests cover all fifteen keyboard-reachable rows,
+platform filtering, pointer input, and the exact environment choices; the focused settings/time set
+passes 28/28 and the complete unit label passes 1,463/1,463. `check_xna_only.py` and strict-XNA are
+clean (342 translation units). The complete static gate reports only the known user-owned root
+`.claude` layout entry. The first sandboxed build attempt could not write `/rv/cnaccache`; the
+approved rerun used that required shared cache successfully. Every compilation and test was pinned
+to CPUs 4,5,7,9 with no more than four workers; strict-XNA explicitly used `--jobs 4`.
+
+M9 dependency order plus R11/R13 selects `HOUSE-02523` next. The remaining forecast is 87.75
+realistic / 114.5 pessimistic hours. With 138.5 task-hours completed since the final reduction, the
+R14 projection remains 253 h, 27 h below the ceiling.
+
+---
+
 # Graphics settings handoff — 2026-09-25 (`HOUSE-02518`)
 
 The existing one-page `SettingsScreen` now has the final bounded Graphics section: High, Web and

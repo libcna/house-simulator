@@ -149,13 +149,29 @@ namespace cnahouse::ui
         using Microsoft::Xna::Framework::Color;
         using Microsoft::Xna::Framework::Vector2;
 
-        constexpr std::array<float, SettingsScreen::ControlCount()> kSettingsRowY = {
-            0.111F, 0.149F, 0.187F, 0.224F, 0.262F, 0.344F, 0.382F, 0.420F, 0.458F, 0.540F, 0.578F, 0.616F};
+        constexpr std::array<float, SettingsScreen::ControlCount()> kSettingsRowY = {0.111F,
+                                                                                     0.149F,
+                                                                                     0.187F,
+                                                                                     0.224F,
+                                                                                     0.262F,
+                                                                                     0.344F,
+                                                                                     0.382F,
+                                                                                     0.420F,
+                                                                                     0.458F,
+                                                                                     0.540F,
+                                                                                     0.578F,
+                                                                                     0.616F,
+                                                                                     0.698F,
+                                                                                     0.736F,
+                                                                                     0.774F};
         constexpr float kSettingsHitHalfHeight = 0.017F;
         constexpr float kSettingsSliderStart = 0.55F;
         constexpr float kSettingsSliderEnd = 0.80F;
         constexpr std::array kVisibleQualityPresets = {
             app::QualityPreset::Low, app::QualityPreset::Medium, app::QualityPreset::High};
+        constexpr std::array kFixedHours = {-1.0F, 6.0F, 12.0F, 18.0F, 22.0F};
+        constexpr std::array kTimeSpeeds = {24.0F, 48.0F, 96.0F};
+        constexpr std::array<std::string_view, 3> kFixedWeather = {"W_CLEAR", "W_OVERCAST", "W_RAIN"};
 
         [[nodiscard]] std::size_t SettingsIndex(SettingsControl control) noexcept
         {
@@ -191,6 +207,13 @@ namespace cnahouse::ui
             }
             return 2;
         }
+
+        template<typename T, std::size_t Size>
+        [[nodiscard]] std::size_t ChoiceIndex(const std::array<T, Size>& choices, const T& value) noexcept
+        {
+            const auto found = std::find(choices.begin(), choices.end(), value);
+            return found == choices.end() ? 0U : static_cast<std::size_t>(found - choices.begin());
+        }
     } // namespace
 
     std::string_view SettingsControlName(SettingsControl control) noexcept
@@ -221,6 +244,12 @@ namespace cnahouse::ui
                 return "Invert Y";
             case SettingsControl::WalkSpeed:
                 return "Walk speed";
+            case SettingsControl::TimeOfDay:
+                return "Time of day";
+            case SettingsControl::TimeSpeed:
+                return "Time speed";
+            case SettingsControl::EnvironmentWeather:
+                return "Weather";
             case SettingsControl::Count:
                 break;
         }
@@ -276,6 +305,9 @@ namespace cnahouse::ui
             case SettingsControl::LookSensitivity:
             case SettingsControl::InvertY:
             case SettingsControl::WalkSpeed:
+            case SettingsControl::TimeOfDay:
+            case SettingsControl::TimeSpeed:
+            case SettingsControl::EnvironmentWeather:
                 return true;
             case SettingsControl::Count:
                 break;
@@ -406,6 +438,42 @@ namespace cnahouse::ui
                 return AssignChanged(settings_->invertY, direction > 0);
             case SettingsControl::WalkSpeed:
                 return AssignChanged(settings_->fastWalk, direction > 0);
+            case SettingsControl::TimeOfDay:
+            {
+                const auto count = static_cast<int>(kFixedHours.size());
+                int index = static_cast<int>(ChoiceIndex(kFixedHours, settings_->fixedTimeOfDayHours));
+                index = (index + count + direction) % count;
+                return AssignChanged(settings_->fixedTimeOfDayHours,
+                                     kFixedHours[static_cast<std::size_t>(index)]);
+            }
+            case SettingsControl::TimeSpeed:
+            {
+                const auto count = static_cast<int>(kTimeSpeeds.size());
+                int index = static_cast<int>(ChoiceIndex(kTimeSpeeds, settings_->dayLengthRealMinutes));
+                index = (index + count + direction) % count;
+                return AssignChanged(settings_->dayLengthRealMinutes,
+                                     kTimeSpeeds[static_cast<std::size_t>(index)]);
+            }
+            case SettingsControl::EnvironmentWeather:
+            {
+                int index = 0;
+                if (settings_->weatherMode == app::WeatherMode::Fixed)
+                {
+                    index = 1 + static_cast<int>(ChoiceIndex(
+                                    kFixedWeather, std::string_view{settings_->fixedWeatherArchetype}));
+                }
+                constexpr int count = 4;
+                index = (index + count + direction) % count;
+                if (index == 0)
+                {
+                    return AssignChanged(settings_->weatherMode, app::WeatherMode::On);
+                }
+                const bool modeChanged = AssignChanged(settings_->weatherMode, app::WeatherMode::Fixed);
+                const bool stateChanged =
+                    AssignChanged(settings_->fixedWeatherArchetype,
+                                  std::string{kFixedWeather[static_cast<std::size_t>(index - 1)]});
+                return modeChanged || stateChanged;
+            }
             case SettingsControl::Count:
                 break;
         }
@@ -526,6 +594,26 @@ namespace cnahouse::ui
                 return settings_->invertY ? "On" : "Off";
             case SettingsControl::WalkSpeed:
                 return settings_->fastWalk ? "Fast" : "Normal";
+            case SettingsControl::TimeOfDay:
+                return settings_->fixedTimeOfDayHours < 0.0F
+                           ? "Automatic"
+                           : std::format("{:02.0f}:00", static_cast<double>(settings_->fixedTimeOfDayHours));
+            case SettingsControl::TimeSpeed:
+                return std::format("{:.0f}x", 1440.0 / static_cast<double>(settings_->dayLengthRealMinutes));
+            case SettingsControl::EnvironmentWeather:
+                if (settings_->weatherMode != app::WeatherMode::Fixed)
+                {
+                    return "Automatic";
+                }
+                if (settings_->fixedWeatherArchetype == "W_OVERCAST")
+                {
+                    return "Overcast";
+                }
+                if (settings_->fixedWeatherArchetype == "W_RAIN")
+                {
+                    return "Rain";
+                }
+                return "Clear";
             case SettingsControl::Count:
                 break;
         }

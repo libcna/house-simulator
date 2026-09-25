@@ -28,6 +28,7 @@ namespace
         EXPECT_FLOAT_EQ(settings.weatherVolume, 0.75f);
         EXPECT_TRUE(settings.showEnvironmentReadout);
         EXPECT_FLOAT_EQ(settings.moonPhaseSpeedMultiplier, 1.0F);
+        EXPECT_FLOAT_EQ(settings.fixedTimeOfDayHours, -1.0F);
         EXPECT_EQ(settings.weatherMode, WeatherMode::On);
         EXPECT_EQ(settings.fixedWeatherArchetype, "W_PARTLY");
     }
@@ -49,6 +50,7 @@ namespace
         written.headBob = cnahouse::player::HeadBobLevel::Off;
         written.showEnvironmentReadout = false;
         written.moonPhaseSpeedMultiplier = 6.5F;
+        written.fixedTimeOfDayHours = 18.0F;
         written.weatherMode = WeatherMode::Fixed;
         written.fixedWeatherArchetype = "W_HEAVY_SNOW";
 
@@ -70,6 +72,7 @@ namespace
         EXPECT_FALSE(read->showEnvironmentReadout)
             << "the player's choice to hide HOUSE-01546's readout did not survive the file";
         EXPECT_FLOAT_EQ(read->moonPhaseSpeedMultiplier, 6.5F);
+        EXPECT_FLOAT_EQ(read->fixedTimeOfDayHours, 18.0F);
         EXPECT_EQ(read->weatherMode, WeatherMode::Fixed);
         EXPECT_EQ(read->fixedWeatherArchetype, "W_HEAVY_SNOW");
     }
@@ -189,6 +192,21 @@ namespace
         EXPECT_EQ(settings->quality, QualityPreset::High);
     }
 
+    TEST(SettingsTests, VersionElevenNarrowsTheFormerEnvironmentControls)
+    {
+        auto settings = Settings::FromJson(
+            R"({"version":10,"weatherMode":"fixed","fixedWeatherArchetype":"W_HEAVY_SNOW"})",
+            "settings.json");
+        ASSERT_TRUE(settings) << settings.Error().ToString();
+        EXPECT_FLOAT_EQ(settings->fixedTimeOfDayHours, -1.0F);
+        EXPECT_EQ(settings->weatherMode, WeatherMode::Fixed);
+        EXPECT_EQ(settings->fixedWeatherArchetype, "W_CLEAR");
+
+        auto disabled = Settings::FromJson(R"({"version":10,"weatherMode":"off"})", "settings.json");
+        ASSERT_TRUE(disabled) << disabled.Error().ToString();
+        EXPECT_EQ(disabled->weatherMode, WeatherMode::On);
+    }
+
     TEST(SettingsTests, AWrongTypeIsStillAnErrorEvenThoughFieldsAreOptional)
     {
         // "Optional" means the field may be absent, not that a string may stand in for a number.
@@ -216,6 +234,7 @@ namespace
         settings.fieldOfView = 179.0f;
         settings.fixedWeatherArchetype.clear();
         settings.moonPhaseSpeedMultiplier = 99.0F;
+        settings.fixedTimeOfDayHours = 25.0F;
 
         const std::string changed = settings.ClampToSupportedRanges();
         EXPECT_FALSE(changed.empty()) << "the user is told, not silently overruled";
@@ -234,6 +253,7 @@ namespace
         EXPECT_FLOAT_EQ(settings.fieldOfView, cnahouse::player::kMaxFovDegrees);
         EXPECT_EQ(settings.fixedWeatherArchetype, "W_PARTLY");
         EXPECT_FLOAT_EQ(settings.moonPhaseSpeedMultiplier, 8.0F);
+        EXPECT_FLOAT_EQ(settings.fixedTimeOfDayHours, -1.0F);
 
         settings.moonPhaseSpeedMultiplier = 0.0F;
         EXPECT_NE(settings.ClampToSupportedRanges().find("moonPhaseSpeedMultiplier"), std::string::npos);

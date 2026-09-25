@@ -1247,11 +1247,12 @@ extended.
       trace: absorbs `HOUSE-02517`'s display rows
       note: (2026-09-25) The one page now exposes only quality (High/Web/Android), standard-XNA display resolution (`Canvas size` on Web), fullscreen, v-sync and FOV. `SettingsFeatures` resolves rows from `BuildTarget`, `RenderTier` and `GraphicsAdapter` display modes: Web retains canvas size/fullscreen for `HOUSE-03721` but omits browser-fixed v-sync, Android omits fixed device display controls, and Tier S labels the effective High profile honestly. Changes apply to the existing graphics manager, effective quality, camera, text and input viewports. Settings v10 migrates the removed persisted Ultra UI choice to High; the diagnostic command-line row remains internal. Focused tests pass 52/52, startup/tier integrations 9/9 and the complete unit label 1461/1461. `check_xna_only.py` is clean; strict-XNA caught and removed a first-pass CNAEXT collection iterator, then compiled all 342 translation units clean through the standard XNA format indexer.
 
-- [ ] HOUSE-02521 — The Environment section: time of day and weather
+- [x] HOUSE-02521 — The Environment section: time of day and weather
       dep: HOUSE-02516 · sys: ui · plat: ALL · pri: MUST · zone: all · adv: D5, D8 · est: 1
       accept: time of day (automatic, or a fixed hour), time speed, and weather (automatic, clear, overcast, rain); no location, season jump, archetype list, pets or save slots
       verify: unit tests; `HOUSE-02528`
       trace: was *the Simulation tab (day length, weather mode, moon speed, location, pets, pause-on-menu, slots)* (`HOUSE-03206`)
+      note: (2026-09-25) The existing one-page settings screen now exposes only Automatic or 06:00/12:00/18:00/22:00 time, 60x/30x/15x time speed, and Automatic/Clear/Overcast/Rain weather. Fixed time updates and freezes the existing `SimClock`; returning to Automatic resumes it at the selected speed. Weather changes rebuild only the existing `WeatherSystem` state so fixed choices apply immediately, including wet rain, while Automatic resumes authored transitions. Settings v11 persists the fixed-hour choice and narrows removed legacy fixed weather to Clear. No location, season, full archetype list or simulation UI was added. Focused tests pass 28/28 and the complete unit label passes 1463/1463; XNA-only and strict-XNA are clean.
 
 - [ ] HOUSE-02523 — The main menu, the pause menu, the credits screen and the first-run controls hint
       dep: HOUSE-02516, HOUSE-00198 · sys: ui · plat: ALL · pri: MUST · zone: all · adv: D8 · est: 2
@@ -1932,7 +1933,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M6 Main cells and hero areas | 20 | 32.5 | **0** | 0 | **0** | 0 | — |
 | M7 A compact environment | 13 | 21 | **0** | 0 | **0** | 0 | — |
 | M8 Atmospheric audio essentials | 11 | 14.5 | **4** | 4.25 | **5** | 5.5 | — |
-| M9 Application shell | 10 | 12.5 | **4** | 4.5 | **5.25** | 5.75 | — |
+| M9 Application shell | 10 | 12.5 | **3** | 3.5 | **4.25** | 4.75 | — |
 | M10 Performance | 6 | 13 | **3** | 6.75 | **8** | 12.75 | R-C +4 |
 | M11 Final defect pass | 3 | 11 | **3** | 6 | **7** | 7.75 | — |
 | M12 Representative tests | 4 | 5 | **2** | 3 | **3.5** | 3.75 | — |
@@ -1940,11 +1941,11 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **56** | **75.5** | **88.75** | **115.5** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **55** | **74.5** | **87.75** | **114.5** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-164.5 h. Adding the 137.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+165.5 h. Adding the 138.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
 253 h, 27 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 

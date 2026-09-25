@@ -165,6 +165,9 @@ namespace cnahouse::ui
         LookSensitivity,
         InvertY,
         WalkSpeed,
+        TimeOfDay,
+        TimeSpeed,
+        EnvironmentWeather,
         Count,
     };
 
@@ -191,9 +194,8 @@ namespace cnahouse::ui
 
     /// @brief One settings page, using the existing screen stack and device-independent input.
     ///
-    /// Environment deliberately has a heading only here until HOUSE-02521. Every row is applied
-    /// through @p onChanged after an edit; the screen neither owns a second settings copy nor
-    /// invents a widget system.
+    /// Every row is applied through @p onChanged after an edit; the screen neither owns a second
+    /// settings copy nor invents a widget system.
     class SettingsScreen final : public IScreen
     {
     public:

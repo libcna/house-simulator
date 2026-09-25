@@ -46,7 +46,7 @@ namespace cnahouse::app
     struct Settings
     {
         /// @brief Bumped whenever a field changes meaning. `Migrate` handles every older value.
-        static constexpr std::int32_t kCurrentVersion = 10;
+        static constexpr std::int32_t kCurrentVersion = 11;
 
         std::int32_t version = kCurrentVersion;
 
@@ -111,6 +111,12 @@ namespace cnahouse::app
         /// `SimClock::timeScale`, and the default 24 is the one §35.2 chose because it makes
         /// 1 real second exactly 1 simulated minute.
         float dayLengthRealMinutes = static_cast<float>(environment::kDefaultDayLengthRealMinutes);
+
+        /// @brief Negative follows the clock; otherwise the selected wall-clock hour is held.
+        ///
+        /// The compact M9 page deliberately offers only Automatic, 06:00, 12:00, 18:00 and
+        /// 22:00. It does not expose location, calendar or the old simulation-depth controls.
+        float fixedTimeOfDayHours = -1.0F;
 
         /// @brief §33.5's phase-only acceleration, 1x astronomical through 8x.
         ///

@@ -194,6 +194,13 @@ namespace cnahouse::app
         }
         settings.dayLengthRealMinutes = *dayLength;
 
+        auto fixedTime = root.OptionalFloat("fixedTimeOfDayHours", settings.fixedTimeOfDayHours);
+        if (!fixedTime)
+        {
+            return fixedTime.Error();
+        }
+        settings.fixedTimeOfDayHours = *fixedTime;
+
         auto moonPhaseSpeed =
             root.OptionalFloat("moonPhaseSpeedMultiplier", settings.moonPhaseSpeedMultiplier);
         if (!moonPhaseSpeed)
@@ -306,6 +313,22 @@ namespace cnahouse::app
             }
             settings.version = 10;
         }
+        if (settings.version < 11)
+        {
+            // The reduced Environment section replaces the old broad simulation controls. Older
+            // files follow the clock, and removed fixed weather choices narrow to retained clear.
+            settings.fixedTimeOfDayHours = -1.0F;
+            if (settings.weatherMode == WeatherMode::Off)
+            {
+                settings.weatherMode = WeatherMode::On;
+            }
+            if (settings.weatherMode == WeatherMode::Fixed && settings.fixedWeatherArchetype != "W_CLEAR" &&
+                settings.fixedWeatherArchetype != "W_OVERCAST" && settings.fixedWeatherArchetype != "W_RAIN")
+            {
+                settings.fixedWeatherArchetype = "W_CLEAR";
+            }
+            settings.version = 11;
+        }
         settings.version = kCurrentVersion;
     }
 
@@ -375,6 +398,12 @@ namespace cnahouse::app
                                        : static_cast<float>(environment::kDefaultDayLengthRealMinutes);
             note("dayLengthRealMinutes");
         }
+        if (!std::isfinite(fixedTimeOfDayHours) ||
+            (fixedTimeOfDayHours < 0.0F && fixedTimeOfDayHours != -1.0F) || fixedTimeOfDayHours >= 24.0F)
+        {
+            fixedTimeOfDayHours = -1.0F;
+            note("fixedTimeOfDayHours");
+        }
         const auto minimumMoonSpeed = static_cast<float>(environment::kMinMoonPhaseSpeedMultiplier);
         const auto maximumMoonSpeed = static_cast<float>(environment::kMaxMoonPhaseSpeedMultiplier);
         if (!std::isfinite(moonPhaseSpeedMultiplier) || moonPhaseSpeedMultiplier < minimumMoonSpeed ||
@@ -416,6 +445,7 @@ namespace cnahouse::app
                            "  \"fieldOfView\": {},\n"
                            "  \"fastWalk\": {},\n"
                            "  \"dayLengthRealMinutes\": {},\n"
+                           "  \"fixedTimeOfDayHours\": {},\n"
                            "  \"moonPhaseSpeedMultiplier\": {},\n"
                            "  \"showEnvironmentReadout\": {},\n"
                            "  \"weatherMode\": \"{}\",\n"
@@ -438,6 +468,7 @@ namespace cnahouse::app
                            fieldOfView,
                            fastWalk ? "true" : "false",
                            dayLengthRealMinutes,
+                           fixedTimeOfDayHours,
                            moonPhaseSpeedMultiplier,
                            showEnvironmentReadout ? "true" : "false",
                            WeatherModeName(weatherMode),

@@ -453,6 +453,11 @@ namespace cnahouse::app
         {
             SetWallTimeOfDay(clock_, *options_.timeOfDay);
         }
+        else if (settings_.fixedTimeOfDayHours >= 0.0F)
+        {
+            SetWallTimeOfDay(clock_, settings_.fixedTimeOfDayHours);
+            clock_.timeScale = 0.0;
+        }
         if (options_.freezeTime)
         {
             clock_.timeScale = 0.0;
@@ -968,11 +973,96 @@ namespace cnahouse::app
         }
     }
 
+    void CnaHouseGame::ApplyEnvironmentSettings(ui::SettingsControl control)
+    {
+        if (control == ui::SettingsControl::TimeOfDay || control == ui::SettingsControl::TimeSpeed)
+        {
+            if (settings_.fixedTimeOfDayHours >= 0.0F)
+            {
+                SetWallTimeOfDay(clock_, settings_.fixedTimeOfDayHours);
+                clock_.timeScale = 0.0;
+            }
+            else
+            {
+                clock_.timeScale =
+                    environment::TimeScaleForDayLength(static_cast<double>(settings_.dayLengthRealMinutes));
+            }
+            return;
+        }
+
+        if (control != ui::SettingsControl::EnvironmentWeather || !weather_.has_value() ||
+            !world_.has_value())
+        {
+            return;
+        }
+
+        weather::WeatherState state = weather_->State();
+        util::Id target = weather_->TargetArchetype();
+        float expiry = 0.0F;
+        const bool automatic = settings_.weatherMode == WeatherMode::On;
+        if (!automatic)
+        {
+            const auto selected = std::ranges::find_if(world_->WeatherArchetypes(),
+                                                       [this](const weather::WeatherArchetype& archetype)
+                                                       {
+                                                           return !archetype.modifier &&
+                                                                  util::IdRegistry::NameOf(archetype.id) ==
+                                                                      settings_.fixedWeatherArchetype;
+                                                       });
+            if (selected == world_->WeatherArchetypes().end())
+            {
+                Log::Warn(LogCat::Content,
+                          "settings weather '{}' is not an authored state",
+                          settings_.fixedWeatherArchetype);
+                return;
+            }
+            weather::WeatherSampler sampler(world_->WeatherArchetypes(), world_->WeatherTransitions());
+            auto sampled = sampler.SampleTarget(
+                selected->id, static_cast<float>(clock_.OutdoorBaseTemperatureC()), 0.0F, state);
+            if (!sampled)
+            {
+                Log::Warn(LogCat::Content,
+                          "settings weather '{}': {}",
+                          settings_.fixedWeatherArchetype,
+                          sampled.Error().ToString());
+                return;
+            }
+            state = std::move(sampled.Value().state);
+            state.surfaceWetness = state.precipType != weather::PrecipType::None &&
+                                           state.precipType != weather::PrecipType::Snow &&
+                                           state.precipIntensity > 0.0F
+                                       ? 1.0F
+                                       : 0.0F;
+            target = selected->id;
+            expiry = 380.0F;
+        }
+
+        auto changed = weather::WeatherSystem::Create(world_->WeatherArchetypes(),
+                                                      world_->WeatherTransitions(),
+                                                      world_->WeatherRates(),
+                                                      state,
+                                                      target,
+                                                      expiry);
+        if (!changed)
+        {
+            Log::Warn(LogCat::Content, "settings weather: {}", changed.Error().ToString());
+            return;
+        }
+        weather_.emplace(std::move(changed.Value()));
+        weather_->SetAutomaticTransitions(automatic);
+        weather_->TransitionsPausedControl() = !automatic;
+    }
+
     void CnaHouseGame::ApplyChangedSetting(ui::SettingsControl control)
     {
         if (control <= ui::SettingsControl::FieldOfView)
         {
             ApplyGraphicsSettings(control);
+            return;
+        }
+        if (control >= ui::SettingsControl::TimeOfDay)
+        {
+            ApplyEnvironmentSettings(control);
             return;
         }
         ApplyAudioAndControlSettings();

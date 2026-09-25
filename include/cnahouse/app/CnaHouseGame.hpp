@@ -544,6 +544,7 @@ namespace cnahouse::app
         void ApplyPlayerCamera();
         void ApplyAudioAndControlSettings();
         void ApplyGraphicsSettings(ui::SettingsControl control);
+        void ApplyEnvironmentSettings(ui::SettingsControl control);
         void ApplyChangedSetting(ui::SettingsControl control);
         void OpenSettings();
 

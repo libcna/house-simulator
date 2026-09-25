@@ -20,6 +20,7 @@
 namespace
 {
     using cnahouse::app::Settings;
+    using cnahouse::app::WeatherMode;
     using cnahouse::audio::AudioSystem;
     using cnahouse::audio::Category;
     using cnahouse::player::InputState;
@@ -312,7 +313,10 @@ namespace
                                          SettingsControl::Weather,
                                          SettingsControl::LookSensitivity,
                                          SettingsControl::InvertY,
-                                         SettingsControl::WalkSpeed};
+                                         SettingsControl::WalkSpeed,
+                                         SettingsControl::TimeOfDay,
+                                         SettingsControl::TimeSpeed,
+                                         SettingsControl::EnvironmentWeather};
 
         for (const SettingsControl control : expected)
         {
@@ -327,7 +331,7 @@ namespace
         InputState up;
         up.uiUpPressed = true;
         screen.Update(up, 0.016F);
-        EXPECT_EQ(screen.Selected(), SettingsControl::WalkSpeed);
+        EXPECT_EQ(screen.Selected(), SettingsControl::EnvironmentWeather);
     }
 
     TEST(SettingsScreenTests, GraphicsRowsAreFilteredByTheBuildProfileWithoutCapabilityQueries)
@@ -343,7 +347,7 @@ namespace
         EXPECT_TRUE(desktopScreen.Shows(SettingsControl::DisplaySize));
         EXPECT_TRUE(desktopScreen.Shows(SettingsControl::Fullscreen));
         EXPECT_TRUE(desktopScreen.Shows(SettingsControl::VerticalSync));
-        EXPECT_EQ(desktopScreen.VisibleControlCount(), 12U);
+        EXPECT_EQ(desktopScreen.VisibleControlCount(), 15U);
 
         platform.target = cnahouse::app::BuildTarget::Web;
         SettingsFeatures web = SettingsFeatures::Resolve(platform, tier, settings);
@@ -468,6 +472,42 @@ namespace
             EXPECT_NEAR(settings.footstepsVolume, 0.25F, 1e-6F);
             EXPECT_EQ(applied, 1);
         }
+    }
+
+    TEST(SettingsScreenTests, EnvironmentOffersOnlyTheRetainedTimeAndWeatherChoices)
+    {
+        Settings settings = Settings::Defaults();
+        std::vector<SettingsControl> changed;
+        SettingsScreen screen(settings, [&](SettingsControl control) { changed.push_back(control); });
+
+        InputState down;
+        down.uiDownPressed = true;
+        for (int row = 0; row < 12; ++row)
+        {
+            screen.Update(down, 0.016F);
+        }
+        ASSERT_EQ(screen.Selected(), SettingsControl::TimeOfDay);
+
+        InputState right;
+        right.uiRightPressed = true;
+        screen.Update(right, 0.016F);
+        EXPECT_FLOAT_EQ(settings.fixedTimeOfDayHours, 6.0F);
+
+        screen.Update(down, 0.016F);
+        screen.Update(right, 0.016F);
+        EXPECT_FLOAT_EQ(settings.dayLengthRealMinutes, 48.0F);
+
+        screen.Update(down, 0.016F);
+        ASSERT_EQ(screen.Selected(), SettingsControl::EnvironmentWeather);
+        for (const std::string_view expected : {"W_CLEAR", "W_OVERCAST", "W_RAIN"})
+        {
+            screen.Update(right, 0.016F);
+            EXPECT_EQ(settings.weatherMode, WeatherMode::Fixed);
+            EXPECT_EQ(settings.fixedWeatherArchetype, expected);
+        }
+        screen.Update(right, 0.016F);
+        EXPECT_EQ(settings.weatherMode, WeatherMode::On);
+        EXPECT_EQ(changed.size(), 6U);
     }
 
     TEST(SettingsScreenTests, AClickOutsideThePageChangesNothingAndEscapeClosesIt)
