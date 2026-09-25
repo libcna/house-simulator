@@ -1,3 +1,39 @@
+# Wet-surface handoff — 2026-09-25 (`HOUSE-01748`)
+
+Tier S now selects the fourteen existing fully-wet material endpoints at integrated
+`surfaceWetness >= 0.5` and returns to dry below that threshold. `StaticGeometryPass` resolves the
+pair once per chunk-library material. No puddle, continuous blend, new weather system or new
+texture was added. Explicit fixed liquid-weather review states start fully established because
+`--weather` deliberately pauses the ordinary weather integrator; automatic weather retains its
+existing rise/fall behavior.
+
+The first visual pass exposed that the real driveway uses a generated unbaked Basic material while
+the canonical wet concrete endpoint is DualTexture. The outdoor-material generator now records an
+optional `wetVariant` id in world data, and the loader/schema/documentation carry it. The existing
+material binder can apply that endpoint's tint/specular description through the geometry's actual
+packed layout, so no runtime material-name table or second material set exists. This also preserves
+the exact fourteen authored endpoints and the XNA-only stock-effect path.
+
+Matched 1,600 x 900 OPENGLES3 heavy-rain captures at 14:00 use the same driveway camera, seed and
+frame 3. The driveway crop mean changes from 0.362553 dry to 0.335560 wet (-7.45%); complete-frame
+MAE is 0.0234842. Full-resolution inspection shows coherent darkening across driveway, facade,
+roof, soil and lawn, with no puddles or visible material/layout failure. Captures remain ignored
+under `docs/visual-review/captures/house-01748-wet-r177/`.
+
+Three focused wet-swap tests plus the material-loader case pass. The complete unit label passes
+1,440/1,440 and the serial software-offscreen StaticGeometryPass set passes 8/8. Strict-XNA
+compiles all 337 translation units clean with `--jobs 4`. The complete pre-commit gate set passes
+except the known layout report for the user-owned root `.claude` entry, which was not touched. The
+initial integration invocation with SDL's `dummy` video driver failed before test code because it
+cannot create an OpenGL window; the required `offscreen` rerun is green.
+
+Rule R2's M7 dependency order selects `HOUSE-03520` next. The remaining forecast is 97.75 realistic
+/ 125.5 pessimistic hours. With 128.5 task-hours spent since the final reduction, the R14
+projection is 254 h, 26 h below the ceiling. Every build, test, check and render is limited to four
+workers and pinned to CPUs 4,5,7,9.
+
+---
+
 # Rain coverage handoff — 2026-09-25 (`HOUSE-01744`)
 
 `CoverageMask` now reads the existing CCOV v1 bake through `TitleContainer`, rejects malformed or

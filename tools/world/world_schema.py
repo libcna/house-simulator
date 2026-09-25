@@ -380,6 +380,7 @@ def build() -> dict[str, dict]:
              "uvScale": {"type": "array", "items": NUM, "minItems": 2, "maxItems": 2},
              "wetResponse": obj([], {"albedoDarken": UNIT, "specularBoost": NUM,
                                      "powerBoost": NUM}),
+             "wetVariant": ID_OR_NULL,
              "snowResponse": obj([], {"coverable": BOOL,
                                       "slopeLimitDeg": {"type": "number", "minimum": 0,
                                                         "maximum": 90}}),

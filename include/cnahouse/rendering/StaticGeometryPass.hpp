@@ -35,6 +35,7 @@ namespace cnahouse::world
     struct Chunk;
     struct ChunkLibrary;
     struct Light;
+    struct MaterialDef;
 } // namespace cnahouse::world
 
 namespace cnahouse::rendering
@@ -82,6 +83,19 @@ namespace cnahouse::rendering
     FixtureEmissiveMultiplier(const Microsoft::Xna::Framework::Vector3& groupColour,
                               float groupLevel,
                               float effectExposure) noexcept;
+
+    /// @brief Tier S changes to the fully-wet endpoint at this integrated wetness.
+    inline constexpr float kTierSWetSwapThreshold = 0.5F;
+
+    /// @brief Finds the validated `_WET` endpoint for one authored dry material name.
+    ///
+    /// `HOUSE-00905` authored the fourteen pairs with a stable suffix. The lookup happens once
+    /// when the static pass is constructed; frame drawing retains only the two hashed ids.
+    [[nodiscard]] util::Id FindTierSWetVariant(std::span<const world::MaterialDef> materials,
+                                               std::string_view dryName);
+
+    /// @brief Chooses one prevalidated Tier-S endpoint from the live integrated wetness.
+    [[nodiscard]] util::Id SelectTierSMaterial(util::Id dry, util::Id wet, float surfaceWetness) noexcept;
     class MaterialBinder;
     struct FogParams;
 
@@ -146,7 +160,8 @@ namespace cnahouse::rendering
                            visibility::RenderList& list,
                            MaterialBinder& binder,
                            TextureLookup textures,
-                           const FogParams* exteriorFog = nullptr);
+                           const FogParams* exteriorFog = nullptr,
+                           const float* surfaceWetness = nullptr);
         ~StaticGeometryPass() override;
 
         void Draw(PassContext& context) override;
@@ -213,8 +228,11 @@ namespace cnahouse::rendering
         MaterialBinder* binder_ = nullptr;
         TextureLookup textures_;
         const FogParams* exteriorFog_ = nullptr;
+        const float* surfaceWetness_ = nullptr;
         std::unique_ptr<Microsoft::Xna::Framework::Graphics::BasicEffect> effect_;
         std::vector<util::Id> fixtureGroups_;
+        /// One validated wet endpoint per chunk-library material, or invalid for no endpoint.
+        std::vector<util::Id> wetMaterials_;
         StaticGeometryMode mode_ = StaticGeometryMode::DebugBlockout;
         bool showBackFaces_ = false;
         std::uint32_t chunksDrawn_ = 0u;

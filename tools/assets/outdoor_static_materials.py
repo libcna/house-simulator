@@ -71,6 +71,11 @@ def variant_row(variant: Variant, rows: dict[str, dict]) -> dict:
     row["id"] = variant.material_id
     row["lightmapChannel"] = 0
     row["effectTierS"] = "Basic"
+    wet_id = f"{variant.base_id}_WET"
+    if wet_id in rows:
+        row["wetVariant"] = wet_id
+    else:
+        row.pop("wetVariant", None)
     if variant.tint is not None:
         row["tint"] = list(variant.tint)
     if variant.footstep is not None:
@@ -122,7 +127,7 @@ def render_row(row: dict) -> str:
     def value(field: str) -> str:
         return json.dumps(row[field])
 
-    return "\n".join((
+    lines = [
         "    {",
         f'      "id": {value("id")}, "class": {value("class")},',
         f'      "albedo": {value("albedo")},',
@@ -132,12 +137,17 @@ def render_row(row: dict) -> str:
         f'      "alpha": {value("alpha")}, "alphaCutoff": {value("alphaCutoff")},',
         f'      "twoSided": {value("twoSided")}, "uvScale": {value("uvScale")},',
         f'      "wetResponse": {value("wetResponse")},',
+    ]
+    if "wetVariant" in row:
+        lines.append(f'      "wetVariant": {value("wetVariant")},')
+    lines.extend((
         f'      "snowResponse": {value("snowResponse")},',
         f'      "footstepSurface": {value("footstepSurface")},',
         f'      "audioAbsorption": {value("audioAbsorption")},',
         f'      "effectTierS": {value("effectTierS")}, "effectTierE": {value("effectTierE")}',
         "    },",
     ))
+    return "\n".join(lines)
 
 
 def main() -> int:

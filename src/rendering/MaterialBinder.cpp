@@ -326,8 +326,19 @@ namespace cnahouse::rendering
         {
             return Err(ErrorCode::NotFound, std::format("no material {:#010x} is registered", id.Value()));
         }
+        return BindAs(id, desc->kind, draw);
+    }
 
-        switch (desc->kind)
+    util::Result<Gfx::Effect*>
+    MaterialBinder::BindAs(util::Id id, MaterialKind layoutKind, const DrawParams& draw)
+    {
+        const MaterialDesc* desc = Find(id);
+        if (desc == nullptr)
+        {
+            return Err(ErrorCode::NotFound, std::format("no material {:#010x} is registered", id.Value()));
+        }
+
+        switch (layoutKind)
         {
             case MaterialKind::Basic:
             {

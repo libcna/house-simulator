@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **62 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 84 / 99 / 127 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5 passed; compact-environment work is active.** Next: retained wet surfaces in `HOUSE-01748` |
+| Active plan | **61 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 83 / 98 / 126 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5 passed; compact-environment work is active.** Next: representative environment captures and render set in `HOUSE-03520` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -1160,10 +1160,11 @@ a simulation of its own.
       trace: absorbs `HOUSE-01755` (the coverage test)
       note: (2026-09-25) `CoverageMask` is the strict runtime reader for the existing CCOV v1 bake (160 × 128 at 0.5 m; 1,635/20,480 finite samples) and the fixed rain update teleports every drop at or below finite cover to the top of its existing camera-relative volume before submission. The writer now correctly stores the highest slab underside—the first barrier encountered by rain falling from the sky—rather than the lowest floor in a multi-storey stack; the format documentation also explicitly treats IEEE +infinity as open sky before applying the finite-height comparison. The authored-field test measures the porch at 3.30 m 0.30 m inside its edge and +infinity 0.30 m outside, the shed at 2.35 m, observes sheltered teleports, and proves every submitted drop is exposed both under the porch and from an indoor camera. Outdoor rain remains visible through the closed family-room windows while no particle position under the house roof is submitted, preserving `HOUSE-03520`'s indoor-rain view without modelling open windows. Full-resolution OPENGLES3 captures at 1,600 × 900 were inspected: rain stops at the porch edge and the indoor frame shows streaks only through the window apertures, with none in the room. The coverage selftest and six focused rain/coverage tests pass; the complete 1,437-test unit label passes. The serial offscreen integration label passes 142/143; the sole failure is the pre-existing authored-content assertion expecting 50 alpha-cutout batches while `chunks.bin` contains 51, reproduced alone and unrelated to this task. Strict-XNA compiles all 336 translation units clean with four workers
 
-- [ ] HOUSE-01748 — Wet surfaces in rain: the wet-material swap driven by `surfaceWetness` (Tier S)
+- [x] HOUSE-01748 — Wet surfaces in rain: the wet-material swap driven by `surfaceWetness` (Tier S)
       dep: HOUSE-01690, HOUSE-00905 · sys: rendering · plat: ALL · pri: MUST · zone: all · adv: D5 · est: 1.25
       accept: the 14 existing wet variants (`HOUSE-00905`) replace their dry materials as `surfaceWetness` (`HOUSE-01690`) rises, and return as it falls; no puddles
       verify: unit test of the swap threshold; the wet-driveway capture
+      note: (2026-09-25) `StaticGeometryPass` resolves each dry Tier-S material to one of the fourteen existing fully-wet endpoints once at construction and swaps at integrated `surfaceWetness >= 0.5`, returning to dry below the threshold. The generated unbaked outdoor rows now carry an explicit data-owned `wetVariant` reference to their canonical endpoint; `MaterialBinder::BindAs` applies that endpoint's tint and specular values through the Basic vertex layout those meshes actually pack, so the driveway does not silently remain dry and no material id is hard-coded in runtime code. Fixed command-line liquid-weather reviews start at their established wet endpoint while ordinary weather still rises and falls through the existing integrator. Three focused swap tests, the material-loader case, all eight serial software-offscreen `StaticGeometryPass` tests and the complete 1,440-test unit label pass. Strict-XNA compiles all 337 translation units clean with four workers. The complete pre-commit gate set passes except the known user-owned root `.claude` layout report. Matched full-resolution OPENGLES3 heavy-rain frames at 14:00 use the same camera, seed and frame 3: the driveway crop's linear mean falls from 0.362553 to 0.335560 (-7.45%) and the complete-frame MAE is 0.0234842; inspection finds the retained darkened surface and no puddles
 
 - [ ] HOUSE-03520 — Environment captures and the representative environment render set
       dep: HOUSE-01696, HOUSE-01650, HOUSE-01743, HOUSE-01744, HOUSE-01748 · sys: ci · plat: LNX · pri: MUST · zone: all · adv: D5, D11 · est: 1.75
@@ -1922,7 +1923,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M4 Dressing everywhere | 40 | 48.75 | **0** | 0 | **0** | 0 | R-D +3 |
 | M5 Baseline lighting everywhere | 12 | 24.5 | **0** | 0 | **0** | 0 | — |
 | M6 Main cells and hero areas | 20 | 32.5 | **0** | 0 | **0** | 0 | — |
-| M7 A compact environment | 13 | 21 | **2** | 2.5 | **3** | 3.25 | — |
+| M7 A compact environment | 13 | 21 | **1** | 1.5 | **1.75** | 2 | — |
 | M8 Atmospheric audio essentials | 11 | 14.5 | **6** | 7.75 | **9** | 10 | — |
 | M9 Application shell | 10 | 12.5 | **6** | 7.25 | **8.5** | 9.25 | — |
 | M10 Performance | 6 | 13 | **3** | 6.75 | **8** | 12.75 | R-C +4 |
@@ -1932,11 +1933,11 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **62** | **84** | **99** | **126.75** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **61** | **83** | **97.75** | **125.5** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-153.25 h. Adding the 127.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+154.5 h. Adding the 128.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
 254 h, 26 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 

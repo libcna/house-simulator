@@ -695,6 +695,9 @@ namespace cnahouse::world
         float uvScaleU = 1.0F;
         float uvScaleV = 1.0F;
         WetResponse wet;
+        /// Optional fully-wet Tier-S endpoint. Used when a geometry-layout variant cannot follow
+        /// the canonical `_WET` naming convention (for example an unbaked outdoor Basic mesh).
+        util::Id wetVariant;
         SnowResponse snow;
         std::string footstepSurface;
         float audioAbsorption = 0.0F;

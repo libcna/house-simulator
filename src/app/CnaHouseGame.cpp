@@ -447,6 +447,16 @@ namespace cnahouse::app
                 return;
             }
             initialWeather = std::move(sampled.Value().state);
+            // `--weather` is the deterministic review state and pauses the complete weather
+            // system below, including persistent wetness. Start a retained liquid-precipitation
+            // review at its fully established wet endpoint so the fixed rain capture can prove
+            // the Tier-S material swap; clear/overcast/snow review states remain dry. Ordinary
+            // automatic weather still reaches and leaves this endpoint only through integration.
+            initialWeather.surfaceWetness = initialWeather.precipType != weather::PrecipType::Snow &&
+                                                    initialWeather.precipType != weather::PrecipType::None &&
+                                                    initialWeather.precipIntensity > 0.0F
+                                                ? 1.0F
+                                                : 0.0F;
             initialWeatherTarget = selected->id;
             initialWeatherExpiry = 380.0F;
             commandWeatherApplied = true;
@@ -686,7 +696,8 @@ namespace cnahouse::app
                                   renderList_,
                                   *materialBinder_,
                                   [this](std::string_view name) { return caches_->textures.Get(name); },
-                                  exteriorFog_.get()));
+                                  exteriorFog_.get(),
+                                  &weather_->State().surfaceWetness));
         }
         if (skyDome && skyColours && stars)
         {

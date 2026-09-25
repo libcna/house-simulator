@@ -239,6 +239,14 @@ namespace cnahouse::rendering
         /// just been overwritten.
         util::Result<Microsoft::Xna::Framework::Graphics::Effect*> Bind(util::Id id, const DrawParams& draw);
 
+        /// @brief Binds @p id's parameters through the effect required by the packed vertex layout.
+        ///
+        /// A derived unbaked outdoor material uses a Basic vertex layout but may select the same
+        /// canonical wet endpoint as its lightmapped source. This narrow override preserves the
+        /// endpoint's tint/specular values without pretending the mesh contains a second UV set.
+        util::Result<Microsoft::Xna::Framework::Graphics::Effect*>
+        BindAs(util::Id id, MaterialKind layoutKind, const DrawParams& draw);
+
         /// @brief The supplemental `EnvironmentMapEffect` pass for @p id (§22.2, §59).
         ///
         /// Environment mapping is deliberately not a fifth `MaterialKind`: chrome and mirror

@@ -937,6 +937,13 @@ namespace cnahouse::world
                 material.wet = {darken.Value(), boost.Value(), powerBoost.Value()};
             }
 
+            const Result<util::Id> wetVariant = OptionalId(row, "wetVariant");
+            if (!wetVariant)
+            {
+                return wetVariant.Error().WithContext("layout.materials.json");
+            }
+            material.wetVariant = wetVariant.Value();
+
             if (row.Has("snowResponse") && !row.IsNull("snowResponse"))
             {
                 const Result<JsonValue> snow = row.RequireObject("snowResponse");

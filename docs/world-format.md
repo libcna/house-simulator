@@ -567,6 +567,7 @@ systems read as well as the visual ones.
       "twoSided": false,
       "uvScale": [4.0, 4.0],
       "wetResponse":  { "albedoDarken": 0.22, "specularBoost": 2.1, "powerBoost": 2.5 },
+      "wetVariant": null,                  // optional Tier-S wet endpoint id
       "snowResponse": { "coverable": true, "slopeLimitDeg": 40 },
       "footstepSurface": "tile",
       "audioAbsorption": 0.06,
@@ -582,6 +583,10 @@ systems read as well as the visual ones.
 class table is the documented fallback when a material omits it — `wood` is `DualTextureEffect`
 static and `BasicEffect` dynamic, and only static props are batched, so the static column is the
 one the batcher uses.
+
+`wetVariant` is normally omitted because Tier S resolves the authored `<dry-id>_WET` pair. A
+derived geometry-layout variant may name that canonical wet endpoint explicitly; this keeps the
+relationship in world data instead of hard-coding material ids in runtime code.
 
 `snowResponse.slopeLimitDeg` is read by [`snowshell-format.md`](snowshell-format.md): a face
 steeper than this never joins the snow shell, which is what stops snow clinging to walls (§38).

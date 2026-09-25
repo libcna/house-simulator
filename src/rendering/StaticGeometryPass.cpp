@@ -185,6 +185,36 @@ namespace cnahouse::rendering
 
     } // namespace
 
+    util::Id FindTierSWetVariant(std::span<const world::MaterialDef> materials, std::string_view dryName)
+    {
+        const util::Id dryId = util::Id::Of(dryName);
+        const auto dry = std::find_if(
+            materials.begin(), materials.end(), [dryId](const auto& row) { return row.id == dryId; });
+        if (dry == materials.end() || dry->surfaceState != world::SurfaceState::Dry)
+        {
+            return {};
+        }
+
+        std::string wetName(dryName);
+        wetName += "_WET";
+        const util::Id wetId = dry->wetVariant.IsValid() ? dry->wetVariant : util::Id::Of(wetName);
+        const auto wet = std::find_if(
+            materials.begin(), materials.end(), [wetId](const auto& row) { return row.id == wetId; });
+        if (wet == materials.end() || wet->surfaceState != world::SurfaceState::Wet ||
+            wet->materialClass != dry->materialClass || wet->albedo != dry->albedo)
+        {
+            return {};
+        }
+        return wetId;
+    }
+
+    util::Id SelectTierSMaterial(util::Id dry, util::Id wet, float surfaceWetness) noexcept
+    {
+        return wet.IsValid() && std::isfinite(surfaceWetness) && surfaceWetness >= kTierSWetSwapThreshold
+                   ? wet
+                   : dry;
+    }
+
     Vector3 StaticGeometryPass::BlockoutColour(const std::string& material)
     {
         const std::uint32_t hash = Fnv1a(material);
@@ -217,7 +247,8 @@ namespace cnahouse::rendering
                                            visibility::RenderList& list,
                                            MaterialBinder& binder,
                                            TextureLookup textures,
-                                           const FogParams* exteriorFog)
+                                           const FogParams* exteriorFog,
+                                           const float* surfaceWetness)
         : library_(library)
         , cells_(cells)
         , world_(&world)
@@ -227,12 +258,18 @@ namespace cnahouse::rendering
         , binder_(&binder)
         , textures_(std::move(textures))
         , exteriorFog_(exteriorFog)
+        , surfaceWetness_(surfaceWetness)
         , mode_(StaticGeometryMode::ProductionMaterials)
     {
         fixtureGroups_.reserve(library_.chunks.size());
         for (const world::Chunk& chunk : library_.chunks)
         {
             fixtureGroups_.push_back(FixtureGroupForChunk(chunk, world.Lights()));
+        }
+        wetMaterials_.reserve(library_.materials.size());
+        for (const std::string& material : library_.materials)
+        {
+            wetMaterials_.push_back(FindTierSWetVariant(world.Materials(), material));
         }
     }
 
@@ -439,11 +476,17 @@ namespace cnahouse::rendering
                 continue;
             }
 
-            const world::MaterialDef* material =
-                world_->FindMaterial(util::Id::Of(library_.materials[leader.material]));
+            const util::Id dryMaterial = util::Id::Of(library_.materials[leader.material]);
+            const util::Id wetMaterial =
+                leader.material < wetMaterials_.size() ? wetMaterials_[leader.material] : util::Id{};
+            const float surfaceWetness = surfaceWetness_ != nullptr ? *surfaceWetness_ : 0.0F;
+            const util::Id selectedMaterial = SelectTierSMaterial(dryMaterial, wetMaterial, surfaceWetness);
+            const world::MaterialDef* material = world_->FindMaterial(selectedMaterial);
             const world::Cell* cell = world_->FindCell(util::Id::Of(library_.cells[leaderChunk.cell]));
-            if (material == nullptr || cell == nullptr ||
-                material->effectTierS != visibility::EffectForLayout(leaderChunk.layout))
+            const world::MaterialDef* dryDefinition = world_->FindMaterial(dryMaterial);
+            const world::EffectTier layoutEffect = visibility::EffectForLayout(leaderChunk.layout);
+            if (material == nullptr || dryDefinition == nullptr || cell == nullptr ||
+                dryDefinition->effectTierS != layoutEffect)
             {
                 first = last;
                 continue;
@@ -480,7 +523,24 @@ namespace cnahouse::rendering
 
             auto submit = [&](const DrawParams& draw, bool additive, bool countGeometry)
             {
-                const util::Result<Gfx::Effect*> effectResult = binder_->Bind(material->id, draw);
+                MaterialKind layoutKind = MaterialKind::Basic;
+                switch (layoutEffect)
+                {
+                    case world::EffectTier::Basic:
+                        layoutKind = MaterialKind::Basic;
+                        break;
+                    case world::EffectTier::DualTexture:
+                        layoutKind = MaterialKind::DualTexture;
+                        break;
+                    case world::EffectTier::AlphaTest:
+                        layoutKind = MaterialKind::AlphaTest;
+                        break;
+                    case world::EffectTier::Skinned:
+                        layoutKind = MaterialKind::Skinned;
+                        break;
+                }
+                const util::Result<Gfx::Effect*> effectResult =
+                    binder_->BindAs(material->id, layoutKind, draw);
                 if (!effectResult)
                 {
                     return false;

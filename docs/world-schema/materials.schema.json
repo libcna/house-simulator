@@ -216,6 +216,9 @@
             },
             "required": [],
             "type": "object"
+          },
+          "wetVariant": {
+            "$ref": "#/$defs/idOrNull"
           }
         },
         "required": [
