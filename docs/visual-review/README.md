@@ -5690,3 +5690,27 @@ remain fog-free and reset the shared stock effect; `EXT_WORLD`, alpha-tested ext
 and explicitly weather-facing shell/window/door batches consume the one per-frame value. Focused
 mapping, sky-direction and live-device binder/pass tests pass. No S1/S2 was found. M7 dependency
 order next selects the fixed-pool shared particle renderer in `HOUSE-01741`.
+
+## Round 178 — representative environment set
+
+Commit: `HOUSE-03520` working tree (`2026-09-25`). The compact set contains thirteen fixed
+Tier-S/High scenes rather than a weather/time cross product. Clear noon, 17:00 dusk and 22:00 night
+are viewed from the front approach and through the master-bedroom's upper-floor windows. Noon
+overcast and rain, heavy rain behind those closed windows, rain viewed from under the porch, the
+fully wet driveway and the non-particle `W_SNOW` state complete the weather boundaries. The
+specialised sun, moon and star render fixtures from `HOUSE-01617` remain the exact celestial-disc
+proof; these integrated scenes retain the visible clear-night star field.
+
+The first snow candidate exposed a test-input error rather than a rendering defect: at 12:00 and
+8.9 C the authored nominal snow archetype correctly resolves to rain. The final row is fixed at
+06:00 and -0.4 C, where it shows the snow state's overcast sky and fog with no particle, as D5
+requires. All thirteen 1,600 x 900 images and the contact sheet were inspected at full resolution.
+Rain remains outside the upper-floor windows and under-porch camera, the driveway is visibly wet,
+weather fog has no band, and the clear/overcast/rain/snow presentations remain distinct. No S1/S2
+was found, so the task's one-hour sky/fog tuning allowance was not used. Local evidence is in
+`captures/house-03520-environment-r178/`.
+
+The same thirteen rows are committed as 640 x 360 software-OPENGLES3 references. Their coverage
+test and complete comparison pass at the existing per-channel tolerance 2 and <0.2% differing-pixel
+limit; no runtime, world content, sky or fog parameter changed. M7 is complete. Track-B dependency
+order and rules R11/R13 select the still-unfinished MUST `HOUSE-01911` next.

@@ -1,3 +1,39 @@
+# Representative environment handoff — 2026-09-25 (`HOUSE-03520`)
+
+The existing visual-review tool now has `--environment-set`, a bounded thirteen-scene matrix shared
+with `EnvironmentRenderTests`: clear noon/dusk/night at the front approach and upper-floor window,
+the useful noon overcast/rain contrasts, then heavy rain behind the closed upper windows, shelter
+under the porch, the wet driveway and the cold non-particle snow state. It reuses the production
+walk/screenshot path and the existing render harness; no new runtime system or weather cross
+product was added.
+
+The first snow-state capture at 12:00 visibly emitted rain because the real temperature was 8.9 C.
+That was a bad proof input, not hidden: the final row uses deterministic 06:00 at -0.4 C, retains
+the overcast/fog presentation and emits no particle. The complete 1,600 x 900 contact sheet and all
+thirteen source frames were inspected. Rain stays outside both the upper-floor windows and porch,
+the wet driveway uses the retained wet materials, atmospheres remain distinct, and no S1/S2 or fog
+band was found. Consequently none of the one-hour tuning allowance was spent. Captures remain
+ignored under `docs/visual-review/captures/house-03520-environment-r178/`.
+
+The thirteen committed 640 x 360 software-OPENGLES3 references pass both focused environment tests
+with the established tolerance (2 channel values, <0.2% changed pixels). The existing specialised
+sun/moon/star fixtures continue to guard the exact celestial discs and catalogue. The complete
+render binary passes 40/52 active cases: the twelve failures are the already-recorded stale
+`BlockoutPose` exterior/interior, `BlockoutRender`, `CullingSanity`, `EnvironmentReadout`,
+`FirstPersonPose`, `PropertyPose`, `RepresentativeInterior` and four `SunSeason` reference groups
+that predate the recent finished-house content; the same independent baseline state is documented
+under `HOUSE-01650`. This task changed no runtime/content pixel outside its new references and does
+not refresh unrelated goldens ahead of their owning baseline work.
+
+All 1,440 unit tests pass. The complete static gate compiles 338 strict-XNA translation units clean
+with four workers and fails only on the known user-owned root `.claude` layout entry, which remains
+untouched. M7 is complete; Track-B dependency order plus R11/R13 selects `HOUSE-01911` next. The
+remaining forecast is 96 realistic / 123.5 pessimistic hours. With 130.25 task-hours completed
+since the final reduction, the R14 projection is 253.75 h, 26.25 h below the ceiling. Every build,
+test, check and render in this work was limited to four workers and pinned to CPUs 4,5,7,9.
+
+---
+
 # Wet-surface handoff — 2026-09-25 (`HOUSE-01748`)
 
 Tier S now selects the fourteen existing fully-wet material endpoints at integrated

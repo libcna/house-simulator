@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **61 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 83 / 98 / 126 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5 passed; compact-environment work is active.** Next: representative environment captures and render set in `HOUSE-03520` |
+| Active plan | **60 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 82 / 96 / 124 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5 and M7 passed; atmospheric-audio work is active.** Next: `AudioSystem` categories and bank loading in `HOUSE-01911` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -1166,11 +1166,12 @@ a simulation of its own.
       verify: unit test of the swap threshold; the wet-driveway capture
       note: (2026-09-25) `StaticGeometryPass` resolves each dry Tier-S material to one of the fourteen existing fully-wet endpoints once at construction and swaps at integrated `surfaceWetness >= 0.5`, returning to dry below the threshold. The generated unbaked outdoor rows now carry an explicit data-owned `wetVariant` reference to their canonical endpoint; `MaterialBinder::BindAs` applies that endpoint's tint and specular values through the Basic vertex layout those meshes actually pack, so the driveway does not silently remain dry and no material id is hard-coded in runtime code. Fixed command-line liquid-weather reviews start at their established wet endpoint while ordinary weather still rises and falls through the existing integrator. Three focused swap tests, the material-loader case, all eight serial software-offscreen `StaticGeometryPass` tests and the complete 1,440-test unit label pass. Strict-XNA compiles all 337 translation units clean with four workers. The complete pre-commit gate set passes except the known user-owned root `.claude` layout report. Matched full-resolution OPENGLES3 heavy-rain frames at 14:00 use the same camera, seed and frame 3: the driveway crop's linear mean falls from 0.362553 to 0.335560 (-7.45%) and the complete-frame MAE is 0.0234842; inspection finds the retained darkened surface and no puddles
 
-- [ ] HOUSE-03520 — Environment captures and the representative environment render set
+- [x] HOUSE-03520 — Environment captures and the representative environment render set
       dep: HOUSE-01696, HOUSE-01650, HOUSE-01743, HOUSE-01744, HOUSE-01748 · sys: ci · plat: LNX · pri: MUST · zone: all · adv: D5, D11 · est: 1.75
       accept: (1) `capture_review.py` gains an environment scenario set: clear, overcast and rain at noon, dusk and night from the front approach and from an upper-floor window looking out; (2) every D5 item is visible in it; (3) the same scenes, plus heavy rain seen from indoors, rain under the porch and the wet driveway, become render tests (about 13 scenes); (4) sky and fog are tuned only where the set shows an S1/S2, bounded to 1 h; (5) S1/S2 environment defects are fixed or filed
       verify: the capture set; the render suite; a ledger round
       trace: absorbs `HOUSE-01653` (the environment render tests) and `HOUSE-01652` (sky and fog tuning); the snowfall scene moved to the optional backlog with `HOUSE-01791`
+      note: (2026-09-25) Round 178 adds one bounded 13-scene Tier-S/High set to the existing capture tool and software-OPENGLES3 render harness. Clear noon, dusk and night are shown from the fixed front approach and through the master-bedroom's upper-floor windows; matched noon overcast/rain views plus heavy rain through those closed windows, rain stopping at the porch edge, the fully wet driveway, and the cold `W_SNOW` dawn state cover the remaining D5 weather boundaries. The first snow candidate at 12:00 correctly resolved to rain at 8.9 C, so the final deterministic row uses 06:00 at -0.4 C and visibly has the required overcast/fog state with no precipitation particle. Existing dedicated sun/moon/star render fixtures continue to prove their exact discs/catalogue; this integrated set shows the clear time-of-day progression and star field. All thirteen 1600 x 900 frames and their contact sheet were inspected at full resolution: rain stays outdoors, wet materials remain coherent, clear/overcast/rain/snow atmospheres separate, and no S1/S2, clipping, missing material or fog band is present. The one-hour tuning allowance was therefore unused. The committed 640 x 360 references pass both focused environment tests at the existing tolerance; no runtime, content, sky or fog value changed
 
 ---
 
@@ -1923,7 +1924,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M4 Dressing everywhere | 40 | 48.75 | **0** | 0 | **0** | 0 | R-D +3 |
 | M5 Baseline lighting everywhere | 12 | 24.5 | **0** | 0 | **0** | 0 | — |
 | M6 Main cells and hero areas | 20 | 32.5 | **0** | 0 | **0** | 0 | — |
-| M7 A compact environment | 13 | 21 | **1** | 1.5 | **1.75** | 2 | — |
+| M7 A compact environment | 13 | 21 | **0** | 0 | **0** | 0 | — |
 | M8 Atmospheric audio essentials | 11 | 14.5 | **6** | 7.75 | **9** | 10 | — |
 | M9 Application shell | 10 | 12.5 | **6** | 7.25 | **8.5** | 9.25 | — |
 | M10 Performance | 6 | 13 | **3** | 6.75 | **8** | 12.75 | R-C +4 |
@@ -1933,12 +1934,12 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **61** | **83** | **97.75** | **125.5** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **60** | **81.5** | **96** | **123.5** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-154.5 h. Adding the 128.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-254 h, 26 h under the limit. That margin is
+156.5 h. Adding the 130.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+253.75 h, 26.25 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |

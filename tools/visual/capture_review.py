@@ -230,6 +230,27 @@ SCENARIOS = {
     "clear-night": (22.0, "W_CLEAR"),
 }
 
+# HOUSE-03520: the compact environment review deliberately does not multiply every weather by
+# every clock time. Clear carries the noon/dusk/night comparison at both required viewpoints;
+# overcast and ordinary rain add the weather comparison at noon. The four focused rows complete
+# D5 with heavy rain through a closed upper-floor window, porch shelter, a wet driveway, and the
+# retained snow state's overcast/fog presentation without optional snow particles.
+ENVIRONMENT_SCENES = (
+    ("front-clear-noon", "0.00,0.00,5.20,0.0,3.0", 12.0, "W_CLEAR"),
+    ("front-clear-dusk", "0.00,0.00,5.20,0.0,3.0", 17.0, "W_CLEAR"),
+    ("front-clear-night", "0.00,0.00,5.20,0.0,3.0", 22.0, "W_CLEAR"),
+    ("front-overcast-noon", "0.00,0.00,5.20,0.0,3.0", 12.0, "W_OVERCAST"),
+    ("front-rain-noon", "0.00,0.00,5.20,0.0,3.0", 12.0, "W_RAIN"),
+    ("upper-window-clear-noon", "-6.20,3.65,-24.80,0.0,0.0", 12.0, "W_CLEAR"),
+    ("upper-window-clear-dusk", "-6.20,3.65,-24.80,0.0,0.0", 17.0, "W_CLEAR"),
+    ("upper-window-clear-night", "-6.20,3.65,-24.80,0.0,0.0", 22.0, "W_CLEAR"),
+    ("upper-window-overcast-noon", "-6.20,3.65,-24.80,0.0,0.0", 12.0, "W_OVERCAST"),
+    ("upper-window-heavy-rain", "-6.20,3.65,-24.80,0.0,0.0", 14.0, "W_HEAVY_RAIN"),
+    ("under-porch-rain", "0.00,0.60,-12.10,180.0,0.0", 14.0, "W_RAIN"),
+    ("wet-driveway-rain", "13.00,0.00,-4.00,0.0,0.0", 14.0, "W_HEAVY_RAIN"),
+    ("front-snow-state-dawn", "0.00,0.00,5.20,0.0,3.0", 6.0, "W_SNOW"),
+)
+
 
 def load_zones() -> dict:
     try:
@@ -248,6 +269,15 @@ def coverage_problems(document: dict) -> list[str]:
         found.append("pose names are not unique")
     if set(pose_names) != set(POSE_DETAILS):
         found.append("POSES and POSE_DETAILS name different pose sets")
+
+    environment_names = [row[0] for row in ENVIRONMENT_SCENES]
+    if len(ENVIRONMENT_SCENES) != 13:
+        found.append(f"the compact environment set has {len(ENVIRONMENT_SCENES)} scenes, expected 13")
+    if len(environment_names) != len(set(environment_names)):
+        found.append("environment scene names are not unique")
+    if {row[3] for row in ENVIRONMENT_SCENES} != {
+            "W_CLEAR", "W_HEAVY_RAIN", "W_OVERCAST", "W_RAIN", "W_SNOW"}:
+        found.append("the compact environment set does not cover its five retained weather states")
 
     zones = {zone.get("id"): zone for zone in document.get("zones", [])
              if isinstance(zone, dict)}
@@ -342,6 +372,8 @@ def main() -> int:
                            help="capture only one planning zone")
     selection.add_argument("--all-zones", action="store_true",
                            help="capture every planning zone (the default)")
+    selection.add_argument("--environment-set", action="store_true",
+                           help="capture HOUSE-03520's compact 13-scene environment set")
     parser.add_argument("--check", action="store_true",
                         help="validate fixed-view coverage and exit without capturing")
     parser.add_argument("--light-on", action="append", default=[], metavar="GROUP",
@@ -384,10 +416,15 @@ def main() -> int:
     poses = selected_poses(args.zone, args.scenario)
     if not poses:
         parser.error(f"{args.zone or 'the selected set'} has no {args.scenario} hero view")
+    if args.environment_set and (args.light_on or args.light_off):
+        parser.error("the environment set owns its fixed lighting state")
+
+    capture_rows = ([(name, pose, time_of_day, weather) for name, pose in poses]
+                    if not args.environment_set else list(ENVIRONMENT_SCENES))
 
     with tempfile.TemporaryDirectory(prefix="cnahouse-visual-review-") as review_data_home:
         environment["XDG_DATA_HOME"] = review_data_home
-        for name, pose in poses:
+        for name, pose, row_time, row_weather in capture_rows:
             output = destination / f"{name}.png"
             command = [
                 str(binary),
@@ -396,9 +433,9 @@ def main() -> int:
                 "--tier=s",
                 "--quality=high",
                 f"--seed={SEED}",
-                f"--time={time_of_day}",
+                f"--time={row_time}",
                 "--freeze-time",
-                f"--weather={weather}",
+                f"--weather={row_weather}",
                 *(f"--light-on={group}" for group in args.light_on),
                 *(f"--light-off={group}" for group in args.light_off),
                 "--no-audio",
@@ -411,6 +448,12 @@ def main() -> int:
             if completed.returncode != 0 or not output.is_file():
                 print(completed.stdout, file=sys.stderr)
                 return completed.returncode or 1
+
+    if args.environment_set:
+        make_contact_sheet(destination, [row[0] for row in capture_rows],
+                           "Environment · HOUSE-03520",
+                           destination / "contact-environment.png")
+        return 0
 
     by_zone: dict[str, list[str]] = {}
     for name, _ in poses:
