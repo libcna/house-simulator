@@ -1,3 +1,27 @@
+# Footstep category listening blocker — 2026-09-25 (`HOUSE-01920`, still open)
+
+The implementation is locally ready but the task is deliberately not marked complete. Six existing
+NOX walk banks cover all 22 non-null surface spellings in cells, materials and stairs exactly once;
+the player loop feeds its real collision surface and authored stair-riser height into the existing
+`FootstepDirector`, then uses the existing `AudioSystem` gate and content cache for one-shot playback.
+No sound was sourced or derived, and no mixer or generalized routing subsystem was introduced.
+
+Automated evidence is green: the mapping selftest/check, all 15 world validators, 20 focused unit
+tests, five audio-gate integration tests, and a 240-fixed-step real-controller walk with audio
+disabled. A representative wood/carpet/tile/stone/gravel/grass montage is 48 kHz mono, 4.628 s and
+peaks at -8.07 dBFS. It was not called a listening check: this environment has no `/dev/snd`, ALSA
+reports no soundcards, PulseAudio refuses the connection, and the Codex runtime explicitly rejects
+audio input. The implementation changes are preserved in the named stash
+`house-01920-awaiting-listening`; apply it only in a session able to complete the six-location human
+listening check, rerun the broader suites, then tick and commit the task once.
+
+The blocker does not gate `HOUSE-01922`, whose dependencies are complete. M8 dependency order plus
+R11/R13 therefore selects `HOUSE-01922` next. The forecast remains 92 realistic / 119 pessimistic
+hours because HOUSE-01920 is still open; the R14 projection remains 253.25 h, 26.75 h below the
+ceiling. All validation was pinned to CPUs 4,5,7,9 and used no more than four workers.
+
+---
+
 # Footstep cadence handoff — 2026-09-25 (`HOUSE-01919`)
 
 `FootstepDirector` is the bounded consumer of facts the player controller already knows: fixed-step
