@@ -1,3 +1,34 @@
+# Accessible-room automatic-light handoff — 2026-09-25 (`HOUSE-03634`)
+
+The user's report that fixtures existed but did not shine exposed a wider case than the earlier
+wet-room correction. The renderer and baked-light path were working: matched Living and Kitchen
+captures at 10:30 and 22:00 show their timed groups switch on and visibly illuminate the rooms at
+night. The data audit instead found 28 accessible service, closet and store groups assigned to
+`SC-OFF`; because the retained showcase has no light interaction, those physical fixtures could
+never emit at any time.
+
+All 28 reuse the existing always-automatic `SC-CIRC` class. No fixture, bake, exposure constant,
+interaction or runtime mechanism changed. `SC-OFF` remains only for the nested refrigerator
+interior outside the retained walk-only scope, while Living, Bedroom, Task and Dusk keep their
+timed/solar behaviour. A new world-backed regression rejects any non-nested cell whose authored
+fixtures are all permanently off.
+
+Matched 1,600 × 900 software-OPENGLES3 captures at 10:30 show the Butler's-pantry ceiling fixture
+and existing bake contribute automatically. Against the identical `--light-off` control, 95.08%
+of pixels change; linear luminance rises 0.020995→0.034080 over the fixture, 0.014411→0.024711
+on the left wall and 0.023037→0.024512 on the floor. Both full-resolution frames were inspected;
+the automatic frame has a visibly emitting lamp and coherent warm receiver light without clipping,
+missing texture or a new global exposure lift.
+
+The focused three-test schedule set and all 1,474 unit tests pass. `HOUSE-03634` uses 0.75 h from
+the already-bounded `HOUSE-03631` allowance; M11 and the project ceiling do not expand. The open
+plan stays at 49 MUST tasks with 75.25 realistic / 100.7 pessimistic hours remaining; 151 completed
+hours plus that pessimistic remainder project 251.7 h, 28.3 h below the ceiling. R1(a), R10 and R15
+selected this manual S2 correction; dependency order now returns to `HOUSE-02891`. Every build and
+test was pinned to CPUs 0–3 with at most four workers.
+
+---
+
 # Web-readiness audit handoff — 2026-09-25 (`HOUSE-02843`)
 
 R11/R13 and M14's explicitly dependency-unblocked Track B selected `HOUSE-02843` after the bounded

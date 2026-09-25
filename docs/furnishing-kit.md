@@ -75,14 +75,15 @@ task/accent groups). `HOUSE-03401` implements the schedule classes and seeded gr
 | `LP-WET` | ceiling/downlight on `MAIN`; mirror light on `VANITY`, bath accent when authored | `SC-WET`: always on for automatic readability |
 | `LP-TASK` | neutral ceiling on `MAIN`; desk, table, bench, shelf, or mirror practical on authored task group | `SC-TASK`: dusk to late evening |
 | `LP-CIRC` | ceiling/sconce/batten on `MAIN`; step, art, seat, or night group where authored | `SC-CIRC`: always on for automatic readability |
-| `LP-SERVICE` | neutral bare batten/downlight on `MAIN`; task fitting only on an existing task group | `SC-OFF`: no automatic interval; utility rooms are reviewed by day |
+| `LP-SERVICE` | neutral bare batten/downlight on `MAIN`; task fitting only on an existing task group | `SC-CIRC`: always on for automatic readability |
 | `LP-CINEMA` | warm dimmable-look ceiling/sconce on `MAIN`; low aisle practical on `AISLE` | `SC-LIVING`: dusk to late evening |
 | `LP-GARAGE` | neutral fluorescent/LED battens on `MAIN`; opener practical where authored | `SC-CIRC`: always on for automatic readability |
 | `LP-EXTERIOR` | existing lantern, bollard, flood, street, or shed group; otherwise nearby lantern/window spill | `SC-DUSK`: existing automatic dusk sensor |
 
-Bathrooms use the explicitly named `SC-WET` class; closets and stores remain `SC-OFF`. This is the
-deliberate exception mechanism required by `HOUSE-03401`, not an assumption that every interior
-group burns all night.
+Bathrooms use the explicitly named `SC-WET` class. Accessible closets, stores and service rooms use
+`SC-CIRC`: the showcase has no light switches, so an authored fixture in an accessible room must
+actually contribute. `SC-OFF` remains only for the nested refrigerator interior whose door is not
+part of the retained walk-only scope.
 
 The exact timed windows are deliberately few and fixed: `SC-LIVING` is 17:00–00:30, `SC-BED`
 18:30–23:45 and `SC-TASK` 16:30–00:00. Each requires the shared sun to be below −4°; `SC-DUSK`

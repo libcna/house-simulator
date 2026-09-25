@@ -440,6 +440,35 @@ TEST(LightScheduleTests, RepresentativeGroupOnEveryInteriorLevelFollowsItsAutoma
     }
 }
 
+TEST(LightScheduleTests, EveryAccessibleLitCellHasAnAutomaticGroup)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    const world::WorldData world = LoadWorld();
+    for (const world::Cell& cell : world.Cells())
+    {
+        if (cell.parent.IsValid() || cell.lightGroups.empty())
+        {
+            continue;
+        }
+        const bool hasAutomaticGroup =
+            std::any_of(cell.lightGroups.begin(),
+                        cell.lightGroups.end(),
+                        [&world](const Id group)
+                        {
+                            const auto schedule = std::find_if(world.LightSchedules().begin(),
+                                                               world.LightSchedules().end(),
+                                                               [group](const world::LightSchedule& row)
+                                                               { return row.group == group; });
+                            return schedule != world.LightSchedules().end() &&
+                                   schedule->scheduleClass != world::LightScheduleClass::Off;
+                        });
+        EXPECT_TRUE(hasAutomaticGroup) << cell.name << " has fixtures that can never turn on";
+    }
+}
+
 TEST(LightScheduleTests, ExplicitGroupStateOverridesTheSchedule)
 {
     if (!ContentIsBuilt())

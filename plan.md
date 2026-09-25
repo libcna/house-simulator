@@ -13,7 +13,7 @@ renumbered.
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
 | Active plan | **49 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 65 / 76 / 102 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Estimate to DONE | **≈ 64 / 75.25 / 101 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
 | Current gate | **G5, M7, M9 and M12 passed; M8 listening and M10 baseline work are environment-blocked.** Next: `HOUSE-02891` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
@@ -1336,11 +1336,17 @@ There is no zone rotation, no "polish everything" pass and no screenshot → twe
       verify: focused lighting tests plus inspected fixed-pose before/after captures of WC1/hall and the stair approach
       note: (2026-09-25, targeted R15 correction) Manual exploration and fixed captures found an S2 D6 failure: Wet and Circulation schedules switched all fixtures off during bright clock hours even where baked daylight was insufficient. Those two existing schedule classes now remain automatic throughout the civil day; Living, Bedroom, Task, Dusk and Off keep their bounded behaviour. The existing WC1 and main-stair bakes were linearly recalibrated through their source-local `bakeLumensPerRadiantWatt` values, with matching scale and receiver-mean metadata; no texture, fixture count, exposure value, interaction or subsystem was added. Focused tests prove the three reported groups are on at noon and retain at least 0.10 mean baked receiver energy. Matched 1,600 × 900 OPENGLES3 day captures with the same groups forced off/on change 5.00% MAE in WC1 and 6.51% at the stair; HUD-cropped linear luminance rises 0.008336→0.022411 in WC1 and 0.024460→0.062018 over the stair route. Day and 22:00 views show visible warm fixtures and readable WC1, hall and stair approach. All 1,473 unit tests and every task-owned repository gate pass, including 341 strict-XNA translation units with four workers; only the pre-existing user-owned root `.claude` layout entry fails. This consumes 1 h of `HOUSE-03631`'s original allowance; no new lighting system or weather depth was added
 
+- [x] HOUSE-03634 — Make every accessible authored room light automatic
+      dep: HOUSE-03633 · sys: lighting, world-content · plat: ALL · pri: MUST · zone: all · adv: D6, D13 · est: 0.75
+      accept: (1) no accessible cell with authored fixtures has only groups that can never turn on; (2) service rooms, closets and stores reuse the retained automatic schedule rather than gaining switches or a new controller; (3) a real fixed view shows the fixture and its baked contribution; (4) the timed Living, Bedroom and Task schedules remain unchanged
+      verify: `LightScheduleTests.EveryAccessibleLitCellHasAnAutomaticGroup`, the complete unit suite and an inspected matched automatic/forced-off service-room capture
+      note: (2026-09-25, targeted R15 correction) Manual play exposed the wider case behind the dark-room report: 28 accessible service, closet and store groups were `SC-OFF`, so their physical fixtures could never emit in the interaction-free showcase. Those groups now reuse the already-always-on `SC-CIRC` class; `SC-OFF` remains only on the nested refrigerator interior outside the retained walk. A regression checks every non-nested lit cell. The 10:30 Butler's-pantry automatic/forced-off pair changes 95.08% of pixels; linear luminance rises 0.020995→0.034080 over the fixture and 0.014411→0.024711 on the left wall. The fixture visibly emits and the floor receives the existing bake. All 1,474 unit tests pass. This consumes 0.75 h of `HOUSE-03631`'s remaining allowance and adds no light, interaction, exposure change or subsystem
+
 - [ ] HOUSE-03631 — The bounded fix pass
-      dep: HOUSE-02714, HOUSE-03633 · sys: — · plat: LNX · pri: MUST · zone: all · adv: D2, D4, D13, D14 · est: 2
+      dep: HOUSE-02714, HOUSE-03634 · sys: — · plat: LNX · pri: MUST · zone: all · adv: D2, D4, D13, D14 · est: 1.25
       accept: (1) every S1 and S2 from `HOUSE-02714` and the zone backlogs is fixed; (2) S3 only where the severity table allows it (cheap, repeatedly visible, in a hero area or in a release capture); (3) S4 is never scheduled; (4) **hard budget: 4.5 agent-hours of S2/S3 work**, plus whatever S1 fixes need; when it is spent, the remaining S3 items are waived with a reason; (5) no area gets more than two fix rounds (rule R6)
       verify: one ledger round over the fixed items
-      note: split into ≤ 4 h slices when scheduled (R7). This replaces the zone polish rotation and the eleven legacy polish passes. `HOUSE-03632` and `HOUSE-03633` consume 3 h of the original 5 h estimate after manual S1/S2 findings, leaving 2 h here; M11 does not expand
+      note: split into ≤ 4 h slices when scheduled (R7). This replaces the zone polish rotation and the eleven legacy polish passes. `HOUSE-03632`, `HOUSE-03633` and `HOUSE-03634` consume 3.75 h of the original 5 h estimate after manual S1/S2 findings, leaving 1.25 h here; M11 does not expand
 
 - [ ] HOUSE-02713 — Refresh the representative render sets whose images changed on purpose
       dep: HOUSE-03631 · sys: ci · plat: CI · pri: MUST · zone: all · adv: D11 · est: 0.5
@@ -1960,18 +1966,18 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M8 Atmospheric audio essentials | 11 | 14.5 | **4** | 4.25 | **5** | 5.5 | — |
 | M9 Application shell | 10 | 12.5 | **0** | 0 | **0** | 0 | — |
 | M10 Performance | 6 | 13 | **3** | 6.75 | **8** | 12.75 | R-C +4 |
-| M11 Final defect pass | 3 | 11 | **3** | 3.5 | **4** | 4.4 | — |
+| M11 Final defect pass | 3 | 11 | **3** | 2.75 | **3.25** | 3.6 | — |
 | M12 Representative tests | 4 | 5 | **0** | 0 | **0** | 0 | — |
 | M13 Linux desktop release | 10 | 13.25 | **8** | 8.75 | **10.25** | 11.25 | — |
 | M14 Web | 17 | 24.75 | **11** | 15.75 | **18.5** | 26.35 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **49** | **64.75** | **76** | **101.5** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **49** | **64** | **75.25** | **100.7** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-178.5 h. Adding the 150.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-251.75 h, 28.25 h under the limit. That margin is
+179.3 h. Adding the 151 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+251.7 h, 28.3 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |
