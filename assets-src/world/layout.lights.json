@@ -553,6 +553,7 @@
       "type": "point", "position": [3.55, 2.80, -17.25],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 2200.0, "range": 4.42,
+      "bakeLumensPerRadiantWatt": 12.5,
       "fixtureProp": "PROP_L0_STAIR_MAIN_CEILING_LIGHT", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -563,6 +564,7 @@
       "type": "point", "position": [3.55, 1.45, -18.23],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 180.0, "range": 4.74,
+      "bakeLumensPerRadiantWatt": 25.0,
       "fixtureProp": "PROP_L0_STAIR_MAIN_STEP_PUCK_1", "emissiveMaterialSlot": "PuckDiffuser",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -571,6 +573,7 @@
       "type": "point", "position": [3.55, 1.45, -16.27],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 180.0, "range": 4.74,
+      "bakeLumensPerRadiantWatt": 25.0,
       "fixtureProp": "PROP_L0_STAIR_MAIN_STEP_PUCK_2", "emissiveMaterialSlot": "PuckDiffuser",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -617,6 +620,7 @@
       "type": "point", "position": [3.55, 3.12, -21.10],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 3.63,
+      "bakeLumensPerRadiantWatt": 25.0,
       "fixtureProp": "PROP_L0_WC1_MAIN_1_FIXTURE", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },

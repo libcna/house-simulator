@@ -106,11 +106,15 @@ namespace cnahouse::lighting
             case world::LightScheduleClass::Bedroom:
                 return dark && MinuteInWindow(minute, 18 * 60 + 30, 23 * 60 + 45);
             case world::LightScheduleClass::Wet:
-                return dark && MinuteInWindow(minute, 18 * 60, 23 * 60);
+                // Wet rooms have no light interaction and several have little useful daylight.
+                // Their practical is the automatic readability guarantee, not decoration.
+                return true;
             case world::LightScheduleClass::Task:
                 return dark && MinuteInWindow(minute, 16 * 60 + 30, 24 * 60);
             case world::LightScheduleClass::Circulation:
-                return dark && MinuteInWindow(minute, 16 * 60, 6 * 60 + 30);
+                // The same applies to windowless halls and stair cores. With no player-operated
+                // switches, a night-only schedule made required routes black at noon.
+                return true;
             case world::LightScheduleClass::Dusk:
                 return dark;
         }

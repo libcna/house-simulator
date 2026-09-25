@@ -621,14 +621,14 @@
           {
             "group": "LG_L0_STAIR_MAIN_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_MAIN",
-            "scale": 0.19222491979599,
-            "receiverMean": 0.014082034846374937
+            "scale": 1.53779935836792,
+            "receiverMean": 0.1126562787709995
           },
           {
             "group": "LG_L0_STAIR_MAIN_STEP",
             "contentName": "Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_STEP",
-            "scale": 0.19598403573036194,
-            "receiverMean": 0.0023310445079994936
+            "scale": 0.7839361429214478,
+            "receiverMean": 0.009324178031997974
           }
         ]
       },
@@ -714,8 +714,8 @@
           {
             "group": "LG_L0_WC1_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_WC1_LM_LG_L0_WC1_MAIN",
-            "scale": 0.9345681667327881,
-            "receiverMean": 0.03777620193182426
+            "scale": 3.7382726669311523,
+            "receiverMean": 0.15110480772729704
           }
         ]
       },

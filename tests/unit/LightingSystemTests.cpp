@@ -276,7 +276,7 @@ TEST(LightingSystemTests, OneFixtureReadsTheSameSunAsTheClockAndCrossesAtNight)
     EXPECT_TRUE(DuskSensorOn(clock, Id::Of("LIGHT_L0_PORCH_LANTERN_1")));
 }
 
-TEST(LightScheduleTests, ClassesFollowTheirBoundedSunAndClockWindows)
+TEST(LightScheduleTests, RoomsWithoutReliableDaylightStayLitWhileOtherClassesFollowTheirWindows)
 {
     cnahouse::environment::SimClock clock;
     clock.calendarDaysPerSimDay = 1.0;
@@ -291,13 +291,13 @@ TEST(LightScheduleTests, ClassesFollowTheirBoundedSunAndClockWindows)
     clock.SetStandard(time);
     for (const world::LightScheduleClass scheduleClass : {world::LightScheduleClass::Living,
                                                           world::LightScheduleClass::Bedroom,
-                                                          world::LightScheduleClass::Wet,
                                                           world::LightScheduleClass::Task,
-                                                          world::LightScheduleClass::Circulation,
                                                           world::LightScheduleClass::Dusk})
     {
         EXPECT_FALSE(LightScheduleOn(scheduleClass, clock, group));
     }
+    EXPECT_TRUE(LightScheduleOn(world::LightScheduleClass::Wet, clock, group));
+    EXPECT_TRUE(LightScheduleOn(world::LightScheduleClass::Circulation, clock, group));
 
     time.hour = 22;
     clock.SetStandard(time);
@@ -313,9 +313,61 @@ TEST(LightScheduleTests, ClassesFollowTheirBoundedSunAndClockWindows)
     clock.SetStandard(time);
     EXPECT_FALSE(LightScheduleOn(world::LightScheduleClass::Living, clock, group));
     EXPECT_FALSE(LightScheduleOn(world::LightScheduleClass::Bedroom, clock, group));
-    EXPECT_FALSE(LightScheduleOn(world::LightScheduleClass::Wet, clock, group));
+    EXPECT_TRUE(LightScheduleOn(world::LightScheduleClass::Wet, clock, group));
     EXPECT_FALSE(LightScheduleOn(world::LightScheduleClass::Task, clock, group));
     EXPECT_TRUE(LightScheduleOn(world::LightScheduleClass::Circulation, clock, group));
+}
+
+TEST(LightingSystemTests, NoonScheduleLightsTheReportedHallPowderRoomAndStair)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    HouseLighting house;
+    cnahouse::environment::CivilTime noon;
+    noon.year = 2031;
+    noon.month = 6;
+    noon.day = 14;
+    noon.hour = 12;
+    house.clock.SetStandard(noon);
+    house.lighting.Update(Frame(1));
+
+    for (const Id group :
+         {Id::Of("LG_L0_HALL_MAIN"), Id::Of("LG_L0_WC1_MAIN"), Id::Of("LG_L0_STAIR_MAIN_MAIN")})
+    {
+        const SwitchGroupState* state = house.lighting.FindGroup(group);
+        ASSERT_NE(state, nullptr);
+        EXPECT_TRUE(state->on);
+        EXPECT_GT(house.lighting.GroupOutputLevel(group), 0.0F);
+    }
+    for (const Id cell : {Id::Of("L0_HALL"), Id::Of("L0_WC1"), Id::Of("L0_STAIR_MAIN")})
+    {
+        const RoomLightState* state = house.lighting.FindCell(cell);
+        ASSERT_NE(state, nullptr);
+        EXPECT_GT(state->artificial, 0.0F);
+    }
+
+    struct Receiver
+    {
+        Id cell;
+        Id group;
+    };
+
+    for (const Receiver receiver : {Receiver{Id::Of("L0_HALL"), Id::Of("LG_L0_HALL_MAIN")},
+                                    Receiver{Id::Of("L0_WC1"), Id::Of("LG_L0_WC1_MAIN")},
+                                    Receiver{Id::Of("L0_STAIR_MAIN"), Id::Of("LG_L0_STAIR_MAIN_MAIN")}})
+    {
+        const world::Cell* cell = house.world.FindCell(receiver.cell);
+        ASSERT_NE(cell, nullptr);
+        const auto binding = std::find_if(cell->lightmaps.artificial.begin(),
+                                          cell->lightmaps.artificial.end(),
+                                          [&](const world::CellLightmapGroup& candidate)
+                                          { return candidate.group == receiver.group; });
+        ASSERT_NE(binding, cell->lightmaps.artificial.end());
+        EXPECT_GE(binding->texture.receiverMean, 0.10F)
+            << "an automatic route light must have enough baked receiver energy to remain visible";
+    }
 }
 
 TEST(LightScheduleTests, GroupOffsetsAreStableBoundedAndNotAllEqual)
@@ -338,7 +390,7 @@ TEST(LightScheduleTests, GroupOffsetsAreStableBoundedAndNotAllEqual)
     EXPECT_TRUE(differs);
 }
 
-TEST(LightScheduleTests, RepresentativeGroupOnEveryInteriorLevelChangesItsRoomAtNight)
+TEST(LightScheduleTests, RepresentativeGroupOnEveryInteriorLevelFollowsItsAutomaticClass)
 {
     if (!ContentIsBuilt())
     {
@@ -365,7 +417,7 @@ TEST(LightScheduleTests, RepresentativeGroupOnEveryInteriorLevelChangesItsRoomAt
     std::array<float, 5> dayLevels{};
     for (std::size_t index = 0; index < cases.size(); ++index)
     {
-        EXPECT_FALSE(house.lighting.FindGroup(cases[index].first)->on);
+        EXPECT_EQ(house.lighting.FindGroup(cases[index].first)->on, index == 0U);
         dayLevels[index] = house.lighting.FindCell(cases[index].second)->artificial;
     }
 
@@ -377,7 +429,14 @@ TEST(LightScheduleTests, RepresentativeGroupOnEveryInteriorLevelChangesItsRoomAt
     for (std::size_t index = 0; index < cases.size(); ++index)
     {
         EXPECT_TRUE(house.lighting.FindGroup(cases[index].first)->on);
-        EXPECT_GT(house.lighting.FindCell(cases[index].second)->artificial, dayLevels[index]);
+        if (index == 0U)
+        {
+            EXPECT_FLOAT_EQ(house.lighting.FindCell(cases[index].second)->artificial, dayLevels[index]);
+        }
+        else
+        {
+            EXPECT_GT(house.lighting.FindCell(cases[index].second)->artificial, dayLevels[index]);
+        }
     }
 }
 

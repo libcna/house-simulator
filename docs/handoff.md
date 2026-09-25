@@ -1,3 +1,41 @@
+# Automatic interior-light handoff — 2026-09-25 (`HOUSE-03633`)
+
+The user's dark-room report was real in two separate layers. `SC-WET` and `SC-CIRC` switched their
+groups off during the day even though the retained walk-only showcase has no light interaction and
+several bathrooms, halls and stair cores lack reliable daylight. They now remain automatic across
+the civil day; the timed Living, Bedroom and Task classes, solar Dusk class and Off class are
+unchanged. At noon the authored `LG_L0_HALL_MAIN`, `LG_L0_WC1_MAIN` and
+`LG_L0_STAIR_MAIN_MAIN` groups are all on and contribute to their cells.
+
+The first real render check prevented a false completion: changing the schedule alone loaded the
+correct bakes but still left WC1 and the main stair visibly too dark. The existing normalized PNGs
+were therefore linearly recalibrated through the source-local offline
+`bakeLumensPerRadiantWatt` values already used by the hall and family fixtures. Matching scale and
+receiver-mean metadata preserves the bake's exact spatial shape while raising WC1 4×, the main
+stair 8× and its step group 4×. This adds no fixture, texture, exposure change, interaction or new
+lighting path. A regression pins at least 0.10 mean receiver energy for each reported main group.
+
+Matched 1,600 × 900 software-OPENGLES3 captures at the actual player poses compare automatic noon
+against the same groups forced off. WC1 changes by 5.00% MAE and its HUD-cropped linear luminance
+rises 0.008336→0.022411; the central stair-route crop changes 0.024460→0.062018 while the complete
+stair frame changes by 6.51% MAE. Full-resolution day and 22:00 inspection shows the ceiling
+fixtures emitting, the hall readable, the WC/toilet/vanity legible, and the full stair run and
+landing readable without clipping or missing textures. Captures remain local under
+`/tmp/house-03633-*`.
+
+The focused schedule/readability set passes 6/6 and the complete unit suite passes 1,473/1,473.
+The complete repository gate passes every task-owned check, including all 341 strict-XNA
+translation units with four workers; its only failure is the pre-existing user-owned root
+`.claude` layout entry, which was neither changed nor staged.
+
+R1(a), R10 and R15 selected this bounded S2/D6 correction; its one hour was already carved from
+M11, so the milestone and total budget do not expand. The plan now has 50 open MUST tasks and
+77 realistic / 102.65 pessimistic hours remaining. 149.25 completed task-hours plus the
+pessimistic remainder project 251.9 h, 28.1 h below the 280 h ceiling. Dependency order now returns
+to `HOUSE-02843`. All compilation and checks remain pinned to CPUs 0–3 with at most four workers.
+
+---
+
 # Traversal-regression handoff — 2026-09-25 (`HOUSE-03632`)
 
 Manual exploration after G5 exposed two S1 traversal defects, so R1(a), R10 and R15 selected this

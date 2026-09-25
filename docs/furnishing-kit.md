@@ -72,24 +72,26 @@ task/accent groups). `HOUSE-03401` implements the schedule classes and seeded gr
 |---|---|---|
 | `LP-LIVING` | warm ceiling/pendant on `MAIN`; table/floor/practical on existing accent groups | `SC-LIVING`: dusk to late evening |
 | `LP-BED` | warm ceiling on `MAIN`; bedside or desk lamp on `BEDSIDE`/`DESK`/equivalent | `SC-BED`: evening |
-| `LP-WET` | ceiling/downlight on `MAIN`; mirror light on `VANITY`, bath accent when authored | `SC-WET`: named evening interval |
+| `LP-WET` | ceiling/downlight on `MAIN`; mirror light on `VANITY`, bath accent when authored | `SC-WET`: always on for automatic readability |
 | `LP-TASK` | neutral ceiling on `MAIN`; desk, table, bench, shelf, or mirror practical on authored task group | `SC-TASK`: dusk to late evening |
-| `LP-CIRC` | ceiling/sconce/batten on `MAIN`; step, art, seat, or night group where authored | `SC-CIRC`: night |
+| `LP-CIRC` | ceiling/sconce/batten on `MAIN`; step, art, seat, or night group where authored | `SC-CIRC`: always on for automatic readability |
 | `LP-SERVICE` | neutral bare batten/downlight on `MAIN`; task fitting only on an existing task group | `SC-OFF`: no automatic interval; utility rooms are reviewed by day |
 | `LP-CINEMA` | warm dimmable-look ceiling/sconce on `MAIN`; low aisle practical on `AISLE` | `SC-LIVING`: dusk to late evening |
-| `LP-GARAGE` | neutral fluorescent/LED battens on `MAIN`; opener practical where authored | `SC-CIRC`: night |
+| `LP-GARAGE` | neutral fluorescent/LED battens on `MAIN`; opener practical where authored | `SC-CIRC`: always on for automatic readability |
 | `LP-EXTERIOR` | existing lantern, bollard, flood, street, or shed group; otherwise nearby lantern/window spill | `SC-DUSK`: existing automatic dusk sensor |
 
-Bathrooms use the explicitly named `SC-WET` interval; closets and stores remain `SC-OFF`. This is
-the deliberate exception mechanism required by `HOUSE-03401`, not an assumption that every
-interior group burns all night.
+Bathrooms use the explicitly named `SC-WET` class; closets and stores remain `SC-OFF`. This is the
+deliberate exception mechanism required by `HOUSE-03401`, not an assumption that every interior
+group burns all night.
 
-The exact automatic windows are deliberately few and fixed: `SC-LIVING` is 17:00–00:30,
-`SC-BED` 18:30–23:45, `SC-WET` 18:00–23:00, `SC-TASK` 16:30–00:00 and `SC-CIRC`
-16:00–06:30. Each requires the shared sun to be below −4°; `SC-DUSK` uses that solar crossing
-without a clock window and `SC-OFF` has no interval. A stable group-id offset of −8…+8 minutes is
-applied to both the solar crossing and clock window. Command-line `--light-on` and `--light-off`
-remain persistent per-group overrides for review captures.
+The exact timed windows are deliberately few and fixed: `SC-LIVING` is 17:00–00:30, `SC-BED`
+18:30–23:45 and `SC-TASK` 16:30–00:00. Each requires the shared sun to be below −4°; `SC-DUSK`
+uses that solar crossing without a clock window and `SC-OFF` has no interval. The retained
+showcase has no light interaction, so `SC-WET` and `SC-CIRC` remain on through the civil day:
+bathrooms, halls and stair cores cannot become unreadable merely because the sun is up outside.
+A stable group-id offset of −8…+8 minutes is applied to timed solar crossings and clock windows.
+Command-line `--light-on` and `--light-off` remain persistent per-group overrides for review
+captures.
 
 ## Interior recipes
 

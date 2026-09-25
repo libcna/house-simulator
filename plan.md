@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **51 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 66 / 78 / 104 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5, M7, M9 and M12 passed; M8 listening and M10 baseline work are environment-blocked.** Next: `HOUSE-03633`, then `HOUSE-02843` |
+| Active plan | **50 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 65.5 / 77 / 103 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5, M7, M9 and M12 passed; M8 listening and M10 baseline work are environment-blocked.** Next: `HOUSE-02843` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -1330,11 +1330,11 @@ There is no zone rotation, no "polish everything" pass and no screenshot → twe
       verify: `HeadlessRunTests.PowderRoomDoorwayIsTraversableInBothDirections`, `OpeningReachTests.*`, `StairTraversalTests.*`, `PosedLeafCollisionTests.*`, and an inspected fixed-pose stair-entrance capture
       note: (2026-09-25, targeted R15 correction) Manual exploration found an S1 trap at `L0_WC1` and an inaccessible main-stair entrance after G5. Grounded soles settle a few ulps below FFL, so exact vertical cell containment left the old room active after the body crossed a doorway; tracking the capsule centre restores the invariant already used at spawn. The stair opening's southern half was authored into the solid return support, the lower run had no approach landing, and the foyer console occupied the only remaining path. The cased opening is now a clear 1.00 m passage, the L0 flight leaves its real approach strip while still opening the basement-well guard, and the existing console/dressing are mirrored away from the route. The final focused set passes 10/10 plus the two-direction offscreen runtime test: every door retains its open control, all eight flights traverse both ways, and the foyer route reaches L1. A trial shift of the L1→L2 flight was rejected before commit when the open-door control proved it obstructed `L1_BED5`; that flight remains unchanged. The inspected day capture shows the furniture removed from the opening; lighting remains too dark and is `HOUSE-03633`. The complete gate passes every task-owned check, including 341 strict-XNA translation units; only the pre-existing user-owned root `.claude` layout entry fails. This S1 work consumes 2 h of `HOUSE-03631`'s original 5 h allowance rather than expanding M11
 
-- [ ] HOUSE-03633 — Restore automatic light coverage in dark circulation and wet rooms
+- [x] HOUSE-03633 — Restore automatic light coverage in dark circulation and wet rooms
       dep: HOUSE-03632 · sys: lighting · plat: ALL · pri: MUST · zone: all · adv: D6, D13 · est: 1
       accept: (1) the retained automatic schedule makes the ground-floor hall, WC1 and the main-stair approach readable by day and night without player interaction; (2) the authored fixtures visibly contribute light in those fixed views; (3) the fix uses the existing schedule/lightmap path and does not globally raise exposure or add light interaction
       verify: focused lighting tests plus inspected fixed-pose before/after captures of WC1/hall and the stair approach
-      note: (2026-09-25, targeted R15 correction) Manual exploration and fixed captures found an S2 D6 failure: Wet and Circulation schedules switch all fixtures off during bright clock hours even where baked daylight is insufficient. This consumes 1 h of `HOUSE-03631`'s original allowance; no new lighting system or weather depth is authorised
+      note: (2026-09-25, targeted R15 correction) Manual exploration and fixed captures found an S2 D6 failure: Wet and Circulation schedules switched all fixtures off during bright clock hours even where baked daylight was insufficient. Those two existing schedule classes now remain automatic throughout the civil day; Living, Bedroom, Task, Dusk and Off keep their bounded behaviour. The existing WC1 and main-stair bakes were linearly recalibrated through their source-local `bakeLumensPerRadiantWatt` values, with matching scale and receiver-mean metadata; no texture, fixture count, exposure value, interaction or subsystem was added. Focused tests prove the three reported groups are on at noon and retain at least 0.10 mean baked receiver energy. Matched 1,600 × 900 OPENGLES3 day captures with the same groups forced off/on change 5.00% MAE in WC1 and 6.51% at the stair; HUD-cropped linear luminance rises 0.008336→0.022411 in WC1 and 0.024460→0.062018 over the stair route. Day and 22:00 views show visible warm fixtures and readable WC1, hall and stair approach. All 1,473 unit tests and every task-owned repository gate pass, including 341 strict-XNA translation units with four workers; only the pre-existing user-owned root `.claude` layout entry fails. This consumes 1 h of `HOUSE-03631`'s original allowance; no new lighting system or weather depth was added
 
 - [ ] HOUSE-03631 — The bounded fix pass
       dep: HOUSE-02714, HOUSE-03633 · sys: — · plat: LNX · pri: MUST · zone: all · adv: D2, D4, D13, D14 · est: 2
@@ -1953,18 +1953,18 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M8 Atmospheric audio essentials | 11 | 14.5 | **4** | 4.25 | **5** | 5.5 | — |
 | M9 Application shell | 10 | 12.5 | **0** | 0 | **0** | 0 | — |
 | M10 Performance | 6 | 13 | **3** | 6.75 | **8** | 12.75 | R-C +4 |
-| M11 Final defect pass | 3 | 11 | **4** | 4.25 | **5** | 5.5 | — |
+| M11 Final defect pass | 3 | 11 | **3** | 3.5 | **4** | 4.4 | — |
 | M12 Representative tests | 4 | 5 | **0** | 0 | **0** | 0 | — |
 | M13 Linux desktop release | 10 | 13.25 | **8** | 8.75 | **10.25** | 11.25 | — |
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **51** | **66.25** | **78** | **103.75** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **50** | **65.5** | **77** | **102.65** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-176.25 h. Adding the 148.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-252 h, 28 h under the limit. That margin is
+177.35 h. Adding the 149.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+251.9 h, 28.1 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |
