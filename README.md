@@ -112,7 +112,7 @@ a cold build of CNA plus this project is **330 s**; the same build from an empty
 cache warm is **14.9 s**.
 
 ```bash
-export CCACHE_DIR="$HOME/.cache/ccache"
+export CCACHE_DIR=/rv/cnaccache
 export CCACHE_BASEDIR=/rv
 ```
 
@@ -138,6 +138,16 @@ Other presets exist for the cases that need a different renderer, each with its 
 from the closed list — `headless` (CI integration tests), `gl33` (diagnostic only), `linux-asan`
 and `linux-ubsan`. The renderer cannot be changed after configure and there is deliberately no
 `--renderer` option; one binary is built per renderer.
+
+The Web preset reuses `build-consumer/` and needs the Emscripten SDK environment plus the native
+host content tool from `build/`. Its default build target is the bounded browser spike (one room,
+one prop and one sound); the full application is enabled by the following Web milestone.
+
+```bash
+source "$HOME/emsdk/emsdk_env.sh"
+cmake --fresh --preset web
+cmake --build --preset web
+```
 
 Tier E — compiled `.fx` effects — additionally needs an `fxc` and Wine:
 

@@ -1,3 +1,42 @@
+# Emscripten minimal-scene handoff — 2026-09-25 (`HOUSE-02891`)
+
+R11/R13 selected the dependency-unblocked M14 Web bring-up after `HOUSE-02843`. The `web` preset
+now reuses the permitted `build-consumer/` directory, the shared `/rv/cnaccache`, the existing
+native `cna-content` executable and the sibling CNA/sharp-runtime trees. Cross configurations must
+provide a real host content executable; this is a narrow content-pipeline seam, not a new runtime
+system. `CNA_CNAEXT=OFF` remains forced.
+
+The deliberately bounded `cna-house-web-spike` uses only XNA APIs: an open-front room, one blue
+table/plinth prop and the existing compiled smoke-test chime. The generated Emscripten link command
+contains `MIN_WEBGL_VERSION=2`, `MAX_WEBGL_VERSION=2`, `DISABLE_EXCEPTION_CATCHING=0`,
+`ASYNCIFY=1` and the 27 KiB sound-pack preload. Final artifacts are 20 KiB HTML, 249 KiB JS,
+28 KiB data and 7.5 MiB wasm. No full-house Web work from `HOUSE-02892` was pulled forward.
+
+Chrome 152.0.7977.82, served locally, reported OpenGL ES 3.0 / WebGL 2.0 and CNA renderer WEBGL2.
+Three completed runs printed `HOUSE-02891 WEB SPIKE PASS room=1 prop=1 sound=1`, including two
+stable 90-frame runs; the SDL Web Audio mixer initialized and the `SoundEffectInstance` entered
+Playing state. A CDP capture taken while the loop was active visibly shows the grey room, brown
+floor and central blue prop at 800×457; its SHA-256 is
+`688565ad1296748ab851350b78bbf8d53294113ec708362c6c82e6956c7af404` (temporary evidence under
+`/tmp/house-02891-running-fast.png`, not committed). Chrome's favicon 404, deprecated
+`ScriptProcessorNode` notice and host certificate/GCM messages were unrelated to the application.
+
+The clean Web cross-build and its final incremental rebuild pass. The XNA-only scan is clean and
+the mandatory repository suite passes every task-owned gate, including 341 strict-XNA translation
+units; its sole failure remains the pre-existing root-layout report for the unrelated `.claude`
+directory, which this session did not touch. The complete 1,474-test native run had one transient
+failure in `SkySystemTests.ColoursFollowAltitudeAndOvercastButUpdatesAreMaterialNotPerFrame`; its
+immediate isolated verbose rerun passed, and the complete confirmation run then passed
+1,474/1,474 in 163.64 s.
+
+The plan now has 48 open MUST tasks and 72.75 realistic / 97.95 pessimistic hours remaining.
+153.5 completed hours plus that pessimistic remainder project 251.45 h, 28.55 h below the hard
+ceiling. The exact next dependency-unblocked task is `HOUSE-02848`; the owner directed a 13-hour
+pause before it begins. Every compilation and check owned by this session is pinned to CPUs 0–3
+and uses at most four workers.
+
+---
+
 # Accessible-room automatic-light handoff — 2026-09-25 (`HOUSE-03634`)
 
 The user's report that fixtures existed but did not shine exposed a wider case than the earlier

@@ -12,7 +12,7 @@
         "CMAKE_C_COMPILER_LAUNCHER": "ccache"
       },
       "environment": {
-        "CCACHE_DIR": "$env{HOME}/.cache/ccache",
+        "CCACHE_DIR": "/rv/cnaccache",
         "CCACHE_BASEDIR": "/rv"
       }
     },
@@ -89,13 +89,18 @@
     },
     {
       "name": "web",
-      "displayName": "Web / WEBGL2 (phase 48, not yet buildable)",
-      "description": "Reserved. Phase 47 is the first task that configures it; BL-14 gates it.",
+      "displayName": "Web / WEBGL2",
+      "description": "Single-threaded Emscripten build. Requires the EMSDK environment and the native build's host cna-content tool.",
       "inherits": "base",
       "binaryDir": "${sourceDir}/build-consumer",
       "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake",
         "CMAKE_BUILD_TYPE": "Release",
-        "CNAHOUSE_RENDERER": "WEBGL2"
+        "CNAHOUSE_RENDERER": "WEBGL2",
+        "CNAHOUSE_CNA_ROOT": "${sourceDir}/../cna",
+        "CNAHOUSE_SHARP_RUNTIME_ROOT": "${sourceDir}/../sharp-runtime",
+        "CNAHOUSE_CONTENT_EXECUTABLE": "${sourceDir}/build/CNA_BUILD/cna-content",
+        "CNAHOUSE_BUILD_TESTS": "OFF"
       }
     }
   ],
@@ -106,7 +111,13 @@
     { "name": "linux-asan", "configurePreset": "linux-asan" },
     { "name": "linux-ubsan", "configurePreset": "linux-ubsan" },
     { "name": "headless", "configurePreset": "headless" },
-    { "name": "gl33", "configurePreset": "gl33" }
+    { "name": "gl33", "configurePreset": "gl33" },
+    {
+      "name": "web",
+      "configurePreset": "web",
+      "targets": ["cna-house-web-spike"],
+      "jobs": 4
+    }
   ],
 
   "testPresets": [

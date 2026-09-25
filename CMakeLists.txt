@@ -160,6 +160,23 @@ set_target_properties(cna-house PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BIN
 include(ToolContentPipeline OPTIONAL)
 
 set(CNAHOUSE_CNB_ASSET_DIRS Models Textures Audio Fonts world)
+set(CNAHOUSE_CONTENT_EXECUTABLE "" CACHE FILEPATH
+    "Host cna-content executable used by cross-compiling configurations")
+
+set(_cnahouse_content_tool_args "")
+if(CNAHOUSE_CONTENT_EXECUTABLE)
+    if(NOT EXISTS "${CNAHOUSE_CONTENT_EXECUTABLE}")
+        message(FATAL_ERROR
+            "cna-house: CNAHOUSE_CONTENT_EXECUTABLE does not exist: "
+            "'${CNAHOUSE_CONTENT_EXECUTABLE}'")
+    endif()
+    list(APPEND _cnahouse_content_tool_args
+        CONTENT_EXECUTABLE "${CNAHOUSE_CONTENT_EXECUTABLE}")
+elseif(CMAKE_CROSSCOMPILING)
+    message(FATAL_ERROR
+        "cna-house: a cross build needs a host cna-content tool. Build the native 'cna_content_tool' "
+        "target first, then set CNAHOUSE_CONTENT_EXECUTABLE to that executable.")
+endif()
 
 # `Media/` is built differently, and the reason is MEASURED (`HOUSE-00201`). A `Video` (and a
 # `Song`) compiles to a small metadata `.cnb` plus a byte-identical copy of the media file, and the
@@ -196,7 +213,8 @@ if(COMMAND cna_add_content)
         cna_add_content(
             TARGET cnahouse_content_${_dir}
             SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets-src/${_dir}"
-            OUTPUT_DIR "${_out}")
+            OUTPUT_DIR "${_out}"
+            ${_cnahouse_content_tool_args})
         list(APPEND _content_targets cnahouse_content_${_dir})
     endforeach()
 
@@ -209,6 +227,40 @@ else()
     message(WARNING
         "cna-house: cna_add_content is unavailable, so the content tree is not built by this "
         "configuration. The application starts without it and logs what it could not load.")
+endif()
+
+# HOUSE-02891: keep the first browser proof intentionally smaller than the full game. It exercises
+# the real WEBGL2 renderer, the blocking XNA Game loop through Asyncify, JS-lowered exceptions and
+# an Emscripten data preload containing one compiled SoundEffect. The full `cna-house` target is
+# brought across only by HOUSE-02892 after this boundary is known good.
+if(EMSCRIPTEN)
+    set(_web_spike_pack "${CMAKE_BINARY_DIR}/web-spike-pack/content")
+    cna_add_content(
+        TARGET cnahouse_web_spike_content
+        SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets-src/Audio/Smoke"
+        OUTPUT_DIR "${_web_spike_pack}/Audio/Smoke"
+        ${_cnahouse_content_tool_args})
+
+    add_executable(cna-house-web-spike src/app/WebSpike.cpp)
+    target_link_libraries(cna-house-web-spike PRIVATE
+        CNA
+        ${RENDERER_TARGET}
+        SHARP_RUNTIME
+        CNA::EmscriptenExceptionAbi
+        CNA::EmscriptenAsyncify
+        cnahouse_warnings)
+    target_link_options(cna-house-web-spike PRIVATE
+        -sALLOW_MEMORY_GROWTH=1
+        -sSTACK_SIZE=1048576
+        -sINITIAL_MEMORY=134217728
+        -sFORCE_FILESYSTEM=1
+        -sEXIT_RUNTIME=1
+        "SHELL:--preload-file ${_web_spike_pack}@/content")
+    set_target_properties(cna-house-web-spike PROPERTIES
+        SUFFIX ".html"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+    cna_apply_emscripten_renderer_link_contract(cna-house-web-spike)
+    add_dependencies(cna-house-web-spike cnahouse_web_spike_content)
 endif()
 
 # The generated attribution document is runtime UI data, not compiled content. Keep it under the
