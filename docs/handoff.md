@@ -1,3 +1,27 @@
+# Weather-to-sky/light wiring handoff — 2026-09-25 (`HOUSE-01696`)
+
+The retained runtime already contained the complete minimal wiring and needed verification rather
+than a second mapping layer. Each frame, `CnaHouseGame` publishes the one live weather state's
+cloud cover to `LightingSystem`, then passes the same cover and its wind/thunder channels to
+`SkySystem`. The existing continuous mapping tests cover cloud alpha including the storm row,
+clear-to-overcast sky tint, direct/diffuse attenuation and invalid inputs; the fixed-weather
+headless integration test proves command-line weather reaches the shared lighting state.
+
+Round 169 inspected matched 10:30 front views in clear, overcast, rain and thunderstorm states.
+Clear is blue and bright; all three covered states are cooler and dimmer, with storm darkest and
+no lightning. HUD-cropped linear-grey means are respectively 0.573992, 0.528032, 0.527462 and
+0.526576. The captures remain ignored under
+`docs/visual-review/captures/house-01696-weather-r169/`. The representative multi-time environment
+set remains correctly owned by `HOUSE-03520`; no runtime/content retuning was justified here.
+
+M7 dependency order selects `HOUSE-01650` next, connecting the existing `MaterialBinder` fog path
+to weather for exterior batches only. The remaining forecast is 107.75 realistic / 136.5
+pessimistic hours. With 118.5 task-hours spent since the final reduction, the R14 projection is
+255 h, 25 h below the ceiling. Every build, test, capture and check is limited to four workers and
+pinned to CPUs 4,5,7,9; strict-XNA additionally uses `HOUSE_XNA_STRICT_JOBS=4`.
+
+---
+
 # G5 hero-area gate handoff — 2026-09-25 (`HOUSE-03480`)
 
 Gate G5 passes. Round 168 consolidates six fixed views over all five retained hero areas:

@@ -5659,3 +5659,17 @@ material, light, schedule, chunk or lightmap change was needed. Local evidence i
 
 G5 passes. With Track A complete through the showcase gate, dependency order next selects
 `HOUSE-01696`, wiring the existing weather state into sky and lighting for M7.
+
+## Round 169 — weather-driven sky and light
+
+Commit: `HOUSE-01696` working tree (`2026-09-25`). Four matched fixed front views at 10:30 use
+`W_CLEAR`, `W_OVERCAST`, `W_RAIN` and `W_THUNDERSTORM`. Full-resolution inspection confirms that
+the one live weather state reaches the existing sky and lighting paths: clear is visibly blue and
+bright; overcast and rain are cooler and dimmer; the storm is darkest and adds only denser cloud,
+with no lightning. HUD-cropped linear-grey means are 0.573992, 0.528032, 0.527462 and 0.526576 in
+that order. No S1/S2 or retuning need was found. Local evidence is in
+`captures/house-01696-weather-r169/`.
+
+The existing mapping and end-to-end integration tests pass. The full multi-time representative
+environment capture set remains owned by `HOUSE-03520`; no duplicate mapper or new subsystem was
+added. M7 dependency order next selects `HOUSE-01650`, weather-driven exterior fog.

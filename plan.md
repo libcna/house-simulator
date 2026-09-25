@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **68 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 93 / 109 / 138 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5 passed; all five retained hero areas are at C5.** Next: the compact environment, beginning with `HOUSE-01696` |
+| Active plan | **67 open tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 92 / 108 / 137 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5 passed; compact-environment work is active.** Next: weather-driven exterior fog in `HOUSE-01650` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -1122,10 +1122,11 @@ hail, storm and lightning, glare and lens flare, vegetation sway, puddles, splas
 vegetation are in the [optional backlog](#optional-and-conditional-backlog).** No piece may grow into
 a simulation of its own.
 
-- [ ] HOUSE-01696 — Wire the weather into the sky (cloud cover), the light (cloud modulation) and the fog
+- [x] HOUSE-01696 — Wire the weather into the sky (cloud cover), the light (cloud modulation) and the fog
       dep: HOUSE-01686, HOUSE-01648, HOUSE-01706 · sys: weather · plat: ALL · pri: MUST · zone: all · adv: D5 · est: 1.5
       accept: (1) cloud cover follows the weather state, so clear, overcast and rain read differently; (2) cloud cover dims and cools the sun and sky light; (3) the storm archetype darkens clouds and light only; there is no lightning
       verify: unit tests of the mapping; the environment captures (`HOUSE-03520`)
+      note: (2026-09-25) The remaining wiring was already present through the retained systems and is now verified as one path rather than duplicated: `CnaHouseGame` publishes `WeatherSystem::State().cloudCover` to `LightingSystem`, and the same cover plus wind and thunder intensity to `SkySystem` every frame. Existing mapping tests prove continuous cloud-layer interpolation including the storm row, clear-to-overcast sky tint, direct/diffuse attenuation and non-finite rejection; the end-to-end fixed-weather test proves the command-line weather reaches the shared light state. Round 169 inspected matched 10:30 clear, overcast, rain and thunderstorm front views: clear is visibly blue/bright, all three covered states are cooler/dimmer, storm is the darkest, and no lightning path exists. HUD-cropped linear-grey means were 0.573992, 0.528032, 0.527462 and 0.526576 respectively. The later `HOUSE-03520` set remains the representative environment suite; no duplicate mapper, runtime system or visible retuning was justified. Captures remain local under `house-01696-weather-r169`
 
 - [ ] HOUSE-01650 — Fog from the weather: horizon colour in the view direction, distance from `fogDensity` and precipitation, exterior batches only
       dep: HOUSE-01649, HOUSE-00892 · sys: rendering · plat: ALL · pri: MUST · zone: all · adv: D5 · est: 1.5
@@ -1916,7 +1917,7 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M4 Dressing everywhere | 40 | 48.75 | **0** | 0 | **0** | 0 | R-D +3 |
 | M5 Baseline lighting everywhere | 12 | 24.5 | **0** | 0 | **0** | 0 | — |
 | M6 Main cells and hero areas | 20 | 32.5 | **0** | 0 | **0** | 0 | — |
-| M7 A compact environment | 13 | 21 | **8** | 11.25 | **13.25** | 14.5 | — |
+| M7 A compact environment | 13 | 21 | **7** | 10 | **11.75** | 13 | — |
 | M8 Atmospheric audio essentials | 11 | 14.5 | **6** | 7.75 | **9** | 10 | — |
 | M9 Application shell | 10 | 12.5 | **6** | 7.25 | **8.5** | 9.25 | — |
 | M10 Performance | 6 | 13 | **3** | 6.75 | **8** | 12.75 | R-C +4 |
@@ -1926,11 +1927,11 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M14 Web | 17 | 24.75 | **12** | 16.5 | **19.5** | 27.5 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **68** | **92.75** | **109.25** | **138** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **67** | **91.5** | **107.75** | **136.5** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-142 h. Adding the 117 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+143.5 h. Adding the 118.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
 255 h, 25 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
