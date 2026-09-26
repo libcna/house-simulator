@@ -1,3 +1,31 @@
+# Touch-friendly menu targets handoff — 2026-09-26 (`HOUSE-02998`)
+
+R11/R13 selected this next dependency-unblocked M15 desktop-side readiness task after
+`HOUSE-02995`; BL-13 blocks Android device validation, not this UI work. Only the
+four-item main and pause menus have touch-only row centres at 0.35/0.47/0.59/0.71
+of the 900-vu canvas, 108 vu apart, with an 88-vu vertical hit target. The desktop
+centres and hit bands are unchanged. The one-pointer touch source now normalises menu
+tap coordinates to the existing safe virtual canvas, matching the UI layout at 20:9
+without a new widget/layout system. Unit tests cover both ends of the 88-vu band,
+the inter-row gap, unchanged desktop hit testing and a 20:9 safe-canvas coordinate.
+
+The native game/unit targets and full Web game build passed in the existing build
+trees with the shared ccache and four-core affinity. All 16 focused menu/touch tests
+and the complete native unit label passed. A real Xvfb/software-GL capture at
+`/tmp/house-02998-main3.png` shows the forced-touch main menu's separated rows;
+the first captures hit the startup prompt because the synthetic press came after
+the very fast screenshot run had already exited, not because a press failed.
+The Web link repeated the known 391-MB pack warning owned by `HOUSE-02850`.
+Strict XNA and static-check results are recorded in `plan.md`; the user-owned
+`.claude` layout entry was not modified or staged.
+
+40 ACTIVE/MUST tasks remain: 58.5 realistic and 82.35 pessimistic hours. R14
+projects 168.5 completed task-hours plus 82.35 remaining = 250.85 h, 29.15
+below the 280-hour ceiling. Next dependency-unblocked task: `HOUSE-03723`, the
+touch-only Web control scheme; do not claim Android DONE while BL-13 persists.
+
+---
+
 # Touch HUD and buttons handoff — 2026-09-26 (`HOUSE-02995`)
 
 R11/R13 selected the next dependency-unblocked desktop-side M15 readiness task after

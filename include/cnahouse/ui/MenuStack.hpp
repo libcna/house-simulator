@@ -170,7 +170,7 @@ namespace cnahouse::ui
     class MainMenuScreen final : public IScreen
     {
     public:
-        explicit MainMenuScreen(MenuRequested requested);
+        explicit MainMenuScreen(MenuRequested requested, bool touchLayout = false);
 
         [[nodiscard]] ScreenId Id() const override
         {
@@ -194,12 +194,13 @@ namespace cnahouse::ui
     private:
         MenuRequested requested_;
         std::size_t selected_ = 0;
+        bool touchLayout_ = false;
     };
 
     class PauseMenuScreen final : public IScreen
     {
     public:
-        explicit PauseMenuScreen(MenuRequested requested);
+        explicit PauseMenuScreen(MenuRequested requested, bool touchLayout = false);
 
         [[nodiscard]] ScreenId Id() const override
         {
@@ -218,6 +219,7 @@ namespace cnahouse::ui
     private:
         MenuRequested requested_;
         std::size_t selected_ = 0;
+        bool touchLayout_ = false;
     };
 
     /// @brief Scrollable view of the generated third-party asset document.

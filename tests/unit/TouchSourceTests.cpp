@@ -221,6 +221,8 @@ namespace
         source.Apply(Frame({Finger(1, TouchLocationState::Pressed, 1650.0F, 115.0F),
                             Finger(2, TouchLocationState::Pressed, 1650.0F, 785.0F)}),
                      0.016F);
+        EXPECT_NEAR(source.Current().pointerX, 1370.0F / 1440.0F, 1e-6F);
+        EXPECT_NEAR(source.Current().pointerY, 70.0F / 810.0F, 1e-6F);
         EXPECT_TRUE(source.Current().menuPressed);
         EXPECT_TRUE(source.Current().runPressed);
         EXPECT_FALSE(source.LookAvailable());

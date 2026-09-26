@@ -61,9 +61,11 @@ namespace cnahouse::player
         bool uiRightPressed = false;
         bool uiAcceptPressed = false;
 
-        /// @brief A primary pointer press in normalised back-buffer coordinates.
+        /// @brief A primary pointer press in normalised UI coordinates.
         ///
-        /// Mouse and touch share hit testing after the source records which device produced it.
+        /// Mouse uses the back buffer; touch uses the safe virtual canvas so phone insets do
+        /// not shift menu targets away from their drawn rows. Both expose [0, 1] to UI screens.
+        /// The source records which device produced the edge.
         /// `pointerPressed` is an edge; dragging or holding cannot change a setting every frame.
         PointerKind pointerKind = PointerKind::None;
         float pointerX = 0.0F;

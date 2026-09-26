@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **41 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 50.1 / 59 / 82.9 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5, M7, M9 and M12 passed; M8 listening and M10 baseline work are environment-blocked.** Next: `HOUSE-02998` (touch-friendly menu targets) |
+| Active plan | **40 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 49.7 / 58.5 / 82.35 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5, M7, M9 and M12 passed; M8 listening and M10 baseline work are environment-blocked.** Next: `HOUSE-03723` (touch-only Web control scheme) |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -1644,8 +1644,9 @@ emulator, not a compatibility lab. Cosmetic platform luxuries are cut.
             The existing SpriteBatch draws the bounded MOVE/MENU/WALK or FAST HUD.
             No camera toggle, avatar, extra input framework or CNA API was added
 
-- [ ] HOUSE-02998 — Touch-friendly menu hit targets (≥ 88 vu) without changing the desktop layout
+- [x] HOUSE-02998 — Touch-friendly menu hit targets (≥ 88 vu) without changing the desktop layout
       dep: HOUSE-02995 · sys: ui · plat: ALL · pri: MUST · zone: all · adv: D10c · est: 0.5
+      note: (2026-09-26) The four-item main/pause menus use touch-only rows centred 108 virtual units apart and an 88-vu vertical pointer target, preserving the desktop rows and bands. Touch pointers now normalise within the existing safe virtual canvas, so widescreen insets do not offset those targets. Edge/gap/desktop unit tests pass; an actual forced-touch Xvfb capture shows the four separated rows. Native and Web builds and the full native unit label pass. Strict XNA passed with four workers; the full static gate is otherwise blocked only by the pre-existing user-owned `.claude` root-layout entry
 
 ### Device path (gated on BL-13)
 
@@ -2086,14 +2087,14 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M12 Representative tests | 4 | 5 | **0** | 0 | **0** | 0 | — |
 | M13 Linux desktop release | 10 | 13.25 | **8** | 8.75 | **10.25** | 11.28 | — |
 | M14 Web | 17 | 24.75 | **6** | 6.8 | **8** | 14.8 | R-B +6 |
-| M15 Android | 23 | 29 | **11** | 15.3 | **18** | 27.8 | R-A +8 |
+| M15 Android | 23 | 29 | **10** | 14.9 | **17.5** | 27.25 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.15 | — |
-| **Total, all three platforms** | **205** | **318.75** | **41** | **50.1** | **59** | **82.9** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **40** | **49.7** | **58.5** | **82.35** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-197.1 h. Adding the 168 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-250.9 h, 29.1 h under the limit. That margin is
+197.65 h. Adding the 168.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+250.85 h, 29.15 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |

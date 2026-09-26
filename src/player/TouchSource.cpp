@@ -94,14 +94,12 @@ namespace cnahouse::player
             speedFinger_.reset();
         }
 
-        const float width = static_cast<float>(std::max(config_.viewportWidth, 1));
-        const float height = static_cast<float>(std::max(config_.viewportHeight, 1));
         const float left = static_cast<float>(config_.layoutX);
         const float top = static_cast<float>(config_.layoutY);
-        const float layoutWidth =
-            static_cast<float>(config_.layoutWidth > 0 ? config_.layoutWidth : config_.viewportWidth);
-        const float layoutHeight =
-            static_cast<float>(config_.layoutHeight > 0 ? config_.layoutHeight : config_.viewportHeight);
+        const float layoutWidth = static_cast<float>(
+            std::max(config_.layoutWidth > 0 ? config_.layoutWidth : config_.viewportWidth, 1));
+        const float layoutHeight = static_cast<float>(
+            std::max(config_.layoutHeight > 0 ? config_.layoutHeight : config_.viewportHeight, 1));
         const float right = left + layoutWidth;
         const float bottom = top + layoutHeight;
         const float scale = std::min(layoutWidth / 1600.0F, layoutHeight / 900.0F);
@@ -123,8 +121,8 @@ namespace cnahouse::player
                 if (!state_.pointerPressed)
                 {
                     state_.pointerKind = PointerKind::Touch;
-                    state_.pointerX = std::clamp(position.X / width, 0.0F, 1.0F);
-                    state_.pointerY = std::clamp(position.Y / height, 0.0F, 1.0F);
+                    state_.pointerX = std::clamp((position.X - left) / layoutWidth, 0.0F, 1.0F);
+                    state_.pointerY = std::clamp((position.Y - top) / layoutHeight, 0.0F, 1.0F);
                     state_.pointerPressed = true;
                 }
             }

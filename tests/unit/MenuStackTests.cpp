@@ -350,6 +350,45 @@ namespace
         EXPECT_EQ(scheme, ControlScheme::Touch);
     }
 
+    TEST(ApplicationMenuTests, TouchOnlyMainAndPauseRowsHaveDistinctEightyEightUnitTargets)
+    {
+        std::vector<MenuCommand> requested;
+        MainMenuScreen main([&](MenuCommand command, ControlScheme) { requested.push_back(command); }, true);
+        PauseMenuScreen pause([&](MenuCommand command, ControlScheme) { requested.push_back(command); },
+                              true);
+        InputState tap;
+        tap.pointerKind = PointerKind::Touch;
+        tap.pointerPressed = true;
+        tap.pointerX = 0.5F;
+
+        // Each row owns 88 virtual units vertically; 108-unit centre spacing leaves a gap.
+        for (const float edge : {0.47F - 44.0F / 900.0F, 0.47F + 44.0F / 900.0F})
+        {
+            tap.pointerY = edge;
+            EXPECT_EQ(main.Update(tap, 0.016F), ScreenAction::None);
+            ASSERT_FALSE(requested.empty());
+            EXPECT_EQ(requested.back(), MenuCommand::Settings);
+            EXPECT_EQ(pause.Update(tap, 0.016F), ScreenAction::None);
+            EXPECT_EQ(requested.back(), MenuCommand::Settings);
+        }
+        const std::size_t beforeGap = requested.size();
+        tap.pointerY = 0.41F;
+        EXPECT_EQ(main.Update(tap, 0.016F), ScreenAction::None);
+        EXPECT_EQ(requested.size(), beforeGap);
+        tap.pointerY = 0.71F;
+        EXPECT_EQ(main.Update(tap, 0.016F), ScreenAction::Quit);
+        EXPECT_EQ(pause.Update(tap, 0.016F), ScreenAction::Quit);
+
+        // The existing desktop row centres and hit bands are unchanged.
+        MainMenuScreen desktop([&](MenuCommand command, ControlScheme) { requested.push_back(command); });
+        tap.pointerY = 0.35F;
+        EXPECT_EQ(desktop.Update(tap, 0.016F), ScreenAction::None);
+        EXPECT_EQ(requested.size(), beforeGap);
+        tap.pointerY = 0.48F;
+        EXPECT_EQ(desktop.Update(tap, 0.016F), ScreenAction::None);
+        EXPECT_EQ(requested.back(), MenuCommand::Settings);
+    }
+
     TEST(ApplicationMenuTests, PauseMenuCanResumeOpenSettingsReturnHomeAndQuit)
     {
         std::vector<MenuCommand> requested;

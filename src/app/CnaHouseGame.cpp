@@ -1129,16 +1129,16 @@ namespace cnahouse::app
 
     void CnaHouseGame::OpenMainMenu()
     {
-        menus_.Replace(
-            std::make_unique<ui::MainMenuScreen>([this](ui::MenuCommand command, ui::ControlScheme scheme)
-                                                 { QueueMenuCommand(command, scheme); }));
+        menus_.Replace(std::make_unique<ui::MainMenuScreen>(
+            [this](ui::MenuCommand command, ui::ControlScheme scheme) { QueueMenuCommand(command, scheme); },
+            TouchHudVisible()));
     }
 
     void CnaHouseGame::OpenPauseMenu()
     {
-        menus_.Push(
-            std::make_unique<ui::PauseMenuScreen>([this](ui::MenuCommand command, ui::ControlScheme scheme)
-                                                  { QueueMenuCommand(command, scheme); }));
+        menus_.Push(std::make_unique<ui::PauseMenuScreen>(
+            [this](ui::MenuCommand command, ui::ControlScheme scheme) { QueueMenuCommand(command, scheme); },
+            TouchHudVisible()));
     }
 
     void CnaHouseGame::OpenCredits()

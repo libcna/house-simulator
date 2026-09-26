@@ -219,6 +219,8 @@ namespace cnahouse::ui
         constexpr std::array<std::string_view, 4> kPauseMenuItems = {
             "Resume", "Settings", "Main menu", "Quit"};
         constexpr std::array<float, 4> kMenuRowY = {0.40F, 0.48F, 0.56F, 0.64F};
+        constexpr std::array<float, 4> kTouchMenuRowY = {0.35F, 0.47F, 0.59F, 0.71F};
+        constexpr float kTouchMenuHalfTarget = 44.0F / TextRenderer::kVirtualHeight;
 
         [[nodiscard]] ControlScheme SchemeFor(const player::InputState& input) noexcept
         {
@@ -227,15 +229,19 @@ namespace cnahouse::ui
                        : ControlScheme::KeyboardMouse;
         }
 
-        [[nodiscard]] bool SelectMenuPointer(const player::InputState& input, std::size_t& selected)
+        [[nodiscard]] bool
+        SelectMenuPointer(const player::InputState& input, std::size_t& selected, bool touchLayout)
         {
             if (!input.pointerPressed || input.pointerX < 0.30F || input.pointerX > 0.70F)
             {
                 return false;
             }
-            for (std::size_t i = 0; i < kMenuRowY.size(); ++i)
+            const auto& rows = touchLayout ? kTouchMenuRowY : kMenuRowY;
+            const float halfHeight = touchLayout ? kTouchMenuHalfTarget : 0.035F;
+            for (std::size_t i = 0; i < rows.size(); ++i)
             {
-                if (std::abs(input.pointerY - kMenuRowY[i]) <= 0.035F)
+                // Normalised touch coordinates and row centres round independently at the edge.
+                if (std::abs(input.pointerY - rows[i]) <= halfHeight + 0.000001F)
                 {
                     selected = i;
                     return true;
@@ -249,24 +255,27 @@ namespace cnahouse::ui
                       const TextRenderer& text,
                       std::string_view title,
                       const std::array<std::string_view, Size>& items,
-                      std::size_t selected)
+                      std::size_t selected,
+                      bool touchLayout)
         {
             text.DrawShadowed(batch, title, Vector2(0.0F, 220.0F), Anchor::TopCentre, Color::White);
+            const auto& rows = touchLayout ? kTouchMenuRowY : kMenuRowY;
             for (std::size_t i = 0; i < items.size(); ++i)
             {
                 const std::string line = std::format("{}{}", i == selected ? "> " : "  ", items[i]);
                 const int shade = i == selected ? 255 : 210;
                 text.DrawShadowed(batch,
                                   line,
-                                  Vector2(0.0F, kMenuRowY[i] * TextRenderer::kVirtualHeight),
+                                  Vector2(0.0F, rows[i] * TextRenderer::kVirtualHeight),
                                   Anchor::TopCentre,
                                   Color(shade, shade, shade, 255));
             }
         }
     } // namespace
 
-    MainMenuScreen::MainMenuScreen(MenuRequested requested)
+    MainMenuScreen::MainMenuScreen(MenuRequested requested, bool touchLayout)
         : requested_(std::move(requested))
+        , touchLayout_(touchLayout)
     {
     }
 
@@ -281,7 +290,7 @@ namespace cnahouse::ui
         {
             selected_ = (selected_ + 1U) % kMainMenuItems.size();
         }
-        const bool pointerSelected = SelectMenuPointer(input, selected_);
+        const bool pointerSelected = SelectMenuPointer(input, selected_, touchLayout_);
         if (!input.uiAcceptPressed && !pointerSelected)
         {
             return ScreenAction::None;
@@ -301,11 +310,12 @@ namespace cnahouse::ui
     void MainMenuScreen::Draw(Microsoft::Xna::Framework::Graphics::SpriteBatch& batch,
                               const TextRenderer& text) const
     {
-        DrawMenu(batch, text, "House Simulator", kMainMenuItems, selected_);
+        DrawMenu(batch, text, "House Simulator", kMainMenuItems, selected_, touchLayout_);
     }
 
-    PauseMenuScreen::PauseMenuScreen(MenuRequested requested)
+    PauseMenuScreen::PauseMenuScreen(MenuRequested requested, bool touchLayout)
         : requested_(std::move(requested))
+        , touchLayout_(touchLayout)
     {
     }
 
@@ -324,7 +334,7 @@ namespace cnahouse::ui
         {
             selected_ = (selected_ + 1U) % kPauseMenuItems.size();
         }
-        const bool pointerSelected = SelectMenuPointer(input, selected_);
+        const bool pointerSelected = SelectMenuPointer(input, selected_, touchLayout_);
         if (!input.uiAcceptPressed && !pointerSelected)
         {
             return ScreenAction::None;
@@ -347,7 +357,7 @@ namespace cnahouse::ui
     void PauseMenuScreen::Draw(Microsoft::Xna::Framework::Graphics::SpriteBatch& batch,
                                const TextRenderer& text) const
     {
-        DrawMenu(batch, text, "Paused", kPauseMenuItems, selected_);
+        DrawMenu(batch, text, "Paused", kPauseMenuItems, selected_, touchLayout_);
     }
 
     CreditsScreen::CreditsScreen(std::string document)
