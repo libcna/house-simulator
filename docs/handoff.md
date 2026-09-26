@@ -1,3 +1,35 @@
+# Web preload progress handoff — 2026-09-26 (`HOUSE-02899`)
+
+R11/R13 selected the next dependency-unblocked M14 task after `HOUSE-02895`. The existing
+Emscripten default shell already exposed download/preparation counts but trapped them in a
+generic toolbar above the canvas. The full Web target now uses `cmake/web_shell.html`: a
+single static page bound to those same Emscripten callbacks, with a visible centred progress
+bar and no toolbar overflow. On engine handoff it reveals the existing in-game
+`LoadingScreen`, which keeps the first-gesture/audio prompt until the main menu. The CMake
+preload remains one upfront `content` plus `content-fx` package; no runtime loader, streaming
+or progressive fetch was added. The `build-consumer/` preset and shared ccache were reused
+with four jobs and CPU affinity 0–3.
+
+Chrome 152 CDP deliberately throttled the local download: the visible bar advanced from
+8,504,652 to 31,963,944 of 410,635,649 bytes between its five- and fifteen-second samples.
+At completion the overlay hid and the in-game prompt appeared; one click opened audio and
+displayed the full menu. Chrome still started the house and acquired pointer lock. Firefox
+140 ESR also reached prompt and menu under the new shell. Actual screenshots and the local
+HTTP-server interruption/restart are documented in `docs/portability.md`. The 391 MiB pack
+still needs `HOUSE-02850`'s separate limit work.
+
+The plan now has 44 open MUST tasks, 64.75 realistic and 89.15 pessimistic hours. R14
+projects 162.25 completed plus 89.15 remaining = 251.4 h, 28.6 below the ceiling. The
+next dependency-unblocked MUST is `HOUSE-02991`, desktop-side touch input for Android; the
+Web verification tasks await M10, M13 and touch-control dependencies. `HOUSE-02951` remains
+an independent upstream-gated Android check, not a DONE substitute.
+The native game also rebuilt successfully. The full static gate passed every check except
+the pre-existing user-owned `.claude` root-layout entry; strict XNA passed 341 translation
+units at four workers and `git diff --check` is clean. No unit code changed in this task;
+the preceding `HOUSE-02895` checkpoint's isolated unit suite passed 1476/1476.
+
+---
+
 # Web canvas/audio handoff — 2026-09-26 (`HOUSE-02895`)
 
 R11/R13 chose the next dependency-unblocked M14 Web task after `HOUSE-03721`; `HOUSE-02850`

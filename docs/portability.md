@@ -3,6 +3,30 @@
 This is a running validation record, not a claim that the Linux, Web or Android DONE checklists
 have passed. `plan.md` remains the release authority.
 
+## Web preload progress — HOUSE-02899 (2026-09-26)
+
+The Web target now links a small project-owned Emscripten shell. It uses Emscripten's existing
+`Module.setStatus` download reports and `monitorRunDependencies` preparation counts to show a
+visible progress bar, then yields to the existing in-game loading/first-gesture screen. That
+screen remains visible until the user enters the main menu. The default Emscripten toolbar is
+gone; the canvas fits the window without its former header/scrollbar. The shell does not fetch
+packs itself: CMake still preloads the existing `content` and `content-fx` roots up front. It
+does not attempt progressive fetch or streaming.
+
+Chrome 152 was reloaded with its local network deliberately throttled. At five seconds the
+loading overlay was visible with 8,504,652 / 410,635,649 bytes; at fifteen seconds it showed
+31,963,944 / 410,635,649 bytes. After normal speed was restored, the overlay was hidden,
+the canvas showed the existing `Press any key to begin` screen, and one click opened audio
+and displayed the complete main menu. Chrome could still start the house and acquire pointer
+lock from the scaled canvas. Firefox 140 ESR independently reached the same in-game prompt
+and main menu after its local test server was restarted (the initial connection error was
+that stopped server, not a game error). Inspected local captures are
+`/tmp/house-02899-download-5s.png`, `/tmp/house-02899-download-15s.png`,
+`/tmp/house-02899-ready.png`, `/tmp/house-03721-click.png` (Chrome's post-gesture menu),
+`/tmp/house-02899-firefox-loaded.png` and `/tmp/house-02899-firefox-menu.png`.
+The measured 410.6 MB transfer and the 391 MiB pack remain overlarge; `HOUSE-02850` owns the
+limit, while `HOUSE-02898` owns Web performance.
+
 ## Web canvas and first-gesture audio — HOUSE-02895 (2026-09-26)
 
 The full 391 MiB-preload game was served from localhost to Chrome 152 (headless/WebGL2) and
@@ -26,10 +50,9 @@ fullscreen screen was only 800×544; that is a test-display size, not a producti
 Inspected local captures: `/tmp/house-02895-chrome-click.png`,
 `/tmp/house-02895-chrome-key.png`, `/tmp/house-02895-firefox-settings.png`,
 `/tmp/house-02895-firefox-resized.png`, `/tmp/house-02895-firefox-fullscreen.png` and
-`/tmp/house-02895-firefox-windowed.png`. The generated Emscripten page still places a toolbar
-above the canvas, so a 1280×720 windowed viewport can scroll; fullscreen removes that toolbar.
-The bounded browser loading/page treatment is `HOUSE-02899`, not evidence of a broken canvas
-resize. Pack sizing remains `HOUSE-02850`.
+`/tmp/house-02895-firefox-windowed.png`. The generic Emscripten toolbar visible in these
+earlier captures was subsequently removed by `HOUSE-02899`; those snapshots still accurately
+record the in-game controls and DOM canvas transitions. Pack sizing remains `HOUSE-02850`.
 
 ## Web desktop controls — HOUSE-03721 (2026-09-26)
 

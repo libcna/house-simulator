@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **45 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 55.9 / 65.75 / 90.25 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5, M7, M9 and M12 passed; M8 listening and M10 baseline work are environment-blocked.** Next: `HOUSE-02899` (Web preload progress) |
+| Active plan | **44 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 55.0 / 64.75 / 89.15 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5, M7, M9 and M12 passed; M8 listening and M10 baseline work are environment-blocked.** Next: `HOUSE-02991` (desktop-side Android touch input) |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -403,7 +403,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 3 | `HOUSE-02713` | D2, D4, D13, D14 | 3.25 |
 | [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 0 | **done** · `HOUSE-02598` | D11 | 0 |
 | [M13](#m13--linux-desktop-release) — Linux desktop release | after M11 | 03701–03720 | 8 | `HOUSE-02797` | D9–D13 | 10.25 |
-| [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 7 | `HOUSE-02904` | D10b | 9 |
+| [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 6 | `HOUSE-02904` | D10b | 8 |
 | [M15](#m15--android) — Android | readiness: B · device: after M13 | 03751–03780 | 14 | `HOUSE-03041` (a BL-13 record does not close it) | D10c | 23.75 |
 | [M16](#m16--final-release) — Final release | last | 03781–03800 | 6 | **DONE** · `HOUSE-03078` | D9–D14 | 6.5 |
 
@@ -1542,10 +1542,23 @@ limitation (reload the page), recorded by `HOUSE-02904`.
       dep: HOUSE-02892, HOUSE-02405 · sys: — · plat: WEB · pri: MUST · zone: all · adv: D9, D10b · est: 2
       accept: the Web preset's representative scenes (the street approach, one interior, the rear garden) in Chrome on the reference machine meet the documented Web target
 
-- [ ] HOUSE-02899 — The browser loading screen with progress from the pack preload
+- [x] HOUSE-02899 — The browser loading screen with progress from the pack preload
       dep: HOUSE-02892, HOUSE-00156 · sys: ui · plat: WEB · pri: MUST · zone: all · adv: D10b · est: 1
       accept: progress shown from the preload until the main menu; no progressive fetch or streaming
       trace: absorbs `HOUSE-02854`; was *the browser loading screen and the progressive pack fetch*
+      verify: the full Web preset rebuilt with its one upfront 391 MiB preload. Chrome CDP
+              throttling showed visible progress advancing from 8,504,652 to 31,963,944 of
+              410,635,649 bytes; after the preload, the existing in-game gesture/loading
+              screen appeared, and its first click opened audio and reached the main menu.
+              Firefox also reached the in-game prompt and main menu under the new shell.
+              Native game build and strict XNA (341 units, four workers) passed; the full
+              static gate failed only the pre-existing user-owned `.claude` root-layout entry.
+              Inspected captures and DOM states are in `docs/portability.md`
+      note: (2026-09-26) One Web-only Emscripten shell replaces the generic toolbar with a
+            centred progress screen using Emscripten's existing `setStatus` and
+            `monitorRunDependencies` callbacks. When the engine takes over, the existing
+            `LoadingScreen` carries the startup/gesture handoff to the menu. No runtime
+            fetch, streaming, new loader system or desktop behaviour changed
 
 - [ ] HOUSE-02900 — The Web DONE checklist in Chrome and in Firefox
       dep: HOUSE-02898, HOUSE-02899, HOUSE-02895, HOUSE-03721, HOUSE-03723, HOUSE-02850, HOUSE-02797 · sys: — · plat: WEB · pri: MUST · zone: all · adv: D10b · est: 1.5
@@ -2031,15 +2044,15 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M11 Final defect pass | 3 | 11 | **3** | 2.75 | **3.25** | 3.6 | — |
 | M12 Representative tests | 4 | 5 | **0** | 0 | **0** | 0 | — |
 | M13 Linux desktop release | 10 | 13.25 | **8** | 8.75 | **10.25** | 11.25 | — |
-| M14 Web | 17 | 24.75 | **7** | 7.65 | **9** | 15.9 | R-B +6 |
+| M14 Web | 17 | 24.75 | **6** | 6.8 | **8** | 14.8 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **45** | **55.9** | **65.75** | **90.25** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **44** | **55.0** | **64.75** | **89.15** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-189.75 h. Adding the 161.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-251.5 h, 28.5 h under the limit. That margin is
+190.85 h. Adding the 162.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+251.4 h, 28.6 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |

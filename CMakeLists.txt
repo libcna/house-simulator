@@ -240,16 +240,20 @@ if(EMSCRIPTEN)
     target_link_libraries(cna-house PRIVATE
         CNA::EmscriptenExceptionAbi
         CNA::EmscriptenAsyncify)
+    # HOUSE-02899: Emscripten's own preload status drives this one-page loading shell; the
+    # existing in-game LoadingScreen takes over after the pack has been prepared.
     target_link_options(cna-house PRIVATE
         -sALLOW_MEMORY_GROWTH=1
         -sSTACK_SIZE=1048576
         -sINITIAL_MEMORY=134217728
         -sFORCE_FILESYSTEM=1
         -sEXIT_RUNTIME=1
+        "SHELL:--shell-file ${CMAKE_CURRENT_SOURCE_DIR}/cmake/web_shell.html"
         "SHELL:--pre-js ${CMAKE_CURRENT_SOURCE_DIR}/cmake/web_pointer_lock_pre.js"
         "SHELL:--preload-file ${CMAKE_BINARY_DIR}/content@/content"
         "SHELL:--preload-file ${CMAKE_BINARY_DIR}/content-fx@/content-fx")
     set_property(TARGET cna-house APPEND PROPERTY LINK_DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/web_shell.html"
         "${CMAKE_CURRENT_SOURCE_DIR}/cmake/web_pointer_lock_pre.js")
     set_target_properties(cna-house PROPERTIES SUFFIX ".html")
     cna_apply_emscripten_renderer_link_contract(cna-house)
