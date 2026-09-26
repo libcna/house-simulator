@@ -1,3 +1,36 @@
+# Touch input source handoff — 2026-09-26 (`HOUSE-02991`)
+
+R11/R13 chose the next dependency-unblocked desktop-side M15 Android readiness task after
+Web bring-up. The upstream Android graphics gate (`HOUSE-02951`/BL-13) does not block this
+input work and does not count as Android DONE. `TouchSource` is a real implementation of the
+existing `IInputSource`, not a parallel input framework: it samples only XNA `TouchPanel`,
+tracks independent stick and look fingers by ID through reordered snapshots, emits movement
+and look deltas, and forwards new presses as the same normalised UI/tap edge the mouse uses.
+Released or missing fingers clear their roles. The source's 180-virtual-unit stick radius and
+separate look sensitivity are groundwork for `HOUSE-02992`'s visible/tuned HUD; the source
+is not yet selected in the game, since `HOUSE-02995` owns touch-only selection and
+`--force-touch`. No interaction or camera-toggle control was added from historical docs.
+
+`tools/ci/check_input_boundary.py` now enforces that runtime `Keyboard`/`Mouse`/`TouchPanel`
+polling remains only in input-source implementations. Its selftest and repository scan pass
+for 280 other runtime files. Five recorded-sequence `TouchSourceTests` plus the existing
+21 input tests pass together; the complete isolated unit suite passed 1481/1481 in
+127.355 s. Native and full Web builds passed in the existing `build/` and
+`build-consumer/` directories with shared ccache and four jobs. The full static gate passed
+all checks except the pre-existing user-owned `.claude` root-layout entry; strict XNA
+passed 343 translation units with four workers. `git diff --check` is clean.
+
+This leaves 43 open MUST tasks, 62.5 realistic and 86.75 pessimistic hours. The small
+pre-existing rounding differences in the milestone pessimistic cells were brought back to
+the plan's stated 1.10× formula plus active reserves; no task/scope changed. R14 projects
+164.5 completed plus 86.75 remaining = 251.25 h, 28.75 below the unchanged ceiling.
+The next dependency-unblocked MUST is `HOUSE-02992` (touch stick/look and desktop tuning).
+Its acceptance names `--force-touch` although the flag is currently assigned to dependent
+`HOUSE-02995`; resolve that local scheduling contradiction before implementation without
+adding another control or changing either task's DONE coverage.
+
+---
+
 # Web preload progress handoff — 2026-09-26 (`HOUSE-02899`)
 
 R11/R13 selected the next dependency-unblocked M14 task after `HOUSE-02895`. The existing

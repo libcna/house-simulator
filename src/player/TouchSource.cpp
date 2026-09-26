@@ -1,0 +1,140 @@
+// SPDX-License-Identifier: MIT
+#include "cnahouse/player/TouchSource.hpp"
+
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
+
+#include "Microsoft/Xna/Framework/Input/Touch/TouchLocationState.hpp"
+#include "Microsoft/Xna/Framework/Input/Touch/TouchPanel.hpp"
+
+namespace cnahouse::player
+{
+    namespace
+    {
+        using Microsoft::Xna::Framework::Vector2;
+        using Microsoft::Xna::Framework::Input::Touch::TouchCollection;
+        using Microsoft::Xna::Framework::Input::Touch::TouchLocation;
+        using Microsoft::Xna::Framework::Input::Touch::TouchLocationState;
+
+        const TouchLocation* ActiveFinger(const TouchCollection& touches, int id)
+        {
+            for (int index = 0; index < touches.getCountProperty(); ++index)
+            {
+                const auto& touch = touches[static_cast<std::size_t>(index)];
+                if (touch.getIdProperty() == id && touch.getStateProperty() != TouchLocationState::Released &&
+                    touch.getStateProperty() != TouchLocationState::Invalid)
+                {
+                    return &touch;
+                }
+            }
+            return nullptr;
+        }
+    } // namespace
+
+    TouchSource::TouchSource(TouchConfig config)
+        : config_(config)
+    {
+    }
+
+    void TouchSource::Update(float deltaSeconds)
+    {
+        Apply(Microsoft::Xna::Framework::Input::Touch::TouchPanel::GetState(), deltaSeconds);
+    }
+
+    void TouchSource::Apply(const TouchCollection& touches, float deltaSeconds)
+    {
+        (void)deltaSeconds;
+        state_ = InputState{};
+        lookAvailable_ = false;
+
+        if (stick_ && ActiveFinger(touches, stick_->id) == nullptr)
+        {
+            stick_.reset();
+        }
+        if (look_ && ActiveFinger(touches, look_->id) == nullptr)
+        {
+            look_.reset();
+        }
+
+        const float width = static_cast<float>(std::max(config_.viewportWidth, 1));
+        const float height = static_cast<float>(std::max(config_.viewportHeight, 1));
+        for (int index = 0; index < touches.getCountProperty(); ++index)
+        {
+            const auto& touch = touches[static_cast<std::size_t>(index)];
+            const auto phase = touch.getStateProperty();
+            if (phase != TouchLocationState::Pressed && phase != TouchLocationState::Moved)
+            {
+                continue;
+            }
+            const Vector2 position = touch.getPositionProperty();
+            if (phase == TouchLocationState::Pressed)
+            {
+                state_.anyPressed = true;
+                // A new finger is a menu tap even while the other two fingers continue walking
+                // and looking. Menus consume the normalised primary pointer edge.
+                if (!state_.pointerPressed)
+                {
+                    state_.pointerKind = PointerKind::Touch;
+                    state_.pointerX = std::clamp(position.X / width, 0.0F, 1.0F);
+                    state_.pointerY = std::clamp(position.Y / height, 0.0F, 1.0F);
+                    state_.pointerPressed = true;
+                }
+            }
+
+            const int id = touch.getIdProperty();
+            if (stick_ && stick_->id == id)
+            {
+                continue;
+            }
+            if (look_ && look_->id == id)
+            {
+                continue;
+            }
+            // Assign once, by the first position, then keep the ID even when a drag crosses
+            // the centre line. This permits an independent look drag while the stick is held.
+            if (!stick_ && position.X < width * 0.5F && position.Y >= height * 0.5F)
+            {
+                stick_ = Finger{id, position, position};
+            }
+            else if (!look_ && position.X >= width * 0.5F)
+            {
+                look_ = Finger{id, position, position};
+            }
+        }
+
+        if (stick_)
+        {
+            const auto* touch = ActiveFinger(touches, stick_->id);
+            const Vector2 position = touch->getPositionProperty();
+            // The 180-virtual-unit radius is scaled by the same 1600x900 virtual viewport as
+            // the HUD. The next task adds its visible ring and desktop tuning, not a second
+            // movement interpretation.
+            const float scale = std::min(width / 1600.0F, height / 900.0F);
+            const float radius = std::max(180.0F * scale, 1.0F);
+            const float dx = (position.X - stick_->origin.X) / radius;
+            const float dy = (stick_->origin.Y - position.Y) / radius;
+            const float length = std::sqrt(dx * dx + dy * dy);
+            const float divisor = std::max(length, 1.0F);
+            state_.move = Vector2(dx / divisor, dy / divisor);
+            stick_->previous = position;
+        }
+
+        if (look_)
+        {
+            const auto* touch = ActiveFinger(touches, look_->id);
+            const Vector2 position = touch->getPositionProperty();
+            const float dx = position.X - look_->previous.X;
+            const float dy = position.Y - look_->previous.Y;
+            look_->previous = position;
+            if (dx != 0.0F || dy != 0.0F)
+            {
+                constexpr float kRadiansPerPixel = 0.0022F;
+                const float scale = kRadiansPerPixel * config_.lookSensitivity;
+                state_.look = Vector2(dx * scale, dy * scale * (config_.invertY ? -1.0F : 1.0F));
+                lookAvailable_ = true;
+            }
+        }
+    }
+
+} // namespace cnahouse::player

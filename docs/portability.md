@@ -3,6 +3,16 @@
 This is a running validation record, not a claim that the Linux, Web or Android DONE checklists
 have passed. `plan.md` remains the release authority.
 
+## Android desktop-side touch input — HOUSE-02991 (2026-09-26)
+
+The new XNA `TouchPanel`-backed `TouchSource` is unit-tested with recorded multi-finger
+snapshots and implements the same `IInputSource` consumed by the game. It tracks floating
+stick and look IDs independently, retains them across reordered/crossing fingers, reports
+new presses as normalised UI tap edges, and drops released/missing roles without a look jump.
+Its native and Web compilation passed. This is input-source readiness only: the visible HUD,
+desktop `--force-touch` selection, touch-only browser check and real Android device path are
+still open. An upstream Android graphics blocker remains a blocker, not proof of DONE.
+
 ## Web preload progress — HOUSE-02899 (2026-09-26)
 
 The Web target now links a small project-owned Emscripten shell. It uses Emscripten's existing

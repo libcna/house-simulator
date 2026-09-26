@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **44 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 55.0 / 64.75 / 89.15 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5, M7, M9 and M12 passed; M8 listening and M10 baseline work are environment-blocked.** Next: `HOUSE-02991` (desktop-side Android touch input) |
+| Active plan | **43 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 53.1 / 62.5 / 86.75 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5, M7, M9 and M12 passed; M8 listening and M10 baseline work are environment-blocked.** Next: `HOUSE-02992` (touch stick/look region and desktop tuning) |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -404,7 +404,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 0 | **done** · `HOUSE-02598` | D11 | 0 |
 | [M13](#m13--linux-desktop-release) — Linux desktop release | after M11 | 03701–03720 | 8 | `HOUSE-02797` | D9–D13 | 10.25 |
 | [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 6 | `HOUSE-02904` | D10b | 8 |
-| [M15](#m15--android) — Android | readiness: B · device: after M13 | 03751–03780 | 14 | `HOUSE-03041` (a BL-13 record does not close it) | D10c | 23.75 |
+| [M15](#m15--android) — Android | readiness: B · device: after M13 | 03751–03780 | 13 | `HOUSE-03041` (a BL-13 record does not close it) | D10c | 21.5 |
 | [M16](#m16--final-release) — Final release | last | 03781–03800 | 6 | **DONE** · `HOUSE-03078` | D9–D14 | 6.5 |
 
 Legacy ids 03121–03200 are unallocated and stay unused. The budgets are the sums of the tasks'
@@ -1587,11 +1587,23 @@ emulator, not a compatibility lab. Cosmetic platform luxuries are cut.
 
 ### Desktop-side readiness (Track B, any time after G1)
 
-- [ ] HOUSE-02991 — `TouchSource` over `TouchPanel`, and a complete `IInputSource` abstraction
+- [x] HOUSE-02991 — `TouchSource` over `TouchPanel`, and a complete `IInputSource` abstraction
       dep: HOUSE-00101, HOUSE-00140 · sys: player · plat: AND · pri: MUST · zone: all · adv: D8, D10c · est: 2.25
       accept: (1) multi-touch tracking with the gestures the scheme needs: the stick, the look drag and taps; (2) no direct `Keyboard`/`Mouse` read anywhere outside the input sources, checked by a lint
-      verify: unit tests with recorded touch sequences; the lint
       trace: absorbs `HOUSE-02954` (the `IInputSource` check)
+      verify: five new touch-sequence tests and 21 existing input tests pass; the isolated
+              native suite passes 1481/1481. Input-boundary lint scans 280 other runtime
+              files; native and Web builds pass. Strict XNA passed 343 translation units
+              with four workers; the full static gate failed only on the pre-existing
+              user-owned `.claude` root-layout entry. Details in `docs/handoff.md`
+      note: (2026-09-26) `TouchSource` now implements the existing `IInputSource` and samples
+            XNA `TouchPanel`, preserving stick/look finger IDs across collection reordering,
+            independent drags, press/tap pointer edges and clean role release. Recorded
+            sequences cover crossing, simultaneous third-finger taps, viewport/sensitivity
+            scaling and re-acquisition without a look jump. The new input-boundary lint
+            scans runtime code; only the source implementations may poll devices. Native
+            and Web builds pass; the HUD, forced desktop selection and button regions remain
+            `HOUSE-02992`/`HOUSE-02995`, not claimed here
 
 - [ ] HOUSE-02992 — The floating movement stick and the look region
       dep: HOUSE-02991 · sys: ui · plat: AND · pri: MUST · zone: all · adv: D8, D10c · est: 2
@@ -2040,19 +2052,19 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M7 A compact environment | 13 | 21 | **0** | 0 | **0** | 0 | — |
 | M8 Atmospheric audio essentials | 11 | 14.5 | **4** | 4.25 | **5** | 5.5 | — |
 | M9 Application shell | 10 | 12.5 | **0** | 0 | **0** | 0 | — |
-| M10 Performance | 6 | 13 | **3** | 6.75 | **8** | 12.75 | R-C +4 |
-| M11 Final defect pass | 3 | 11 | **3** | 2.75 | **3.25** | 3.6 | — |
+| M10 Performance | 6 | 13 | **3** | 6.75 | **8** | 12.8 | R-C +4 |
+| M11 Final defect pass | 3 | 11 | **3** | 2.75 | **3.25** | 3.58 | — |
 | M12 Representative tests | 4 | 5 | **0** | 0 | **0** | 0 | — |
-| M13 Linux desktop release | 10 | 13.25 | **8** | 8.75 | **10.25** | 11.25 | — |
+| M13 Linux desktop release | 10 | 13.25 | **8** | 8.75 | **10.25** | 11.28 | — |
 | M14 Web | 17 | 24.75 | **6** | 6.8 | **8** | 14.8 | R-B +6 |
-| M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
-| M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **44** | **55.0** | **64.75** | **89.15** | +21 |
+| M15 Android | 23 | 29 | **13** | 18.3 | **21.5** | 31.65 | R-A +8 |
+| M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.15 | — |
+| **Total, all three platforms** | **205** | **318.75** | **43** | **53.1** | **62.5** | **86.75** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-190.85 h. Adding the 162.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-251.4 h, 28.6 h under the limit. That margin is
+193.25 h. Adding the 164.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+251.25 h, 28.75 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |

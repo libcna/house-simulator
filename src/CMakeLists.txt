@@ -70,6 +70,7 @@ add_library(cnahouse_core STATIC
     player/MouseCapture.cpp
     player/MouseLook.cpp
     player/KeyboardMouseSource.cpp
+    player/TouchSource.cpp
     player/PlayerController.cpp
 
     # content

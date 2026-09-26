@@ -110,6 +110,7 @@ check_world()
 
 run_gate "layout"     python3 tools/ci/check_layout.py
 run_gate "xna-only"   python3 tools/ci/check_xna_only.py
+run_gate "input-boundary" python3 tools/ci/check_input_boundary.py
 run_gate "web-materials" python3 tools/ci/check_web_materials.py
 run_gate "clang-format" check_format
 # Needs no compiler and no Wine, which is exactly why it can be a gate: it compares the committed
