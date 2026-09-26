@@ -19,6 +19,7 @@
 #include "cnahouse/app/CommandLine.hpp"
 #include "cnahouse/app/Settings.hpp"
 #include "cnahouse/debug/Counters.hpp"
+#include "cnahouse/player/IInputSource.hpp"
 
 namespace
 {
@@ -102,6 +103,25 @@ namespace
     {
     };
 
+    class NeutralInput final : public cnahouse::player::IInputSource
+    {
+    public:
+        void Update(float) override {}
+
+        [[nodiscard]] const cnahouse::player::InputState& Current() const noexcept override
+        {
+            return state_;
+        }
+
+        [[nodiscard]] bool LookAvailable() const noexcept override
+        {
+            return false;
+        }
+
+    private:
+        cnahouse::player::InputState state_;
+    };
+
     std::string ScenarioName(const testing::TestParamInfo<Scenario>& parameter)
     {
         return parameter.param.id;
@@ -131,6 +151,11 @@ namespace
         settings.quality = QualityPreset::High;
 
         CnaHouseGame game(options, settings);
+        // A fixed camera must not consume the owner's real mouse while this window is visible.
+        // Otherwise the measured draw/triangle counts describe wherever the cursor happened to
+        // point, not the named scenario, and platform preset comparisons are meaningless.
+        NeutralInput input;
+        game.SetInputSourceForTesting(&input);
         game.SetFrameLimit(kWarmUp + kMeasured);
         game.EnableGpuCompletionSamplingForTesting();
         game.Run();

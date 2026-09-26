@@ -148,6 +148,13 @@ Recorded here for convenience; `cna-house.md` §71–72 is authoritative.
 
 ### 2026-09-26 — furnished-house Release baseline (`HOUSE-02403`)
 
+**Correction:** the first per-scene table below is invalid as a fixed-camera
+baseline. The harness set the initial pose but still consumed live mouse input
+while the visible window ran. Counts and timings depended on where the cursor
+moved. Keep it only as an audit trail; the corrected table following it is the
+reference measurement. The separately measured texture, load and resident
+footprint numbers did not use this moving-camera sampling and remain valid.
+
 Current `build-probe/` Release build, 1920×1080, OPENGLES3, Tier S / High, vsync off,
 fixed time/weather/seed, on the reference Radeon 780M with Wayland/radeonsi (not Mesa's
 offscreen software path). Each scenario ran in a fresh process with 120 warm-up and 600
@@ -166,9 +173,9 @@ per-frame averages. CPU and GPU are different clocks and must not be added.
 | Heavy rain outside | 83 | 380,032 | 2.150 | 3.686 / 5.924 |
 | Night outside | 30 | 361,931 | 2.101 | 3.471 / 6.491 |
 
-All eight pass the High hard limits (CPU 9.5 ms, GPU 14 ms, 1,800 draws,
-3.4 million triangles). These are fixed-camera performance results, **not** proof
-that the main stair is visually acceptable or walkable with live controls.
+The preceding apparent pass is **withdrawn**. It is not fixed-camera evidence
+and cannot close `HOUSE-02404`. It also says nothing about whether the main
+stair is visually acceptable or walkable with live controls.
 
 The current compiled content has 332 textures accounting for 117.334 MB of
 base-level RGBA8 texels, including 216 lightmaps accounting for 14.156 MB.
@@ -194,7 +201,52 @@ allocations, not a claim that every packaged but unused texture was uploaded;
 the conservative texture/mip sum above bounds that remainder. Both are below
 the 550 MB GPU and 1.6 GB RSS gates, so no residency system is justified.
 
-`HOUSE-02404` decision: no High scenario misses a hard target, so no
-optimization technique is selected and the M10 performance-technique risk
-reserve is retired. The eight rows above are the task's before-and-after
-evidence: no render code or content changed between them and this decision.
+`HOUSE-02404`'s original no-optimization decision and retired R-C reserve are
+withdrawn with the invalid sampling above.
+
+### Corrected fixed-camera High baseline, contended sample (`HOUSE-02403` / `HOUSE-02404`)
+
+The same Release build/reference Radeon 780M, with the test input source now
+neutral so the real mouse and keyboard cannot move the camera. Each value is
+120 warm-up plus 600 measured frames; CPU is average updates plus median
+submission, GPU is readback-forced completion. These are per-scene results,
+not a claim of a visually correct real-control walkthrough. This run was on a
+shared machine; timing is **not yet an uncontended acceptance result**.
+
+| Scene | Draw calls | Triangles | CPU ms | GPU median / p95 ms | High CPU/GPU target |
+|---|---:|---:|---:|---:|---|
+| Kitchen | 73 | 172,934 | 2.998 | 4.515 / 6.246 | pass |
+| Library | 89 | 555,276 | 4.116 | 6.479 / 11.234 | pass |
+| Main stair looking up | 63 | 25,844 | 4.961 | 7.946 / 13.263 | pass |
+| Street approach | 479 | 1,008,112 | 16.929 | 18.589 / 26.207 | **fail CPU and GPU** |
+| Rear garden | 347 | 1,167,555 | 12.749 | 15.638 / 21.787 | **fail CPU and GPU** |
+| Upper window | 85 | 259,265 | 5.496 | 7.355 / 11.251 | pass |
+| Heavy rain outside | 306 | 1,318,460 | 7.847 | 10.352 / 18.228 | median pass; high p95 |
+| Night outside | 479 | 1,011,116 | 7.056 | 7.797 / 9.480 | pass |
+
+The High hard targets are 9.5 ms CPU and 14 ms GPU, 1,800 draws and 3.4
+million triangles. Submission dominates CPU on the two failing daylight
+exteriors (15.572 and 11.603 ms median respectively). The counts themselves
+are below the hard draw and triangle caps; passing those caps does not override
+a reproducible time failure.
+
+Independent fresh-process reruns with the same fixed cameras and identical
+draw/triangle counts showed large timing spread without a House code/content
+change:
+
+| Scene | First corrected CPU / GPU median ms | Later CPU / GPU median ms | Further CPU / GPU median ms |
+|---|---:|---:|---:|
+| Street approach | 16.929 / 18.589 | 5.732 / 7.239 | 6.031 / 7.719 |
+| Rear garden | 12.749 / 15.638 | 6.661 / 8.937 | 8.102 / 11.355 |
+| Night outside | 7.056 / 7.797 | 11.336 / 12.090 | 11.823 / 12.313 |
+
+The other five scenes' latest isolated CPU/GPU medians were: kitchen 3.223/4.865,
+library 3.603/5.527, main stair 4.358/7.202, upper window 4.181/6.593,
+heavy rain 7.655/10.676 (GPU p95 15.594). `ps` during the latter night miss
+showed a separate `wasm-opt` at ~805% CPU, two `cc1plus` processes near 100%
+each and `Graphics3DSampl` near 91%, with system load average 8.39; the CPU
+temperature was 79.2 °C. This is concrete competing CPU/GPU activity, though
+it does not prove which individual spike it caused. `HOUSE-02404` stays open
+until a clean/repeatable reference run establishes whether any scene truly
+misses. No rendering or content technique is selected from these ambiguous
+timings; the restored R-C reserve is retained.

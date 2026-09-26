@@ -1,4 +1,38 @@
-# High performance gate handoff — 2026-09-26 (`HOUSE-02404`)
+# Corrected fixed-camera performance handoff — 2026-09-26 (`HOUSE-02403` / `HOUSE-02404`)
+
+R7/R11 select `HOUSE-02404` again before `HOUSE-02405`. The prior High
+benchmark and `HOUSE-02404` closure were invalid: the performance harness set
+an initial pose but then let the real mouse steer during its visible window.
+The harness now installs neutral test input. The corrected Release Radeon 780M
+measurements show the street approach at 16.929 ms CPU / 18.589 ms GPU median
+and the rear garden at 12.749 / 15.638 ms, both over the High 9.5 / 14 ms
+limits. Repeat isolated runs with identical draw/triangle counts then passed
+at 5.732 / 7.239 and 6.661 / 8.937 respectively; night outside varied the
+other way from 7.056 / 7.797 to 11.823 / 12.313. The machine concurrently
+ran `wasm-opt` at ~805% CPU, two further compiler processes and a graphics
+sample. Full eight-scene rows and repeats are in `docs/performance-log.md`.
+The timing misses are therefore not yet an uncontended/repeatable House
+bottleneck, and no technique is justified. The separately
+measured 332-texture memory, cold startup and all-resident GPU/RSS figures
+remain valid. `HOUSE-02404` is reopened and R-C's 4 h technique reserve is
+restored. The next step on this path is an uncontended High remeasurement, then
+the smallest effective technique only if a miss persists, with before/after
+and image correctness checked; then
+`HOUSE-02405`'s named presets and Android content delivery. Uncommitted preset
+work is deliberately not marked complete.
+
+33 MUST tasks remain; 45.25 realistic and 67.78 pessimistic hours. R14 projects
+249.53 h, 30.47 h below the 280-hour ceiling. User reports of dark rooms,
+poor first-floor stair usability and doorway flashes remain open for a real
+walkthrough/visual defect pass. Short visible GPU tests are authorized by the
+user, with advance notice. A previous false claim that Android emulator access
+was unavailable has been corrected: CNA Android graphics and House's minimal
+arm64 APK/settings/lifecycle path pass on `Medium_Phone`; content, touch
+traversal and Android performance are still unverified.
+
+---
+
+# Superseded High performance gate handoff — 2026-09-26 (`HOUSE-02404`)
 
 R11/R13 next selected the measured High gate after `HOUSE-02403`. All eight
 current Release representative scenes pass the desktop hard budgets; no scene
