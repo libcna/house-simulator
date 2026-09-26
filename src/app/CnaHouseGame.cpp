@@ -1462,11 +1462,41 @@ namespace cnahouse::app
         Game::UnloadContent();
     }
 
+    void CnaHouseGame::OnDeactivated(System::Object* sender, const System::EventArgs& args)
+    {
+        Game::OnDeactivated(sender, args);
+        lifecyclePaused_ = true;
+        touchInput_.Reset();
+        pendingRunToggle_ = false;
+        stepAccumulator_ = 0.0F;
+        player::CaptureRequest capture;
+        capture.windowActive = false;
+        mouseCapture_.Update(capture);
+        input_.SetMouseCaptured(false);
+        setIsMouseVisibleProperty(true);
+        audio_.SetMuted(true);
+        Log::Info(LogCat::App, "deactivated: simulation paused and input released");
+    }
+
+    void CnaHouseGame::OnActivated(System::Object* sender, const System::EventArgs& args)
+    {
+        Game::OnActivated(sender, args);
+        lifecyclePaused_ = false;
+        touchInput_.Reset();
+        ResetElapsedTime();
+        audio_.SetMuted(false);
+        Log::Info(LogCat::App, "activated: simulation resumed");
+    }
+
     void CnaHouseGame::Update(Microsoft::Xna::Framework::GameTime& gameTime)
     {
         if (crashed_)
         {
             Exit();
+            return;
+        }
+        if (lifecyclePaused_)
+        {
             return;
         }
         try

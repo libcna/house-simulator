@@ -3,6 +3,31 @@
 This is a running validation record, not a claim that the Linux, Web or Android DONE checklists
 have passed. `plan.md` remains the release authority.
 
+## House Android lifecycle — 2026-09-26
+
+`HOUSE-03036` uses XNA `Game` events, not an Android/SDL runtime hook in House:
+
+| Source event in current CNA | XNA event | House action |
+|---|---|---|
+| Desktop focus lost; Android will enter background | `Game::OnDeactivated` | Pause updates, discard held touch roles and pending run toggle, release mouse capture, mute the existing audio mix |
+| Desktop focus gained; Android entered foreground | `Game::OnActivated` | Reset elapsed time, discard stale touches, resume updates and mix |
+| Android surface destroyed/recreated | CNA's renderer surface invalidation at foreground/resizing | House keeps XNA graphics resources; CNA restores the output surface without a House-native graphics call |
+
+CNA's current `Game.cpp` maps Android background/foreground to activation events,
+suspends its loop while backgrounded, resets elapsed timing at return and invalidates
+the renderer surface. The same House event handlers ran under real Linux/Xvfb focus
+transfer: log sequence `activated → deactivated → activated`.
+
+On the `Medium_Phone` API-35 GPU-backed emulator, the installed arm64 House APK kept
+PID 6363 across `KEYCODE_HOME` and return. SDL logged `onPause()` then
+`surfaceDestroyed()`, followed by `onResume()`, `surfaceCreated()` and
+`surfaceChanged()`. EGL frame-submission logs resumed (about 60 frames per
+one-second interval), with no fatal exception. Once the foreground orientation
+settled at 2400×1080, a 1600×700 central crop compared pixel-identical before
+and after backgrounding (AE 0); its center pixel was `srgba(18,20,24,1)`.
+The clear-color frame proves the output surface was restored; without packaged House content it cannot
+prove scene rendering, touch traversal or a performance target. Those remain open.
+
 ## Android settings store — 2026-09-26
 
 `HOUSE-03034` reuses the existing XNA `StorageDevice`/`DesktopSaveStore`. Current

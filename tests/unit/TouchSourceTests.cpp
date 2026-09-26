@@ -34,6 +34,32 @@ namespace
         return TouchCollection(std::vector<TouchLocation>(touches));
     }
 
+    TEST(TouchSourceTests, FocusLossDropsHeldFingersBeforeTheNextGesture)
+    {
+        TouchSource source;
+        source.Apply(Frame({Finger(10, TouchLocationState::Pressed, 200.0F, 700.0F),
+                            Finger(20, TouchLocationState::Pressed, 1200.0F, 450.0F)}),
+                     0.016F);
+        source.Apply(Frame({Finger(10, TouchLocationState::Moved, 290.0F, 610.0F),
+                            Finger(20, TouchLocationState::Moved, 1250.0F, 450.0F)}),
+                     0.016F);
+        ASSERT_TRUE(source.StickOrigin().has_value());
+        ASSERT_TRUE(source.LookAvailable());
+
+        source.Reset();
+        EXPECT_FALSE(source.StickOrigin().has_value());
+        EXPECT_FALSE(source.StickPosition().has_value());
+        EXPECT_FALSE(source.LookAvailable());
+        EXPECT_FLOAT_EQ(source.Current().move.X, 0.0F);
+        EXPECT_FLOAT_EQ(source.Current().look.X, 0.0F);
+
+        source.Apply(Frame({}), 0.016F);
+        source.Apply(Frame({Finger(30, TouchLocationState::Pressed, 210.0F, 690.0F)}), 0.016F);
+        EXPECT_TRUE(source.StickOrigin().has_value());
+        EXPECT_TRUE(source.Current().pointerPressed);
+        EXPECT_FLOAT_EQ(source.Current().move.X, 0.0F);
+    }
+
     TEST(TouchSourceTests, IndependentStickAndLookFollowIdsWhenCollectionOrderChanges)
     {
         TouchSource source;

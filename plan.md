@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **35 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 41.9 / 49.25 / 72.18 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5, M7, M9 and M12 passed; CNA's Android graphics gate and House's arm64 APK/settings-store path passed on the `Medium_Phone` emulator.** The next dependency-unblocked MUST paths are `HOUSE-01920`/`HOUSE-01922` (listening unavailable here), `HOUSE-02403` (Release baseline needs refresh) and `HOUSE-03036` (Android lifecycle); Android content delivery waits for `HOUSE-02405` |
+| Active plan | **34 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 40.2 / 47.25 / 69.98 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5, M7, M9 and M12 passed; CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator.** The next dependency-unblocked MUST paths are `HOUSE-01920`/`HOUSE-01922` (listening unavailable here) and `HOUSE-02403` (Release baseline); Android content delivery then waits for `HOUSE-02405` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -1709,14 +1709,28 @@ emulator, not a compatibility lab. Cosmetic platform luxuries are cut.
               standard-XNA container beneath the package-private files directory;
               no Android or SDL storage API was added to House runtime
 
-- [ ] HOUSE-03036 — The Android lifecycle: pause, resume, background and surface loss onto `Game`'s events, verified on a device
+- [x] HOUSE-03036 — The Android lifecycle: pause, resume, background and surface loss onto `Game`'s events, verified on a device
       dep: HOUSE-03032 · sys: app · plat: AND · pri: MUST · zone: all · adv: D10c · est: 2
       accept: (1) the mapping is designed and recorded; (2) the desktop focus-loss path runs the same lifecycle code; (3) pause, resume and background work on the device without a crash or a lost surface
       trace: absorbs `HOUSE-02959` (the design) and `HOUSE-02960`
+      verify: `docs/portability.md` records the XNA event map. Real Xvfb focus
+              transfer logged activated → deactivated → activated through House's
+              shared handlers. On the API-35 `Medium_Phone` emulator, Home caused
+              SDL `onPause()`/`surfaceDestroyed()`; returning caused
+              `onResume()`/`surfaceCreated()`. The House PID stayed 6363,
+              EGL resumed frame submission; after orientation settled, the
+              1600×700 central rendered crop had zero differing pixels versus
+              before backgrounding (clear-color pixel `srgba(18,20,24,1)`). No
+              content was packaged, so this proves surface lifecycle, not the
+              later scene traversal or Android performance checklist
 
 - [ ] HOUSE-03037 — Run on the device; measure against the Android target; reduce until it fits
-      dep: HOUSE-03036 · sys: — · plat: AND · pri: MUST · zone: all · adv: D9, D10c · est: 2.5
+      dep: HOUSE-03036, HOUSE-03033 · sys: — · plat: AND · pri: MUST · zone: all · adv: D9, D10c · est: 2.5
       accept: one physical device; if none is available, the best available emulator with GPU acceleration, recorded as such; the Android preset's representative scenes meet the documented Android target
+      note: (2026-09-26) A measured representative scene requires the Android
+            content root and packs from `HOUSE-03033`; a clear-color-only APK
+            cannot establish the preset's target. This is dependency ordering,
+            not a new performance requirement
 
 - [ ] HOUSE-03038 — The Android DONE checklist
       dep: HOUSE-03037, HOUSE-02797 · sys: — · plat: AND · pri: MUST · zone: all · adv: D10c · est: 1.5
@@ -2127,14 +2141,14 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M12 Representative tests | 4 | 5 | **0** | 0 | **0** | 0 | — |
 | M13 Linux desktop release | 10 | 13.25 | **8** | 8.75 | **10.25** | 11.28 | — |
 | M14 Web | 17 | 24.75 | **5** | 6.2 | **7.25** | 13.98 | R-B +6 |
-| M15 Android | 23 | 29 | **6** | 7.7 | **9** | 17.9 | R-A +8 |
+| M15 Android | 23 | 29 | **5** | 6.0 | **7** | 15.7 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.15 | — |
-| **Total, all three platforms** | **205** | **318.75** | **35** | **41.9** | **49.25** | **72.18** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **34** | **40.2** | **47.25** | **69.98** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-207.82 h. Adding the 177.75 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-249.93 h, 30.07 h under the limit. That margin is
+210.02 h. Adding the 179.75 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+249.73 h, 30.27 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |
@@ -2184,9 +2198,10 @@ under R5.
 
 **What could still explode** (watch these at every R10 reassessment):
 
-1. **House Android after the CNA graphics gate** (`HOUSE-03031`, `03032`, `03036`, `03037`).
-   CNA's sample now draws on the emulator, but House Simulator has no Android APK yet; the
-   reserve is 8 h for the package, real traversal and performance. If this path costs more,
+1. **House Android after the CNA graphics gate** (`HOUSE-03033`, `03037`, `03038`).
+   CNA's sample and House's clear-color APK now draw on the emulator, but House's
+   content, real traversal and performance are still unverified; the reserve is 8 h
+   for the device path. If this path costs more,
    R15 cuts depth elsewhere, never the platform. House Simulator is **not DONE** until its
    own device path passes.
 2. **The full Emscripten build** (`HOUSE-02892`, 5 h) and Web memory (`HOUSE-02898`, `02850`).
@@ -2206,6 +2221,17 @@ Corrections made to `cna-house.md` or to this file during implementation, with t
 forced each one. Nothing is changed silently. The 2026-09-06 → 2026-09-20 corrections are in the
 legacy ledger; the two of 2026-09-21 (`HOUSE-03201`, `HOUSE-03205`) are in
 [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md).
+
+### PC-2026-09-26 — Android performance measurement needs delivered scenes (`HOUSE-03037`)
+
+* **Evidence:** `HOUSE-03036` verified that the current Android APK survives a real
+  `surfaceDestroyed()`/`surfaceCreated()` cycle, but it presently contains no House
+  content. Its displayed pixel is only the game's clear color. `HOUSE-03037` asks
+  for the Android preset's representative *scenes* to meet their target; that
+  measurement is not possible before `HOUSE-03033` delivers the scene packs.
+* **Smallest correction:** add `HOUSE-03033` to `03037`'s `dep:` line. No acceptance
+  criterion, platform, scope or estimate changes; a blank-surface frame cannot
+  substitute for the existing D9/D10c measurement.
 
 ### PC-2026-09-26 — Put the desktop touch-test flag before its dependent HUD task (`HOUSE-02992`)
 

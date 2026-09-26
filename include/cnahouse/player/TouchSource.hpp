@@ -39,6 +39,9 @@ namespace cnahouse::player
         void Apply(const Microsoft::Xna::Framework::Input::Touch::TouchCollection& touches,
                    float deltaSeconds);
 
+        /// @brief Discard fingers held before focus/background loss without changing the control layout.
+        void Reset() noexcept;
+
         /// @brief Whether XNA currently reports an active touch, for Web's first-touch selection.
         [[nodiscard]] bool HasActiveTouch() const;
 

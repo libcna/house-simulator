@@ -385,6 +385,8 @@ namespace cnahouse::app
         void UnloadContent() override;
         void Update(Microsoft::Xna::Framework::GameTime& gameTime) override;
         void Draw(const Microsoft::Xna::Framework::GameTime& gameTime) override;
+        void OnActivated(System::Object* sender, const System::EventArgs& args) override;
+        void OnDeactivated(System::Object* sender, const System::EventArgs& args) override;
 
     private:
         /// @brief Everything the frame draws, into whatever target is currently bound.
@@ -726,6 +728,7 @@ namespace cnahouse::app
         std::unique_ptr<debug::DebugDraw> debugDraw_;
         /// §49.3's leftover time: the fixed step is 1/120 s and a frame is not.
         float stepAccumulator_ = 0.0F;
+        bool lifecyclePaused_ = false;
         /// @brief A frame-edge survives zero-step frames and reaches exactly one physics step.
         bool pendingRunToggle_ = false;
         bool walking_ = false;

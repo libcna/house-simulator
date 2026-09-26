@@ -54,6 +54,17 @@ namespace cnahouse::player
     {
     }
 
+    void TouchSource::Reset() noexcept
+    {
+        state_ = InputState{};
+        stick_.reset();
+        look_.reset();
+        menuFinger_.reset();
+        speedFinger_.reset();
+        lookAvailable_ = false;
+        mouseWasDown_ = false;
+    }
+
     bool TouchSource::HasActiveTouch() const
     {
         const auto touches = Microsoft::Xna::Framework::Input::Touch::TouchPanel::GetState();

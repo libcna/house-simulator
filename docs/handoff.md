@@ -1,3 +1,32 @@
+# Android lifecycle handoff — 2026-09-26 (`HOUSE-03036`)
+
+R11/R13 selected the last independent Android readiness task before content
+delivery. House now handles the XNA `Game` activation/deactivation events on
+desktop and Android: inactive updates pause, held touch roles and mouse capture
+release, audio mutes, and activation resets elapsed time before resuming. CNA's
+existing Android game loop already suspends in background and invalidates its
+renderer surface on foreground; House adds no native graphics hook. A focused
+unit regression covers stale touch roles. Linux/Xvfb focus transfer logged the
+same activated → deactivated → activated House handlers.
+
+On the `Medium_Phone` emulator, Home destroyed the SDL surface and return
+recreated it. House PID 6363 survived, EGL resumed frame submissions, and the
+settled 1600×700 central screenshot crop was pixel-identical before/after
+(AE 0; center `srgba(18,20,24,1)`). That is
+surface-lifecycle evidence only: no Android content packs or representative
+walk/performance are claimed. The minimal plan correction makes `HOUSE-03037`
+depend on `HOUSE-03033`, since measuring representative Android scenes needs
+delivered content. The next executable MUST path is `HOUSE-02403` (current Release
+baseline), then `HOUSE-02404`/`02405` to unblock Android content delivery.
+
+34 MUST tasks remain, 47.25 realistic and 69.98 pessimistic hours; R14 projects
+249.73 h, 30.27 below the 280-hour ceiling. Native and Android builds, 13
+focused touch tests and all 1,490 unit tests passed. The full static gate
+passed every check except the pre-existing user-owned `.claude` root-layout
+entry; strict XNA compiled 344 translation units with four workers.
+
+---
+
 # Android app-private settings handoff — 2026-09-26 (`HOUSE-03034`)
 
 R11/R13 selected the next unblocked Android MUST task after the arm64 package
