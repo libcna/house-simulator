@@ -1,3 +1,41 @@
+# Touch-only Web input handoff — 2026-09-26 (`HOUSE-03723`)
+
+R11/R13 selected the dependency-unblocked Web input task after the M15 desktop-side
+touch menu work. The Web build starts keyboard/mouse and switches to the existing
+touch-only profile only when standard-XNA `TouchPanel::GetState()` actually contains
+a touch, before sampling that frame. This avoids a speculative device-capability
+query or a second input system. The first browser probe showed the profile switch
+but exposed a real edge loss: CNA's input-frame boundary advanced `Pressed` to
+`Moved` before the game's read. `TouchSource` now treats `Moved` with a previous
+`Pressed` location as a one-frame new-finger edge. The native unit test covers it.
+
+Chrome 152 mobile/touch emulation at 400×800 with the full localhost Web build
+now passes the user flow: first tap dismisses the loading/gesture gate, main menu
+appears with touch-spaced rows, Start enters the furnished walk with MOVE/MENU/WALK
+HUD, and the Menu touch button opens Pause. Inspected captures are
+`/tmp/house-03723-before.png`, `house-03723-menu.png`, `house-03723-walk.png`
+and `house-03723-pause.png`; `docs/portability.md` has the exact browser evidence.
+The canvas was a measured 400×225 rectangle centred in the 400×800 portrait viewport.
+No CNA or sibling repository was modified. The Web pack still warns at 391 MB;
+`HOUSE-02850` owns that separate requirement.
+
+Native and Web builds and 12 focused touch tests pass with shared ccache and four
+compile jobs. The full unit label passes 1489/1489 at two-way test parallelism;
+an unrelated SkySystem 5-ms timing assertion briefly failed at four-way parallelism,
+then passed both alone and in that full rerun. The input-boundary gate checks 282
+runtime files clean; strict XNA passes 344 translation units with four workers.
+The full static script fails only its pre-existing user-owned `.claude` root-layout
+entry. 39 ACTIVE/MUST tasks remain: 57.75 realistic and 81.53 pessimistic
+hours. R14 projects 169.25 completed plus 81.53 remaining = 250.78 h, 29.22 h
+below the 280-hour ceiling. After this checkpoint the next dependency-unblocked
+MUST paths are `HOUSE-01920`/`HOUSE-01922` (human listening unavailable in this
+environment), `HOUSE-02403` (current Release baseline blocked by the sibling CNA
+SDL-cache configure lock) and `HOUSE-02951` (upstream Android BL-13). M11 and then
+M13 remain gated on the audio walk; `HOUSE-02850` and Web performance wait for
+`HOUSE-02405`. A blocker record does not count as Android DONE.
+
+---
+
 # Touch-friendly menu targets handoff — 2026-09-26 (`HOUSE-02998`)
 
 R11/R13 selected this next dependency-unblocked M15 desktop-side readiness task after

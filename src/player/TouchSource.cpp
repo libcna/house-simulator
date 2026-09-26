@@ -33,11 +33,39 @@ namespace cnahouse::player
             }
             return nullptr;
         }
+
+        bool NewFinger(const TouchLocation& touch)
+        {
+            if (touch.getStateProperty() == TouchLocationState::Pressed)
+            {
+                return true;
+            }
+            // CNA advances Pressed to Moved at the input-frame boundary. The first game read
+            // may therefore see Moved with a previous Pressed location, not Pressed itself.
+            TouchLocation previous(touch.getIdProperty(), TouchLocationState::Invalid, Vector2(0.0F, 0.0F));
+            return touch.getStateProperty() == TouchLocationState::Moved &&
+                   touch.TryGetPreviousLocation(previous) &&
+                   previous.getStateProperty() == TouchLocationState::Pressed;
+        }
     } // namespace
 
     TouchSource::TouchSource(TouchConfig config)
         : config_(config)
     {
+    }
+
+    bool TouchSource::HasActiveTouch() const
+    {
+        const auto touches = Microsoft::Xna::Framework::Input::Touch::TouchPanel::GetState();
+        for (int index = 0; index < touches.getCountProperty(); ++index)
+        {
+            const auto state = touches[static_cast<std::size_t>(index)].getStateProperty();
+            if (state == TouchLocationState::Pressed || state == TouchLocationState::Moved)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     void TouchSource::Update(float deltaSeconds)
@@ -113,7 +141,8 @@ namespace cnahouse::player
                 continue;
             }
             const Vector2 position = touch.getPositionProperty();
-            if (phase == TouchLocationState::Pressed)
+            const bool newFinger = NewFinger(touch);
+            if (newFinger)
             {
                 state_.anyPressed = true;
                 // A new finger is a menu tap even while the other two fingers continue walking
@@ -135,7 +164,7 @@ namespace cnahouse::player
             const bool rightButton = position.X >= right - buttonInset && position.X < right;
             const bool menuButton = rightButton && position.Y >= top && position.Y < top + buttonInset;
             const bool speedButton = rightButton && position.Y >= bottom - buttonInset && position.Y < bottom;
-            if (phase == TouchLocationState::Pressed && buttonsEnabled_ && (menuButton || speedButton))
+            if (newFinger && buttonsEnabled_ && (menuButton || speedButton))
             {
                 state_.menuPressed |= menuButton;
                 state_.runPressed |= speedButton;

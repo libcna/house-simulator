@@ -101,6 +101,28 @@ namespace
         EXPECT_FLOAT_EQ(source.Current().move.X, 0.5F);
     }
 
+    TEST(TouchSourceTests, AdvancedFirstFrameStillProducesOneTapEdge)
+    {
+        TouchSource source;
+        const TouchLocation first(7,
+                                  TouchLocationState::Moved,
+                                  Vector2(800.0F, 450.0F),
+                                  TouchLocationState::Pressed,
+                                  Vector2(800.0F, 450.0F));
+        source.Apply(Frame({first}), 0.016F);
+        EXPECT_TRUE(source.Current().anyPressed);
+        EXPECT_TRUE(source.Current().pointerPressed);
+        EXPECT_EQ(source.Current().pointerKind, PointerKind::Touch);
+        source.Apply(Frame({TouchLocation(7,
+                                          TouchLocationState::Moved,
+                                          Vector2(800.0F, 450.0F),
+                                          TouchLocationState::Moved,
+                                          Vector2(800.0F, 450.0F))}),
+                     0.016F);
+        EXPECT_FALSE(source.Current().anyPressed);
+        EXPECT_FALSE(source.Current().pointerPressed);
+    }
+
     TEST(TouchSourceTests, CrossingTheCentreDoesNotSwapMovementAndLook)
     {
         TouchSource source;
@@ -247,5 +269,23 @@ namespace
             EXPECT_FALSE(platform.hasTouch);
             EXPECT_TRUE(platform.hasKeyboard);
         }
+    }
+
+    TEST(TouchSourceTests, WebProfileSelectsTouchOnlyAfterReportedTouch)
+    {
+        cnahouse::app::Platform web;
+        web.target = cnahouse::app::BuildTarget::Web;
+        EXPECT_FALSE(web.SelectWebTouchInput(false));
+        EXPECT_FALSE(web.hasTouch);
+        EXPECT_TRUE(web.hasKeyboard);
+        EXPECT_TRUE(web.SelectWebTouchInput(true));
+        EXPECT_TRUE(web.hasTouch);
+        EXPECT_FALSE(web.hasKeyboard);
+        EXPECT_FALSE(web.SelectWebTouchInput(true));
+
+        cnahouse::app::Platform desktop;
+        EXPECT_FALSE(desktop.SelectWebTouchInput(true));
+        EXPECT_FALSE(desktop.hasTouch);
+        EXPECT_TRUE(desktop.hasKeyboard);
     }
 } // namespace

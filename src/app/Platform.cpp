@@ -35,6 +35,17 @@ namespace cnahouse::app
         return platform;
     }
 
+    bool Platform::SelectWebTouchInput(bool touchReported) noexcept
+    {
+        if (target != BuildTarget::Web || !touchReported || hasTouch)
+        {
+            return false;
+        }
+        hasTouch = true;
+        hasKeyboard = false;
+        return true;
+    }
+
     std::string Platform::Summary() const
     {
         return std::format("cna-house {} · {} · Tier {} · debug {} · {}x{} · {}",

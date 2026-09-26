@@ -1464,6 +1464,13 @@ namespace cnahouse::app
             // key.
             {
                 const debug::Timing::Scope scope(timing_, UpdateStage::Input);
+                // A touch-only browser has no build-time device profile. Switch on the first real
+                // XNA touch frame, before sampling the selected source, so its first tap is not lost.
+                if (platform_.target == BuildTarget::Web && !TouchHudVisible() && scriptedInput_ == nullptr &&
+                    platform_.SelectWebTouchInput(touchInput_.HasActiveTouch()))
+                {
+                    Log::Info(LogCat::App, "Web touch input selected");
+                }
                 touchInput_.SetButtonsEnabled(TouchHudVisible() && walking_ && menus_.Empty());
                 Input().Update(frame.deltaSeconds);
             }

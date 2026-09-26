@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **40 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 49.7 / 58.5 / 82.35 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5, M7, M9 and M12 passed; M8 listening and M10 baseline work are environment-blocked.** Next: `HOUSE-03723` (touch-only Web control scheme) |
+| Active plan | **39 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 49.1 / 57.75 / 81.53 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5, M7, M9 and M12 passed.** The next dependency-unblocked MUST paths are `HOUSE-01920`/`HOUSE-01922` (listening unavailable here), `HOUSE-02403` (Release baseline blocked by sibling CNA cache lock), and `HOUSE-02951` (upstream Android BL-13); M13 waits for M11 and Web sizing waits for `HOUSE-02405` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -1507,11 +1507,12 @@ limitation (reload the page), recorded by `HOUSE-02904`.
       verify: manual browser check recorded in `docs/portability.md`; the headless smoke remains `HOUSE-02901`
       note: (2026-09-26, targeted R7/R15 split) Chrome and Firefox both reached walking, acquired pointer lock on canvas click, changed view without idle drift, and opened Pause with cursor release on Escape and tab focus loss. Firefox real-key W and Up moved the body; native `InputTests` covers WASD/arrow aliases and Shift's speed edge. XNA has no browser pointer-lock operation, so a tiny pre-JS bridge follows the existing `Game.IsMouseVisible` cursor state; Emscripten alone skips desktop mouse recentering. The touch-only condition was not claimed: M15's `TouchSource`/HUD is unfinished and is now `HOUSE-03723` after its real dependency. `docs/portability.md` records the browser evidence and remaining limitation. The native/Web builds passed; the isolated unit suite passed 1475/1475 and four-worker strict XNA passed 341 units. The full static gate passed except the pre-existing user-owned `.claude` root-layout entry
 
-- [ ] HOUSE-03723 — Select and verify the touch-only Web control scheme
+- [x] HOUSE-03723 — Select and verify the touch-only Web control scheme
       dep: HOUSE-03721, HOUSE-02995 · sys: player · plat: WEB · pri: MUST · zone: all · adv: D8, D10b · est: 0.75
       accept: on a touch-only browser use M15's `TouchSource` scheme when CNA `TouchPanel` reports touch under Emscripten; otherwise record the measured limitation
       verify: browser touch emulation or device check recorded in `docs/portability.md`
       trace: remaining conditional touch criterion split from `HOUSE-03721` under R7/R15, not optional scope
+      note: (2026-09-26) Chrome mobile/touch emulation at 400×800 received real CNA `TouchPanel` frames: the first tap selected Web touch input, dismissed the gesture gate and displayed the touch-spaced main menu; a Start tap entered walking with MOVE/MENU/WALK HUD, and the Menu button opened Pause. CNA advances a new Pressed touch to Moved before the game read; `TouchSource` now recognises the XNA previous-Pressed location as a one-frame edge. Device polling stays inside that source (`check_input_boundary`: 282 files clean), and untouched Web stays keyboard/mouse until actual touch. Native/Web builds, 12 focused tests and the full 1489/1489 unit label pass; one unrelated SkySystem timing test failed at four-way parallelism, passed alone and in the final two-way full run. Strict XNA passed 344 translation units with four workers; the full static gate reports only the pre-existing user-owned `.claude` root-layout entry. Browser captures are in `docs/portability.md`
 
 ### Verification (after M13)
 
@@ -2086,15 +2087,15 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M11 Final defect pass | 3 | 11 | **3** | 2.75 | **3.25** | 3.58 | — |
 | M12 Representative tests | 4 | 5 | **0** | 0 | **0** | 0 | — |
 | M13 Linux desktop release | 10 | 13.25 | **8** | 8.75 | **10.25** | 11.28 | — |
-| M14 Web | 17 | 24.75 | **6** | 6.8 | **8** | 14.8 | R-B +6 |
+| M14 Web | 17 | 24.75 | **5** | 6.2 | **7.25** | 13.98 | R-B +6 |
 | M15 Android | 23 | 29 | **10** | 14.9 | **17.5** | 27.25 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.15 | — |
-| **Total, all three platforms** | **205** | **318.75** | **40** | **49.7** | **58.5** | **82.35** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **39** | **49.1** | **57.75** | **81.53** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-197.65 h. Adding the 168.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-250.85 h, 29.15 h under the limit. That margin is
+198.47 h. Adding the 169.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+250.78 h, 29.22 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |

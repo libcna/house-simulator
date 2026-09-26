@@ -3,6 +3,29 @@
 This is a running validation record, not a claim that the Linux, Web or Android DONE checklists
 have passed. `plan.md` remains the release authority.
 
+## Touch-only Web controls — HOUSE-03723 (2026-09-26)
+
+The Web build still starts with keyboard/mouse controls. On the first actual XNA `TouchPanel`
+frame it switches to the existing `TouchSource` and touch-only HUD before sampling that frame;
+device capability presence alone does not switch a hybrid desktop. Chrome 152 in 400×800
+mobile/touch emulation, serving the full `build-consumer/cna-house.html` over localhost,
+reported the transition as `Web touch input selected`. The first touch dismissed the
+first-gesture loading gate; a subsequent tap displayed the touch-spaced main menu, a
+tap on Start entered the furnished walk with MOVE/MENU/WALK HUD, and the upper-right
+Menu button opened Pause. Inspected CDP captures are `/tmp/house-03723-before.png`,
+`/tmp/house-03723-menu.png`, `/tmp/house-03723-walk.png` and
+`/tmp/house-03723-pause.png`. The canvas occupied a 400×225 letterboxed region within
+the 400×800 portrait emulation; all taps were placed inside that measured rectangle.
+
+The first browser probe selected touch but could not dismiss the loading gate. CNA's
+event snapshot had already advanced the new finger from `Pressed` to `Moved` before
+`TouchSource` read it. Recognising the standard-XNA previous `Pressed` location as
+the new-finger edge fixed that without touching CNA or adding an input system; the
+source emits the edge only once on the next `Moved` frame. Twelve focused native
+touch tests include that case. The native and full Web builds pass with the shared
+ccache and four-job cap. The Web link still warns about its 391-MB bundle, owned by
+`HOUSE-02850`; this control validation does not close Web performance or pack sizing.
+
 ## Touch HUD desktop readiness — HOUSE-02995 (2026-09-26)
 
 The game now selects and displays touch controls only from the project-owned
@@ -124,8 +147,6 @@ committed assets or an image-quality baseline. The earlier 1600×900 launch canv
 become 1280×720 under `HOUSE-02895`. Firefox briefly showed its slow-page warning while
 loading the 391 MiB preload; pack sizing remains `HOUSE-02850`.
 
-Touch-only Web control is **not yet validated or claimed functional**. CNA's `TouchPanel`
-can report a connected device after a touch event, but the required multi-touch `TouchSource`
-and touch HUD are still open M15 work (`HOUSE-02991`–`HOUSE-02995`). The conditional Web
-selection/browser check is tracked separately as `HOUSE-03723`; the Web DONE checklist depends
-on it. Desktop Chrome/Firefox evidence does not substitute for that check.
+The desktop Chrome/Firefox evidence above did not validate touch-only Web control;
+the separate mobile-emulation check is recorded under `HOUSE-03723` above. It does
+not substitute for the remaining Web performance, pack-sizing or Android device gates.

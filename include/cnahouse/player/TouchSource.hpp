@@ -39,6 +39,9 @@ namespace cnahouse::player
         void Apply(const Microsoft::Xna::Framework::Input::Touch::TouchCollection& touches,
                    float deltaSeconds);
 
+        /// @brief Whether XNA currently reports an active touch, for Web's first-touch selection.
+        [[nodiscard]] bool HasActiveTouch() const;
+
         [[nodiscard]] const InputState& Current() const noexcept override
         {
             return state_;

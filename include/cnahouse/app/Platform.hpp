@@ -24,7 +24,7 @@ namespace cnahouse::app
         auto operator<=>(const DisplaySize&) const = default;
     };
 
-    /// @brief What this build and this machine can do. Populated once, at startup, and never re-queried.
+    /// @brief What this build and this machine can do. Populated at startup; Web input can switch on touch.
     ///
     /// **This struct is the project's answer to "does the renderer support X".** ADR-0001 forbids
     /// `GraphicsDevice::SupportsCapability` and every other CNA capability query, and `cna-house.md`
@@ -40,7 +40,7 @@ namespace cnahouse::app
         /// @brief The renderer this binary was built for. Fixed at configure time (§7.3).
         std::string rendererName;
         BuildTarget target = BuildTarget::Desktop;
-        /// @brief Input profile used by the compact touch HUD; not a graphics capability query.
+        /// @brief Input profile used by the compact touch HUD; Web selects touch on a real touch frame.
         bool hasTouch = false;
         bool hasKeyboard = true;
         /// @brief Whether Tier E was compiled in. `HOUSE-00122` is the only place this is decided.
@@ -79,6 +79,10 @@ namespace cnahouse::app
 
         /// @brief Populates everything that can be known without a `GraphicsDevice`.
         [[nodiscard]] static Platform FromBuild();
+
+        /// @brief Selects Web's touch-only controls after XNA TouchPanel reports an actual touch.
+        /// @return Whether this frame changed the input profile.
+        bool SelectWebTouchInput(bool touchReported) noexcept;
 
         /// @brief A one-line summary for the log header and the bug-report footer.
         [[nodiscard]] std::string Summary() const;
