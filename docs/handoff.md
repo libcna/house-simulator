@@ -1,3 +1,38 @@
+# Release performance baseline handoff — 2026-09-26 (`HOUSE-02403`)
+
+R11/R13 selected the next unblocked M10 task after Android lifecycle. The
+current Release `build-probe/` was refreshed using its existing configuration
+and shared ccache, with at most four concurrent compiler processes. All eight
+representative High scenes ran directly on the reference Radeon 780M Wayland
+path (not the offscreen software renderer). Every scene is below the desktop
+CPU/GPU/draw/triangle hard limits; the worst CPU estimate is 2.154 ms, worst GPU
+median 4.557 ms, worst draw count 83 and worst triangle count 412,957.
+`docs/performance-log.md` has all eight rows and p95s. The 332 textures and
+216 lightmaps are under 300/60 MB even with conservative full-mip accounting.
+Three process-cold, filesystem-warm first-frame captures took 1.38/1.38/1.27 s
+including PNG work. All 1,391 world chunks are resident; an all-draw live
+process used 368.4 MB amdgpu memory and 710.2 MB RSS. No speculative
+streaming/residency work is justified.
+
+The next unblocked MUST is `HOUSE-02404`: close it with the green measured
+High results and no optimization, then implement/measure `HOUSE-02405`'s
+three named presets to unblock Android content delivery. Independently, the
+owner reports a poor main stair, dark rooms and flashes at room thresholds.
+Earlier automated stair traversal and matched light captures are not proof
+of a satisfactory real-control walkthrough; reproduce these on the current
+game, classify any remaining S1/S2 under the bounded M11 correction rules,
+and do not claim them solved from the old tests. No complete Android house
+traversal has been claimed before the content pack is delivered.
+
+33 MUST tasks remain, 45.25 realistic and 67.78 pessimistic hours; R14
+projects 249.53 h, 30.47 below the 280-hour ceiling. The pre-existing
+user-owned `.claude` root entry prevents the all-stage content wrapper and
+full layout gate, but current Release asset roots were refreshed with the
+existing per-pack CMake targets. Preserve `.claude` and all other session
+changes.
+
+---
+
 # Android lifecycle handoff — 2026-09-26 (`HOUSE-03036`)
 
 R11/R13 selected the last independent Android readiness task before content

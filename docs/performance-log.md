@@ -145,3 +145,51 @@ Recorded here for convenience; `cna-house.md` §71–72 is authoritative.
 | Save write | < 8 ms |
 | Portal-path audio solve | ≈ 40 µs for 64 emitters |
 | Cold-start load | < 4 s, or a background loader is implemented (`HOUSE-02451`) |
+
+### 2026-09-26 — furnished-house Release baseline (`HOUSE-02403`)
+
+Current `build-probe/` Release build, 1920×1080, OPENGLES3, Tier S / High, vsync off,
+fixed time/weather/seed, on the reference Radeon 780M with Wayland/radeonsi (not Mesa's
+offscreen software path). Each scenario ran in a fresh process with 120 warm-up and 600
+measured frames. CPU is average update plus median render submission; GPU is median completion
+after a one-texel render-target readback, with its p95 shown. Draws and triangles are
+per-frame averages. CPU and GPU are different clocks and must not be added.
+
+| Scene | Draw calls | Triangles | CPU ms | GPU median / p95 ms |
+|---|---:|---:|---:|---:|
+| Kitchen | 15 | 29,679 | 1.006 | 2.276 / 3.463 |
+| Library | 16 | 25,574 | 0.988 | 2.215 / 3.500 |
+| Main stair looking up | 82 | 336,055 | 2.154 | 4.557 / 6.471 |
+| Street approach | 71 | 412,957 | 1.145 | 2.404 / 4.814 |
+| Rear garden | 12 | 11,847 | 1.282 | 2.459 / 4.094 |
+| Upper window | 20 | 23,429 | 1.482 | 2.810 / 4.471 |
+| Heavy rain outside | 83 | 380,032 | 2.150 | 3.686 / 5.924 |
+| Night outside | 30 | 361,931 | 2.101 | 3.471 / 6.491 |
+
+All eight pass the High hard limits (CPU 9.5 ms, GPU 14 ms, 1,800 draws,
+3.4 million triangles). These are fixed-camera performance results, **not** proof
+that the main stair is visually acceptable or walkable with live controls.
+
+The current compiled content has 332 textures accounting for 117.334 MB of
+base-level RGBA8 texels, including 216 lightmaps accounting for 14.156 MB.
+Charging a conservative full 4/3 mip chain gives at most 156.445 MB total
+textures and 18.874 MB lightmaps, below the respective 300 MB and 60 MB
+budgets; no texture or lightmap downscaling is warranted. The report does not
+enumerate font atlases, so these are content-texture estimates, not an exact
+GPU allocation ledger. The separate compiled **pack-size** report still warns
+about `core` (66.6 MB versus 55 MB) and `audio-core` (30.05 MB versus 30 MB);
+those packaging budgets are not the texture-memory criterion here.
+
+Three fresh-process starts of the normal walk scene to the first captured frame,
+including screenshot readback/PNG encoding, took 1.38, 1.38 and 1.27 s wall
+(median 1.38 s) with the filesystem cache warm. This is an upper bound for
+load-to-first-frame under that cache condition, not a disk-cache-cold result.
+The game reported all 1,391 chunks across 96 cells resident and 93.613 MB of
+geometry uploaded. With `--no-cull` to draw the resident world and exercise its
+materials, the live process had 693,580 KiB RSS (710.2 MB) and one amdgpu DRM
+client with 353,696 KiB GTT plus 6,116 KiB VRAM (368.4 MB total); repeated
+fdinfo entries for that client were counted once. The worst peak RSS of the
+eight isolated scenarios was 743,828 KiB (761.7 MB). These are measured live
+allocations, not a claim that every packaged but unused texture was uploaded;
+the conservative texture/mip sum above bounds that remainder. Both are below
+the 550 MB GPU and 1.6 GB RSS gates, so no residency system is justified.
