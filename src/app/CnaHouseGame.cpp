@@ -86,6 +86,23 @@ namespace cnahouse::app
             clock.SetStandard(environment::CivilFromEpochSeconds(requestedStandard));
         }
 
+#if defined(__ANDROID__)
+        void PersistAndroidSettings(const Settings& settings)
+        {
+            auto store = persistence::DesktopSaveStore::Open();
+            if (!store)
+            {
+                Log::Warn(
+                    LogCat::Persistence, "Android settings store unavailable: {}", store.Error().ToString());
+            }
+            else if (auto saved = (*store)->Write("settings.json", settings.ToJson()); !saved)
+            {
+                Log::Warn(
+                    LogCat::Persistence, "Android settings could not be saved: {}", saved.Error().ToString());
+            }
+        }
+#endif
+
     } // namespace
 
     /// The HUD's XNA resources, hidden from the header so that including `CnaHouseGame.hpp` does not
@@ -910,6 +927,9 @@ namespace cnahouse::app
                 // D-09: the walk mode is a SETTING, so the game writes it back rather than the
                 // controller keeping a second copy of it.
                 settings_.fastWalk = player_.fastWalk;
+#if defined(__ANDROID__)
+                PersistAndroidSettings(settings_);
+#endif
             }
             tracker_.Update(*world_, *index_, player_.position);
             view_.Update(player_, report, look_.pitch, player::kFixedStepSeconds);
@@ -1100,6 +1120,11 @@ namespace cnahouse::app
 
     void CnaHouseGame::ApplyChangedSetting(ui::SettingsControl control)
     {
+#if defined(__ANDROID__)
+        // The settings page mutates settings_ before this callback. Persist each
+        // change now: Android may kill the process after it enters the background.
+        PersistAndroidSettings(settings_);
+#endif
         if (control <= ui::SettingsControl::FieldOfView)
         {
             ApplyGraphicsSettings(control);

@@ -3,6 +3,20 @@
 This is a running validation record, not a claim that the Linux, Web or Android DONE checklists
 have passed. `plan.md` remains the release authority.
 
+## Android settings store — 2026-09-26
+
+`HOUSE-03034` reuses the existing XNA `StorageDevice`/`DesktopSaveStore`. Current
+CNA maps that standard-XNA container beneath the Android package's private `files`
+directory. On the `Medium_Phone` emulator, the built APK wrote
+`files/game/CnaHouse/AllPlayers/settings.json` (596 bytes, schema version 11,
+mode 0600), confirmed with `adb shell run-as com.libcna.house`. The file remained
+after force-stop and relaunch. Startup reads the file if present; each settings-page
+change and the in-walk speed toggle write through the same store. The existing
+store and settings tests pass.
+No SDL or Android storage API was introduced into House runtime. This is not yet
+proof of a visible settings-page interaction on the device; that awaits content
+delivery and the Android traversal checklist.
+
 ## House Android package and arm64 build — 2026-09-26
 
 The new `android/` Gradle/NDK project follows CNA's existing `demo_devices` SDLActivity

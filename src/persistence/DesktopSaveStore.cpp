@@ -199,6 +199,11 @@ namespace cnahouse::persistence
 
     std::string DesktopSaveStore::Location() const
     {
+#if defined(__ANDROID__)
+        // CNA's XNA StorageDevice roots this container below the package-private
+        // files directory. No native Android/SDL path query is needed here.
+        return std::format("<Android app-private files>/game/{}/AllPlayers", kContainerName);
+#else
         // MEASURED (`HOUSE-00102`): the resolved root is `$XDG_DATA_HOME/game/<container>` or
         // `~/.local/share/game/<container>` -- `game` literally, because the only way to change that
         // component is `SetAppNameEXT`, which ADR-0001 forbids. The CONTAINER name is what identifies
@@ -209,6 +214,7 @@ namespace cnahouse::persistence
                                      ? std::string(xdg)
                                      : std::string(home != nullptr ? home : "?") + "/.local/share";
         return std::format("{}/game/{}", base, kContainerName);
+#endif
     }
 
 } // namespace cnahouse::persistence

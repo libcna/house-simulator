@@ -9,12 +9,14 @@
 #include <cstdio>
 #include <exception>
 #include <string>
+#include <utility>
 
 #include "Microsoft/Xna/Framework/TitleLocation.hpp"
 
 #include "cnahouse/app/CnaHouseGame.hpp"
 #include "cnahouse/app/CommandLine.hpp"
 #include "cnahouse/app/Settings.hpp"
+#include "cnahouse/persistence/DesktopSaveStore.hpp"
 #include "cnahouse/util/Log.hpp"
 
 #if defined(__ANDROID__)
@@ -75,6 +77,41 @@ int main(int argc, char** argv)
     }
 
     app::Settings settings = app::Settings::Defaults();
+#if defined(__ANDROID__)
+    // CNA's standard XNA StorageDevice resolves beneath this package's private
+    // files directory on Android. The same store also serves crash reports.
+    auto settingsStore = persistence::DesktopSaveStore::Open();
+    if (!settingsStore)
+    {
+        util::Log::Warn(util::LogCat::Persistence,
+                        "Android settings store unavailable: {}",
+                        settingsStore.Error().ToString());
+    }
+    else if ((*settingsStore)->Exists("settings.json"))
+    {
+        auto saved = (*settingsStore)->Read("settings.json");
+        if (saved)
+        {
+            auto parsed = app::Settings::FromJson(*saved, "settings.json");
+            if (parsed)
+            {
+                settings = std::move(*parsed);
+            }
+            else
+            {
+                util::Log::Warn(util::LogCat::Persistence,
+                                "Android settings invalid; using defaults: {}",
+                                parsed.Error().ToString());
+            }
+        }
+        else
+        {
+            util::Log::Warn(util::LogCat::Persistence,
+                            "Android settings unreadable; using defaults: {}",
+                            saved.Error().ToString());
+        }
+    }
+#endif
 #if defined(__EMSCRIPTEN__)
     // HOUSE-02895: the Web budget is measured at 1280x720. A browser does not inherit the
     // desktop monitor's 1600x900 default, which also overflows the launch page before fullscreen.
@@ -89,6 +126,17 @@ int main(int argc, char** argv)
     {
         util::Log::Warn(util::LogCat::App, "settings clamped into range: {}", clamped);
     }
+#if defined(__ANDROID__)
+    if (settingsStore && !(*settingsStore)->Exists("settings.json"))
+    {
+        if (auto written = (*settingsStore)->Write("settings.json", settings.ToJson()); !written)
+        {
+            util::Log::Warn(util::LogCat::Persistence,
+                            "Android defaults could not be saved: {}",
+                            written.Error().ToString());
+        }
+    }
+#endif
 
     try
     {

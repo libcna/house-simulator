@@ -1,3 +1,27 @@
+# Android app-private settings handoff — 2026-09-26 (`HOUSE-03034`)
+
+R11/R13 selected the next unblocked Android MUST task after the arm64 package
+checkpoint. The existing `DesktopSaveStore` is actually backed by CNA's standard
+XNA `StorageDevice`; current CNA maps it under this Android package's private files.
+The game now reads settings on Android startup, creates defaults on first launch,
+and saves each settings-page change and walk-speed toggle using the same store. The GPU-backed
+`Medium_Phone` emulator showed a 596-byte schema-11 JSON file at
+`files/game/CnaHouse/AllPlayers/settings.json`, mode 0600, surviving a force-stop
+and relaunch. Native and Android builds, 22 focused settings tests, 12 store
+integration tests (with HOME write access), and the full 1,489-unit suite passed.
+The full static script passed all gates except the pre-existing user-owned `.claude`
+root-layout entry; strict XNA passed 344 translation units with four workers.
+A sandbox-only attempt to
+run the store integration tests failed because the sandbox cannot write HOME; the
+same tests all passed unsandboxed. The app still has no Android content delivery,
+so visible settings-page interaction remains for the later device checklist.
+
+35 MUST tasks remain, 49.25 realistic and 72.18 pessimistic hours; R14 projects
+249.93 h, 30.07 below the 280-hour ceiling. `HOUSE-03036` is the next unblocked
+Android task; `HOUSE-03033` waits for `HOUSE-02405`. Do not claim Android DONE.
+
+---
+
 # House Android package and arm64 build handoff — 2026-09-26 (`HOUSE-03031`, `HOUSE-03032`)
 
 R11/R13 selected the newly unblocked Android package path immediately after CNA's

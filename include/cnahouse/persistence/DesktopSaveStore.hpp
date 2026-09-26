@@ -14,14 +14,15 @@ namespace Microsoft::Xna::Framework::Storage
 namespace cnahouse::persistence
 {
 
-    /// @brief The desktop save store, over `StorageDevice`/`StorageContainer`.
+    /// @brief The native save store, over `StorageDevice`/`StorageContainer`.
     ///
     /// **The container name is how `cna-house` identifies itself, and that is a measured decision.**
     /// `HOUSE-00102` found that `StorageDevice`'s `<app>` path component is the literal string `game`
     /// unless `SetAppNameEXT` is called -- and that call is `CNAEXT`, which ADR-0001 forbids. So an
     /// XNA-only game's saves land under a directory shared with every other CNA application. The
     /// container name *is* under our control through plain XNA, so `CnaHouse` is what distinguishes
-    /// them, giving `~/.local/share/game/CnaHouse/`.
+    /// them, giving `~/.local/share/game/CnaHouse/` on Linux. CNA's standard-XNA
+    /// Android path places the same container under the package's private files.
     ///
     /// **No `std::filesystem`.** `cna-house.md` §8.3 permits it only inside this file's implementation,
     /// and even here it is not needed: `StorageContainer` provides create, open, exists, delete and
