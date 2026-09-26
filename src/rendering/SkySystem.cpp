@@ -154,7 +154,8 @@ namespace cnahouse::rendering
         const float cover = static_cast<float>(std::clamp(cloudCover, 0.0, 1.0));
         const float cloudMix = std::pow(cover, 1.5F);
         const Xna::Vector3 day = Lerp(Lerp(horizon, zenith, altitudeBlend), model.overcastGrey, cloudMix);
-        const environment::MoonShading moonShading = environment::MoonShadingFor(moon, phase, cover);
+        const environment::MoonShading moonShading =
+            environment::MoonShadingFor(moon, phase, std::clamp(cloudCover, 0.0, 1.0));
         const Xna::Vector3 night = AddScaled(
             Lerp(nightHorizon, nightZenith, altitudeBlend), moonShading.color, moonShading.intensity);
         const float nightWeight =
@@ -1241,7 +1242,7 @@ namespace cnahouse::rendering
 
     void SkySystem::Draw(PassContext& context)
     {
-        AdvanceClouds(context.deltaSeconds);
+        AdvanceClouds(static_cast<double>(context.deltaSeconds));
         if (resources_ == nullptr)
         {
             resources_ = std::make_unique<Resources>(context.device,

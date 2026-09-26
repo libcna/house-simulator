@@ -126,7 +126,6 @@ namespace cnahouse::content
         : content_(content)
         , effects_(effects)
         , audio_(audio)
-        , tierE_(tierE)
     {
         report_.model.contentName = kModelName;
         report_.texture.contentName = kTextureName;

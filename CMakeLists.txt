@@ -234,6 +234,23 @@ endif()
 # an Emscripten data preload containing one compiled SoundEffect. The full `cna-house` target is
 # brought across only by HOUSE-02892 after this boundary is known good.
 if(EMSCRIPTEN)
+    # The full application uses the same proved WebGL2/exception/Asyncify contract as the bounded
+    # spike below. Keep the desktop content layout under the same absolute MEMFS paths that
+    # Main.cpp derives from XNA's title location; this is a single upfront preload, not streaming.
+    target_link_libraries(cna-house PRIVATE
+        CNA::EmscriptenExceptionAbi
+        CNA::EmscriptenAsyncify)
+    target_link_options(cna-house PRIVATE
+        -sALLOW_MEMORY_GROWTH=1
+        -sSTACK_SIZE=1048576
+        -sINITIAL_MEMORY=134217728
+        -sFORCE_FILESYSTEM=1
+        -sEXIT_RUNTIME=1
+        "SHELL:--preload-file ${CMAKE_BINARY_DIR}/content@/content"
+        "SHELL:--preload-file ${CMAKE_BINARY_DIR}/content-fx@/content-fx")
+    set_target_properties(cna-house PROPERTIES SUFFIX ".html")
+    cna_apply_emscripten_renderer_link_contract(cna-house)
+
     set(_web_spike_pack "${CMAKE_BINARY_DIR}/web-spike-pack/content")
     cna_add_content(
         TARGET cnahouse_web_spike_content

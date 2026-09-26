@@ -195,7 +195,6 @@ namespace cnahouse::content
         Microsoft::Xna::Framework::Content::ContentManager& content_;
         Microsoft::Xna::Framework::Content::ContentManager* effects_;
         audio::AudioSystem& audio_;
-        bool tierE_;
 
         std::optional<Microsoft::Xna::Framework::Graphics::Model> model_;
         std::optional<Microsoft::Xna::Framework::Graphics::Texture2D> texture_;

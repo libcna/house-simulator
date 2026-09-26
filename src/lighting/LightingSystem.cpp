@@ -511,13 +511,14 @@ namespace cnahouse::lighting
         sun_ = environment::SunPositionFor(*clock_);
         moon_ = environment::MoonPositionFor(*clock_);
         moonPhase_ = environment::MoonPhaseFor(*clock_, moon_, sun_);
-        const environment::SunShading shading = environment::SunShadingFor(sun_, cloudCover_);
+        const environment::SunShading shading =
+            environment::SunShadingFor(sun_, static_cast<double>(cloudCover_));
         sunKey_.direction = environment::SunDirection(sun_);
         sunKey_.diffuseColor = Microsoft::Xna::Framework::Vector3(shading.color.X * shading.directIntensity,
                                                                   shading.color.Y * shading.directIntensity,
                                                                   shading.color.Z * shading.directIntensity);
         const environment::MoonShading moonShading =
-            environment::MoonShadingFor(moon_, moonPhase_, cloudCover_);
+            environment::MoonShadingFor(moon_, moonPhase_, static_cast<double>(cloudCover_));
         moonKey_.direction = environment::MoonDirection(moon_);
         moonKey_.diffuseColor =
             Microsoft::Xna::Framework::Vector3(moonShading.color.X * moonShading.intensity,
@@ -527,7 +528,8 @@ namespace cnahouse::lighting
         sunComputed_ = true;
         const Microsoft::Xna::Framework::Vector3 skyColour =
             skyColourModel_ != nullptr
-                ? rendering::SkyAmbientColourFor(*skyColourModel_, sun_, moon_, moonPhase_, cloudCover_)
+                ? rendering::SkyAmbientColourFor(
+                      *skyColourModel_, sun_, moon_, moonPhase_, static_cast<double>(cloudCover_))
                 : Microsoft::Xna::Framework::Vector3(shading.color.X * shading.skyDiffuseIntensity,
                                                      shading.color.Y * shading.skyDiffuseIntensity,
                                                      shading.color.Z * shading.skyDiffuseIntensity);
@@ -571,7 +573,8 @@ namespace cnahouse::lighting
         }
         AdvanceBulbTransitions(frame.deltaSeconds);
 
-        daylight_.Evaluate(sun_.altitudeDeg, sun_.azimuthDeg, cloudCover_, daylightLevels_);
+        daylight_.Evaluate(
+            sun_.altitudeDeg, sun_.azimuthDeg, static_cast<double>(cloudCover_), daylightLevels_);
         for (std::size_t index = 0; index < cells_.size(); ++index)
         {
             cells_[index].daylight = daylightLevels_[index];

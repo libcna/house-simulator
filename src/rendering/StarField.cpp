@@ -616,7 +616,7 @@ namespace cnahouse::rendering
 
     void StarField::Draw(PassContext& context)
     {
-        static_cast<void>(AdvanceTwinkle(context.deltaSeconds));
+        static_cast<void>(AdvanceTwinkle(static_cast<double>(context.deltaSeconds)));
         if (counterOwner_ != &context.counters)
         {
             counterOwner_ = &context.counters;

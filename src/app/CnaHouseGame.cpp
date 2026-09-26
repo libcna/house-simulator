@@ -112,6 +112,30 @@ namespace cnahouse::app
         std::optional<Microsoft::Xna::Framework::Graphics::SpriteFont> font;
     };
 
+    /// The render target a capture frame is drawn into. Created on demand, because most sessions
+    /// never take a screenshot and a spare full-size target is several megabytes of GPU memory.
+    class CnaHouseGame::Capture
+    {
+    public:
+        Capture(Microsoft::Xna::Framework::Graphics::GraphicsDevice& device, int width, int height)
+            : target(device,
+                     width,
+                     height,
+                     false,
+                     Microsoft::Xna::Framework::Graphics::SurfaceFormat::Color,
+                     Microsoft::Xna::Framework::Graphics::DepthFormat::Depth24,
+                     0,
+                     // MEASURED (`HOUSE-00079`): the default is `DiscardContents`, so a target that
+                     // is unbound and then read gives nothing. `PreserveContents` is required here.
+                     Microsoft::Xna::Framework::Graphics::RenderTargetUsage::PreserveContents)
+        {
+        }
+
+        Microsoft::Xna::Framework::Graphics::RenderTarget2D target;
+    };
+
+    // Keep both owning member types complete before the constructor: libc++ instantiates
+    // unique_ptr's exception-cleanup path here even though the destructor is out of line.
     CnaHouseGame::CnaHouseGame(Options options, Settings settings)
         : options_(std::move(options))
         , settings_(std::move(settings))
@@ -142,28 +166,6 @@ namespace cnahouse::app
             ->getPresentationParametersProperty()
             .getIsFullScreenProperty();
     }
-
-    /// The render target a capture frame is drawn into. Created on demand, because most sessions
-    /// never take a screenshot and a spare full-size target is several megabytes of GPU memory.
-    class CnaHouseGame::Capture
-    {
-    public:
-        Capture(Microsoft::Xna::Framework::Graphics::GraphicsDevice& device, int width, int height)
-            : target(device,
-                     width,
-                     height,
-                     false,
-                     Microsoft::Xna::Framework::Graphics::SurfaceFormat::Color,
-                     Microsoft::Xna::Framework::Graphics::DepthFormat::Depth24,
-                     0,
-                     // MEASURED (`HOUSE-00079`): the default is `DiscardContents`, so a target that
-                     // is unbound and then read gives nothing. `PreserveContents` is required here.
-                     Microsoft::Xna::Framework::Graphics::RenderTargetUsage::PreserveContents)
-        {
-        }
-
-        Microsoft::Xna::Framework::Graphics::RenderTarget2D target;
-    };
 
     CnaHouseGame::~CnaHouseGame() = default;
 
@@ -1452,7 +1454,7 @@ namespace cnahouse::app
                 const debug::Timing::Scope scope(timing_, UpdateStage::Weather);
                 const environment::SunPosition sun = environment::SunPositionFor(clock_);
                 const environment::SunShading shading =
-                    environment::SunShadingFor(sun, weather_->State().cloudCover);
+                    environment::SunShadingFor(sun, static_cast<double>(weather_->State().cloudCover));
                 const float directSunlight =
                     sun.altitudeDeg > environment::kRefractedHorizonDeg ? shading.directIntensity : 0.0F;
                 const float simulatedMinutes =
@@ -1510,12 +1512,14 @@ namespace cnahouse::app
                                              lighting_->Sun(),
                                              lighting_->Moon(),
                                              lighting_->LunarPhase(),
-                                             lighting_->CloudCover());
+                                             static_cast<double>(lighting_->CloudCover()));
                     if (weather_.has_value())
                     {
                         const weather::WeatherState& state = weather_->State();
-                        skySystem_->SetWind(state.windSpeed, state.windDirectionDeg);
-                        skySystem_->SetCloudState(state.cloudCover, state.thunderIntensity);
+                        skySystem_->SetWind(static_cast<double>(state.windSpeed),
+                                            static_cast<double>(state.windDirectionDeg));
+                        skySystem_->SetCloudState(static_cast<double>(state.cloudCover),
+                                                  static_cast<double>(state.thunderIntensity));
                         if (exteriorFog_ != nullptr)
                         {
                             const Microsoft::Xna::Framework::Vector3 viewDirection(

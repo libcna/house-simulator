@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <limits>
 
 namespace cnahouse::visibility
@@ -138,9 +139,9 @@ namespace cnahouse::visibility
                 }
                 const int axis = LongestAxis(partBounds);
                 const std::uint32_t middle = begin + size / 2u;
-                std::nth_element(instances_.begin() + begin,
-                                 instances_.begin() + middle,
-                                 instances_.begin() + end,
+                std::nth_element(instances_.begin() + static_cast<std::ptrdiff_t>(begin),
+                                 instances_.begin() + static_cast<std::ptrdiff_t>(middle),
+                                 instances_.begin() + static_cast<std::ptrdiff_t>(end),
                                  [axis](const ExteriorInstance& a, const ExteriorInstance& b)
                                  {
                                      const float ca = CentreOn(a.bounds, axis);

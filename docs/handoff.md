@@ -1,3 +1,28 @@
+# Full Web cross-build handoff — 2026-09-26 (`HOUSE-03722`)
+
+R7 split the original five-hour `HOUSE-02892` into the 3.5-hour compile/link task
+`HOUSE-03722` and its 1.5-hour Chrome-start task; R11/R13 chose the dependency-unblocked
+Web bring-up path. The existing `build-consumer` and shared ccache were reused with CPU affinity
+0–3 and at most four build jobs. The full C++ game now cross-compiles and links as
+`build-consumer/cna-house.html`, `.wasm` (10 MiB) and `.data` (392 MiB). The Web preset builds
+the full target; the bounded spike remains explicitly buildable. The full target inherits the
+already-proved WebGL2/exception/Asyncify contract and preloads both existing content roots.
+
+Clang found mismatched `BoundingSphere` tags, a libc++ constructor instantiation needing the
+`Capture` type complete, several implicit precision/signedness conversions and one unused
+`SmokeScene` field. These were corrected in House code without CNA changes. The native game
+and unit-test binaries rebuild; 1474/1474 unit tests pass and strict-XNA checks 341 translation
+units clean. All other CI gates pass except the pre-existing root-layout complaint about another
+session's `.claude`. The 392 MiB uncompressed preload emits Emscripten's large-pack
+warning; `HOUSE-02850` still owns the Web pack limits. `HOUSE-02892` remains open until Chrome
+starts the full game to its main menu; no browser-start claim is made here.
+
+After this commit the plan has 47 open MUST tasks, 68.75 realistic and 93.55 pessimistic
+hours remaining. The R14 projection is 157.5 completed plus 93.55 pessimistic = 251.05 h,
+28.95 below the ceiling. `HOUSE-02892` is the next dependency-unblocked task.
+
+---
+
 # Web material-format handoff — 2026-09-26 (`HOUSE-02848`)
 
 R11/R13 selected the next dependency-unblocked M14 Web task after the owner's explicit resume.
