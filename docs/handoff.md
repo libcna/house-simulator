@@ -1,3 +1,27 @@
+# House Android package and arm64 build handoff — 2026-09-26 (`HOUSE-03031`, `HOUSE-03032`)
+
+R11/R13 selected the newly unblocked Android package path immediately after CNA's
+emulator graphics gate. The CNA `demo_devices` precedent supplied SDLActivity and
+the already-vendored Java bridge; House's production CMake target supplied all game
+sources. `android/gradlew assembleDebug --offline --max-workers=4` built a real
+API-24/arm64-v8a OPENGLES3 APK with a four-job Ninja compile pool and shared ccache.
+The debug APK installed on the GPU-backed `Medium_Phone` emulator. Its first
+launch found `libmain.so` but not the unmangled `SDL_main`; a project-owned C-linkage
+entry-point correction made the symbol load and the app process stay running.
+
+The current emulator display is dark. No House content is in the APK yet, so
+do not claim visible game play, working touch traversal, lifecycle or performance.
+`HOUSE-03033` owns content delivery but waits for `HOUSE-02405`. The next unblocked
+Android MUST task is `HOUSE-03034` (settings in private storage), then `HOUSE-03036`
+(lifecycle). Independent audio/Release-baseline paths also remain. 36 MUST tasks
+remain, 49.75 realistic and 72.73 pessimistic hours; R14 projection is 249.98 h,
+30.02 below the 280-hour ceiling. All 1,489 unit tests and native/Android builds
+pass. The static gates have the known user-owned `.claude` layout failure;
+the corrected entry point passes targeted format and XNA-only checks. The first
+full static run also found its earlier formatting error, now corrected.
+
+---
+
 # Android CNA graphics gate handoff — 2026-09-26 (`HOUSE-02951`)
 
 R11/R13 selected the independent Android gate after M15's desktop-side touch work.

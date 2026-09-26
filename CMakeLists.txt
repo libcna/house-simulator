@@ -295,8 +295,8 @@ add_custom_command(
     OUTPUT "${CNAHOUSE_CREDITS_DOCUMENT}"
     COMMAND "${CMAKE_COMMAND}" -E make_directory "${CMAKE_BINARY_DIR}/content/Credits"
     COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-            "${CMAKE_SOURCE_DIR}/licenses/THIRD-PARTY-ASSETS.md" "${CNAHOUSE_CREDITS_DOCUMENT}"
-    DEPENDS "${CMAKE_SOURCE_DIR}/licenses/THIRD-PARTY-ASSETS.md"
+            "${CMAKE_CURRENT_SOURCE_DIR}/licenses/THIRD-PARTY-ASSETS.md" "${CNAHOUSE_CREDITS_DOCUMENT}"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/licenses/THIRD-PARTY-ASSETS.md"
     COMMENT "Copying the generated in-game credits document"
     VERBATIM)
 add_custom_target(cnahouse_credits DEPENDS "${CNAHOUSE_CREDITS_DOCUMENT}")
@@ -314,11 +314,11 @@ add_dependencies(cnahouse_core cnahouse_credits)
 # `tools/ci/build_content.py --only world` produces them; this puts what exists where the game
 # looks. Absent files are not an error -- a checkout that has never run the content build still
 # builds and runs, and says what it could not load.
-if(EXISTS "${CMAKE_SOURCE_DIR}/content/world")
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/content/world")
     add_custom_target(cnahouse_world_content ALL
         COMMAND "${CMAKE_COMMAND}" -E make_directory "${CMAKE_BINARY_DIR}/content/world"
         COMMAND "${CMAKE_COMMAND}" -E copy_directory_if_different
-                "${CMAKE_SOURCE_DIR}/content/world" "${CMAKE_BINARY_DIR}/content/world"
+                "${CMAKE_CURRENT_SOURCE_DIR}/content/world" "${CMAKE_BINARY_DIR}/content/world"
         COMMENT "Copying the deployed world data into the build tree's content root"
         VERBATIM)
     add_dependencies(cna-house cnahouse_world_content)

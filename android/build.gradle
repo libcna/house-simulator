@@ -1,0 +1,23 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.7.3'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+// Gradle products stay inside the repository's existing, approved build-probe tree.
+rootProject.buildDir = file('../build-probe/android-gradle/root')
+subprojects { project ->
+    project.buildDir = new File(rootProject.projectDir.parentFile,
+        "build-probe/android-gradle/${project.name}")
+}

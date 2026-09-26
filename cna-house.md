@@ -2267,6 +2267,7 @@ move them, not an assertion in either direction.
 cna-house/
 ├── CMakeLists.txt
 ├── CMakePresets.json
+├── android/                       ← Gradle/NDK package; generated files stay in build-probe/
 ├── cmake/
 │   └── TierSelection.cmake          ← the ONLY place the Tier-E decision is made (§7.3)
 ├── cna-house.md                     ← this document

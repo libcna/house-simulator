@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **38 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 47.8 / 56.25 / 79.88 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5, M7, M9 and M12 passed; the Android CNA graphics gate passed on the `Medium_Phone` emulator.** The next dependency-unblocked MUST paths are `HOUSE-01920`/`HOUSE-01922` (listening unavailable here), `HOUSE-02403` (Release baseline needs refresh), and `HOUSE-03031` (Android package project); M13 waits for M11 and Web sizing waits for `HOUSE-02405` |
+| Active plan | **36 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 42.3 / 49.75 / 72.73 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5, M7, M9 and M12 passed; CNA's Android graphics gate and House's arm64 APK build passed on the `Medium_Phone` emulator.** The next dependency-unblocked MUST paths are `HOUSE-01920`/`HOUSE-01922` (listening unavailable here), `HOUSE-02403` (Release baseline needs refresh), `HOUSE-03034` (Android settings store) and `HOUSE-03036` (Android lifecycle); Android content delivery waits for `HOUSE-02405` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -1674,11 +1674,23 @@ emulator, not a compatibility lab. Cosmetic platform luxuries are cut.
             source trees were not changed. This closes only the CNA gate, not Android
             House Simulator D10c; `HOUSE-03031` is now unblocked
 
-- [ ] HOUSE-03031 — The Gradle/NDK project producing a shared library plus `SDLActivity`, following CNA's own devices-demo precedent
+- [x] HOUSE-03031 — The Gradle/NDK project producing a shared library plus `SDLActivity`, following CNA's own devices-demo precedent
       dep: HOUSE-02951 · sys: app · plat: AND · pri: MUST · zone: all · adv: D10c · est: 2.5
+      verify: `android/gradlew assembleDebug --offline --max-workers=4` packages
+              `lib/arm64-v8a/libmain.so` with CNA's SDL3 Java activity and native
+              libraries; APK installs on the `Medium_Phone` emulator. Gradle and
+              CMake/Ninja products stay in the existing `build-probe/`; the native
+              compile pool is four jobs and uses the shared ccache
 
-- [ ] HOUSE-03032 — Build the full game for `arm64-v8a` and fix every compile and link error
+- [x] HOUSE-03032 — Build the full game for `arm64-v8a` and fix every compile and link error
       dep: HOUSE-03031 · sys: — · plat: AND · pri: MUST · zone: all · adv: D10c · est: 4
+      verify: the full `cnahouse_core` and `libmain.so` compile and link for API 24
+              `arm64-v8a`/OPENGLES3; `llvm-nm -D` finds an unmangled `SDL_main`,
+              SDLActivity loads it and the emulator keeps the process running.
+              The first launch had `_Z8SDL_mainiPPc` and SDL's `Couldn't find
+              function SDL_main`; C linkage in the project-owned entry point fixed it.
+              A dark startup frame remains for content/runtime tasks, so this is
+              **not** the Android DONE checklist or a claim of visible House content
 
 - [ ] HOUSE-03033 — Content delivery (APK assets or OBB), the content root, and the package-size budget
       dep: HOUSE-03032, HOUSE-00203, HOUSE-02405 · sys: content · plat: AND · pri: MUST · zone: all · adv: D10c · est: 1.5
@@ -2106,14 +2118,14 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M12 Representative tests | 4 | 5 | **0** | 0 | **0** | 0 | — |
 | M13 Linux desktop release | 10 | 13.25 | **8** | 8.75 | **10.25** | 11.28 | — |
 | M14 Web | 17 | 24.75 | **5** | 6.2 | **7.25** | 13.98 | R-B +6 |
-| M15 Android | 23 | 29 | **9** | 13.6 | **16** | 25.6 | R-A +8 |
+| M15 Android | 23 | 29 | **7** | 8.1 | **9.5** | 18.45 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.15 | — |
-| **Total, all three platforms** | **205** | **318.75** | **38** | **47.8** | **56.25** | **79.88** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **36** | **42.3** | **49.75** | **72.73** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-200.12 h. Adding the 170.75 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-250.63 h, 29.37 h under the limit. That margin is
+207.27 h. Adding the 177.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+249.98 h, 30.02 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |

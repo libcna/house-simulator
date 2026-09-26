@@ -3,6 +3,27 @@
 This is a running validation record, not a claim that the Linux, Web or Android DONE checklists
 have passed. `plan.md` remains the release authority.
 
+## House Android package and arm64 build — 2026-09-26
+
+The new `android/` Gradle/NDK project follows CNA's existing `demo_devices` SDLActivity
+precedent. It builds House's real `cnahouse_core` and `Main.cpp` into `libmain.so` for
+API 24/`arm64-v8a` with OPENGLES3, alongside CNA's SDL3 and SDL3_mixer libraries.
+Gradle 8.12/AGP 8.7.3, NDK 29.0.14206865, CMake 4.1.2 and Build Tools 36.1.0
+produced a 47,879,471-byte debug APK before content packaging. Generated outputs stay in the existing
+`build-probe/`; Ninja's compile pool is limited to four jobs, as is Gradle, with
+CPU affinity 0–3 and the shared ccache.
+
+The APK installed on `Medium_Phone` (API 35, x86_64 emulator translating the
+arm64-v8a library). The first launch failed at SDL's entry lookup: `llvm-nm -D`
+showed `_Z8SDL_mainiPPc`, and logcat said `Couldn't find function SDL_main`.
+The House entry point now uses C linkage for Android; `llvm-nm -D` confirms the
+literal `SDL_main` export, SDLActivity loads it, and the process remains running.
+The observed screen is still dark because House content and its Android content
+root have not been delivered or validated. This is build and launch evidence for
+`HOUSE-03031`/`HOUSE-03032`, **not** the device traversal, performance or Android
+DONE checklist. Content delivery is `HOUSE-03033`, after its performance-preset
+dependency; the independent settings and lifecycle tasks can proceed first.
+
 ## CNA Android graphics gate — 2026-09-26
 
 The Android environment is **available**, not an unavailable-device blocker. The installed

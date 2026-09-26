@@ -1,0 +1,51 @@
+plugins {
+    id 'com.android.application'
+}
+
+def houseRoot = rootProject.projectDir.parentFile
+def cnaRoot = new File(houseRoot.parentFile, 'cna')
+def sharpRuntimeRoot = new File(houseRoot.parentFile, 'sharp-runtime')
+def hostContentTool = new File(houseRoot, 'build/CNA_BUILD/cna-content')
+
+android {
+    namespace 'com.libcna.house'
+    compileSdk 35
+    buildToolsVersion '36.1.0'
+    ndkVersion '29.0.14206865'
+
+    defaultConfig {
+        applicationId 'com.libcna.house'
+        minSdk 24
+        targetSdk 35
+        versionCode 1
+        versionName '0.1.0'
+
+        externalNativeBuild {
+            cmake {
+                abiFilters 'arm64-v8a'
+                targets 'main'
+                arguments '-DANDROID_PLATFORM=android-24',
+                    "-DCNAHOUSE_CNA_ROOT=${cnaRoot.canonicalPath}",
+                    "-DCNAHOUSE_SHARP_RUNTIME_ROOT=${sharpRuntimeRoot.canonicalPath}",
+                    "-DCNAHOUSE_CONTENT_EXECUTABLE=${hostContentTool.canonicalPath}",
+                    '-DCMAKE_C_COMPILER_LAUNCHER=ccache',
+                    '-DCMAKE_CXX_COMPILER_LAUNCHER=ccache'
+            }
+        }
+    }
+
+    sourceSets {
+        main {
+            // CNA already vendors SDLActivity and its Java bridge. Keep one copy.
+            java.srcDir new File(cnaRoot, 'third_party/SDL/android-project/app/src/main/java')
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path file('jni/CMakeLists.txt')
+            version '4.1.2'
+            buildStagingDirectory new File(houseRoot, 'build-probe/android-cxx')
+        }
+    }
+}

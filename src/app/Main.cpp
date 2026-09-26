@@ -17,7 +17,13 @@
 #include "cnahouse/app/Settings.hpp"
 #include "cnahouse/util/Log.hpp"
 
+#if defined(__ANDROID__)
+// SDLActivity resolves the entry point as a C symbol. The Android target
+// renames main at compile time; desktop keeps its ordinary entry point.
+extern "C" int main(int argc, char** argv)
+#else
 int main(int argc, char** argv)
+#endif
 {
     using namespace cnahouse;
 
