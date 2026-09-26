@@ -1,3 +1,25 @@
+# Chrome full-game startup handoff — 2026-09-26 (`HOUSE-02892`)
+
+R11/R13 chose the dependency-unblocked remainder of the R7 Web bring-up split. The full
+`build-consumer/cna-house.html` was served on localhost to headless Chrome 152.0.7977.82.
+CNA initialized WEBGL2, loaded Tier E, and drew the version/title screen. The title screen is
+intentionally an audio user-gesture gate: after a CDP canvas click and Enter, Chrome opened
+the audio device and the actual House Simulator main menu appeared with Start selected. There
+were no unhandled browser exceptions. The inspected 1280×720 screenshot is
+`/tmp/house-02892-gesture-5.png` (SHA-256
+`5d647de20b9ebf8139eeef266f37ba1e8b3c7d66cea01f81d46c2c027ea2d208`).
+The canvas is 1600×900 and visibly extends below this browser viewport; canvas resize and
+fullscreen are still `HOUSE-02895`, not part of this startup task. The 392 MiB uncompressed
+preload remains `HOUSE-02850`. Chrome logged a favicon 404 and WebGL polygon-mode/software
+fallback warnings; neither prevented startup. No source change was required for this slice.
+
+The plan has 46 open MUST tasks, 67.25 realistic and 91.9 pessimistic hours remaining. R14
+projects 159 completed plus 91.9 pessimistic = 250.9 h, 29.1 below the ceiling. The next
+dependency-unblocked task is `HOUSE-03721` (Web controls). The temporary local HTTP/Chrome
+probe can be stopped once this startup evidence is recorded; no build directory was created.
+
+---
+
 # Full Web cross-build handoff — 2026-09-26 (`HOUSE-03722`)
 
 R7 split the original five-hour `HOUSE-02892` into the 3.5-hour compile/link task

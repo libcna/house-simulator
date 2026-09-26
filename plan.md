@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **47 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 58.5 / 68.75 / 93.55 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5, M7, M9 and M12 passed; M8 listening and M10 baseline work are environment-blocked.** Next: `HOUSE-02892` (Chrome startup) |
+| Active plan | **46 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 57.25 / 67.25 / 91.9 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5, M7, M9 and M12 passed; M8 listening and M10 baseline work are environment-blocked.** Next: `HOUSE-03721` (Web controls) |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -403,7 +403,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 5 | `HOUSE-02713` | D2, D4, D13, D14 | 7 |
 | [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 0 | **done** · `HOUSE-02598` | D11 | 0 |
 | [M13](#m13--linux-desktop-release) — Linux desktop release | after M11 | 03701–03720 | 8 | `HOUSE-02797` | D9–D13 | 10.25 |
-| [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 9 | `HOUSE-02904` | D10b | 12 |
+| [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 8 | `HOUSE-02904` | D10b | 10.5 |
 | [M15](#m15--android) — Android | readiness: B · device: after M13 | 03751–03780 | 14 | `HOUSE-03041` (a BL-13 record does not close it) | D10c | 23.75 |
 | [M16](#m16--final-release) — Final release | last | 03781–03800 | 6 | **DONE** · `HOUSE-03078` | D9–D14 | 6.5 |
 
@@ -1488,9 +1488,17 @@ limitation (reload the page), recorded by `HOUSE-02904`.
               to `HOUSE-02850`, not a claim that Web pack limits are met
       note: the compile/link slice of `HOUSE-02892`, scheduled under R7; no added scope or hours
 
-- [ ] HOUSE-02892 — Start the full Emscripten game in Chrome and fix startup to the main menu
+- [x] HOUSE-02892 — Start the full Emscripten game in Chrome and fix startup to the main menu
       dep: HOUSE-03722 · sys: app · plat: WEB · pri: MUST · zone: all · adv: D10b · est: 1.5
       accept: the full game starts to the main menu in Chrome
+      done: served the full HTML/WASM/data build to local Chrome 152. CNA reported WEBGL2,
+            loaded Tier E and displayed the title/loading screen; the intended first
+            click/Enter user gesture opened audio and advanced to the House Simulator main menu
+            with Start selected. No unhandled browser exception appeared
+      verify: CDP console trace and actual 1280×720 Chrome screenshot
+              `/tmp/house-02892-gesture-5.png`, SHA-256
+              `5d647de20b9ebf8139eeef266f37ba1e8b3c7d66cea01f81d46c2c027ea2d208`;
+              the visible 1600×900 canvas extends below the viewport, owned by `HOUSE-02895`
       note: browser-start slice of the original five-hour task under R7; the two estimates sum to 5
 
 - [ ] HOUSE-03721 — Web controls: pointer-lock mouse look, keyboard walk, focus handling
@@ -2003,15 +2011,15 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M11 Final defect pass | 3 | 11 | **3** | 2.75 | **3.25** | 3.6 | — |
 | M12 Representative tests | 4 | 5 | **0** | 0 | **0** | 0 | — |
 | M13 Linux desktop release | 10 | 13.25 | **8** | 8.75 | **10.25** | 11.25 | — |
-| M14 Web | 17 | 24.75 | **9** | 10.25 | **12** | 19.2 | R-B +6 |
+| M14 Web | 17 | 24.75 | **8** | 9 | **10.5** | 17.55 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **47** | **58.5** | **68.75** | **93.55** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **46** | **57.25** | **67.25** | **91.9** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-186.45 h. Adding the 157.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-251.05 h, 28.95 h under the limit. That margin is
+188.1 h. Adding the 159 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+250.9 h, 29.1 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |
@@ -2026,7 +2034,7 @@ small on purpose: the ceiling is a limit, not a budget to fill.
 4 h (≈ 18); furnishing kit 19 h (18–22); whole-house furnishing 31 h (30–38); lighting 19.75 h
 (18–22); C4/C5 polish 19.75 h (18–24); environment 4.75 h; audio 9 h (8–10); shell 5.25 h
 (8–10); performance 9.5 h (≈ 10); final polish 7 h (6–8); tests 3.5 h (≈ 5); Linux 10.25 h
-(11–13); Web 12 h (18–22); Android 23.75 h (23–27); release 6.5 h (6–8).
+(11–13); Web 10.5 h (18–22); Android 23.75 h (23–27); release 6.5 h (6–8).
 
 **Where the 92.5 h came from** (realistic, before → now):
 
