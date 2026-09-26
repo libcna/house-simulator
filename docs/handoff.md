@@ -1,3 +1,33 @@
+# Android CNA graphics gate handoff — 2026-09-26 (`HOUSE-02951`)
+
+R11/R13 selected the independent Android gate after M15's desktop-side touch work.
+The previous handoff's "no emulator" assumption was incorrect. The installed SDK,
+NDK and CMake are present; `Medium_Phone` (API 35, x86_64 with arm64-v8a translation)
+boots and responds to `adb`, using host GPU mode through the Android Emulator OpenGL
+ES Translator on Radeon 780M. The current CNA/sharp-runtime arm64-v8a API-24 build
+with explicit OPENGLES3 passed in CNA's existing `build-probe/`, with shared ccache
+and four build jobs/CPU cores. The old sharp-runtime failures did not recur.
+
+The existing CNA `demo_devices` graphics sample, copied only into House's ignored
+`build-probe/`, built into an arm64 APK after selecting the installed Android tools,
+restricting Gradle to `main`, and adding SDL's Android `SDL_main.h` to the probe copy.
+It installed, stayed running, and drew real SpriteBatch colored panels; the committed
+capture is `docs/android-cna-graphics-sample.png`. The first launch exited because
+the old sample wrapper exported `main` instead of `SDL_main`; the corrected library
+exported `SDL_main` and ran. `docs/portability.md` records versions and evidence.
+This passes only CNA's gate, **not** House Simulator D10c. CNA and sharp-runtime
+sources were not changed; CNA's old untracked `startup-metrics.log` was preserved.
+
+38 ACTIVE/MUST tasks remain, with 56.25 realistic and 79.88 pessimistic hours.
+R14 projects 170.75 completed task-hours plus 79.88 remaining = 250.63 h,
+29.37 h below the 280-hour ceiling. The exact next unblocked Android task is
+`HOUSE-03031`: a minimal Gradle/NDK package reusing CNA's SDLActivity precedent.
+`HOUSE-03032` and content/lifecycle/device tasks depend on it. The independent
+audio and Release-baseline paths remain open. Later M15 device checklist work
+still waits for its explicit M13 dependency.
+
+---
+
 # Touch-only Web input handoff — 2026-09-26 (`HOUSE-03723`)
 
 R11/R13 selected the dependency-unblocked Web input task after the M15 desktop-side

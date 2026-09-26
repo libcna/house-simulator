@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **39 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 49.1 / 57.75 / 81.53 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5, M7, M9 and M12 passed.** The next dependency-unblocked MUST paths are `HOUSE-01920`/`HOUSE-01922` (listening unavailable here), `HOUSE-02403` (Release baseline blocked by sibling CNA cache lock), and `HOUSE-02951` (upstream Android BL-13); M13 waits for M11 and Web sizing waits for `HOUSE-02405` |
+| Active plan | **38 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 47.8 / 56.25 / 79.88 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5, M7, M9 and M12 passed; the Android CNA graphics gate passed on the `Medium_Phone` emulator.** The next dependency-unblocked MUST paths are `HOUSE-01920`/`HOUSE-01922` (listening unavailable here), `HOUSE-02403` (Release baseline needs refresh), and `HOUSE-03031` (Android package project); M13 waits for M11 and Web sizing waits for `HOUSE-02405` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -404,7 +404,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 0 | **done** · `HOUSE-02598` | D11 | 0 |
 | [M13](#m13--linux-desktop-release) — Linux desktop release | after M11 | 03701–03720 | 8 | `HOUSE-02797` | D9–D13 | 10.25 |
 | [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 6 | `HOUSE-02904` | D10b | 8 |
-| [M15](#m15--android) — Android | readiness: B · device: after M13 | 03751–03780 | 11 | `HOUSE-03041` (a BL-13 record does not close it) | D10c | 18 |
+| [M15](#m15--android) — Android | readiness: B · device: after M13 | 03751–03780 | 9 | `HOUSE-03041` (a BL-13 record does not close it) | D10c | 16 |
 | [M16](#m16--final-release) — Final release | last | 03781–03800 | 6 | **DONE** · `HOUSE-03078` | D9–D14 | 6.5 |
 
 Legacy ids 03121–03200 are unallocated and stay unused. The budgets are the sums of the tasks'
@@ -1580,8 +1580,8 @@ limitation (reload the page), recorded by `HOUSE-02904`.
 ## M15 — Android
 
 **Android is a first-class DONE target** (D10c). The desktop-side readiness block waits only for
-G1. The device path is gated on CNA's Android graphics path (BL-13, upstream; `cna-house` never
-modifies CNA), and `HOUSE-02951` re-verifies that whenever it is picked. The touch scheme is a
+G1. CNA's Android graphics gate passed on 2026-09-26 (`HOUSE-02951`); `cna-house` still does not
+modify CNA. The touch scheme is a
 floating movement stick, a look region, a walk-speed toggle and a menu button; there is no interact
 button and no camera toggle. Validation is one representative device, or the best available
 emulator, not a compatibility lab. Cosmetic platform luxuries are cut.
@@ -1649,12 +1649,30 @@ emulator, not a compatibility lab. Cosmetic platform luxuries are cut.
       dep: HOUSE-02995 · sys: ui · plat: ALL · pri: MUST · zone: all · adv: D10c · est: 0.5
       note: (2026-09-26) The four-item main/pause menus use touch-only rows centred 108 virtual units apart and an 88-vu vertical pointer target, preserving the desktop rows and bands. Touch pointers now normalise within the existing safe virtual canvas, so widescreen insets do not offset those targets. Edge/gap/desktop unit tests pass; an actual forced-touch Xvfb capture shows the four separated rows. Native and Web builds and the full native unit label pass. Strict XNA passed with four workers; the full static gate is otherwise blocked only by the pre-existing user-owned `.claude` root-layout entry
 
-### Device path (gated on BL-13)
+### Device path (BL-13 gate passed 2026-09-26)
 
-- [ ] HOUSE-02951 — **Gate: CNA can build and draw on Android** (BL-13)
+- [x] HOUSE-02951 — **Gate: CNA can build and draw on Android** (BL-13)
       dep: — · sys: — · plat: AND · pri: MUST · zone: all · adv: D10c · est: 1.5
       accept: re-verified whenever this task is picked (the last recorded state is *blocked*, 2026-09-06): (1) CNA's Android cross-compile succeeds for `arm64-v8a` (the two `sharp-runtime` NDK-portability bugs fixed upstream, CNA Task 920); (2) `CNA_GRAPHICS_RENDERER=OPENGLES3` is selectable and buildable for Android; (3) a CNA graphics sample runs on a device or emulator. If any step fails, the evidence is recorded here and in `cna-house.md` §6, the device path stops, and the task stays open; the desktop-side readiness tasks do not wait for it. A recorded blocker never closes this task, M15 or D10c
       trace: absorbs `HOUSE-02952` and `HOUSE-02953` (the second and third gates)
+      verify: current CNA `cefe6c83b` with sharp-runtime `d86adb65` configured for
+              Android API 24/`arm64-v8a`/`OPENGLES3` using installed NDK 29.0.14206865;
+              `cna_runtime` and `cna_renderer_easygl` cross-built successfully with
+              four jobs and the shared ccache. A temporary copy of CNA's existing
+              `demo_devices` graphics sample built as an arm64 APK, installed and ran
+              on `Medium_Phone` (API 35, x86_64 emulator with arm64-v8a translation,
+              GPU-accelerated OpenGL ES 3.1). The inspected `adb screencap` is
+              `docs/android-cna-graphics-sample.png`; `pidof` still reported the app
+              and logcat had no graphics crash after the draw
+      note: (2026-09-26) The old two sharp-runtime NDK failures did not recur. The
+            sample's old Gradle defaults required absent Build Tools 34/NDK 30 and
+            CMake 3.22 (below EasyGL's 3.23 minimum); only the ignored probe copy
+            selected installed Build Tools 36.1/NDK 29/CMake 4.1, target `main`,
+            and SDL's documented `SDL_main.h` entry point. The first APK launched
+            but returned home because its library exported `main`, not `SDL_main`;
+            the corrected probe exported `SDL_main` and drew. CNA and sharp-runtime
+            source trees were not changed. This closes only the CNA gate, not Android
+            House Simulator D10c; `HOUSE-03031` is now unblocked
 
 - [ ] HOUSE-03031 — The Gradle/NDK project producing a shared library plus `SDLActivity`, following CNA's own devices-demo precedent
       dep: HOUSE-02951 · sys: app · plat: AND · pri: MUST · zone: all · adv: D10c · est: 2.5
@@ -2088,19 +2106,19 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M12 Representative tests | 4 | 5 | **0** | 0 | **0** | 0 | — |
 | M13 Linux desktop release | 10 | 13.25 | **8** | 8.75 | **10.25** | 11.28 | — |
 | M14 Web | 17 | 24.75 | **5** | 6.2 | **7.25** | 13.98 | R-B +6 |
-| M15 Android | 23 | 29 | **10** | 14.9 | **17.5** | 27.25 | R-A +8 |
+| M15 Android | 23 | 29 | **9** | 13.6 | **16** | 25.6 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.15 | — |
-| **Total, all three platforms** | **205** | **318.75** | **39** | **49.1** | **57.75** | **81.53** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **38** | **47.8** | **56.25** | **79.88** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-198.47 h. Adding the 169.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-250.78 h, 29.22 h under the limit. That margin is
+200.12 h. Adding the 170.75 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+250.63 h, 29.37 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |
 |---|---|---|---|
-| R-A | M15 | 8 | the device path after BL-13 is fixed upstream: the first CNA graphics ever run on Android |
+| R-A | M15 | 8 | House Simulator's device path after the CNA graphics gate: build, traversal and performance on Android |
 | R-B | M14 | 6 | Web memory or package size forces deeper content cuts; Emscripten workarounds |
 | R-C | M10 | 4 | performance needs two of `HOUSE-02404`'s candidate techniques |
 | R-D | M4 | 3 | a few rooms (the library shelving, the cinema, the workshop) need more than their recipe estimate |
@@ -2145,11 +2163,11 @@ under R5.
 
 **What could still explode** (watch these at every R10 reassessment):
 
-1. **Android after BL-13** (`HOUSE-02951`, `03031`, `03032`, `03036`, `03037`). No CNA graphics has
-   ever run on Android; the reserve is 8 h. While it is blocked upstream, House Simulator
-   is **not DONE**: the desktop-side Android work and everything else finishes, and the release
-   waits for CNA's fix (rule R17: the fix happens in CNA, not here). If the path opens and costs
-   more, R15 cuts depth elsewhere, never the platform.
+1. **House Android after the CNA graphics gate** (`HOUSE-03031`, `03032`, `03036`, `03037`).
+   CNA's sample now draws on the emulator, but House Simulator has no Android APK yet; the
+   reserve is 8 h for the package, real traversal and performance. If this path costs more,
+   R15 cuts depth elsewhere, never the platform. House Simulator is **not DONE** until its
+   own device path passes.
 2. **The full Emscripten build** (`HOUSE-02892`, 5 h) and Web memory (`HOUSE-02898`, `02850`).
 3. **Props versus the bake** (`HOUSE-03402`, 4 h) and the furnished re-bake (`HOUSE-01030`, 4 h):
    a second iteration of either is the likeliest lighting overrun.

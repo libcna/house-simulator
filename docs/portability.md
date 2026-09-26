@@ -3,6 +3,42 @@
 This is a running validation record, not a claim that the Linux, Web or Android DONE checklists
 have passed. `plan.md` remains the release authority.
 
+## CNA Android graphics gate — 2026-09-26
+
+The Android environment is **available**, not an unavailable-device blocker. The installed
+SDK has `adb` 37.0.0, emulator 36.5.11, platforms 34/35/36.1/37.0, NDK
+23.1.7779620/25.2.9519653/29.0.14206865, CMake 3.22.1/4.1.2 and Build Tools
+36.1.0. `adb devices -l` reported `emulator-5554 device`; `emulator -list-avds` reported
+`CNA_Racing_API35` and `Medium_Phone`. The latter was chosen because its AVD enables
+GPU acceleration. It booted with `-gpu host -no-window -no-audio -no-snapshot-save`,
+`sys.boot_completed=1`, API 35, x86_64 with `ro.product.cpu.abilist=x86_64,arm64-v8a`.
+SurfaceFlinger reported the Android Emulator OpenGL ES Translator on host AMD Radeon
+780M, OpenGL ES 3.1. `/dev/kvm` was absent, but boot and graphics still worked.
+
+Current CNA `cefe6c83b` and sharp-runtime `d86adb65` were configured using the NDK
+29.0.14206865 Android toolchain for API 24, `arm64-v8a` and
+`CNA_GRAPHICS_RENDERER=OPENGLES3` in CNA's existing `build-probe/`. With the shared
+`/rv/cnaccache` and four build jobs/CPU affinity 0–3, both `cna_runtime` and
+`cna_renderer_easygl` built successfully. The old sharp-runtime portability errors
+did not recur. This proves the arm64 cross-compile and explicit renderer selection,
+not a House Simulator Android build.
+
+For runtime proof, a **temporary ignored copy** of CNA's existing `demo_devices` APK
+template was built in House's existing `build-probe/`. Only that copy selected the
+installed NDK 29, Build Tools 36.1 and CMake 4.1 (the template defaults required
+unavailable Build Tools 34/NDK 30 and CMake 3.22, below EasyGL's 3.23 minimum),
+restricted Gradle's native target list to `main` to avoid cross-building host content
+tools, selected OPENGLES3, and included SDL's documented `SDL_main.h` in `Main.cpp`.
+The first APK had no `SDL_main` export; `logcat` showed `Couldn't find function
+SDL_main`, then the app returned home. The corrected library exported `SDL_main`
+(`llvm-nm -D`), the 18-MB arm64 APK installed, the app remained running (`pidof`
+reported 4764), and a real emulator screencap shows CNA `SpriteBatch` rendering
+the demo's colored panels: [Android CNA sample capture](android-cna-graphics-sample.png).
+No graphics crash appeared in the post-launch logcat. CNA/sharp-runtime source trees
+were not edited. Thus the CNA gate is passed; House Simulator's Android packaging,
+touch traversal and performance remain open. Older dated entries below are snapshots
+from before this re-verification.
+
 ## Touch-only Web controls — HOUSE-03723 (2026-09-26)
 
 The Web build still starts with keyboard/mouse controls. On the first actual XNA `TouchPanel`

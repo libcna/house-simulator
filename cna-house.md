@@ -214,7 +214,7 @@ Headline numbers:
 | Ridge height above grade | 14.30 m |
 | Simulated day length (default) | **24 real minutes** — 1 real second = 1 simulated minute |
 | Initial platform | Linux desktop, `CNA_GRAPHICS_RENDERER=OPENGLES3` (EasyGL) |
-| Later platforms | Web (`WEBGL2`), Android (`OPENGLES3`, blocked upstream) |
+| Later platforms | Web (`WEBGL2`), Android (`OPENGLES3`; CNA graphics gate passed 2026-09-26, House APK still open) |
 
 ---
 
@@ -557,7 +557,7 @@ eventually be modified — `cna-house` never modifies CNA.
 | **BL-10** | Animation | `AnimationPlayer` plays exactly one clip; `Update()` overwrites every bone. No blending, no layering, no additive tracks | `AnimationPlayer.hpp:107-169` | L | `cna-house` implements `cnahouse::anim::ClipPlayer` — the same evaluation with 2-clip cross-fade, an upper-body mask and rate control — over its **own** `Skeleton`/`Clip` types (§47.0), not CNA's sample copies. Pure XNA `Matrix`/`Quaternion` math. | No | Yes |
 | **BL-11** | Audio / 3D | `Apply3D` is a simplified stereo pan + attenuation + Doppler; no cones, curves, filters, reverb or HRTF. **Measured, `HOUSE-00095`/`HOUSE-00096`, 2026-09-06:** the attenuation is **full volume inside `DistanceScale`, then inverse *distance* beyond it** (1 m → 1.000, 2 m → 0.500, 10 m → 0.100, 20 m → 0.050 at the default scale) — not inverse-square — and pan is the listener-relative rightward displacement over distance, clamped. **`Apply3D` writes none of this to the public `Volume`/`Pan`/`Pitch`**, so a game cannot read back what CNA applied. The Doppler guarantee holds absolutely: at scale 0 the factor is set to exactly `1.0f` **without evaluating the Doppler math**, so no rounding path exists. | `cna_audio_deep_audit_2026-07-17.md:131,161`; measured by `HOUSE-00095`, `HOUSE-00096` | M | `SoundEffect::DopplerScale = 0` and zero listener/emitter velocities by default (settings-exposed). Room-aware attenuation, occlusion and "sound through the doorway" repositioning are implemented **in `cna-house`** over the portal graph (§64); muffling is a two-instance bright/dull cross-fade on the ~20 sounds that need it | Would be nice | Yes |
 | **BL-12** | Content | The legacy `.model.json` `ModelTypeReader` synthesises exactly one bone and never sets `ParentBone`, `BoundingSphere` or `Tag`. **The `.cnb` route was measured instead, `HOUSE-00072`/`HOUSE-00073`, 2026-09-06:** a depth-3 hierarchy round-trips with every local and absolute transform matching an offline computation, and `ModelMesh::BoundingSphere` **is** populated and contains every vertex. | `docs/model-content-pipeline-support.md` summary table; measured by `HOUSE-00072`, `HOUSE-00073` | — | Not used. `cna-house` uses `.cnb`. **Caveat measured:** the `.cnb` bounding sphere is **conservative, not minimal** — radius 7.686 against a minimal 6.225 on the test box (+23 %), centre 1.55 off in Y. Usable as a cheap conservative reject; anywhere a tight bound matters, `cna-house` computes its own from the vertex data it already reads back. | No | Yes |
-| **BL-13** | Android | CNA selects the **2D-only `SDL_RENDERER`** on Android (`CMAKE_SYSTEM_NAME` is `Android`, not `Linux`), and the Android cross-compile currently fails in two `sharp-runtime` NDK-portability bugs before reaching any graphics code (upstream Task 920). No CNA graphics has ever run on Android. | `docs/android-graphics-limitations.md` | **H** *(Android phase)* | Android phase 49 begins with an upstream gate: `OPENGLES3` must be selectable and buildable for `arm64-v8a`. `cna-house` does not fix CNA. | **Yes — required** | Not for Android |
+| **BL-13** | Android | **Gate resolved by current-source measurement, 2026-09-26.** Android still defaults to `SDL_RENDERER`, but explicit `CNA_GRAPHICS_RENDERER=OPENGLES3` configured and `cna_runtime` plus `cna_renderer_easygl` cross-built for API 24/`arm64-v8a` with CNA `cefe6c83b`, sharp-runtime `d86adb65` and NDK 29.0.14206865. The former sharp-runtime NDK errors did not recur. CNA's `demo_devices` graphics sample then built as an arm64 APK and drew SpriteBatch panels on the GPU-accelerated `Medium_Phone` API-35 emulator (arm64 translation); the inspected capture is `docs/android-cna-graphics-sample.png`. Its old Gradle template needed installed Build Tools 36.1/CMake 4.1/NDK 29, a `main`-only build and an explicit `SDL_main.h` include in the ignored probe copy; without the include SDL logged `Couldn't find function SDL_main` and returned home. The corrected APK remained running after the draw. | `HOUSE-02951` verification in `plan.md`; `docs/portability.md`; emulator screenshot | **Resolved as a gate; Android House path still open** | Build House's Android package from the current CNA path; do not mistake this sample for House D10c. | No source change for the gate; CNA's sample template can be corrected upstream separately | Yes, proceed to Android House work |
 | **BL-14** | Web | `WEBGL2` has no implicit WebGL 1 fallback; the Web build needs Asyncify + JS exceptions; SharedArrayBuffer needs COOP/COEP headers for the threaded variant | `docs/web-emscripten-graphics-limitations.md` | M | Single-threaded WebGL 2 build in phase 48; threads only if measurement demands them | No | Yes (later) |
 | **BL-15** | Graphics / effects | `SpriteBatch::Begin(effect)` on a renderer without `CompiledEffects` throws | `docs/fx-compiled-effects.md` §3 | L | Tier E is a build configuration, never a runtime query (§7.3): `SpriteBatch::Begin(effect)` is compiled only into a Tier-E build and is reached only after that build's effect set has loaded successfully. Every Tier-E path has a named Tier-S fallback | No | Yes |
 | **BL-16** | Graphics / samplers | CNA's public XNA-shaped `SamplerStateCollection::operator[]` returns a `SamplerState&`, but assigning an XNA singleton to it selects `SamplerState::operator=`, which CNA marks `CNAEXT`; there is no separate strict-XNA setter. Measured after CNA merge `fcd43e995` by `HOUSE-01620`, 2026-09-13. | `SamplerStateCollection.hpp`; strict-XNA gate | L | Runtime does not assign sampler slots. CNA initializes every slot to XNA's default `LinearWrap`. `HOUSE-00927` found that the HUD's default `SpriteBatch::Begin()` instead left `LinearClamp` in slot 0 after `End()`, flattening repeat-UV house materials in the next frame. The existing XNA-shaped `SpriteBatch::Begin(..., &SamplerState::LinearWrap, ...)` keeps the HUD premultiplied and leaves repeat sampling correct without calling the forbidden assignment. Fonts/UI and real-device material/golden tests protect the boundary. Sky sun/moon texture borders remain wrap/clamp-equivalent. | **Yes — an XNA-shaped indexed-property setter or equivalent is still required for arbitrary per-pass sampler control** | Yes |
@@ -587,7 +587,8 @@ targeting an OpenGL ES 3.0 context. Rationale:
   adds constraints the desktop build never exercises (Asyncify, JS exceptions, no threads, real
   context loss, browser texture-format and canvas rules — §9.1, BL-14). Those are settled by the
   dedicated Web phases (47–48) and their own validation, never by extrapolation from Linux.
-* It is also the correct Android target once BL-13 is lifted upstream.
+* It is also the Android target verified by the 2026-09-26 CNA graphics gate; House Simulator's
+  own Android package and traversal remain to be proved.
 * EasyGL is the only renderer where `OcclusionQuery` is both wired **and** pixel-verified in both
   directions (`docs/occlusionquery-support.md` support matrix).
 
@@ -803,16 +804,20 @@ Web budget tier: 1280×720, 30 FPS floor, ≤ 160 MB textures, ≤ 500 draw call
 
 ### 9.2 Android
 
-**Blocked upstream (BL-13).** Phase 49 opens with a gate that is not `cna-house` work:
+**CNA graphics gate passed on 2026-09-26 (BL-13).** The older upstream requirements were
+re-tested against current CNA and sharp-runtime, rather than inferred from their 2026-09-06 state:
 
-1. `sharp-runtime`'s two NDK-portability bugs (`FileStream.cpp` unused-private-field under
-   `-Werror`; `FileSystemInfo.cpp` using `std::chrono::clock_cast`, absent from NDK libc++) must
-   be fixed upstream — CNA's own Task 920.
+1. The two formerly reported `sharp-runtime` NDK-portability bugs (`FileStream.cpp`
+   unused-private-field under `-Werror`; `FileSystemInfo.cpp` using `std::chrono::clock_cast`,
+   absent from NDK libc++) did not recur in the current API-24/arm64 cross-build. The historical
+   CNA Task 920 record is not a current blocker.
 2. `CNA_GRAPHICS_RENDERER=OPENGLES3` must be selectable and buildable for `arm64-v8a` (CNA
-   currently defaults Android to the 2D-only `SDL_RENDERER`).
-3. A CNA graphics sample must run on a real device or emulator once.
+   defaults Android to `SDL_RENDERER`, but the explicit OPENGLES3 cross-build succeeded).
+3. CNA's `demo_devices` graphics sample ran and drew on the GPU-accelerated `Medium_Phone` emulator
+   (API 35, arm64-v8a translated on x86_64). See `docs/portability.md` for toolchain and proof.
 
-Only then does `cna-house` build an Android APK. What we do *now* to be ready:
+This unlocks House Simulator's Android APK work; the sample does **not** satisfy D10c.
+The platform preparation already in the project includes:
 
 * GLES 3.0 feature floor is already the desktop target.
 * Input goes through an `IInputSource` abstraction with `KeyboardMouseSource` and (later)
@@ -7427,7 +7432,7 @@ and phase 9 must precede 13.
 | R-09 | The 780M cannot hold 550 MB of GPU resources alongside the compositor | Medium | Medium | The residency system and the quality tiers exist for exactly this; the Medium tier halves texture memory |
 | R-10 | Audio voice starvation in a storm | Low | Medium | The voice manager's category limits and virtualisation |
 | R-11 | Emscripten Asyncify + our frame structure interact badly | Medium | Medium | Phase 47 starts with a minimal-scene Web build before any porting work |
-| R-12 | Android stays blocked upstream (BL-13) indefinitely | **High** | Medium | Android is explicitly the last phase and is gated. The project is complete and shippable without it. |
+| R-12 | Android House package or runtime fails after the CNA gate | **High** | Medium | Investigate on the available emulator and record exact ownership. Android remains required for DONE; an upstream blocker never makes the project complete or shippable as DONE. |
 | R-13 | Scope creep in furnishing (2 400 placements is a lot of authoring) | High | Medium | Kit-based placement, per-room placement tasks with fixed counts, and a "good enough, move on" rule enforced by the phase's exit criteria |
 | R-14 | The weather system becomes a research project | Medium | Medium | The archetype table and the rate-limit table are fixed *now*; tuning is a bounded task, not an open-ended one |
 | R-15 | Save-format churn during development invalidates test saves | High | Low | The migration chain is built in phase 39 before any content depends on it; test fixtures are regenerated by a script |
@@ -7491,7 +7496,7 @@ placeholder for work not yet thought about.
 | D-27 | **Single-threaded in v1** | Emscripten threading changes the module ABI and needs COOP/COEP; the cost must be justified by a measurement |
 | D-28 | **Crouching exists only in the attic, automatically** | The roof geometry demands it; a general crouch would be a feature nobody asked for |
 | D-29 | **The pause menu does not pause the world by default** | A house that stops when you look away is less convincing; it is a setting |
-| D-30 | **Android is the last phase and is gated on an upstream CNA fix (BL-13)** | Honest sequencing: `cna-house` does not modify CNA |
+| D-30 | **Android remains a required DONE platform; the CNA graphics gate passed on 2026-09-26** | House Simulator still must build, run and complete its device checklist; `cna-house` does not modify CNA |
 
 ---
 
