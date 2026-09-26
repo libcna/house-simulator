@@ -69,6 +69,12 @@ int main(int argc, char** argv)
     }
 
     app::Settings settings = app::Settings::Defaults();
+#if defined(__EMSCRIPTEN__)
+    // HOUSE-02895: the Web budget is measured at 1280x720. A browser does not inherit the
+    // desktop monitor's 1600x900 default, which also overflows the launch page before fullscreen.
+    settings.backBufferWidth = 1280;
+    settings.backBufferHeight = 720;
+#endif
     // `--quality` is NOT applied here. The preset is resolved in `LoadContent`, because auto-detect
     // needs the adapter and the FINAL render tier, and the tier is not final until the Tier-E
     // effect set has been tried (`HOUSE-00161`). Applying it here as well would give two places

@@ -1,3 +1,37 @@
+# Web canvas/audio handoff — 2026-09-26 (`HOUSE-02895`)
+
+R11/R13 chose the next dependency-unblocked M14 Web task after `HOUSE-03721`; `HOUSE-02850`
+still waits for the M10 baseline. The Web executable now starts at the architecture's
+1280×720 tier instead of carrying the desktop 1600×900 default into a browser tab. The
+existing Graphics controls were retained. On Web, their mode list is the two legible 16:9
+canvas sizes (1280×720 and 1600×900), not the browser's 800×600 pseudo-monitor mode; native
+mode enumeration and native default are unchanged. No new runtime system or CNA change was
+needed.
+
+Actual Chrome 152 and Firefox 140 ESR runs showed the canvas changing 1280×720 → 1600×900,
+and the in-game Fullscreen row entering and leaving browser fullscreen. Fresh-load logs in
+both browsers showed audio waiting for a gesture, followed by audio-device open/ready only
+after a real canvas click. Firefox used X11 input and WebDriver BiDi logs, Chrome used CDP.
+The visual captures, exact browser evidence and remaining generated-launcher scroll caveat
+are in `docs/portability.md`. Focused native SettingsScreen tests passed 8/8; the native
+game/unit targets and full Web target rebuilt in the pre-existing `build/` and
+`build-consumer/` directories with shared ccache and a four-core cap. The 391 MiB preload
+remains the separate `HOUSE-02850` limit task; generated-page loading progress is
+`HOUSE-02899`.
+The isolated full unit suite passed 1476/1476 in 162.566 s. The required full static gate
+passed strict XNA for 341 units with four workers and all other checks except the existing
+user-owned `.claude` root-layout entry; `git diff --check` is clean.
+
+After this task there are 45 open MUST tasks, 65.75 realistic and 90.25 pessimistic hours.
+R14 projects 161.25 completed plus 90.25 remaining = 251.5 h, 28.5 below the ceiling.
+The milestone index's older M6/M7/M8/M10/M11 counts and budgets were synchronized with the
+already-current remaining-work table; no task or scope was changed by that ledger repair.
+The next dependency-unblocked task is `HOUSE-02899` (preload progress). Run the full gate
+with `HOUSE_XNA_STRICT_JOBS=4 taskset -c 0-3 tools/ci/run_checks.sh`; do not modify the
+pre-existing user-owned `.claude` layout entry if it alone fails.
+
+---
+
 # Web desktop controls handoff — 2026-09-26 (`HOUSE-03721`)
 
 R11/R13 selected the next dependency-unblocked M14 Web bring-up task after `HOUSE-02892`.

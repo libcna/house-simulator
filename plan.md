@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **46 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 56.5 / 66.5 / 91.1 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5, M7, M9 and M12 passed; M8 listening and M10 baseline work are environment-blocked.** Next: `HOUSE-02895` (Web canvas/audio) |
+| Active plan | **45 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 55.9 / 65.75 / 90.25 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5, M7, M9 and M12 passed; M8 listening and M10 baseline work are environment-blocked.** Next: `HOUSE-02899` (Web preload progress) |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -395,15 +395,15 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M3](#m3--the-reusable-furnishing-kit) — The reusable furnishing kit | A (support) | 03301–03340 | 0 | **kit ready for M4** | D3 | 0 |
 | [M4](#m4--dressing-everywhere-the-furnishing-half-of-c3--checkpoint) — Dressing everywhere | A | 03341–03400 | 0 | **checkpoint passed** · `HOUSE-03380` | D3 | 0 |
 | [M5](#m5--baseline-lighting-everywhere-the-lighting-half-of-c3--gate-g3) — Baseline lighting everywhere | A | 03401–03440 | 0 | **G3 passed** · `HOUSE-03420` | D3, D6 | 0 |
-| [M6](#m6--main-cells-and-hero-areas-c4-c5--gates-g4-and-g5) — Main cells and hero areas | A | 03441–03500 | 15 | **G4** · `HOUSE-03452`, **G5** · `HOUSE-03480` | D4 | 19.75 |
-| [M7](#m7--a-compact-environment) — A compact environment | B | 03501–03540 | 8 | `HOUSE-03520` | D5 | 13.25 |
-| [M8](#m8--atmospheric-audio-essentials) — Atmospheric audio essentials | B | 03541–03570 | 6 | `HOUSE-01939` | D7 | 9 |
+| [M6](#m6--main-cells-and-hero-areas-c4-c5--gates-g4-and-g5) — Main cells and hero areas | A | 03441–03500 | 0 | **G4** · `HOUSE-03452`, **G5** · `HOUSE-03480` | D4 | 0 |
+| [M7](#m7--a-compact-environment) — A compact environment | B | 03501–03540 | 0 | `HOUSE-03520` | D5 | 0 |
+| [M8](#m8--atmospheric-audio-essentials) — Atmospheric audio essentials | B | 03541–03570 | 4 | `HOUSE-01939` | D7 | 5 |
 | [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 0 | `HOUSE-02528` | D8 | — |
-| [M10](#m10--performance-measurement-driven) — Performance, measurement-driven | B | 03601–03630 | 4 | `HOUSE-02405` | D9 | 9.5 |
-| [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 5 | `HOUSE-02713` | D2, D4, D13, D14 | 7 |
+| [M10](#m10--performance-measurement-driven) — Performance, measurement-driven | B | 03601–03630 | 3 | `HOUSE-02405` | D9 | 8 |
+| [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 3 | `HOUSE-02713` | D2, D4, D13, D14 | 3.25 |
 | [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 0 | **done** · `HOUSE-02598` | D11 | 0 |
 | [M13](#m13--linux-desktop-release) — Linux desktop release | after M11 | 03701–03720 | 8 | `HOUSE-02797` | D9–D13 | 10.25 |
-| [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 8 | `HOUSE-02904` | D10b | 9.75 |
+| [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 7 | `HOUSE-02904` | D10b | 9 |
 | [M15](#m15--android) — Android | readiness: B · device: after M13 | 03751–03780 | 14 | `HOUSE-03041` (a BL-13 record does not close it) | D10c | 23.75 |
 | [M16](#m16--final-release) — Final release | last | 03781–03800 | 6 | **DONE** · `HOUSE-03078` | D9–D14 | 6.5 |
 
@@ -1520,10 +1520,23 @@ limitation (reload the page), recorded by `HOUSE-02904`.
       accept: (1) a check of both limits in CI; (2) where a limit is missed, the Web tier's texture sizes, audio bitrates or LOD-only packs are reduced until it fits
       trace: absorbs `HOUSE-02851` (the reduction)
 
-- [ ] HOUSE-02895 — The canvas as the display, and the audio gesture gate, in a real browser
+- [x] HOUSE-02895 — The canvas as the display, and the audio gesture gate, in a real browser
       dep: HOUSE-02892 · sys: ui · plat: WEB · pri: MUST · zone: all · adv: D10b · est: 0.75
       accept: (1) canvas resize and the fullscreen toggle work from the Graphics section; (2) audio starts only after the first user gesture, in Chrome and Firefox, and the desktop build is unaffected
       trace: absorbs `HOUSE-02896` and `HOUSE-02846`
+      verify: Chrome 152 CDP and Firefox 140 ESR/Xvfb showed audio waiting before the first click,
+              then device opened/ready after it; Graphics changed the DOM canvas from 1280×720
+              to 1600×900 and toggled document/browser fullscreen on and off in both browsers.
+              Inspected menu/fullscreen screenshots and the native game/unit build; focused
+              SettingsScreen tests passed 8/8, isolated full unit suite 1476/1476, strict XNA
+              341 units. The full static gate had only the pre-existing user-owned `.claude`
+              root-layout failure. Details in `docs/portability.md`
+      note: (2026-09-26) The Web launch now starts at the documented 1280×720 tier instead
+            of the desktop 1600×900 size. The Web Graphics list uses the two legible 16:9
+            canvas sizes rather than the browser's 800×600 pseudo-monitor mode; desktop mode
+            enumeration remains unchanged. The generated Emscripten launcher still adds a
+            header above the canvas in windowed mode, so a short viewport may scroll; its
+            bounded page/loading treatment remains `HOUSE-02899`
 
 - [ ] HOUSE-02898 — Measure the Web build against its target; reduce content until it fits
       dep: HOUSE-02892, HOUSE-02405 · sys: — · plat: WEB · pri: MUST · zone: all · adv: D9, D10b · est: 2
@@ -2018,15 +2031,15 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M11 Final defect pass | 3 | 11 | **3** | 2.75 | **3.25** | 3.6 | — |
 | M12 Representative tests | 4 | 5 | **0** | 0 | **0** | 0 | — |
 | M13 Linux desktop release | 10 | 13.25 | **8** | 8.75 | **10.25** | 11.25 | — |
-| M14 Web | 17 | 24.75 | **8** | 8.3 | **9.75** | 16.73 | R-B +6 |
+| M14 Web | 17 | 24.75 | **7** | 7.65 | **9** | 15.9 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **46** | **56.5** | **66.5** | **91.1** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **45** | **55.9** | **65.75** | **90.25** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-188.9 h. Adding the 160.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-251.6 h, 28.4 h under the limit. That margin is
+189.75 h. Adding the 161.25 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+251.5 h, 28.5 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |

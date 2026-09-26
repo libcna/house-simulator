@@ -471,8 +471,9 @@ namespace
         SettingsScreen webScreen(settings, {}, web);
         EXPECT_TRUE(web.canvasSize);
         EXPECT_TRUE(webScreen.Shows(SettingsControl::DisplaySize));
+        EXPECT_EQ(web.displaySizes, (std::vector<cnahouse::app::DisplaySize>{{1280, 720}, {1600, 900}}));
         EXPECT_TRUE(webScreen.Shows(SettingsControl::Fullscreen))
-            << "HOUSE-03721 owns the browser fullscreen path from this row";
+            << "HOUSE-02895 owns the browser fullscreen path from this row";
         EXPECT_FALSE(webScreen.Shows(SettingsControl::VerticalSync));
 
         platform.target = cnahouse::app::BuildTarget::Android;
@@ -483,6 +484,29 @@ namespace
         EXPECT_FALSE(androidScreen.Shows(SettingsControl::VerticalSync));
         EXPECT_TRUE(androidScreen.Shows(SettingsControl::Quality));
         EXPECT_TRUE(androidScreen.Shows(SettingsControl::FieldOfView));
+    }
+
+    TEST(SettingsScreenTests, WebCanvasSizeIgnoresTheBrowserPseudoMonitorMode)
+    {
+        Settings settings = Settings::Defaults();
+        cnahouse::app::Platform platform;
+        platform.target = cnahouse::app::BuildTarget::Web;
+        platform.displaySizes = {{800, 600}};
+        const cnahouse::rendering::RenderTier tier(cnahouse::app::RenderTier::S);
+        SettingsScreen screen(settings, {}, SettingsFeatures::Resolve(platform, tier, settings));
+
+        InputState down;
+        down.uiDownPressed = true;
+        screen.Update(down, 0.016F);
+        ASSERT_EQ(screen.Selected(), SettingsControl::DisplaySize);
+        InputState right;
+        right.uiRightPressed = true;
+        screen.Update(right, 0.016F);
+        EXPECT_EQ(settings.backBufferWidth, 1280);
+        EXPECT_EQ(settings.backBufferHeight, 720);
+        screen.Update(right, 0.016F);
+        EXPECT_EQ(settings.backBufferWidth, 1600);
+        EXPECT_EQ(settings.backBufferHeight, 900);
     }
 
     TEST(SettingsScreenTests, GraphicsRowsUseOnlyHighWebAndAndroidProfiles)

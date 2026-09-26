@@ -500,7 +500,19 @@ namespace cnahouse::ui
         features.verticalSync = platform.target == app::BuildTarget::Desktop;
         features.displaySizes.clear();
 
-        if (features.displaySize)
+        if (features.canvasSize)
+        {
+            // Web has no meaningful monitor-mode list. Keep the two 16:9 canvas sizes that can
+            // show the complete settings page with the project's existing 16-pixel UI font;
+            // the browser-reported 800x600 mode compresses rows until labels overlap.
+            features.displaySizes = {{1280, 720}, {1600, 900}};
+            if (settings.backBufferWidth >= 1280 && settings.backBufferHeight >= 720 &&
+                settings.backBufferWidth * 9 == settings.backBufferHeight * 16)
+            {
+                features.displaySizes.push_back({settings.backBufferWidth, settings.backBufferHeight});
+            }
+        }
+        else if (features.displaySize)
         {
             for (const app::DisplaySize size : platform.displaySizes)
             {
@@ -510,11 +522,10 @@ namespace cnahouse::ui
                 }
             }
             features.displaySizes.push_back({settings.backBufferWidth, settings.backBufferHeight});
-            std::sort(features.displaySizes.begin(), features.displaySizes.end());
-            features.displaySizes.erase(
-                std::unique(features.displaySizes.begin(), features.displaySizes.end()),
-                features.displaySizes.end());
         }
+        std::sort(features.displaySizes.begin(), features.displaySizes.end());
+        features.displaySizes.erase(std::unique(features.displaySizes.begin(), features.displaySizes.end()),
+                                    features.displaySizes.end());
         return features;
     }
 

@@ -3,6 +3,34 @@
 This is a running validation record, not a claim that the Linux, Web or Android DONE checklists
 have passed. `plan.md` remains the release authority.
 
+## Web canvas and first-gesture audio — HOUSE-02895 (2026-09-26)
+
+The full 391 MiB-preload game was served from localhost to Chrome 152 (headless/WebGL2) and
+Firefox 140 ESR (Xvfb/software WebGL2). The Web launch now requests a 1280×720 back buffer;
+desktop still uses its existing 1600×900 default. The Graphics menu offers 1280×720 and
+1600×900 canvas sizes. The browser's reported 800×600 pseudo-monitor size is excluded because
+its row spacing makes the existing settings page unreadable. Native monitor-mode enumeration
+is unchanged. `SettingsScreenTests.WebCanvasSizeIgnoresTheBrowserPseudoMonitorMode` covers
+the list and cycling behavior.
+
+Both browsers logged `audio waiting for a user gesture` on a fresh load before input, then
+`audio device opened` and `audio ready` after a real canvas click. Chrome used CDP console
+events and a canvas click; Firefox used WebDriver BiDi `log.entryAdded` with a held X11 click.
+Neither opened the audio device during preload. Chrome's DOM canvas dimensions changed from
+1280×720 to 1600×900 after Graphics → Canvas size. Firefox showed the same change in its
+inspected settings capture. The Fullscreen row entered and left browser fullscreen in both:
+Chrome's `document.fullscreenElement` toggled false → true → false, and Firefox displayed the
+browser's fullscreen confirmation and the menu's On → Off state. Headless Chrome's virtual
+fullscreen screen was only 800×544; that is a test-display size, not a production target.
+
+Inspected local captures: `/tmp/house-02895-chrome-click.png`,
+`/tmp/house-02895-chrome-key.png`, `/tmp/house-02895-firefox-settings.png`,
+`/tmp/house-02895-firefox-resized.png`, `/tmp/house-02895-firefox-fullscreen.png` and
+`/tmp/house-02895-firefox-windowed.png`. The generated Emscripten page still places a toolbar
+above the canvas, so a 1280×720 windowed viewport can scroll; fullscreen removes that toolbar.
+The bounded browser loading/page treatment is `HOUSE-02899`, not evidence of a broken canvas
+resize. Pack sizing remains `HOUSE-02850`.
+
 ## Web desktop controls — HOUSE-03721 (2026-09-26)
 
 The full `build-consumer/cna-house.html` build was served over localhost. Chrome 152
@@ -32,8 +60,8 @@ Representative inspected captures: `/tmp/house-03721-click.png`,
 `/tmp/house-03721-firefox-locked.png`, `/tmp/house-03721-firefox-arrow.png`,
 `/tmp/house-03721-firefox-refocused.png`, and
 `/tmp/house-03721-firefox-lockproof.png` (Firefox). These are local test evidence, not
-committed assets or an image-quality baseline. The current 1600×900 canvas overflows the
-1280×720 test viewport (`HOUSE-02895`). Firefox briefly showed its slow-page warning while
+committed assets or an image-quality baseline. The earlier 1600×900 launch canvas has since
+become 1280×720 under `HOUSE-02895`. Firefox briefly showed its slow-page warning while
 loading the 391 MiB preload; pack sizing remains `HOUSE-02850`.
 
 Touch-only Web control is **not yet validated or claimed functional**. CNA's `TouchPanel`
