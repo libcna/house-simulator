@@ -30,6 +30,15 @@ was unavailable has been corrected: CNA Android graphics and House's minimal
 arm64 APK/settings/lifecycle path pass on `Medium_Phone`; content, touch
 traversal and Android performance are still unverified.
 
+A follow-up real-game, scripted-input stair regression now passes all 15
+foyer-to-L1 waypoints and ends in `L1_STAIR_MAIN` at 3.65 m, using the game's
+own cell tracker. This corrects the earlier weaker unit evidence, which handed
+the collision cell to each leg. It is **not** a human/manual traversal or a
+visual usability pass: `/tmp/house-stair-route.png` shows a massive stair
+support dominating the entrance view, and the owner's complaint remains for
+M11. The focused headless integration test passes; no stair/content fix has
+yet been made.
+
 ---
 
 # Superseded High performance gate handoff — 2026-09-26 (`HOUSE-02404`)

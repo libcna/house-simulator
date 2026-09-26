@@ -11,9 +11,17 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
+#include <filesystem>
+#include <memory>
+#include <string>
 #include <thread>
+#include <vector>
 
 #include <gtest/gtest.h>
+
+#include "System/IO/FileAccess.hpp"
+#include "System/IO/FileMode.hpp"
+#include "System/IO/FileStream.hpp"
 
 #include "cnahouse/app/CnaHouseGame.hpp"
 #include "cnahouse/app/CommandLine.hpp"
@@ -26,11 +34,13 @@
 #include "cnahouse/environment/Season.hpp"
 #include "cnahouse/environment/SunModel.hpp"
 #include "cnahouse/lighting/LightingSystem.hpp"
+#include "cnahouse/physics/CollisionLoader.hpp"
 #include "cnahouse/player/FirstPersonView.hpp"
 #include "cnahouse/player/FixedStep.hpp"
 #include "cnahouse/player/IInputSource.hpp"
 #include "cnahouse/util/Ids.hpp"
 #include "cnahouse/util/Log.hpp"
+#include "unit/StairPath.hpp"
 
 namespace
 {
@@ -1214,6 +1224,114 @@ namespace
         EXPECT_EQ(in.exitCode, 0);
         EXPECT_EQ(in.cell, "L0_WC1");
         EXPECT_GT(in.feet.X, 2.40F);
+    }
+
+    TEST(HeadlessRunTests, TheRealWalkControllerReachesL1FromTheFoyer)
+    {
+        // The unit stair test changes collision cells by hand between legs. This starts at the
+        // foyer in the running game, so its actual tracker, input path and camera must all survive
+        // the opening and the entire first flight without a test-supplied cell transition.
+        const std::string collisionPath = "content/world/collision.bin";
+        if (!std::filesystem::exists(collisionPath))
+        {
+            GTEST_SKIP() << "no deployed collision; run tools/ci/build_content.py --only world";
+        }
+        const std::unique_ptr<System::IO::FileStream> stream(new System::IO::FileStream(
+            collisionPath, System::IO::FileMode::Open, System::IO::FileAccess::Read));
+        const auto loaded = cnahouse::physics::CollisionLoader::Read(*stream, collisionPath);
+        ASSERT_TRUE(loaded) << loaded.Error().Message();
+        const cnahouse::physics::CollisionCell* stair = loaded.Value().Cell("L0_STAIR_MAIN");
+        ASSERT_NE(stair, nullptr);
+        const auto segments = cnahouse::tests::SegmentsOf(loaded.Value(), *stair, 0.60F, 3.65F);
+        ASSERT_FALSE(segments.empty());
+        std::vector<Microsoft::Xna::Framework::Vector3> route{
+            {2.55F, 0.60F, -14.80F}, {2.75F, 0.60F, -14.70F}, {4.10F, 0.60F, -14.70F}};
+        const auto flight = cnahouse::tests::PathUp(segments);
+        route.insert(route.end(), flight.begin(), flight.end());
+
+        class RouteInput final : public cnahouse::player::IInputSource
+        {
+        public:
+            RouteInput(CnaHouseGame& game, const std::vector<Microsoft::Xna::Framework::Vector3>& route)
+                : game_(game)
+                , route_(route)
+            {
+            }
+
+            void Update(float) override
+            {
+                state_ = {};
+                const auto& body = game_.PlayerForTesting();
+                while (next_ < route_.size() && cnahouse::tests::Flat(body.position, route_[next_]) < 0.12F)
+                {
+                    ++next_;
+                }
+                if (next_ == route_.size())
+                {
+                    return;
+                }
+                const auto& target = route_[next_];
+                const float wanted = std::atan2(target.X - body.position.X, body.position.Z - target.Z);
+                const float difference = std::remainder(wanted - body.yaw, 6.2831853F);
+                state_.look.X = std::clamp(difference, -0.20F, 0.20F);
+                if (std::fabs(difference) < 0.10F)
+                {
+                    state_.move.Y = 1.0F;
+                }
+            }
+
+            [[nodiscard]] const cnahouse::player::InputState& Current() const noexcept override
+            {
+                return state_;
+            }
+
+            [[nodiscard]] bool LookAvailable() const noexcept override
+            {
+                return true;
+            }
+
+            [[nodiscard]] std::size_t Reached() const noexcept
+            {
+                return next_;
+            }
+
+        private:
+            CnaHouseGame& game_;
+            const std::vector<Microsoft::Xna::Framework::Vector3>& route_;
+            cnahouse::player::InputState state_;
+            std::size_t next_ = 0;
+        };
+
+        cnahouse::util::Log::ResetForTesting();
+        Options options;
+        options.headless = true;
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+        options.noAudio = true;
+        options.scene = "walk";
+        options.player = std::array<float, 5>{1.55F, 0.60F, -16.00F, 90.0F, 0.0F};
+        Settings settings = Settings::Defaults();
+        settings.backBufferWidth = 320;
+        settings.backBufferHeight = 180;
+        settings.verticalSync = false;
+        CnaHouseGame game(options, settings);
+        RouteInput input(game, route);
+        game.SetInputSourceForTesting(&input);
+        game.SetFixedStepLimit(2400);
+        game.SetFrameLimit(12000);
+        game.Run();
+
+        const auto& feet = game.PlayerForTesting().Feet();
+        std::printf("  real stair route: reached %zu/%zu, cell %s, feet (%.2f, %.2f, %.2f)\n",
+                    input.Reached(),
+                    route.size(),
+                    std::string(cnahouse::util::IdRegistry::NameOf(game.CellForTesting())).c_str(),
+                    static_cast<double>(feet.X),
+                    static_cast<double>(feet.Y),
+                    static_cast<double>(feet.Z));
+        EXPECT_EQ(game.ExitCode(), 0);
+        EXPECT_EQ(input.Reached(), route.size());
+        EXPECT_GT(feet.Y, 3.25F);
+        EXPECT_EQ(cnahouse::util::IdRegistry::NameOf(game.CellForTesting()), "L1_STAIR_MAIN");
     }
 
     TEST(HeadlessRunTests, TheWalkSceneLoadsTheSunBakeAndPublishesDaylight)
