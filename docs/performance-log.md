@@ -193,3 +193,8 @@ eight isolated scenarios was 743,828 KiB (761.7 MB). These are measured live
 allocations, not a claim that every packaged but unused texture was uploaded;
 the conservative texture/mip sum above bounds that remainder. Both are below
 the 550 MB GPU and 1.6 GB RSS gates, so no residency system is justified.
+
+`HOUSE-02404` decision: no High scenario misses a hard target, so no
+optimization technique is selected and the M10 performance-technique risk
+reserve is retired. The eight rows above are the task's before-and-after
+evidence: no render code or content changed between them and this decision.

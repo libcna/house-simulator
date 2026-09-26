@@ -1,3 +1,25 @@
+# High performance gate handoff — 2026-09-26 (`HOUSE-02404`)
+
+R11/R13 next selected the measured High gate after `HOUSE-02403`. All eight
+current Release representative scenes pass the desktop hard budgets; no scene
+qualifies for optimization. No render/content code was changed, no technique
+was selected, and the M10 R-C 4 h pessimistic technique reserve was retired.
+The exact next unblocked MUST is `HOUSE-02405`: expose the named High, Web and
+Android presets through `--quality` and Graphics, then measure each against
+its documented desktop-run budget before Android content delivery. Existing
+low/medium CLI and stored settings must remain compatible. The owner's
+reports of dark rooms, a poor real stair route and doorway flashes still
+need current-build investigation; fixed-camera performance is not a visual
+or first-person walkthrough test.
+
+32 MUST tasks remain, 41.25 realistic and 59.38 pessimistic hours. R14
+projects 245.13 h, 34.87 below the 280 h ceiling. `HOUSE-02403`'s full static
+gate passed every task-owned check, including 344 strict XNA translation
+units at four workers; only the unrelated user-owned `.claude` root-layout
+entry failed. No sibling repository changed.
+
+---
+
 # Release performance baseline handoff — 2026-09-26 (`HOUSE-02403`)
 
 R11/R13 selected the next unblocked M10 task after Android lifecycle. The

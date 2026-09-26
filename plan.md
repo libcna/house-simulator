@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **33 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 38.5 / 45.25 / 67.78 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5, M7, M9 and M12 passed; CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator.** The Release desktop baseline also passes; `HOUSE-02404` is next, followed by `HOUSE-02405` before Android content delivery. `HOUSE-01920`/`HOUSE-01922` remain independently open (listening unavailable here) |
+| Active plan | **32 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 35.1 / 41.25 / 59.38 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5, M7, M9 and M12 passed; CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator.** The Release desktop High baseline passes without optimization; `HOUSE-02405` is next before Android content delivery. `HOUSE-01920`/`HOUSE-01922` remain independently open (listening unavailable here) |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -399,7 +399,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M7](#m7--a-compact-environment) — A compact environment | B | 03501–03540 | 0 | `HOUSE-03520` | D5 | 0 |
 | [M8](#m8--atmospheric-audio-essentials) — Atmospheric audio essentials | B | 03541–03570 | 4 | `HOUSE-01939` | D7 | 5 |
 | [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 0 | `HOUSE-02528` | D8 | — |
-| [M10](#m10--performance-measurement-driven) — Performance, measurement-driven | B | 03601–03630 | 2 | `HOUSE-02405` | D9 | 6 |
+| [M10](#m10--performance-measurement-driven) — Performance, measurement-driven | B | 03601–03630 | 1 | `HOUSE-02405` | D9 | 2 |
 | [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 3 | `HOUSE-02713` | D2, D4, D13, D14 | 3.25 |
 | [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 0 | **done** · `HOUSE-02598` | D11 | 0 |
 | [M13](#m13--linux-desktop-release) — Linux desktop release | after M11 | 03701–03720 | 8 | `HOUSE-02797` | D9–D13 | 10.25 |
@@ -1297,11 +1297,12 @@ numbers and no code. No speculative optimisation infrastructure is built (rule R
       note: (2026-09-25) The then-current Release build was stale and its shared CNA SDL-cache lock could not be acquired under that session's sandbox; this was not treated as a measured baseline.
       note: (2026-09-26) Refreshed the existing Release `build-probe/` against current source/content and measured all eight 1920×1080 Tier-S/High scenarios on the reference Radeon 780M Wayland/radeonsi path. Worst measured scenario: 83 draws, 412,957 triangles, 2.154 ms CPU (average updates plus median submit) and 4.557 ms GPU median (these extrema occur in different scenes); all are below High hard limits. The 332 compiled textures total 117.334 MB base RGBA8, ≤156.445 MB including a conservative full mip chain; 216 lightmaps total 14.156/≤18.874 MB, below 300/60 MB. Three process-cold, warm-filesystem startup captures took 1.38/1.38/1.27 s including readback/PNG. All 1,391 chunks were resident; with no culling, live amdgpu memory was 368.4 MB and RSS 710.2 MB, while the isolated-scenario RSS peak was 761.7 MB, below the 550 MB and 1.6 GB limits. `docs/performance-log.md` records per-scene metrics and measurement qualifications. No residency/streaming system or texture-size reduction is warranted. The separate compiled pack-size warnings remain for packaging work. The user-owned `.claude` root entry still fails the full layout gate; targeted built-in pack targets refreshed Release assets without changing or bypassing that entry.
 
-- [ ] HOUSE-02404 — Optimise the scenarios that miss their target, and only those
+- [x] HOUSE-02404 — Optimise the scenarios that miss their target, and only those
       dep: HOUSE-02403 · sys: rendering · plat: LNX · pri: MUST · zone: all · adv: D9 · est: 4
       accept: (1) every scenario meets its documented target at the *High* tier (`cna-house.md` §71.2), with no headroom margin; (2) the technique is chosen by the measured bottleneck, and each technique is a ≤ 4 h slice planned under R7 only when chosen: per-category LOD, detail-set culling, chunk sub-range culling, render-list and state work, instancing; (3) when every scenario meets its target, the task closes, even with budget left; (4) the result is recorded in `docs/performance-log.md`
       verify: the harness before and after
       note: impostors (`HOUSE-00851`/`02395`) stay in the optional backlog unless a measurement proves the neighbourhood is the bottleneck and nothing cheaper works
+      note: (2026-09-26) `HOUSE-02403` measured all eight current Release Tier-S/High scenes on the reference Radeon 780M. Across them, the worst CPU estimate is 2.154 ms versus 9.5 ms hard; GPU median 4.557 ms (worst p95 6.491 ms) versus 14 ms; 83 draws versus 1,800; 412,957 triangles versus 3.4 million. No scene misses a target, so acceptance (3) closes this task with the unchanged harness results in `docs/performance-log.md`. No LOD, culling, instancing, render-list, content or infrastructure work was authorized by the measurements. R-C's 4 h pessimistic technique reserve is retired.
 
 - [ ] HOUSE-02405 — The three quality presets, each measured against its own budget
       dep: HOUSE-02404, HOUSE-00157 · sys: rendering · plat: ALL · pri: MUST · zone: all · adv: D9, D10b, D10c · est: 2
@@ -2137,26 +2138,26 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M7 A compact environment | 13 | 21 | **0** | 0 | **0** | 0 | — |
 | M8 Atmospheric audio essentials | 11 | 14.5 | **4** | 4.25 | **5** | 5.5 | — |
 | M9 Application shell | 10 | 12.5 | **0** | 0 | **0** | 0 | — |
-| M10 Performance | 6 | 13 | **2** | 5.1 | **6** | 10.6 | R-C +4 |
+| M10 Performance | 6 | 13 | **1** | 1.7 | **2** | 2.2 | R-C retired |
 | M11 Final defect pass | 3 | 11 | **3** | 2.75 | **3.25** | 3.58 | — |
 | M12 Representative tests | 4 | 5 | **0** | 0 | **0** | 0 | — |
 | M13 Linux desktop release | 10 | 13.25 | **8** | 8.75 | **10.25** | 11.28 | — |
 | M14 Web | 17 | 24.75 | **5** | 6.2 | **7.25** | 13.98 | R-B +6 |
 | M15 Android | 23 | 29 | **5** | 6.0 | **7** | 15.7 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.15 | — |
-| **Total, all three platforms** | **205** | **318.75** | **33** | **38.5** | **45.25** | **67.78** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **32** | **35.1** | **41.25** | **59.38** | +17 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-212.22 h. Adding the 181.75 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-249.53 h, 30.47 h under the limit. That margin is
+220.62 h. Adding the 185.75 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+245.13 h, 34.87 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |
 |---|---|---|---|
 | R-A | M15 | 8 | House Simulator's device path after the CNA graphics gate: build, traversal and performance on Android |
 | R-B | M14 | 6 | Web memory or package size forces deeper content cuts; Emscripten workarounds |
-| R-C | M10 | 4 | performance needs two of `HOUSE-02404`'s candidate techniques |
+| R-C | M10 | 0 (retired at `HOUSE-02404`) | all eight High scenarios meet target without a technique |
 | R-D | M4 | 3 | a few rooms (the library shelving, the cinema, the workshop) need more than their recipe estimate |
 | R-E | M1 | 0 (retired at G1) | the grand tour and sweep stayed within M1's budget plus gate review |
 
