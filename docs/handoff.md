@@ -39,6 +39,22 @@ support dominating the entrance view, and the owner's complaint remains for
 M11. The focused headless integration test passes; no stair/content fix has
 yet been made.
 
+The next unblocked task remains `HOUSE-02404`, but its reference timing is
+currently blocked by shared-machine contention (load reached 33.85; ongoing
+compiler, browser, Blender and graphics jobs). Retry the eight High scenes as
+fresh processes with neutral input after those jobs stop; the older moving-
+camera table is invalid. If a repeatable High miss remains, measure and fix
+only that bottleneck; otherwise close the task without speculative changes.
+The unfinished named Web/Android preset edits for dependent `HOUSE-02405` are
+recoverable in stash commit `fe5ae204eb422ea7aa323fd4701a2d6bc2f06c6d`
+(`git stash list`, entry initially `stash@{0}`). It contains exactly six
+source/test files: `src/app/{CnaHouseGame,CommandLine,Main}.cpp`,
+`src/rendering/Quality.cpp`, and `tests/unit/{CommandLine,Quality}Tests.cpp`.
+It is **not validated or complete**; the performance harness profile selector
+still needs to be re-added after the High gate. Restore this exact stash only
+once `HOUSE-02404` is resolved, inspect its diff, then finish/measure all
+three presets. No other session files were stashed.
+
 ---
 
 # Superseded High performance gate handoff — 2026-09-26 (`HOUSE-02404`)
