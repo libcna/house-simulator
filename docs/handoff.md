@@ -1,3 +1,31 @@
+# Web material-format handoff — 2026-09-26 (`HOUSE-02848`)
+
+R11/R13 selected the next dependency-unblocked M14 Web task after the owner's explicit resume.
+The manifest lists 332 packaged PNG textures; 34 ambientCG ORM maps are explicitly `notPackaged`
+offline inputs. CNA's TextureProcessor defaults to one mip and NoChange, and the existing compiled
+furniture/lightmap assets confirmed that many runtime textures previously had only level zero.
+
+The existing `assets-src/Textures/.cna-content.json` now requests offline mip generation for all
+332 packaged textures. The 80 already registered material/sky assets retain their generator-owned
+parameters; 218 absent registrations were added, and the two 16-pixel fallback maps now request
+mips too. The new `tools/ci/check_web_materials.py` gate checks manifest/config parity, every
+world-material albedo/normal reference and runtime sources for MRT, stencil, geometry and
+tessellation APIs. Its negative-case self-test and live repository scan pass. The native content
+target rebuilt 252 textures, skipped 114 and failed none. A direct header audit of every packaged
+`.cnb` confirms format id 1 (RGBA8/`SurfaceFormat::Color`) and the exact full mip count, 332/332;
+the compiled packaged texture total is 149.44 MiB. This is a content size measurement, not a GPU
+performance claim. The later `HOUSE-02850` and `HOUSE-02898` still own Web pack and target checks.
+The native `cna-house` target built, all 1474 unit tests passed, and the full static gate passed
+every check except its pre-existing root-layout complaint about another session's `.claude`
+directory. The strict-XNA gate checked 341 translation units clean with four parallel jobs.
+
+The plan now has 47 open MUST tasks, 72.25 realistic and 97.4 pessimistic hours remaining. Adding
+154 completed task-hours since `HOUSE-03206` projects 251.4 hours, 28.6 below the hard ceiling.
+`HOUSE-02892` is next, split into at most four-hour slices under R7. All owned compilation and
+checks remain pinned to CPU 0–3 with at most four workers.
+
+---
+
 # Emscripten minimal-scene handoff — 2026-09-25 (`HOUSE-02891`)
 
 R11/R13 selected the dependency-unblocked M14 Web bring-up after `HOUSE-02843`. The `web` preset

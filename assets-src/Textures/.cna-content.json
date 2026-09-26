@@ -6,7 +6,7 @@
       "parameters": {
         "generateMipmaps": {
           "type": "bool",
-          "value": false
+          "value": true
         },
         "premultiplyAlpha": {
           "type": "bool",
@@ -18,7 +18,7 @@
       "parameters": {
         "generateMipmaps": {
           "type": "bool",
-          "value": false
+          "value": true
         },
         "premultiplyAlpha": {
           "type": "bool",
@@ -984,6 +984,1506 @@
           "type": "bool",
           "value": true
         }
+      }
+    },
+    "Furniture/Decoration/abstract_13.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Furniture/Decoration/abstract_14.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Furniture/Decoration/abstract_15.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Furniture/Decoration/abstract_16.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Furniture/Foyer/console_table_albedo.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Furniture/Foyer/upholstered_armchair_albedo.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Furniture/LivingRoom/cushion_green_circles.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Furniture/LivingRoom/cushion_purple_stripe.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Furniture/LivingRoom/cushion_purple_yellow.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Furniture/LivingRoom/grey_room_palette.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Furniture/LivingRoom/lamp_shade_stripes.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Furniture/LivingRoom/living_sofa_frame.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Furniture/LivingRoom/living_sofa_fringe.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Furniture/LivingRoom/living_sofa_leather.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Furniture/LivingRoom/living_sofa_paisley.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Furniture/LivingRoom/living_sofa_stripe.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Furniture/LivingRoom/plant_leaf.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Furniture/LivingRoom/rug_charcoal.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Furniture/LivingRoom/white_room_palette.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Vegetation/flower.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Vegetation/grass.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Vegetation/grass_medium_02.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Vegetation/jacaranda_branches.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Vegetation/jacaranda_trunk.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Vegetation/periwinkle.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Vegetation/searsia_lucida.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Vegetation/shrub_04.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Vegetation/shrub_foliage.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Vegetation/tree_foliage.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Vegetation/tree_small_02_branches.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Vegetation/tree_small_02_leaves.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Vegetation/tree_small_02_trunk.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/B1_CELLAR_LM_LG_B1_CELLAR_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/B1_CINEMA_LM_LG_B1_CINEMA_AISLE.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/B1_CINEMA_LM_LG_B1_CINEMA_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/B1_ELECTRICAL_LM_LG_B1_ELECTRICAL_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/B1_GYM_LM_LG_B1_GYM_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/B1_GYM_LM_LG_B1_GYM_MIRROR.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/B1_HALL_LM_LG_B1_HALL_MAIN_C.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/B1_HALL_LM_LG_B1_HALL_MAIN_N.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/B1_HALL_LM_LG_B1_HALL_MAIN_S.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/B1_HOBBY_LM_LG_B1_HOBBY_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/B1_HOBBY_LM_LG_B1_HOBBY_TABLE.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/B1_LAUNDRY2_LM_LG_B1_LAUNDRY2_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/B1_MECHANICAL_LM_LG_B1_MECHANICAL_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/B1_STAIR_LM_LG_B1_STAIR_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/B1_STOR1_LM_LG_B1_STOR1_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/B1_STOR2_LM_LG_B1_STOR2_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/B1_UNDERSTAIR_LM_LG_B1_UNDERSTAIR_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/B1_UTILITY_LM_LG_B1_UTILITY_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/B1_WC7_LM_LG_B1_WC7_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/B1_WORKSHOP_LM_LG_B1_WORKSHOP_BENCH.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/B1_WORKSHOP_LM_LG_B1_WORKSHOP_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_BUTLERS_LM_LG_L0_BUTLERS_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_CLOSET_W_LM_LG_L0_CLOSET_W_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_DINING_LM_LG_L0_DINING_CHANDELIER.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_DINING_LM_LG_L0_DINING_SIDE.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_FAMILY_LM_LG_L0_FAMILY_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_FAMILY_LM_LG_L0_FAMILY_MEDIA.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_FAMILY_LM_LG_L0_FAMILY_READING.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_FOYER_LM_LG_L0_FOYER_ACCENT.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_FOYER_LM_LG_L0_FOYER_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_FOYER_LM_LG_L0_PORCH_LANTERN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_GARAGE_LM_LG_EXT_GARAGE_LANTERN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_GARAGE_LM_LG_L0_GARAGE_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_GARAGE_LM_LG_L0_GARAGE_OPENER.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_GARAGE_LOFT_LM_LG_L0_GARAGE_LOFT_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_HALL_LM_LG_L0_HALL_GALLERY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_HALL_LM_LG_L0_HALL_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_ISLAND.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_SINK.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_UNDERCAB.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_LAUNDRY_LM_LG_L0_LAUNDRY_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_LIVING_LM_LG_L0_LIVING_FIRE.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_LIVING_LM_LG_L0_LIVING_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_LIVING_LM_LG_L0_LIVING_PIANO.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_LIVING_LM_LG_L0_PORCH_LANTERN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_MUDROOM_LM_LG_L0_MUDROOM_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_OFFICE_LM_LG_L0_OFFICE_DESK.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_OFFICE_LM_LG_L0_OFFICE_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_PANTRY_LM_LG_L0_PANTRY_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_PORCH_LANTERN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_STEP.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_STOR_LM_LG_L0_STOR_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_SUNROOM_LM_LG_EXT_TERRACE_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_SUNROOM_LM_LG_L0_SUNROOM_BAR.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_SUNROOM_LM_LG_L0_SUNROOM_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_WC1_LM_LG_L0_WC1_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L0_WC2_LM_LG_L0_WC2_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_BATH2_LM_LG_L1_BATH2_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_BATH2_LM_LG_L1_BATH2_VANITY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_BATH3_LM_LG_L1_BATH3_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_BATH3_LM_LG_L1_BATH3_VANITY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_BED2_LM_LG_L1_BED2_DESK.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_BED2_LM_LG_L1_BED2_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_BED3_LM_LG_EXT_FACADE_UPLIGHT.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_BED3_LM_LG_L1_BED3_BEDSIDE.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_BED3_LM_LG_L1_BED3_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_BED4_LM_LG_EXT_FACADE_UPLIGHT.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_BED4_LM_LG_L1_BED4_DESK.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_BED4_LM_LG_L1_BED4_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_BED5_LM_LG_EXT_FACADE_UPLIGHT.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_BED5_LM_LG_L1_BED5_BEDSIDE.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_BED5_LM_LG_L1_BED5_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_CLOSET_2_LM_LG_L1_CLOSET_2_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_CLOSET_3_LM_LG_L1_CLOSET_3_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_HALL_LM_LG_L1_HALL_ART.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_HALL_LM_LG_L1_HALL_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_HALL_W_LM_LG_L1_HALL_W_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_HALL_W_LM_LG_L1_HALL_W_NIGHT.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_LANDING_LM_LG_L1_BALCONY_FRONT_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_LANDING_LM_LG_L1_LANDING_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_LANDING_LM_LG_L1_LANDING_SEAT.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_LINEN_LM_LG_L1_LINEN_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_MASTER_BATH_LM_LG_L1_MASTER_BATH_BATH.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_MASTER_BATH_LM_LG_L1_MASTER_BATH_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_MASTER_BATH_LM_LG_L1_MASTER_BATH_VANITY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_MASTER_BED_LM_LG_L1_MASTER_BED_BEDSIDE.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_MASTER_BED_LM_LG_L1_MASTER_BED_DRESSER.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_MASTER_BED_LM_LG_L1_MASTER_BED_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_MASTER_BED_LM_LG_L1_MASTER_BED_SEATING.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_MASTER_CLOSET_LM_LG_L1_MASTER_CLOSET_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_MASTER_CLOSET_LM_LG_L1_MASTER_CLOSET_MIRROR.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_STAIR_MAIN_LM_LG_EXT_FACADE_UPLIGHT.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_STAIR_MAIN_LM_LG_L1_STAIR_MAIN_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_STOR_LM_LG_L1_STOR_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_WC3_LM_LG_L1_WC3_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L1_WC4_LM_LG_L1_WC4_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_BATH4_LM_LG_L2_BATH4_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_BATH4_LM_LG_L2_BATH4_VANITY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_BATH5_LM_LG_L2_BATH5_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_BATH5_LM_LG_L2_BATH5_VANITY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_BED6_LM_LG_EXT_FACADE_UPLIGHT.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_BED6_LM_LG_L2_BED6_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_BED6_LM_LG_L2_BED6_SEWING.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_BED7_LM_LG_L2_BED7_BEDSIDE.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_BED7_LM_LG_L2_BED7_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_CLOSET_4_LM_LG_L2_CLOSET_4_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_GAMES_LM_LG_L2_GAMES_ARCADE.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_GAMES_LM_LG_L2_GAMES_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_GAMES_LM_LG_L2_GAMES_TABLE.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_HALL_LM_LG_L2_HALL_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_HALL_LM_LG_L2_HALL_NIGHT.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_HALL_W_LM_LG_L2_HALL_W_ART.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_HALL_W_LM_LG_L2_HALL_W_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_LANDING_LM_LG_L2_LANDING_JULIET.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_LANDING_LM_LG_L2_LANDING_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_LIBRARY_LM_LG_EXT_FACADE_UPLIGHT.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_LIBRARY_LM_LG_L2_LIBRARY_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_LIBRARY_LM_LG_L2_LIBRARY_READING.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_LIBRARY_LM_LG_L2_LIBRARY_SHELVES.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_LINEN2_LM_LG_L2_LINEN2_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_SITTING_LM_LG_L2_SITTING_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_SITTING_LM_LG_L2_SITTING_READING.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_STAIR_ATTIC_LM_LG_EXT_FACADE_UPLIGHT.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_STAIR_ATTIC_LM_LG_L2_STAIR_ATTIC_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_STAIR_MAIN_LM_LG_EXT_FACADE_UPLIGHT.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_STAIR_MAIN_LM_LG_L2_STAIR_MAIN_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_STOR2_LM_LG_L2_STOR2_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_WC5_LM_LG_L2_WC5_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L2_WC6_LM_LG_L2_WC6_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L3_ROOM_LM_LG_L3_ROOM_DESK.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L3_ROOM_LM_LG_L3_ROOM_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L3_STAIR_HEAD_LM_LG_L3_STAIR_HEAD_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L3_STORE_E_LM_LG_L3_STORE_E_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L3_STORE_N_LM_LG_L3_STORE_N_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L3_STORE_S_LM_LG_L3_STORE_S_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Artificial/L3_STORE_W_LM_LG_L3_STORE_W_MAIN.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/B1_CELLAR_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/B1_CINEMA_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/B1_ELECTRICAL_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/B1_GYM_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/B1_HALL_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/B1_HOBBY_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/B1_LAUNDRY2_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/B1_MECHANICAL_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/B1_STAIR_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/B1_STOR1_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/B1_STOR2_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/B1_UNDERSTAIR_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/B1_UTILITY_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/B1_WC7_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/B1_WORKSHOP_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/CELL_FREEZER_INTERIOR_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/CELL_FRIDGE_INTERIOR_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L0_BUTLERS_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L0_CLOSET_W_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L0_DINING_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L0_FAMILY_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L0_FOYER_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L0_GARAGE_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L0_GARAGE_LOFT_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L0_HALL_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L0_KITCHEN_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L0_LAUNDRY_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L0_LIVING_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L0_MUDROOM_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L0_OFFICE_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L0_PANTRY_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L0_STAIR_MAIN_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L0_STOR_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L0_SUNROOM_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L0_WC1_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L0_WC2_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L1_BATH2_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L1_BATH3_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L1_BED2_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L1_BED3_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L1_BED4_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L1_BED5_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L1_CLOSET_2_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L1_CLOSET_3_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L1_HALL_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L1_HALL_W_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L1_LANDING_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L1_LINEN_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L1_MASTER_BATH_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L1_MASTER_BED_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L1_MASTER_CLOSET_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L1_STAIR_MAIN_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L1_STOR_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L1_WC3_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L1_WC4_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L2_BATH4_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L2_BATH5_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L2_BED6_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L2_BED7_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L2_CLOSET_4_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L2_GAMES_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L2_HALL_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L2_HALL_W_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L2_LANDING_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L2_LIBRARY_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L2_LINEN2_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L2_SITTING_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L2_STAIR_ATTIC_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L2_STAIR_MAIN_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L2_STOR2_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L2_WC5_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L2_WC6_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L3_ROOM_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L3_STAIR_HEAD_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L3_STORE_E_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L3_STORE_N_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L3_STORE_S_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Lightmaps/Daylight/L3_STORE_W_LM_DAY.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Smoke/quadrants.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
+      }
+    },
+    "Weather/rain_streak.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "textureFormat": { "type": "string", "value": "Color" }
       }
     }
   }

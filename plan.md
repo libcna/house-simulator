@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **48 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 61.75 / 72.75 / 98 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5, M7, M9 and M12 passed; M8 listening and M10 baseline work are environment-blocked.** Next: `HOUSE-02848` |
+| Active plan | **47 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 61.5 / 72.25 / 97.4 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5, M7, M9 and M12 passed; M8 listening and M10 baseline work are environment-blocked.** Next: `HOUSE-02892` (split under R7) |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -1458,8 +1458,19 @@ limitation (reload the page), recorded by `HOUSE-02904`.
               `688565ad1296748ab851350b78bbf8d53294113ec708362c6c82e6956c7af404`
       trace: absorbs `HOUSE-02855` (the spike)
 
-- [ ] HOUSE-02848 — Lint the material data: every runtime texture is `SurfaceFormat::Color` with pre-generated mips; no MRT, stencil, geometry or tessellation stage
+- [x] HOUSE-02848 — Lint the material data: every runtime texture is `SurfaceFormat::Color` with pre-generated mips; no MRT, stencil, geometry or tessellation stage
       dep: HOUSE-00110 · sys: ci · plat: CI · pri: MUST · zone: all · adv: D10b · est: 0.5
+      done: the manifest-backed gate checks every one of the 332 packaged PNG textures, their
+            content configuration and all world-material albedo/normal references. It rejects
+            absent mip generation, non-Color format overrides and runtime MRT/stencil/geometry/
+            tessellation APIs. The 218 previously unconfigured packaged textures plus two
+            fallback textures now request complete offline mip chains; the 34 ORM authoring maps
+            explicitly marked notPackaged remain outside the runtime set.
+      verify: gate self-test and repository scan pass; native content build recompiles 252 and
+              skips 114 textures with no failure; direct CNB-header audit confirms all 332
+              packaged textures are RGBA8 with full mip chains (149.44 MiB compiled total);
+              native `cna-house` builds and 1474/1474 unit tests pass. The complete CI gate has
+              only the pre-existing root-layout complaint about another session's `.claude`
       trace: absorbs `HOUSE-02849`
 
 - [ ] HOUSE-02892 — Build the full game for Emscripten and fix every compile and link error
@@ -1977,15 +1988,15 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M11 Final defect pass | 3 | 11 | **3** | 2.75 | **3.25** | 3.6 | — |
 | M12 Representative tests | 4 | 5 | **0** | 0 | **0** | 0 | — |
 | M13 Linux desktop release | 10 | 13.25 | **8** | 8.75 | **10.25** | 11.25 | — |
-| M14 Web | 17 | 24.75 | **10** | 13.5 | **16** | 23.6 | R-B +6 |
+| M14 Web | 17 | 24.75 | **9** | 13.25 | **15.5** | 23.05 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **48** | **61.75** | **72.75** | **97.95** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **47** | **61.5** | **72.25** | **97.4** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-182.05 h. Adding the 153.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-251.45 h, 28.55 h under the limit. That margin is
+182.6 h. Adding the 154 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+251.4 h, 28.6 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |
@@ -2000,7 +2011,7 @@ small on purpose: the ceiling is a limit, not a budget to fill.
 4 h (≈ 18); furnishing kit 19 h (18–22); whole-house furnishing 31 h (30–38); lighting 19.75 h
 (18–22); C4/C5 polish 19.75 h (18–24); environment 4.75 h; audio 9 h (8–10); shell 5.25 h
 (8–10); performance 9.5 h (≈ 10); final polish 7 h (6–8); tests 3.5 h (≈ 5); Linux 10.25 h
-(11–13); Web 16 h (18–22); Android 23.75 h (23–27); release 6.5 h (6–8).
+(11–13); Web 15.5 h (18–22); Android 23.75 h (23–27); release 6.5 h (6–8).
 
 **Where the 92.5 h came from** (realistic, before → now):
 
