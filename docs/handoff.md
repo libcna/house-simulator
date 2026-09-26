@@ -1,3 +1,44 @@
+# Floating touch controls handoff — 2026-09-26 (`HOUSE-02992`)
+
+R11/R13 selected the next dependency-unblocked desktop-side M15 task after `HOUSE-02991`;
+the upstream Android graphics blocker BL-13 does not close or prevent this readiness work.
+The plan had a local ordering contradiction: `HOUSE-02992` required tuning with
+`--force-touch`, while the dependent `HOUSE-02995` assigned creation of that flag to
+itself. The targeted Planning correction moves only flag creation to `02992`.
+`02995` remains responsible for the two buttons, Platform-driven touch-only HUD visibility,
+and a 20:9 reference screenshot. No optional or historical controls were revived.
+
+The existing `TouchSource` now has two 160-vu right-corner button reservations and publishes
+the live floating-stick origin/thumb. The existing HUD SpriteBatch and white texel draw a
+180-vu ring with an analogue thumb only while the stick is held. `--force-touch` selects
+the touch source on Linux and feeds one mouse finger through the same `Apply` path; Android
+selects its real XNA TouchPanel source without any new framework. `touchLookSensitivity`
+is an independently persisted, backwards-compatible setting with a 0.2–4× clamp; the
+existing mouse setting is unchanged. Two new input tests plus CLI/settings tests pass.
+
+Xvfb visual evidence: `/tmp/house-02992-active2.png` shows the held ring at 1600×900,
+and `/tmp/house-02992-look5.png` shows a genuine 200-pixel right-half drag rotating the
+camera in the same walk scene. The latter used a 2560×1440 virtual display so both
+window-relative pointer positions were inside the 1600×900 game window. A first attempt
+on 1600×900 did not rotate because the window extended past the virtual display edge;
+that was a test-harness coordinate error, not a game defect. The scene's dark adjacent
+room is unchanged by this input/HUD task and is not claimed as a lighting fix.
+
+This leaves 42 open MUST tasks, 60.5 realistic and 84.55 pessimistic hours. R14 projects
+166.5 completed task-hours plus 84.55 remaining = 251.05 h, 28.95 below 280. Next
+dependency-unblocked task: `HOUSE-02995` (touch buttons/HUD visibility). The existing
+`build/` and `build-consumer/` trees, shared ccache and four-worker cap remain mandatory.
+
+Verification: both native targets and the full Web game built warning-clean with `-j4` and
+CPU affinity 0–3. The complete native unit label passed 1483/1483; the focused
+input/CLI/settings group passed 33/33. `tools/ci/run_checks.sh` passed every gate
+except root layout: the pre-existing user-owned `.claude` entry is still present
+(not staged or modified). Strict XNA passed 343 translation units under explicit
+`HOUSE_XNA_STRICT_JOBS=4`. The Web linker repeated its known 391-MB bundle warning,
+owned by `HOUSE-02850`; that is not a new failure from this touch task.
+
+---
+
 # Touch input source handoff — 2026-09-26 (`HOUSE-02991`)
 
 R11/R13 chose the next dependency-unblocked desktop-side M15 Android readiness task after

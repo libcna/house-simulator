@@ -3,6 +3,19 @@
 This is a running validation record, not a claim that the Linux, Web or Android DONE checklists
 have passed. `plan.md` remains the release authority.
 
+## Desktop touch-control preview — HOUSE-02992 (2026-09-26)
+
+On Linux, `--force-touch` selects the XNA touch input source and emulates one finger from
+the mouse for desktop tuning. The left-bottom floating stick uses a 180-virtual-unit
+radius and analogue magnitude; the right half drives look except for the two reserved
+160-vu button corners. Its look sensitivity is separate from mouse sensitivity in the
+backward-compatible settings JSON. The HUD ring reuses the current SpriteBatch/texel.
+Xvfb captures `/tmp/house-02992-active2.png` and `/tmp/house-02992-look5.png` prove the
+active ring and a 200-pixel right-half drag changing the walk camera respectively.
+`HOUSE-02995` still owns actual touch buttons, the Platform-driven visibility rule and
+20:9 UI reference; `HOUSE-03723` still owns touch-only browser verification. This is not
+Android device validation; BL-13 remains open.
+
 ## Android desktop-side touch input — HOUSE-02991 (2026-09-26)
 
 The new XNA `TouchPanel`-backed `TouchSource` is unit-tested with recorded multi-finger

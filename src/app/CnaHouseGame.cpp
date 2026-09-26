@@ -30,6 +30,7 @@
 #include "Microsoft/Xna/Framework/Graphics/RenderTarget2D.hpp"
 #include "Microsoft/Xna/Framework/Graphics/SamplerState.hpp"
 #include "Microsoft/Xna/Framework/Graphics/SpriteBatch.hpp"
+#include "Microsoft/Xna/Framework/Graphics/SpriteEffects.hpp"
 #include "Microsoft/Xna/Framework/Graphics/SpriteFont.hpp"
 #include "Microsoft/Xna/Framework/Graphics/SpriteSortMode.hpp"
 #include "Microsoft/Xna/Framework/Graphics/Texture2D.hpp"
@@ -72,6 +73,36 @@ namespace cnahouse::app
         constexpr Microsoft::Xna::Framework::Color ClearColour()
         {
             return Microsoft::Xna::Framework::Color(18, 20, 24, 255);
+        }
+
+        void DrawTouchRing(Microsoft::Xna::Framework::Graphics::SpriteBatch& batch,
+                           const Microsoft::Xna::Framework::Graphics::Texture2D& texel,
+                           Microsoft::Xna::Framework::Vector2 centre,
+                           float radius,
+                           Microsoft::Xna::Framework::Color colour)
+        {
+            using Microsoft::Xna::Framework::Vector2;
+            using Microsoft::Xna::Framework::Graphics::SpriteEffects;
+            constexpr int kSegments = 24;
+            constexpr float kTau = 6.28318530718F;
+            for (int segment = 0; segment < kSegments; ++segment)
+            {
+                const float first = kTau * static_cast<float>(segment) / static_cast<float>(kSegments);
+                const float second = kTau * static_cast<float>(segment + 1) / static_cast<float>(kSegments);
+                const Vector2 start(centre.X + radius * std::cos(first), centre.Y + radius * std::sin(first));
+                const Vector2 end(centre.X + radius * std::cos(second), centre.Y + radius * std::sin(second));
+                const float dx = end.X - start.X;
+                const float dy = end.Y - start.Y;
+                batch.Draw(texel,
+                           start,
+                           std::nullopt,
+                           colour,
+                           std::atan2(dy, dx),
+                           Vector2(0.0F, 0.5F),
+                           Vector2(std::sqrt(dx * dx + dy * dy), 3.0F),
+                           SpriteEffects::None,
+                           0.0F);
+            }
         }
 
         void SetWallTimeOfDay(environment::SimClock& clock, float hours) noexcept
@@ -222,6 +253,8 @@ namespace cnahouse::app
         {
             return game_->contentLoaded_ && game_->hud_ != nullptr &&
                    (game_->hud_->font.has_value() ||
+                    ((game_->options_.forceTouch || game_->platform_.target == BuildTarget::Android) &&
+                     game_->touchInput_.StickOrigin().has_value()) ||
                     (game_->lighting_.has_value() && game_->lighting_->CameraExposureTintAlpha() > 0.0F));
         }
 
@@ -302,6 +335,13 @@ namespace cnahouse::app
         inputConfig.viewportWidth = settings_.backBufferWidth;
         inputConfig.viewportHeight = settings_.backBufferHeight;
         input_.SetConfig(inputConfig);
+        player::TouchConfig touchConfig;
+        touchConfig.viewportWidth = settings_.backBufferWidth;
+        touchConfig.viewportHeight = settings_.backBufferHeight;
+        touchConfig.invertY = settings_.invertY;
+        touchConfig.lookSensitivity = settings_.touchLookSensitivity;
+        touchInput_.SetConfig(touchConfig);
+        touchInput_.SetMouseEmulation(options_.forceTouch);
 
         if (options_.screenshot.has_value())
         {
@@ -940,6 +980,12 @@ namespace cnahouse::app
         inputConfig.sensitivity = settings_.mouseSensitivity;
         inputConfig.invertY = settings_.invertY;
         input_.SetConfig(inputConfig);
+        player::TouchConfig touchConfig;
+        touchConfig.viewportWidth = settings_.backBufferWidth;
+        touchConfig.viewportHeight = settings_.backBufferHeight;
+        touchConfig.invertY = settings_.invertY;
+        touchConfig.lookSensitivity = settings_.touchLookSensitivity;
+        touchInput_.SetConfig(touchConfig);
         if (walking_)
         {
             player_.fastWalk = settings_.fastWalk;
@@ -983,6 +1029,12 @@ namespace cnahouse::app
             inputConfig.viewportWidth = settings_.backBufferWidth;
             inputConfig.viewportHeight = settings_.backBufferHeight;
             input_.SetConfig(inputConfig);
+            player::TouchConfig touchConfig;
+            touchConfig.viewportWidth = settings_.backBufferWidth;
+            touchConfig.viewportHeight = settings_.backBufferHeight;
+            touchConfig.invertY = settings_.invertY;
+            touchConfig.lookSensitivity = settings_.touchLookSensitivity;
+            touchInput_.SetConfig(touchConfig);
             view_.Camera().SetViewport(settings_.backBufferWidth, settings_.backBufferHeight);
         }
 
@@ -1629,7 +1681,8 @@ namespace cnahouse::app
             // sites, because whichever ran last would otherwise have the final say.
             player::CaptureRequest capture;
             capture.windowActive = getIsActiveProperty();
-            capture.menuOpen = !menus_.Empty();
+            capture.menuOpen =
+                !menus_.Empty() || options_.forceTouch || platform_.target == BuildTarget::Android;
             capture.freeCursorHeld = Input().Current().freeCursorHeld;
             if (mouseCapture_.Update(capture))
             {
@@ -2155,6 +2208,32 @@ namespace cnahouse::app
                                  Microsoft::Xna::Framework::Rectangle(
                                      0, 0, viewport.getWidthProperty(), viewport.getHeightProperty()),
                                  Microsoft::Xna::Framework::Color(0.0F, 0.0F, 0.0F, alpha));
+            }
+        }
+        if (walking_ && menus_.Empty() && (options_.forceTouch || platform_.target == BuildTarget::Android))
+        {
+            const auto origin = touchInput_.StickOrigin();
+            const auto position = touchInput_.StickPosition();
+            if (origin && position)
+            {
+                const float width = static_cast<float>(std::max(settings_.backBufferWidth, 1));
+                const float height = static_cast<float>(std::max(settings_.backBufferHeight, 1));
+                const float radius = 180.0F * std::min(width / 1600.0F, height / 900.0F);
+                const float dx = position->X - origin->X;
+                const float dy = position->Y - origin->Y;
+                const float length = std::sqrt(dx * dx + dy * dy);
+                const float factor = length > radius ? radius / length : 1.0F;
+                DrawTouchRing(hud_->batch,
+                              hud_->exposureTint,
+                              *origin,
+                              radius,
+                              Microsoft::Xna::Framework::Color(0.25F, 0.75F, 0.9F, 0.45F));
+                DrawTouchRing(
+                    hud_->batch,
+                    hud_->exposureTint,
+                    Microsoft::Xna::Framework::Vector2(origin->X + dx * factor, origin->Y + dy * factor),
+                    28.0F * std::min(width / 1600.0F, height / 900.0F),
+                    Microsoft::Xna::Framework::Color(0.45F, 0.95F, 1.0F, 0.85F));
             }
         }
         if (!hud_->font.has_value())

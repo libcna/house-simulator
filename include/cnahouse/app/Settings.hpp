@@ -68,6 +68,8 @@ namespace cnahouse::app
         /// A MULTIPLIER and not an angle: the rad/px is `InputConfig::kRadiansPerPixel`, and
         /// exposing both would let a player find two ways to mean the same thing.
         float mouseSensitivity = 1.0f;
+        /// @brief Touch look multiplier, independent of the desktop mouse setting.
+        float touchLookSensitivity = 1.0f;
         bool invertY = false;
 
         /// @brief §44's *"optional raw-ish smoothing over 2 frames, default off"*.

@@ -149,6 +149,13 @@ namespace cnahouse::app
         }
         settings.mouseSensitivity = *sensitivity;
 
+        auto touchSensitivity = root.OptionalFloat("touchLookSensitivity", settings.touchLookSensitivity);
+        if (!touchSensitivity)
+        {
+            return touchSensitivity.Error();
+        }
+        settings.touchLookSensitivity = *touchSensitivity;
+
         auto smoothing = root.OptionalBool("lookSmoothing", settings.lookSmoothing);
         if (!smoothing)
         {
@@ -373,6 +380,11 @@ namespace cnahouse::app
             mouseSensitivity = std::clamp(mouseSensitivity, 0.2f, 4.0f);
             note("mouseSensitivity");
         }
+        if (touchLookSensitivity < 0.2f || touchLookSensitivity > 4.0f)
+        {
+            touchLookSensitivity = std::clamp(touchLookSensitivity, 0.2f, 4.0f);
+            note("touchLookSensitivity");
+        }
         // §44's band again, and this one is the CAMERA's own constants rather than a copy of
         // them: `player::FirstPersonCamera` clamps whatever it is handed to 55-95 too, so a file
         // outside the band used to be corrected silently by the camera after being accepted here.
@@ -439,6 +451,7 @@ namespace cnahouse::app
                            "  \"ambienceVolume\": {},\n"
                            "  \"weatherVolume\": {},\n"
                            "  \"mouseSensitivity\": {},\n"
+                           "  \"touchLookSensitivity\": {},\n"
                            "  \"invertY\": {},\n"
                            "  \"lookSmoothing\": {},\n"
                            "  \"headBob\": \"{}\",\n"
@@ -462,6 +475,7 @@ namespace cnahouse::app
                            ambienceVolume,
                            weatherVolume,
                            mouseSensitivity,
+                           touchLookSensitivity,
                            invertY ? "true" : "false",
                            lookSmoothing ? "true" : "false",
                            HeadBobLevelName(headBob),

@@ -160,6 +160,7 @@ namespace cnahouse::app
                "  --light-off=<group>         Turn one authored group off for deterministic review;\n"
                "                              repeat for additional groups\n"
                "  --no-audio                  Start with audio disabled\n"
+               "  --force-touch               Emulate one touch finger with the desktop mouse\n"
                "  --no-cull                   Draw everything resident instead of §25's visible\n"
                "                              set -- the same switch as the `cull off` command\n"
                "  --debug-blockout-materials Use the diagnostic material palette in the walk scene\n"
@@ -202,6 +203,10 @@ namespace cnahouse::app
             else if (argument.name == "--no-audio")
             {
                 options.noAudio = true;
+            }
+            else if (argument.name == "--force-touch")
+            {
+                options.forceTouch = true;
             }
             else if (argument.name == "--no-cull")
             {

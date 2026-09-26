@@ -29,6 +29,7 @@ namespace
         // for anyone who did not know to ask for it.
         EXPECT_FALSE(options->quality.has_value());
         EXPECT_FALSE(options->headless);
+        EXPECT_FALSE(options->forceTouch);
         EXPECT_FALSE(options->seed.has_value());
     }
 
@@ -38,6 +39,7 @@ namespace
                               "--tier=s",
                               "--headless",
                               "--no-audio",
+                              "--force-touch",
                               "--debug-blockout-materials",
                               "--scene=kitchen",
                               "--seed=12345",
@@ -54,6 +56,7 @@ namespace
         EXPECT_EQ(options->tier, RenderTier::S);
         EXPECT_TRUE(options->headless);
         EXPECT_TRUE(options->noAudio);
+        EXPECT_TRUE(options->forceTouch);
         EXPECT_TRUE(options->debugBlockoutMaterials);
         EXPECT_EQ(options->scene.value_or(""), "kitchen");
         EXPECT_EQ(options->seed.value_or(0), 12345u);

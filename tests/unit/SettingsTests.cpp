@@ -46,6 +46,7 @@ namespace
         written.ambienceVolume = 0.55f;
         written.weatherVolume = 0.45f;
         written.mouseSensitivity = 1.5f;
+        written.touchLookSensitivity = 2.2f;
         written.invertY = true;
         written.fieldOfView = 90.0f;
         written.headBob = cnahouse::player::HeadBobLevel::Off;
@@ -66,6 +67,7 @@ namespace
         EXPECT_FLOAT_EQ(read->ambienceVolume, 0.55f);
         EXPECT_FLOAT_EQ(read->weatherVolume, 0.45f);
         EXPECT_FLOAT_EQ(read->mouseSensitivity, 1.5f);
+        EXPECT_FLOAT_EQ(read->touchLookSensitivity, 2.2f);
         EXPECT_TRUE(read->invertY);
         EXPECT_FLOAT_EQ(read->fieldOfView, 90.0f);
         EXPECT_EQ(read->headBob, cnahouse::player::HeadBobLevel::Off)
@@ -315,6 +317,7 @@ namespace
         written.ambienceVolume = 0.33F;
         written.weatherVolume = 0.44F;
         written.mouseSensitivity = 2.3F;
+        written.touchLookSensitivity = 1.7F;
         written.invertY = true;
         written.lookSmoothing = true;
         written.fieldOfView = 85.0F;
@@ -340,6 +343,7 @@ namespace
         EXPECT_FLOAT_EQ(read->ambienceVolume, written.ambienceVolume);
         EXPECT_FLOAT_EQ(read->weatherVolume, written.weatherVolume);
         EXPECT_FLOAT_EQ(read->mouseSensitivity, written.mouseSensitivity);
+        EXPECT_FLOAT_EQ(read->touchLookSensitivity, written.touchLookSensitivity);
         EXPECT_EQ(read->invertY, written.invertY);
         EXPECT_EQ(read->lookSmoothing, written.lookSmoothing);
         EXPECT_FLOAT_EQ(read->fieldOfView, written.fieldOfView);
@@ -363,6 +367,7 @@ namespace
         low.ambienceVolume = -1.0F;
         low.weatherVolume = -1.0F;
         low.mouseSensitivity = 0.0F;
+        low.touchLookSensitivity = 0.0F;
         low.fieldOfView = 0.0F;
         low.dayLengthRealMinutes = -1.0F;
         low.fixedTimeOfDayHours = -2.0F;
@@ -377,6 +382,7 @@ namespace
         EXPECT_FLOAT_EQ(low.ambienceVolume, 0.0F);
         EXPECT_FLOAT_EQ(low.weatherVolume, 0.0F);
         EXPECT_FLOAT_EQ(low.mouseSensitivity, 0.2F);
+        EXPECT_FLOAT_EQ(low.touchLookSensitivity, 0.2F);
         EXPECT_FLOAT_EQ(low.fieldOfView, cnahouse::player::kMinFovDegrees);
         EXPECT_FLOAT_EQ(low.dayLengthRealMinutes,
                         static_cast<float>(cnahouse::environment::kMinDayLengthRealMinutes));
@@ -393,6 +399,7 @@ namespace
         high.ambienceVolume = 2.0F;
         high.weatherVolume = 2.0F;
         high.mouseSensitivity = 5.0F;
+        high.touchLookSensitivity = 5.0F;
         high.fieldOfView = 180.0F;
         high.dayLengthRealMinutes = 99999.0F;
         high.fixedTimeOfDayHours = 24.0F;
@@ -406,6 +413,7 @@ namespace
         EXPECT_FLOAT_EQ(high.ambienceVolume, 1.0F);
         EXPECT_FLOAT_EQ(high.weatherVolume, 1.0F);
         EXPECT_FLOAT_EQ(high.mouseSensitivity, 4.0F);
+        EXPECT_FLOAT_EQ(high.touchLookSensitivity, 4.0F);
         EXPECT_FLOAT_EQ(high.fieldOfView, cnahouse::player::kMaxFovDegrees);
         EXPECT_FLOAT_EQ(high.dayLengthRealMinutes,
                         static_cast<float>(cnahouse::environment::kMaxDayLengthRealMinutes));

@@ -4,7 +4,10 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <vector>
 
+#include "Microsoft/Xna/Framework/Input/ButtonState.hpp"
+#include "Microsoft/Xna/Framework/Input/Mouse.hpp"
 #include "Microsoft/Xna/Framework/Input/Touch/TouchLocationState.hpp"
 #include "Microsoft/Xna/Framework/Input/Touch/TouchPanel.hpp"
 
@@ -39,7 +42,33 @@ namespace cnahouse::player
 
     void TouchSource::Update(float deltaSeconds)
     {
+        if (emulateMouse_)
+        {
+            const auto mouse = Microsoft::Xna::Framework::Input::Mouse::GetState();
+            const bool down =
+                mouse.getLeftButtonProperty() == Microsoft::Xna::Framework::Input::ButtonState::Pressed;
+            const TouchCollection touches(
+                down ? std::vector<TouchLocation>{TouchLocation(
+                           1,
+                           mouseWasDown_ ? TouchLocationState::Moved : TouchLocationState::Pressed,
+                           Vector2(static_cast<float>(mouse.getXProperty()),
+                                   static_cast<float>(mouse.getYProperty())))}
+                     : std::vector<TouchLocation>{});
+            mouseWasDown_ = down;
+            Apply(touches, deltaSeconds);
+            return;
+        }
         Apply(Microsoft::Xna::Framework::Input::Touch::TouchPanel::GetState(), deltaSeconds);
+    }
+
+    std::optional<Microsoft::Xna::Framework::Vector2> TouchSource::StickOrigin() const noexcept
+    {
+        return stick_ ? std::optional<Vector2>(stick_->origin) : std::nullopt;
+    }
+
+    std::optional<Microsoft::Xna::Framework::Vector2> TouchSource::StickPosition() const noexcept
+    {
+        return stick_ ? std::optional<Vector2>(stick_->previous) : std::nullopt;
     }
 
     void TouchSource::Apply(const TouchCollection& touches, float deltaSeconds)
@@ -59,6 +88,8 @@ namespace cnahouse::player
 
         const float width = static_cast<float>(std::max(config_.viewportWidth, 1));
         const float height = static_cast<float>(std::max(config_.viewportHeight, 1));
+        const float scale = std::min(width / 1600.0F, height / 900.0F);
+        const float buttonInset = 160.0F * scale;
         for (int index = 0; index < touches.getCountProperty(); ++index)
         {
             const auto& touch = touches[static_cast<std::size_t>(index)];
@@ -97,7 +128,9 @@ namespace cnahouse::player
             {
                 stick_ = Finger{id, position, position};
             }
-            else if (!look_ && position.X >= width * 0.5F)
+            else if (!look_ && position.X >= width * 0.5F &&
+                     !(position.X >= width - buttonInset &&
+                       (position.Y < buttonInset || position.Y >= height - buttonInset)))
             {
                 look_ = Finger{id, position, position};
             }
@@ -107,10 +140,7 @@ namespace cnahouse::player
         {
             const auto* touch = ActiveFinger(touches, stick_->id);
             const Vector2 position = touch->getPositionProperty();
-            // The 180-virtual-unit radius is scaled by the same 1600x900 virtual viewport as
-            // the HUD. The next task adds its visible ring and desktop tuning, not a second
-            // movement interpretation.
-            const float scale = std::min(width / 1600.0F, height / 900.0F);
+            // The 180-virtual-unit radius scales with the 1600x900 virtual viewport.
             const float radius = std::max(180.0F * scale, 1.0F);
             const float dx = (position.X - stick_->origin.X) / radius;
             const float dy = (stick_->origin.Y - position.Y) / radius;
@@ -130,8 +160,8 @@ namespace cnahouse::player
             if (dx != 0.0F || dy != 0.0F)
             {
                 constexpr float kRadiansPerPixel = 0.0022F;
-                const float scale = kRadiansPerPixel * config_.lookSensitivity;
-                state_.look = Vector2(dx * scale, dy * scale * (config_.invertY ? -1.0F : 1.0F));
+                const float lookScale = kRadiansPerPixel * config_.lookSensitivity;
+                state_.look = Vector2(dx * lookScale, dy * lookScale * (config_.invertY ? -1.0F : 1.0F));
                 lookAvailable_ = true;
             }
         }

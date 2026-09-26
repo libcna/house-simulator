@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **43 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 53.1 / 62.5 / 86.75 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5, M7, M9 and M12 passed; M8 listening and M10 baseline work are environment-blocked.** Next: `HOUSE-02992` (touch stick/look region and desktop tuning) |
+| Active plan | **42 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 51.4 / 60.5 / 84.55 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5, M7, M9 and M12 passed; M8 listening and M10 baseline work are environment-blocked.** Next: `HOUSE-02995` (touch buttons and HUD visibility) |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -404,7 +404,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 0 | **done** · `HOUSE-02598` | D11 | 0 |
 | [M13](#m13--linux-desktop-release) — Linux desktop release | after M11 | 03701–03720 | 8 | `HOUSE-02797` | D9–D13 | 10.25 |
 | [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 6 | `HOUSE-02904` | D10b | 8 |
-| [M15](#m15--android) — Android | readiness: B · device: after M13 | 03751–03780 | 13 | `HOUSE-03041` (a BL-13 record does not close it) | D10c | 21.5 |
+| [M15](#m15--android) — Android | readiness: B · device: after M13 | 03751–03780 | 12 | `HOUSE-03041` (a BL-13 record does not close it) | D10c | 19.5 |
 | [M16](#m16--final-release) — Final release | last | 03781–03800 | 6 | **DONE** · `HOUSE-03078` | D9–D14 | 6.5 |
 
 Legacy ids 03121–03200 are unallocated and stay unused. The budgets are the sums of the tasks'
@@ -1605,14 +1605,28 @@ emulator, not a compatibility lab. Cosmetic platform luxuries are cut.
             and Web builds pass; the HUD, forced desktop selection and button regions remain
             `HOUSE-02992`/`HOUSE-02995`, not claimed here
 
-- [ ] HOUSE-02992 — The floating movement stick and the look region
+- [x] HOUSE-02992 — The floating movement stick and the look region
       dep: HOUSE-02991 · sys: ui · plat: AND · pri: MUST · zone: all · adv: D8, D10c · est: 2
       accept: (1) a floating stick bottom-left (180 vu) with analogue direction and magnitude; (2) a look region (the right half minus buttons) with its own sensitivity setting; (3) both tuned on desktop with `--force-touch`
       trace: absorbs `HOUSE-02993` (the look region) and the desktop half of `HOUSE-03001`
+      verify: native and full Web targets build with four jobs; 33 focused
+              input/CLI/settings tests and the 1483-test native unit suite pass.
+              Xvfb 1600×900 captured the held floating stick, and Xvfb 2560×1440
+              captured a right-half drag rotating the actual camera at 1600×900 back buffer.
+              The full static gate passes except the pre-existing user-owned `.claude`
+              layout entry; strict XNA recompilation passes 343 units with four workers
+      note: (2026-09-26) The source keeps independent roles, clips the analogue stick to
+            a 180-vu radius and excludes the two future button corners from look starts.
+            A 24-segment ring and movable thumb use the existing HUD SpriteBatch/white texel;
+            no new graphics or input framework was added. `touchLookSensitivity` is a separate,
+            backward-compatible persisted setting with 0.2–4× clamp. `--force-touch` selects
+            the source and turns a desktop mouse into one test finger. The flag was moved here
+            from the dependent `HOUSE-02995` because this task's desktop acceptance requires it;
+            see the targeted correction below. Android device proof remains gated by BL-13
 
-- [ ] HOUSE-02995 — The walk-speed and menu buttons, the touch-HUD visibility rule and the `--force-touch` flag
+- [ ] HOUSE-02995 — The walk-speed and menu buttons, the touch-HUD visibility rule and forced-touch integration
       dep: HOUSE-02992, HOUSE-00141, HOUSE-02527 · sys: ui · plat: ALL · pri: MUST · zone: all · adv: D10c · est: 1.5
-      accept: (1) a walk-speed toggle and a menu button, no camera toggle; (2) the HUD shows only when `hasTouch && !hasKeyboard`, so desktop never shows it; (3) `--force-touch` makes the HUD testable on Linux and proves that the `Platform` struct drives it; (4) its 20:9 screenshot joins `HOUSE-02527`'s UI render set
+      accept: (1) a walk-speed toggle and a menu button, no camera toggle; (2) the HUD shows only when `hasTouch && !hasKeyboard`, so desktop never shows it without the force flag; (3) the existing `--force-touch` makes the HUD testable on Linux and proves that the `Platform` struct drives it; (4) its 20:9 screenshot joins `HOUSE-02527`'s UI render set
       trace: absorbs `HOUSE-02996`, `HOUSE-02997`, `HOUSE-02955` and `HOUSE-03000`
 
 - [ ] HOUSE-02998 — Touch-friendly menu hit targets (≥ 88 vu) without changing the desktop layout
@@ -2057,14 +2071,14 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M12 Representative tests | 4 | 5 | **0** | 0 | **0** | 0 | — |
 | M13 Linux desktop release | 10 | 13.25 | **8** | 8.75 | **10.25** | 11.28 | — |
 | M14 Web | 17 | 24.75 | **6** | 6.8 | **8** | 14.8 | R-B +6 |
-| M15 Android | 23 | 29 | **13** | 18.3 | **21.5** | 31.65 | R-A +8 |
+| M15 Android | 23 | 29 | **12** | 16.6 | **19.5** | 29.45 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.15 | — |
-| **Total, all three platforms** | **205** | **318.75** | **43** | **53.1** | **62.5** | **86.75** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **42** | **51.4** | **60.5** | **84.55** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-193.25 h. Adding the 164.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-251.25 h, 28.75 h under the limit. That margin is
+195.45 h. Adding the 166.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+251.05 h, 28.95 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |
@@ -2136,6 +2150,18 @@ Corrections made to `cna-house.md` or to this file during implementation, with t
 forced each one. Nothing is changed silently. The 2026-09-06 → 2026-09-20 corrections are in the
 legacy ledger; the two of 2026-09-21 (`HOUSE-03201`, `HOUSE-03205`) are in
 [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md).
+
+### PC-2026-09-26 — Put the desktop touch-test flag before its dependent HUD task (`HOUSE-02992`)
+
+* **Evidence:** `HOUSE-02992` requires both stick and look to be tuned on desktop with
+  `--force-touch`, but the flag was assigned to the dependent `HOUSE-02995`. Completing
+  the former without a real flag would falsely satisfy its acceptance.
+* **Correction:** `HOUSE-02992` now introduces the flag and mouse-as-one-finger test path.
+  `HOUSE-02995` still owns the Platform-driven visibility rule, both buttons and the
+  20:9 HUD screenshot; it integrates and verifies the existing flag rather than
+  introducing it. No feature, task or estimate was added, and Android remains required.
+* **Budget:** realistic remaining 60.5 h; pessimistic 84.55 h. Completed task estimates
+  166.5 h plus pessimistic remaining project 251.05 h, below the unchanged 280 h ceiling.
 
 ### PC-2026-09-26 — Web touch controls wait for the M15 input source (`HOUSE-03721`)
 

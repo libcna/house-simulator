@@ -21,9 +21,8 @@ namespace cnahouse::player
 
     /// @brief Turns XNA touch snapshots into independent movement, look and menu-tap intent.
     ///
-    /// Finger IDs own their roles until release, even if TouchCollection changes order. M15's
-    /// following HUD task supplies the visual stick and button regions; this source owns device
-    /// sampling and gesture edges so no game system needs to read TouchPanel directly.
+    /// Finger IDs own their roles until release, even if TouchCollection changes order. The
+    /// source owns device sampling and gesture edges so no game system reads TouchPanel directly.
     class TouchSource final : public IInputSource
     {
     public:
@@ -41,6 +40,16 @@ namespace cnahouse::player
         [[nodiscard]] bool LookAvailable() const noexcept override
         {
             return lookAvailable_;
+        }
+
+        /// @brief Active floating-stick geometry in back-buffer pixels, if a finger owns it.
+        [[nodiscard]] std::optional<Microsoft::Xna::Framework::Vector2> StickOrigin() const noexcept;
+        [[nodiscard]] std::optional<Microsoft::Xna::Framework::Vector2> StickPosition() const noexcept;
+
+        /// @brief Use a desktop mouse as one test finger; production Android still reads TouchPanel.
+        void SetMouseEmulation(bool enabled) noexcept
+        {
+            emulateMouse_ = enabled;
         }
 
         void SetConfig(const TouchConfig& config) noexcept
@@ -61,6 +70,8 @@ namespace cnahouse::player
         std::optional<Finger> stick_;
         std::optional<Finger> look_;
         bool lookAvailable_ = false;
+        bool emulateMouse_ = false;
+        bool mouseWasDown_ = false;
     };
 
 } // namespace cnahouse::player

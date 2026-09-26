@@ -140,10 +140,41 @@ namespace
         ASSERT_TRUE(source.LookAvailable());
         source.Apply(Frame({}), 0.016F);
         EXPECT_FALSE(source.LookAvailable());
-        source.Apply(Frame({Finger(5, TouchLocationState::Pressed, 1500.0F, 100.0F)}), 0.016F);
+        source.Apply(Frame({Finger(5, TouchLocationState::Pressed, 1300.0F, 100.0F)}), 0.016F);
         EXPECT_FALSE(source.LookAvailable());
         EXPECT_FLOAT_EQ(source.Current().look.X, 0.0F);
-        source.Apply(Frame({Finger(5, TouchLocationState::Moved, 1510.0F, 100.0F)}), 0.016F);
+        source.Apply(Frame({Finger(5, TouchLocationState::Moved, 1310.0F, 100.0F)}), 0.016F);
         EXPECT_NEAR(source.Current().look.X, 0.022F, 1e-6F);
+    }
+
+    TEST(TouchSourceTests, FloatingStickExposesActualOriginAndThumb)
+    {
+        TouchSource source;
+        EXPECT_FALSE(source.StickOrigin());
+        source.Apply(Frame({Finger(8, TouchLocationState::Pressed, 300.0F, 700.0F)}), 0.016F);
+        ASSERT_TRUE(source.StickOrigin());
+        EXPECT_FLOAT_EQ(source.StickOrigin()->X, 300.0F);
+        EXPECT_FLOAT_EQ(source.StickOrigin()->Y, 700.0F);
+        source.Apply(Frame({Finger(8, TouchLocationState::Moved, 390.0F, 700.0F)}), 0.016F);
+        EXPECT_FLOAT_EQ(source.StickPosition()->X, 390.0F);
+        EXPECT_FLOAT_EQ(source.Current().move.X, 0.5F);
+        source.Apply(Frame({}), 0.016F);
+        EXPECT_FALSE(source.StickOrigin());
+    }
+
+    TEST(TouchSourceTests, ButtonCornersAreNotLookGestures)
+    {
+        TouchSource source;
+        source.Apply(Frame({Finger(1, TouchLocationState::Pressed, 1500.0F, 100.0F),
+                            Finger(2, TouchLocationState::Pressed, 1500.0F, 800.0F)}),
+                     0.016F);
+        source.Apply(Frame({Finger(1, TouchLocationState::Moved, 1450.0F, 100.0F),
+                            Finger(2, TouchLocationState::Moved, 1450.0F, 800.0F)}),
+                     0.016F);
+        EXPECT_FALSE(source.LookAvailable());
+        source.Apply(Frame({Finger(3, TouchLocationState::Pressed, 1200.0F, 450.0F)}), 0.016F);
+        source.Apply(Frame({Finger(3, TouchLocationState::Moved, 1300.0F, 450.0F)}), 0.016F);
+        EXPECT_TRUE(source.LookAvailable());
+        EXPECT_NEAR(source.Current().look.X, 0.22F, 1e-6F);
     }
 } // namespace

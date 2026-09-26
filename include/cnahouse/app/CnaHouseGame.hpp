@@ -38,6 +38,7 @@
 #include "cnahouse/player/KeyboardMouseSource.hpp"
 #include "cnahouse/player/MouseCapture.hpp"
 #include "cnahouse/player/MouseLook.hpp"
+#include "cnahouse/player/TouchSource.hpp"
 #include "cnahouse/rendering/Camera.hpp"
 #include "cnahouse/rendering/Quality.hpp"
 #include "cnahouse/rendering/RenderTier.hpp"
@@ -460,6 +461,7 @@ namespace cnahouse::app
         /// everywhere rather than only in the build that needs it.
         audio::AudioSystem audio_;
         player::KeyboardMouseSource input_;
+        player::TouchSource touchInput_;
         player::MouseCapturePolicy mouseCapture_;
         ui::TextRenderer text_;
         ui::EnvironmentReadout environmentReadout_;
@@ -727,13 +729,19 @@ namespace cnahouse::app
         bool pendingRunToggle_ = false;
         bool walking_ = false;
         std::uint64_t fixedSteps_ = 0;
-        /// @brief Set by `SetInputSourceForTesting`; null means the keyboard and mouse.
+        /// @brief Set by `SetInputSourceForTesting`; null selects the platform's normal source.
         player::IInputSource* scriptedInput_ = nullptr;
 
         /// @brief Whichever source is driving this session.
         [[nodiscard]] player::IInputSource& Input() noexcept
         {
-            return scriptedInput_ != nullptr ? *scriptedInput_ : static_cast<player::IInputSource&>(input_);
+            if (scriptedInput_ != nullptr)
+            {
+                return *scriptedInput_;
+            }
+            return options_.forceTouch || platform_.target == BuildTarget::Android
+                       ? static_cast<player::IInputSource&>(touchInput_)
+                       : static_cast<player::IInputSource&>(input_);
         }
 
         std::uint64_t framesDrawn_ = 0;

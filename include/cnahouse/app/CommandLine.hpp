@@ -56,6 +56,8 @@ namespace cnahouse::app
         RenderTier tier = RenderTier::E;
         bool headless = false;
         bool noAudio = false;
+        /// @brief Exercise the touch walk with a desktop mouse as one finger.
+        bool forceTouch = false;
 
         /// @brief `--no-cull`: build the draw list from everything resident, not from §25's
         ///        visible set.
