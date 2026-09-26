@@ -1,3 +1,49 @@
+# Touch HUD and buttons handoff — 2026-09-26 (`HOUSE-02995`)
+
+R11/R13 selected the next dependency-unblocked desktop-side M15 readiness task after
+`HOUSE-02992`. BL-13 still blocks the Android device path and cannot close D10c, but
+does not block the Linux-tested HUD. The existing `Platform` profile now contains the
+two input facts `hasTouch` and `hasKeyboard`: Android defaults to true/false, desktop
+and Web to false/true. `--force-touch` overrides those facts for testing; the game
+uses the same `hasTouch && !hasKeyboard` condition for selecting `TouchSource`,
+drawing controls and avoiding desktop mouse capture. No XNA capability query or new
+input framework was introduced.
+
+`TouchSource` keeps 160-vu Menu and walk-speed button fingers separate from stick and
+look IDs, including simultaneous presses, with no camera toggle. Hit boxes follow the
+existing `TextRenderer` safe virtual canvas, not the full physical edge of a 20:9
+screen. A small concrete `ui::DrawTouchHud` function uses the existing SpriteBatch,
+font and white texel: idle MOVE plus MENU and WALK/FAST rings, with the 180-vu
+floating stick when held. This single draw path is used by both the game and the
+seventh UI render fixture; no generic HUD framework was created.
+
+Actual Xvfb game captures: `/tmp/house-02995-fast2.png` shows the lower-right touch
+button changed WALK to FAST with its active colour; `/tmp/house-02995-menu.png` shows
+the upper-right button opened Pause without exiting and the touch HUD hid while the
+menu owned the screen; `/tmp/house-02995-desktop.png` shows no touch HUD in the
+ordinary desktop walk. The inspected 20:9 reference is
+`tests/render/reference/ui-touch-20x9.png`. All seven UI fixtures pass in Xvfb
+software GL. The first offscreen EGL attempt segfaulted even on the unchanged main-menu
+fixture with `LIBGL_ALWAYS_SOFTWARE=1`; switching to the repository's Xvfb/X11 path
+passed both unchanged and new references. A too-short synthetic click initially
+missed the speed edge between frames; a held press confirmed the actual control.
+
+Native game/unit/render targets and the full Web game build passed in the existing
+`build/` and `build-consumer/` trees with shared ccache and four jobs. Ten focused
+touch tests and the complete 1486-test native unit label pass. The Web linker repeats
+the separate `HOUSE-02850` 391-MB pack warning. `tools/ci/run_checks.sh` passed
+every gate except root layout, which still sees the pre-existing user-owned `.claude`
+entry; strict XNA passed 344 translation units with explicit four-worker limit.
+That unrelated entry was not modified or staged.
+
+41 ACTIVE/MUST tasks remain, with 59 realistic and 82.9 pessimistic hours. R14 projects
+168 completed task-hours plus 82.9 remaining = 250.9 h, 29.1 below the unchanged
+280-hour ceiling. Next dependency-unblocked MUST is `HOUSE-02998`, the bounded
+touch-friendly menu target change; do not start Android device tasks while BL-13
+persists, and do not schedule optional controls.
+
+---
+
 # Floating touch controls handoff — 2026-09-26 (`HOUSE-02992`)
 
 R11/R13 selected the next dependency-unblocked desktop-side M15 task after `HOUSE-02991`;

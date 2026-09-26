@@ -85,11 +85,27 @@ namespace cnahouse::player
         {
             look_.reset();
         }
+        if (menuFinger_ && ActiveFinger(touches, *menuFinger_) == nullptr)
+        {
+            menuFinger_.reset();
+        }
+        if (speedFinger_ && ActiveFinger(touches, *speedFinger_) == nullptr)
+        {
+            speedFinger_.reset();
+        }
 
         const float width = static_cast<float>(std::max(config_.viewportWidth, 1));
         const float height = static_cast<float>(std::max(config_.viewportHeight, 1));
-        const float scale = std::min(width / 1600.0F, height / 900.0F);
-        const float buttonInset = 160.0F * scale;
+        const float left = static_cast<float>(config_.layoutX);
+        const float top = static_cast<float>(config_.layoutY);
+        const float layoutWidth =
+            static_cast<float>(config_.layoutWidth > 0 ? config_.layoutWidth : config_.viewportWidth);
+        const float layoutHeight =
+            static_cast<float>(config_.layoutHeight > 0 ? config_.layoutHeight : config_.viewportHeight);
+        const float right = left + layoutWidth;
+        const float bottom = top + layoutHeight;
+        const float scale = std::min(layoutWidth / 1600.0F, layoutHeight / 900.0F);
+        const float buttonInset = TouchConfig::kButtonInsetVirtual * scale;
         for (int index = 0; index < touches.getCountProperty(); ++index)
         {
             const auto& touch = touches[static_cast<std::size_t>(index)];
@@ -114,6 +130,27 @@ namespace cnahouse::player
             }
 
             const int id = touch.getIdProperty();
+            if ((menuFinger_ && *menuFinger_ == id) || (speedFinger_ && *speedFinger_ == id))
+            {
+                continue;
+            }
+            const bool rightButton = position.X >= right - buttonInset && position.X < right;
+            const bool menuButton = rightButton && position.Y >= top && position.Y < top + buttonInset;
+            const bool speedButton = rightButton && position.Y >= bottom - buttonInset && position.Y < bottom;
+            if (phase == TouchLocationState::Pressed && buttonsEnabled_ && (menuButton || speedButton))
+            {
+                state_.menuPressed |= menuButton;
+                state_.runPressed |= speedButton;
+                if (menuButton)
+                {
+                    menuFinger_ = id;
+                }
+                else
+                {
+                    speedFinger_ = id;
+                }
+                continue;
+            }
             if (stick_ && stick_->id == id)
             {
                 continue;
@@ -124,13 +161,13 @@ namespace cnahouse::player
             }
             // Assign once, by the first position, then keep the ID even when a drag crosses
             // the centre line. This permits an independent look drag while the stick is held.
-            if (!stick_ && position.X < width * 0.5F && position.Y >= height * 0.5F)
+            if (!stick_ && position.X >= left && position.X < left + layoutWidth * 0.5F &&
+                position.Y >= top + layoutHeight * 0.5F && position.Y < bottom)
             {
                 stick_ = Finger{id, position, position};
             }
-            else if (!look_ && position.X >= width * 0.5F &&
-                     !(position.X >= width - buttonInset &&
-                       (position.Y < buttonInset || position.Y >= height - buttonInset)))
+            else if (!look_ && position.X >= left + layoutWidth * 0.5F && position.X < right &&
+                     position.Y >= top && position.Y < bottom && !(menuButton || speedButton))
             {
                 look_ = Finger{id, position, position};
             }
@@ -141,7 +178,7 @@ namespace cnahouse::player
             const auto* touch = ActiveFinger(touches, stick_->id);
             const Vector2 position = touch->getPositionProperty();
             // The 180-virtual-unit radius scales with the 1600x900 virtual viewport.
-            const float radius = std::max(180.0F * scale, 1.0F);
+            const float radius = std::max(TouchConfig::kStickRadiusVirtual * scale, 1.0F);
             const float dx = (position.X - stick_->origin.X) / radius;
             const float dy = (stick_->origin.Y - position.Y) / radius;
             const float length = std::sqrt(dx * dx + dy * dy);

@@ -147,6 +147,7 @@ add_library(cnahouse_core STATIC
     ui/EnvironmentReadout.cpp
     ui/LoadingScreen.cpp
     ui/MenuStack.cpp
+    ui/TouchHud.cpp
     ui/TextRenderer.cpp
 
     # debug -- compiled always; the OVERLAY is what CNAHOUSE_DEBUG_TOOLS gates, not the counters,

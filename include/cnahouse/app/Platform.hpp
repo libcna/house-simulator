@@ -40,6 +40,9 @@ namespace cnahouse::app
         /// @brief The renderer this binary was built for. Fixed at configure time (§7.3).
         std::string rendererName;
         BuildTarget target = BuildTarget::Desktop;
+        /// @brief Input profile used by the compact touch HUD; not a graphics capability query.
+        bool hasTouch = false;
+        bool hasKeyboard = true;
         /// @brief Whether Tier E was compiled in. `HOUSE-00122` is the only place this is decided.
         bool tierECompiledIn = false;
         bool debugToolsCompiledIn = false;

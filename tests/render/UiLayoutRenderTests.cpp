@@ -5,6 +5,7 @@
 // frame behind it, and the forced insets make the safe-area contract visible in every reference.
 #include <cstddef>
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -18,6 +19,7 @@
 #include "Microsoft/Xna/Framework/Graphics/RenderTarget2D.hpp"
 #include "Microsoft/Xna/Framework/Graphics/SpriteBatch.hpp"
 #include "Microsoft/Xna/Framework/Graphics/SpriteFont.hpp"
+#include "Microsoft/Xna/Framework/Graphics/Texture2D.hpp"
 #include "Microsoft/Xna/Framework/GraphicsDeviceManager.hpp"
 #include "Microsoft/Xna/Framework/Rectangle.hpp"
 
@@ -25,6 +27,7 @@
 #include "cnahouse/debug/Screenshot.hpp"
 #include "cnahouse/ui/MenuStack.hpp"
 #include "cnahouse/ui/TextRenderer.hpp"
+#include "cnahouse/ui/TouchHud.hpp"
 
 #include "render/ImageCompare.hpp"
 #include "render/RenderHarness.hpp"
@@ -43,6 +46,7 @@ namespace
         MainMenu,
         PauseMenu,
         Settings,
+        TouchHud,
     };
 
     struct UiFixture
@@ -116,14 +120,24 @@ namespace
                 {
                     screen = std::make_unique<cnahouse::ui::PauseMenuScreen>(nullptr);
                 }
-                else
+                else if (fixture_.scene == UiScene::Settings)
                 {
                     settings_ = cnahouse::app::Settings::Defaults();
                     screen = std::make_unique<cnahouse::ui::SettingsScreen>(settings_);
                 }
 
+                Gfx::Texture2D whiteTexel(device, 1, 1);
+                const Color white = Color::White;
+                whiteTexel.SetData(&white, 1);
                 batch.Begin();
-                screen->Draw(batch, text);
+                if (screen)
+                {
+                    screen->Draw(batch, text);
+                }
+                else
+                {
+                    cnahouse::ui::DrawTouchHud(batch, whiteTexel, text, false, std::nullopt, std::nullopt);
+                }
                 batch.End();
 
                 device.SetRenderTarget(nullptr);
@@ -249,6 +263,7 @@ namespace
             UiFixture{"settings-16x9", UiScene::Settings, 1600, 900, Rectangle(48, 27, 1504, 846)},
             UiFixture{"main-20x9", UiScene::MainMenu, 2000, 900, Rectangle(120, 45, 1760, 810)},
             UiFixture{"pause-20x9", UiScene::PauseMenu, 2000, 900, Rectangle(120, 45, 1760, 810)},
-            UiFixture{"settings-20x9", UiScene::Settings, 2000, 900, Rectangle(120, 45, 1760, 810)}),
+            UiFixture{"settings-20x9", UiScene::Settings, 2000, 900, Rectangle(120, 45, 1760, 810)},
+            UiFixture{"touch-20x9", UiScene::TouchHud, 2000, 900, Rectangle(120, 45, 1760, 810)}),
         FixtureName);
 } // namespace

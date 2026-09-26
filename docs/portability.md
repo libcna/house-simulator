@@ -3,6 +3,20 @@
 This is a running validation record, not a claim that the Linux, Web or Android DONE checklists
 have passed. `plan.md` remains the release authority.
 
+## Touch HUD desktop readiness — HOUSE-02995 (2026-09-26)
+
+The game now selects and displays touch controls only from the project-owned
+`Platform.hasTouch && !Platform.hasKeyboard` profile. Android defaults to touch-only;
+Linux and Web default to keyboard/mouse. `--force-touch` overrides those input facts
+for a Linux test without querying CNA capabilities. Menu and walk-speed hit boxes
+follow the safe 1600×900 virtual canvas even on a 20:9 display. The inspected
+`tests/render/reference/ui-touch-20x9.png` joins the six existing UI references;
+all seven match under Xvfb software GL. Live Linux captures in `/tmp` show the
+speed button switching WALK → FAST (`house-02995-fast2.png`), Menu opening Pause
+without quitting (`house-02995-menu.png`), and no touch HUD in normal desktop mode
+(`house-02995-desktop.png`). These desktop results do not claim Android device or
+touch-only Web browser validation; BL-13 and `HOUSE-03723` remain open.
+
 ## Desktop touch-control preview — HOUSE-02992 (2026-09-26)
 
 On Linux, `--force-touch` selects the XNA touch input source and emulates one finger from

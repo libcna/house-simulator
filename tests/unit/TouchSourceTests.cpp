@@ -10,6 +10,7 @@
 #include "Microsoft/Xna/Framework/Input/Touch/TouchLocationState.hpp"
 #include "Microsoft/Xna/Framework/Vector2.hpp"
 
+#include "cnahouse/app/Platform.hpp"
 #include "cnahouse/player/TouchSource.hpp"
 
 namespace
@@ -176,5 +177,73 @@ namespace
         source.Apply(Frame({Finger(3, TouchLocationState::Moved, 1300.0F, 450.0F)}), 0.016F);
         EXPECT_TRUE(source.LookAvailable());
         EXPECT_NEAR(source.Current().look.X, 0.22F, 1e-6F);
+    }
+
+    TEST(TouchSourceTests, ButtonsEmitIndependentEdgesWithoutStealingHeldGestures)
+    {
+        TouchSource source;
+        source.SetButtonsEnabled(true);
+        source.Apply(Frame({Finger(1, TouchLocationState::Pressed, 200.0F, 700.0F),
+                            Finger(2, TouchLocationState::Pressed, 1200.0F, 450.0F)}),
+                     0.016F);
+        source.Apply(Frame({Finger(1, TouchLocationState::Moved, 290.0F, 700.0F),
+                            Finger(2, TouchLocationState::Moved, 1250.0F, 450.0F),
+                            Finger(3, TouchLocationState::Pressed, 1500.0F, 100.0F),
+                            Finger(4, TouchLocationState::Pressed, 1500.0F, 800.0F)}),
+                     0.016F);
+        EXPECT_TRUE(source.Current().menuPressed);
+        EXPECT_TRUE(source.Current().runPressed);
+        EXPECT_FLOAT_EQ(source.Current().move.X, 0.5F);
+        EXPECT_NEAR(source.Current().look.X, 0.11F, 1e-6F);
+
+        source.Apply(Frame({Finger(3, TouchLocationState::Moved, 1200.0F, 450.0F),
+                            Finger(4, TouchLocationState::Moved, 1200.0F, 450.0F),
+                            Finger(1, TouchLocationState::Moved, 290.0F, 700.0F),
+                            Finger(2, TouchLocationState::Moved, 1250.0F, 450.0F)}),
+                     0.016F);
+        EXPECT_FALSE(source.Current().menuPressed);
+        EXPECT_FALSE(source.Current().runPressed);
+        EXPECT_FLOAT_EQ(source.Current().look.X, 0.0F);
+        EXPECT_FLOAT_EQ(source.Current().move.X, 0.5F);
+    }
+
+    TEST(TouchSourceTests, ButtonHitBoxesFollowSafeVirtualCanvasOnWideDisplay)
+    {
+        TouchConfig config;
+        config.viewportWidth = 2000;
+        config.viewportHeight = 900;
+        config.layoutX = 280;
+        config.layoutY = 45;
+        config.layoutWidth = 1440;
+        config.layoutHeight = 810;
+        TouchSource source(config);
+        source.SetButtonsEnabled(true);
+        source.Apply(Frame({Finger(1, TouchLocationState::Pressed, 1650.0F, 115.0F),
+                            Finger(2, TouchLocationState::Pressed, 1650.0F, 785.0F)}),
+                     0.016F);
+        EXPECT_TRUE(source.Current().menuPressed);
+        EXPECT_TRUE(source.Current().runPressed);
+        EXPECT_FALSE(source.LookAvailable());
+        source.Apply(Frame({}), 0.016F);
+        source.Apply(Frame({Finger(3, TouchLocationState::Pressed, 1200.0F, 450.0F)}), 0.016F);
+        source.Apply(Frame({Finger(3, TouchLocationState::Moved, 1250.0F, 450.0F)}), 0.016F);
+        EXPECT_FALSE(source.Current().menuPressed);
+        EXPECT_FALSE(source.Current().runPressed);
+        EXPECT_NEAR(source.Current().look.X, 0.11F, 1e-6F);
+    }
+
+    TEST(TouchSourceTests, BuildProfileDefaultsKeepTouchHudOffDesktop)
+    {
+        const auto platform = cnahouse::app::Platform::FromBuild();
+        if (platform.target == cnahouse::app::BuildTarget::Android)
+        {
+            EXPECT_TRUE(platform.hasTouch);
+            EXPECT_FALSE(platform.hasKeyboard);
+        }
+        else
+        {
+            EXPECT_FALSE(platform.hasTouch);
+            EXPECT_TRUE(platform.hasKeyboard);
+        }
     }
 } // namespace

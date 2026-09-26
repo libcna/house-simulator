@@ -13,8 +13,15 @@ namespace cnahouse::player
     /// @brief Dimensions and sensitivity of the touch-only walkthrough input.
     struct TouchConfig
     {
+        static constexpr float kStickRadiusVirtual = 180.0F;
+        static constexpr float kButtonInsetVirtual = 160.0F;
         int viewportWidth = 1600;
         int viewportHeight = 900;
+        int layoutX = 0;
+        int layoutY = 0;
+        /// @brief Zero uses the whole viewport; the game supplies TextRenderer's safe canvas.
+        int layoutWidth = 0;
+        int layoutHeight = 0;
         float lookSensitivity = 1.0F;
         bool invertY = false;
     };
@@ -52,6 +59,11 @@ namespace cnahouse::player
             emulateMouse_ = enabled;
         }
 
+        void SetButtonsEnabled(bool enabled) noexcept
+        {
+            buttonsEnabled_ = enabled;
+        }
+
         void SetConfig(const TouchConfig& config) noexcept
         {
             config_ = config;
@@ -69,9 +81,12 @@ namespace cnahouse::player
         InputState state_{};
         std::optional<Finger> stick_;
         std::optional<Finger> look_;
+        std::optional<int> menuFinger_;
+        std::optional<int> speedFinger_;
         bool lookAvailable_ = false;
         bool emulateMouse_ = false;
         bool mouseWasDown_ = false;
+        bool buttonsEnabled_ = false;
     };
 
 } // namespace cnahouse::player

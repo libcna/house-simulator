@@ -14,6 +14,8 @@ namespace cnahouse::app
         platform.target = BuildTarget::Web;
 #elif defined(__ANDROID__)
         platform.target = BuildTarget::Android;
+        platform.hasTouch = true;
+        platform.hasKeyboard = false;
 #else
         platform.target = BuildTarget::Desktop;
 #endif

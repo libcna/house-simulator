@@ -394,6 +394,7 @@ namespace cnahouse::app
         /// usable as a regression fixture at all.
         void RenderFrame();
         void DrawHud();
+        void ConfigureTouchInput();
 
         /// @brief The `Pass::Hud` implementation, defined in the .cpp because it is an adapter onto
         ///        `DrawHud` and nothing else needs its name.
@@ -739,9 +740,13 @@ namespace cnahouse::app
             {
                 return *scriptedInput_;
             }
-            return options_.forceTouch || platform_.target == BuildTarget::Android
-                       ? static_cast<player::IInputSource&>(touchInput_)
-                       : static_cast<player::IInputSource&>(input_);
+            return TouchHudVisible() ? static_cast<player::IInputSource&>(touchInput_)
+                                     : static_cast<player::IInputSource&>(input_);
+        }
+
+        [[nodiscard]] bool TouchHudVisible() const noexcept
+        {
+            return platform_.hasTouch && !platform_.hasKeyboard;
         }
 
         std::uint64_t framesDrawn_ = 0;
