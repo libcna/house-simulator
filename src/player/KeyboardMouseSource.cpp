@@ -18,10 +18,16 @@ namespace cnahouse::player
         using Microsoft::Xna::Framework::Input::Keys;
         using KeyboardState = Microsoft::Xna::Framework::Input::KeyboardState;
 
-        float Axis(const KeyboardState& keyboard, Keys positive, Keys negative)
+        float Axis(const KeyboardState& keyboard,
+                   Keys positive,
+                   Keys alternatePositive,
+                   Keys negative,
+                   Keys alternateNegative)
         {
-            const float plus = keyboard.IsKeyDown(positive) ? 1.0f : 0.0f;
-            const float minus = keyboard.IsKeyDown(negative) ? 1.0f : 0.0f;
+            const float plus =
+                keyboard.IsKeyDown(positive) || keyboard.IsKeyDown(alternatePositive) ? 1.0f : 0.0f;
+            const float minus =
+                keyboard.IsKeyDown(negative) || keyboard.IsKeyDown(alternateNegative) ? 1.0f : 0.0f;
             return plus - minus;
         }
 
@@ -57,6 +63,11 @@ namespace cnahouse::player
               Microsoft::Xna::Framework::Input::Touch::TouchPanel::GetState(),
               deltaSeconds);
 
+        // A browser owns the locked pointer. Warping it to a nominal centre there is ignored or
+        // reported as ordinary motion, so the next frame would consume a bogus large delta.
+        // The normal sample-to-sample path below already handles Web pointer motion and seeds
+        // itself again after each capture transition. Preserve desktop's measured recenter path.
+#if !defined(__EMSCRIPTEN__)
         if (captured_)
         {
             // Recentre AFTER sampling, so the sample just taken is the player's motion and the write
@@ -66,6 +77,7 @@ namespace cnahouse::player
             previousMouseY_ = config_.recentreY;
             hasPreviousMouse_ = true;
         }
+#endif
     }
 
     void KeyboardMouseSource::Apply(const KeyboardState& keyboard,
@@ -93,8 +105,8 @@ namespace cnahouse::player
         state_ = InputState{};
 
         // --- movement, in game terms ---------------------------------------------------------------
-        state_.move.X = Axis(keyboard, Keys::D, Keys::A);
-        state_.move.Y = Axis(keyboard, Keys::W, Keys::S);
+        state_.move.X = Axis(keyboard, Keys::D, Keys::Right, Keys::A, Keys::Left);
+        state_.move.Y = Axis(keyboard, Keys::W, Keys::Up, Keys::S, Keys::Down);
         // Normalised so diagonal movement is not faster than cardinal -- the oldest bug in
         // first-person movement, and one that only shows up as "the player feels fast on the diagonal".
         const float length = std::sqrt(state_.move.X * state_.move.X + state_.move.Y * state_.move.Y);

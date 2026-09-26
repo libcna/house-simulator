@@ -1,3 +1,40 @@
+# Web desktop controls handoff — 2026-09-26 (`HOUSE-03721`)
+
+R11/R13 selected the next dependency-unblocked M14 Web bring-up task after `HOUSE-02892`.
+XNA provides cursor visibility and mouse state but no browser pointer-lock request, so the
+small Emscripten launch bridge in `cmake/web_pointer_lock_pre.js` follows CNA's existing
+`Game.IsMouseVisible` canvas style: walking clicks lock, menus release, and browser lock loss
+feeds the existing Escape binding. The game's title/menu now explicitly starts with a visible
+mouse, and Emscripten skips desktop `Mouse::SetPosition` recentering to prevent a large bogus
+look delta. WASD and arrows now share the same normalized axes without double-counting; the
+existing Shift speed-toggle path is unchanged. No CNA repository file or new gameplay system
+was changed.
+
+Chrome 152 headless and Firefox 140 ESR in Xvfb both reached walking. Captures and event
+checks in `docs/portability.md` show pointer capture (including Firefox X11 recentering after
+a +120 X motion), mouse look without idle drift, W/Up
+movement, and Pause after Escape and tab focus loss. Firefox used real XTest input; Chrome
+used CDP/DOM input and a real target-tab switch. Native `InputTests` passed 21/21 focused
+tests (including the new arrow alias case); the native game/unit targets and full Web target
+rebuilt using `build/` and `build-consumer`, shared ccache and affinity to CPUs 0–3.
+The standalone strict-XNA gate passed 341 translation units with `--jobs 4`. The full
+`run_checks.sh` passed all other gates except the pre-existing user-owned `.claude` root
+layout entry; its embedded strict gate also passed. For every future full check run,
+set `HOUSE_XNA_STRICT_JOBS=4` explicitly as well as CPU affinity: `taskset` caps CPU use
+but does not cap the script's worker count. One load-contaminated full unit run passed
+1474/1475; the single SkySystem timing assertion passed alone once competing checks and
+browsers stopped, and an isolated full-suite rerun passed **1475/1475** in 153.823 s.
+
+R7/R15 separated the touch-only Web criterion into `HOUSE-03723`, dependent on M15's
+`TouchSource`/HUD rather than claiming touch-only play without it. The Web DONE checklist
+depends on the new task. The current plan has 46 open MUST tasks, 66.5 realistic and 91.1
+pessimistic hours. R14 projects 160.5 completed plus 91.1 remaining = 251.6 h, 28.4 below
+the ceiling. `HOUSE-02850` is blocked by `HOUSE-02405`'s unmeasured performance baseline;
+the next dependency-unblocked MUST is `HOUSE-02895` (Web canvas/audio). The 391 MiB Web
+preload and Firefox slow-page warning belong to the pack task, not a controls claim.
+
+---
+
 # Chrome full-game startup handoff — 2026-09-26 (`HOUSE-02892`)
 
 R11/R13 chose the dependency-unblocked remainder of the R7 Web bring-up split. The full

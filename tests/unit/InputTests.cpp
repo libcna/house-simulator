@@ -117,6 +117,22 @@ namespace
         EXPECT_FLOAT_EQ(source.Current().move.X, -1.0f);
     }
 
+    TEST(InputTests, ArrowMovementSharesTheWasdAxesWithoutDoubleCounting)
+    {
+        KeyboardMouseSource source;
+        source.Apply(KeyboardState{Keys::Up, Keys::Right}, At(0, 0), 0.016F);
+        EXPECT_NEAR(source.Current().move.X, std::sqrt(0.5F), 1e-5F);
+        EXPECT_NEAR(source.Current().move.Y, std::sqrt(0.5F), 1e-5F);
+
+        source.Apply(KeyboardState{Keys::W, Keys::Up, Keys::A, Keys::Left}, At(0, 0), 0.016F);
+        EXPECT_NEAR(source.Current().move.X, -std::sqrt(0.5F), 1e-5F);
+        EXPECT_NEAR(source.Current().move.Y, std::sqrt(0.5F), 1e-5F);
+
+        source.Apply(KeyboardState{Keys::Down, Keys::Up, Keys::Left, Keys::Right}, At(0, 0), 0.016F);
+        EXPECT_FLOAT_EQ(source.Current().move.X, 0.0F);
+        EXPECT_FLOAT_EQ(source.Current().move.Y, 0.0F);
+    }
+
     TEST(InputTests, DiagonalMovementIsNotFasterThanCardinal)
     {
         // The oldest bug in first-person movement, and one that only ever presents as "the player

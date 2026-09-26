@@ -13,8 +13,8 @@ renumbered.
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
 | Active plan | **46 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 57.25 / 67.25 / 91.9 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5, M7, M9 and M12 passed; M8 listening and M10 baseline work are environment-blocked.** Next: `HOUSE-03721` (Web controls) |
+| Estimate to DONE | **≈ 56.5 / 66.5 / 91.1 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5, M7, M9 and M12 passed; M8 listening and M10 baseline work are environment-blocked.** Next: `HOUSE-02895` (Web canvas/audio) |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -114,7 +114,7 @@ the [optional backlog](#optional-and-conditional-backlog) is required.
 | **D5** | Environment | Time of day runs automatically and can be set; day and night show the sun, moon and stars; the sky shows clear, overcast and rain; rain stays out of covered areas; surfaces are wet in rain; fog follows the weather. A snow weather state shows its overcast sky and fog without particles (falling snow is optional). Detailed weather simulation is not required | `HOUSE-03520`, `HOUSE-02521` |
 | **D6** | Lighting | Interior lights follow the automatic schedule; furniture is consistent with the baked lighting; every accessible room is readable by day and at night; exterior night lighting is readable | `HOUSE-03401`, `HOUSE-03402`, `HOUSE-03633`, G3 |
 | **D7** | Audio | Footsteps on six broad surface categories; one interior tone; exterior day and night beds; rain and wind layers, quieter indoors by sky exposure; volume settings | `HOUSE-01939`, `HOUSE-02516` |
-| **D8** | Application | *Start*, pause, one settings screen (graphics, audio, controls, environment), credits and quit; a controls hint; Web controls; Android touch controls | `HOUSE-02523`, `HOUSE-02528`, `HOUSE-03721`, `HOUSE-03039` |
+| **D8** | Application | *Start*, pause, one settings screen (graphics, audio, controls, environment), credits and quit; a controls hint; Web controls; Android touch controls | `HOUSE-02523`, `HOUSE-02528`, `HOUSE-03721`, `HOUSE-03723`, `HOUSE-03039` |
 | **D9** | Performance | The representative scenarios meet the documented target on the reference desktop; the Web and Android presets meet their targets in their representative scenes; no major memory or performance defect remains | `HOUSE-02404`, `HOUSE-02898`, `HOUSE-03037`, `HOUSE-03071` |
 | **D10a** | Linux | A packaged Release build runs on a clean profile, with and without an audio device | `HOUSE-02790` |
 | **D10b** | Web | It builds and loads; its controls work; the representative traversal completes in Chrome and Firefox without major rendering corruption and with acceptable performance; a headless smoke test runs in CI | `HOUSE-02900`, `HOUSE-02901` |
@@ -403,7 +403,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 5 | `HOUSE-02713` | D2, D4, D13, D14 | 7 |
 | [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 0 | **done** · `HOUSE-02598` | D11 | 0 |
 | [M13](#m13--linux-desktop-release) — Linux desktop release | after M11 | 03701–03720 | 8 | `HOUSE-02797` | D9–D13 | 10.25 |
-| [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 8 | `HOUSE-02904` | D10b | 10.5 |
+| [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 8 | `HOUSE-02904` | D10b | 9.75 |
 | [M15](#m15--android) — Android | readiness: B · device: after M13 | 03751–03780 | 14 | `HOUSE-03041` (a BL-13 record does not close it) | D10c | 23.75 |
 | [M16](#m16--final-release) — Final release | last | 03781–03800 | 6 | **DONE** · `HOUSE-03078` | D9–D14 | 6.5 |
 
@@ -1501,10 +1501,17 @@ limitation (reload the page), recorded by `HOUSE-02904`.
               the visible 1600×900 canvas extends below the viewport, owned by `HOUSE-02895`
       note: browser-start slice of the original five-hour task under R7; the two estimates sum to 5
 
-- [ ] HOUSE-03721 — Web controls: pointer-lock mouse look, keyboard walk, focus handling
+- [x] HOUSE-03721 — Web desktop controls: pointer-lock mouse look, keyboard walk, focus handling
       dep: HOUSE-02892 · sys: player · plat: WEB · pri: MUST · zone: all · adv: D8, D10b · est: 1.5
-      accept: (1) a click on the canvas acquires pointer lock and mouse look works without drift; (2) Esc and focus loss release the pointer and open the pause menu; (3) WASD/arrows and the walk-speed modifier work; (4) verified in Chrome and Firefox; (5) on a touch-only browser the `TouchSource` scheme of M15 is used if `TouchPanel` reports touch under Emscripten, and otherwise the limitation is recorded
-      verify: manual browser check recorded in `docs/portability.md`; the headless smoke (`HOUSE-02901`)
+      accept: (1) a click on the canvas acquires pointer lock and mouse look works without drift; (2) Esc and focus loss release the pointer and open the pause menu; (3) WASD/arrows and the walk-speed modifier work; (4) verified in Chrome and Firefox
+      verify: manual browser check recorded in `docs/portability.md`; the headless smoke remains `HOUSE-02901`
+      note: (2026-09-26, targeted R7/R15 split) Chrome and Firefox both reached walking, acquired pointer lock on canvas click, changed view without idle drift, and opened Pause with cursor release on Escape and tab focus loss. Firefox real-key W and Up moved the body; native `InputTests` covers WASD/arrow aliases and Shift's speed edge. XNA has no browser pointer-lock operation, so a tiny pre-JS bridge follows the existing `Game.IsMouseVisible` cursor state; Emscripten alone skips desktop mouse recentering. The touch-only condition was not claimed: M15's `TouchSource`/HUD is unfinished and is now `HOUSE-03723` after its real dependency. `docs/portability.md` records the browser evidence and remaining limitation. The native/Web builds passed; the isolated unit suite passed 1475/1475 and four-worker strict XNA passed 341 units. The full static gate passed except the pre-existing user-owned `.claude` root-layout entry
+
+- [ ] HOUSE-03723 — Select and verify the touch-only Web control scheme
+      dep: HOUSE-03721, HOUSE-02995 · sys: player · plat: WEB · pri: MUST · zone: all · adv: D8, D10b · est: 0.75
+      accept: on a touch-only browser use M15's `TouchSource` scheme when CNA `TouchPanel` reports touch under Emscripten; otherwise record the measured limitation
+      verify: browser touch emulation or device check recorded in `docs/portability.md`
+      trace: remaining conditional touch criterion split from `HOUSE-03721` under R7/R15, not optional scope
 
 ### Verification (after M13)
 
@@ -1528,7 +1535,7 @@ limitation (reload the page), recorded by `HOUSE-02904`.
       trace: absorbs `HOUSE-02854`; was *the browser loading screen and the progressive pack fetch*
 
 - [ ] HOUSE-02900 — The Web DONE checklist in Chrome and in Firefox
-      dep: HOUSE-02898, HOUSE-02899, HOUSE-02895, HOUSE-03721, HOUSE-02850, HOUSE-02797 · sys: — · plat: WEB · pri: MUST · zone: all · adv: D10b · est: 1.5
+      dep: HOUSE-02898, HOUSE-02899, HOUSE-02895, HOUSE-03721, HOUSE-03723, HOUSE-02850, HOUSE-02797 · sys: — · plat: WEB · pri: MUST · zone: all · adv: D10b · est: 1.5
       accept: the build loads; the controls work; the representative traversal (street → foyer → main stair → an upper floor → the garden) completes; no major rendering corruption; acceptable performance; saving settings does not fail (persistence across a reload is optional). Differences between the browsers are recorded
       trace: absorbs `HOUSE-02903`; was *Verify the whole feature set in a browser: every phase's headline feature*
 
@@ -2011,15 +2018,15 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M11 Final defect pass | 3 | 11 | **3** | 2.75 | **3.25** | 3.6 | — |
 | M12 Representative tests | 4 | 5 | **0** | 0 | **0** | 0 | — |
 | M13 Linux desktop release | 10 | 13.25 | **8** | 8.75 | **10.25** | 11.25 | — |
-| M14 Web | 17 | 24.75 | **8** | 9 | **10.5** | 17.55 | R-B +6 |
+| M14 Web | 17 | 24.75 | **8** | 8.3 | **9.75** | 16.73 | R-B +6 |
 | M15 Android | 23 | 29 | **14** | 20.25 | **23.75** | 34 | R-A +8 |
 | M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.25 | — |
-| **Total, all three platforms** | **205** | **318.75** | **46** | **57.25** | **67.25** | **91.9** | +21 |
+| **Total, all three platforms** | **205** | **318.75** | **46** | **56.5** | **66.5** | **91.1** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
 completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-188.1 h. Adding the 159 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-250.9 h, 29.1 h under the limit. That margin is
+188.9 h. Adding the 160.5 task-hours completed since `HOUSE-03206` gives a ceiling projection of
+251.6 h, 28.4 h under the limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |
@@ -2091,6 +2098,20 @@ Corrections made to `cna-house.md` or to this file during implementation, with t
 forced each one. Nothing is changed silently. The 2026-09-06 → 2026-09-20 corrections are in the
 legacy ledger; the two of 2026-09-21 (`HOUSE-03201`, `HOUSE-03205`) are in
 [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md).
+
+### PC-2026-09-26 — Web touch controls wait for the M15 input source (`HOUSE-03721`)
+
+* **Evidence:** desktop Chrome and Firefox could prove pointer lock, keyboard walk and focus
+  handling, but `HOUSE-03721`'s touch-only criterion explicitly needs M15's unfinished
+  `TouchSource` and HUD. CNA's XNA `TouchPanel` can report a connected device after touch
+  input; the keyboard/mouse source only maps a first touch to menu pointer input. Claiming
+  touch-only walking now would be false.
+* **Correction:** keep the desktop browser controls under permanent id `HOUSE-03721`, and put
+  only its original conditional touch criterion into `HOUSE-03723`, dependent on `HOUSE-02995`.
+  The Web DONE checklist now depends on both. The additional 0.75 h is a targeted R7/R15
+  estimate for integration and browser verification, not a new feature or system.
+* **Budget:** realistic remaining 66.5 h, pessimistic 91.1 h; 160.5 completed task-hours plus
+  the remaining pessimistic forecast projects 251.6 h, below the unchanged 280 h ceiling.
 
 ### PC-2026-09-23 — Walk-only accessibility and traversal topology (`HOUSE-03226`)
 

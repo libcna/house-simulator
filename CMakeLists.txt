@@ -246,8 +246,11 @@ if(EMSCRIPTEN)
         -sINITIAL_MEMORY=134217728
         -sFORCE_FILESYSTEM=1
         -sEXIT_RUNTIME=1
+        "SHELL:--pre-js ${CMAKE_CURRENT_SOURCE_DIR}/cmake/web_pointer_lock_pre.js"
         "SHELL:--preload-file ${CMAKE_BINARY_DIR}/content@/content"
         "SHELL:--preload-file ${CMAKE_BINARY_DIR}/content-fx@/content-fx")
+    set_property(TARGET cna-house APPEND PROPERTY LINK_DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/web_pointer_lock_pre.js")
     set_target_properties(cna-house PROPERTIES SUFFIX ".html")
     cna_apply_emscripten_renderer_link_contract(cna-house)
 

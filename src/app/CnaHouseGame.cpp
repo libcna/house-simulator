@@ -332,6 +332,11 @@ namespace cnahouse::app
     void CnaHouseGame::LoadContent()
     {
         Game::LoadContent();
+        // The title/loading screen starts with a pointer. Match Game's initially hidden cursor
+        // property to MouseCapturePolicy's initially released state while the window exists;
+        // otherwise the first walk capture sets false to an already-false property and the Web
+        // canvas never publishes its hidden-cursor state for pointer lock.
+        setIsMouseVisibleProperty(true);
         hud_ = std::make_unique<Hud>(getGraphicsDeviceProperty());
         const auto& viewport = getGraphicsDeviceProperty().getViewportProperty();
         text_.SetViewport(
