@@ -891,9 +891,12 @@ namespace cnahouse::app
 
     void CnaHouseGame::UpdateWalk(float deltaSeconds)
     {
-        const player::InputState frameInput = Input().Current();
+        // A command-line capture is a fixed authored pose. Desktop pointer events can arrive
+        // while its window opens and turn the camera before --screenshot-frame is reached.
+        const player::InputState frameInput =
+            options_.screenshot.has_value() ? player::InputState{} : Input().Current();
         // §44's mouse look, from the source that owns the devices (`HOUSE-00622`).
-        player::ApplyLook(look_, frameInput, Input().LookAvailable());
+        player::ApplyLook(look_, frameInput, !options_.screenshot.has_value() && Input().LookAvailable());
         player_.yaw = look_.yaw;
 
         // Shift is a one-frame edge, but a frame can contain zero or several physics steps.
@@ -1495,7 +1498,10 @@ namespace cnahouse::app
             Exit();
             return;
         }
-        if (lifecyclePaused_)
+        // A synthetic test source has no relationship to desktop focus. Visible GPU capture
+        // tests must keep advancing when the shared desktop steals their window; ordinary
+        // keyboard/mouse and touch play still pause on deactivation.
+        if (lifecyclePaused_ && scriptedInput_ == nullptr)
         {
             return;
         }
@@ -1717,7 +1723,7 @@ namespace cnahouse::app
             // sites, because whichever ran last would otherwise have the final say.
             player::CaptureRequest capture;
             capture.windowActive = getIsActiveProperty();
-            capture.menuOpen = !menus_.Empty() || TouchHudVisible();
+            capture.menuOpen = !menus_.Empty() || TouchHudVisible() || options_.screenshot.has_value();
             capture.freeCursorHeld = Input().Current().freeCursorHeld;
             if (mouseCapture_.Update(capture))
             {

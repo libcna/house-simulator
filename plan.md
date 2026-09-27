@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
 | **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **33 open MUST tasks** in 16 milestones. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 38.5 / 45.25 / 67.78 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5, M7, M9 and M12 passed; CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator.** The corrected fixed-camera Release desktop High runs vary sharply under shared-machine contention; `HOUSE-02404` is open for an uncontended/repeatable verdict before `HOUSE-02405` and Android content delivery. `HOUSE-01920`/`HOUSE-01922` remain independently open (listening unavailable here) |
+| Active plan | **35 open MUST tasks** in 16 milestones, including two urgent open corrective tasks for reported S1/S2 defects. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
+| Estimate to DONE | **≈ 44.84 / 52.75 / 76.03 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
+| Current gate | **G5, M7, M9 and M12 passed; CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator.** Owner-reported main-stair usability and dark-room defects remain urgent open MUST corrections `HOUSE-03635`/`03636`; the doorway flash is corrected under `HOUSE-03637`. Desktop performance `HOUSE-02404` is paused until the other two defects are resolved. `HOUSE-01920`/`HOUSE-01922` remain independently open (listening unavailable here) |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -400,7 +400,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M8](#m8--atmospheric-audio-essentials) — Atmospheric audio essentials | B | 03541–03570 | 4 | `HOUSE-01939` | D7 | 5 |
 | [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 0 | `HOUSE-02528` | D8 | — |
 | [M10](#m10--performance-measurement-driven) — Performance, measurement-driven | B | 03601–03630 | 2 | `HOUSE-02404` | D9 | 6 |
-| [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 3 | `HOUSE-02713` | D2, D4, D13, D14 | 3.25 |
+| [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 5 | `HOUSE-03635` | D2, D4, D6, D13, D14 | 10.75 |
 | [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 0 | **done** · `HOUSE-02598` | D11 | 0 |
 | [M13](#m13--linux-desktop-release) — Linux desktop release | after M11 | 03701–03720 | 8 | `HOUSE-02797` | D9–D13 | 10.25 |
 | [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 6 | `HOUSE-02904` | D10b | 8 |
@@ -1348,6 +1348,25 @@ There is no zone rotation, no "polish everything" pass and no screenshot → twe
       verify: `LightScheduleTests.EveryAccessibleLitCellHasAnAutomaticGroup`, the complete unit suite and an inspected matched automatic/forced-off service-room capture
       note: (2026-09-25, targeted R15 correction) Manual play exposed the wider case behind the dark-room report: 28 accessible service, closet and store groups were `SC-OFF`, so their physical fixtures could never emit in the interaction-free showcase. Those groups now reuse the already-always-on `SC-CIRC` class; `SC-OFF` remains only on the nested refrigerator interior outside the retained walk. A regression checks every non-nested lit cell. The 10:30 Butler's-pantry automatic/forced-off pair changes 95.08% of pixels; linear luminance rises 0.020995→0.034080 over the fixture and 0.014411→0.024711 on the left wall. The fixture visibly emits and the floor receives the existing bake. All 1,474 unit tests pass. This consumes 0.75 h of `HOUSE-03631`'s remaining allowance and adds no light, interaction, exposure change or subsystem
 
+- [ ] HOUSE-03635 — Correct the main-stair entrance and flight for natural first-person use
+      dep: HOUSE-03634 · sys: world-content, player · plat: LNX · pri: MUST · zone: Z-STAIR, Z-L0M, Z-L1 · adv: D2, D4, D13 · est: 3.5
+      accept: (1) inspect the real GPU game from the foyer, foot, turn, landing and upper exit in both directions; (2) correct visually obstructive or architecturally implausible support/rail/flight/opening geometry and matching collision; (3) an ordinary player using WASD and mouse can find and walk the foyer-to-L1 route without a memorised waypoint sequence or precision steering, with sane headroom; (4) all eight automated stair traversals still pass; (5) retain current-game screenshots of the corrected entrance, flight, landing and exit
+      verify: real-controller manual walkthrough and inspected GPU captures; `StairTraversalTests.*`, `OpeningReachTests.*`, the real-game foyer-to-L1 integration test, and a focused geometry regression
+      note: owner-reported S1/S2 defect after `HOUSE-03632`; its scripted 15-waypoint success does not establish natural usability or architectural plausibility. Required independently of `HOUSE-02714` and before performance work resumes.
+
+- [ ] HOUSE-03636 — Find and correct every unreadable accessible room by day and scheduled night
+      dep: HOUSE-03634 · sys: lighting, world-content · plat: LNX · pri: MUST · zone: all · adv: D6, D13 · est: 4
+      accept: (1) inspect all 90 intended-accessible cells in the real GPU game at clear 10:30 and scheduled night, recording specific failing cell IDs; (2) diagnose each failure's schedule, fixture, bake, material, visibility or renderer cause and correct it without globally flattening exposure; (3) each cell is navigable/readable at both times and deliberately dark rooms remain intentional; (4) retain matched before/after captures for corrected rooms, verify already-correct rooms are not blown out, and keep automated lighting checks green
+      verify: day/night whole-house moving walkthrough, affected-cell before/after GPU captures, focused root-cause regression and lighting suite
+      note: owner-reported S1/S2 defect remains open despite `HOUSE-03633`/`03634` fixed-pose checks. Those tests prove group activation, not whole-house readability.
+
+- [x] HOUSE-03637 — Eliminate visible flashes at room thresholds during normal movement
+      dep: HOUSE-03634 · sys: visibility, rendering, lighting · plat: LNX · pri: MUST · zone: all · adv: D2, D6, D13 · est: 3.5
+      accept: (1) reproduce and record consecutive real-GPU frames while crossing ground-floor room/room, foyer/stair, upper room/corridor, basement room/hall and applicable exterior/interior thresholds; (2) identify frame-before/during/after camera cell, visible set and lighting/render state, then fix the demonstrated root cause; (3) repeated crossings in both directions at day and scheduled night show no flash, without lost visibility or obvious overdraw/performance regression; (4) add focused deterministic regression where the cause permits and retain before/after frame evidence
+      verify: moving normal-game GPU capture sequence, relevant visibility/lighting tests and a measured draw-count comparison
+      note: owner-reported S2 rendering defect; this is not optional weather lightning. Static screenshots and the camera-cell hysteresis test alone cannot close it.
+      done: (2026-09-27) Moving first-person GPU frames reproduced the fault at the foyer/stair threshold: at eye x=2.199 m the camera was still L0_FOYER, the adjacent cell vanished, visible=1 and draw=0, exposing a full-screen sky for one frame. The 100 mm rendering near plane rejected the portal before the eye crossed it. Visibility now uses a conservative 5 mm near plane behind the eye and seeds an open neighbour only inside its actual aperture within 5 cm of the plane; the render projection, camera cell, lighting and door state are unchanged. An invisible Radeon 780M/OPENGLES3 run, with no desktop display, captured 36 consecutive frames at each of ten directional ground/upper/basement/exterior thresholds at both 10:30 and 23:00 (720 frames); no sky-only frame appeared. The largest consecutive HUD-cropped RGB mean difference was 8.53/255, at the moving foyer/stair view. The renderer's draw-count regression measured 5–274 draws across the full matrix, never zero; at the original foyer/stair transition it remained 98–104, compared with the defective frame's zero. The focused near-plane/threshold regression and the full movement matrix pass. Before/after evidence: `build/test-output/threshold-movement/foyer-stair-day/cna-house-20260926-225458-823.png` and the 2026-09-27 offscreen sequences in the same tree. No meaningful overdraw increase is visible in those counts; desktop performance benchmarking remains owned by `HOUSE-02404`.
+
 - [ ] HOUSE-03631 — The bounded fix pass
       dep: HOUSE-02714, HOUSE-03634 · sys: — · plat: LNX · pri: MUST · zone: all · adv: D2, D4, D13, D14 · est: 1.25
       accept: (1) every S1 and S2 from `HOUSE-02714` and the zone backlogs is fixed; (2) S3 only where the severity table allows it (cheap, repeatedly visible, in a hero area or in a release capture); (3) S4 is never scheduled; (4) **hard budget: 4.5 agent-hours of S2/S3 work**, plus whatever S1 fixes need; when it is spent, the remaining S3 items are waived with a reason; (5) no area gets more than two fix rounds (rule R6)
@@ -2143,18 +2162,19 @@ milestone. Optional work is not counted. The *before* columns are the open MUST 
 | M8 Atmospheric audio essentials | 11 | 14.5 | **4** | 4.25 | **5** | 5.5 | — |
 | M9 Application shell | 10 | 12.5 | **0** | 0 | **0** | 0 | — |
 | M10 Performance | 6 | 13 | **2** | 5.1 | **6** | 10.6 | R-C +4 |
-| M11 Final defect pass | 3 | 11 | **3** | 2.75 | **3.25** | 3.58 | — |
+| M11 Final defect pass | 3 | 11 | **5** | 9.14 | **10.75** | 11.83 | — |
 | M12 Representative tests | 4 | 5 | **0** | 0 | **0** | 0 | — |
-| M13 Linux desktop release | 10 | 13.25 | **8** | 8.75 | **10.25** | 11.28 | — |
-| M14 Web | 17 | 24.75 | **5** | 6.2 | **7.25** | 13.98 | R-B +6 |
-| M15 Android | 23 | 29 | **5** | 6.0 | **7** | 15.7 | R-A +8 |
-| M16 Final release | 8 | 9 | **6** | 5.5 | **6.5** | 7.15 | — |
-| **Total, all three platforms** | **205** | **318.75** | **33** | **38.5** | **45.25** | **67.78** | +21 |
+| M13 Linux desktop release | 10 | 13.25 | **8** | 8.71 | **10.25** | 11.28 | — |
+| M14 Web | 17 | 24.75 | **5** | 6.16 | **7.25** | 13.98 | R-B +6 |
+| M15 Android | 23 | 29 | **5** | 5.95 | **7** | 15.7 | R-A +8 |
+| M16 Final release | 8 | 9 | **6** | 5.53 | **6.5** | 7.15 | — |
+| **Total, all three platforms** | **205** | **318.75** | **35** | **44.84** | **52.75** | **76.03** | +21 |
 
 The remaining forecast has fallen below the reduction's initial 210–250 h realistic target as work
-completed, and the pessimistic remaining total is under the **280 h hard ceiling** (rule R14) by
-212.22 h. Adding the 181.75 task-hours completed since `HOUSE-03206` gives a ceiling projection of
-249.53 h, 30.47 h under the limit. That margin is
+completed. The three newly explicit defect corrections add 11 realistic hours (12.10 pessimistic)
+for already-required D2/D6/D13 behavior. With `HOUSE-03637` accepted, adding the 185.25
+task-hours completed since `HOUSE-03206` to the 76.03 pessimistic remaining forecast gives a
+ceiling projection of 261.28 h, 18.72 h under the unchanged 280 h limit. That margin is
 small on purpose: the ceiling is a limit, not a budget to fill.
 
 | Reserve | Milestone | Hours | Risk |
@@ -2228,6 +2248,22 @@ Corrections made to `cna-house.md` or to this file during implementation, with t
 forced each one. Nothing is changed silently. The 2026-09-06 → 2026-09-20 corrections are in the
 legacy ledger; the two of 2026-09-21 (`HOUSE-03201`, `HOUSE-03205`) are in
 [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md).
+
+### PC-2026-09-26 — Make owner-observed traversal, lighting and threshold defects explicit
+
+* **Evidence:** the owner repeatedly observes an unnatural/visually obstructed main stair,
+  unreadable rooms and a flash while crossing doorways in normal gameplay. `HOUSE-03632`'s
+  scripted path, `HOUSE-03633`/`03634`'s fixed lighting views and static culling tests do not
+  establish the required real-controller or moving-frame behavior. These reports contradict D2,
+  D6 and D13 (S1/S2); they are not optional polish.
+* **Correction:** add `HOUSE-03635`–`03637` as separately visible urgent MUST defect tasks,
+  independent of the audio-gated final review `HOUSE-02714`, and pause `HOUSE-02404` until they
+  are resolved. This exposes obligations already present in DONE; it adds no feature, room, platform
+  or system. R15's equal-cut rule for *scope expansion* cannot remove the same D2/D6/D13
+  requirements that the correction exists to enforce. Their 11 h realistic / 12.1 h pessimistic
+  forecasts are charged honestly rather than hidden in a completed task or a false equal cut.
+* **Budget at correction:** 36 open MUST tasks, 56.25 h realistic / 79.88 h pessimistic. Completed task estimates
+  181.75 h plus remaining pessimistic 79.88 h project 261.63 h, 18.37 h below the unchanged ceiling.
 
 ### PC-2026-09-26 — Android performance measurement needs delivered scenes (`HOUSE-03037`)
 

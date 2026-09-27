@@ -2,6 +2,7 @@
 #include "cnahouse/visibility/PortalTraversal.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <span>
 
 #include "cnahouse/visibility/ClipRect.hpp"
@@ -76,11 +77,70 @@ namespace cnahouse::visibility
             return;
         }
 
+        // The renderer's 10 cm near plane can pass *through* an open doorway before the eye
+        // crosses the cell boundary. Clipping that portal against the render near plane makes
+        // the entire next room vanish for those last centimetres, exposing the sky for a frame.
+        // Visibility is conservative: place its near plane 5 mm behind the eye, while keeping
+        // the render projection and all five other frustum planes unchanged. The exact portal-
+        // plane crossing needs the separate, aperture-bounded hand-off below.
+        constexpr float kVisibilityNear = 0.005F;
+        const Xna::Plane& renderNear = input.nearPlane;
+        const Xna::Vector3& normal = renderNear.Normal;
+        const float eyeDot = normal.X * input.eye.X + normal.Y * input.eye.Y + normal.Z * input.eye.Z;
+        const Xna::Plane visibilityNear(normal, kVisibilityNear - eyeDot);
+        ClipFrustum visibilityFrustum;
+        (void)visibilityFrustum.Add(visibilityNear);
+        const std::span<const Xna::Plane> renderPlanes = input.cameraFrustum.Planes();
+        for (std::size_t i = 1; i < renderPlanes.size(); ++i)
+        {
+            (void)visibilityFrustum.Add(renderPlanes[i]);
+        }
+
         // The whole screen: the camera's own frustum covers all of it, so nothing can be
         // "contained" by it and skipped before the walk has started.
         const NdcRect whole{-1.0F, -1.0F, 1.0F, 1.0F};
         static_cast<void>(queue_.Push(Work{
-            input.cameraCell, input.cameraFrustum, whole, ClippedPolygon{}, 0, kNoLimit, ConeFlags::None}));
+            input.cameraCell, visibilityFrustum, whole, ClippedPolygon{}, 0, kNoLimit, ConeFlags::None}));
+
+        // At the exact crossing frame the eye can lie in the portal plane. All four camera side
+        // planes meet there, so clipping the portal polygon to even the relaxed near frustum
+        // produces an empty polygon. Seed the open neighbour directly while the eye is within
+        // 5 cm of its actual aperture; at this distance the opening occupies the full view.
+        // This is a visibility-only hand-off, not a new camera cell or a render projection change.
+        constexpr float kThresholdOverlap = 0.05F;
+        for (const std::uint32_t index : input.world->PortalsOf(input.cameraCell))
+        {
+            if (index >= input.portals.size())
+            {
+                continue;
+            }
+            const world::Portal& portal = input.world->Portals()[index];
+            const PortalRuntime& runtime = input.portals[index];
+            if (!runtime.PassesLight() ||
+                std::abs(SignedDistanceToPlane(portal, input.eye)) > kThresholdOverlap)
+            {
+                continue;
+            }
+            const float u = portal.axis == world::PlaneAxis::X ? input.eye.Z : input.eye.X;
+            const float v = portal.axis == world::PlaneAxis::Y ? input.eye.Z : input.eye.Y;
+            if (u < portal.minU || u > portal.maxU || v < portal.minV || v > portal.maxV)
+            {
+                continue;
+            }
+            const util::Id other = portal.cellA == input.cameraCell ? portal.cellB : portal.cellA;
+            const ConeFlags flags =
+                portal.opacity == world::PortalOpacity::Translucent ? ConeFlags::Diffuse : ConeFlags::None;
+            if (queue_.Push(Work{other,
+                                 visibilityFrustum,
+                                 whole,
+                                 ClippedPolygon{},
+                                 1,
+                                 MaxDepthFor(portal, *input.world, input.side),
+                                 flags}))
+            {
+                ++stats_.portalsCrossed;
+            }
+        }
 
         const auto seedExteriorGlazing = [&]()
         {
@@ -93,7 +153,7 @@ namespace cnahouse::visibility
             // never put in the walk. The outdoor root already gives §25.6 the camera's whole
             // cone; use the actual glazed aperture to seed its ONE room
             // directly, without making the yard cell or every room behind it visible.
-            const std::span<const Xna::Plane> planes = input.cameraFrustum.Planes();
+            const std::span<const Xna::Plane> planes = visibilityFrustum.Planes();
             const std::span<const world::Portal> portals = input.world->Portals();
             for (std::size_t index = 0; index < portals.size() && index < input.portals.size(); ++index)
             {
@@ -153,7 +213,7 @@ namespace cnahouse::visibility
                 }
                 const NdcRect rect = NdcBounds(clipped.Points(), input.viewProjection);
                 const ReducedFrustum next =
-                    ReduceFrustum(input.eye, clipped.Points(), input.nearPlane, input.farPlane);
+                    ReduceFrustum(input.eye, clipped.Points(), visibilityNear, input.farPlane);
                 const ConeFlags flags = portal.opacity == world::PortalOpacity::Translucent
                                             ? ConeFlags::Diffuse
                                             : ConeFlags::None;
@@ -279,7 +339,7 @@ namespace cnahouse::visibility
                     }
 
                     const ReducedFrustum next =
-                        ReduceFrustum(input.eye, clipped.Points(), input.nearPlane, input.farPlane);
+                        ReduceFrustum(input.eye, clipped.Points(), visibilityNear, input.farPlane);
                     // §25.2: *"if p.opacity == translucent: next.flags |= DIFFUSE"*. The `|=` is the
                     // point -- a cone that came through frosted glass stays diffuse however many
                     // clear doorways it crosses afterwards, because the glass is still between the

@@ -11,9 +11,12 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
+#include <cstdlib>
 #include <filesystem>
+#include <limits>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <thread>
 #include <vector>
 
@@ -1151,8 +1154,9 @@ namespace
     class ScriptedInput final : public cnahouse::player::IInputSource
     {
     public:
-        explicit ScriptedInput(cnahouse::player::InputState state)
+        explicit ScriptedInput(cnahouse::player::InputState state, bool lookAvailable = false)
             : state_(state)
+            , lookAvailable_(lookAvailable)
         {
         }
 
@@ -1165,12 +1169,219 @@ namespace
 
         [[nodiscard]] bool LookAvailable() const noexcept override
         {
-            return false;
+            return lookAvailable_;
         }
 
     private:
         cnahouse::player::InputState state_;
+        bool lookAvailable_ = false;
     };
+
+    TEST(HeadlessRunTests, CommandLineScreenshotKeepsItsAuthoredWalkPose)
+    {
+        const std::filesystem::path output =
+            std::filesystem::path(CNAHOUSE_TEST_OUTPUT_DIR) / "fixed-walk-pose.png";
+        std::filesystem::remove(output);
+        cnahouse::player::InputState movingLook;
+        movingLook.move.Y = 1.0F;
+        movingLook.look.X = 0.2F;
+        movingLook.look.Y = 0.2F;
+        ScriptedInput input(movingLook, true);
+        Options options;
+        options.headless = true;
+        options.scene = "walk";
+        options.player = std::array{0.0F, 0.6F, -16.3F, 90.0F, 0.0F};
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+        options.noAudio = true;
+        options.screenshot = output.string();
+        options.screenshotFrame = 8;
+        Settings settings = Settings::Defaults();
+        settings.backBufferWidth = 320;
+        settings.backBufferHeight = 180;
+        const std::filesystem::path original = std::filesystem::current_path();
+        std::filesystem::current_path(std::filesystem::path(CNAHOUSE_TEST_CONTENT_ROOT).parent_path());
+        CnaHouseGame game(options, settings);
+        game.SetInputSourceForTesting(&input);
+        game.Run();
+        std::filesystem::current_path(original);
+        ASSERT_EQ(game.ExitCode(), 0);
+        EXPECT_TRUE(std::filesystem::exists(output));
+        EXPECT_NEAR(game.PlayerForTesting().Feet().X, 0.0F, 0.01F);
+        EXPECT_NEAR(game.PlayerForTesting().Feet().Z, -16.3F, 0.01F);
+        EXPECT_NEAR(game.ViewForTesting().Camera().Pose().forward.X, 1.0F, 0.01F);
+        EXPECT_NEAR(game.ViewForTesting().Camera().Pose().forward.Y, 0.0F, 0.01F);
+    }
+
+    /// Actual renderer diagnostic for HOUSE-03637. Keep the production walk, visibility and
+    /// screenshot paths, but neutralise desktop mouse warps so each captured frame differs only
+    /// by the controller's forward movement. Opt-in because it performs repeated GPU readbacks;
+    /// run with SDL_VIDEODRIVER=offscreen and no desktop display.
+    class ThresholdCaptureInput final : public cnahouse::player::IInputSource
+    {
+    public:
+        explicit ThresholdCaptureInput(const CnaHouseGame& game)
+            : game_(&game)
+        {
+        }
+
+        void Update(float deltaSeconds) override
+        {
+            ++updates_;
+            // The snapshot is from the frame just drawn. A zero-draw frame in this movement
+            // interval was the original sky flash, even though a later static pose rendered.
+            if (updates_ > 2 && updates_ <= 37)
+            {
+                const int draws = game_->VisibilitySnapshotForTesting().drawCalls;
+                minDraws_ = std::min(minDraws_, draws);
+                maxDraws_ = std::max(maxDraws_, draws);
+            }
+            state_ = {};
+            // Loading and PNG readback can make a frame much longer than a normal game frame.
+            // Bound the requested travel per captured frame so the camera does not jump completely
+            // through the doorway between the two images we need to compare.
+            if (updates_ > 1 && deltaSeconds > 0.0F)
+            {
+                state_.move.Y = std::min(1.0F, 0.025F / (1.35F * deltaSeconds));
+            }
+            state_.toggleVisibilityOverlayPressed = updates_ == 1;
+            state_.screenshotPressed = updates_ <= 36;
+        }
+
+        [[nodiscard]] const cnahouse::player::InputState& Current() const noexcept override
+        {
+            return state_;
+        }
+
+        [[nodiscard]] bool LookAvailable() const noexcept override
+        {
+            return false;
+        }
+
+        [[nodiscard]] int MinDraws() const noexcept
+        {
+            return minDraws_;
+        }
+
+        [[nodiscard]] int MaxDraws() const noexcept
+        {
+            return maxDraws_;
+        }
+
+    private:
+        const CnaHouseGame* game_;
+        unsigned int updates_ = 0;
+        int minDraws_ = std::numeric_limits<int>::max();
+        int maxDraws_ = 0;
+        cnahouse::player::InputState state_;
+    };
+
+    TEST(HeadlessRunTests, GpuThresholdMovementCaptures)
+    {
+        if (std::getenv("HOUSE_THRESHOLD_GPU_CAPTURE") == nullptr)
+        {
+            GTEST_SKIP() << "GPU doorway frames are an opt-in visual review";
+        }
+        const char* videoDriver = std::getenv("SDL_VIDEODRIVER");
+        if (videoDriver == nullptr || std::string_view(videoDriver) != "offscreen" ||
+            std::getenv("DISPLAY") != nullptr || std::getenv("WAYLAND_DISPLAY") != nullptr)
+        {
+            GTEST_SKIP() << "GPU doorway capture requires offscreen SDL and no desktop display";
+        }
+
+        struct Crossing
+        {
+            const char* name;
+            std::array<float, 5> start;
+            const char* arrival;
+        };
+
+        const std::array crossings{
+            Crossing{"foyer-stair", {2.04F, 0.60F, -14.80F, 90.0F, 0.0F}, "L0_STAIR_MAIN"},
+            Crossing{"stair-foyer", {2.35F, 0.60F, -14.80F, 270.0F, 0.0F}, "L0_FOYER"},
+            Crossing{"hall-wc1", {2.04F, 0.60F, -21.10F, 90.0F, 0.0F}, "L0_WC1"},
+            Crossing{"wc1-hall", {2.37F, 0.60F, -21.10F, 270.0F, 0.0F}, "L0_HALL"},
+            Crossing{"wc3-hall", {-5.70F, 3.65F, -20.84F, 180.0F, 0.0F}, "L1_HALL_W"},
+            Crossing{"hall-wc3", {-5.70F, 3.65F, -20.48F, 0.0F, 0.0F}, "L1_WC3"},
+            Crossing{"wc7-hall", {2.32F, -2.30F, -22.10F, 270.0F, 0.0F}, "B1_HALL"},
+            Crossing{"hall-wc7", {2.03F, -2.30F, -22.10F, 90.0F, 0.0F}, "B1_WC7"},
+            Crossing{"porch-foyer", {0.00F, 0.57F, -14.10F, 0.0F, 0.0F}, "L0_FOYER"},
+            Crossing{"foyer-porch", {0.00F, 0.60F, -14.48F, 180.0F, 0.0F}, "L0_PORCH"},
+        };
+        const char* requestedCase = std::getenv("HOUSE_THRESHOLD_CASE");
+        const std::filesystem::path original = std::filesystem::current_path();
+        const std::filesystem::path buildRoot =
+            std::filesystem::path(CNAHOUSE_TEST_CONTENT_ROOT).parent_path();
+        for (const float time : {10.5F, 23.0F})
+        {
+            for (const Crossing& crossing : crossings)
+            {
+                if (requestedCase != nullptr && std::string_view(requestedCase) != crossing.name)
+                {
+                    continue;
+                }
+                const std::filesystem::path output =
+                    std::filesystem::path(CNAHOUSE_TEST_OUTPUT_DIR) / "threshold-movement" /
+                    (std::string(crossing.name) + (time < 12.0F ? "-day" : "-night"));
+                std::filesystem::create_directories(output);
+                std::vector<std::filesystem::path> existing;
+                for (const auto& entry : std::filesystem::directory_iterator(buildRoot))
+                {
+                    if (entry.path().filename().string().starts_with("cna-house-") &&
+                        entry.path().extension() == ".png")
+                    {
+                        existing.push_back(entry.path());
+                    }
+                }
+                // WorldLoader reads deployed files relative to the build root, not contentRoot.
+                std::filesystem::current_path(buildRoot);
+                cnahouse::util::Log::ResetForTesting();
+                Options options;
+                options.scene = "walk";
+                options.player = crossing.start;
+                options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+                options.noAudio = true;
+                options.timeOfDay = time;
+                options.freezeTime = true;
+                Settings settings = Settings::Defaults();
+                settings.backBufferWidth = 960;
+                settings.backBufferHeight = 540;
+                settings.verticalSync = true;
+                CnaHouseGame game(options, settings);
+                ThresholdCaptureInput input(game);
+                game.SetInputSourceForTesting(&input);
+                game.SetFrameLimit(40);
+                game.Run();
+                std::filesystem::current_path(original);
+                std::size_t captured = 0;
+                for (const auto& entry : std::filesystem::directory_iterator(buildRoot))
+                {
+                    if (entry.path().filename().string().starts_with("cna-house-") &&
+                        entry.path().extension() == ".png" &&
+                        std::ranges::find(existing, entry.path()) == existing.end())
+                    {
+                        std::filesystem::rename(entry.path(), output / entry.path().filename());
+                        ++captured;
+                    }
+                }
+                ASSERT_EQ(game.ExitCode(), 0) << crossing.name;
+                EXPECT_GE(captured, 3U) << crossing.name << " did not retain a movement sequence";
+                EXPECT_GT(input.MinDraws(), 0) << crossing.name << " exposed the sky during traversal";
+                std::printf(
+                    "  %s at %.1f: %zu frames, draws %d..%d, x %.3f z %.3f, cell %.*s\n",
+                    crossing.name,
+                    static_cast<double>(time),
+                    captured,
+                    input.MinDraws(),
+                    input.MaxDraws(),
+                    static_cast<double>(game.PlayerForTesting().Feet().X),
+                    static_cast<double>(game.PlayerForTesting().Feet().Z),
+                    static_cast<int>(cnahouse::util::IdRegistry::NameOf(game.CellForTesting()).size()),
+                    cnahouse::util::IdRegistry::NameOf(game.CellForTesting()).data());
+                EXPECT_EQ(cnahouse::util::IdRegistry::NameOf(game.CellForTesting()), crossing.arrival)
+                    << crossing.name;
+            }
+        }
+    }
 
     TEST(HeadlessRunTests, PowderRoomDoorwayIsTraversableInBothDirections)
     {

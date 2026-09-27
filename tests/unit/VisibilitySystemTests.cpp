@@ -134,6 +134,55 @@ TEST(VisibilitySystemTests, TheSetIsThisFramesAndIsComputedOnce)
     EXPECT_EQ(system.Visible().size(), first) << "the same camera gave a different answer next frame";
 }
 
+TEST(VisibilitySystemTests, TheNeighbourStaysVisibleInsideTheRenderNearPlaneAtAnOpenThreshold)
+{
+    IdRegistry::ResetForTesting();
+    if (!WorldIsDeployed())
+    {
+        GTEST_SKIP() << "no deployed world";
+    }
+    const world::WorldData data = Load();
+    VisibilitySystem system(data);
+    std::uint64_t frame = 1;
+    // The running controller can still report the previous cell while its eye lies on or a
+    // few millimetres across the shared plane. The old sampled positions skipped that exact
+    // frame, which is where the real GPU sequence still showed a full-screen sky flash.
+    for (const bool fromFoyer : {true, false})
+    {
+        for (const float x : {2.08F, 2.12F, 2.18F, 2.199F, 2.20F, 2.201F, 2.22F, 2.28F, 2.32F})
+        {
+            if ((fromFoyer && x > 2.22F) || (!fromFoyer && x < 2.18F))
+            {
+                continue; // cell-tracker hand-off, not a camera assigned a room 12 cm away
+            }
+            PlayerState state;
+            state.position = Vector3(x, 0.60F + state.Rise(), -15.00F);
+            state.yaw = (fromFoyer ? 90.0F : 270.0F) * 3.14159265F / 180.0F;
+            FirstPersonCamera camera;
+            camera.SetAspect(16.0F / 9.0F);
+            camera.Update(state, kPlayerEyeHeight, 0.0F);
+
+            CameraView view;
+            view.cell = cnahouse::util::Intern(fromFoyer ? "L0_FOYER" : "L0_STAIR_MAIN");
+            view.eye = camera.Pose().eye;
+            view.viewProjection = camera.View() * camera.Projection();
+            view.frustum = ClipFrustum(camera.Frustum());
+            view.nearPlane = camera.Frustum().getNearProperty();
+            view.farPlane = camera.Frustum().getFarProperty();
+            system.SetCamera(view);
+            system.Update(Frame(frame++));
+
+            const char* neighbour = fromFoyer ? "L0_STAIR_MAIN" : "L0_FOYER";
+            const auto& stats = system.Stats();
+            EXPECT_TRUE(system.IsVisible(cnahouse::util::Intern(neighbour)))
+                << "eye x=" << x << " from " << (fromFoyer ? "foyer" : "stair") << "; portals tested/crossed "
+                << stats.portalsTested << "/" << stats.portalsCrossed << ", facing " << stats.skippedFacing
+                << ", clipped " << stats.skippedClipped << ", area " << stats.skippedArea;
+            EXPECT_LE(system.Visible().size(), cnahouse::visibility::kMaxVisibleCells);
+        }
+    }
+}
+
 TEST(VisibilitySystemTests, OpeningADoorChangesTheSetWithoutMovingTheCamera)
 {
     // §25.3, and the reason the aperture lives here: with the kitchen door shut, *"the kitchen's 5
