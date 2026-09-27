@@ -10,11 +10,11 @@ renumbered.
 | | |
 |---|---|
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
-| Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers, a reusable kit, a compact feature set), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (**the final reduction**: canonical tasks, five hero areas, a 280-hour ceiling, maintenance mode after DONE) |
-| **This is the final proactive scope reduction** | No further broad replanning pass is scheduled. Scope changes from here on are the targeted corrections of rule [R15](#scheduling-rules--time-discipline) only |
-| Active plan | **35 open MUST tasks** in 16 milestones, including two urgent open corrective tasks for reported S1/S2 defects. Every active task's title and acceptance state the current work; nothing has to be read "plus its amendments" |
-| Estimate to DONE | **≈ 44.84 / 52.75 / 76.03 agent-hours** (optimistic / realistic / pessimistic), Linux, Web and Android included. **Hard ceiling 280 h** (rule R14). See [Remaining-work estimate](#remaining-work-estimate) |
-| Current gate | **G5, M7, M9 and M12 passed; CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator.** Owner-reported main-stair usability and dark-room defects remain urgent open MUST corrections `HOUSE-03635`/`03636`; the doorway flash is corrected under `HOUSE-03637`. Desktop performance `HOUSE-02404` is paused until the other two defects are resolved. `HOUSE-01920`/`HOUSE-01922` remain independently open (listening unavailable here) |
+| Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers and a reusable kit), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (2026-09-22 reduction, retained breadth and maintenance mode; its former hour ceiling is superseded below) |
+| Scope policy | The owner explicitly superseded the former 280-hour ceiling on 2026-09-27 and requested further targeted corrections and a filming tour. Keep MUST/OPT boundaries explicit; do not infer other features |
+| Active plan | **40 open MUST tasks** in 16 milestones, including newly reported traversal, geometry and visibility defects and the owner-requested filming tour. Every active task's title and acceptance states the current work |
+| Estimate to DONE | The old **44.84 / 52.75 / 76.03 agent-hour** forecast is a historical snapshot before the 2026-09-27 owner additions, not a current forecast or scheduling gate. Per-task `est:` remains for task sizing; see [Planning corrections](#planning-corrections) |
+| Current gate | **G5, M7 and M12 passed; M9 reopened for the owner-requested filming tour. CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator.** Main-stair usability and dark-room defects remain urgent open MUST corrections `HOUSE-03635`/`03636`; the doorway flash is corrected under `HOUSE-03637`. Newly reported S1/S2 defects are explicit in M11. Desktop performance `HOUSE-02404` is paused for the user-visible defects. `HOUSE-01920`/`HOUSE-01922` remain open; the owner reports the normal game is silent despite enabled audio |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -113,8 +113,8 @@ the [optional backlog](#optional-and-conditional-backlog) is required.
 | **D4** | Visual quality | Every accessible room is at C3, the twelve main cells at C4, and the five hero areas at C5. No higher level is required anywhere | G3, G4 `HOUSE-03452`, G5 `HOUSE-03480` |
 | **D5** | Environment | Time of day runs automatically and can be set; day and night show the sun, moon and stars; the sky shows clear, overcast and rain; rain stays out of covered areas; surfaces are wet in rain; fog follows the weather. A snow weather state shows its overcast sky and fog without particles (falling snow is optional). Detailed weather simulation is not required | `HOUSE-03520`, `HOUSE-02521` |
 | **D6** | Lighting | Interior lights follow the automatic schedule; furniture is consistent with the baked lighting; every accessible room is readable by day and at night; exterior night lighting is readable | `HOUSE-03401`, `HOUSE-03402`, `HOUSE-03633`, G3 |
-| **D7** | Audio | Footsteps on six broad surface categories; one interior tone; exterior day and night beds; rain and wind layers, quieter indoors by sky exposure; volume settings | `HOUSE-01939`, `HOUSE-02516` |
-| **D8** | Application | *Start*, pause, one settings screen (graphics, audio, controls, environment), credits and quit; a controls hint; Web controls; Android touch controls | `HOUSE-02523`, `HOUSE-02528`, `HOUSE-03721`, `HOUSE-03723`, `HOUSE-03039` |
+| **D7** | Audio | With sound enabled in the normal application, audible footsteps on six broad surface categories; one interior tone; exterior day and night beds; rain and wind layers, quieter indoors by sky exposure; volume settings | `HOUSE-01920`, `HOUSE-01922`, `HOUSE-01939`, `HOUSE-02516` |
+| **D8** | Application | *Start*, pause, one settings screen (graphics, audio, controls, environment), credits and quit; a controls hint; Web controls; Android touch controls; on Linux, `C` toggles a bounded automatic filming tour of the whole accessible property | `HOUSE-02523`, `HOUSE-02528`, `HOUSE-03572`, `HOUSE-03721`, `HOUSE-03723`, `HOUSE-03039` |
 | **D9** | Performance | The representative scenarios meet the documented target on the reference desktop; the Web and Android presets meet their targets in their representative scenes; no major memory or performance defect remains | `HOUSE-02404`, `HOUSE-02898`, `HOUSE-03037`, `HOUSE-03071` |
 | **D10a** | Linux | A packaged Release build runs on a clean profile, with and without an audio device | `HOUSE-02790` |
 | **D10b** | Web | It builds and loads; its controls work; the representative traversal completes in Chrome and Firefox without major rendering corruption and with acceptable performance; a headless smoke test runs in CI | `HOUSE-02900`, `HOUSE-02901` |
@@ -203,12 +203,12 @@ follow M13; M16 is last.
 | **R7: every task pays its way** | Every task states `adv:` (the DONE item or gate it advances) and `est:` (agent-hours). A task estimated above 4 h is split into ≤ 4 h slices when it is scheduled. A task that reaches **2× its estimate** stops, records what it learned in a `note:`, and either splits the rest into a new task with a new estimate or, if the rest is not needed for DONE, moves it to the optional backlog (rule R15) |
 | **R8: kit first, reuse freely** | Furniture and fixtures come from the shared kit: the generators (`HOUSE-00985`, `HOUSE-00973`, `HOUSE-02681`), the M3 acquisition groups and the existing ground-floor pieces. **The same model may appear any number of times**, varied by tint, scale, dimensions, arrangement and small accessory swaps; there is no uniqueness or density quota. **The acquired catalogue is capped at 32 models plus one wall-art set of at most 8 images** (M3); a model beyond a group's cap needs a Planning corrections entry and an equal cut elsewhere. Depth follows the tier: utility essential only, secondary believable, main complete, hero full. Bespoke per-object authoring is allowed **only in a hero area**, at most one piece, inside its C5 task's estimate. Once a room reads as its purpose during normal exploration, stop adding detail unless it is a main or hero cell |
 | **R9: no new systems** | **No new system unless it is strictly necessary to satisfy an already-authorised DONE item.** A new runtime subsystem, interaction, simulation or framework requires a [Planning corrections](#planning-corrections) entry showing which DONE item cannot be met with existing code, existing CNA capabilities or simpler content. "It would look nicer" is not a reason, and nothing on the [Non-goals](#non-goals--not-required-for-done) list qualifies. Offline tooling that speeds up breadth work is allowed under R7 |
-| **R10: reassess** | At every gate, and after every 10 completed tasks: update the [scoreboard](#zone-scoreboard) with evidence (a review round and `zone_scoreboard.py` output), compare the hours spent with each milestone's budget and with R14's ceiling, and record in `docs/handoff.md` which rule chose the next task. A milestone that overruns its budget by 50 % needs a Planning corrections entry that **cuts or simplifies** the rest; continuing unchanged is allowed only for S1/S2 fixes |
+| **R10: reassess** | At every gate, and after every 10 completed tasks: update the [scoreboard](#zone-scoreboard) with evidence (a review round and `zone_scoreboard.py` output) and record in `docs/handoff.md` which rule chose the next task. Keep task estimates honest, but the former aggregate ceiling no longer blocks owner-requested work |
 | **R11: unfinished beats finished** | When the choice is between completing an unfinished area and improving a finished one, complete the unfinished area. Do not invent scope |
 | **R12: bounded polish** | Visual polish outside the hero C5 tasks happens only in M11's final defect pass: **4.5 agent-hours of S2/S3 work** plus whatever S1 fixes need (about 7 h for the milestone with its review and golden refresh; never more than 12 h unless S1/S2 remain). No screenshot → tweak → screenshot loop runs more than two rounds on one area. When the pass is spent and no S1/S2 remains, polish is **done** |
-| **R13: optional stays optional** | A task in the [optional backlog](#optional-and-conditional-backlog) is never scheduled while a MUST task is open, never counts towards the estimate, never blocks a gate or DONE, and is never implemented because it "looks cheap". It never moves into the active plan silently: promotion needs a Planning corrections entry naming the DONE item that cannot be met without it, and must fit under R14's ceiling |
-| **R14: budget ceiling** | The realistic remaining estimate at `HOUSE-03206` is **226 agent-hours**; the **hard ceiling is 280 h**, measured as *hours spent since 2026-09-22 plus the remaining pessimistic estimate*. The ceiling is not a target. When the projection would exceed it, the next task is a Planning corrections entry that **cuts depth or moves work to the optional backlog** until it fits. The ceiling is never raised, and an overrun is never resolved by re-estimating without cutting. Breadth (every floor, the basement, the attic, the garage, the exterior, Linux, Web, Android) is not cut to meet it |
-| **R15: final scope, targeted corrections only** | `HOUSE-03206` is the **final proactive scope reduction**. No further broad replanning, re-scoping or re-estimation pass is scheduled. A later reduction is allowed only when a task proves unexpectedly expensive (R7), a platform constraint makes a feature disproportionately costly, or R14 is threatened; each is one targeted Planning corrections entry. **Expansion is never automatic**: adding MUST work needs a Planning corrections entry naming a DONE item that cannot be met otherwise, and an equal cut elsewhere |
+| **R13: optional stays optional** | A task in the [optional backlog](#optional-and-conditional-backlog) is never scheduled while a MUST task is open, never blocks a gate or DONE, and is never implemented because it "looks cheap". It never moves into the active plan silently: promotion needs a Planning corrections entry naming the DONE item or explicit owner request that changed the requirement |
+| **R14: former budget ceiling superseded** | The owner explicitly withdrew the 280-agent-hour hard ceiling on 2026-09-27. Keep each task's `est:` honest for sizing, but do not run an aggregate budget guard, cut required breadth, or stop owner-requested corrections because of the old forecast. The pre-override numbers remain historical evidence only |
+| **R15: targeted corrections and explicit owner additions** | `HOUSE-03206` remains the final proactive scope reduction; do not revive cancelled work or add speculative features. Correct an S1/S2 defect under an existing DONE item with a Planning corrections entry. A new requirement explicitly requested by the owner may be added to DONE with a targeted entry and bounded task, without an equal cut under the superseded R14. No other expansion is automatic |
 | **R16: validation lives in the task** | Every task proves its own acceptance through its `verify:` step. There are no separate "validate X", "re-validate X", "cross-check X" or "review X" tasks for one deliverable. The only standalone review tasks are the gates G1–G5, the dressing checkpoint, M11's final walkthrough, M13's DONE audit and the Web and Android DONE checklists |
 | **R17: maintenance mode; CNA stays CNA** | After `HOUSE-03078`, feature development stops. A CNA defect found here is proved, recorded in `cna-house.md` §6 with enough evidence to fix it in CNA, and worked around here only where a local workaround is reasonable; CNA changes happen in CNA under their own task. A missing CNA feature is never a reason to grow this plan |
 
@@ -398,13 +398,13 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M6](#m6--main-cells-and-hero-areas-c4-c5--gates-g4-and-g5) — Main cells and hero areas | A | 03441–03500 | 0 | **G4** · `HOUSE-03452`, **G5** · `HOUSE-03480` | D4 | 0 |
 | [M7](#m7--a-compact-environment) — A compact environment | B | 03501–03540 | 0 | `HOUSE-03520` | D5 | 0 |
 | [M8](#m8--atmospheric-audio-essentials) — Atmospheric audio essentials | B | 03541–03570 | 4 | `HOUSE-01939` | D7 | 5 |
-| [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 0 | `HOUSE-02528` | D8 | — |
+| [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 1 | `HOUSE-03572` | D8 | 8 |
 | [M10](#m10--performance-measurement-driven) — Performance, measurement-driven | B | 03601–03630 | 2 | `HOUSE-02404` | D9 | 6 |
-| [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 5 | `HOUSE-03635` | D2, D4, D6, D13, D14 | 10.75 |
+| [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 9 | `HOUSE-03635` | D1, D2, D4, D6, D13, D14 | 22.75 |
 | [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 0 | **done** · `HOUSE-02598` | D11 | 0 |
 | [M13](#m13--linux-desktop-release) — Linux desktop release | after M11 | 03701–03720 | 8 | `HOUSE-02797` | D9–D13 | 10.25 |
-| [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 6 | `HOUSE-02904` | D10b | 8 |
-| [M15](#m15--android) — Android | readiness: B · device: after M13 | 03751–03780 | 9 | `HOUSE-03041` (a BL-13 record does not close it) | D10c | 16 |
+| [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 5 | `HOUSE-02904` | D10b | 7.25 |
+| [M15](#m15--android) — Android | readiness: B · device: after M13 | 03751–03780 | 5 | `HOUSE-03041` (a BL-13 record does not close it) | D10c | 7 |
 | [M16](#m16--final-release) — Final release | last | 03781–03800 | 6 | **DONE** · `HOUSE-03078` | D9–D14 | 6.5 |
 
 Legacy ids 03121–03200 are unallocated and stay unused. The budgets are the sums of the tasks'
@@ -1204,6 +1204,7 @@ derivative set, no positional source, no special zone loop and no room-aware rou
       verify: a mapping check over every surface in the world data; a listening check in one room of each category
       trace: was *Wire the 20 footstep surface sets (12 from NOX, 8 sourced)*, then six with an offline-derived carpet set (`HOUSE-03206`)
       blocked: (2026-09-25) Implementation and automated validation are ready locally: all 22 authored surface spellings map exactly once to the six retained direct-NOX banks, 20 focused unit tests, five audio-gate integration tests and the real-controller silent walk pass. The required subjective listening check cannot be performed in this execution environment: `/dev/snd` is absent, `aplay -l` reports no soundcards, PulseAudio refuses the connection, and the Codex runtime rejects audio input. A 48 kHz mono six-category review montage was produced under `/tmp` and measured at 4.628 s / -8.07 dBFS peak, but it was not claimed as listened to. The box remains open until a human-capable audio session listens in one representative location per category; no requirement is weakened.
+      note: (2026-09-27 owner report) The ordinary game remains completely silent although sound is enabled in Settings. Recheck the current tracked runtime and packaging before relying on the 2026-09-25 "ready locally" note; test-only dummy/silent runs do not prove audible normal play. This task stays open and active even if subjective listening later needs the owner.
 
 - [ ] HOUSE-01922 — Ambience: one interior tone and the exterior day and night beds, cross-faded by listener cell and sun
       dep: HOUSE-01911, HOUSE-00559 · sys: audio · plat: ALL · pri: MUST · zone: all · adv: D7 · est: 1.75
@@ -1211,6 +1212,7 @@ derivative set, no positional source, no special zone loop and no room-aware rou
       verify: unit tests of the selection and the cross-fade; a listening walk indoors and out
       trace: absorbs `HOUSE-01923` and `HOUSE-01924`; was *per-cell room tone with an 0.8 s cross-fade* plus two special zone loops (`HOUSE-03206`)
       blocked: (2026-09-25) The bounded implementation and automated evidence are ready locally: listener cell selection, the 0.8 s indoor/outdoor cross-fade and the -6°..+3° sun-elevation day/night blend pass four focused director tests; the real `--scene=walk` path opens exactly the four retained loop voices (interior, forest-birds, night and cicadas) under SDL dummy audio. All 1,453 unit tests pass; 137/145 serial integration tests pass, with the other eight isolated to the sandbox refusing SaveStore writes under `/home/robertvokac/.local/share`; strict-XNA compiles 342 translation units clean. The required indoor/outdoor listening walk cannot be performed here because `/dev/snd` is absent, ALSA reports no soundcards, PulseAudio refuses the connection and the Codex runtime rejects audio input. The task remains open until an audio-capable session performs that walk; no acceptance criterion is weakened.
+      note: (2026-09-27 owner report) Enabled sound is absent in the normal application. Verify that the tracked production build actually starts and retains the ambience voices before attributing this solely to this agent environment's missing `/dev/snd`; the owner has an audio-capable playback path.
 
 - [ ] HOUSE-01925 — Weather layers: rain and wind over the exterior bed, quieter and duller indoors by sky exposure
       dep: HOUSE-01922, HOUSE-00779 · sys: audio · plat: ALL · pri: MUST · zone: all · adv: D7 · est: 1.5
@@ -1231,7 +1233,8 @@ Track B. Functional, not productised: *Start*, pause, **one settings screen**, c
 controls hint, and layouts that work at desktop and phone aspects. It reuses the existing
 `MenuStack`, `TextRenderer` and loading screen, and settings persistence (`HOUSE-00131`,
 `HOUSE-00152`). The debug overlays (`F1`–`F5`, `F8`, `F9`) and the console stay as they are; none is
-extended.
+extended. The 2026-09-27 owner addition `HOUSE-03572` is a single Linux filming route using the
+existing walk/controller path, not another menu or a reusable cinematic framework.
 
 - [x] HOUSE-02516 — The settings screen: one page with Graphics, Audio, Controls and Environment sections
       dep: HOUSE-00156, HOUSE-00131, HOUSE-01911 · sys: ui · plat: ALL · pri: MUST · zone: all · adv: D7, D8 · est: 2
@@ -1272,6 +1275,12 @@ extended.
       dep: HOUSE-02516, HOUSE-02518, HOUSE-02521 · sys: ci · plat: CI · pri: MUST · zone: all · adv: D8, D11 · est: 0.75
       verify: unit SettingsRoundTripTests.*
       note: (2026-09-25) `SettingsRoundTripTests` now prove all 22 persisted fields through the production JSON writer/reader, both endpoints of every bounded numeric setting plus the empty fixed-weather fallback, and all 15 retained settings-page rows. Each page row is mutated before its existing live-apply callback sees the committed value; no second application path or settings subsystem was introduced. The focused 3/3 tests and complete 1,471/1,471 unit suite pass.
+
+- [ ] HOUSE-03572 — `C` toggles a complete Linux filming tour of the property
+      dep: HOUSE-03638, HOUSE-03639, HOUSE-03640, HOUSE-03635, HOUSE-03636 · sys: player, app · plat: LNX · pri: MUST · zone: all · adv: D8 · est: 8
+      accept: (1) from normal play, `C` starts/stops a camera-friendly automatic walk; (2) a deliberate sequence shows the street, front and rear grounds, garage, basement, ground floor, both upper floors, attic and every intended-accessible room without teleporting, clipping, getting stuck or omitting a zone; (3) view direction and pace make each space legible for a recorded video, without a new gameplay framework or generalized cutscene editor; (4) ordinary controls return cleanly when stopped or completed; (5) Linux capture proves one complete tour, and a focused route test protects zone/cell coverage
+      verify: actual offscreen-rendered full tour with frame/video review, coverage log and a focused input/route regression
+      note: (2026-09-27 owner addition) This filming mode was formerly an unnumbered optional idea, but the owner explicitly requested it for a whole-house YouTube walkthrough. Reuse the existing player input, navigation and grand-tour knowledge; implement only this one bounded route, not a generic cinematic system. Schedule after the reported traversal and visibility defects.
 
 ---
 
@@ -1366,6 +1375,30 @@ There is no zone rotation, no "polish everything" pass and no screenshot → twe
       verify: moving normal-game GPU capture sequence, relevant visibility/lighting tests and a measured draw-count comparison
       note: owner-reported S2 rendering defect; this is not optional weather lightning. Static screenshots and the camera-cell hysteresis test alone cannot close it.
       done: (2026-09-27) Moving first-person GPU frames reproduced the fault at the foyer/stair threshold: at eye x=2.199 m the camera was still L0_FOYER, the adjacent cell vanished, visible=1 and draw=0, exposing a full-screen sky for one frame. The 100 mm rendering near plane rejected the portal before the eye crossed it. Visibility now uses a conservative 5 mm near plane behind the eye and seeds an open neighbour only inside its actual aperture within 5 cm of the plane; the render projection, camera cell, lighting and door state are unchanged. An invisible Radeon 780M/OPENGLES3 run, with no desktop display, captured 36 consecutive frames at each of ten directional ground/upper/basement/exterior thresholds at both 10:30 and 23:00 (720 frames); no sky-only frame appeared. The largest consecutive HUD-cropped RGB mean difference was 8.53/255, at the moving foyer/stair view. The renderer's draw-count regression measured 5–274 draws across the full matrix, never zero; at the original foyer/stair transition it remained 98–104, compared with the defective frame's zero. The focused near-plane/threshold regression and the full movement matrix pass. Before/after evidence: `build/test-output/threshold-movement/foyer-stair-day/cna-house-20260926-225458-823.png` and the 2026-09-27 offscreen sequences in the same tree. No meaningful overdraw increase is visible in those counts; desktop performance benchmarking remains owned by `HOUSE-02404`.
+
+- [ ] HOUSE-03638 — Repair the upper/attic stair approach, guard and blocked attic doorway
+      dep: HOUSE-03634 · sys: world-content, collision · plat: LNX · pri: MUST · zone: Z-STAIR, Z-L2, Z-L3 · adv: D1, D2, D4, D13 · est: 3.5
+      accept: (1) from L2, the attic stair has a level approach before its first riser and joins the attic floor without the reported roughly 30 cm gap; (2) every exposed edge at the top floor has a complete visible and colliding guard, with no walk-off fall; (3) both intended-accessible attic exits/doorways are visibly and physically passable with the normal controller; (4) stair-side wall art remains wholly on its wall, not partly inside the well; (5) capture eye-height approaches, flight, head and both exits, and protect headroom/guard/door clearance with focused regression tests
+      verify: real-controller ascent/descent and doorway walk on an invisible GPU surface, day/night screenshots, stair and collision tests
+      note: (2026-09-27 owner report) The missing guard, awkward stair start/floor gap, clipped art and impassable attic-room opening are observed in normal play; audit BUG-011/012/016 independently supports the guard, doorway and attic-step concerns. Old scripted stair paths do not close this defect.
+
+- [ ] HOUSE-03639 — Correct basement stair placement and garage-loft floor integrity
+      dep: HOUSE-03634 · sys: world-content, collision · plat: LNX · pri: MUST · zone: Z-STAIR, Z-GAR · adv: D1, D2, D4, D13 · est: 2.5
+      accept: (1) basement stair foot/head and their approaches form a plausible, clearly legible route without a misplaced flight or trap; (2) the ladder-accessible garage loft has a visibly opaque, colliding floor with no transparent strip or walk-through hole outside its intended hatch; (3) normal-controller traversal works in both directions and screenshots from above and below show the corrected joins
+      verify: real-game offscreen eye-height captures, ascent/descent and loft-edge collision regressions
+      note: (2026-09-27 owner report) These are architecture and traversal defects, not extra basement or garage content.
+
+- [ ] HOUSE-03640 — Eliminate exterior/interior visibility holes and wall seams
+      dep: HOUSE-03637 · sys: visibility, world-content · plat: LNX · pri: MUST · zone: all · adv: D1, D2, D13 · est: 3.5
+      accept: (1) reproduce the reported missing interior from an upper balcony and from the road looking into the enclosed garage, plus striped wall holes that show outdoors; (2) identify whether each is a portal/culling, missing shell or material error and correct the actual cause; (3) movement through and views from both sides remain complete by day and night, without reintroducing threshold flashes; (4) retain consecutive-frame or matched-pose before/after evidence and a focused regression for the root cause
+      verify: actual offscreen GPU moving-view captures at the balcony, garage-road sightline and affected wall joins; visibility/shell tests
+      note: (2026-09-27 owner report) The garage is an enclosed room inside the house, not a carport. A momentary view through it to the rear landscape is an S1/S2 rendering/architecture defect even when the interior appears after stepping closer.
+
+- [ ] HOUSE-03641 — Bring the existing static car family up to the property's visual standard
+      dep: HOUSE-00847, HOUSE-03640 · sys: content · plat: ALL · pri: MUST · zone: Z-GAR, Z-STR · adv: D4, D13 · est: 2.5
+      accept: the household garage car and the reused street cars read as credible parked vehicles at normal player distance and no longer look several quality tiers below the house; keep one reusable estate/van family, tint variation, static placement and bounded collision, with no driving, vehicle interactions or new runtime system; inspect actual garage, street and approach views before/after and stop when the visible mismatch is corrected
+      verify: deterministic asset/provenance and prop-placement checks, actual offscreen GPU garage/street screenshots
+      note: (2026-09-27 owner request) The previous `HOUSE-00847` deliberately delivered 248/212-triangle low-detail bodies for C3 breadth. The owner now reports they noticeably spoil the finished house; this is a targeted visual correction, not permission to add vehicle gameplay or a large asset family.
 
 - [ ] HOUSE-03631 — The bounded fix pass
       dep: HOUSE-02714, HOUSE-03634 · sys: — · plat: LNX · pri: MUST · zone: all · adv: D2, D4, D13, D14 · est: 1.25
@@ -1813,10 +1846,10 @@ maintenance mode.
 them. Rule R13 governs every one of them:
 
 * never scheduled while a MUST task is open, and never implemented because it "looks cheap";
-* never counted in the estimate, and never blocking a gate, a release or DONE;
+* never counted as remaining MUST work, and never blocking a gate, a release or DONE;
 * never moved into the active plan silently. **Activation rule:** a Planning corrections entry names
-  the DONE item that cannot be met without it (or, after DONE, the real use that demonstrated the
-  need), shows that it fits under rule R14's ceiling, and only then changes its `pri:`.
+  the DONE item that cannot be met without it, or the explicit owner request that changes DONE
+  (or, after DONE, the real use that demonstrated the need), and only then changes its `pri:`.
 
 Each entry shows its title and dependencies only; the full text is in the legacy ledger (every id
 here is a legacy id) and in `plan.md` at `5927073`. A dependency on a cancelled or merged task is
@@ -2023,8 +2056,7 @@ replanned when the optional task is activated.
 - [ ] HOUSE-03079 — Post-release retrospective: what the plan got wrong, recorded for the next project
       dep: HOUSE-03078 · sys: — · plat: ALL · pri: OPT · was: SHOULD, M16
 
-Without ids (each would need a Planning corrections entry under R9 and R13 first): an attract mode
-that auto-walks the grand-tour route for demonstrations; seasonal decorations; additional unique
+Without ids (each would need a Planning corrections entry under R9 and R13 first): seasonal decorations; additional unique
 furniture or acquired storage furniture beyond the kit caps; the toys and shoes fill kits; special
 zone audio loops (a basement hum, attic wind) and offline-derived footstep sets; progressive Web pack
 streaming; additional browsers and devices; C4 for the cells made secondary by `HOUSE-03206`
@@ -2145,7 +2177,10 @@ schedule with an R7 estimate after G3, or earlier if it blocks breadth work, as 
 
 ## Remaining-work estimate
 
-Agent-hours, recomputed by `HOUSE-03206` from the repository on 2026-09-22. **Realistic** is the sum
+**Historical pre-owner-override snapshot, not a current forecast or a work gate.** The owner
+withdrew the 280-hour ceiling and added five ACTIVE/MUST tasks on 2026-09-27. Do not use the
+numbers below to defer their implementation; current task IDs, dependencies and acceptance above
+are authoritative. Agent-hours were recomputed by `HOUSE-03206` from the repository on 2026-09-22. **Realistic** is the sum
 of the open tasks' `est:` values. **Optimistic** is 0.85 × realistic. **Pessimistic** is 1.10 ×
 realistic for ordinary estimation error **plus** the named risk reserves below, each charged to its
 milestone. Optional work is not counted. The *before* columns are the open MUST tasks at `174f2ba`.
@@ -2248,6 +2283,27 @@ Corrections made to `cna-house.md` or to this file during implementation, with t
 forced each one. Nothing is changed silently. The 2026-09-06 → 2026-09-20 corrections are in the
 legacy ledger; the two of 2026-09-21 (`HOUSE-03201`, `HOUSE-03205`) are in
 [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md).
+
+### PC-2026-09-27 — Owner-directed defect corrections and filming tour
+
+* **Evidence:** in normal play the owner observes an incomplete top-floor guard and a fall,
+  poorly joined/placed attic and basement stairs, a blocked attic-room exit, clipped stair art,
+  a transparent garage-loft floor, exterior-visible wall strips, and missing room/garage
+  geometry when viewed from the balcony or road. These violate existing D1/D2/D4/D13. The
+  normal game is silent despite enabled sound, so the open M8 tasks must establish D7 in
+  production rather than treating dummy-audio tests as audible proof. The owner also reports
+  the intentionally low-detail cars as visually disruptive and explicitly requests a `C`-key
+  complete property tour for recording a YouTube video.
+* **Correction:** add ACTIVE/MUST `HOUSE-03638`–`03641` for the defects and car-quality
+  correction; add ACTIVE/MUST `HOUSE-03572` and extend D8 for the specifically requested Linux
+  filming tour. The tour reuses existing traversal/input code and must not become a general
+  cutscene framework. `HOUSE-01920`/`01922` retain ownership of the audible-sound gap.
+  No pets, avatars, car driving, interaction gameplay or other cancelled scope is revived.
+* **Owner policy override:** the owner explicitly withdrew the former 280-hour ceiling and
+  instructed continued implementation without aggregate budget gating. R14/R15 and the local
+  agent instructions are updated accordingly; task-level estimates remain for execution
+  sizing, and the old aggregate forecast is retained only as historical context. This
+  targeted owner addition does not imply permission for unrelated optional work.
 
 ### PC-2026-09-26 — Make owner-observed traversal, lighting and threshold defects explicit
 

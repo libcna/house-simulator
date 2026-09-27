@@ -97,12 +97,13 @@ add code for them. Objects are static dressing. **Cut depth, preserve breadth:**
 `plan.md`'s *Non-goals* list is required for DONE or may be written into a task (R9), and an `OPT`
 task is never scheduled while a MUST task is open (R13).
 
-**The scope is final** (ADR-0016, 2026-09-22). `plan.md`'s active task text is the requirement:
-a task's `trace:` line and any older wording (notes, commits, `cna-house.md`, the history files)
-are never requirements. Do not start another replanning pass; scope changes are the targeted
-corrections of rule R15 only, and the 280-hour ceiling of R14 is never raised. No new system
-unless a DONE item cannot be met without it (R9). After DONE the project is in maintenance mode
-(R17).
+**The scope is controlled by the current plan.** ADR-0016 records the 2026-09-22 reduction;
+the owner explicitly superseded its 280-hour ceiling and requested five additional ACTIVE/MUST
+tasks on 2026-09-27 (see `plan.md`'s Planning corrections). A task's `trace:` line and any older
+wording (notes, commits, `cna-house.md`, the history files) are never requirements. Do not start
+another broad replanning pass; scope changes are targeted corrections or explicit owner additions
+under R15. No new system unless a current DONE item needs it (R9). After DONE the project is in
+maintenance mode (R17).
 
 **Breadth before depth. Pick work by `plan.md`'s scheduling rules (R1–R17)**, not by task number
 and not by the largest defect in one area. Quality is **tiered**: every accessible room reaches C3,
