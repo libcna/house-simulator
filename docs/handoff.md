@@ -1,8 +1,57 @@
 # Current owner-visible defect work — 2026-09-28
 
-## Accepted visibility/wall correction — next HOUSE-03641
+## Accepted exact owner-screenshot corner correction — next HOUSE-03641
 
-**HOUSE-03640 is complete; 35 ACTIVE/MUST / 78 OPT remain.** Counts exclude the
+**HOUSE-03640 is complete again; 35 ACTIVE/MUST / 78 OPT remain.** The additional
+owner photograph was reproduced exactly on the current Release/Radeon/OPENGLES3
+game, including with culling disabled. Its opening reveal was left at z=-14.30
+while the wall panel stopped at the inner face z=-14.45. Both 75 mm partition halves
+now meet that inner face. No room/stair/portal dimensions, collision tolerances,
+runtime renderer or global lighting changes.
+
+Matched owner-view gap pixels **1634→0**; ten day/night static pairs and **eight
+final moving cases / 288 consecutive GPU frames** are reviewed from both sides.
+The support-adjacent first stair-right draft failed >0.20 m projected movement and
+was rejected, not counted as a visual pass. Its corrected starting lane passes with
+unchanged collision/assertion. Evidence and before/after sequence hashes:
+`docs/visual-review/house-03640/foyer-corner/{before,after}-index.json` and the top
+section of `docs/visual-review/house-03640-visibility.md`.
+
+Eighteen affected shells, 34 artificial/18 daylight atlases are regenerated/baked
+sequentially and promoted with current provenance; 48 PNG bytes change. Triangle
+count remains **85235**, resident chunks **1389**, and the main binary SHA stays
+`a0e68e4113b7a343068b3df47da7d92ff320f1a20791c58cadda030f0d3a6ce4`.
+Unit **1507/1507**, nine actual GPU static tests, the 90-cell controller tour
+(564 stops, 86635 steps, 14 detours), all world/content stages and **344 strict-XNA
+units** pass. Initial full-gate manifest/licence/format/budget failures occurred
+during generated updates; final focused checks are clean after report regeneration.
+The pre-existing owner-owned `.claude` layout entry and extra nested-refrigerator
+opening report remain unchanged. No FPS claim, monitor window, Android run or sibling
+write. Selection remains the owner's S1/S2 override; the aggregate hour ceiling is
+withdrawn. Own CPU affinity remains 0–3 and compile/strict fan-out two.
+
+Resume **HOUSE-03641**. Its own paused changes are safely saved in stash commit
+`68a5ded130bb508a50b9c68ccab2cc647bc2056f` (message: `house-03641 own vehicle work
+paused for owner foyer seam`), not mixed into the wall commit. Never pop a different
+stash: older quality/audio stashes belong to separate unfinished work. The vehicle
+draft still needs its estate mirror width reduced to ≤2.00 m, measured chunk-role
+handling, sequential garage re-bakes, actual before/after GPU review and acceptance.
+Then `HOUSE-03572` is the explicitly requested filming tour, not an optional system.
+
+## Reopened owner-screenshot investigation — historical context
+
+**HOUSE-03640 is OPEN again; 36 ACTIVE/MUST / 78 OPT remain.** After the accepted
+corrections below, the owner supplied
+`/home/robertvokac/Pictures/Screenshots/house_simulator_ko.png`: a vertical outdoor
+gap beside the foyer/main-stair opening and front door. This exact corner was not
+covered by the prior moving captures. Reproduce it on the current GPU build and
+close the geometry/visibility gap; previous passing evidence cannot dismiss it.
+HOUSE-03641's own uncommitted vehicle work is paused and must not enter the wall
+fix commit. No visible monitor window is allowed.
+
+## Previously accepted visibility/wall correction checkpoint
+
+**Historical checkpoint before the additional owner screenshot: 35 ACTIVE/MUST / 78 OPT.** Counts exclude the
 illustrative `HOUSE-09999` row in the plan's task-format example. Selection is the
 owner's S1/S2 override, not performance/Android ordering. The next explicit owner
 requirement is **HOUSE-03641**, the existing static car family's visual correction;

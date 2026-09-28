@@ -1,0 +1,1296 @@
+{
+  "phase": "before",
+  "renderer": "Radeon 780M / OPENGLES3; SDL offscreen + surfaceless EGL",
+  "physicalDisplayUsed": false,
+  "gameBinarySha256": "a0e68e4113b7a343068b3df47da7d92ff320f1a20791c58cadda030f0d3a6ce4",
+  "cases": [
+    {
+      "case": "wall-foyer-corner-left",
+      "time": "day",
+      "frames": 36,
+      "contact": "before-wall-foyer-corner-left-day.webp",
+      "files": [
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075254-104.png",
+          "sha256": "5d94853c1759dd3ac4ab19d6723a4c953d70d05595fa507d106bd11f39017799"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075254-685.png",
+          "sha256": "3f16c045c0352a6054f41b0bb9b7a87a71b6b92e3a5c022e9b0180023dc2ab76"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075254-989.png",
+          "sha256": "cf9bc5a342f53bf142b36bc9336792cc55968514719239c7d369da4c115f74bf"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075255-289.png",
+          "sha256": "6ef0574caa61f002ee7a09ca3ed5e60ecac99e6e768f13e786aa6a680c76b895"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075255-595.png",
+          "sha256": "3980aeb060aca15a6644b339a78566d8fbf43e08b583fa9ecb775fd75d9ff270"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075255-877.png",
+          "sha256": "327e82059049cd347ff85752c0552aede91e5de6cff997e8a5714f2f0bb99c50"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075256-179.png",
+          "sha256": "c0eb06e3df53268e9084aebfbe7b2963365b1a97df157a03854161db0e044c1d"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075256-504.png",
+          "sha256": "ad4a5599496809e9d0b458df13d642b6b7848b3c170243a3ca54458c93663ed2"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075256-806.png",
+          "sha256": "2bd10b247f150e89fd35179379193276a3420187e8c548732c2ee7b7599be242"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075257-110.png",
+          "sha256": "76b548d5eade7953f82e8f25fde68367f9ab735f4d8e4b4108be0df76c7661d4"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075257-414.png",
+          "sha256": "bfcc1c7f518dfd76b5902de622c73935238e75c154e9ab5e96c2c47ab57c859e"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075257-705.png",
+          "sha256": "fe9549dab75c0a8869c148848fec56f4f4c0eff0c435594c13221cce8d253ad2"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075258-006.png",
+          "sha256": "1496ff5c599690f77055eee2f4d1494887a381ce2146a1b35c2f78a82ce5fc01"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075258-299.png",
+          "sha256": "9862a3d9979758503484d2dc624e5af1639bcb6655efe94d007cac393f892d72"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075258-600.png",
+          "sha256": "3a6baa8243724e9dcc86bc4615ffc135db9409fcc120441e46c0880c60b07e6a"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075258-895.png",
+          "sha256": "ff01eda07552b40b37a7e74096f20f796a9cb40c5048882baed01b81b82c78be"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075259-186.png",
+          "sha256": "9b9117f5836a070d061798fc49d2deb1ac2770ea7415502c5c34d17825afb9cd"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075259-487.png",
+          "sha256": "7f17632d208623395cecf3f50e42547919845c82a41de52b58996f05a8559f9e"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075259-785.png",
+          "sha256": "357c3ebf385119d6c1a01f546af857de4aecca9eee27e537aadf73b00f859cb9"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075300-065.png",
+          "sha256": "2e249ae8c121f6b5cf5e717800ddf8895cf404bd5892af3831189a89fff85018"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075300-345.png",
+          "sha256": "6776f090f7d00a4591bf2675300c19d8f664299431978fd50a8c5fc3757fade6"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075300-651.png",
+          "sha256": "b0f53287c23e6794a18892e28a33baa3392baac66db14971475623f6100c83d1"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075300-951.png",
+          "sha256": "75cc3f8d2a0312f8ae6d8bdd5bea2f8169a7460249eb522afd65e55ece207acb"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075301-265.png",
+          "sha256": "caafb5560bf61ed5f1f23999230f60fd4d1faab510e7363b1ce6d6b2f8ced266"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075301-568.png",
+          "sha256": "0999643c7f5c0669b65121b6cb82dea065cba0f0655f6fdfb45a4e8dfc9ea092"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075301-864.png",
+          "sha256": "ed81db5ffe58112200c24b0a069b734bc4978bb25c323ca65fae567c53794d70"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075302-145.png",
+          "sha256": "a3c99de3a42e02c0eb38065d098ca4f8327f2ee1c649e42936f113af7b39cb5f"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075302-436.png",
+          "sha256": "0fe55a672fbcd4656a2709719693192fb01d4097559698663421c3342709006e"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075302-724.png",
+          "sha256": "1bc9001ea8807c45eedbdcc8bd4044b78d4005c42766291fc9f96faa7a3797a8"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075303-009.png",
+          "sha256": "ee63c53f71874f212546895db27d8b51b88ec3b026338ddd4021f3c708f57873"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075303-312.png",
+          "sha256": "89e817c2211d5241afa731e14155b5ba68cc1f1d34b8eaea1a7b43780a90490b"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075303-605.png",
+          "sha256": "fe46cc236f370fa5e7419232eed8cdf9ff5db4bced12953b450747113dd1e08e"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075303-892.png",
+          "sha256": "dddc04eea65c032ae2251aae37dae7ed415fb9e259404774ac6c1fb1f508a49a"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075304-197.png",
+          "sha256": "5e5bc5c2da44b61e11d01d5d60602e79995b4f198f15b0df25ea212c89de61fa"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075304-508.png",
+          "sha256": "227b7907d823d131fa35e70e153c98b742c7fd69fbc9c0625108242c255a9c95"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-day/cna-house-20260928-075304-814.png",
+          "sha256": "06f231fd83ab42764f79f894aa0de98993297638ff5f1a4b4dfa342367ac21ce"
+        }
+      ]
+    },
+    {
+      "case": "wall-foyer-corner-left",
+      "time": "night",
+      "frames": 36,
+      "contact": "before-wall-foyer-corner-left-night.webp",
+      "files": [
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075306-683.png",
+          "sha256": "9be6de98ed74e154d450a66632341f6d4c067f0451c617547b4fc68dfaeafd1c"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075307-339.png",
+          "sha256": "c38f28c56d6d0e6cb47942eacbd4c1d6da66363a503bee5044e6d212c137702f"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075307-972.png",
+          "sha256": "0c3d1cf9a6ac400f0a66fd5edf4973c328b11ee74ed299a8a6972b0615a09545"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075308-584.png",
+          "sha256": "b54f5f3b26bb2d51955c0c64a7be52c32d0ebe97a7239d81765c07675c75b999"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075309-262.png",
+          "sha256": "fb138b15413494c660219f7ebee6a5d7ae99b70744db4899010c56e6d402f71e"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075309-947.png",
+          "sha256": "67192f85ed71e250d7c6311eab643265426e35db42adc5036678bad18e868d99"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075310-680.png",
+          "sha256": "85c2490ad1d1a1b6c498a1d3ab305cd5c08d84ea515e25023c68338fbd95c748"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075311-034.png",
+          "sha256": "3eee3b21525a350108dceaf700dbb209ae3bc7142814ceb87e6b7ad1cd7d0f6f"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075311-316.png",
+          "sha256": "41309e5031d33227132fd4996d8b0a855c9d8b287b5aa8966885e6b66238d3eb"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075311-594.png",
+          "sha256": "244bb93275c00635db699d0cc4636dc0daf3645bc347083cf9ea61d5380bc8b4"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075311-868.png",
+          "sha256": "ed8095c2a90a9b8875af36a9612e30da1aa9e66910ecca799677cfc1334b4dfc"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075312-133.png",
+          "sha256": "68bb9317dee45496d88e758508e568a40118b1ba1bf0bf873d30cd73a00c9d95"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075312-405.png",
+          "sha256": "eab898f662f6554f33f7e1da61da88f23104caafb31883e2a2ed4fed1ff68001"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075312-738.png",
+          "sha256": "b102daddbf4fc35e4ead9dcb563875a0763b86b8e09f3b0be97656c8a8a6e82e"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075313-410.png",
+          "sha256": "b3ac86be9f8f1d1fc69c0237c4134172d0d7610fb32ca1f8ae4d66c1c013289a"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075314-075.png",
+          "sha256": "cdb26b59a993b96c696459529a6c3355ba579316b12a05f9780541686e148f05"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075314-665.png",
+          "sha256": "052649b3ee58dc953f54f63eaa2414b8d1eea46c7346c3563fd8935ed8208088"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075315-302.png",
+          "sha256": "ccccfb499947e8924d387ce40b2ae2c8039d14f4961e90cf89eed6bf5d3a32c5"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075315-807.png",
+          "sha256": "e4ee55921d54ff250af8546528af91020ac564b71300c76a68428d3a31833ff2"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075316-372.png",
+          "sha256": "e27c578b6bc2b9dd5f926b8887b1fc846589fefc6de8318ba310c70873df9478"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075316-867.png",
+          "sha256": "0e49d4847184e077862ede6929c5021feaaf5124f37daf0f004b4f7b9b64f023"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075317-123.png",
+          "sha256": "825e10fc67303f742f0fcb806990a036bc997faa4cabd3fb0cc0fe120b23019a"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075317-385.png",
+          "sha256": "d0369bfc88057d1731c7040f5b9d166babacfbe5089c1c6b3e5f56ff9468235d"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075317-646.png",
+          "sha256": "eebe28528c065e0f9dc626ceba4748bbf0cb9900c0f86837a0b600db4a846ba9"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075317-907.png",
+          "sha256": "d91ecf6cb0f96ee6ee4ff47880076271d8477cb52e0bb36aa2992b3828781815"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075318-166.png",
+          "sha256": "55aa026ef4ee16f61ff10a1478842a50726f10d0971785b602ea46a6edac8785"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075318-431.png",
+          "sha256": "3a2a4bf136abfdc3c821e199b04e1b366b79196c68b906afa02732c415985c9e"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075318-729.png",
+          "sha256": "75e8e21f7d598c7e90ca39080a564b8d83dd11db56254e62ea2557f44e0ecb89"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075319-075.png",
+          "sha256": "0c9c504c36360f24c7d34af45447682aa74f896b2fd80b07b87f3ab55c67bc59"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075319-406.png",
+          "sha256": "bb15804225f884c254e3c37f46ef7ad7de2eba64317db252a039b52f45fab53f"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075319-741.png",
+          "sha256": "e3309e63ec9d33075cc5a633afc49b753b068d1615df866760d4d4e5c9e1e8e4"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075320-043.png",
+          "sha256": "f6f4888e4bd00379a173db3b9f63217460acbaa35f7c095b01226828d76e1fe1"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075320-304.png",
+          "sha256": "e51efc5cf6097d24b7ed6028fbc7503183b42755e340c05a6a5bae39a39fed84"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075320-603.png",
+          "sha256": "43bb01d572358521b7332026f0692eb4e70f22483448d6947229e48e50aabf92"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075320-951.png",
+          "sha256": "8a24029e80d3b16480b00fd2af20dfd3d422bff582f252a0a83942700de13331"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-left-night/cna-house-20260928-075321-311.png",
+          "sha256": "fc03d9c33c2f958d029d49cc6805ad6b6f98b6a3074c1140b1373526f2e1b7c4"
+        }
+      ]
+    },
+    {
+      "case": "wall-foyer-corner-right",
+      "time": "day",
+      "frames": 36,
+      "contact": "before-wall-foyer-corner-right-day.webp",
+      "files": [
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075325-670.png",
+          "sha256": "5d94853c1759dd3ac4ab19d6723a4c953d70d05595fa507d106bd11f39017799"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075326-830.png",
+          "sha256": "da41351a0f45d1e085c431ed8ddc21171b663e3d916df06f14b70a4ac4d03556"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075327-248.png",
+          "sha256": "4e945ee9d1022db72f889a5f6b3cc5bda6430c09386a76c36b63cffde2289b6b"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075327-664.png",
+          "sha256": "e9986355f9a804320b577557d25110c47b701873fc683f0f20e4478a45bae831"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075328-107.png",
+          "sha256": "64d61ab0b8ad1473645462f81dfb422e6507e85809a0e110f092d514821bb164"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075328-562.png",
+          "sha256": "65b0ff801d022a8437792cd3d9fa1e2a18aa1e0ce50fb65868e90677cac0696c"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075329-020.png",
+          "sha256": "9a6e45e247638680f6cc2f6a2224e4bdb9ed2be595525679714e2ce01e4734b7"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075329-458.png",
+          "sha256": "f3c99e71e61298bbf7444dbed59a93108e71debce039d0d8e0c219b6ccd141a5"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075329-887.png",
+          "sha256": "21cb4f4ee094ca663a2adcd03d35bfa5bddb2dbf57e7b29938f1d801b62a55e6"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075330-311.png",
+          "sha256": "d0dba2fcc244ba876045b633bdd37d9fe191ba22b88309c26562e265c5323828"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075330-635.png",
+          "sha256": "8277fd5c880ad7109b4d2c00f8bfb461a565b1db356fb7a8e4e6ae4d4b633c48"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075330-974.png",
+          "sha256": "7bc69f6c633e168ed9e2640e730b8e9ccd339dce645abec773387743abc59e53"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075331-311.png",
+          "sha256": "60e961effa866f0ad965946f884cabbe71119de89e6223fc8878cb39778dc7c9"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075331-648.png",
+          "sha256": "a6babe0bb7959e0a38059c5bdd784cb1db6e40381e6f7cb1990e5a0f30d6400b"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075331-994.png",
+          "sha256": "22456a3c1abec57193839f005805da671116e70ecb2dc6fe98339317713b9613"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075332-367.png",
+          "sha256": "5c33aba1955f1fe7813d5bc3f4e2660180bf5f9f40a013fc24ac96578ed313ad"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075332-798.png",
+          "sha256": "b2506cc382ea7d17574b2c28178318c1ab6a48ddf797c1495eac6da8cf9f6977"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075333-566.png",
+          "sha256": "4ec6eb8d77223b46d5662f3bafdfd43177b03160ab339a80c814a42756ea9b22"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075334-359.png",
+          "sha256": "6524be67ce5618bf18b13350472d8d390c3c9b87bf92bc9b5d47f15e7b1b03c2"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075335-089.png",
+          "sha256": "66d7f3b519b29cfb33798476886afcd04787f4d4a8a1a5b4d41f274718c348fd"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075335-783.png",
+          "sha256": "fe7506809dddf6983e0bc559bd81520fd37584828282a1c6b6ef62e895d3e9e4"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075336-528.png",
+          "sha256": "9dbdfb29642c90dbd3879342d0ce677cf74d2ef8edc99aa014dfb710c46f0456"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075337-268.png",
+          "sha256": "53865d28899745584a80718a2f22756738786d9f1d3d48308cf962a5b7f2b4a6"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075337-832.png",
+          "sha256": "d0b82c81e57867eda2834bb5af2ac2d92889a79b19140854873fe0f377024e11"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075338-705.png",
+          "sha256": "ff4b71dce751393feec26b07791a54f147901a284ae4c00de712c25dc349f080"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075339-579.png",
+          "sha256": "c61dcf85fcb3070dc62e85e42113edfb0980d6ee1fcae338a86d57464166323a"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075340-428.png",
+          "sha256": "72f4962a8cbb85a1ce4f783df8661c8f025352a5dfed0359622a86be06bb8c75"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075341-148.png",
+          "sha256": "99d1d4d694c5b4520525894be7803c44eba17ff33ad6d1c0ceba0dba765d5b67"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075341-525.png",
+          "sha256": "9ebf9ff9e0fd47463a2a6772065a838b10bd22dc97de85640a889ab2ced37061"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075341-932.png",
+          "sha256": "678473b73654200e9d107ed6c4c583329b6abb4b1f8db4d6f7c592467960ba81"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075342-324.png",
+          "sha256": "c127c7f167efdc1b9e2b97e543276c606c209ab8a3aa9582dc03d31a2e18272b"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075342-720.png",
+          "sha256": "e49e511d0eba17362c0b6784367f7eb44d795148c4e3b1f3c9480a24183eb10d"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075343-111.png",
+          "sha256": "1112a5ce3005dfc7076162320691dedbfe9e58dfb2501cf81279236429e457ce"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075343-530.png",
+          "sha256": "4ee2ef7316e53469b2f5540d3ccd5c8bb5cad5e0b4a7333e6529ec28b8e55999"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075344-247.png",
+          "sha256": "fba1f07a3765f82986d82a1919f0e6be7d5b23795fefc9cb853813b63e1a32ac"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-day/cna-house-20260928-075344-703.png",
+          "sha256": "7652f615a6b86ce042e02aea4aef30398fb6ea31ace8b55d4f4aede2054ea55a"
+        }
+      ]
+    },
+    {
+      "case": "wall-foyer-corner-right",
+      "time": "night",
+      "frames": 36,
+      "contact": "before-wall-foyer-corner-right-night.webp",
+      "files": [
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075349-326.png",
+          "sha256": "9be6de98ed74e154d450a66632341f6d4c067f0451c617547b4fc68dfaeafd1c"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075350-132.png",
+          "sha256": "21733be04c9f6594e17f16320068bb56565e5c447d778c51b0ed48eba811d30c"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075350-452.png",
+          "sha256": "2e8dff6183033ed9631544e4d9dd5e14dce31437bba65fe6ef24c292845b26d2"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075350-734.png",
+          "sha256": "96dc5c0cb2ee71163529a7846b5aa4eb344627d8fb6ce9a5e0c2a6c1c7a9a125"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075351-034.png",
+          "sha256": "98cad25e049235a52898c63eb7b13791cf6a5d8f78e613237d3e792591803c78"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075351-391.png",
+          "sha256": "0d409a271d88736006506472f1938d9f49ff0b7a90f7187a3a38b4cb8a6eac72"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075351-747.png",
+          "sha256": "789e1ad9d3e2d2fe9c0a766e397e2669674ace0bd5c3dfcfaceb313451f1ae93"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075352-128.png",
+          "sha256": "aa6aaa4112524606953c6dd97c4d5960485b66ef931214961e14ab39081c1b0c"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075352-531.png",
+          "sha256": "b7df647eacb4f713248ab26023723f60ab37a702447bc8871489d3ab50c17ada"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075352-931.png",
+          "sha256": "f68db43491f1dde30256b579e3cafa1ae08d09c07c05b6db78b8f929f9a2ede7"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075353-667.png",
+          "sha256": "3cf11c0b079c93d7a8aa3dc146bb39cfec5967cd3a549067c8e84ad74fee03af"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075354-284.png",
+          "sha256": "5f7ab0e95bf04705aa764d61c7659e2eddb313479e59cab7a11afd6415e3264f"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075354-930.png",
+          "sha256": "1f885651ddb9323252f4a5afd8d5da4b8be6cc1bb1b88cd88374db42c17ba02a"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075355-203.png",
+          "sha256": "c3371cd5a62e8390209953a46e54e6e3c1dc1ce2760c8fb6a900dcf8c5b2abd3"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075355-503.png",
+          "sha256": "080ef028248d06194bf7ad4359a66af1c58cfa692a388bf9a2150f6d2bfd48f5"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075355-838.png",
+          "sha256": "f4d40b0b32660f620135c632108b500cba3705c8abd83e538f05c868dced5734"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075356-122.png",
+          "sha256": "fd7e23599c70a47fc7086ce730c1d2f8c32e6e7f90975d7fdfca0ff5a8034113"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075356-439.png",
+          "sha256": "6001d6b572efb59bb9796ea82cc4ef980e376ddb7e281cf21514ec255bd42edf"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075356-753.png",
+          "sha256": "da687f0d8a4287920ff6f02810abd7529e1fead63ebcac19549cd19866c2ab5b"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075357-111.png",
+          "sha256": "62ff34bcd93ce93a239fa8188750e146fa8ce3b1db89f3c236f943252985f61c"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075357-778.png",
+          "sha256": "20f7b449ac56a9c070bb1db613316503b87bcce7566422d44744cafb5b0be7a5"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075358-408.png",
+          "sha256": "a6429d3dc64404f0943ef9eb0dae9be3290affbe3e059a4ac541a45aaf775e46"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075359-135.png",
+          "sha256": "1e1d6ec3a4662a5549f0c7429dde4d6c32ca46f02c6f8fcfced1701bc50c6805"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075359-665.png",
+          "sha256": "3cebf3f4d51421ed3056ace06f65e9fefbbdd9640b7172523328262fccf91861"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075400-230.png",
+          "sha256": "7a10287495f8225d856137c54589bdc10f82880b447a6f6f725fac6eb182cf9f"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075401-009.png",
+          "sha256": "2d8be61e1f4f701e28910e9ec9296316e1c795bbf583bb594c3b523bd2e3c696"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075401-500.png",
+          "sha256": "06720dd182f8496b23a6a1b4c8f2157bae19c14dca2d7596dcf211ef96f4bd87"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075402-091.png",
+          "sha256": "123f49ed8b538e6ec97dd1da9342f83edb6639086b2e415b44ad01a914a94612"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075402-699.png",
+          "sha256": "597dc5a44d5788cf5b34c01ebdcf138ea748d8c3d33938fc12b1cfcfccb577c3"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075403-280.png",
+          "sha256": "16374ef5b121283b598ace207df3c7e90118f9eb87513e40f295cf8face8e10f"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075403-776.png",
+          "sha256": "46f4e177ae18ca59a346dbb96a24fbc499b1f64dcb04a544be216593f8ac7e6c"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075404-168.png",
+          "sha256": "1dfa1a2fbaa609b934932a4be76a468c7ef2d759db1d558d6144151e80bdc81e"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075404-515.png",
+          "sha256": "cf9b7a2f1d39375d0d6a42493f68a8a60132785d67adce0a31bd72ffb391a643"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075404-892.png",
+          "sha256": "1e33f3528dceb4814bdf52cf6e8af3ab1d3b37c25f3bc1d65b0e09c351837697"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075405-255.png",
+          "sha256": "d89dc5ff175ec781f40886beba457a6bea62a48281f63810b81b280a67fb11e5"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-foyer-corner-right-night/cna-house-20260928-075405-631.png",
+          "sha256": "c6fd0f1a4ba3d5c43934b962092f34b986563089f28d32d01abcd56abdfa8a89"
+        }
+      ]
+    },
+    {
+      "case": "wall-stair-corner-left",
+      "time": "day",
+      "frames": 36,
+      "contact": "before-wall-stair-corner-left-day.webp",
+      "files": [
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075410-265.png",
+          "sha256": "5ef13e9f2cbcab049491388cf3fee31ee46edf30ea88d5c1ded36b0dedadbbaf"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075412-653.png",
+          "sha256": "cc0c73907c76febd8c58e72e1ff45473fcb1e1c0537c0ea0f41ac248a70f4f7a"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075413-251.png",
+          "sha256": "358fd6d29b871ca04b77337801057cab67122df887723bf503853ff49376da46"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075413-743.png",
+          "sha256": "2bbb3ba95aeef92f0ace5ed255becebf55c5a225c35af1124fa61f16c07f93d8"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075414-142.png",
+          "sha256": "c503f8c0a1c9f5b4d12a05827bff0440e339f1bf5a9833675a732cd51be995ac"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075414-568.png",
+          "sha256": "25d257fb42ce82713029188aba154169aa7cb0f3f181c2c949b650895012bf19"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075414-975.png",
+          "sha256": "6f68a13e401b5cf89d72f7cd4e8a767a60caad6ad292ca7d233aa908ed384da7"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075415-366.png",
+          "sha256": "80ec14ba784dec2aa1df5d74e1091cb9fc22d617fd911045a990667f4da30c36"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075415-970.png",
+          "sha256": "5649a9d5e6bed6d291935f464d3c5e6fa7d58fd66e3ad77a31ad1d3cd771cc0d"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075416-528.png",
+          "sha256": "9f1f93f19ca9bf87c971cad305c2f04afc5313ad2e8f6602de4f2d38d99a6452"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075417-071.png",
+          "sha256": "78c599a6333d37cc898637546f7f090a012edc9f99f7036747a200d0d64b30f2"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075417-686.png",
+          "sha256": "39067077daf5981cdfe5a06e64fe47216612cbe4d13156338146a882abd5d355"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075418-359.png",
+          "sha256": "08ee70faa3ee5f692cd28b5a89021ac667699b9d6f3ded11dac88d9d7d8df896"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075418-685.png",
+          "sha256": "9d2fd7353392d843cab89873c2cedc8a5f93814f8124c00c26adbb9fd34f8096"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075419-075.png",
+          "sha256": "029735af5ae8b7edf73dfa8dd676f81995701bf89c143299555b871bcb5f7863"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075419-416.png",
+          "sha256": "a88fc72d7266719e8f37e547e9a5fea8e2d813588673cbb16518a502e5cb5bc8"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075419-748.png",
+          "sha256": "d0f3b174203171be53fd081e1ea9a97e9099d81756c80c6e0a60d0ee06060b95"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075420-077.png",
+          "sha256": "68b597bcee5bc3f2119c75ca63a00b5b5051138c394a7bbc6c264897c814fb08"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075420-412.png",
+          "sha256": "ab8571fd0e24beab2c47889e740fde58ac4d4d0118fff7381b560a3a285b83f8"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075420-795.png",
+          "sha256": "42ca29b21a16887f65a41d1836698b50114eaa92ffcd65c037ca9dab36bce715"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075421-148.png",
+          "sha256": "dbf606a22267982fa60b368d8d8a90be44e0b5d28c7f1910c78b9bda5025bd81"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075421-547.png",
+          "sha256": "26654da9cf39ffeedd7e5d7c71d0d7f26d1919f9a8f69e10970f21fe0f417a7b"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075421-900.png",
+          "sha256": "bde0c68cf9bc9ea9b8271a0fb822dadf324d921782a94cc9440db4ad2047963a"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075422-250.png",
+          "sha256": "e6c6a746821326bca58aa10ba90b59188eccbaed78441d022d3e10ff75a7a4ea"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075422-602.png",
+          "sha256": "fd128875b6283eb02cd0fc42f7bb165c4f314d7d2cb2dce773acfde993b008bd"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075422-955.png",
+          "sha256": "ed6270d5f3dd6eb0e3b41db8961e153934187af8815fa88af13f1613c4e685fd"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075423-316.png",
+          "sha256": "4c4ae0c0474695b68c3cf222ce4bb2592a29541d75047e2cf7095a93c1828863"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075423-664.png",
+          "sha256": "62c3ea7f625f106fcb9265742649f5561102d304fc3890727de4ff83d6b716f2"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075424-276.png",
+          "sha256": "57de65561bb229a3a70d9de50eaf0e0d093c4d74b28c981fb6c84e2e620689ff"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075424-851.png",
+          "sha256": "f9c2b646aa8a725f4bf379eb7a22ca944e38c782c6c4c88f20fcac39559cb53f"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075425-449.png",
+          "sha256": "0f757216d1dbb5f84984a0d732f24736a6c6912293975ba419a8d983b16899ce"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075426-160.png",
+          "sha256": "3b13d0a48f64da4784301c6d97291c511bd9d120f5f900065ff0a2b1aa015660"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075426-515.png",
+          "sha256": "ddae901dfb72a652cd50a633ab6225282373651fab8e8994c78340e568927cd3"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075427-078.png",
+          "sha256": "bea50af948ce5e6a1d476690fdc39c7eb9b26472fcebeb4e403347aef3450162"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075427-649.png",
+          "sha256": "87f286d4b6c3dfec89a2f2e4de825aa079e7936a64f47c61d70da15f56b82a4b"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-day/cna-house-20260928-075428-325.png",
+          "sha256": "73895282fd88dbe038e0ed0d4956b0b0be96cc31f73ab88950a8df96142ca1cc"
+        }
+      ]
+    },
+    {
+      "case": "wall-stair-corner-left",
+      "time": "night",
+      "frames": 36,
+      "contact": "before-wall-stair-corner-left-night.webp",
+      "files": [
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075431-809.png",
+          "sha256": "2fdbe87367ccc00deeb45723282e48260f5ddf275013fc4c750f12c1ccfbdcd3"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075433-251.png",
+          "sha256": "227d37ee0f508f77ac9730e6237f71d972dc4069a7364b8e7247323ad6052cc9"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075433-604.png",
+          "sha256": "b621738db5a0d34f89b8e50d0ba4c314088793f73a69d37dec0ca8ecddd2fd43"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075434-278.png",
+          "sha256": "1aef5841ebf173f94edc48d13a629e9446f87e125aa894c07058ccb42af46340"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075434-979.png",
+          "sha256": "035bcef04907c638f11b284a03abae51c44d13a45890cfbcb32fd7b7095d409c"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075435-538.png",
+          "sha256": "825a98e9cd92c9271bc04786db8dd5e72a253d412006e2a90f19ddc959bc0c4a"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075435-978.png",
+          "sha256": "881730c93b5107047f4ebdbe01311b5e07fb6e5997c5cdffeba11a9e42ed5d9c"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075436-554.png",
+          "sha256": "114d9e14fae1402cfe8488ad385624dc9f08dc999b7a22a958ee88a89cf596dc"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075437-139.png",
+          "sha256": "03e62577a29b4a0b91417be1ab10a652a99573dffd18d490040a52a4d49a57dd"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075437-740.png",
+          "sha256": "89425a9aeec4d169cda18c614eddbb1f46501219f6b191f8131de5552b37adc8"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075438-410.png",
+          "sha256": "7f5cefb699845500ad708cf2a7cc4f33781525596b27d7aaee836e8c888aefb4"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075438-736.png",
+          "sha256": "0191074e4f65d93044735e54b94c5871dadc341f2e3332a8dc73fb317c80da5f"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075439-000.png",
+          "sha256": "2f7ab3a6426857164452ee225b59d4eeacba6bdf68e652a2c6b44d70c162ee3e"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075439-253.png",
+          "sha256": "c2c744578354480c3471ad571990506282d24a3d01bae660209a44b1779220ed"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075439-509.png",
+          "sha256": "b89a55c05db941e3b5e14c9e942f268d4cb2cbd85b5e93a67e7bfc1916c18b4a"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075439-763.png",
+          "sha256": "94d276fa95ffd1de25076b7915b98cc770860c793b69d16567a357caaa7a7b8c"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075440-020.png",
+          "sha256": "ee74ffd55f8a0da8ac1659f4f388ad78ae49a3c408f905cc2bcfe81f5d0efb8a"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075440-271.png",
+          "sha256": "1175246bca6aa910167cca226512ba496115a1c1369dad38bf895cb3e13aa40e"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075440-581.png",
+          "sha256": "646c79a7e17930fa63d4f2f469483eb8e06de3752a4a4a7facf9e414b61fbd16"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075440-935.png",
+          "sha256": "d0008fdc01ab507b9302b874b33f66a0404e6a6f5eca674964a583033636a9ac"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075441-279.png",
+          "sha256": "0fc0cc2b97e6488516092bc006c939ff6cc05ed4266cd951ebfc715cec186e1a"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075441-627.png",
+          "sha256": "82d01da97d1d56f4f5007f8f407ceaffcbccbfdec95234480cf8726ba945ee43"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075441-943.png",
+          "sha256": "9afe2e44ff111e0350e00a707ba347c9920d25506089e5d2a6fabb408dab2aa5"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075442-282.png",
+          "sha256": "cfee1f184f538f4a1b53e3bcee4d5ea9dc5fe7dee391198484deb3ea7d0c110a"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075442-637.png",
+          "sha256": "4a3fec8d816c74eae1dcc3152bc11fab4aaf512bf8b0ae136c37948c170ea33f"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075443-229.png",
+          "sha256": "8f29a7c95d7a6a53bb2e9b24ce44c296468bc1929cb42874a50108386b1a73f7"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075443-827.png",
+          "sha256": "5783924abfe044a38a6713dd4416f9e35f09351397faf2c0d8eaadebba36e864"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075444-461.png",
+          "sha256": "6fc6869c056a71f31b0a39b809a315d1748bd7b05f1d967fc58b5d9978290055"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075445-045.png",
+          "sha256": "ecdfd258aadccb3382076cc2cd40ccb35d92f8ac26dd8bd35f5450bdc4a1b6a3"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075445-490.png",
+          "sha256": "4099c373aa89fe977c133b4b3aa40ca5950a75592c449cf6b61b7aecb08ecf71"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075446-163.png",
+          "sha256": "4e5e1a0a04cb034f7b424e0b530a69b1c32bc5ee8efce325eed1be9842701032"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075446-812.png",
+          "sha256": "c9e5aafc4698882141b3dd66179985434a17a18a63079e49f6027232fd62ef74"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075447-360.png",
+          "sha256": "e426da46444e6c268fa7bc543800dee83cde9b10801bb835085e78444bcc3cee"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075447-998.png",
+          "sha256": "8a8941ac195a217b8f7de375acc35e47f17bb6d656e58dea2aeb02bbe3ea742b"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075448-520.png",
+          "sha256": "723a20496c608404810244b486a3f681ec412714fb97490eee9e00973fb570fa"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-left-night/cna-house-20260928-075449-200.png",
+          "sha256": "a4cbbe584067175f24bd64a009f46e338827083fa6b3fd7fc62ae8566f498bf4"
+        }
+      ]
+    },
+    {
+      "case": "wall-stair-corner-right",
+      "time": "day",
+      "frames": 36,
+      "contact": "before-wall-stair-corner-right-day.webp",
+      "files": [
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075735-293.png",
+          "sha256": "e84fc308385b4db34ce86070c5a16f0701daad0ca26b8e3af51d2bdd122ce81f"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075737-721.png",
+          "sha256": "88561f6b65175eef42cc534991279d209b552e2072912d6351204f52370ae04c"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075738-140.png",
+          "sha256": "27fad6e25795cea170a332367eaf1325ebbc20f442a71abf3f99b73f4ad25f15"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075738-551.png",
+          "sha256": "0656e3a13669fa90c5cccbbaa0f8feb1972330a2d13bbce61b4fe4fca1f2a428"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075738-906.png",
+          "sha256": "bc6a9c8edcbeaa37348b204c5a1e1e25141659cb705d2cbe1166913732023c7c"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075739-311.png",
+          "sha256": "94821637b22ea29564bdac9aabbcdebd3e56ab9e86a968ff520adde9b47ac904"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075739-898.png",
+          "sha256": "badf0a2a5473899ebd4a86fa004bd36ebc3107cfa8a88aba3ac0e4b8356b383d"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075740-655.png",
+          "sha256": "39f9f46b89bff57aeac7707360592af86185d473655cd3b165b5863a89b4189a"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075741-425.png",
+          "sha256": "519ec8f94ac7dc8c9057496a0d7de4d261f656e93da1135619d835b0faede6cb"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075742-090.png",
+          "sha256": "1c3fd2bd2e553d813eeeca4f307955701ffeb8854c3689178cbf8b6f8d6546ba"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075742-432.png",
+          "sha256": "e33bd429d3c2700686a61a144f354f359456b8a3a4a55ba72bea8164244c3844"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075742-725.png",
+          "sha256": "ab8ac3535d1074d0ea972f0ee3c3a3688ed3b21b7573ee521b1f3bf95b1a424f"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075743-105.png",
+          "sha256": "1be44ba38dcf3dd68206eb66b766ebbcbd9a68b61c406faa693d7efe450cf083"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075743-487.png",
+          "sha256": "c84791a98a5244e48aadd13c3976557bb3533dbd30f3e60ca91a605535085fa0"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075743-875.png",
+          "sha256": "6f276341c89b3d8164d249cf51b5e03725a79b586992453462700823134ef196"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075744-254.png",
+          "sha256": "8cc75288ef4de5f24c6a6297225b7c42df1ab1a6e84ccc169e7564d0269d696c"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075744-586.png",
+          "sha256": "055764e2e0d4bf8e77f175483682b0b9b2f8abe4c2d15bdf18547875e5f24f96"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075744-865.png",
+          "sha256": "b5be9c0828931c8fdb5cc42f2c3abef41b5ce996cd2a4971575d701a1ddc6327"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075745-144.png",
+          "sha256": "8b3e1b0321d00894d72fd2477dec2a4e101ef838a2526af18898bfc35ef21e49"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075745-421.png",
+          "sha256": "08c1e5cd5bc5bf8065ef1f376c45b3c2d66fa91867b5eb7881c38f7297559322"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075745-710.png",
+          "sha256": "8fca914c51ef0b1ada9dd068b79a411e43fd391632e1da87fcdb150c4b60906d"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075745-996.png",
+          "sha256": "185619e803dc6f8c7a7cfb8fbfb9a659ee57f0112b25dd7a5f360a7603120f42"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075746-337.png",
+          "sha256": "f74f1a523424af06b742f82cc51c2264a5dc1348628a020ce7afc34123767e1e"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075746-670.png",
+          "sha256": "ae467d98d444ac8032647bf9d4ab0f67124710ea0dcda0f850c11748a51e1233"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075747-029.png",
+          "sha256": "3d7b78fc55742ef203e231ed91b5a08414834380b24d617fbb3d40e04ef03ac9"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075747-401.png",
+          "sha256": "22dc21019bdb8184c294d2df53484b4c43dcab386df224e0aadad98e8fd77c56"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075747-767.png",
+          "sha256": "7ecbf02cbf28f05117730177f5252dc34f4eb4a2394f1e9defdbae3fdd30a954"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075748-154.png",
+          "sha256": "63d11fd6650631826d70cfbd41769b070e275fcf700b0c2f15b5b608f6ce3ccc"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075748-521.png",
+          "sha256": "36aaddf8628b239d15c51dc9c0cddeb9dd099f066943a876e808f11fe83b5f2c"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075748-890.png",
+          "sha256": "18578d8316b86c96a12bd777f2bb212ebc161b16882ec98b9c11fec6e5349492"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075749-261.png",
+          "sha256": "7a02e4a3da95947c65db26a42b9ac63d3ecc4e249774330d55f30511d798675f"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075749-623.png",
+          "sha256": "cb4322375e19971708e56b8f722c9dae1bba919ea38a1604d8152da7c83940fe"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075749-991.png",
+          "sha256": "a1a85cfa49aaf99873bc3d907f3ab4468fca6bf07ddf1d4750bd47e195f91798"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075750-363.png",
+          "sha256": "41dcb7454388f2a3d943b5ac115918b52f8e3fcf70ea16455a1ac585d47c1cfb"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075750-720.png",
+          "sha256": "8f75b08e9399fa52ecdfd0c812dc76d3fb69f8c07f068a4ca92eb15e81dbc268"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-day/cna-house-20260928-075751-080.png",
+          "sha256": "74e4ac17f15118e8307df4a0069490bd2050fcf21317c886eff34b992215615e"
+        }
+      ]
+    },
+    {
+      "case": "wall-stair-corner-right",
+      "time": "night",
+      "frames": 36,
+      "contact": "before-wall-stair-corner-right-night.webp",
+      "files": [
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075753-532.png",
+          "sha256": "c9e28618be36c5511d5802686bd68b890040a0b8c246ba2d62c6be2d6bee5a49"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075755-000.png",
+          "sha256": "1d3c2d1d1013cd8cb6c7b5587aaf0c89340f2ad1de53b29b063bafd108c468d4"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075755-344.png",
+          "sha256": "4b685e2447803b62ba60eb2c7626819ad4b9ad16b93cd0137481fa664bc672ba"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075755-674.png",
+          "sha256": "b2cc23a0bbb8a72df5cafdd2a762679a9a5c7b37b891e818e97bc53246f59f70"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075756-008.png",
+          "sha256": "a8c1791fc3290a1c03401c60a494085655727c68ac263f2e085dd9a1c5255d60"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075756-346.png",
+          "sha256": "1f7558368158018adc90f6a433912a1b49f4e61c8ad30ed42c1827f7e2010aa4"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075756-688.png",
+          "sha256": "eaa769d12335dd4767f8d4555be59f9ddf088e9a8bf1c1a51d1acbfc11821a99"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075757-026.png",
+          "sha256": "d3cbac64d7125cbd322c6a4f2ed807269e5aceb6104f346d947b91e6642e90d7"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075757-350.png",
+          "sha256": "a8b277fca91707394eac4bfc3a01155faa20bedae3f964a1cfe0ef544fdd9d5a"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075757-655.png",
+          "sha256": "7f65e12508831fddbdfe65500586487cc69cf5ef918f99ac6dc564d24509b3bf"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075757-962.png",
+          "sha256": "988c11833914f5e81fe294c10751540418f933277c027b143c025e6cc8939572"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075758-248.png",
+          "sha256": "469ce33e8b144b539f7566ac143364aeee607227a62bdf02ab202091dfb41287"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075758-560.png",
+          "sha256": "56f402b34da41e38be8100630978d0a812d0d87d35791960c9cfc7be8153f78a"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075758-893.png",
+          "sha256": "02ddcb2be31374ea2db50d4aff7153b4e0ddd0be98e1b21b53983959bea7c432"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075759-235.png",
+          "sha256": "5a951a6172d5c3c3488e0b96ae680f3ea509ed8cdf1cc8526e3f3633ac3ac322"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075759-574.png",
+          "sha256": "dd029fa35287a419368bd5ec51f4b5cea1850b8ada72c413b8920a7a09169177"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075759-908.png",
+          "sha256": "cc612f4ed6fcda1996e130f1c9d88ee285f4de9afe69ce9dc3d9fcc422bc1ce1"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075800-239.png",
+          "sha256": "12c4414e22a10c43119d3179454c145c52eb7dc3498f28f47710d3372c60048d"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075800-559.png",
+          "sha256": "985f1900e0a16de81c55b37637e0539d50301afe335c80e2925dcbd1007a7178"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075800-890.png",
+          "sha256": "ffc81cca30b035dfed108f0021fafef18c813dc62a9e22c592f5fcacdf6d867f"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075801-237.png",
+          "sha256": "1d45855133d48c688168d2dd8531f161bca9f17e4181e7ac9482f3f3f4d3a390"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075801-573.png",
+          "sha256": "f553ce1f3c1c31bc61414a6ab1974cacecda07139ea23fb378cefcdfddd2faa2"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075801-885.png",
+          "sha256": "f9366e40376265ce779d7da25600cf033889746de3a37560bee4973c1f94525e"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075802-146.png",
+          "sha256": "ccb80f6eeb0ad56683a1d1b8834988b288875bc92119be34ec4af3fb1d4e1e1f"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075802-405.png",
+          "sha256": "922890d58baac96e93353da76db8a8d9eb38a0372458106753090e47a86d3285"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075802-663.png",
+          "sha256": "ce3af77294d0e1ebb10f3e3c9ecc3f6d3acd4f02b976adaec33e071f2cd1873c"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075802-922.png",
+          "sha256": "3abf14fac0f8c72151eb07386c5c68d4e16a3081daaa2fec127c593d76dd4e12"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075803-198.png",
+          "sha256": "df090c9d6e1069e778ba16aef08d0206437408a3576d1dfd1506a18c686356de"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075803-558.png",
+          "sha256": "127b636a779e1765bceed433edf0eff319fb5b03fa0a6652bee183916e0a5011"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075803-905.png",
+          "sha256": "062edeff07e0c2116a20886c61f5ee54032ceb04aa957ebb581d07cc09c47bc2"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075804-239.png",
+          "sha256": "a6e6a716d5860e9fadee1276d80e3fb3dba73abbd20b949e60657ff7b23d529d"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075804-584.png",
+          "sha256": "d54bfe58c4a05b5e97c1ca677ff81d6dfaf8c60cb3e0d9788d96e6c192213fde"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075804-933.png",
+          "sha256": "0e713491c4871429f3a4f86edd6d970a5f9643a629cecc40355c55b2b4e474a1"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075805-279.png",
+          "sha256": "82f787d2434acc12684bea693283be5c1bf4d22157453ccdbdb8241e6d383623"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075805-611.png",
+          "sha256": "4fe3eea3b772547ebd3c28a76a13515b64fd8d260f062e60e98faf9420c43b12"
+        },
+        {
+          "name": "build/test-output/threshold-movement/wall-stair-corner-right-night/cna-house-20260928-075805-966.png",
+          "sha256": "4964952efca97d6034ebd90ff84cce1e7164e260e7a8fbb181b04ec40a5a4f92"
+        }
+      ]
+    }
+  ],
+  "static": [
+    {
+      "name": "attic-head-day",
+      "capture": "/tmp/house-03640/foyer-corner/before/attic-head-day.png",
+      "retained": "before-attic-head-day.webp",
+      "sha256": "e214845a5d1d645facf698c2c235db25b996cbbde01bb5a246dd9e32a8d6953c"
+    },
+    {
+      "name": "attic-head-night",
+      "capture": "/tmp/house-03640/foyer-corner/before/attic-head-night.png",
+      "retained": "before-attic-head-night.webp",
+      "sha256": "f960d088b2ed33b010f9c8323ed749dc03f29a6c18d0931cbe7e04d68ab41355"
+    },
+    {
+      "name": "basement-foot-day",
+      "capture": "/tmp/house-03640/foyer-corner/before/basement-foot-day.png",
+      "retained": "before-basement-foot-day.webp",
+      "sha256": "8b23d1db142d7577d63d1f30bf7c4d1acdd55d709ac1ef3edf4c48464ce93e83"
+    },
+    {
+      "name": "basement-foot-night",
+      "capture": "/tmp/house-03640/foyer-corner/before/basement-foot-night.png",
+      "retained": "before-basement-foot-night.webp",
+      "sha256": "9adfdb5623a8ad77602729856572b4632499a5eb86b55e2113bfa76579b8f910"
+    },
+    {
+      "name": "owner-view-day",
+      "capture": "/tmp/house-03640/foyer-corner/before/owner-view-day.png",
+      "retained": "before-owner-view-day.webp",
+      "sha256": "509730e10f8d7109a40f572363a70568bf75910b0d39ee6cd766656c2216ceea"
+    },
+    {
+      "name": "owner-view-night",
+      "capture": "/tmp/house-03640/foyer-corner/before/owner-view-night.png",
+      "retained": "before-owner-view-night.webp",
+      "sha256": "72232b889f01a9b9734aa7ffa480e39d9c8363c53579988ac7ea16257a70855d"
+    },
+    {
+      "name": "stair-reverse-day",
+      "capture": "/tmp/house-03640/foyer-corner/before/stair-reverse-day.png",
+      "retained": "before-stair-reverse-day.webp",
+      "sha256": "e54d45737fb0458a05eb18b58673ab5ee8fd1cc0b568eb6a94a75b3b47fd1341"
+    },
+    {
+      "name": "stair-reverse-night",
+      "capture": "/tmp/house-03640/foyer-corner/before/stair-reverse-night.png",
+      "retained": "before-stair-reverse-night.webp",
+      "sha256": "6b12907b24b28cbcad90d5c8c26039d5ec3f22cd2f80a17e984c66e240495b7d"
+    },
+    {
+      "name": "upper-landing-day",
+      "capture": "/tmp/house-03640/foyer-corner/before/upper-landing-day.png",
+      "retained": "before-upper-landing-day.webp",
+      "sha256": "cbc354bd3daeadaa703918912c2a9f39617b3469e48f307e78fc6f8f74e73a54"
+    },
+    {
+      "name": "upper-landing-night",
+      "capture": "/tmp/house-03640/foyer-corner/before/upper-landing-night.png",
+      "retained": "before-upper-landing-night.webp",
+      "sha256": "a872e52e283c148f523f50961234d7622ec8477052a64185026551ea2b4a85d8"
+    }
+  ],
+  "metrics": {
+    "dayGapRoi": [
+      794,
+      310,
+      805,
+      775
+    ],
+    "blueSkyPixels": 1634,
+    "predicate": "B>110, B>R+30, G>R+15"
+  }
+}

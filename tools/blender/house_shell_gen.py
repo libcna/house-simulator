@@ -3134,6 +3134,14 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                         fixed_box(lu0, lu1, lv1, hv1, reveal_lo, reveal_hi, "trim")
 
                 for hu0, hu1, hv0, hv1, _portal_id in holes:
+                    # Panel() clips an aperture against this inset wall run.
+                    # Its reveals must use that same cut, especially when an
+                    # opening ends at a perpendicular wall's centre line.
+                    # Otherwise the end jamb sits behind the adjacent inner
+                    # face and leaves a full-height view into the wall core.
+                    hu0, hu1 = max(hu0, lo), min(hu1, hi)
+                    if hu1 - hu0 <= 1e-6:
+                        continue
                     for corner_lo, corner_hi, along, look in (
                             (hv0, hv0, "v", (0.0, 1.0, 0.0)),      # the sill, looking up
                             (hv1, hv1, "v", (0.0, -1.0, 0.0)),     # the head, looking down
@@ -4402,6 +4410,30 @@ def selftest(output: Path) -> int:
     # The walls alone, with the trim switched off the way the DATA switches it off: a construction
     # block that declares no skirting and no cornice gets none. No test-only knob.
     plain = dict(construction, skirting=0.0, cornice=0.0)
+    # A cased opening may reach a perpendicular wall's centre line. Its
+    # reveal must meet that wall's INNER face, not leave a slot into its core.
+    for room_id, start, end in (("L0_FOYER", 2.125, 2.2),
+                               ("L0_STAIR_MAIN", 2.2, 2.275)):
+        corner_cell = cells[room_id]
+        corner_extent = extent_of(corner_cell, levels["L0"])[0]
+        reset_scene()
+        corner_mesh = build_cell(
+            corner_cell, corner_extent, neighbours=neighbours, construction=plain,
+            level=levels["L0"], levels=levels, cells_by_id=cells,
+            portals=all_portals, openings=openings_by_portal)
+        corner_returns = [face for face in corner_mesh.data.polygons
+                          if face.material_index == SURFACE_ORDER.index("trim")
+                          and all(abs(corner_mesh.data.vertices[index].co.y - 14.45) < 1e-5
+                                  for index in face.vertices)
+                          and abs(min(corner_mesh.data.vertices[index].co.x
+                                      for index in face.vertices) - start) < 1e-5
+                          and abs(max(corner_mesh.data.vertices[index].co.x
+                                      for index in face.vertices) - end) < 1e-5]
+        require(len(corner_returns) == 1
+                and abs(corner_returns[0].area - (end - start) * 2.2) < 1e-5
+                and corner_returns[0].normal.y > 0.99,
+                f"{room_id}'s corner opening has a full-height half-wall reveal "
+                "meeting the front inner face, not the outdoor-facing centre line")
     # A mixed wall's inner faces are on different planes. Their meeting edge
     # must have a return, not a narrow view of the sky between two open panels.
     laundry = cells["L0_LAUNDRY"]

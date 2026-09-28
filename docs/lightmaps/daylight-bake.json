@@ -137,7 +137,7 @@
       "furnishedProps": 2,
       "groups": [],
       "lumensPerRadiantWatt": 200.0,
-      "shellHash": "sha256:468edd92d6615ad0096d96345fd36a012e9059bae006395d8ef15bc1d37e5322"
+      "shellHash": "sha256:d67407500947560f6082c9e5436a33840e0c49008e3dfa64267ed1716dcb9a0c"
     },
     {
       "cell": "B1_STOR1",
@@ -172,15 +172,15 @@
       "cellPropsSha256": "f20ad36d19ec7f181ca7bab1a6a99dc5770f86fdc52da8b148adcdb50156e588",
       "daylight": {
         "image": "B1_UNDERSTAIR_LM_DAY.png",
-        "receiverMean": 0.1266679707218751,
-        "scale": 0.8038541078567505,
+        "receiverMean": 0.1263340641799472,
+        "scale": 0.8042770624160767,
         "skyStrength": 1.0
       },
       "furnishedMeshes": 12,
       "furnishedProps": 2,
       "groups": [],
       "lumensPerRadiantWatt": 200.0,
-      "shellHash": "sha256:893b4d0de3203ab7dd659f28fa26edab68ec50309f7d17e79426d34d35d4d3e9"
+      "shellHash": "sha256:21c4b3ffe329749a2849540628b8706038fc3943564ae20e95c827e6de8b0fff"
     },
     {
       "cell": "B1_UTILITY",
@@ -244,14 +244,15 @@
       "cellPropsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "daylight": {
         "image": "CELL_FRIDGE_INTERIOR_LM_DAY.png",
-        "receiverMean": 0.05450071199889132,
-        "scale": 0.11673995852470398,
+        "receiverMean": 0.0015344131707389767,
+        "scale": 0.0038670049980282784,
         "skyStrength": 1.0
       },
       "furnishedMeshes": 0,
       "furnishedProps": 0,
       "groups": [],
-      "shellHash": "sha256:2df96fd174638fd1140a1d0ee65346921ab0b36cf1812126dab6080bc3216079"
+      "lumensPerRadiantWatt": 200.0,
+      "shellHash": "sha256:1c7ec70cbfaae379de078ced6cee5d30348d02101fc4e01a92335b651dfd78ef"
     },
     {
       "cell": "L0_BUTLERS",
@@ -300,7 +301,7 @@
       "cellPropsSha256": "38659b36ee8d7ed233eba66274253307db15be7217a167740ec5a4f7d702886f",
       "daylight": {
         "image": "L0_FAMILY_LM_DAY.png",
-        "receiverMean": 0.3990992255015595,
+        "receiverMean": 0.39908182392639385,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -308,21 +309,22 @@
       "furnishedProps": 6,
       "groups": [],
       "lumensPerRadiantWatt": 200.0,
-      "shellHash": "sha256:27fcd232ca3d90c6c339baeccf26a5ba6b8c808a3f7d668227961b2b4252f223"
+      "shellHash": "sha256:57b03ce7ade715a00735b3067ad2ee79be629238c6575b373388d938dc840582"
     },
     {
       "cell": "L0_FOYER",
       "cellPropsSha256": "7cee495776841a42afdbc1872394e390b396965e4d47564e8a9cdbf84907fd9d",
       "daylight": {
         "image": "L0_FOYER_LM_DAY.png",
-        "receiverMean": 0.5255204570920758,
+        "receiverMean": 0.5248437616182443,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
       "furnishedMeshes": 2,
       "furnishedProps": 2,
       "groups": [],
-      "shellHash": "sha256:c3c7833619720fe4e2949d08aa563ee5601cc06edbd0af092992528c4000e29f"
+      "lumensPerRadiantWatt": 200.0,
+      "shellHash": "sha256:06d9d877741bf3028ce345d043fcb8afea5c0cef4dac5708546487acf18ce720"
     },
     {
       "cell": "L0_GARAGE",
@@ -359,14 +361,15 @@
       "cellPropsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "daylight": {
         "image": "L0_HALL_LM_DAY.png",
-        "receiverMean": 0.6082574058057674,
+        "receiverMean": 0.6082076706664187,
         "scale": 0.832278311252594,
         "skyStrength": 1.0
       },
       "furnishedMeshes": 0,
       "furnishedProps": 0,
       "groups": [],
-      "shellHash": "sha256:6c872067856f8195a554baf857f7d362fca3c5e99a067b5ad71873c5a6e689ee"
+      "lumensPerRadiantWatt": 200.0,
+      "shellHash": "sha256:0a8e180507afb417a5283b4ad537b86624080087def970c0dec0f6f5e9183c1f"
     },
     {
       "cell": "L0_KITCHEN",
@@ -417,14 +420,15 @@
       "cellPropsSha256": "28eb26b3bb7152dbc2f94dfd576e030ff78dc7b763098c0e426a7ff296bb0c52",
       "daylight": {
         "image": "L0_MUDROOM_LM_DAY.png",
-        "receiverMean": 0.2843444156556903,
+        "receiverMean": 0.28348239410926074,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
       "furnishedMeshes": 21,
       "furnishedProps": 3,
       "groups": [],
-      "shellHash": "sha256:11e2f96ebd757d274aba36004b7128a800746b297898323e24c5bab4570956be"
+      "lumensPerRadiantWatt": 200.0,
+      "shellHash": "sha256:fdf57696922a278866a10a7c79670dc924d34709a324413df1502ae5a48ec74d"
     },
     {
       "cell": "L0_OFFICE",
@@ -459,7 +463,7 @@
       "cellPropsSha256": "6defc10992e2aca0b67e50b5642bd979abe6ec5c15d1e09575fcf8191af8bcc5",
       "daylight": {
         "image": "L0_STAIR_MAIN_LM_DAY.png",
-        "receiverMean": 0.4728486770018709,
+        "receiverMean": 0.4723959686622744,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -467,7 +471,7 @@
       "furnishedProps": 1,
       "groups": [],
       "lumensPerRadiantWatt": 200.0,
-      "shellHash": "sha256:723efcc4d6413f712660f5b2ee31bb0617e06726b18e32f7a404a618731e4374"
+      "shellHash": "sha256:b88def2dfccb4b3d82e069a9abc1763210dc8320d6019e34338d03a87b5b184e"
     },
     {
       "cell": "L0_STOR",
@@ -601,14 +605,15 @@
       "cellPropsSha256": "74ef2687740a2fdf4b303d63b304d6c1af2da3cbf4f524340c0ddcae44a62bff",
       "daylight": {
         "image": "L1_BED5_LM_DAY.png",
-        "receiverMean": 0.3366638681501285,
+        "receiverMean": 0.33618468549642067,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
       "furnishedMeshes": 35,
       "furnishedProps": 4,
       "groups": [],
-      "shellHash": "sha256:9ac1d492f87eae299a9e0d6bc6590dab85727387df0237cffb68bfb665b007b7"
+      "lumensPerRadiantWatt": 200.0,
+      "shellHash": "sha256:cdbeef7c26329ee1369c8d04d757e190b139622b86f964720208ad7ae8bc7a6e"
     },
     {
       "cell": "L1_CLOSET_2",
@@ -671,14 +676,15 @@
       "cellPropsSha256": "cb2c576fe976d41199b34c6123cc59f934ba0c0c5ae90640640e887e62068a0b",
       "daylight": {
         "image": "L1_LANDING_LM_DAY.png",
-        "receiverMean": 0.3767792986168466,
+        "receiverMean": 0.37648484689104844,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
       "furnishedMeshes": 16,
       "furnishedProps": 1,
       "groups": [],
-      "shellHash": "sha256:d11ed871d5c1523e18225b8446faa8b3b12746df3fda387297d648c4591dabcd"
+      "lumensPerRadiantWatt": 200.0,
+      "shellHash": "sha256:9a8f89ae4f65b84ff7978534b11692218a3119fb73ab480299a12bf1937b0e8e"
     },
     {
       "cell": "L1_LINEN",
@@ -741,14 +747,15 @@
       "cellPropsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "daylight": {
         "image": "L1_STAIR_MAIN_LM_DAY.png",
-        "receiverMean": 0.6449232976490719,
+        "receiverMean": 0.644371113431767,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
       "furnishedMeshes": 0,
       "furnishedProps": 0,
       "groups": [],
-      "shellHash": "sha256:4d53907caae63f678acfea3d21f58f8cd8aea7428c0b6400b604992e9ca12adb"
+      "lumensPerRadiantWatt": 200.0,
+      "shellHash": "sha256:1506273e364d98f40fc76e5dc34613093ec745e42673f34c1d46aaa79fe4bce4"
     },
     {
       "cell": "L1_STOR",
@@ -867,14 +874,15 @@
       "cellPropsSha256": "bb9f1c489a9b6a5d5e5de60d8107edffd9d4c4767aa593e5d1a577103f8bfadf",
       "daylight": {
         "image": "L2_GAMES_LM_DAY.png",
-        "receiverMean": 0.1951885405753017,
+        "receiverMean": 0.194834712208238,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
       "furnishedMeshes": 42,
       "furnishedProps": 4,
       "groups": [],
-      "shellHash": "sha256:5fde1313058dcbc29725a89dfbf3e517735d94b629c7a2f1ec1f658a896583da"
+      "lumensPerRadiantWatt": 200.0,
+      "shellHash": "sha256:5abcc69b0b14245f10d017728c9efa0635af87ec1ec646d79edac52383ba8d79"
     },
     {
       "cell": "L2_HALL",
@@ -909,14 +917,15 @@
       "cellPropsSha256": "27a3ee0bcde5dfcfbe72dc207d88b6cf23ddbe40264297a68f3a6d5b8d502da1",
       "daylight": {
         "image": "L2_LANDING_LM_DAY.png",
-        "receiverMean": 0.39407531304738846,
+        "receiverMean": 0.3937909390921327,
         "scale": 1.0,
         "skyStrength": 1.0
       },
       "furnishedMeshes": 16,
       "furnishedProps": 1,
       "groups": [],
-      "shellHash": "sha256:5ec4bbdac0c0b25cc7bcc94285520bbb531954a1fc155f80e4b2b351fbd19357"
+      "lumensPerRadiantWatt": 200.0,
+      "shellHash": "sha256:3af51659b8b0a8b8a1c2930baed527af7bfb13036c5efdd65f77d35d100a435c"
     },
     {
       "cell": "L2_LIBRARY",
@@ -965,42 +974,45 @@
       "cellPropsSha256": "f317954db82bd09d73525cffdfe50fdd5fb09f184df348714b84efd44317ca67",
       "daylight": {
         "image": "L2_STAIR_ATTIC_LM_DAY.png",
-        "receiverMean": 0.4371714172338401,
+        "receiverMean": 0.4367375584602388,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
       "furnishedMeshes": 22,
       "furnishedProps": 2,
       "groups": [],
-      "shellHash": "sha256:4833d210b1322e2ef3fc5604dc528c60e0aedc743e399387e1f92cd921f73393"
+      "lumensPerRadiantWatt": 200.0,
+      "shellHash": "sha256:7da49f32d84d2700884fb3f7ce90f62e8afc2361b94e8cebdec6db0900a512b5"
     },
     {
       "cell": "L2_STAIR_MAIN",
       "cellPropsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "daylight": {
         "image": "L2_STAIR_MAIN_LM_DAY.png",
-        "receiverMean": 0.6690841136907306,
+        "receiverMean": 0.6680592638378381,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
       "furnishedMeshes": 0,
       "furnishedProps": 0,
       "groups": [],
-      "shellHash": "sha256:fe4a39020fe2dcb85eba3de9ba7254b9005fc3e1cc21bfc36af02a7f8ff5640f"
+      "lumensPerRadiantWatt": 200.0,
+      "shellHash": "sha256:3565f338c098ac39860629a3acdb62e4569ef99fc30d381fda9bfc33644b2bcc"
     },
     {
       "cell": "L2_STOR2",
       "cellPropsSha256": "e831412a5ccb833699c1c2c46f90d8a30fa22b11eb253783e816e08495ed4e49",
       "daylight": {
         "image": "L2_STOR2_LM_DAY.png",
-        "receiverMean": 0.36427986414432506,
+        "receiverMean": 0.36306371967150863,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
       "furnishedMeshes": 12,
       "furnishedProps": 2,
       "groups": [],
-      "shellHash": "sha256:90ab6f4d2d9ccd85d68fb8e65b66a7e9dd6fcce6548f1b956a2d0a5079e967b1"
+      "lumensPerRadiantWatt": 200.0,
+      "shellHash": "sha256:3412acdeb7ba9aab6c50ea7c5fce944d1e06994c67adf71b31ada0776e2adaa6"
     },
     {
       "cell": "L2_WC5",
@@ -1050,14 +1062,15 @@
       "cellPropsSha256": "a9617fb09dda4b234bd066e04df65b29696c610c607f92d76eb18e1e984e7656",
       "daylight": {
         "image": "L3_STAIR_HEAD_LM_DAY.png",
-        "receiverMean": 0.36499637430673465,
+        "receiverMean": 0.36477066695223564,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
       "furnishedMeshes": 15,
       "furnishedProps": 2,
       "groups": [],
-      "shellHash": "sha256:2d43bece7157ec8fa824a3c2cd8e81bce9872fc744754731533b29d2b0d46781"
+      "lumensPerRadiantWatt": 200.0,
+      "shellHash": "sha256:82465c8dde8bb447431f1e67c724bf27c17eaca3009499028f98873a79e0eb3a"
     },
     {
       "cell": "L3_STORE_E",
@@ -1078,14 +1091,15 @@
       "cellPropsSha256": "d432ceda519f15ea44ad9778f3795b2e5541429827df1a500268fad3afa5fcb6",
       "daylight": {
         "image": "L3_STORE_N_LM_DAY.png",
-        "receiverMean": 0.25821909540020843,
+        "receiverMean": 0.2581289864510743,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
       "furnishedMeshes": 15,
       "furnishedProps": 3,
       "groups": [],
-      "shellHash": "sha256:e3205d1511e090e16ce635894c062da17345f03bea47a9fd7823f944c21300cc"
+      "lumensPerRadiantWatt": 200.0,
+      "shellHash": "sha256:fedeea87d280136090f1e59c3b6523e0ea83c6973fbbf48d8bfa0eb743955de1"
     },
     {
       "cell": "L3_STORE_S",
@@ -1117,13 +1131,29 @@
     }
   ],
   "promotedSubsetCells": [
+    "B1_STAIR",
     "B1_UNDERSTAIR",
-    "L3_ROOM"
+    "CELL_FRIDGE_INTERIOR",
+    "L0_FAMILY",
+    "L0_FOYER",
+    "L0_HALL",
+    "L0_MUDROOM",
+    "L0_STAIR_MAIN",
+    "L1_BED5",
+    "L1_LANDING",
+    "L1_STAIR_MAIN",
+    "L2_GAMES",
+    "L2_LANDING",
+    "L2_STAIR_ATTIC",
+    "L2_STAIR_MAIN",
+    "L2_STOR2",
+    "L3_STAIR_HEAD",
+    "L3_STORE_N"
   ],
   "reusedCells": 77,
   "rgba8Bytes": 5111808,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 1157402,
+  "sourceBytes": 1139514,
   "tool": "bake_house_lightmaps.py"
 }

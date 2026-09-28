@@ -1311,6 +1311,20 @@ namespace
         const std::array crossings{
             Crossing{"foyer-stair", {2.04F, 0.60F, -14.80F, 90.0F, 0.0F}, "L0_STAIR_MAIN"},
             Crossing{"stair-foyer", {2.35F, 0.60F, -14.80F, 270.0F, 0.0F}, "L0_FOYER"},
+            // Owner's exact front-wall corner: the old portal captures faced
+            // straight through the passage and missed the perpendicular seam.
+            Crossing{
+                "wall-foyer-corner-left", {0.80F, 0.60F, -16.50F, 145.0F, -2.0F}, "L0_FOYER", {-1.0F, 0.0F}},
+            Crossing{
+                "wall-foyer-corner-right", {0.80F, 0.60F, -16.50F, 145.0F, -2.0F}, "L0_FOYER", {1.0F, 0.0F}},
+            Crossing{"wall-stair-corner-left",
+                     {3.90F, 0.60F, -15.00F, 235.0F, -2.0F},
+                     "L0_STAIR_MAIN",
+                     {-1.0F, 0.0F}},
+            Crossing{"wall-stair-corner-right",
+                     {4.30F, 0.60F, -15.00F, 235.0F, -2.0F},
+                     "L0_STAIR_MAIN",
+                     {1.0F, 0.0F}},
             Crossing{"hall-wc1", {2.04F, 0.60F, -21.10F, 90.0F, 0.0F}, "L0_WC1"},
             Crossing{"wc1-hall", {2.37F, 0.60F, -21.10F, 270.0F, 0.0F}, "L0_HALL"},
             Crossing{"wc3-hall", {-5.70F, 3.65F, -20.84F, 180.0F, 0.0F}, "L1_HALL_W"},
