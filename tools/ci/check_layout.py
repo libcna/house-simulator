@@ -135,6 +135,8 @@ def check_root_entries(root: Path, out: list[Problem]) -> None:
         path = root / entry
         if _is_injected_empty_root_dir(root, path):
             continue
+        if _is_ignored_local_claude_settings(root, path):
+            continue
         if entry in ALLOWED_ROOT_ENTRIES:
             continue
         if entry in ALLOWED_BUILD_DIRS:
@@ -260,6 +262,26 @@ def _git_tracks(root: Path, path: Path) -> bool:
     return result.returncode == 0
 
 
+def _is_ignored_local_claude_settings(root: Path, path: Path) -> bool:
+    """Recognize personal tool metadata, never a general ignored-directory exemption.
+
+    The owner keeps an ignored settings.local.json here. Requiring exactly that
+    untracked regular file preserves source-placement and build-name enforcement,
+    without reading, deleting or rewriting the owner's settings.
+    """
+    if path.name != ".claude" or path.is_symlink() or not path.is_dir():
+        return False
+    try:
+        entries = list(path.iterdir())
+    except OSError:
+        return False
+    if len(entries) != 1 or entries[0].name != "settings.local.json":
+        return False
+    settings = entries[0]
+    return (not settings.is_symlink() and settings.is_file()
+            and _git_ignores(root, settings) and not _git_tracks(root, path))
+
+
 def _injected_root_policy(*, name: str, directory: bool, empty: bool, tracked: bool) -> bool:
     """Recognise only the two empty, untracked control directories Codex injects."""
     return name in INJECTED_EMPTY_ROOT_DIRS and directory and empty and not tracked
@@ -340,6 +362,60 @@ def _stale_gitkeep(root: Path) -> None:
 def selftest() -> int:
     failures: list[str] = []
 
+    local_settings_cases = {
+        "ignored regular settings": True,
+        "unignored settings": False,
+        "tracked settings": False,
+        "extra ignored config": False,
+        "extra ignored source": False,
+        "empty directory": False,
+        "symlink directory": False,
+        "symlink settings": False,
+    }
+    for label, expected in local_settings_cases.items():
+        with tempfile.TemporaryDirectory(prefix="cnahouse-layout-local-") as tmp:
+            root = Path(tmp)
+            _build_clean_tree(root)
+            commands = [["git", "-C", str(root), "init", "-q"],
+                        ["git", "-C", str(root), "config", "core.excludesFile", os.devnull]]
+            if any(subprocess.run(command, capture_output=True, check=False).returncode != 0
+                   for command in commands):
+                failures.append(f"could not create isolated Git fixture for {label}")
+                continue
+            local = root / ".claude"
+            if label == "symlink directory":
+                target = root / "docs" / "local-config"
+                target.mkdir()
+                (target / "settings.local.json").write_text("{}\n", encoding="utf-8")
+                local.symlink_to(target, target_is_directory=True)
+            else:
+                local.mkdir()
+                settings = local / "settings.local.json"
+                if label == "symlink settings":
+                    settings.symlink_to(root / "docs" / "conventions.md")
+                elif label != "empty directory":
+                    settings.write_text("{}\n", encoding="utf-8")
+            ignored = "" if label == "unignored settings" else "/.claude/\n"
+            (root / ".gitignore").write_text(ignored, encoding="utf-8")
+            if label == "extra ignored config":
+                (local / "settings.json").write_text("{}\n", encoding="utf-8")
+            if label == "extra ignored source":
+                (local / "Hidden.cpp").write_text("int f();\n", encoding="utf-8")
+            if label == "tracked settings":
+                result = subprocess.run(
+                    ["git", "-C", str(root), "add", "-f", ".claude/settings.local.json"],
+                    capture_output=True, check=False)
+                if result.returncode != 0:
+                    failures.append("could not stage the tracked-settings fixture")
+            actual = _is_ignored_local_claude_settings(root, local)
+            problems, _ = scan(root)
+            rejected = any(p.kind == "stray-root-entry" and p.path == ".claude" for p in problems)
+            if actual != expected or rejected == expected:
+                failures.append(f"local-settings policy misclassified {label}: {actual}, {problems}")
+            if label == "extra ignored source" and not any(
+                    p.kind == "misplaced-source" for p in problems):
+                failures.append("ignored C++ in .claude bypassed source-placement enforcement")
+
     injected_cases = {
         "empty untracked .agents": (".agents", True, True, False, True),
         "empty untracked .codex": (".codex", True, True, False, True),
@@ -414,6 +490,7 @@ def selftest() -> int:
 
     print(f"check_layout self-test passed: {len(PLANTED)} planted layout faults detected, "
           f"{len(injected_cases)} injected-directory cases classified, "
+          f"{len(local_settings_cases)} local-settings cases classified, "
           f"a .gitkeep beside ignored output accepted and beside tracked content rejected, "
           f"clean tree accepted.")
     return 0

@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers and a reusable kit), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (2026-09-22 reduction, retained breadth and maintenance mode; its former hour ceiling is superseded below) |
 | Scope policy | The owner explicitly superseded the former 280-hour ceiling on 2026-09-27 and requested further targeted corrections and a filming tour. Keep MUST/OPT boundaries explicit; do not infer other features |
-| Active plan | **33 open MUST tasks** in 16 milestones. Owner walk/run, reopened guard/art and terrace corrections are accepted with current input/GPU evidence; audio, platform and release work remain. Every active task's title and acceptance states the current work |
+| Active plan | **33 open MUST tasks** in 16 milestones. Owner walk/run, reopened guard/art, terrace and the local-settings layout-gate correction are accepted; audio, platform and release work remain. Every active task's title and acceptance states the current work |
 | Estimate to DONE | The old **44.84 / 52.75 / 76.03 agent-hour** forecast is a historical snapshot before the 2026-09-27 owner additions, not a current forecast or scheduling gate. Per-task `est:` remains for task sizing; see [Planning corrections](#planning-corrections) |
-| Current gate | **G5, M7, M9 and M12 passed. CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator.** Main/attic/basement stairs, garage-loft floor and whole-house lighting are corrected under `HOUSE-03635`/`03638`/`03639`/`03636`; doorway flashes and visibility/wall holes under `HOUSE-03637`/`03640`, including the owner's precise foyer/stair corner-gap screenshot. The existing car family is corrected under `HOUSE-03641`; full GPU filming circuit accepted under `HOUSE-03572`. Diagnostic ownership defect `HOUSE-03644` is corrected; next resume `HOUSE-01920`/`HOUSE-01922`: the normal game is silent despite enabled audio. Desktop performance `HOUSE-02404` stays paused |
+| Current gate | **G5, M7, M9 and M12 passed. CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator.** Main/attic/basement stairs, garage-loft floor and whole-house lighting are corrected under `HOUSE-03635`/`03638`/`03639`/`03636`; doorway flashes and visibility/wall holes under `HOUSE-03637`/`03640`, including the owner's precise foyer/stair corner-gap screenshot. The existing car family is corrected under `HOUSE-03641`; full GPU filming circuit accepted under `HOUSE-03572`. Normal title/Start audio produces real backend PCM; `HOUSE-01920`/`HOUSE-01922` remain open for required subjective listening. Desktop performance `HOUSE-02404` awaits repeatable current measurements |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -398,10 +398,10 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M6](#m6--main-cells-and-hero-areas-c4-c5--gates-g4-and-g5) — Main cells and hero areas | A | 03441–03500 | 0 | **G4** · `HOUSE-03452`, **G5** · `HOUSE-03480` | D4 | 0 |
 | [M7](#m7--a-compact-environment) — A compact environment | B | 03501–03540 | 0 | `HOUSE-03520` | D5 | 0 |
 | [M8](#m8--atmospheric-audio-essentials) — Atmospheric audio essentials | B | 03541–03570 | 4 | `HOUSE-01939` | D7 | 5 |
-| [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 1 | `HOUSE-03573` | D8 | 0.75 |
+| [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 0 | **done** · `HOUSE-03573` | D8 | 0 |
 | [M10](#m10--performance-measurement-driven) — Performance, measurement-driven | B | 03601–03630 | 2 | `HOUSE-02404` | D9 | 6 |
-| [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 5 | `HOUSE-03638` | D1, D2, D4, D6, D8, D9, D11, D13, D14 | 6.25 |
-| [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 0 | **done** · `HOUSE-02598` | D11 | 0 |
+| [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 3 | `HOUSE-03631` | D1, D2, D4, D6, D8, D9, D11, D13, D14 | 3.25 |
+| [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 0 | **done** · `HOUSE-03681` | D11 | 0 |
 | [M13](#m13--linux-desktop-release) — Linux desktop release | after M11 | 03701–03720 | 8 | `HOUSE-02797` | D9–D13 | 10.25 |
 | [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 5 | `HOUSE-02904` | D10b | 7.25 |
 | [M15](#m15--android) — Android | readiness: B · device: after M13 | 03751–03780 | 5 | `HOUSE-03041` (a BL-13 record does not close it) | D10c | 7 |
@@ -1476,6 +1476,13 @@ and new tests are representative, not exhaustive. Each feature task carries its 
 R16): the representative render sets live with their features (`HOUSE-01275`, `HOUSE-03520`,
 `HOUSE-02527`) and the grand tour is `HOUSE-03226`. This milestone holds only what no feature owns.
 
+- [x] HOUSE-03681 — Keep the layout gate strict without rejecting ignored local Claude settings
+      dep: HOUSE-00493 · sys: ci · plat: CI · pri: MUST · zone: all · adv: D11 · est: 0.25
+      accept: the root .claude directory is accepted only when it contains exactly an untracked, Git-ignored regular settings.local.json file; tracked, unignored, extra-file and symlink cases remain rejected; unrelated local settings are not modified, staged or committed; other directory/source-placement and closed-build-directory gates remain enforced
+      verify: current-root scan, focused positive/negative selftests and tools/ci/run_checks.sh
+      note: (2026-09-28 R15) The actual owner-owned local settings file is ignored by the user's Git excludes, but check_layout.py rejects its parent on every full gate run. D11 cannot be green in this normal development environment. Reuse the checker's existing Git-ignore/index queries; do not generally exempt ignored directories or weaken runtime XNA gates.
+      done: (2026-09-28) Current root scan and eight isolated Git-fixture positive/negative cases pass, including misplaced ignored C++ detection. Existing ten planted faults, five control-directory cases and gitkeep checks remain enforced. The selftest now runs in the full gate. All run_checks.sh gates are green; 353 strict-XNA units clean/109 destructor exemptions with four workers. Full unit 1530/1530 passes. A separate runtime integration run has 167 PASS/3 opt-in SKIP/1 threshold-sampling failure; its unmodified test missed its narrow spatial band on a four-step frame, not a layout or visibility assertion, and passes three isolated reruns. Owner settings SHA remains unchanged; no owner or sibling files edited. Evidence: /tmp/house-03681-static-final.log and docs/handoff.md.
+
 - [x] HOUSE-00493 — Make intermittent gate failures diagnosable: output on failure, the failing pose and pixel count, and a difference image
       dep: HOUSE-00483 · sys: ci · plat: CI · pri: MUST · zone: all · adv: D11 · est: 1.5
       accept: (1) `ctest` runs with `--output-on-failure` in the wrapper; (2) a render comparison names the failing pose, the differing pixel count and the mean absolute difference against its stated budget, and writes a difference image as an artefact; (3) the two known intermittent failures (`AudioGateTests.NoAudioRunsAFullSessionAndNeverOpensTheDevice`, `BlockoutPoseRenderTests.*`) are diagnosed and fixed if they reproduce, or their next sighting is guaranteed to be diagnosable
@@ -2334,6 +2341,15 @@ under R5.
 ---
 
 ## Planning corrections
+
+### 2026-09-28 — Layout gate rejects legitimate ignored owner settings
+
+* Add ACTIVE/MUST `HOUSE-03681` (0.25 h), D11: recognize only the exact,
+  untracked and Git-ignored `.claude/settings.local.json` local-config case.
+  Repeated prior full gates reported this deterministic false positive.
+* Do not edit or remove the owner's settings, broadly skip ignored directories,
+  accept tracked project content there, or weaken source placement/build naming.
+  Regression cases must reject those alternatives, including symlinks.
 
 ### 2026-09-28 — New-pace validation exposes terrace support and threshold defects
 

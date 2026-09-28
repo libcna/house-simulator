@@ -1,5 +1,48 @@
 # Current owner-visible defect work — 2026-09-28
 
+## Current continuation: normal Start audio evidence and strict layout gate
+
+Starting HEAD `9e937ca48415d81c1617d1c54302957131bab820`, clean `develop`.
+R15/D11 selected `HOUSE-03681`: the full layout gate rejected legitimate
+owner-local ignored metadata. Only the sole, untracked, Git-ignored regular
+`.claude/settings.local.json` case is accepted. Eight isolated positive/negative
+cases reject tracked, unignored, extra-file and symlink alternatives; ignored C++
+still fails source placement. Existing closed build-directory policy is unchanged.
+The owner's file was not read, changed or staged; SHA remains
+`84c99e7c36f4d8ec3d75eb7e29d3e127796d85b1585a3bb0d41cd794109bf28a`.
+
+Validation: fresh Debug application/integration build PASS (-j2/shared ccache);
+full unit **1530/1530 PASS**, including the unchanged previously load-sensitive
+SkySystem time test. All full static gates PASS, **353 strict-XNA units clean /
+109 destructor exemptions**, explicit four workers, log
+`/tmp/house-03681-static-final.log`. An earlier check run was rejected and its own
+process group stopped after editing the running shell script invalidated bash's
+read offset; the fresh final run above is the evidence, not that interrupted run.
+
+Full actual-GPU integration: **167 PASS / 3 opt-in SKIP / 1 FAIL**, 171 total,
+`/tmp/house-01920-normal-start-integration.log`. The unmodified
+`ACameraCrossingADoorwaySeesTheNewRoomBeforeTheBodyCellHysteresisEnds` test never
+sampled its 40 mm band on a four-fixed-step frame: new walking can travel 68 mm
+between input observations. Neither visibility assertion failed. Three exact
+isolated repeats PASS (`/tmp/house-current-threshold-rerun.log`). This needs a
+focused deterministic test correction, not a weakened runtime visibility rule.
+
+Normal title/Start audio regression and real-PipeWire capture are in progress,
+not completed audio tasks. Real PCM peak -18.788821 dBFS / RMS -46.884028 dBFS;
+no bank problems, four ambience voices, standing silent footsteps and ordinary
+walking oneshots. Owner saved ambience is 10.5%; preferences and default sink
+were not changed. Required six-category and indoor/outdoor human listening stay
+OPEN. See `docs/audio-playback-review.md`. No missing-emulator or missing-audio-
+hardware blocker is claimed. The emulator was not used in this continuation.
+
+**33 MUST / 78 OPT remain, nominal 45.25 h**, practical 50–65 h, pessimistic
+roughly 80 h; ceiling withdrawn by owner. Next correct the reproduced threshold
+test sampling, finish normal executable/audio evidence, then retry `HOUSE-02404`
+on current Release content. Existing build-probe executable/perf/content are
+fresh, not the stale Sept 26 copy; no measured optimisation claim yet.
+All graphics remain invisible (actual Radeon surfaceless GPU; any private Xvfb
+is additional keyboard-input evidence only). No monitor windows or sibling edits.
+
 ## Accepted owner walking/running, reopened guard/art and terrace corrections
 
 This is the current state; older sections below are checkpoint history, not

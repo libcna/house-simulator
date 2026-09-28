@@ -109,6 +109,7 @@ check_world()
 # ---------------------------------------------------------------------------------------------
 
 run_gate "layout"     python3 tools/ci/check_layout.py
+run_gate "layout-selftest" python3 tools/ci/check_layout.py --selftest
 run_gate "xna-only"   python3 tools/ci/check_xna_only.py
 run_gate "input-boundary" python3 tools/ci/check_input_boundary.py
 run_gate "web-materials" python3 tools/ci/check_web_materials.py

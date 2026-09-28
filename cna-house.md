@@ -2368,6 +2368,13 @@ cna-house/
     └── perf/         budget assertions and the measurement harness
 ```
 
+The source layout gate also recognizes personal `.claude/settings.local.json`
+metadata at the repository root only when it is the directory's sole regular,
+untracked and Git-ignored file. It does not read or modify those settings.
+Tracked, unignored, extra-file and symlink cases are rejected; this is not a
+general exemption for ignored content or additional build directories.
+(`HOUSE-03681`, 2026-09-28.)
+
 ---
 
 ## 18. Content pipeline
