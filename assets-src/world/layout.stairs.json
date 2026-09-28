@@ -55,12 +55,13 @@
     },
     {
       // Straight, south-running beneath the main stair. The B1 hall enters near the north foot;
+      // A metre of level floor connects the north hall door to the first tread;
       // the head reaches L0's free south approach strip instead of an open floor-well edge.
       "id": "STAIR_BASEMENT_L0_B1",
       "fromCell": "B1_STAIR", "toCell": "L0_STAIR_MAIN",
-      "risers": 16, "rise": 0.1812500, "going": 0.275, "width": 1.00,
+      "risers": 16, "rise": 0.1812500, "going": 0.250, "width": 1.00,
       "footprint": { "x": [2.20, 4.90], "z": [-20.20, -14.30] },
-      "run": "+Z", "shape": "straight",
+      "run": "+Z", "shape": "straight", "approachDepth": 1.00,
       "landings": [],
       "collisionRamp": true, "surface": "concrete"
     },

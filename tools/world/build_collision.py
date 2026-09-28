@@ -2120,6 +2120,22 @@ def build(world_dir: Path, manifest_path: Path | None = None, *, include_props: 
     build_stairwell_guards(layout, shapes, per_cell, stats)
     build_rafters(layout, shapes, per_cell, stats)
     build_mezzanine_guards(layout, shapes, per_cell, stats)
+    # A raised child deck is a physical object inside its parent, not only a
+    # neighbour reachable through its hatch. The parent must collide with the
+    # entire deck and its guard even before the tracker selects the child.
+    cell_rows = layout_io.by_id(layout_io.rows(layout, "cells"), "cell")
+    level_rows = layout_io.by_id(layout_io.rows(layout, "levels"), "level")
+    for child in cell_rows.values():
+        parent = cell_rows.get(child.get("parent"))
+        if parent is None:
+            continue
+        child_floor = layout_io.cell_extent(child, level_rows[child["level"]])[0]
+        parent_floor = layout_io.cell_extent(parent, level_rows[parent["level"]])[0]
+        if child_floor - parent_floor <= GUARD_DROP:
+            continue
+        for index in tuple(per_cell.get(child["id"], [])):
+            if index >= 0 and shapes.obbs[index][4] in (KIND_FLOOR, KIND_WALL):
+                _add(per_cell, parent["id"], index)
     if include_props:
         build_props(layout, shapes, per_cell, asset_paths, stats)
     build_posed_leaves(layout, shapes, per_cell, stats, world_dir)

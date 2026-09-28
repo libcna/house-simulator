@@ -1911,6 +1911,62 @@ namespace
         }
     }
 
+    TEST(HeadlessRunTests, BasementApproachesAndGarageLoftHaveContinuousSupport)
+    {
+        // HOUSE-03639: ordinary held-forward controller intent, with no waypoint steering.
+        struct Probe
+        {
+            const char* name;
+            std::array<float, 5> start;
+            std::uint64_t steps;
+            const char* endCell;
+            float floor;
+            bool moving;
+        };
+
+        for (const Probe& probe :
+             {Probe{"ascent-left", {3.97F, -2.30F, -19.70F, 180.0F, 0.0F}, 780, "L0_STAIR_MAIN", 0.60F, true},
+              Probe{
+                  "ascent-right", {4.23F, -2.30F, -19.70F, 180.0F, 0.0F}, 780, "L0_STAIR_MAIN", 0.60F, true},
+              Probe{"descent", {4.10F, 0.60F, -14.60F, 0.0F, 0.0F}, 780, "B1_STAIR", -2.30F, true},
+              Probe{"loft-floor", {14.0F, 2.90F, -19.5F, 0.0F, 0.0F}, 180, "L0_GARAGE", 2.90F, false},
+              Probe{"loft-edge", {14.0F, 2.90F, -19.5F, 180.0F, 0.0F}, 360, "L0_GARAGE", 2.90F, true}})
+        {
+            SCOPED_TRACE(probe.name);
+            cnahouse::util::Log::ResetForTesting();
+            cnahouse::player::InputState state;
+            state.move.Y = probe.moving ? 1.0F : 0.0F;
+            ScriptedInput input(state);
+            Options options;
+            options.headless = true;
+            options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+            options.noAudio = true;
+            options.scene = "walk";
+            options.player = probe.start;
+            options.timeOfDay = 10.5;
+            options.freezeTime = true;
+            Settings settings = Settings::Defaults();
+            settings.backBufferWidth = 320;
+            settings.backBufferHeight = 180;
+            settings.verticalSync = false;
+            CnaHouseGame game(options, settings);
+            game.SetInputSourceForTesting(&input);
+            game.SetFixedStepLimit(probe.steps);
+            game.SetFrameLimit(16000);
+            game.Run();
+            const auto feet = game.PlayerForTesting().Feet();
+            std::printf("  basement/loft %s: %s, feet (%.3f, %.3f, %.3f)\n",
+                        probe.name,
+                        std::string(cnahouse::util::IdRegistry::NameOf(game.CellForTesting())).c_str(),
+                        static_cast<double>(feet.X),
+                        static_cast<double>(feet.Y),
+                        static_cast<double>(feet.Z));
+            EXPECT_EQ(game.ExitCode(), 0);
+            EXPECT_EQ(cnahouse::util::IdRegistry::NameOf(game.CellForTesting()), probe.endCell);
+            EXPECT_NEAR(feet.Y, probe.floor, 0.12F);
+        }
+    }
+
     TEST(HeadlessRunTests, TheWalkSceneLoadsTheSunBakeAndPublishesDaylight)
     {
         // `HOUSE-01564`, end to end: the walk loader reads openings, interactables, initial state

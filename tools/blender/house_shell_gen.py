@@ -3220,6 +3220,50 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                         continue
                     add([tuple(point) for point in piece], (0.0, -1.0, 0.0), "insulation")
 
+    # Raised child platforms need a parent-owned underside: the upward child floor
+    # is one-sided and a closed hatch can cull the entire child. Do not duplicate
+    # the child's top finish or seal its intended hatch. Low container interiors
+    # are not mezzanines, matching the guard's existing one-metre distinction.
+    for child in cells_by_id.values():
+        if child.get("parent") != cell.get("id"):
+            continue
+        child_level = (levels or {}).get(child.get("level"))
+        child_extent, _ = extent_of(child, child_level) if child_level else (None, "")
+        if child_extent is None or child_extent[0] - extent[0] <= 1.0:
+            continue
+        for child_box in cell_boxes(child, child_extent):
+            if not enclosed_by_parent(child, child_box, cells_by_id, levels or {}):
+                continue
+            fx0, fx1, floor_y, _head_y, fz0, fz1 = inset_box(
+                child_box, child, list(neighbours), construction)
+            # Match the already-authored collision slab depth, not an independent shell guess.
+            deck_depth = float(child_level.get("structureDepth", construction.get("wallPartition", 0.15)))
+            underside_y = floor_y - deck_depth
+            wells = slab_holes(list(portals), child, floor_y, child_box)
+            for px0, px1, pz0, pz1 in panel(fx0, fx1, fz0, fz1, wells):
+                add([(px0, underside_y, pz0), (px1, underside_y, pz0),
+                     (px1, underside_y, pz1), (px0, underside_y, pz1)],
+                    (0.0, -1.0, 0.0), "structure")
+            for side, inward in INWARD.items():
+                plane, lo, hi = side_span(side, (fx0, fx1, floor_y, floor_y, fz0, fz1))
+                corners = ([(plane, underside_y, lo), (plane, floor_y, lo),
+                            (plane, floor_y, hi), (plane, underside_y, hi)]
+                           if side in ("-X", "+X") else
+                           [(lo, underside_y, plane), (lo, floor_y, plane),
+                            (hi, floor_y, plane), (hi, underside_y, plane)])
+                add(corners, tuple(-axis for axis in inward), "structure")
+            for hx0, hx1, hz0, hz1, _identifier in wells:
+                for plane, lo, hi, axis_x, look in (
+                        (hx0, hz0, hz1, True, (1.0, 0.0, 0.0)),
+                        (hx1, hz0, hz1, True, (-1.0, 0.0, 0.0)),
+                        (hz0, hx0, hx1, False, (0.0, 0.0, 1.0)),
+                        (hz1, hx0, hx1, False, (0.0, 0.0, -1.0))):
+                    corners = ([(plane, underside_y, lo), (plane, floor_y, lo),
+                                (plane, floor_y, hi), (plane, underside_y, hi)] if axis_x
+                               else [(lo, underside_y, plane), (lo, floor_y, plane),
+                                     (hi, floor_y, plane), (hi, underside_y, plane)])
+                    add(corners, look, "structure")
+
     surface["class"] = "metal"
     build_balcony_edge(cell, extent, list(neighbours), construction, solid, add)
     build_mezzanine_guard(cell, extent, cells_by_id, levels or {}, construction, solid)
@@ -4930,7 +4974,9 @@ def selftest(output: Path) -> int:
     without = build_cell(stair_cell, stair_extent, neighbours=neighbours,
                          construction=construction, level=levels[stair_cell["level"]],
                          levels=levels, portals=list(portal_rows.values()),
-                         openings=openings_by_portal, cells_by_id=cells)
+                         openings=openings_by_portal, cells_by_id=cells,
+                         flights=[row for row in flight_rows.values()
+                                  if row.get("toCell") == stair_cell["id"]])
     without_faces = len(without.data.polygons)
     reset_scene()
     with_stair = build_cell(stair_cell, stair_extent, neighbours=neighbours,
@@ -4938,22 +4984,18 @@ def selftest(output: Path) -> int:
                             levels=levels, portals=list(portal_rows.values()),
                             openings=openings_by_portal, cells_by_id=cells,
                             flights=list(flight_rows.values()))
-    # The narrowed basement well leaves two separate rail pieces at the exit bridge. The widened
-    # main well gives each exposed switchback edge its own non-intersecting balustrade.
+    # Keep incoming-flight arrival gaps in both shells. Otherwise moving the basement
+    # arrival changes this census even when the main flight itself is unchanged.
     expected_balusters = sum(max(1, math.ceil(
         ((tread["box"][1] - tread["box"][0]) if tread["axis"] == "x"
          else (tread["box"][3] - tread["box"][2])) / STAIR_BALUSTER_MAX_PITCH - 1e-9))
         for tread in first_run + second_run)
     expected_raked_members = 4
-    # The arrival removes four well-infill posts. Their two buried caps are now omitted,
-    # so removing those posts subtracts eight fewer faces than the old closed-box census.
-    arrival_infill_cap_savings = 4 * 2
     require(len(with_stair.data.polygons) == without_faces + 6 * (
-                len(boxes) + expected_raked_members + 4 + expected_balusters + 2)
-            + arrival_infill_cap_savings,
+                len(boxes) + expected_raked_members + 4 + expected_balusters),
             f"{main['fromCell']} gains the flight's {len(boxes)} boxes, two handrails and "
-            f"strings, four newels, {expected_balusters} balusters, and two railing pieces "
-            f"beside the narrowed basement well "
+            f"strings, four newels and {expected_balusters} balusters, independently of "
+            f"the basement arrival guard "
             f"({without_faces} -> {len(with_stair.data.polygons)})")
     top = max(vertex.co.z for vertex in with_stair.data.vertices)
     handrail = float(levels["L1"]["ffl"]) + float(construction["balustrade"]) \
@@ -5768,6 +5810,25 @@ def selftest(output: Path) -> int:
         openings=openings_by_portal, cells_by_id=cells)
     garage_classes = [SURFACE_ORDER[polygon.material_index]
                       for polygon in garage_shell.data.polygons]
+    loft_box = next(iter(cell_boxes(loft, extent_of(loft, levels[loft["level"]])[0])))
+    lx0, lx1, ly0, _ly1, lz0, lz1 = inset_box(loft_box, loft, neighbours, construction)
+    deck_depth = float(levels[loft["level"]].get("structureDepth", construction["wallPartition"]))
+    loft_wells = slab_holes(all_portals, loft, ly0, loft_box)
+    expected_deck_area = sum((x1 - x0) * (z1 - z0)
+                             for x0, x1, z0, z1 in panel(lx0, lx1, lz0, lz1, loft_wells))
+    underside_faces = [polygon for polygon in garage_shell.data.polygons
+                       if polygon.material_index == SURFACE_ORDER.index("structure")
+                       and polygon.normal.z < -0.99
+                       and all(abs(garage_shell.data.vertices[index].co.z - (ly0 - deck_depth)) < 1e-5
+                               for index in polygon.vertices)]
+    require(abs(sum(face.area for face in underside_faces) - expected_deck_area) < 1e-4,
+            "the parent garage owns a complete opaque loft underside except its intended hatch")
+    require(not any(polygon.normal.z > 0.99
+                    and polygon.material_index == SURFACE_ORDER.index("structure")
+                    and all(abs(garage_shell.data.vertices[index].co.z - ly0) < 1e-5
+                            for index in polygon.vertices)
+                    for polygon in garage_shell.data.polygons),
+            "the parent does not duplicate the child's upward walking finish")
     expected_solid_panel_faces = ((GARAGE_SECTION_COUNT - 1) * GARAGE_PANEL_COLUMNS * 2 * 6)
     expected_lite_frame_faces = GARAGE_PANEL_COLUMNS * 4 * 2 * 6
     expected_garage_panel_faces = expected_solid_panel_faces + expected_lite_frame_faces

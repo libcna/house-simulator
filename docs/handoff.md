@@ -1,6 +1,36 @@
 # Current owner-visible defect work — 2026-09-28
 
-## Accepted lighting checkpoint and exact next work
+## Basement/garage correction checkpoint
+
+`HOUSE-03639` is accepted; **36 MUST / 79 OPT tasks remain**. The final basement data uses sixteen
+181.25 mm rises, 250 mm goings and 1.00 m width, with a 1 m north entry and
+0.90 m south exit. The first 275 mm-going attempt left a 0.50 m head strip
+and failed capsule clearance/GrandTour; it is not the accepted geometry.
+The garage loft now has an opaque parent-owned underside/reveals matching its
+existing 0.35 m slab, and shares its floor/guard OBBs with its parent in full.
+No new ladder mechanic; the loft remains non-player-accessible per §13.3/zones.
+
+Current checks: 1504/1504 unit tests, five production-game held-forward/support
+probes, eight-flight shell/stair selftests, all 15 world rules, full content
+build and deployment pass. The final collision GrandTour passes **90 cells,
+564 stops, 86,635 steps, 14 detours**. Old lighting trace sample 3623 is stale
+after this geometry change; generate a new trace rather than relaxing its
+acceptance to replay the old points. GPU day/night before/after views are in
+`docs/visual-review/house-03639-basement-garage.md` and its evidence folder.
+The full static run passes 344 strict-XNA units with two workers; only inherited
+`.claude` layout and then-stale floor plans failed. Plans were regenerated and
+their individual check passes, as do final licence/resource-budget consistency.
+No physical-display windows, new build directory or sibling edits were used.
+
+Selection: explicit owner S1/S2 priority override / R1 exception. Next is
+`HOUSE-03640`, missing interiors from balcony/garage-road and wall strips;
+do not resume unrelated Android/audio/performance/cars/cinema before it.
+Read-only investigation: `PortalTraversal`'s exterior aperture seed explicitly
+excludes open opaque garage doors, and requires the exterior-side cell to have
+already been reached by the outdoor graph. Reproduce on the real invisible GPU
+before changing these conditions; they also prevent back-side leakage.
+
+## Previous accepted lighting checkpoint (before HOUSE-03639)
 
 `HOUSE-03636` is accepted after actual invisible Radeon/OPENGLES3 day/night
 inspection of all **90 accessible cells**, not merely the old lighting scoreboard.

@@ -187,7 +187,7 @@
       "name": "Vertical circulation",
       "cells": [
         {"id": "B1_STAIR", "accessible": true, "standingPoint": [2.8, -2.3, -18.5], "tier": "S"},
-        {"id": "L0_STAIR_MAIN", "accessible": true, "standingPoint": [4.1, 0.6, -15.8], "tier": "M"},
+        {"id": "L0_STAIR_MAIN", "accessible": true, "standingPoint": [4.1, 0.6, -14.85], "tier": "M"},
         {"id": "L1_STAIR_MAIN", "accessible": true, "standingPoint": [4.15, 3.65, -14.8], "tier": "M"},
         {"id": "L2_STAIR_MAIN", "accessible": true, "standingPoint": [2.8, 6.55, -14.8], "tier": "M"},
         {"id": "L2_STAIR_ATTIC", "accessible": true, "standingPoint": [6.8, 6.55, -14.85], "tier": "S"},

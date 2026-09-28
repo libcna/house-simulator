@@ -399,6 +399,13 @@ def selftest() -> int:
             f"the attic top has over 0.9 m of level landing before its north wall "
             f"({head[0]:.3f}..{attic[2]:.3f})")
 
+    basement = flights["STAIR_BASEMENT_L0_B1"]
+    basement_run = flight_runs(basement, -2.30, portals)[0]["box"]
+    require(basement.get("approachDepth", 0.0) >= 1.0
+            and abs(basement_run[2] - (-19.20)) < 1e-6
+            and abs(basement_run[3] - (-15.20)) < 1e-6,
+            "the basement has a level north approach and joins the clear south entry strip")
+
     garage = flights["STEPS_GARAGE"]
     gx0, gx1, gz0, gz1 = flight_runs(garage, 0.15)[0]["box"]
     require(abs((gx1 - gx0) - 3 * float(garage["going"])) < 1e-6

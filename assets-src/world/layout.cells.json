@@ -40,18 +40,18 @@
       "thermal": { "heated": true, "ductBranch": null },
       "lightGroups": ["LG_B1_STAIR_MAIN"],
       "lightmaps": {
-        "shellHash": "sha256:e25327c2d5f9d15cb05579115fce4375c74da99e5b5b7f846490c0dab39e9c2e",
+        "shellHash": "sha256:468edd92d6615ad0096d96345fd36a012e9059bae006395d8ef15bc1d37e5322",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/B1_STAIR_LM_DAY",
           "scale": 1.0000001192092896,
-          "receiverMean": 0.34028797898598273
+          "receiverMean": 0.34895153891726466
         },
         "artificial": [
           {
             "group": "LG_B1_STAIR_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/B1_STAIR_LM_LG_B1_STAIR_MAIN",
-            "scale": 0.952714741230011,
-            "receiverMean": 0.18159243226218016
+            "scale": 0.8048479557037354,
+            "receiverMean": 0.18953313410008713
           }
         ]
       },
@@ -605,30 +605,30 @@
       "daylight": { "orientation": "E", "exposure": 0.28 },
       "lightGroups": ["LG_L0_STAIR_MAIN_MAIN", "LG_L0_STAIR_MAIN_STEP"],
       "lightmaps": {
-        "shellHash": "sha256:6a6c7007b1948622a8d8b2c0ca1d40705b3c6afb08126dbe788f15b5916c776e",
+        "shellHash": "sha256:723efcc4d6413f712660f5b2ee31bb0617e06726b18e32f7a404a618731e4374",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_STAIR_MAIN_LM_DAY",
           "scale": 1.0000001192092896,
-          "receiverMean": 0.4391655568530325
+          "receiverMean": 0.4728486770018709
         },
         "artificial": [
           {
             "group": "LG_L0_PORCH_LANTERN",
             "contentName": "Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_PORCH_LANTERN",
-            "scale": 0.16962981224060059,
-            "receiverMean": 0.03006446696864071
+            "scale": 0.1715843379497528,
+            "receiverMean": 0.03158178366190239
           },
           {
             "group": "LG_L0_STAIR_MAIN_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_MAIN",
-            "scale": 1.1520915031433105,
-            "receiverMean": 0.14879615022994921
+            "scale": 1.0208438634872437,
+            "receiverMean": 0.15001298695223353
           },
           {
             "group": "LG_L0_STAIR_MAIN_STEP",
             "contentName": "Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_STEP",
-            "scale": 0.4662742018699646,
-            "receiverMean": 0.07811212454973417
+            "scale": 0.5063003897666931,
+            "receiverMean": 0.09105725457559354
           }
         ]
       },
@@ -1135,11 +1135,11 @@
       "daylight": { "orientation": "E", "exposure": 0.26 },
       "lightGroups": ["LG_L0_GARAGE_MAIN", "LG_L0_GARAGE_OPENER"],
       "lightmaps": {
-        "shellHash": "sha256:c6407decac2e8edbdb41601b50fdfbd8f56f2795e003f6282067620892d2233d",
+        "shellHash": "sha256:163e6a17f8b738d4129b4e4cac2741db4dd4f039778bf1fc0219d4cf58ee9865",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_GARAGE_LM_DAY",
           "scale": 1.0000001192092896,
-          "receiverMean": 0.35756376798108924
+          "receiverMean": 0.3479668314282778
         },
         "artificial": [
           {
@@ -1151,14 +1151,14 @@
           {
             "group": "LG_L0_GARAGE_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_GARAGE_LM_LG_L0_GARAGE_MAIN",
-            "scale": 0.8267616629600525,
-            "receiverMean": 0.24863561132122589
+            "scale": 0.9339394569396973,
+            "receiverMean": 0.19343838778015843
           },
           {
             "group": "LG_L0_GARAGE_OPENER",
             "contentName": "Textures/Lightmaps/Artificial/L0_GARAGE_LM_LG_L0_GARAGE_OPENER",
-            "scale": 0.06656565517187119,
-            "receiverMean": 0.009820617150523916
+            "scale": 0.06773874908685684,
+            "receiverMean": 0.007328498803350222
           }
         ]
       },
@@ -1182,18 +1182,18 @@
       "thermal": { "heated": false, "ductBranch": null },
       "lightGroups": ["LG_L0_GARAGE_LOFT_MAIN"],
       "lightmaps": {
-        "shellHash": "sha256:b6518ac12cbed912cf30004009ab498d4a441151c94c096f5a4d88795f3740b7",
+        "shellHash": "sha256:42b7c43433bf8ae105921058b7c5af89fa8f8f6cb4d71ed636b7064985507f6b",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_GARAGE_LOFT_LM_DAY",
-          "scale": 0.20512057840824127,
-          "receiverMean": 0.03528638109821471
+          "scale": 0.17752985656261444,
+          "receiverMean": 0.020329189588411792
         },
         "artificial": [
           {
             "group": "LG_L0_GARAGE_LOFT_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_GARAGE_LOFT_LM_LG_L0_GARAGE_LOFT_MAIN",
-            "scale": 0.5034675598144531,
-            "receiverMean": 0.15036209944200582
+            "scale": 0.5151118040084839,
+            "receiverMean": 0.13988535998617216
           }
         ]
       },

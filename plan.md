@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers and a reusable kit), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (2026-09-22 reduction, retained breadth and maintenance mode; its former hour ceiling is superseded below) |
 | Scope policy | The owner explicitly superseded the former 280-hour ceiling on 2026-09-27 and requested further targeted corrections and a filming tour. Keep MUST/OPT boundaries explicit; do not infer other features |
-| Active plan | **37 open MUST tasks** in 16 milestones, including newly reported geometry and visibility defects and the owner-requested filming tour. Every active task's title and acceptance states the current work |
+| Active plan | **36 open MUST tasks** in 16 milestones, including newly reported geometry and visibility defects and the owner-requested filming tour. Every active task's title and acceptance states the current work |
 | Estimate to DONE | The old **44.84 / 52.75 / 76.03 agent-hour** forecast is a historical snapshot before the 2026-09-27 owner additions, not a current forecast or scheduling gate. Per-task `est:` remains for task sizing; see [Planning corrections](#planning-corrections) |
-| Current gate | **G5, M7 and M12 passed; M9 reopened for the owner-requested filming tour. CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator.** Main/attic stairs and whole-house lighting are corrected under `HOUSE-03635`/`03638`/`03636`; the doorway flash is corrected under `HOUSE-03637`. Next owner-priority defects are basement/garage floor `HOUSE-03639` and visibility holes `HOUSE-03640`. Desktop performance `HOUSE-02404` stays paused. `HOUSE-01920`/`HOUSE-01922` remain open; the owner reports the normal game is silent despite enabled audio |
+| Current gate | **G5, M7 and M12 passed; M9 reopened for the owner-requested filming tour. CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator.** Main/attic/basement stairs, garage-loft floor and whole-house lighting are corrected under `HOUSE-03635`/`03638`/`03639`/`03636`; the doorway flash is corrected under `HOUSE-03637`. The next owner-priority defect is visibility holes `HOUSE-03640`. Desktop performance `HOUSE-02404` stays paused. `HOUSE-01920`/`HOUSE-01922` remain open; the owner reports the normal game is silent despite enabled audio |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -400,7 +400,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M8](#m8--atmospheric-audio-essentials) — Atmospheric audio essentials | B | 03541–03570 | 4 | `HOUSE-01939` | D7 | 5 |
 | [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 1 | `HOUSE-03572` | D8 | 8 |
 | [M10](#m10--performance-measurement-driven) — Performance, measurement-driven | B | 03601–03630 | 2 | `HOUSE-02404` | D9 | 6 |
-| [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 6 | `HOUSE-03639` | D1, D2, D4, D6, D13, D14 | 11.75 |
+| [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 5 | `HOUSE-03640` | D1, D2, D4, D6, D13, D14 | 9.25 |
 | [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 0 | **done** · `HOUSE-02598` | D11 | 0 |
 | [M13](#m13--linux-desktop-release) — Linux desktop release | after M11 | 03701–03720 | 8 | `HOUSE-02797` | D9–D13 | 10.25 |
 | [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 5 | `HOUSE-02904` | D10b | 7.25 |
@@ -1385,11 +1385,12 @@ There is no zone rotation, no "polish everything" pass and no screenshot → twe
       note: (2026-09-27 owner report) The missing guard, awkward stair start/floor gap, clipped art and impassable attic-room opening are observed in normal play; audit BUG-011/012/016 independently supports the guard, doorway and attic-step concerns. Old scripted stair paths do not close this defect.
       done: (2026-09-28) The retained 15-riser flight now has a 1 m level entry, 250 mm going and a 1.15 m solid upper turning landing. Its narrowed well preserves the rest of the head's floor; the west room doorway and north store doorway both open from the landing. Exposed guards have visible newels/infill and collision, with no redundant rail against walls. Both artworks are wholly on their walls. The adjacent bath remains fitted; the east attic store retains its north service dressing. Three obstructing/intersecting prop IDs are deliberately retired in the golden list with reasons in the evidence report. Actual W-key input independently ascends, descends, enters both exits and stops at the guard on virtual Xvfb; the same five intents pass in the current Radeon game loop. Ten reviewed GPU day/night views and five input HUD captures are retained in `docs/visual-review/house-03638/`, with root causes and exact results in `docs/visual-review/house-03638-attic-stair.md`. The complete 1502-test unit suite and 90-cell tour pass. This coupled geometry/data correction shares the main-stair checkpoint; no task was closed solely from scripted waypoints.
 
-- [ ] HOUSE-03639 — Correct basement stair placement and garage-loft floor integrity
+- [x] HOUSE-03639 — Correct basement stair placement and garage-loft floor integrity
       dep: HOUSE-03634 · sys: world-content, collision · plat: LNX · pri: MUST · zone: Z-STAIR, Z-GAR · adv: D1, D2, D4, D13 · est: 2.5
-      accept: (1) basement stair foot/head and their approaches form a plausible, clearly legible route without a misplaced flight or trap; (2) the ladder-accessible garage loft has a visibly opaque, colliding floor with no transparent strip or walk-through hole outside its intended hatch; (3) normal-controller traversal works in both directions and screenshots from above and below show the corrected joins
+      accept: (1) basement stair foot/head and their approaches form a plausible, clearly legible route without a misplaced flight or trap; (2) the fixed-ladder garage loft has a visibly opaque, colliding floor with no transparent strip or walk-through hole outside its intended hatch; (3) normal-controller basement traversal works in both directions and screenshots from above and below show the corrected joins
       verify: real-game offscreen eye-height captures, ascent/descent and loft-edge collision regressions
       note: (2026-09-27 owner report) These are architecture and traversal defects, not extra basement or garage content.
+      done: (2026-09-28) Sixteen 181.25 mm rises and 250 mm goings preserve the 1 m wide south-running basement flight, with a 1 m level north foot and 0.90 m south exit. The well/head and standing point follow the corrected route; no controller tolerance is loosened. Raised child decks gain a parent-owned opaque underside/fascia/hatch reveals matching their existing slab depth, without duplicating the top finish; existing floor/guard OBBs are fully shared with the parent. The intended garage hatch remains open and the loft remains non-player-accessible (no ladder mechanic). Five normal-game controller probes pass, as do actual W/mouse basement ascent/descent and hall approach on virtual Xvfb. Twelve matched GPU day/night before/after pairs, real-input HUDs and precise causes are retained in `docs/visual-review/house-03639-basement-garage.md`. Unit 1504/1504, complete 90-cell collision tour (564 stops, 86635 steps, 14 detours), focused integration, shell/stair selftests and all 15 world rules pass. Strict XNA: 344 units clean with two workers; the inherited owner-owned `.claude` layout exception remains, and transient generated floor-plan drift is corrected.
 
 - [ ] HOUSE-03640 — Eliminate exterior/interior visibility holes and wall seams
       dep: HOUSE-03637 · sys: visibility, world-content · plat: LNX · pri: MUST · zone: all · adv: D1, D2, D13 · est: 3.5
@@ -2281,6 +2282,20 @@ under R5.
 ---
 
 ## Planning corrections
+
+### PC-2026-09-28 — Basement approach dimensions and garage platform ownership
+
+* `HOUSE-03639` exposes a basement flight starting against its north boundary and a
+  one-sided garage-loft deck whose collision is available to the parent only near the
+  hatch. These are existing D1/D2/D4/D13 failures. A 1 m level foot and 0.90 m level
+  head fit the existing stair bay with sixteen 181.25 mm rises and 250 mm goings
+  (`2r+g=612.5 mm`); retain its width, floors and southward route. The first attempted
+  275 mm going left only a 0.50 m head strip and failed real capsule clearance.
+* The deck gains a parent-owned underside and shares its existing floor/guard collision
+  with the parent; its intended hatch remains open. "Fixed-ladder" clarifies the task's
+  former "ladder-accessible" wording: §13.3 and `docs/zones.json` already exclude this
+  loft from player-accessible areas because no ladder controller exists. Above-floor
+  probes prove support, not a new ladder-traversal feature. No DONE breadth is removed.
 
 Corrections made to `cna-house.md` or to this file during implementation, with the evidence that
 forced each one. Nothing is changed silently. The 2026-09-06 → 2026-09-20 corrections are in the

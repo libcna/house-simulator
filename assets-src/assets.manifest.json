@@ -23166,7 +23166,7 @@
       "id": "TEXTURE_B1_STAIR_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_STAIR_LM_DAY.png",
-      "sourceSha256": "1bf36a5401c8c50e777c467cfbc23bb729a896ba0221699ac606d23ab0db07a0",
+      "sourceSha256": "88571d1f0cac0ae3c0ea57152dcec67a33a90209b6e6a02fc42bc517bcca1314",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23193,7 +23193,7 @@
       "id": "TEXTURE_B1_STAIR_LM_LG_B1_STAIR_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_STAIR_LM_LG_B1_STAIR_MAIN.png",
-      "sourceSha256": "f23ff96538c07530789f13f78ea1c6486abfa932d62b341643761672566f4ebc",
+      "sourceSha256": "f64200e282fc77462de03a17ce2797edc3fc9d98781c71cad470b09b2a07b816",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24492,7 +24492,7 @@
       "id": "TEXTURE_L0_GARAGE_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_GARAGE_LM_DAY.png",
-      "sourceSha256": "f51316026603cccb06fbddf08a34b5ba18a81c63730468b774f702fa172a038a",
+      "sourceSha256": "1e7fa78f84bb81372f1dfee6a2819427b0684ee387af357749acc9d38c449396",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24546,7 +24546,7 @@
       "id": "TEXTURE_L0_GARAGE_LM_LG_L0_GARAGE_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_GARAGE_LM_LG_L0_GARAGE_MAIN.png",
-      "sourceSha256": "e636f55d8c82ab4bba6567c1f123e1dff8e90b6b75f94ee1567b5888b7fd52e1",
+      "sourceSha256": "c65bbe0ad5a353773bb10565e122559cbf2523a3173407b7168384a41bc1505e",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24573,7 +24573,7 @@
       "id": "TEXTURE_L0_GARAGE_LM_LG_L0_GARAGE_OPENER",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_GARAGE_LM_LG_L0_GARAGE_OPENER.png",
-      "sourceSha256": "9aa45637c088f24adb951fd889b67c280b17085f5664f5372d1eb38be780f893",
+      "sourceSha256": "b6b906d64a73cef02bd9c7dfb517236ea45ae92d036d677472f9231fd188580b",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24600,7 +24600,7 @@
       "id": "TEXTURE_L0_GARAGE_LOFT_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_GARAGE_LOFT_LM_DAY.png",
-      "sourceSha256": "7bd76784880abadfe7225305019aaee66cd4d65b055837a74f5011dae6860e6f",
+      "sourceSha256": "504fdc13e6c3102f5f4be9f1da583b73b1d07f6ca2ffa52d88e58de89ef955b4",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24627,7 +24627,7 @@
       "id": "TEXTURE_L0_GARAGE_LOFT_LM_LG_L0_GARAGE_LOFT_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_GARAGE_LOFT_LM_LG_L0_GARAGE_LOFT_MAIN.png",
-      "sourceSha256": "08dc5c79f7e2cafaa3d03a58e85656e67f1c3b6d36d661b0db7075f52bc80f3c",
+      "sourceSha256": "bf3efdd0a333b28aec2d92d3da387735fe76622eada8a073babfbb3eb2210248",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25248,7 +25248,7 @@
       "id": "TEXTURE_L0_STAIR_MAIN_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_STAIR_MAIN_LM_DAY.png",
-      "sourceSha256": "5b474541bc69329c9ee7efb7186d632e205c72e2a61912c940841b2dd3866e4f",
+      "sourceSha256": "048b72afb87aa2f9a3168c977514dbcd5b98452d19825fa29b96a97a881e6c5d",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25275,7 +25275,7 @@
       "id": "TEXTURE_L0_STAIR_MAIN_LM_LG_L0_PORCH_LANTERN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_PORCH_LANTERN.png",
-      "sourceSha256": "8363770b0e23c908f145ef724952bbd822675d6c06c6cc3d293c1eb85628ba21",
+      "sourceSha256": "6e0099bb1ab212de8be26589f2bf93aed4de240569c4c5e4f2907f89877abfbb",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25302,7 +25302,7 @@
       "id": "TEXTURE_L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_MAIN.png",
-      "sourceSha256": "753e64aa588fc3c877816bea33264f625437d31c6d64304d8aeb3523ea89d8cb",
+      "sourceSha256": "a760c359e98687b1fa670efec74cf1c4481b81317ef3cf897e2b3130ea48f33b",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25329,7 +25329,7 @@
       "id": "TEXTURE_L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_STEP",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_STEP.png",
-      "sourceSha256": "2eb4577d83e8ee88b4f4db01faad648a308489baf5bb3c861da0568ad0cae893",
+      "sourceSha256": "f565d692377fc2c4276f3dc8a0d4bb2f2ae04a0519645f4746ee3f59e2c83bb0",
       "texture": {
         "width": 128,
         "height": 128,

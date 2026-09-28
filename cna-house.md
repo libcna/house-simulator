@@ -1192,7 +1192,7 @@ Every flight satisfies `2·rise + going ∈ [600, 650] mm` and a consistent rise
 | `STAIR_MAIN_L0_L1` | L0 +0.60 → L1 +3.65 | 3.050 m | 17 × 179.4 mm | 280 mm | 1.10 m | U, suspended turn at riser 9, **+2.2147** | X +2.20…+4.90, Z −20.20…−14.30; the first tread is set back 1.00 m from the south entry |
 | `STAIR_MAIN_L1_L2` | L1 +3.65 → L2 +6.55 | 2.900 m | 16 × 181.3 mm | 280 mm | 1.10 m | U, landing at riser 8, **+1.450 rel.** | X +2.20…+4.90, Z −20.20…−14.30 |
 | `STAIR_ATTIC_L2_L3` | L2 +6.55 → L3 +9.30 | 2.750 m | 15 × 183.3 mm | 250 mm | 0.90 m | straight, north-running, 1.00 m level entry | X +5.40…+8.20, Z −19.30…−14.30 |
-| `STAIR_BASEMENT_L0_B1` | B1 −2.30 → L0 +0.60 | 2.900 m | 16 × 181.3 mm | 275 mm | 1.00 m | straight, south-running, **beneath the main stair** | X +2.20…+4.90, Z −20.20…−14.30 |
+| `STAIR_BASEMENT_L0_B1` | B1 −2.30 → L0 +0.60 | 2.900 m | 16 × 181.3 mm | 250 mm | 1.00 m | straight, south-running, **beneath the main stair**, with a 1.00 m north approach and 0.90 m south exit | X +2.20…+4.90, Z −20.20…−14.30 |
 | `STEPS_PORCH` | grade 0.00 → porch +0.57 | 0.570 m | 3 × 190 mm | 300 mm | 3.00 m | straight | Z −11.60…−10.70 |
 | `STEPS_TERRACE_LAWN` | lawn 0.00 → terrace +0.45 | 0.450 m | 3 × 150 mm | 350 mm | 3.00 m | straight | Z −36.00, the terrace's south edge |
 | `STEPS_TERRACE` | terrace +0.45 → sunroom +0.60 | 0.150 m | 1 × 150 mm | 350 mm | 3.60 m | single step | Z −32.40 |
@@ -1210,7 +1210,7 @@ starts beside its north hall door and arrives in L0's clear south approach strip
 collision and railing gaps derive from the same flight placement.
 
 `2·179.4 + 280 = 638.8` ✔ · `2·181.3 + 280 = 642.6` ✔ · `2·183.3 + 250 = 616.6` ✔ ·
-`2·181.3 + 275 = 637.6` ✔ · `2·150 + 350 = 650` ✔ (both terrace flights) ·
+`2·181.3 + 250 = 612.6` ✔ · `2·150 + 350 = 650` ✔ (both terrace flights) ·
 `2·150 + 300 = 600` ✔ (garage) · `2·190 + 300 = 680` (exterior, permitted) ✔
 
 > Corrected 2026-09-07 by `HOUSE-00379`, which authored these as data and checked the arithmetic.
@@ -1409,7 +1409,7 @@ Footprint: the main block only, interior X −12.70 … +8.70, Z −27.10 … �
 | `L0_KITCHEN` | Kitchen | −8.20 … +2.20 | −27.10 … −23.00 | 42.6 | 4 | 2 | 2 | Island, **large refrigerator**, range, ovens, dishwasher, sink |
 | `L0_SUNROOM` | Sunroom / breakfast room (rear extension) | −6.70 … +2.70 | −32.10 … −27.10 | 47.0 | 2 | 6 | 1 | Breakfast table, wicker chairs, plants and wet bar; the visible suite and physical main/task fixtures are established by `HOUSE-01068`; five fixed panels and a slider to the terrace; roof = rear balcony |
 | `L0_GARAGE` | Garage | +8.70 … +17.10 | −21.70 … −13.30 | 70.6 | 2 | 1 | 4 | **One car**, workbench, shelving, bins, bikes; sectional, side and house doors, plus the loft hatch |
-| `L0_GARAGE_LOFT` | Garage storage loft | +9.20 … +16.60 | −21.20 … −17.50 | 27.4 | 1 | — | 1 | Nested in `L0_GARAGE` at +2.90; the ladder and 0.90 m hatch remain visible architecture, but the loft is not an intended-accessible area because the walk-only showcase has no ladder traversal (`HOUSE-00377`, PC-2026-09-23) |
+| `L0_GARAGE_LOFT` | Garage storage loft | +9.20 … +16.60 | −21.20 … −17.50 | 27.4 | 1 | — | 1 | Nested in `L0_GARAGE` at +2.90; its opaque 0.35 m deck has a parent-owned underside and shared floor/guard collision. The ladder and 0.90 m hatch remain visible architecture, but the loft is not an intended-accessible area because the walk-only showcase has no ladder traversal (`HOUSE-00377`, PC-2026-09-23) |
 | `L0_PORCH` | Front porch (exterior cell) | −3.60 … +3.60 | −14.30 … −11.60 | 19.4 | 1 | 3 | 1 | Two rockers, a doormat, a wall lantern each side of the door |
 
 **19 cells. 410.9 m² incl. garage and porch; 273.9 m² of heated interior in the main block plus
