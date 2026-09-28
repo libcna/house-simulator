@@ -1,6 +1,295 @@
-# Current owner-visible defect work — 2026-09-28
+# Handoff for Claude Code Opus 5.5 High — 2026-09-28
 
-## Whole-zone listening accepted; windowed pointer report next
+## Resume from this checkpoint
+
+Continue from the clean `develop` HEAD containing this handoff. The owner asked
+this Codex session to finish its current work, commit, push, stop its ongoing
+goal and wait. **House Simulator is not DONE.** Do not translate that requested
+session stop into project completion. The next authorized agent should finish
+the existing ACTIVE/MUST roadmap and stop feature development at exact DONE.
+
+The implementation/evidence checkpoint is **0a1aee2**. Session starting HEAD was
+**b38cac50f0b499d158883efcac48d19da5e7cec4**. Earlier completed checkpoints:
+**a7d8b33b7e46ccebc147f5d789dc2d32402633db** (HOUSE-01925) and **eee3590**
+(HOUSE-01939). No task-owned work is intentionally left unstaged. The ignored
+owner `.claude/settings.local.json` is unrelated and preserved. Inspect status,
+staged/untracked files and current sibling state again before resuming.
+
+**Concurrent upstream work warning:** after the final successful build/tests,
+CNA advanced independently from 6f6100cd3 to **200d08fb6** and had **343 dirty
+status entries**, including staged renderer cleanup, at the handoff inspection.
+None was created, staged, reverted or committed by this House session. Do not
+clean or overwrite that other session's changes. The final one-TU strict probe
+still fails on the annotated aliases; evidence is
+`/tmp/house-handoff-upstream-final-probe.log`. The full successful build/unit/GPU
+snapshot below belongs to the recorded earlier upstream state, not a claim that
+the moving, dirty CNA tree was fully rebuilt again. sharp-runtime was clean at
+007280bd. Recheck current upstream stability before the next build.
+
+Read `plan.md` completely, `cna-house.md`, local and parent AGENTS/CLAUDE,
+`docs/workflow.md`, conventions and ADR-0016 before implementation. The current
+plan is authoritative; the historical notes **below this current handoff** are
+not instructions to revive scope, open monitor windows, use old CPU limits or
+assume platforms unavailable.
+
+## Exact task and forecast state
+
+**30 open MUST / 78 open OPT**, nominal **38.75 agent-hours**, pessimistic
+**56.63 h** (1.10 × 38.75 + 8 h Android + 6 h Web reserves). Starting forecast
+was 38.50 h. Two audio tasks closed, two corrective tasks were added, and the
+actual final review adds one honest hour to the existing bounded fix forecast.
+This is agent-work estimation, not a promised elapsed finish time. Upstream
+waiting is not quantifiable. The owner withdrew the old 280-hour ceiling on
+2026-09-27; do not restore it or use it to waive breadth or required fixes.
+R12's bounded S2/S3 polish rule and all MUST/OPT boundaries still apply.
+
+| Path | Remaining MUST IDs / work |
+|---|---|
+| Current corrective acceptance | HOUSE-03574 pointer targets; HOUSE-03683 strict compiler error detection; both implemented, final mandatory strict acceptance pending BL-18 |
+| Final visual pass | HOUSE-02714 review performed/recorded, final acceptance pending BL-18 → HOUSE-03631 actual required fixes → HOUSE-02713 intentional representative golden refresh |
+| Effective measured presets | HOUSE-02405, after required user-visible fixes |
+| Linux release | HOUSE-02781 DONE audit → 02782 gaps → 02783 ASAN/UBSAN → 02784 two-hour soak; 02788 licences, 02789 package, 02790 packaged smoke, 02797 desktop tag; follow actual dependencies |
+| Web | HOUSE-02850 pack sizes → 02898 performance → 02900 Chrome/Firefox DONE walk; 02901 CI smoke, 02904 distribution; follow actual dependencies |
+| Android | HOUSE-03033 full content delivery → 03037 emulator/device performance → 03038 full touch/traversal DONE → 03039 touch tuning → 03041 distribution; some gates also depend on desktop release |
+| Final multiplatform release | HOUSE-03071 measurements, 03074 final XNA audit, 03075 docs, 03076 tests/content, 03077 notes/credits, 03078 final tag and maintenance mode |
+
+The table is an orientation aid, **not a replacement for each `dep:`/`accept:`**.
+Do not start OPT while MUST remains. No pets, avatar, life/gameplay simulation,
+new editor/framework/manager or optional weather expansion. Keep the required
+basement, all floors/attic, garage, exterior, Linux, Web and Android.
+
+## Immediate next actions and the real blocker
+
+**First House implementation: HOUSE-03631's S1 shed roof enclosure**, selected
+by R1's fix-now exception. The normal dependency review was performed, but its
+checkbox remains open solely because the mandatory current strict gate cannot
+pass. Do not wait idly for CNA or start unrelated performance while these new
+visible defects remain. All current findings are filed under the existing MUST
+bounded fix task, not hidden in handoff prose:
+
+1. **S1 EXT_SHED / Z-EXR:** inward roof/gable surfaces are missing; from inside
+   you see sky by day and night. `tools/world/fence_gen.py:641–660` emits only
+   outward faces. Use the existing generator/content pipeline, correct interior
+   enclosure and winding, add focused coverage and inspect actual interior and
+   exterior GPU output. Do not disable global back-face culling.
+2. **S2 L1_BED3 / Z-L1:** mature-tree canopy intersects the bedroom corner above
+   the desk. Candidate instance in `layout.exterior.json`, VEG_MAPLE, position
+   (-13.50, 0, -12.00), yaw 197°, scale .78. Measure transformed canopy bounds
+   before adjusting placement. Do not remove vegetation breadth or asset families.
+3. **S2 EXT_SHED:** daytime interior tools/materials are under-readable; night
+   fixture state is much more readable. Investigate actual light selection,
+   daylight propagation/bake/material response after the roof correction. Do
+   not increase global ambient light or flatten the whole house.
+4. **S2 exterior foliage:** crowns/planting remain conspicuously bright at 22 h
+   against dark ground/facades (Z-EXF/Z-EXR/Z-STR). The actual lighting/material
+   root cause is **not yet established**. Diagnose the existing path and fix it
+   minimally; do not create a new rendering system.
+
+Full Round 179 record: `docs/visual-review/house-02714-final.md` and the visual
+ledger README. S3 attic mottling/plain street remains bounded backlog, not a new
+asset quota. Remaining fix estimate is 2.25 h; keep S1 versus S2/S3 time separate
+and obey R6/R12 rather than silently increasing depth.
+
+**BL-18 is CNA-owned, not an unavailable GPU/emulator.** At CNA 3d5742e84,
+a62c40b09 and final recheck/build 6f6100cd3, `CNAEXT using ...` in these headers
+expands under `CNA_STRICT_XNA_API` to invalid `[[deprecated(...)]] using`:
+
+* `modules/content/include/.../ContentManager.hpp:313/395`;
+* `modules/runtime/include/.../GameComponentCollection.hpp:25/27/29`;
+* `modules/runtime/include/.../GameWindow.hpp:52/54`.
+
+Compiler error: **expected unqualified-id before using**, then missing aliases.
+The old House checker discarded compiler status and printed false green.
+HOUSE-03683 now preserves every nonzero status (including crashes/empty stderr),
+reports the source/error context and never claims clean after failure. Seven
+planted checker tests pass; the corrected whole wrapper correctly fails with
+**38 failed compiler invocations**, only `xna-strict` red. Every other gate is
+green. Earlier printed strict green is explicitly invalidated.
+
+Minimal alias/control probes isolate attribute placement. There is no safe House
+workaround without weakening strict XNA. **Do not edit CNA/sharp-runtime** from
+this repository; a separately authorized upstream session must fix placement.
+After current upstream correction, rerun the full strict gate and normal tests,
+then accept HOUSE-03683/03574/02714 only when their real criteria pass. Do not
+rewrite the workflow or tick them merely to make the task count smaller.
+
+## What was implemented and verified
+
+* HOUSE-01925 completed audible retained weather: standard XNA loop voices,
+  load-time filtered rain/wind, authored roof/sky coverage and basement floor
+  transmission. No new audio framework/assets or native runtime calls. Owner
+  accepted attic/ordinary-room/sunroom/basement rain balance: “nyni je vse ok”.
+* HOUSE-01939 completed after owner's explicit seven-zone, four-state listening
+  confirmation: “vse je ok”. `docs/audio-playback-review.md` holds the record.
+  Sound is no longer merely in a stash. Do not reopen subjective listening from
+  the historical audit. Owner preferences and default speaker/sink were not changed.
+* HOUSE-03574 pointer implementation is complete but acceptance stays open:
+  real held mouse clicks at 800x600 on private Xvfb reproduced FOV changing
+  Master. Corrected identical clicks change only FOV. Both pointer sources invert
+  the actual TextRenderer safe canvas and physical-font half-height; refresh from
+  live XNA viewport before sampling, reject padding, preserve raw look. Do not
+  double-scale CNA MouseState by OS client bounds. No serialized schema change.
+  Evidence: `docs/visual-review/house-03574-pointer.md`.
+* Current normal shared-cache build **PASS** after CNA advances to 6f6100cd3;
+  latest full unit suite **1540/1540 PASS**; latest pointer/fullscreen GPU
+  regression **3/3 PASS**, including pointer clicks after actual ApplyChanges.
+  Earlier broader same-House-runtime snapshot: **172 GPU integration PASS,
+  3 explicit opt-in SKIP, 0 FAIL**; 65 focused unit PASS. Do not label that broad
+  snapshot as a new full integration run after the final upstream advancement.
+* Whole-property GPU review: **90/90 arrivals day and night**, 1076 frames each;
+  all 54 room-view pages, 72 low-fixture supplement captures, twelve established
+  hero captures and sampled consecutive threshold bursts inspected. Review wall
+  times are not frame-budget benchmarks. Current trace PASS does not prove human
+  staircase usability, and static screenshots do not prove flicker fixed.
+* Native fullscreen on WM-less private Xvfb timed out in both old/new binaries;
+  that is an inconclusive fixture, not claimed native fullscreen acceptance.
+  Two interrupted night attempts are not passes; completed persistent-PTY retry
+  provides the real night result. No monitor window or emulator was used here.
+
+Current logs: `/tmp/house-handoff-{build,unit,pointer-gpu,static}.log`;
+`/tmp/house-03683-{selftest,upstream-probe,upstream-recheck,alias-minimal,alias-control}.log`;
+`/tmp/house-02714-{trace,day,night-retry,heroes,supplement,hardware-proof}.log`.
+Captures: `build/test-output/lighting-walk-{day,night}-to11729/`,
+`house-02714-{heroes,supplement,review-sheets}/` and `house-03574/` under the
+same test-output root. Private UI before/after images are `/tmp/house-03574-*`.
+The owned old probe executable was removed after documenting its result.
+
+## Platform truth and useful next-preset investigation
+
+**Web and Android remain real DONE requirements**, not finished releases.
+Web keyboard/mouse/pointer-lock and touch-only Chrome emulation passed earlier
+under HOUSE-03721/03723. First real XNA touch selects TouchSource. Left floating
+joystick moves, right drag looks, onscreen MENU and WALK/RUN avoid any keyboard
+requirement. Final full-content Web packaging, both-browser traversal and
+performance still remain. Android uses the same scheme; desktop Shift toggles
+walk 2.05 m/s versus run 4.00 m/s. Normal Start/settings persistence and cinema
+tour corrections are already implemented; do not add the optional speed setting.
+
+**Android SDK/toolchain and emulator exist.** HOUSE-02951, Android arm64 APK,
+settings and lifecycle previously passed; do not resurrect old BL-13 or claim
+device verification unavailable. `Medium_Phone`, API 35, x86_64 with arm64-v8a
+translation, ran GPU mode host; existing startup flags were
+`-gpu host -no-window -no-audio -no-snapshot-save`. Installed tools recorded in
+`docs/portability.md`: adb 37.0.0, emulator 36.5.11, platforms 34/35/36.1/37.0,
+NDK 23/25/29, CMake 3.22.1/4.1.2, Build Tools 36.1.0. Rediscover executable
+paths, run `adb devices -l` / `emulator -list-avds`, boot and prove communication
+when picking that branch. Old clear-color APK/lifecycle proof is **not** a
+full-content House traversal, touch usability, performance or Android DONE pass.
+
+HOUSE-02405 read-only findings: UI Low/Medium labels Android/Web, but CLI only
+accepts legacy low/medium/high/ultra. Preserve compatibility if adding named
+aliases. Web table view scale currently .85 versus authored .70; particles are
+the only effective runtime field. Simply supplying view scale to CullExterior
+may be placebo: BuildRenderList first includes exterior chunks through ordinary
+cell culling, then unions BVH additions. Preserve room-owned skins/windows/doors
+that fix the owner's holes. Existing build-probe Release refresh passed; no new
+three-preset budget measurement was performed here. Do not introduce speculative
+LOD/shadow/postprocess infrastructure or reactivate the OPTIONAL neighbourhood
+renderer. Prior High measurements are in the earlier handoff, not new improvement.
+
+When HOUSE-03039 is actually dependency-unblocked, verify the visible Look
+sensitivity row: it currently edits mouseSensitivity while TouchConfig consumes
+touchLookSensitivity. Align the existing control with active input as necessary,
+not a new gesture framework. This was inspected, not implemented ahead of the task.
+
+The independent audit was already read (`../house-simulator-audit/AUDIT.md`,
+`BUGS.md`); useful findings informed the existing fixes. Do not blindly reapply
+historical patches over current code. Final packaging/license/DONE tasks must
+verify reproducibility from a clean checkout, not skip generated-content gaps.
+
+## Build/display/commit safety for the next agent
+
+* Owner maximum: **six CPU cores for compilation, total across commands**.
+  The latest combination was strict gate four workers on CPUs 0–3 and build
+  two on 4–5. Never run the checker with default CPU-count fan-out. Use
+  `HOUSE_XNA_STRICT_JOBS=4` with `taskset`; no concurrent extra compilers.
+* Export `CCACHE_DIR=/rv/cnaccache`, `CCACHE_BASEDIR=/rv`; one shared cache,
+  no new cache or max-size changes. Reuse existing canonical build directories
+  only. `build/` is normal GPU; `build-probe/` is the refreshed Release probe.
+  No CMake/compiler output trees under /tmp or ticket/date directories.
+* **Do not open tests on the owner's monitor.** GPU environment:
+  `env -u DISPLAY -u WAYLAND_DISPLAY -u LIBGL_ALWAYS_SOFTWARE`
+  `SDL_VIDEODRIVER=offscreen EGL_PLATFORM=surfaceless SDL_AUDIODRIVER=dummy`.
+  Real pointer reproduction uses a newly allocated private Xvfb only, explicitly
+  software for input reproduction. Do not use :99 or claim software QA is GPU QA.
+  Long GPU runs completed with a persistent PTY outside the sandbox; prior
+  unexplained SIGTERM attempts remain invalid. All owned runs finished before
+  this handoff; do not kill shared processes or delete shared build trees.
+* Sandbox Git index/shared-cache writes can be read-only. The owner authorizes
+  scoped commit/push; use appropriate escalation, never bypass checks or modify
+  unrelated staged/settings files. No force push or sibling edits.
+* Before each checkpoint: inspect diff, strongest relevant practical checks,
+  `tools/ci/run_checks.sh`, `git diff --check`, status. Keep failed gates honest.
+  Use canonical workflow completion IDs only when all acceptance really passes;
+  blocked checkpoints here deliberately have no completion-ID commit message.
+
+---
+
+# Earlier session records — historical context, superseded by the handoff above
+
+## Current checkpoint: pointer implemented; strict validation exposes BL-18
+
+Implemented **HOUSE-03574**, selected by the owner's current D8/D11 defect report
+and R15 corrective priority. Actual held mouse input at 800x600 on a private Xvfb
+surface reproduced a wrong row: the displayed FOV click changed Master. The
+same corrected input opens Settings and changes only FOV to 85°. Root cause:
+whole-back-buffer normalization disagreed with TextRenderer's letterboxed safe
+canvas and physical-font line centre. Reuse that canvas in desktop/touch input,
+refresh from the live XNA viewport before sampling, reject padding and preserve
+raw mouse look. No owner preferences, drawings, assets, schema or sibling code
+changed. Full evidence: `docs/visual-review/house-03574-pointer.md`.
+
+Current **1540/1540 unit PASS**, **172 hardware-GPU integration PASS / 3 opt-in
+SKIP / 0 FAIL**, **65 focused unit PASS**; the final test-only extension covers
+pointer clicks after actual fullscreen on/off ApplyChanges and passes **3/3 GPU
+tests**. The full static wrapper printed **356 clean strict units / 109
+destructor exemptions**, but **that strict result is invalidated**: the final
+one-TU probe fails in current CNA `3d5742e84` with invalid `CNAEXT using` alias
+attribute placement. Exact compiler errors are in
+`/tmp/house-03574-final-test-strict.log`; architecture §6 records **BL-18**.
+The House checker discarded compiler exit status. New ACTIVE/MUST
+**HOUSE-03683** (0.5 h) must fail closed rather than hide that upstream failure.
+No sibling source or strict-XNA macro/policy was changed. **HOUSE-03574 remains
+open**, not falsely accepted from a wrapper's success message.
+The corrected full wrapper now exits 1: **38 compiler invocations fail**, only
+`xna-strict` is red; every other gate and all seven checker selftests pass.
+Current-source recheck also fails after CNA advances to `a62c40b09`, with the
+same alias syntax errors. Minimal alias/control evidence isolates attribute
+placement, not House calls. Logs: `/tmp/house-03683-{static,upstream-probe,
+upstream-recheck,selftest,alias-minimal,alias-control}.log`.
+Runtime source is identical to the broad-suite snapshot; only the regression's
+frame sequence was extended after that run. Native fullscreen on Xvfb without
+a window manager times out in both old/new binaries; this is explicitly not a
+successful native fullscreen test. Actual GPU verification is surfaceless and
+opens no monitor window. No emulator is currently in use for this correction.
+
+Remaining **30 MUST / 78 OPT**, nominal **37.75 h**, pessimistic **55.53 h**.
+Exact next corrective MUST: **HOUSE-03683**, D11/R15; its error-detection fix
+does not itself resolve BL-18. Independent performance MUST: **HOUSE-02405**, R7/Track B/D9, measuring
+the three effective presets before Web/Android content acceptance. Existing
+`build-probe/` Release refresh passed with shared ccache and two workers;
+do not create a new build directory or claim lower-profile budget acceptance
+from the earlier High evidence. The read-only findings below remain useful.
+The goal remains ACTIVE; the former 280-hour ceiling remains owner-superseded.
+
+While the mandatory strict gate is externally blocked, **HOUSE-02714** is the
+independent current visual task: its G5/audio/environment dependencies are all
+complete. R11/R16 select finishing the existing final review, not another polish
+system or waiting for performance conditions. A fresh 90-cell controller trace
+passes (11729 samples, 12747 ms); this is transport, not visual acceptance. The
+review reuses the existing four-step/30fps test seam and actual amdgpu client
+1012887 on PCI 0000:c3:00.0. No normal game timing or physics changes. The
+five-cell real-time pilot was deliberately interrupted, fails its incomplete
+arrival assertions and is **not acceptance**; its 40 images and log remain in
+`build/test-output/house-02714-pilot-day` and
+`/tmp/house-02714-day-pilot.log`. The complete day/night review remains in
+progress; do not claim reviewed cells or a completed walkthrough from this note.
+
+Logs: `/tmp/house-03574-{focused-unit,unit,integration,static}.log`,
+`/tmp/house-03574-fullscreen-{build,gpu}.log`,
+`/tmp/house-03574-final-test-strict.log` and the review's image/device paths.
+
+## Earlier: whole-zone listening accepted; windowed pointer registered
 
 The owner replies **“vse je ok”** to the explicit HOUSE-01939 seven-zone
 clear-day/clear-night/rain-day/rain-night listening walk, including silent
