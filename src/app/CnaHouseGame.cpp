@@ -415,7 +415,7 @@ namespace cnahouse::app
         const auto& viewport = getGraphicsDeviceProperty().getViewportProperty();
         text_.SetViewport(
             viewport.getWidthProperty(), viewport.getHeightProperty(), viewport.getTitleSafeAreaProperty());
-        ConfigureTouchInput();
+        ConfigureInputViewport();
         ActivateTierE();
         // AFTER `ActivateTierE`, never before: a failed Tier-E load narrows the tier, and a quality
         // resolved against the pre-narrowing tier would offer post-processing that cannot run.
@@ -1145,16 +1145,39 @@ namespace cnahouse::app
         blockoutCamera_.farPlane = player::kFarPlane;
     }
 
-    void CnaHouseGame::ConfigureTouchInput()
+    void CnaHouseGame::ConfigureInputViewport()
     {
-        player::TouchConfig touchConfig;
-        touchConfig.viewportWidth = settings_.backBufferWidth;
-        touchConfig.viewportHeight = settings_.backBufferHeight;
+        const auto& viewport = getGraphicsDeviceProperty().getViewportProperty();
+        text_.SetViewport(
+            viewport.getWidthProperty(), viewport.getHeightProperty(), viewport.getTitleSafeAreaProperty());
         const auto bounds = text_.LayoutBounds();
+        player::InputConfig inputConfig = input_.Config();
+        const bool resized = inputConfig.viewportWidth != viewport.getWidthProperty() ||
+                             inputConfig.viewportHeight != viewport.getHeightProperty();
+        // CNA's public MouseState already reports logical back-buffer coordinates. Do not
+        // scale them again by the OS client bounds; only invert our own safe-canvas layout.
+        inputConfig.viewportWidth = viewport.getWidthProperty();
+        inputConfig.viewportHeight = viewport.getHeightProperty();
+        inputConfig.recentreX = inputConfig.viewportWidth / 2;
+        inputConfig.recentreY = inputConfig.viewportHeight / 2;
+        inputConfig.layoutX = bounds.X;
+        inputConfig.layoutY = bounds.Y;
+        inputConfig.layoutWidth = bounds.Width;
+        inputConfig.layoutHeight = bounds.Height;
+        inputConfig.pointerOffsetY = text_.Measure("M").Y * 0.5F;
+        input_.SetConfig(inputConfig);
+        if (resized)
+        {
+            view_.Camera().SetViewport(inputConfig.viewportWidth, inputConfig.viewportHeight);
+        }
+        player::TouchConfig touchConfig;
+        touchConfig.viewportWidth = inputConfig.viewportWidth;
+        touchConfig.viewportHeight = inputConfig.viewportHeight;
         touchConfig.layoutX = bounds.X;
         touchConfig.layoutY = bounds.Y;
         touchConfig.layoutWidth = bounds.Width;
         touchConfig.layoutHeight = bounds.Height;
+        touchConfig.pointerOffsetY = inputConfig.pointerOffsetY;
         touchConfig.invertY = settings_.invertY;
         touchConfig.lookSensitivity = settings_.touchLookSensitivity;
         touchInput_.SetConfig(touchConfig);
@@ -1171,7 +1194,7 @@ namespace cnahouse::app
         inputConfig.sensitivity = settings_.mouseSensitivity;
         inputConfig.invertY = settings_.invertY;
         input_.SetConfig(inputConfig);
-        ConfigureTouchInput();
+        ConfigureInputViewport();
     }
 
     void CnaHouseGame::ApplyGraphicsSettings(ui::SettingsControl control)
@@ -1201,18 +1224,7 @@ namespace cnahouse::app
             graphics_.setSynchronizeWithVerticalRetraceProperty(settings_.verticalSync);
             graphics_.ApplyChanges();
 
-            const auto& viewport = getGraphicsDeviceProperty().getViewportProperty();
-            text_.SetViewport(viewport.getWidthProperty(),
-                              viewport.getHeightProperty(),
-                              viewport.getTitleSafeAreaProperty());
-            player::InputConfig inputConfig = input_.Config();
-            inputConfig.recentreX = settings_.backBufferWidth / 2;
-            inputConfig.recentreY = settings_.backBufferHeight / 2;
-            inputConfig.viewportWidth = settings_.backBufferWidth;
-            inputConfig.viewportHeight = settings_.backBufferHeight;
-            input_.SetConfig(inputConfig);
-            ConfigureTouchInput();
-            view_.Camera().SetViewport(settings_.backBufferWidth, settings_.backBufferHeight);
+            ConfigureInputViewport();
         }
 
         if (control == ui::SettingsControl::FieldOfView)
@@ -1715,6 +1727,9 @@ namespace cnahouse::app
             // key.
             {
                 const debug::Timing::Scope scope(timing_, UpdateStage::Input);
+                // Refresh before sampling: the window manager or fullscreen shortcut can change
+                // the live surface without visiting Settings. Drawing and hit-testing must agree.
+                ConfigureInputViewport();
                 // A touch-only browser has no build-time device profile. Switch on the first real
                 // XNA touch frame, before sampling the selected source, so its first tap is not lost.
                 if (platform_.target == BuildTarget::Web && !TouchHudVisible() && scriptedInput_ == nullptr &&

@@ -5714,3 +5714,26 @@ The same thirteen rows are committed as 640 x 360 software-OPENGLES3 references.
 test and complete comparison pass at the existing per-channel tolerance 2 and <0.2% differing-pixel
 limit; no runtime, world content, sky or fog parameter changed. M7 is complete. Track-B dependency
 order and rules R11/R13 select the still-unfinished MUST `HOUSE-01911` next.
+
+## Round 179 — current full-property day/night GPU walkthrough
+
+HOUSE-02714's actual first-person controller review now reaches all 90 accessible
+cells by day and scheduled night. All 54 zone contact-sheet pages, low-fixture
+supplements and six representative consecutive threshold bursts at each time
+were inspected. This is not a new manual WASD stair-usability claim, and not a
+performance baseline. The task remains open for final static acceptance because
+current upstream CNA fails the strict compiler gate (BL-18).
+
+Current findings are **S1 Z-EXR** (missing inward shed roof/gable enclosure),
+**S2 Z-L1** (canopy intruding into L1_BED3), **S2 Z-EXR** (daytime shed
+readability), and **S2 Z-EXF/Z-EXR/Z-STR** (night-bright foliage mismatch).
+**S3 Z-L3** retains mottled storage-wall illumination; **S3 Z-STR** retains
+the plain road/repetitive planting backlog. No S4 work is scheduled and no
+quality tier is silently waived. The reviewed threshold samples show no flash;
+that does not claim every captured transition frame was individually inspected.
+
+Methods, limitations, exact paths and per-zone dispositions are recorded in
+[the current walkthrough record](house-02714-final.md). HOUSE-03631 owns the
+required corrections; its S1 enclosure issue is selected next by R1's fix-now
+exception, before unrelated performance or optional polish. No defect correction
+is falsely claimed complete by this review.

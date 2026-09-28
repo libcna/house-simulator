@@ -282,6 +282,25 @@ namespace
         EXPECT_NEAR(source.Current().look.X, 0.11F, 1e-6F);
     }
 
+    TEST(TouchSourceTests, MenuPointerUsesPhysicalFontOffsetAndRejectsLetterboxPadding)
+    {
+        TouchConfig config;
+        config.viewportWidth = 800;
+        config.viewportHeight = 600;
+        config.layoutY = 75;
+        config.layoutWidth = 800;
+        config.layoutHeight = 450;
+        config.pointerOffsetY = 20.0F;
+        TouchSource source(config);
+        source.Apply(Frame({Finger(1, TouchLocationState::Pressed, 400.0F, 320.0F)}), 0.016F);
+        ASSERT_TRUE(source.Current().pointerPressed);
+        EXPECT_FLOAT_EQ(source.Current().pointerY, 0.5F);
+        source.Apply(Frame({}), 0.016F);
+        source.Apply(Frame({Finger(2, TouchLocationState::Pressed, 400.0F, 590.0F)}), 0.016F);
+        EXPECT_FALSE(source.Current().pointerPressed);
+        EXPECT_TRUE(source.Current().anyPressed);
+    }
+
     TEST(TouchSourceTests, BuildProfileDefaultsKeepTouchHudOffDesktop)
     {
         const auto platform = cnahouse::app::Platform::FromBuild();

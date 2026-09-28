@@ -22,6 +22,8 @@ namespace cnahouse::player
         /// @brief Zero uses the whole viewport; the game supplies TextRenderer's safe canvas.
         int layoutWidth = 0;
         int layoutHeight = 0;
+        /// Physical-pixel half-height of the top-anchored menu font; does not affect HUD buttons.
+        float pointerOffsetY = 0.0F;
         float lookSensitivity = 1.0F;
         bool invertY = false;
     };

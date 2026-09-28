@@ -163,14 +163,24 @@ namespace cnahouse::player
         state_.uiAcceptPressed =
             edge(Edge::UiAccept, keyboard.IsKeyDown(Keys::Enter) || keyboard.IsKeyDown(Keys::Space));
 
-        const float width = static_cast<float>(std::max(config_.viewportWidth, 1));
-        const float height = static_cast<float>(std::max(config_.viewportHeight, 1));
+        const float left = static_cast<float>(config_.layoutX);
+        const float top = static_cast<float>(config_.layoutY);
+        const float width = static_cast<float>(
+            std::max(config_.layoutWidth > 0 ? config_.layoutWidth : config_.viewportWidth, 1));
+        const float height = static_cast<float>(
+            std::max(config_.layoutHeight > 0 ? config_.layoutHeight : config_.viewportHeight, 1));
+        const auto pointer = [&](float x, float y)
+        {
+            state_.pointerX = (x - left) / width;
+            state_.pointerY = (y - top - config_.pointerOffsetY) / height;
+            return x >= left && x <= left + width && y >= top && y <= top + height;
+        };
         const bool mousePrimary =
             mouse.getLeftButtonProperty() == Microsoft::Xna::Framework::Input::ButtonState::Pressed;
         state_.pointerKind = PointerKind::Mouse;
-        state_.pointerX = std::clamp(static_cast<float>(mouse.getXProperty()) / width, 0.0F, 1.0F);
-        state_.pointerY = std::clamp(static_cast<float>(mouse.getYProperty()) / height, 0.0F, 1.0F);
-        state_.pointerPressed = mousePrimary && !primaryDownPreviously_;
+        const bool insideCanvas =
+            pointer(static_cast<float>(mouse.getXProperty()), static_cast<float>(mouse.getYProperty()));
+        state_.pointerPressed = mousePrimary && !primaryDownPreviously_ && insideCanvas;
         primaryDownPreviously_ = mousePrimary;
 
         bool touchDown = false;
@@ -182,10 +192,10 @@ namespace cnahouse::player
             touchDown = touchState == Microsoft::Xna::Framework::Input::Touch::TouchLocationState::Pressed ||
                         touchState == Microsoft::Xna::Framework::Input::Touch::TouchLocationState::Moved;
             state_.pointerKind = PointerKind::Touch;
-            state_.pointerX = std::clamp(position.X / width, 0.0F, 1.0F);
-            state_.pointerY = std::clamp(position.Y / height, 0.0F, 1.0F);
+            const bool touchInsideCanvas = pointer(position.X, position.Y);
             state_.pointerPressed =
-                touchState == Microsoft::Xna::Framework::Input::Touch::TouchLocationState::Pressed;
+                touchState == Microsoft::Xna::Framework::Input::Touch::TouchLocationState::Pressed &&
+                touchInsideCanvas;
         }
 
         // ANY input, as one edge. `GetPressedKeys()` is plain XNA 4.0 -- the CNAEXT markings on

@@ -118,6 +118,12 @@ namespace cnahouse::app
         /// @brief The graphics device's applied display mode, for an end-to-end input test.
         [[nodiscard]] bool FullscreenForTesting() const;
 
+        /// The production live pointer layout, so device-state replay uses the actual drawn canvas.
+        [[nodiscard]] const player::InputConfig& DesktopInputConfigForTesting() const noexcept
+        {
+            return input_.Config();
+        }
+
         /// @brief Stops after this many frames. 0 means run until the user exits.
         void SetFrameLimit(std::uint64_t frames) noexcept
         {
@@ -417,7 +423,7 @@ namespace cnahouse::app
         /// usable as a regression fixture at all.
         void RenderFrame();
         void DrawHud();
-        void ConfigureTouchInput();
+        void ConfigureInputViewport();
 
         /// @brief The `Pass::Hud` implementation, defined in the .cpp because it is an adapter onto
         ///        `DrawHud` and nothing else needs its name.

@@ -105,7 +105,7 @@ def load_entries(roots: tuple[str, ...]) -> list[dict]:
     return list(wanted.values())
 
 
-def check_one(entry: dict) -> tuple[str, list[Hit], str]:
+def check_one(entry: dict) -> tuple[str, list[Hit], str, int]:
     """Recompiles one translation unit under `CNA_STRICT_XNA_API`."""
     command = shlex.split(entry["command"]) if "command" in entry else list(entry["arguments"])
 
@@ -142,7 +142,7 @@ def check_one(entry: dict) -> tuple[str, list[Hit], str]:
         except (ValueError, OSError):
             pass
         hits.append(Hit(path, int(match.group("line")), int(match.group("col")), match.group("what")))
-    return entry["file"], hits, result.stderr
+    return entry["file"], hits, result.stderr, result.returncode
 
 
 def main() -> int:
@@ -168,9 +168,12 @@ def main() -> int:
 
     jobs = args.jobs or (os.cpu_count() or 4)
     violations: list[Hit] = []
+    failed_compiles: list[tuple[str, int, str]] = []
     exempted = 0
     with ThreadPoolExecutor(max_workers=jobs) as pool:
-        for _source, hits, _stderr in pool.map(check_one, entries):
+        for source, hits, stderr, returncode in pool.map(check_one, entries):
+            if returncode != 0:
+                failed_compiles.append((source, returncode, stderr))
             for hit in hits:
                 if hit.exempt:
                     exempted += 1
@@ -182,6 +185,19 @@ def main() -> int:
     # Deduplicated: a header included by twenty translation units reports its hit twenty times, and
     # twenty copies of one line is a report nobody reads to the end.
     unique = sorted({(h.file, h.line, h.col, h.what) for h in violations})
+
+    if failed_compiles:
+        print(
+            f"check_xna_strict: {len(failed_compiles)} compiler invocation(s) failed; "
+            "API conformance was NOT verified:",
+            file=sys.stderr,
+        )
+        for source, returncode, stderr in failed_compiles:
+            print(f"  {source}: compiler exit {returncode}", file=sys.stderr)
+            # Keep the include context and the first concrete compiler errors without
+            # multiplying thousands of cascading upstream diagnostics across all units.
+            excerpt = stderr.strip().splitlines()[:12]
+            print("\n".join(excerpt) if excerpt else "  (compiler produced no stderr)", file=sys.stderr)
 
     if unique:
         print(
@@ -199,6 +215,8 @@ def main() -> int:
             "  a CNAEXT rvalue overload.",
             file=sys.stderr,
         )
+
+    if failed_compiles or unique:
         return 1
 
     print(

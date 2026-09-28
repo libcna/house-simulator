@@ -65,8 +65,9 @@ namespace cnahouse::player
 
         /// @brief A primary pointer press in normalised UI coordinates.
         ///
-        /// Mouse uses the back buffer; touch uses the safe virtual canvas so phone insets do
-        /// not shift menu targets away from their drawn rows. Both expose [0, 1] to UI screens.
+        /// Mouse and touch use the same safe virtual canvas as drawing, so window padding and phone insets do
+        /// not shift menu targets away from their drawn rows. Padding is rejected and the physical
+        /// top-anchored font's half-height is removed for row-centre hit-testing.
         /// The source records which device produced the edge.
         /// `pointerPressed` is an edge; dragging or holding cannot change a setting every frame.
         PointerKind pointerKind = PointerKind::None;

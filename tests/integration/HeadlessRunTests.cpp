@@ -25,6 +25,9 @@
 
 #include <gtest/gtest.h>
 
+#include "Microsoft/Xna/Framework/Graphics/GraphicsDevice.hpp"
+#include "Microsoft/Xna/Framework/Graphics/Viewport.hpp"
+
 #include "System/IO/FileAccess.hpp"
 #include "System/IO/FileMode.hpp"
 #include "System/IO/FileStream.hpp"
@@ -44,6 +47,8 @@
 #include "cnahouse/player/FirstPersonView.hpp"
 #include "cnahouse/player/FixedStep.hpp"
 #include "cnahouse/player/IInputSource.hpp"
+#include "cnahouse/player/KeyboardMouseSource.hpp"
+#include "cnahouse/ui/TextRenderer.hpp"
 #include "cnahouse/util/Ids.hpp"
 #include "cnahouse/util/Log.hpp"
 #include "unit/StairPath.hpp"
@@ -381,6 +386,129 @@ namespace
         const auto* credits = dynamic_cast<const cnahouse::ui::CreditsScreen*>(game.Menus().Top());
         ASSERT_NE(credits, nullptr);
         EXPECT_GT(credits->LineCount(), 700U);
+    }
+
+    TEST(HeadlessRunTests, MouseRowsFollowTheLiveCanvasAndFontAfterDisplayChanges)
+    {
+        class ClickDrawnRows final : public cnahouse::player::IInputSource
+        {
+        public:
+            explicit ClickDrawnRows(CnaHouseGame& game)
+                : game_(game)
+            {
+            }
+
+            void Update(float deltaSeconds) override
+            {
+                using Microsoft::Xna::Framework::Input::ButtonState;
+                using Microsoft::Xna::Framework::Input::KeyboardState;
+                using Microsoft::Xna::Framework::Input::Keys;
+                using Microsoft::Xna::Framework::Input::MouseState;
+                const auto config = game_.DesktopInputConfigForTesting();
+                source_.SetConfig(config);
+                const auto& viewport = game_.getGraphicsDeviceProperty().getViewportProperty();
+                cnahouse::ui::TextRenderer drawnLayout;
+                drawnLayout.SetViewport(viewport.getWidthProperty(),
+                                        viewport.getHeightProperty(),
+                                        viewport.getTitleSafeAreaProperty());
+                const auto drawnCanvas = drawnLayout.LayoutBounds();
+                if (frame_ == 5U || frame_ == 15U)
+                {
+                    EXPECT_NEAR(game_.UserSettings().fieldOfView, 85.0F, 0.1F);
+                }
+                if (frame_ == 9U || frame_ == 19U)
+                {
+                    EXPECT_NEAR(game_.UserSettings().fieldOfView, 65.0F, 0.1F);
+                }
+                if (frame_ == 13U || frame_ == 17U)
+                {
+                    EXPECT_EQ(game_.FullscreenForTesting(), frame_ == 13U);
+                }
+                const float row = frame_ == 2U                     ? 0.48F
+                                  : frame_ == 6U                   ? 0.149F
+                                  : frame_ == 12U || frame_ == 16U ? 0.187F
+                                                                   : 0.262F;
+                const float sliderX = frame_ == 8U || frame_ == 18U ? 0.6125F : 0.7375F;
+                const int x =
+                    drawnCanvas.X + (frame_ == 2U
+                                         ? drawnCanvas.Width / 2
+                                         : static_cast<int>(sliderX * static_cast<float>(drawnCanvas.Width)));
+                const int y =
+                    frame_ == 10U
+                        ? config.viewportHeight - 1
+                        : drawnCanvas.Y +
+                              static_cast<int>(std::lround(row * static_cast<float>(drawnCanvas.Height) +
+                                                           config.pointerOffsetY));
+                const bool press = frame_ == 2U || frame_ == 4U || frame_ == 6U || frame_ == 8U ||
+                                   frame_ == 10U || frame_ == 12U || frame_ == 14U || frame_ == 16U ||
+                                   frame_ == 18U;
+                source_.Apply(frame_ == 0U ? KeyboardState{Keys::Space} : KeyboardState({}),
+                              MouseState(x,
+                                         y,
+                                         0,
+                                         press ? ButtonState::Pressed : ButtonState::Released,
+                                         ButtonState::Released,
+                                         ButtonState::Released,
+                                         ButtonState::Released,
+                                         ButtonState::Released),
+                              deltaSeconds);
+                ++frame_;
+            }
+
+            const cnahouse::player::InputState& Current() const noexcept override
+            {
+                return source_.Current();
+            }
+
+            bool LookAvailable() const noexcept override
+            {
+                return false;
+            }
+
+        private:
+            CnaHouseGame& game_;
+            cnahouse::player::KeyboardMouseSource source_;
+            unsigned int frame_ = 0U;
+        };
+
+        for (const auto size : {cnahouse::app::DisplaySize{800, 600},
+                                cnahouse::app::DisplaySize{1600, 900},
+                                cnahouse::app::DisplaySize{2000, 900}})
+        {
+            Options options;
+            options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+            options.effectRoot = CNAHOUSE_TEST_EFFECT_ROOT;
+            options.noAudio = true;
+            options.screenshotFrame = 19U;
+            const auto output = std::filesystem::path(CNAHOUSE_TEST_OUTPUT_DIR) / "house-03574";
+            std::filesystem::create_directories(output);
+            options.screenshot = (output / (std::to_string(size.width) + "-settings.png")).string();
+            Settings settings = Settings::Defaults();
+            settings.backBufferWidth = size.width;
+            settings.backBufferHeight = size.height;
+            settings.fieldOfView = 65.0F;
+            settings.verticalSync = false;
+            CnaHouseGame game(options, settings);
+            ClickDrawnRows input(game);
+            game.SetInputSourceForTesting(&input);
+            game.SetFrameLimit(20U);
+            game.Run();
+            ASSERT_EQ(game.ExitCode(), 0);
+            ASSERT_NE(game.Menus().Top(), nullptr);
+            EXPECT_EQ(game.Menus().Top()->Id(), cnahouse::ui::ScreenId::SettingsMenu);
+            EXPECT_NEAR(game.UserSettings().fieldOfView, 65.0F, 0.1F);
+            EXPECT_FLOAT_EQ(game.UserSettings().masterVolume, settings.masterVolume);
+            EXPECT_FLOAT_EQ(game.UserSettings().footstepsVolume, settings.footstepsVolume);
+            EXPECT_FLOAT_EQ(game.UserSettings().ambienceVolume, settings.ambienceVolume);
+            EXPECT_FLOAT_EQ(game.UserSettings().weatherVolume, settings.weatherVolume);
+            EXPECT_TRUE(game.UserSettings().backBufferWidth != size.width ||
+                        game.UserSettings().backBufferHeight != size.height)
+                << "the DisplaySize click must exercise a real ApplyChanges before the second FOV click";
+            const auto& config = game.DesktopInputConfigForTesting();
+            EXPECT_EQ(config.viewportWidth, game.UserSettings().backBufferWidth);
+            EXPECT_EQ(config.viewportHeight, game.UserSettings().backBufferHeight);
+            EXPECT_GT(config.pointerOffsetY, 0.0F);
+        }
     }
 
     TEST(HeadlessRunTests, EscapeReturnsFromChangedSettingsWithoutEndingTheSession)
@@ -1697,6 +1825,7 @@ namespace
         CnaHouseGame game(options, settings);
         WalkReviewInput input(game, samples);
         game.SetInputSourceForTesting(&input);
+        game.SetReviewFrameStepForTesting(true);
         game.SetFixedStepLimit(200000U);
         game.SetFrameLimit(300000U);
         game.Run();

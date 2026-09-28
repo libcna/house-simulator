@@ -15,6 +15,8 @@
 #include "Microsoft/Xna/Framework/Input/Touch/TouchLocationState.hpp"
 
 #include "cnahouse/player/KeyboardMouseSource.hpp"
+#include "cnahouse/ui/MenuStack.hpp"
+#include "cnahouse/ui/TextRenderer.hpp"
 
 namespace
 {
@@ -104,6 +106,69 @@ namespace
         EXPECT_FLOAT_EQ(source.Current().pointerX, 0.25F);
         EXPECT_FLOAT_EQ(source.Current().pointerY, 0.25F);
         EXPECT_TRUE(source.Current().anyPressed) << "a touch also opens the uniform audio gesture gate";
+    }
+
+    TEST(InputTests, MouseTargetsFollowTheDrawnSafeCanvasAndPhysicalFontAcrossAspectChanges)
+    {
+        cnahouse::ui::TextRenderer text;
+        KeyboardMouseSource source;
+        for (const auto viewport : {Microsoft::Xna::Framework::Rectangle(0, 0, 1600, 900),
+                                    Microsoft::Xna::Framework::Rectangle(0, 0, 800, 600),
+                                    Microsoft::Xna::Framework::Rectangle(0, 0, 2000, 900)})
+        {
+            text.SetViewport(
+                viewport.Width,
+                viewport.Height,
+                Microsoft::Xna::Framework::Rectangle(24, 30, viewport.Width - 48, viewport.Height - 60));
+            const auto canvas = text.LayoutBounds();
+            auto config = source.Config();
+            config.viewportWidth = viewport.Width;
+            config.viewportHeight = viewport.Height;
+            config.layoutX = canvas.X;
+            config.layoutY = canvas.Y;
+            config.layoutWidth = canvas.Width;
+            config.layoutHeight = canvas.Height;
+            config.pointerOffsetY = 20.0F;
+            source.SetConfig(config);
+            cnahouse::ui::MenuCommand selected = cnahouse::ui::MenuCommand::Start;
+            cnahouse::ui::MainMenuScreen menu([&](auto command, auto) { selected = command; });
+            const int x = canvas.X + canvas.Width / 2;
+            const int y =
+                canvas.Y + static_cast<int>(std::lround(0.48F * static_cast<float>(canvas.Height))) + 20;
+            source.Apply(KeyboardState({}), At(x, y), 0.016F);
+            source.Apply(KeyboardState({}), PressedAt(x, y), 0.016F);
+            ASSERT_TRUE(source.Current().pointerPressed);
+            EXPECT_NEAR(source.Current().pointerY, 0.48F, 0.001F);
+            menu.Update(source.Current(), 0.016F);
+            EXPECT_EQ(selected, cnahouse::ui::MenuCommand::Settings);
+
+            source.Apply(KeyboardState({}), At(x, 0), 0.016F);
+            source.Apply(KeyboardState({}), PressedAt(x, 0), 0.016F);
+            EXPECT_FALSE(source.Current().pointerPressed) << "padding is not a menu row";
+            EXPECT_TRUE(source.Current().anyPressed) << "padding can still unlock loading audio";
+            source.Apply(KeyboardState({}), PressedAt(x, y), 0.016F);
+            EXPECT_FALSE(source.Current().pointerPressed) << "dragging in must not manufacture a click";
+        }
+    }
+
+    TEST(InputTests, DesktopTouchFallbackUsesTheSameCanvasWithoutChangingMouseLook)
+    {
+        InputConfig config;
+        config.layoutX = 40;
+        config.layoutY = 75;
+        config.layoutWidth = 720;
+        config.layoutHeight = 450;
+        config.pointerOffsetY = 20.0F;
+        KeyboardMouseSource source(config);
+        const TouchCollection touches(std::vector<TouchLocation>{TouchLocation(
+            1, TouchLocationState::Pressed, Microsoft::Xna::Framework::Vector2(400.0F, 320.0F))});
+        source.Apply(KeyboardState({}), At(100, 100), touches, 0.016F);
+        ASSERT_TRUE(source.Current().pointerPressed);
+        EXPECT_FLOAT_EQ(source.Current().pointerX, 0.5F);
+        EXPECT_FLOAT_EQ(source.Current().pointerY, 0.5F);
+        source.Apply(KeyboardState({}), At(110, 105), 0.016F);
+        EXPECT_FLOAT_EQ(source.Current().look.X, 10.0F * InputConfig::kRadiansPerPixel);
+        EXPECT_FLOAT_EQ(source.Current().look.Y, 5.0F * InputConfig::kRadiansPerPixel);
     }
 
     TEST(InputTests, MovementIsExpressedAsADirectionNotAsKeys)

@@ -161,9 +161,10 @@ namespace cnahouse::player
                 if (!state_.pointerPressed)
                 {
                     state_.pointerKind = PointerKind::Touch;
-                    state_.pointerX = std::clamp((position.X - left) / layoutWidth, 0.0F, 1.0F);
-                    state_.pointerY = std::clamp((position.Y - top) / layoutHeight, 0.0F, 1.0F);
-                    state_.pointerPressed = true;
+                    state_.pointerX = (position.X - left) / layoutWidth;
+                    state_.pointerY = (position.Y - top - config_.pointerOffsetY) / layoutHeight;
+                    state_.pointerPressed = position.X >= left && position.X <= right && position.Y >= top &&
+                                            position.Y <= bottom;
                 }
             }
 

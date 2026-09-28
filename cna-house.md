@@ -571,6 +571,8 @@ eventually be modified — `cna-house` never modifies CNA.
 
 | **BL-17** | Shared upstream build configuration | **Temporary, 2026-09-16:** `HOUSE-01039` CMake regeneration first stopped on sibling CNA's unclassified Wayland SDL test. By `HOUSE-01040` that file was no longer in sibling status, but regeneration now stops earlier when CNA's required MojoShader series writer cannot write `/home/robertvokac/deps/FNA3D/cna-mojoshader-patch-series.patch` under this workspace sandbox. CNA's patcher also contains a `git checkout -- .` fallback for a changed series in a presently modified shared MojoShader submodule: do not run it unsandboxed without proving the current series/stamp state. Neither failure is a house-data or XNA exception. | `/tmp/house01039-build-r1.log`, `/tmp/house01040-build-r1.log`; read-only sibling/dependency status and `CNA/cmake/patches/apply-fna3d-mojoshader-patch.cmake` | L *(current build session)* | Build canonical content normally, copy only its verified products into existing `build/content`, and use exact generated house test compile/link commands with the mandated shared ccache. Direct render, culling, unit and strict-XNA checks remain runnable. Do not claim a fresh full CMake/CTest pass until safe upstream/shared-dependency regeneration is available. | **Yes — safe shared-dependency build access or upstream stabilization for the full rebuild** | Yes for visual-data work; full rebuild is blocked |
 
+| **BL-18** | Strict-XNA header compilation | CNA `3d5742e84`, rechecked at `a62c40b09` and `6f6100cd3` on 2026-09-28, puts `CNAEXT` before `using` aliases. With `CNA_STRICT_XNA_API`, the macro expands to `[[deprecated(...)]]` in an invalid location: `expected unqualified-id before using`. Proven in `ContentManager.hpp:313/395`, `GameComponentCollection.hpp:25/27/29` and `GameWindow.hpp:52/54` while compiling normal House sources. | `/tmp/house-03574-final-test-strict.log`, `/tmp/house-03683-upstream-probe.log`, current `/tmp/house-handoff-static.log` (38 failed compilations); `tools/ci/check_xna_strict.py` | H (D11 acceptance) | None that preserves the mandatory strict policy. Ordinary builds and current pointer/GPU regressions pass. The House gate's discarded-exit-status defect is corrected under HOUSE-03683; do not mistake its old false clean output for conformance. | Yes, separately authorized upstream correction of alias attribute placement | Continue independent House work; final strict acceptance and corrective checkboxes remain open |
+
 **Manufactured blockers are not welcome.** Things that are merely *work* — writing a portal
 system, baking lightmaps, authoring 640 interactables — are not blockers and do not appear here.
 
@@ -6856,6 +6858,14 @@ against those line heights, not against the `<Size>` number.
 All UI is laid out in **virtual units** on a 1600 × 900 design canvas and scaled by
 `min(w/1600, h/900) × uiScale`. Safe-area insets are respected (a legacy of the XNA
 `SafeAreaSample` idiom and genuinely needed on Android later).
+
+The current `TextRenderer` fits and centres that canvas inside the live standard-XNA
+viewport's safe area. Mouse and touch menu coordinates invert the same canvas;
+padding is not a hit target. Rows are top-anchored and the font keeps its physical
+pixel size, so pointer row-centre coordinates subtract half the measured font
+height before normalization. Refresh input/drawing layout before device sampling,
+including after fullscreen or display-size changes. CNA already maps public
+`MouseState` to logical back-buffer pixels; do not apply OS client scaling again.
 
 ### 67.3 Menus
 

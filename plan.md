@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers and a reusable kit), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (2026-09-22 reduction, retained breadth and maintenance mode; its former hour ceiling is superseded below) |
 | Scope policy | The owner explicitly superseded the former 280-hour ceiling on 2026-09-27 and requested further targeted corrections and a filming tour. Keep MUST/OPT boundaries explicit; do not infer other features |
-| Active plan | **29 open MUST tasks** in 16 milestones. Owner audio listening is accepted; windowed menu pointer correction, measured presets, platform and release work remain. Every active task's title and acceptance states the current work |
-| Estimate to DONE | Current open-task sum **37.25 agent-hours**; pessimistic **54.98 h** = 1.10 × 37.25 + the still-active Android/Web reserves (8 + 6 h); High performance reserve R-C is retired after repeatable acceptance. The old **44.84 / 52.75 / 76.03 h** table below is historical, not a current forecast or scheduling gate. Per-task `est:` remains for task sizing; platform/dependency waiting is not promised wall-clock completion |
-| Current gate | **G5, M7, M8, M9 and M12 passed. CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator.** Main/attic/basement stairs, garage-loft floor and whole-house lighting are corrected under `HOUSE-03635`/`03638`/`03639`/`03636`; doorway flashes and visibility/wall holes under `HOUSE-03637`/`03640`, including the owner's precise foyer/stair corner-gap screenshot. The existing car family is corrected under `HOUSE-03641`; full GPU filming circuit accepted under `HOUSE-03572`. Normal title/Start audio produces real backend PCM; owner listening accepts all six footstep categories and interior/exterior day/night ambience under `HOUSE-01920`/`01922`. Weather layers and the indoor-rain correction are accepted under `HOUSE-01925`; whole-zone four-state listening passes `HOUSE-01939`. Desktop High scenarios pass three complete current hardware-GPU rounds under `HOUSE-02404`; measured quality presets `HOUSE-02405` remain open |
+| Active plan | **30 open MUST tasks** in 16 milestones. Owner audio listening is accepted; pointer verification, strict-gate error detection, measured presets, platform and release work remain. Every active task's title and acceptance states the current work |
+| Estimate to DONE | Current open-task sum **38.75 agent-hours**; pessimistic **56.63 h** = 1.10 × 38.75 + the still-active Android/Web reserves (8 + 6 h); High performance reserve R-C is retired after repeatable acceptance. Round 179's current S1/S2 findings add one honest hour to the bounded correction forecast, not optional scope. The old **44.84 / 52.75 / 76.03 h** table below is historical, not a current forecast or scheduling gate. Per-task `est:` remains for task sizing; platform/dependency waiting is not promised wall-clock completion |
+| Current gate | **G5, M7 and M8 passed; M9/M12 corrective verification remains open under `HOUSE-03574`/`03683` and current strict-CNA blocker BL-18. CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator.** Main/attic/basement stairs, garage-loft floor and whole-house lighting are corrected under `HOUSE-03635`/`03638`/`03639`/`03636`; doorway flashes and visibility/wall holes under `HOUSE-03637`/`03640`, including the owner's precise foyer/stair corner-gap screenshot. The existing car family is corrected under `HOUSE-03641`; full GPU filming circuit accepted under `HOUSE-03572`. Normal title/Start audio produces real backend PCM; owner listening accepts all six footstep categories and interior/exterior day/night ambience under `HOUSE-01920`/`01922`. Weather layers and the indoor-rain correction are accepted under `HOUSE-01925`; whole-zone four-state listening passes `HOUSE-01939`. Desktop High scenarios pass three complete current hardware-GPU rounds under `HOUSE-02404`; measured quality presets `HOUSE-02405` remain open |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -400,8 +400,8 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M8](#m8--atmospheric-audio-essentials) — Atmospheric audio essentials | B | 03541–03570 | 0 | **done** · `HOUSE-01939` | D7 | 0 |
 | [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 1 | `HOUSE-03574` corrective exit | D8 | 1 |
 | [M10](#m10--performance-measurement-driven) — Performance, measurement-driven | B | 03601–03630 | 1 | `HOUSE-02405` | D9 | 2 |
-| [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 3 | `HOUSE-03631` | D1, D2, D4, D6, D8, D9, D11, D13, D14 | 3.25 |
-| [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 0 | **done** · `HOUSE-03682` | D11 | 0 |
+| [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 3 | `HOUSE-03631` | D1, D2, D4, D6, D8, D9, D11, D13, D14 | 4.25 |
+| [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 1 | `HOUSE-03683` corrective exit | D11 | 0.5 |
 | [M13](#m13--linux-desktop-release) — Linux desktop release | after M11 | 03701–03720 | 8 | `HOUSE-02797` | D9–D13 | 10.25 |
 | [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 5 | `HOUSE-02904` | D10b | 7.25 |
 | [M15](#m15--android) — Android | readiness: B · device: after M13 | 03751–03780 | 5 | `HOUSE-03041` (a BL-13 record does not close it) | D10c | 7 |
@@ -1304,7 +1304,9 @@ existing walk/controller path, not another menu or a reusable cinematic framewor
       dep: HOUSE-02527 · sys: ui, player, app · plat: ALL · pri: MUST · zone: all · adv: D8, D11 · est: 1
       accept: mouse and touch pointer hit coordinates use the same safe virtual canvas as menu drawing; clicking a displayed row activates that row at 16:9, 4:3 and wide window aspects, including after resolution/fullscreen changes; letterbox padding must not activate rows; preserve ordinary mouse look and settings compatibility
       verify: focused transform/menu regressions, actual application windowed pointer input on a private virtual display and current hardware-GPU menu captures; broader unit/integration and static gates
-      current: (2026-09-28 owner report) Mouse clicks sometimes target a different location in windowed mode; fullscreen appears correct. KeyboardMouseSource divides by the whole requested back buffer while TextRenderer fits a centred safe 1600x900 canvas. Runtime layout is refreshed only at load or explicit settings changes. Investigate current presentation/input semantics before adding any client-coordinate scaling; do not double-scale CNA's logical mouse coordinates. No fix or visual acceptance is claimed yet.
+      report: (2026-09-28 initial owner report, before the implementation below) Mouse clicks sometimes target a different location in windowed mode; fullscreen appears correct. KeyboardMouseSource divided by the whole requested back buffer while TextRenderer fitted a centred safe 1600x900 canvas. Layout was refreshed only at load or explicit settings changes. Do not double-scale CNA's logical mouse coordinates.
+      implemented: (2026-09-28 current input/render verification) Reproduced actual held mouse input on private Xvfb: clicking drawn FOV changes Master instead. Both pointer sources now invert TextRenderer's safe canvas plus physical-font half-height, reject padding without fabricated edges, and refresh from the live XNA viewport before sampling. Identical windowed clicks now select Settings and change only FOV. Three starting aspects and actual resolution/fullscreen ApplyChanges are covered by the hardware-GPU game regression; mouse-look deltas and four audio volumes stay unchanged. 1540/1540 unit PASS, 172 hardware-GPU integration PASS / 3 explicit opt-in SKIP, 65 focused unit PASS; final fullscreen/pointer extension 3/3 GPU PASS. Native Xvfb fullscreen times out identically in old/new binaries without a window manager and is not claimed verified. Evidence and rejected probes: docs/visual-review/house-03574-pointer.md. No owner preferences, drawings, content, serialized schema or upstream code changed.
+      blocked: (2026-09-28 current strict compiler evidence, BL-18) CNA 3d5742e84 declares CNAEXT before using aliases in ContentManager.hpp:313/395, GameComponentCollection.hpp:25/27/29 and GameWindow.hpp:52/54. Under CNA_STRICT_XNA_API these become invalid [[deprecated]] using declarations (expected unqualified-id before using). The old strict checker ignored compiler exit status and printed a false clean result. HOUSE-03683 must fail closed; CNA needs a separately authorized alias-attribute placement correction. Do not tick this pointer task from that false green. Current exact compiler log: /tmp/house-03574-final-test-strict.log.
 
 ## M10 — Performance (measurement-driven)
 
@@ -1361,6 +1363,8 @@ There is no zone rotation, no "polish everything" pass and no screenshot → twe
       accept: the grand-tour route walked once by day and once at night in first person, plus each hero area's views; every finding classified S1–S4 by the severity table and filed under its zone
       verify: the ledger round
       trace: absorbs `HOUSE-01033` (the furnishing review); was *Phase-45 review: a full walkthrough with fresh eyes*
+      reviewed: (2026-09-28 R11/R16, Round 179) Fresh current-controller trace passes (11729 samples, all 90 accessible arrivals). Actual GPU day and scheduled-night walkthroughs both pass, with 1076 frames each; all 54 room-view contact pages, downward furnishing supplements and representative consecutive threshold bursts were inspected. Existing deterministic review-clock seam only; normal GameTime unchanged. Findings: S1 inward shed roof/gable enclosure missing, S2 canopy intrusion in L1_BED3, S2 daytime shed readability and S2 night-bright exterior foliage. Existing HOUSE-03631 owns the fixes; no scoreboard waiver. Full methods, hero evidence and limitations: docs/visual-review/house-02714-final.md. This is automated first-person transport, not a new human stair-usability claim.
+      blocked: Final acceptance remains open under the mandatory current strict-CNA gate, BL-18. Do not infer acceptance from transport PASS or hide the new S1/S2 findings behind old G1–G5 screenshots.
 
 - [x] HOUSE-03632 — Restore reliable room-boundary tracking and the main-stair approach
       dep: HOUSE-03480 · sys: player, world-content · plat: ALL · pri: MUST · zone: Z-L0M, Z-L0S, Z-STAIR · adv: D2, D13 · est: 2
@@ -1470,10 +1474,11 @@ There is no zone rotation, no "polish everything" pass and no screenshot → twe
       done: (2026-09-28) Existing five-pole/four-lantern/four-span grid and all nine corresponding emitters move +2.4 m in X, preserving spacing, wire endpoints, assets and full-height solid collision. The full 1.20 m pedestrian approach clearance claim rejects the original column placement; collision and neighbourhood selftests, content rebuild/deployment and complete controller tours pass. Actual before GPU W-equivalent input stops at z=1.23; identical starting pose after crosses into EXT_WALK, and the reverse reaches EXT_ROAD at normal walk. Frames are reviewed and retained with source hashes. The separate neighbourhood renderer remains explicitly OPTIONAL, as HOUSE-00847 records; this task clears the existing invisible collider from the required path, not activates that renderer. Shared checkpoint checks are recorded above; no asset addition, collision waiver, benchmark claim or monitor window. Evidence: docs/visual-review/house-03642-support.md.
 
 - [ ] HOUSE-03631 — The bounded fix pass
-      dep: HOUSE-02714, HOUSE-03634 · sys: — · plat: LNX · pri: MUST · zone: all · adv: D2, D4, D13, D14 · est: 1.25
+      dep: HOUSE-02714, HOUSE-03634 · sys: — · plat: LNX · pri: MUST · zone: all · adv: D2, D4, D13, D14 · est: 2.25
       accept: (1) every S1 and S2 from `HOUSE-02714` and the zone backlogs is fixed; (2) S3 only where the severity table allows it (cheap, repeatedly visible, in a hero area or in a release capture); (3) S4 is never scheduled; (4) **hard budget: 4.5 agent-hours of S2/S3 work**, plus whatever S1 fixes need; when it is spent, the remaining S3 items are waived with a reason; (5) no area gets more than two fix rounds (rule R6)
       verify: one ledger round over the fixed items
-      note: split into ≤ 4 h slices when scheduled (R7). This replaces the zone polish rotation and the eleven legacy polish passes. `HOUSE-03632`, `HOUSE-03633` and `HOUSE-03634` consume 3.75 h of the original 5 h estimate after manual S1/S2 findings, leaving 1.25 h here; M11 does not expand
+      note: split into ≤ 4 h slices when scheduled (R7). This replaces the zone polish rotation and the eleven legacy polish passes. HOUSE-03632/03633/03634 consumed 3.75 h of the original 5 h estimate. Round 179's actual GPU findings revise the remaining forecast from 1.25 to 2.25 h; this does not authorize another polish rotation or relax R12's 4.5 h S2/S3 limit. Record S1 and S2/S3 time separately when implementing. The S1 shed roof is fix-now under R1 even while the review's final strict acceptance is blocked.
+      current: No Round-179 geometry/lighting correction has been implemented yet. Fix the shed enclosure, measured L1_BED3 canopy clearance, shed daytime readability and actual night-foliage lighting cause; preserve breadth and the existing renderer/content pipeline. Evidence and findings are in docs/visual-review/house-02714-final.md.
 
 - [ ] HOUSE-02713 — Refresh the representative render sets whose images changed on purpose
       dep: HOUSE-03631 · sys: ci · plat: CI · pri: MUST · zone: all · adv: D11 · est: 0.5
@@ -1483,6 +1488,13 @@ There is no zone rotation, no "polish everything" pass and no screenshot → twe
 ---
 
 ## M12 — Representative tests
+
+- [ ] HOUSE-03683 — Fail the strict-XNA gate when its compiler fails
+      dep: HOUSE-00168 · sys: ci · plat: CI · pri: MUST · zone: all · adv: D11 · est: 0.5
+      accept: every nonzero compiler exit, including crashes and failures with empty stderr, makes the strict gate fail with the affected source; no clean claim after a failed translation unit; retain CNAEXT overload detection and destructor exemptions; focused planted regressions pass
+      verify: checker selftests in run_checks.sh, current upstream-error reproduction and broader static validation with failures attributed correctly
+      note: (2026-09-28 targeted R15 correction) Current CNA's invalid annotated using aliases produce real compiler errors, but the existing checker discards subprocess returncode and only scans deprecation matches. D11 cannot accept this false green. Correct the existing checker, not the upstream source or XNA policy. The upstream strict-build error remains BL-18 independently of error detection.
+      implemented: (2026-09-28) Preserve compiler returncode and fail without a clean claim for every nonzero exit; retain overload detection/destructor exemptions, report source plus bounded compiler context, and run seven planted selftests in the normal gate wrapper. All seven pass. The current real one-TU probe correctly exits 1 with the upstream alias errors; minimal leading-attribute alias fails and the correctly placed attribute control compiles. Final broader gates remain subject to BL-18; leave open until valid current strict acceptance is possible.
 
 Track B. The existing suites and gates stay. Tests for removed or finished systems are not gaps,
 and new tests are representative, not exhaustive. Each feature task carries its own tests (rule
@@ -1880,6 +1892,7 @@ emulator, not a compatibility lab. Cosmetic platform luxuries are cut.
 
 - [ ] HOUSE-03039 — Tune the touch controls on the device
       dep: HOUSE-03038, HOUSE-02992, HOUSE-02998 · sys: ui · plat: AND · pri: MUST · zone: all · adv: D8, D10c · est: 0.75
+      current: (2026-09-28 read-only input inspection) Desktop and touch share pointer layout, but the visible Look sensitivity row still reads/edits mouseSensitivity while TouchConfig consumes touchLookSensitivity. When the device task is dependency-unblocked, verify and align this existing control with the active input source; no new gestures or control subsystem are required. This is not device tuning acceptance.
 
 - [ ] HOUSE-03041 — Package and document the Android build
       dep: HOUSE-03039, HOUSE-03033, HOUSE-03034 · sys: — · plat: AND · pri: MUST · zone: all · adv: D10c, D12 · est: 0.75
@@ -2361,6 +2374,26 @@ under R5.
 ---
 
 ## Planning corrections
+
+### 2026-09-28 — Current GPU walkthrough exposes required enclosure/lighting corrections
+
+* Round 179 files current S1/S2 findings under existing MUST HOUSE-03631, not
+  optional polish or new systems. The review and classification are performed,
+  but its checkbox stays open while mandatory strict acceptance fails in CNA.
+* Correct the remaining bounded-pass forecast from 1.25 to 2.25 h based on the
+  actual roof, canopy and lighting findings. Preserve R12's S2/S3 limit and
+  account for S1 separately. Current open sum is 38.75 h / 56.63 h pessimistic;
+  the owner-superseded 280-hour ceiling is not reinstated or used to waive defects.
+
+### 2026-09-28 — Strict compiler errors must not produce a green API gate
+
+* Add ACTIVE/MUST HOUSE-03683 (0.5 h), D11, in M12's next free reserved ID.
+  A current one-TU probe failed in CNA's annotated using aliases while the whole
+  checker printed clean: it ignored compiler exit status. Fail closed, retain
+  all overload checks and exemptions, and add focused planted regressions.
+* Keep HOUSE-03574 open despite successful real-pointer and GPU regressions.
+  The upstream CNA error is BL-18, not permission to disable strict XNA or edit
+  sibling repositories. Earlier reported static green is explicitly invalidated.
 
 ### 2026-09-28 — Owner reports displaced windowed menu clicks
 

@@ -30,6 +30,14 @@ namespace cnahouse::player
         int recentreY = 0;
         int viewportWidth = 1600;
         int viewportHeight = 900;
+        /// The same safe virtual canvas used to draw menus, in logical back-buffer pixels.
+        /// Zero dimensions retain the whole-viewport fallback for standalone sources.
+        int layoutX = 0;
+        int layoutY = 0;
+        int layoutWidth = 0;
+        int layoutHeight = 0;
+        /// DrawString retains its physical font size and rows are top-anchored. Hit their centres.
+        float pointerOffsetY = 0.0F;
 
         /// @brief §44's *"optional raw-ish smoothing over 2 frames, default off"*.
         ///
