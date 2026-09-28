@@ -1,6 +1,32 @@
 # Current owner-visible defect work — 2026-09-28
 
-## Current continuation: normal Start audio evidence and strict layout gate
+## Current continuation: deterministic doorway regression accepted
+
+Starting HEAD `9e937ca48415d81c1617d1c54302957131bab820`, clean `develop`.
+R15/R16/D11 selected `HOUSE-03682` after the full GPU suite exposed an input
+sampling failure, not a renewed runtime flash. Analogue review input bounds
+maximum-frame travel to 27.4 mm inside the existing 40 mm test band. A 35 ms
+delay deliberately forces catch-up frames; the new assertion proves an actual
+four-step observation while the body cell remains L0_HALL and L0_KITCHEN is
+both render root and visible. Neither runtime visibility nor walking speed is
+weakened. Five repetitions pass; this is not human stair-usability evidence.
+
+Final complete snapshot: **1530/1530 unit PASS**, **170 actual-GPU integration
+PASS / 3 explicit opt-in SKIP / 0 FAIL** (173 total, 325181 ms), and all static
+gates green, **353 strict units / 109 destructor exemptions**, four workers.
+Logs `/tmp/house-current-final-{units,integration,static}.log`; focused repeats
+`/tmp/house-current-garden-threshold-focused.log`. Debug builds use -j2/shared
+ccache. All graphical runs use invisible Radeon offscreen/surfaceless rendering.
+
+Owner listening now confirms all six footstep categories, including the garden
+after its reproduced contact-classification fix, and indoor/outdoor day/night
+ambience with smooth transitions. The sound/data acceptance checkpoints follow;
+do not resurrect the absent-/dev/snd claim. No emulator was used this continuation.
+The existing Release build-probe refresh is in progress (-j2, no new directory);
+no new timing or optimisation claim. **33 MUST / 78 OPT remain, nominal 45.25 h**
+at this test checkpoint. The goal remains active, not DONE.
+
+## Earlier continuation: normal Start audio evidence and strict layout gate
 
 Starting HEAD `9e937ca48415d81c1617d1c54302957131bab820`, clean `develop`.
 R15/D11 selected `HOUSE-03681`: the full layout gate rejected legitimate

@@ -2245,11 +2245,20 @@ namespace
             explicit ThresholdInput(CnaHouseGame& game)
                 : game_(game)
             {
-                state_.move.Y = 1.0F;
+                // A full 2.05 m/s walk advances 68 mm in a capped four-step frame, skipping
+                // this test's 40 mm band. Analogue review input bounds travel to 27.4 mm;
+                // the real controller, acceleration and cell hysteresis remain unchanged.
+                state_.move.Y = 0.4F;
             }
 
             void Update(float) override
             {
+                // Exercise the worst sampling cadence deliberately rather than depending on
+                // how fast a shared machine draws. The next frame consumes four fixed steps.
+                std::this_thread::sleep_for(std::chrono::milliseconds(35));
+                const std::uint64_t steps = game_.FixedStepsForTesting();
+                const std::uint64_t previousFrameSteps = steps - lastSteps_;
+                lastSteps_ = steps;
                 const auto& eye = game_.ViewForTesting().Camera().Pose().eye;
                 if (cnahouse::util::IdRegistry::NameOf(game_.CellForTesting()) != "L0_HALL" ||
                     eye.Z >= -23.005F || eye.Z <= -23.045F)
@@ -2257,6 +2266,10 @@ namespace
                     return;
                 }
                 sawBand_ = true;
+                sawMaximumStepFrameInBand_ =
+                    sawMaximumStepFrameInBand_ ||
+                    previousFrameSteps ==
+                        static_cast<std::uint64_t>(cnahouse::player::kMaxFixedStepsPerFrame);
                 const auto snapshot = game_.VisibilitySnapshotForTesting();
                 newRoomWasRoot_ = newRoomWasRoot_ && snapshot.cell == "L0_KITCHEN";
                 newRoomWasVisible_ =
@@ -2286,6 +2299,11 @@ namespace
                 return newRoomWasRoot_;
             }
 
+            [[nodiscard]] bool SawMaximumStepFrameInBand() const noexcept
+            {
+                return sawMaximumStepFrameInBand_;
+            }
+
             [[nodiscard]] bool NewRoomWasVisible() const noexcept
             {
                 return newRoomWasVisible_;
@@ -2294,7 +2312,9 @@ namespace
         private:
             CnaHouseGame& game_;
             cnahouse::player::InputState state_;
+            std::uint64_t lastSteps_ = 0U;
             bool sawBand_ = false;
+            bool sawMaximumStepFrameInBand_ = false;
             bool newRoomWasRoot_ = true;
             bool newRoomWasVisible_ = true;
         };
@@ -2319,6 +2339,8 @@ namespace
         game.Run();
         ASSERT_EQ(game.ExitCode(), 0);
         EXPECT_TRUE(input.SawBand()) << "the walking test never sampled the 5 cm doorway band";
+        EXPECT_TRUE(input.SawMaximumStepFrameInBand())
+            << "the threshold was not observed after the maximum catch-up batch";
         EXPECT_TRUE(input.NewRoomWasRoot()) << "render visibility followed the sticky body cell";
         EXPECT_TRUE(input.NewRoomWasVisible()) << "the room ahead vanished while crossing its threshold";
     }

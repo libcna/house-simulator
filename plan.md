@@ -12,7 +12,7 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers and a reusable kit), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (2026-09-22 reduction, retained breadth and maintenance mode; its former hour ceiling is superseded below) |
 | Scope policy | The owner explicitly superseded the former 280-hour ceiling on 2026-09-27 and requested further targeted corrections and a filming tour. Keep MUST/OPT boundaries explicit; do not infer other features |
-| Active plan | **33 open MUST tasks** in 16 milestones. Owner walk/run, reopened guard/art, terrace and the local-settings layout-gate correction are accepted; audio, platform and release work remain. Every active task's title and acceptance states the current work |
+| Active plan | **33 open MUST tasks** in 16 milestones. Owner walk/run, reopened guard/art, terrace, local-settings layout gate and doorway-test sampling are accepted; audio, platform and release work remain. Every active task's title and acceptance states the current work |
 | Estimate to DONE | The old **44.84 / 52.75 / 76.03 agent-hour** forecast is a historical snapshot before the 2026-09-27 owner additions, not a current forecast or scheduling gate. Per-task `est:` remains for task sizing; see [Planning corrections](#planning-corrections) |
 | Current gate | **G5, M7, M9 and M12 passed. CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator.** Main/attic/basement stairs, garage-loft floor and whole-house lighting are corrected under `HOUSE-03635`/`03638`/`03639`/`03636`; doorway flashes and visibility/wall holes under `HOUSE-03637`/`03640`, including the owner's precise foyer/stair corner-gap screenshot. The existing car family is corrected under `HOUSE-03641`; full GPU filming circuit accepted under `HOUSE-03572`. Normal title/Start audio produces real backend PCM; `HOUSE-01920`/`HOUSE-01922` remain open for required subjective listening. Desktop performance `HOUSE-02404` awaits repeatable current measurements |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
@@ -401,7 +401,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 0 | **done** · `HOUSE-03573` | D8 | 0 |
 | [M10](#m10--performance-measurement-driven) — Performance, measurement-driven | B | 03601–03630 | 2 | `HOUSE-02404` | D9 | 6 |
 | [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 3 | `HOUSE-03631` | D1, D2, D4, D6, D8, D9, D11, D13, D14 | 3.25 |
-| [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 0 | **done** · `HOUSE-03681` | D11 | 0 |
+| [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 0 | **done** · `HOUSE-03682` | D11 | 0 |
 | [M13](#m13--linux-desktop-release) — Linux desktop release | after M11 | 03701–03720 | 8 | `HOUSE-02797` | D9–D13 | 10.25 |
 | [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 5 | `HOUSE-02904` | D10b | 7.25 |
 | [M15](#m15--android) — Android | readiness: B · device: after M13 | 03751–03780 | 5 | `HOUSE-03041` (a BL-13 record does not close it) | D10c | 7 |
@@ -1476,6 +1476,13 @@ and new tests are representative, not exhaustive. Each feature task carries its 
 R16): the representative render sets live with their features (`HOUSE-01275`, `HOUSE-03520`,
 `HOUSE-02527`) and the grand tour is `HOUSE-03226`. This milestone holds only what no feature owns.
 
+- [x] HOUSE-03682 — Sample the doorway visibility band reliably with the faster walking controller
+      dep: HOUSE-03573, HOUSE-03637 · sys: tests · plat: CI · pri: MUST · zone: all · adv: D11 · est: 0.25
+      accept: the real-controller integration test observes its existing 40 mm doorway band even when frames consume the maximum four fixed steps; it still asserts the new room is the render root and visible while the body cell is sticky; no runtime speed, hysteresis or visibility rule is weakened
+      verify: forced multi-step frame repetitions, normal focused runtime tests and the full integration suite
+      note: (2026-09-28 R15/R16) Full integration failed only SawBand(): normal 2.05 m/s walking can travel 68 mm across four 1/120 s steps between observations. Three isolated reruns pass when fewer steps share a frame. Deliberate bounded analogue review input and catch-up frames must guarantee the original band is exercised; this test is not manual stair usability acceptance.
+      done: (2026-09-28) Bounded analogue review input travels at most 27.4 mm per maximum four-step frame; a deliberate 35 ms frame delay forces that catch-up cadence. The unchanged 40 mm band is observed, with an explicit four-step-frame assertion, while the body remains in L0_HALL and L0_KITCHEN is both render root and visible. Five repetitions pass. Full actual-GPU integration is 170 PASS/3 explicit opt-in SKIP/0 FAIL, full unit 1530/1530 PASS, all static gates green with 353 strict units/109 destructor exemptions and four compiler workers. Runtime movement, hysteresis, visibility and stair acceptance are unchanged. Logs: /tmp/house-current-garden-threshold-focused.log and /tmp/house-current-final-{units,integration,static}.log.
+
 - [x] HOUSE-03681 — Keep the layout gate strict without rejecting ignored local Claude settings
       dep: HOUSE-00493 · sys: ci · plat: CI · pri: MUST · zone: all · adv: D11 · est: 0.25
       accept: the root .claude directory is accepted only when it contains exactly an untracked, Git-ignored regular settings.local.json file; tracked, unignored, extra-file and symlink cases remain rejected; unrelated local settings are not modified, staged or committed; other directory/source-placement and closed-build-directory gates remain enforced
@@ -2341,6 +2348,15 @@ under R5.
 ---
 
 ## Planning corrections
+
+### 2026-09-28 — Faster walking exposes a frame-rate-dependent doorway regression
+
+* Add ACTIVE/MUST `HOUSE-03682` (0.25 h), D11: retain the same render-room
+  assertions and narrow spatial band, but guarantee that the real-controller
+  test samples it with maximum catch-up frames. Full-suite evidence is
+  `/tmp/house-01920-normal-start-integration.log`; three isolated reruns pass.
+* This is test sampling, not evidence of renewed flashing or permission to
+  change movement/culling. The movement-frame visual review remains required.
 
 ### 2026-09-28 — Layout gate rejects legitimate ignored owner settings
 
