@@ -1222,8 +1222,12 @@ namespace
     class ThresholdCaptureInput final : public cnahouse::player::IInputSource
     {
     public:
-        explicit ThresholdCaptureInput(const CnaHouseGame& game)
+        explicit ThresholdCaptureInput(const CnaHouseGame& game,
+                                       std::array<float, 2> move = {0.0F, 1.0F},
+                                       unsigned int captureFrames = 36)
             : game_(&game)
+            , move_(move)
+            , captureFrames_(captureFrames)
         {
         }
 
@@ -1232,7 +1236,7 @@ namespace
             ++updates_;
             // The snapshot is from the frame just drawn. A zero-draw frame in this movement
             // interval was the original sky flash, even though a later static pose rendered.
-            if (updates_ > 2 && updates_ <= 37)
+            if (updates_ > 2 && updates_ <= captureFrames_ + 1)
             {
                 const int draws = game_->VisibilitySnapshotForTesting().drawCalls;
                 minDraws_ = std::min(minDraws_, draws);
@@ -1244,10 +1248,12 @@ namespace
             // through the doorway between the two images we need to compare.
             if (updates_ > 1 && deltaSeconds > 0.0F)
             {
-                state_.move.Y = std::min(1.0F, 0.025F / (1.35F * deltaSeconds));
+                const float amount = std::min(1.0F, 0.025F / (1.35F * deltaSeconds));
+                state_.move.X = move_[0] * amount;
+                state_.move.Y = move_[1] * amount;
             }
             state_.toggleVisibilityOverlayPressed = updates_ == 1;
-            state_.screenshotPressed = updates_ <= 36;
+            state_.screenshotPressed = updates_ <= captureFrames_;
         }
 
         [[nodiscard]] const cnahouse::player::InputState& Current() const noexcept override
@@ -1272,6 +1278,8 @@ namespace
 
     private:
         const CnaHouseGame* game_;
+        std::array<float, 2> move_;
+        unsigned int captureFrames_;
         unsigned int updates_ = 0;
         int minDraws_ = std::numeric_limits<int>::max();
         int maxDraws_ = 0;
@@ -1296,6 +1304,8 @@ namespace
             const char* name;
             std::array<float, 5> start;
             const char* arrival;
+            std::array<float, 2> move{0.0F, 1.0F};
+            unsigned int captureFrames = 36;
         };
 
         const std::array crossings{
@@ -1320,6 +1330,38 @@ namespace
             Crossing{"bedroom-rear-balcony", {-1.65F, 3.65F, -26.90F, 0.0F, 0.0F}, "L1_BALCONY_REAR"},
             Crossing{"garage-road-west", {0.00F, 0.00F, 3.00F, 39.0F, 0.0F}, "EXT_ROAD"},
             Crossing{"garage-road-east", {22.00F, 0.00F, 3.00F, 335.5F, 0.0F}, "EXT_ROAD"},
+            // Move while looking at each transition, in both directions. For joins within a
+            // capsule radius of the room edge, approach/retreat instead of an impossible strafe.
+            // These stay in the room; positive draw counts alone cannot detect a narrow sky slit.
+            Crossing{"wall-laundry-approach", {7.60F, 0.60F, -21.60F, 90.0F, 0.0F}, "L0_LAUNDRY"},
+            Crossing{
+                "wall-laundry-retreat", {7.90F, 0.60F, -21.60F, 90.0F, 0.0F}, "L0_LAUNDRY", {0.0F, -1.0F}},
+            Crossing{"wall-bath3-approach", {7.30F, 3.65F, -21.60F, 90.0F, 0.0F}, "L1_BATH3"},
+            Crossing{"wall-bath3-retreat", {7.30F, 3.65F, -21.60F, 90.0F, 0.0F}, "L1_BATH3", {0.0F, -1.0F}},
+            Crossing{"wall-utility-left", {7.30F, -2.30F, -21.55F, 90.0F, 0.0F}, "B1_UTILITY", {-1.0F, 0.0F}},
+            Crossing{"wall-utility-right", {7.30F, -2.30F, -21.85F, 90.0F, 0.0F}, "B1_UTILITY", {1.0F, 0.0F}},
+            // The cupboard's 1.75 m head forces the normal controller to crouch. Capture longer,
+            // rather than increasing its speed or lowering the actual-motion assertion.
+            Crossing{"wall-understair-approach",
+                     {4.48F, -2.30F, -21.10F, 270.0F, 0.0F},
+                     "B1_UNDERSTAIR",
+                     {0.0F, 1.0F},
+                     72},
+            Crossing{"wall-understair-retreat",
+                     {4.20F, -2.30F, -21.10F, 270.0F, 0.0F},
+                     "B1_UNDERSTAIR",
+                     {0.0F, -1.0F},
+                     72},
+            Crossing{"wall-kitchen-left", {-6.55F, 0.60F, -25.80F, 0.0F, 0.0F}, "L0_KITCHEN", {-1.0F, 0.0F}},
+            Crossing{"wall-kitchen-right", {-6.85F, 0.60F, -25.80F, 0.0F, 0.0F}, "L0_KITCHEN", {1.0F, 0.0F}},
+            Crossing{"wall-family-left", {2.85F, 0.60F, -25.80F, 0.0F, 0.0F}, "L0_FAMILY", {-1.0F, 0.0F}},
+            Crossing{"wall-family-right", {2.55F, 0.60F, -25.80F, 0.0F, 0.0F}, "L0_FAMILY", {1.0F, 0.0F}},
+            Crossing{
+                "wall-attic-west-left", {-3.75F, 9.30F, -18.70F, 180.0F, 0.0F}, "L3_ROOM", {-1.0F, 0.0F}},
+            Crossing{
+                "wall-attic-west-right", {-3.45F, 9.30F, -18.70F, 180.0F, 0.0F}, "L3_ROOM", {1.0F, 0.0F}},
+            Crossing{"wall-attic-east-left", {3.45F, 9.30F, -18.70F, 180.0F, 0.0F}, "L3_ROOM", {-1.0F, 0.0F}},
+            Crossing{"wall-attic-east-right", {3.75F, 9.30F, -18.70F, 180.0F, 0.0F}, "L3_ROOM", {1.0F, 0.0F}},
         };
         const char* requestedCase = std::getenv("HOUSE_THRESHOLD_CASE");
         const std::filesystem::path original = std::filesystem::current_path();
@@ -1361,9 +1403,9 @@ namespace
                 settings.backBufferHeight = 540;
                 settings.verticalSync = true;
                 CnaHouseGame game(options, settings);
-                ThresholdCaptureInput input(game);
+                ThresholdCaptureInput input(game, crossing.move, crossing.captureFrames);
                 game.SetInputSourceForTesting(&input);
-                game.SetFrameLimit(40);
+                game.SetFrameLimit(crossing.captureFrames + 4);
                 game.Run();
                 std::filesystem::current_path(original);
                 std::size_t captured = 0;
@@ -1393,6 +1435,17 @@ namespace
                     cnahouse::util::IdRegistry::NameOf(game.CellForTesting()).data());
                 EXPECT_EQ(cnahouse::util::IdRegistry::NameOf(game.CellForTesting()), crossing.arrival)
                     << crossing.name;
+                if (std::string_view(crossing.name).starts_with("wall-"))
+                {
+                    const auto feet = game.PlayerForTesting().Feet();
+                    const float dx = feet.X - crossing.start[0];
+                    const float dz = feet.Z - crossing.start[2];
+                    const float yaw = crossing.start[3] * Microsoft::Xna::Framework::MathHelper::Pi / 180.0F;
+                    const float moveX = crossing.move[0] * std::cos(yaw) + crossing.move[1] * std::sin(yaw);
+                    const float moveZ = crossing.move[0] * std::sin(yaw) - crossing.move[1] * std::cos(yaw);
+                    EXPECT_GT(dx * moveX + dz * moveZ, 0.20F)
+                        << crossing.name << " must actually move in the requested review direction";
+                }
             }
         }
     }

@@ -210,12 +210,17 @@ def side_intervals(side: str, box: tuple, cell: dict, neighbours: list,
     skin off the whole storey and leave a hole above the garage roof -- which is what the first
     attempt at `HOUSE-00485` did, and what `ext-east` caught. So each run carries the extents of
     the cells across it, and the caller subtracts them from the span it was going to draw.
+
+    Adjacent boxes of this SAME cell are an `open` run, not another wall. Their zero inset makes
+    the floor finishes meet; the builder emits neither an inner wall nor a weather skin there.
+    Collision already treats these joins as openings. Drawing them as exterior walls produced
+    coincident lit/unlit panels inside the attic room and a visible strip between floor finishes.
     """
     plane, lo, hi = side_span(side, box)
     _x0, _x1, y0, y1, _z0, _z1 = box
     covered: list[tuple[float, float, str, float, float]] = []
     for other, obox in neighbours:
-        if other["id"] == cell["id"]:
+        if other["id"] == cell["id"] and obox == box:
             continue
         ox0, ox1, oy0, oy1, oz0, oz1 = obox
         if oy1 <= y0 + 1e-6 or oy0 >= y1 - 1e-6:
@@ -227,8 +232,9 @@ def side_intervals(side: str, box: tuple, cell: dict, neighbours: list,
         start, end = max(lo, olo), min(hi, ohi)
         if end - start <= 1e-6:
             continue
-        wall = "wallGarage" if "garage" in (cell.get("kind"), other.get("kind")) \
-            else "wallPartition"
+        wall = ("open" if other["id"] == cell["id"] else
+                "wallGarage" if "garage" in (cell.get("kind"), other.get("kind"))
+                else "wallPartition")
         covered.append((start, end, wall, oy0, oy1))
 
     # A SWEEP over every boundary, rather than the first-covered-wins pass this replaced: two cells
@@ -246,7 +252,8 @@ def side_intervals(side: str, box: tuple, cell: dict, neighbours: list,
         if not here:
             out.append((a, b, outside, ()))
             continue
-        wall = "wallGarage" if any(row[2] == "wallGarage" for row in here) else "wallPartition"
+        wall = ("open" if any(row[2] == "open" for row in here) else
+                "wallGarage" if any(row[2] == "wallGarage" for row in here) else "wallPartition")
         out.append((a, b, wall, tuple((row[3], row[4]) for row in here)))
     return out
 
@@ -376,6 +383,26 @@ def exterior_corner_reach(side: str, box: tuple, cell: dict, neighbours: list,
     if any(y0 < high_y and y1 > low_y for y0, y1 in covers):
         return 0.0
     return float(construction.get(wall, 0.0)) / 2.0
+
+
+def inner_corner_reach(side: str, box: tuple, cell: dict, neighbours: list,
+                       half: float, high_end: bool) -> float:
+    """Meet the perpendicular inner face at a concave same-room box junction.
+
+    A straight continuation must instead meet edge-to-edge: extending both
+    collinear panels would introduce the same duplicate-face flicker we remove.
+    """
+    if exterior_corner_side(side, box, cell, neighbours, high_end) is not None:
+        return 0.0
+    plane, lo, hi = side_span(side, box)
+    edge = hi if high_end else lo
+    for other, other_box in neighbours:
+        if other["id"] != cell["id"] or other_box == box:
+            continue
+        other_plane, start, end = side_span(side, other_box)
+        if abs(other_plane - plane) < 1e-6 and start - 1e-6 <= edge <= end + 1e-6:
+            return 0.0
+    return half
 
 
 def exterior_corner_breaks(side: str, box: tuple, cell: dict, neighbours: list,
@@ -2611,14 +2638,52 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
         open_cell = cell.get("kind") == "exterior"
         for side, inward in INWARD.items():
             side_holes = holes_in(side, box, cell, list(portals))
-            for lo, hi, wall, covers in ([] if open_cell
-                                         else side_intervals(side, box, cell, neighbours)):
+            runs = [] if open_cell else side_intervals(side, box, cell, neighbours)
+            # Changing wall thickness offsets the inner face. Close the step
+            # between adjacent runs in this cell's own shell: a neighbour's
+            # culled face cannot be relied on to hide a vertical sky slit.
+            for before, after in zip(runs, runs[1:]):
+                if "open" in (before[2], after[2]):
+                    continue  # a same-room junction has no wall-thickness step
+                edge = before[1]
+                half_before = float(construction.get(before[2], 0.0)) / 2.0
+                half_after = float(construction.get(after[2], 0.0)) / 2.0
+                if abs(edge - after[0]) > 1e-6 or abs(half_before - half_after) <= 1e-9:
+                    continue
+                depths = [{"-X": x0 + half, "+X": x1 - half,
+                           "-Z": z0 + half, "+Z": z1 - half}[side]
+                          for half in (half_before, half_after)]
+                sign = 1.0 if half_before > half_after else -1.0
+                return_side = ("+Z" if sign > 0 else "-Z") if side in ("-X", "+X") \
+                    else ("+X" if sign > 0 else "-X")
+                cuts = roof_lines(roof, return_side, edge)
+                apertures = [(hole[2], hole[3]) for hole in side_holes
+                             if hole[0] - 1e-6 <= edge <= hole[1] + 1e-6]
+                for low, high in minus(y0, y1, apertures):
+                    for pu, pv in under_roof(min(depths), max(depths), low, high, cuts):
+                        corners = ([(u, v, edge) for u, v in zip(pu, pv)]
+                                   if side in ("-X", "+X") else
+                                   [(edge, v, u) for u, v in zip(pu, pv)])
+                        add(corners, (0.0, 0.0, sign) if side in ("-X", "+X")
+                            else (sign, 0.0, 0.0), "wall")
+            for run_index, (lo, hi, wall, covers) in enumerate(runs):
+                if wall == "open":
+                    continue  # neither an inner wall nor a false facade inside this room
                 outer_lo, outer_hi = lo, hi
                 half = float(construction.get(wall, 0.0)) / 2.0
                 plane = {"-X": x0 + half, "+X": x1 - half,
                          "-Z": z0 + half, "+Z": z1 - half}[side]
                 clamp = (iz0, iz1) if side in ("-X", "+X") else (ix0, ix1)
                 lo, hi = max(lo, clamp[0]), min(hi, clamp[1])
+                # At an internal concave corner, the other inner face is half
+                # a wall beyond the centre-line endpoint. A straight same-room
+                # continuation needs no reach (and must not overlap its neighbour).
+                lo -= (half if run_index > 0 and runs[run_index - 1][2] == "open" else
+                       inner_corner_reach(side, box, cell, neighbours, half, False)
+                       if run_index == 0 else 0.0)
+                hi += (half if run_index + 1 < len(runs) and runs[run_index + 1][2] == "open" else
+                       inner_corner_reach(side, box, cell, neighbours, half, True)
+                       if run_index + 1 == len(runs) else 0.0)
                 if hi - lo <= 1e-6:
                     continue
                 holes = [hole for hole in side_holes
@@ -4337,6 +4402,108 @@ def selftest(output: Path) -> int:
     # The walls alone, with the trim switched off the way the DATA switches it off: a construction
     # block that declares no skirting and no cornice gets none. No test-only knob.
     plain = dict(construction, skirting=0.0, cornice=0.0)
+    # A mixed wall's inner faces are on different planes. Their meeting edge
+    # must have a return, not a narrow view of the sky between two open panels.
+    laundry = cells["L0_LAUNDRY"]
+    laundry_extent = extent_of(laundry, levels[laundry["level"]])[0]
+    reset_scene()
+    laundry_mesh = build_cell(
+        laundry, laundry_extent, neighbours=neighbours, construction=plain,
+        level=levels[laundry["level"]], levels=levels, cells_by_id=cells)
+    laundry_returns = [face for face in laundry_mesh.data.polygons
+                       if face.material_index == SURFACE_ORDER.index("wall")
+                       and all(abs(laundry_mesh.data.vertices[index].co.y - 21.7) < 1e-5
+                               for index in face.vertices)]
+    require(len(laundry_returns) == 1
+            and abs(laundry_returns[0].area - 0.025 * 2.7) < 1e-5
+            and laundry_returns[0].normal.y < -0.99,
+            "the laundry's 300/250 mm wall transition has a complete 25 mm return "
+            "facing the recessed side, not a vertical sky slit")
+    seam_aperture = {"id": "TEST_WALL_RETURN", "cellA": laundry["id"],
+                     "cellB": "TEST_OUTSIDE", "plane": {"axis": "x", "value": 8.7},
+                     "rect": {"u": [-21.8, -21.6], "v": [1.0, 2.0]}}
+    reset_scene()
+    aperture_mesh = build_cell(
+        laundry, laundry_extent, neighbours=neighbours, construction=plain,
+        level=levels[laundry["level"]], levels=levels, cells_by_id=cells,
+        portals=[seam_aperture])
+    aperture_returns = [face for face in aperture_mesh.data.polygons
+                        if face.material_index == SURFACE_ORDER.index("wall")
+                        and all(abs(aperture_mesh.data.vertices[index].co.y - 21.7) < 1e-5
+                                for index in face.vertices)]
+    require(len(aperture_returns) == 2
+            and abs(sum(face.area for face in aperture_returns) - 0.025 * 1.7) < 1e-5,
+            "a portal crossing the thickness transition remains a hole; only its "
+            "upper and lower wall returns are closed")
+    reset_scene()
+    roof_return_mesh = build_cell(
+        laundry, laundry_extent, neighbours=neighbours, construction=plain,
+        level=levels[laundry["level"]], levels=levels, cells_by_id=cells,
+        roof=[(0.0, 0.0, 1.8)])
+    roof_returns = [face for face in roof_return_mesh.data.polygons
+                    if face.material_index == SURFACE_ORDER.index("wall")
+                    and all(abs(roof_return_mesh.data.vertices[index].co.y - 21.7) < 1e-5
+                            for index in face.vertices)]
+    require(len(roof_returns) == 1
+            and abs(roof_returns[0].area - 0.025 * 1.2) < 1e-5,
+            "the thickness return is clipped under the roof just like the adjoining walls")
+    reset_scene()
+    reversed_mesh = build_cell(
+        laundry, laundry_extent, neighbours=neighbours,
+        construction=dict(plain, wallExterior=0.25, wallGarage=0.30),
+        level=levels[laundry["level"]], levels=levels, cells_by_id=cells)
+    reversed_returns = [face for face in reversed_mesh.data.polygons
+                       if face.material_index == SURFACE_ORDER.index("wall")
+                       and all(abs(reversed_mesh.data.vertices[index].co.y - 21.7) < 1e-5
+                               for index in face.vertices)]
+    require(len(reversed_returns) == 1
+            and abs(reversed_returns[0].area - 0.025 * 2.7) < 1e-5
+            and reversed_returns[0].normal.y > 0.99,
+            "reversing the thicknesses reverses the return's winding, not its coverage")
+    joined = {"id": "TEST_JOINED_ROOM", "kind": "room", "level": "TEST_LEVEL",
+              "boxes": [{"x": [0.0, 4.0], "z": [0.0, 4.0]},
+                        {"x": [0.0, 2.0], "z": [4.0, 6.0]}]}
+    joined_level = {"id": "TEST_LEVEL", "ffl": 0.0, "ceiling": 3.0}
+    joined_boxes = list(cell_boxes(joined, (0.0, 3.0)))
+    reset_scene()
+    joined_mesh = build_cell(
+        joined, (0.0, 3.0), neighbours=[(joined, box) for box in joined_boxes],
+        construction=plain, level=joined_level, levels={"TEST_LEVEL": joined_level},
+        cells_by_id={joined["id"]: joined})
+    joined_surfaces = []
+    for face in joined_mesh.data.polygons:
+        points = [(float(joined_mesh.data.vertices[index].co.x),
+                   float(joined_mesh.data.vertices[index].co.z),
+                   -float(joined_mesh.data.vertices[index].co.y)) for index in face.vertices]
+        joined_surfaces.append((face, points))
+    require(not any(face.material_index in (SURFACE_ORDER.index("wall"),
+                                           SURFACE_ORDER.index("exterior"))
+                    and abs(face.normal.y) > 0.99
+                    and min(p[0] for p in points) < 1.0 < max(p[0] for p in points)
+                    and all(3.8 < p[2] < 4.2 for p in points)
+                    for face, points in joined_surfaces),
+            "adjoining boxes of one room have no interior wall or false facade "
+            "across their shared opening")
+    joined_floors = [points for face, points in joined_surfaces
+                     if face.material_index == SURFACE_ORDER.index("floor")]
+    require(len(joined_floors) == 2
+            and abs(max(p[2] for p in joined_floors[0]) - 4.0) < 1e-5
+            and abs(min(p[2] for p in joined_floors[1]) - 4.0) < 1e-5,
+            "the two floor finishes meet at their shared centre line without a void strip")
+    require(any(face.material_index == SURFACE_ORDER.index("wall")
+                and face.normal.x < -0.99
+                and all(abs(p[0] - 1.85) < 1e-5 for p in points)
+                and abs(min(p[2] for p in points) - 3.85) < 1e-5
+                for face, points in joined_surfaces),
+            "the concave corner extends to the other inner face, closing the junction")
+    straight = [points for face, points in joined_surfaces
+                if face.material_index == SURFACE_ORDER.index("wall")
+                and face.normal.x > 0.99
+                and all(abs(p[0] - 0.15) < 1e-5 for p in points)]
+    require(len(straight) == 2
+            and abs(sum(max(p[2] for p in points) - min(p[2] for p in points)
+                        for points in straight) - 5.7) < 1e-5,
+            "a collinear continuation meets edge-to-edge without duplicate overlapping panels")
     reset_scene()
     obj = build_cell(subject, extent, neighbours=neighbours, construction=plain,
                      level=levels[subject["level"]], levels=levels, cells_by_id=cells)
@@ -4350,8 +4517,11 @@ def selftest(output: Path) -> int:
     # outward panels with different corner reach. This keeps its lower half from entering the
     # neighbour while its upper half closes the exposed weather corner.
     expected_outer_faces = 2
-    require(len(outside_runs) == 1 and len(polygons) == len(all_runs) + expected_outer_faces + 2,
-            f"one inner face per run, two split weather panels, a floor and a ceiling "
+    expected_returns = 1
+    require(len(outside_runs) == 1
+            and len(polygons) == len(all_runs) + expected_returns + expected_outer_faces + 2,
+            f"one inner face per run, one wall-thickness return, two split weather panels, "
+            f"a floor and a ceiling "
             f"({len(polygons)} for {len(all_runs)} runs and {len(outside_runs)} outside run)")
     require(sum(1 for face in polygons if face.normal.z > 0.99) == 1
             and sum(1 for face in polygons if face.normal.z < -0.99) == 1,
@@ -4367,9 +4537,9 @@ def selftest(output: Path) -> int:
     blender_centre = to_blender(*centre)
     inward = [face for face in polygons
               if sum(n * (c - p) for n, c, p in zip(face.normal, blender_centre, face.center)) > 0]
-    require(len(inward) == len(all_runs) + 2,
-            f"every inner face and both slabs look into the room ({len(inward)} of "
-            f"{len(all_runs) + 2})")
+    require(len(inward) == len(all_runs) + expected_returns + 2,
+            f"every inner face, the thickness return and both slabs look into the room "
+            f"({len(inward)} of {len(all_runs) + expected_returns + 2})")
     require(len(polygons) - len(inward) == expected_outer_faces,
             f"and every outer face looks away from it, at the weather "
             f"({len(polygons) - len(inward)} of {expected_outer_faces})")

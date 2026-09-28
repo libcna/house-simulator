@@ -4,7 +4,7 @@
 |---|---|
 | **Status** | Accepted |
 | **Date** | 2026-09-28 |
-| **Task** | `HOUSE-03640` (still open for wall-seam investigation) |
+| **Task** | `HOUSE-03640` |
 | **Supersedes in part** | [ADR-0004](ADR-0004-portal-visibility.md): the blanket shallow cap for clear glazed doors |
 | **Owns** | `cna-house.md` §16.4/§25.2; existing `SpatialIndex`, `PortalTraversal` and `PortalDepth` |
 
@@ -46,3 +46,9 @@ tests and the exact 24-pose fixture remain bounded; only one pose gains one exte
 cell (104 → 105 total sightings). No new renderer, content family or sibling change.
 Acceptance of the complete task still requires its remaining wall-seam investigation;
 this decision and passing unit tests alone do not close it.
+
+**Validation update, 2026-09-28:** the separate missing wall-return and same-room
+union defects are now reproduced, corrected and accepted from current day/night
+moving GPU images. The complete evidence is in
+[`house-03640-visibility.md`](../visual-review/house-03640-visibility.md); the
+decision above remains unchanged.

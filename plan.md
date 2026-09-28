@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers and a reusable kit), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (2026-09-22 reduction, retained breadth and maintenance mode; its former hour ceiling is superseded below) |
 | Scope policy | The owner explicitly superseded the former 280-hour ceiling on 2026-09-27 and requested further targeted corrections and a filming tour. Keep MUST/OPT boundaries explicit; do not infer other features |
-| Active plan | **36 open MUST tasks** in 16 milestones, including newly reported geometry and visibility defects and the owner-requested filming tour. Every active task's title and acceptance states the current work |
+| Active plan | **35 open MUST tasks** in 16 milestones, including the owner-requested car correction and filming tour. Every active task's title and acceptance states the current work |
 | Estimate to DONE | The old **44.84 / 52.75 / 76.03 agent-hour** forecast is a historical snapshot before the 2026-09-27 owner additions, not a current forecast or scheduling gate. Per-task `est:` remains for task sizing; see [Planning corrections](#planning-corrections) |
-| Current gate | **G5, M7 and M12 passed; M9 reopened for the owner-requested filming tour. CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator.** Main/attic/basement stairs, garage-loft floor and whole-house lighting are corrected under `HOUSE-03635`/`03638`/`03639`/`03636`; the doorway flash is corrected under `HOUSE-03637`. The next owner-priority defect is visibility holes `HOUSE-03640`. Desktop performance `HOUSE-02404` stays paused. `HOUSE-01920`/`HOUSE-01922` remain open; the owner reports the normal game is silent despite enabled audio |
+| Current gate | **G5, M7 and M12 passed; M9 reopened for the owner-requested filming tour. CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator.** Main/attic/basement stairs, garage-loft floor and whole-house lighting are corrected under `HOUSE-03635`/`03638`/`03639`/`03636`; doorway flashes and visibility/wall holes are corrected under `HOUSE-03637`/`03640`. Next is the owner-requested car correction `HOUSE-03641`, then the filming tour. Desktop performance `HOUSE-02404` stays paused. `HOUSE-01920`/`HOUSE-01922` remain open; the owner reports the normal game is silent despite enabled audio |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -400,7 +400,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M8](#m8--atmospheric-audio-essentials) — Atmospheric audio essentials | B | 03541–03570 | 4 | `HOUSE-01939` | D7 | 5 |
 | [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 1 | `HOUSE-03572` | D8 | 8 |
 | [M10](#m10--performance-measurement-driven) — Performance, measurement-driven | B | 03601–03630 | 2 | `HOUSE-02404` | D9 | 6 |
-| [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 5 | `HOUSE-03640` | D1, D2, D4, D6, D13, D14 | 9.25 |
+| [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 4 | `HOUSE-03641` | D1, D2, D4, D6, D13, D14 | 5.75 |
 | [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 0 | **done** · `HOUSE-02598` | D11 | 0 |
 | [M13](#m13--linux-desktop-release) — Linux desktop release | after M11 | 03701–03720 | 8 | `HOUSE-02797` | D9–D13 | 10.25 |
 | [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 5 | `HOUSE-02904` | D10b | 7.25 |
@@ -1392,12 +1392,12 @@ There is no zone rotation, no "polish everything" pass and no screenshot → twe
       note: (2026-09-27 owner report) These are architecture and traversal defects, not extra basement or garage content.
       done: (2026-09-28) Sixteen 181.25 mm rises and 250 mm goings preserve the 1 m wide south-running basement flight, with a 1 m level north foot and 0.90 m south exit. The well/head and standing point follow the corrected route; no controller tolerance is loosened. Raised child decks gain a parent-owned opaque underside/fascia/hatch reveals matching their existing slab depth, without duplicating the top finish; existing floor/guard OBBs are fully shared with the parent. The intended garage hatch remains open and the loft remains non-player-accessible (no ladder mechanic). Five normal-game controller probes pass, as do actual W/mouse basement ascent/descent and hall approach on virtual Xvfb. Twelve matched GPU day/night before/after pairs, real-input HUDs and precise causes are retained in `docs/visual-review/house-03639-basement-garage.md`. Unit 1504/1504, complete 90-cell collision tour (564 stops, 86635 steps, 14 detours), focused integration, shell/stair selftests and all 15 world rules pass. Strict XNA: 344 units clean with two workers; the inherited owner-owned `.claude` layout exception remains, and transient generated floor-plan drift is corrected.
 
-- [ ] HOUSE-03640 — Eliminate exterior/interior visibility holes and wall seams
+- [x] HOUSE-03640 — Eliminate exterior/interior visibility holes and wall seams
       dep: HOUSE-03637 · sys: visibility, world-content · plat: LNX · pri: MUST · zone: all · adv: D1, D2, D13 · est: 3.5
       accept: (1) reproduce the reported missing interior from an upper balcony and from the road looking into the enclosed garage, plus striped wall holes that show outdoors; (2) identify whether each is a portal/culling, missing shell or material error and correct the actual cause; (3) movement through and views from both sides remain complete by day and night, without reintroducing threshold flashes; (4) retain consecutive-frame or matched-pose before/after evidence and a focused regression for the root cause
       verify: actual offscreen GPU moving-view captures at the balcony, garage-road sightline and affected wall joins; visibility/shell tests
       note: (2026-09-27 owner report) The garage is an enclosed room inside the house, not a carport. A momentary view through it to the rear landscape is an S1/S2 rendering/architecture defect even when the interior appears after stepping closer.
-      progress: (2026-09-28, not complete) Real GPU reproduction isolates the west-road garage aperture, overlapping-storey balcony membership and the shallow clear-glass-door cap that discards the hall behind a landing. Existing lookup/traversal/depth code is corrected; ordinary-window and closed-opaque-door limits remain. Unit 1507/1507, focused visibility 36/36, renderer integration 9/9 and the complete 90-cell collision tour pass. Serial day/night motion covers 34 cases / 1224 frames (draws 5–433; largest HUD-cropped RGB mean difference 6.893/255). Matched views, 14 new motion sheets and exact failure/validation history are in `docs/visual-review/house-03640-visibility.md`. The reported striped wall holes still need a concrete affected join and actual reproduction/fix; the checkbox remains open and is the next priority. Shell selftests alone do not close that report.
+      done: (2026-09-28) Garage/balcony culling roots are corrected under ADR-0017 and reviewed on the real offscreen Radeon/OPENGLES3 game. Missing wall returns reproduce sky stripes in L0_LAUNDRY, L1_BATH3 and B1_UTILITY even without culling; matched wall-region sky pixels fall 1220/610/610 to zero. Moving review additionally catches L3_ROOM's coincident lit inner/unlit false exterior faces (also present in B1_UNDERSTAIR). Same-room joins now stay open with continuous floors, closed concave corners and non-overlapping straight panels. Eight focused geometric claims fail before/pass after; seven shells and 14 artificial/seven daylight atlases are regenerated, with no new slots or collision changes. Final 32 day/night wall-motion cases / 1296 frames pass actual projected movement and are visually reviewed: no sky strips or brown/black swaps; west attic ROI difference falls 24.983→4.266 by day and 14.937→2.716 at night. Separate earlier 34 door/balcony/garage cases / 1224 frames validate the culling correction, with the first eight door cases repeated after wall returns. Evidence, hashes, precise roots and failed draft captures are retained in docs/visual-review/house-03640-visibility.md. Final unit 1507/1507, full 90-cell tour (564 stops, 86635 steps, 14 detours), shell selftest/content deployment and 344 strict-XNA units pass. Full static has only the inherited owner-owned .claude layout failure; the extra measured-shell report retains only its historical refrigerator-opening limitation. No monitor windows, siblings or new systems. No FPS improvement claimed.
 
 - [ ] HOUSE-03641 — Bring the existing static car family up to the property's visual standard
       dep: HOUSE-00847, HOUSE-03640 · sys: content · plat: ALL · pri: MUST · zone: Z-GAR, Z-STR · adv: D4, D13 · est: 2.5
@@ -2284,6 +2284,23 @@ under R5.
 
 ## Planning corrections
 
+### PC-2026-09-28 — Missing wall returns and false walls inside one room
+
+* `HOUSE-03640` reproduces vertical sky strips in `L0_LAUNDRY`, `L1_BATH3` and
+  `B1_UTILITY`, including with culling disabled. Adjacent wall runs have different
+  thicknesses (300/250 or 300/150 mm); their offset inner faces need a perpendicular
+  return. The existing generator now emits it with the room's wall finish, preserving
+  crossing apertures and roof clipping. No authored wall dimensions or openings change.
+* Moving GPU review additionally reproduces broad brown/black flicker in `L3_ROOM`:
+  adjoining boxes of the same cell emit coincident lit inner and unlit false exterior
+  faces. `B1_UNDERSTAIR` has the same union error. These shared edges must be open,
+  as the existing collision already treats them. Remove the false panels/trim, meet
+  floor finishes at their common centre line, close concave corners and keep straight
+  continuations non-overlapping. This restores the authored room footprint, not a
+  room redesign or a new visibility subsystem. Focused before-failing geometry claims,
+  matched day/night images and moving-view evidence are recorded in
+  `docs/visual-review/house-03640-visibility.md`.
+
 ### PC-2026-09-28 — Exterior sightlines and overlapping balcony membership
 
 * `HOUSE-03640` reproduces the enclosed garage disappearing from the west road pose
@@ -2298,8 +2315,9 @@ under R5.
   contradicts D13 at this visible sightline. Clear glazed doors, shut or open, use the
   existing six-hop door allowance; ordinary windows and shut frosted glazing retain
   their old limits. Leaves still draw/occlude normally. This is a local correctness
-  correction, not new content or a new visibility subsystem. Wall-seam investigation
-  and current movement/day/night validation are still required before closing the task.
+  correction, not new content or a new visibility subsystem. Whole-task acceptance
+  additionally includes the reproduced wall-return/room-union defects and current
+  day/night movement review documented above; passing portal tests alone was insufficient.
   [ADR-0017](docs/decisions/ADR-0017-exterior-sightline-correctness.md) records the bounded
   amendment to ADR-0004; the original accepted record is not rewritten.
 

@@ -1,6 +1,96 @@
 # Current owner-visible defect work — 2026-09-28
 
+## Accepted visibility/wall correction — next HOUSE-03641
+
+**HOUSE-03640 is complete; 35 ACTIVE/MUST / 78 OPT remain.** Counts exclude the
+illustrative `HOUSE-09999` row in the plan's task-format example. Selection is the
+owner's S1/S2 override, not performance/Android ordering. The next explicit owner
+requirement is **HOUSE-03641**, the existing static car family's visual correction;
+then the newly unblocked **HOUSE-03572** filming tour. Do not add variants, driving
+or a vehicle/cutscene framework. The aggregate hour ceiling remains withdrawn.
+
+Garage/balcony culling, missing 25/75 mm wall returns and same-room false facades
+are all reproduced and corrected. Main/attic/basement stair and whole-house light
+corrections remain accepted; the final 90-cell collision tour passes again. The
+attic west wall no longer alternates brown/black: same-trajectory ROI difference
+falls 24.983→4.266/255 day, 14.937→2.716 night. The dormer openings and under-stair
+passage now have continuous floors and no false weather-facing wall. Real wall
+thickness changes receive aperture/roof-clipped returns. No collision tolerances
+or authored room dimensions change.
+
+Final deployment: seven changed shells, 14 artificial/seven daylight atlases;
+the two joined cells receive a second fresh bake after the return-only intermediate.
+Final **32 wall-motion cases / 1296 consecutive GPU frames**, both directions/day
+and night, were reviewed and pass >0.20 m projected-motion assertions. All six
+daytime brown-wall motion cases have zero sky pixels in their review ROI. Separate
+earlier **34 doorway/balcony/garage cases / 1224 frames** validate the culling fix;
+eight original door cases were repeated after wall returns. Do not misdescribe
+these as one final 66-case run. Final evidence and raw-sequence hashes are in
+`docs/visual-review/house-03640-visibility.md` and
+`house-03640/joined-room-fix/index.json`. `wall-joins/index.json` is deliberately
+preserved **intermediate failing visual evidence**, despite passing input assertions.
+
+Final unit **1507/1507**, complete tour **90 cells / 564 stops / 86635 steps /
+14 detours**, shell selftest (eight before-failing root claims), content build,
+deployment and **344 strict-XNA units** pass. Full `run_checks.sh` fails only on
+the owner-owned `.claude` root-layout entry; do not touch it. The additional
+`tools/world/verify_shell.py --report` retains its historical nested refrigerator
+opening failure only (85235 triangles, worst 3174/3500, no degenerate/reversed
+floor/ceiling faces). Against return-only geometry, 174 false triangles and one
+resident chunk are removed; upload 93.647856→93.636179 MiB. No FPS claim or honest
+uncontended performance baseline. `HOUSE-02404` remains paused for contention.
+
+All graphics remain **offscreen Radeon/OPENGLES3**, with DISPLAY/WAYLAND_DISPLAY
+unset; no monitor window. CPU affinity 0–3, two compile/strict workers, shared
+ccache and existing build directory. No Android run or sibling write here.
+The main game binary hash is unchanged; this continuation changes offline shell
+generation, existing lightmaps and the focused input/capture regression only.
+Commands/logs: `/tmp/house-03640-joined-{unit,tour,static-gates,world,deploy}.log`,
+`/tmp/house-03640-joined-motion-*.log`; final raw poses under
+`/tmp/house-03640/wall-joins-joined-final/`. Capture processes must remain serial.
+The following open-checkpoint paragraphs are historical investigation context,
+not the current task state.
+
 ## Exterior visibility correction checkpoint — task still open
+
+### Current wall-join continuation
+
+The wall-strip report is now reproduced, not unlocated. Normal GPU day views in
+`L0_LAUNDRY`, `L1_BATH3` and `B1_UTILITY` show sky through the 25 mm return omitted
+between 300/250 mm wall runs; it remains with culling disabled. The existing shell
+generator now closes thickness steps with correctly wound, aperture/roof-clipped
+returns. Eight originally classified transitions in seven cells were regenerated
+and their 14 artificial/seven daylight atlases rebaked. Matched brown-wall sky
+pixels fall 1220/610/610 to zero. Four return claims and full shell selftest pass.
+
+Actual moving review then caught another failure that passing arrival assertions
+missed: `L3_ROOM`'s adjacent boxes generated coincident lit inner and unlit false
+exterior panels at z=-17.15. The broad brown/black z-fight reaches a cropped
+consecutive RGB difference 24.983/255 by day, 14.937 at night. `B1_UNDERSTAIR` has
+the same multi-box error. Same-cell joins now emit neither wall nor weather skin;
+their floor finishes meet, concave corners close and straight continuations do not
+overlap. Four new union claims fail before/pass after. Fresh two-cell bakes,
+promotion, world rebuild and five-texture deployment pass. Current matched GPU
+poses show the open dormer bays and under-stair passage. **Final moving sequences
+and broader checks are still running; HOUSE-03640 remains open until reviewed.**
+
+Evidence: `docs/visual-review/house-03640-visibility.md`; return-only sheets/index
+in `house-03640/wall-joins/` are intermediate repro evidence, not acceptance of
+the attic fix. Final raw matched poses are
+`/tmp/house-03640/wall-joins-joined-final/`. Final motion logs use
+`/tmp/house-03640-joined-motion-*.log`; run captures serially (shared root PNGs).
+The extended matrix has 33 cases at two times, 2520 frames total; under-stair
+captures use 72 frames for normal auto-crouch speed, with the same >0.20 m
+projected-motion requirement. Do not replace real motion with a static PASS.
+
+The return-only unit suite was 1507/1507 and full 90-cell tour passed; the final
+two-cell tour passes again (564 stops, 86635 steps, 14 detours). The extra
+`verify_shell.py --report` diagnostic still fails solely on the historically
+recorded nested refrigerator opening (`FRIDGE_L0_KITCHEN`), not these joins.
+Owner `.claude` remains the only full-static failure in the previous run. All
+GPU runs remain invisible/offscreen, CPU 0–3, two compile/strict workers, shared
+cache/existing build. No Android emulator or sibling write. Selection remains
+the owner's S1/S2 priority override; cars/cinema/unrelated work wait for this fix.
 
 **HOUSE-03640 remains OPEN; 36 MUST / 78 OPT remain.** Selection is the explicit
 owner S1/S2 priority override, not ordinary performance/Android ordering. Continue
