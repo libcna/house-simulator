@@ -191,6 +191,21 @@ namespace
                 pass.Draw(context);
                 drawn = pass.ChunksDrawn();
                 states = pass.StateChanges();
+
+                // HOUSE-03644: handles belong to one table, not the process. A second
+                // owner has a different registration order, like another game instance.
+                cnahouse::debug::Counters second;
+                const auto sentinel = second.Resolve("other.owner");
+                second.Set(sentinel, 73);
+                cnahouse::rendering::PassContext next{device, tracker, second, 1.0f / 60.0f};
+                pass.Draw(next);
+                ASSERT_NE(second.Find("static.chunks"), nullptr);
+                ASSERT_NE(second.Find("static.triangles"), nullptr);
+                ASSERT_NE(second.Find("static.stateChanges"), nullptr);
+                EXPECT_EQ(second.Find("static.chunks")->current, 2);
+                EXPECT_EQ(second.Find("static.triangles")->current, 2);
+                EXPECT_EQ(second.Find("static.stateChanges")->current, 2);
+                EXPECT_EQ(second.Find("other.owner")->current, 73);
             });
         host.Run();
         ASSERT_TRUE(host.Ran()) << "the frame that does the drawing never ran";

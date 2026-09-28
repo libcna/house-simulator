@@ -1,5 +1,31 @@
 # Current owner-visible defect work — 2026-09-28
 
+## HOUSE-03644 validated — audible normal play next
+
+**33 ACTIVE/MUST / 78 OPT remain**, nominal **45.25 h**, practical estimate
+roughly 50–65 h / pessimistic around 77 h; owner withdrew the aggregate ceiling.
+R15 selected the reproduced D9/D11 diagnostic defect after cinema acceptance.
+Both render passes now resolve handles against the current counter table instead
+of function-static indices into an earlier game's vector. Two real-device
+independent-table checks fail before/pass after, preserve an unrelated sentinel
+and exact 2-chunk/2-triangle/state counts. Full isolated GPU integration now
+**163 PASS / 3 opt-in SKIP / 0 FAIL**, 275117 ms, including ordered walking →
+opaque diagnostics and C/Esc/Tab controls. No draw/material change or FPS claim.
+Current relinked counter/render-list units pass; the full 1516-unit suite passed
+at the preceding cinema checkpoint. Strict-XNA **349 clean / 109 destructor
+exemptions**; full static gates retain only inherited owner-owned `.claude` layout.
+Logs `/tmp/house-03644-{tables-before,ordered-walk-before,integration,static}.log`.
+
+Next **HOUSE-01920** and **HOUSE-01922**. Fresh production baseline actually
+records **digital silence** (163840 stereo sample frames, 3.41 s, peak/RMS -inf)
+through a temporary private null sink on the working owner PipeWire server:
+`/tmp/house-01920-before-audio.log` and `.pcm`. No monitor window, speaker output
+or default-sink change; the owned temporary module is automatically unloaded.
+The current game resolves 13 banks but still logs waiting for a user gesture in
+the explicit walk scene and has no production footstep/ambience playback. Merge
+the earlier own audio drafts carefully with current cinema; keep Web autoplay
+gated. Required subjective listening remains distinct from measured backend PCM.
+
 ## Accepted HOUSE-03572 — next diagnostic repair, then audible normal play
 
 **34 ACTIVE/MUST / 78 OPT remain**, nominal **45.75 h** (including newly opened

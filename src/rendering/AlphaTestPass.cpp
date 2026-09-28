@@ -202,9 +202,10 @@ namespace cnahouse::rendering
             first = last;
         }
 
-        static const debug::Counters::Handle kChunks = context.counters.Resolve("alpha.chunks");
-        static const debug::Counters::Handle kTriangles = context.counters.Resolve("alpha.triangles");
-        static const debug::Counters::Handle kBinds = context.counters.Resolve("alpha.materialBinds");
+        // The next game/context can have a different counter registration order.
+        const auto kChunks = context.counters.Resolve("alpha.chunks");
+        const auto kTriangles = context.counters.Resolve("alpha.triangles");
+        const auto kBinds = context.counters.Resolve("alpha.materialBinds");
         context.counters.Set(kChunks, static_cast<std::int64_t>(chunksDrawn_));
         context.counters.Set(kTriangles, static_cast<std::int64_t>(trianglesDrawn_));
         context.counters.Set(kBinds, static_cast<std::int64_t>(materialBinds_));

@@ -318,9 +318,10 @@ namespace cnahouse::rendering
             DrawDebug(context);
         }
 
-        static const debug::Counters::Handle kChunks = context.counters.Resolve("static.chunks");
-        static const debug::Counters::Handle kTriangles = context.counters.Resolve("static.triangles");
-        static const debug::Counters::Handle kStates = context.counters.Resolve("static.stateChanges");
+        // Handles are indices into this owner's table, never process-wide identifiers.
+        const auto kChunks = context.counters.Resolve("static.chunks");
+        const auto kTriangles = context.counters.Resolve("static.triangles");
+        const auto kStates = context.counters.Resolve("static.stateChanges");
         context.counters.Set(kChunks, static_cast<std::int64_t>(chunksDrawn_));
         context.counters.Set(kTriangles, static_cast<std::int64_t>(trianglesDrawn_));
         context.counters.Set(kStates, static_cast<std::int64_t>(stateChanges_));

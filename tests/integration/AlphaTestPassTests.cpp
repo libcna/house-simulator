@@ -130,6 +130,19 @@ namespace
                 EXPECT_EQ(counters.Find("alpha.chunks")->current, 2);
                 EXPECT_EQ(counters.Find("alpha.triangles")->current, 2);
                 EXPECT_EQ(counters.Find("alpha.materialBinds")->current, 1);
+
+                cnahouse::debug::Counters second;
+                const auto sentinel = second.Resolve("other.owner");
+                second.Set(sentinel, 73);
+                cnahouse::rendering::PassContext next{device, states, second, 1.0F / 60.0F};
+                pass.Draw(next);
+                ASSERT_NE(second.Find("alpha.chunks"), nullptr);
+                ASSERT_NE(second.Find("alpha.triangles"), nullptr);
+                ASSERT_NE(second.Find("alpha.materialBinds"), nullptr);
+                EXPECT_EQ(second.Find("alpha.chunks")->current, 2);
+                EXPECT_EQ(second.Find("alpha.triangles")->current, 2);
+                EXPECT_EQ(second.Find("alpha.materialBinds")->current, 1);
+                EXPECT_EQ(second.Find("other.owner")->current, 73);
             });
         host.Run();
 
@@ -137,7 +150,7 @@ namespace
         ASSERT_EQ(host.Failure(), "") << "the real device rejected the alpha-test pass";
         EXPECT_EQ(drawn, 2u);
         EXPECT_EQ(binds, 1u);
-        EXPECT_EQ(textureLookups, 1) << "one sorted material run performs one cache lookup";
+        EXPECT_EQ(textureLookups, 2) << "one lookup per sorted material run on each draw";
     }
 
 } // namespace
