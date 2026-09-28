@@ -900,17 +900,17 @@
       "asset": "MODEL_SHED_01", "eavesY": 2.35, "ridgeY": 2.85 },
 
     { "id": "STRUCT_BED_1", "footprint": { "x": [-19.4, -17.2], "z": [-37.7, -36.6] },
-      "asset": "MODEL_RAISED_BED_01", "height": 0.45 },
+      "asset": "MODEL_RAISED_BED_01", "height": 0.45, "footstepSurface": "soil" },
     { "id": "STRUCT_BED_2", "footprint": { "x": [-16.4, -14.2], "z": [-37.7, -36.6] },
-      "asset": "MODEL_RAISED_BED_01", "height": 0.45 },
+      "asset": "MODEL_RAISED_BED_01", "height": 0.45, "footstepSurface": "soil" },
     { "id": "STRUCT_BED_3", "footprint": { "x": [-19.4, -17.2], "z": [-40.2, -39.1] },
-      "asset": "MODEL_RAISED_BED_01", "height": 0.45 },
+      "asset": "MODEL_RAISED_BED_01", "height": 0.45, "footstepSurface": "soil" },
     { "id": "STRUCT_BED_4", "footprint": { "x": [-15.4, -13.2], "z": [-40.2, -39.1] },
-      "asset": "MODEL_RAISED_BED_01", "height": 0.45 },
+      "asset": "MODEL_RAISED_BED_01", "height": 0.45, "footstepSurface": "soil" },
     { "id": "STRUCT_BED_5", "footprint": { "x": [-15.4, -13.2], "z": [-43.6, -42.5] },
-      "asset": "MODEL_RAISED_BED_01", "height": 0.45 },
+      "asset": "MODEL_RAISED_BED_01", "height": 0.45, "footstepSurface": "soil" },
     { "id": "STRUCT_BED_6", "footprint": { "x": [-15.4, -13.2], "z": [-42.2, -41.1] },
-      "asset": "MODEL_RAISED_BED_01", "height": 0.45 },
+      "asset": "MODEL_RAISED_BED_01", "height": 0.45, "footstepSurface": "soil" },
 
     // On the garden's NORTH edge, against the rear boundary, where a 1.8 m panel shades nothing:
     // §14's -Z is north, so the sun is always on the other side of it from the beds.

@@ -10,12 +10,17 @@
 #include <fstream>
 #include <sstream>
 
+#include "System/IO/FileAccess.hpp"
+#include "System/IO/FileMode.hpp"
+#include "System/IO/FileStream.hpp"
+
 #include "cnahouse/app/CnaHouseGame.hpp"
 #include "cnahouse/app/CommandLine.hpp"
 #include "cnahouse/app/Settings.hpp"
 #include "cnahouse/audio/AudioSystem.hpp"
 #include "cnahouse/audio/FootstepDirector.hpp"
 #include "cnahouse/content/ContentRegistry.hpp"
+#include "cnahouse/physics/CollisionLoader.hpp"
 #include "cnahouse/ui/MenuStack.hpp"
 #include "cnahouse/util/Log.hpp"
 #include "cnahouse/world/WorldData.hpp"
@@ -198,7 +203,7 @@ namespace
             EXPECT_EQ(selected->bank, bank.id) << bank.surfaces.front();
         }
         EXPECT_EQ(mappedBanks, 6U);
-        EXPECT_EQ(mappedSurfaces, 22U);
+        EXPECT_EQ(mappedSurfaces, 24U);
     }
 
     TEST(AudioGateTests, TheWalkStartsOnlyTheFourRetainedAmbienceVoices)
@@ -217,6 +222,174 @@ namespace
         ASSERT_EQ(game.Audio().State(), AudioState::Ready) << game.Audio().Summary();
         EXPECT_TRUE(game.Audio().AmbienceStarted());
         EXPECT_EQ(game.Audio().AmbienceVoiceCount(), 4U);
+    }
+
+    TEST(AudioGateTests, EveryPhysicalTerrainMaterialHasFootsteps)
+    {
+        const std::string directory = std::string(CNAHOUSE_TEST_CONTENT_ROOT) + "/world";
+        cnahouse::world::WorldData::Contents contents;
+        const auto layout = cnahouse::world::WorldLoader::LoadAudio(directory, contents);
+        ASSERT_TRUE(layout) << layout.Error().ToString();
+        std::ifstream manifestFile(directory + "/assets.manifest.json");
+        ASSERT_TRUE(manifestFile.is_open());
+        std::ostringstream manifestText;
+        manifestText << manifestFile.rdbuf();
+        cnahouse::content::ContentRegistry registry;
+        const auto manifest = registry.LoadFromJson(manifestText.str(), "assets.manifest.json");
+        ASSERT_TRUE(manifest) << manifest.Error().ToString();
+        cnahouse::audio::AudioSystem audio(false);
+        audio.LoadBanks(contents.audioBanks, registry);
+        cnahouse::audio::FootstepDirector footsteps(audio, 0x01920ULL);
+        footsteps.BindBanks(contents.audioBanks);
+        System::IO::FileStream stream(
+            directory + "/collision.bin", System::IO::FileMode::Open, System::IO::FileAccess::Read);
+        const auto collision = cnahouse::physics::CollisionLoader::Read(stream, "collision.bin");
+        ASSERT_TRUE(collision) << collision.Error().ToString();
+        ASSERT_TRUE(collision->terrain.present);
+        ASSERT_FALSE(collision->terrain.materials.empty());
+        for (const auto surface : collision->terrain.materials)
+        {
+            cnahouse::audio::FootstepStep step;
+            step.surface = collision->SurfaceName(surface);
+            step.distanceMeters = cnahouse::audio::FootstepDirector::kWalkStrideMeters;
+            step.onGround = true;
+            footsteps.Reset();
+            EXPECT_TRUE(footsteps.Advance(step).has_value()) << step.surface;
+        }
+    }
+
+    TEST(AudioGateTests, RaisedVegetableBedWalkPlaysTheSoilBank)
+    {
+        Options options;
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+        options.scene = "walk";
+        options.player = std::array<float, 5>{-18.8F, 0.25F, -37.15F, 90.0F, 0.0F};
+        options.timeOfDay = 12.0F;
+        CnaHouseGame game(options, SmallSettings());
+
+        class BedWalk final : public cnahouse::player::IInputSource
+        {
+        public:
+            explicit BedWalk(const CnaHouseGame& game)
+                : game_(game)
+            {
+            }
+
+            void Update(float) override
+            {
+                state_ = {};
+                if (game_.FixedStepsForTesting() >= 120U)
+                {
+                    state_.move.Y = 0.4F;
+                }
+            }
+
+            const cnahouse::player::InputState& Current() const noexcept override
+            {
+                return state_;
+            }
+
+            bool LookAvailable() const noexcept override
+            {
+                return false;
+            }
+
+        private:
+            const CnaHouseGame& game_;
+            cnahouse::player::InputState state_;
+        } input(game);
+
+        game.SetInputSourceForTesting(&input);
+        game.SetFixedStepLimit(240U);
+        game.SetFrameLimit(4000U);
+        game.Run();
+        ASSERT_EQ(game.ExitCode(), 0);
+        ASSERT_EQ(game.Audio().State(), AudioState::Ready) << game.Audio().Summary();
+        EXPECT_TRUE(game.PlayerForTesting().onGround);
+        EXPECT_EQ(cnahouse::util::IdRegistry::NameOf(game.CellForTesting()), "EXT_GARDEN");
+        EXPECT_GT(game.PlayerForTesting().Feet().X, -18.05F);
+        System::IO::FileStream stream(std::string(CNAHOUSE_TEST_CONTENT_ROOT) + "/world/collision.bin",
+                                      System::IO::FileMode::Open,
+                                      System::IO::FileAccess::Read);
+        const auto collision = cnahouse::physics::CollisionLoader::Read(stream, "collision.bin");
+        ASSERT_TRUE(collision) << collision.Error().ToString();
+        EXPECT_EQ(collision->SurfaceName(game.PlayerForTesting().surface), "soil");
+        EXPECT_GT(game.Audio().OneShotsPlayed(), 0U);
+    }
+
+    TEST(AudioGateTests, NormalTitleAndStartOpenAudioAndPlayTheProductionWalk)
+    {
+        // The owner's normal launch must work, not only the CLI scene shortcut.
+        Options options;
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+        options.player = std::array<float, 5>{0.0F, -2.30F, -15.0F, 0.0F, 0.0F};
+        options.timeOfDay = 12.0F;
+        CnaHouseGame game(options, SmallSettings());
+
+        class StartAndWalk final : public cnahouse::player::IInputSource
+        {
+        public:
+            explicit StartAndWalk(CnaHouseGame& game)
+                : game_(game)
+            {
+            }
+
+            void Update(float) override
+            {
+                state_ = {};
+                if (frame_ == 0U)
+                {
+                    EXPECT_EQ(game_.Audio().State(), AudioState::Waiting);
+                    EXPECT_FALSE(game_.Audio().AmbienceStarted());
+                    state_.anyPressed = true;
+                }
+                else if (frame_ == 1U)
+                {
+                    EXPECT_EQ(game_.Audio().State(), AudioState::Ready) << game_.Audio().Summary();
+                    EXPECT_FALSE(game_.Audio().AmbienceStarted());
+                    ASSERT_NE(game_.Menus().Top(), nullptr);
+                    EXPECT_EQ(game_.Menus().Top()->Id(), cnahouse::ui::ScreenId::MainMenu);
+                    state_.uiAcceptPressed = true;
+                }
+                else if (game_.FixedStepsForTesting() >= 120U)
+                {
+                    state_.move.Y = 1.0F;
+                }
+                else
+                {
+                    EXPECT_EQ(game_.Audio().OneShotsPlayed(), 0U);
+                }
+                ++frame_;
+            }
+
+            const cnahouse::player::InputState& Current() const noexcept override
+            {
+                return state_;
+            }
+
+            bool LookAvailable() const noexcept override
+            {
+                return false;
+            }
+
+        private:
+            CnaHouseGame& game_;
+            cnahouse::player::InputState state_;
+            unsigned int frame_ = 0U;
+        } input(game);
+
+        game.SetInputSourceForTesting(&input);
+        game.SetFixedStepLimit(480U);
+        game.SetFrameLimit(4000U);
+        game.Run();
+        ASSERT_EQ(game.ExitCode(), 0);
+        ASSERT_EQ(game.Audio().State(), AudioState::Ready) << game.Audio().Summary();
+        EXPECT_TRUE(game.Menus().Empty());
+        EXPECT_TRUE(game.Audio().AmbienceStarted());
+        EXPECT_EQ(game.Audio().AmbienceVoiceCount(), 4U);
+        EXPECT_TRUE(game.Audio().BankProblems().empty());
+        EXPECT_GT(game.Audio().OneShotsPlayed(), 0U);
+        EXPECT_LT(game.PlayerForTesting().Feet().Z, -18.0F);
     }
 
     TEST(AudioGateTests, OrdinaryControllerWalkPlaysFootstepsButStandingDoesNot)

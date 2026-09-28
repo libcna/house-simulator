@@ -366,6 +366,10 @@
           "footprint": {
             "$ref": "#/$defs/box"
           },
+          "footstepSurface": {
+            "minLength": 1,
+            "type": "string"
+          },
           "height": {
             "exclusiveMinimum": 0,
             "type": "number"

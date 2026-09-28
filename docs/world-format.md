@@ -699,7 +699,11 @@ section while retaining the fixed per-section variation.
 
 `HOUSE-00390` added four arrays the file needed and did not have: `gates` (§11.2's three),
 `kerbs` (§11.4's two), `paths` (the walk, the driveway and its apron, the two sidewalks, the verge
-and the garden path) and `structures` (the shed). Rule 6 checks that a gate hangs in a declared
+and the garden path) and `structures` (the shed). A non-building structure may declare
+`footstepSurface` for its collision contact, such as `soil` on a raised vegetable bed;
+older rows retain the generic `structure` contact. This changes audio classification,
+not footprint, height or traversal. The six-category audio mapping gate also covers
+terrain materials and these declared contacts. Rule 6 checks that a gate hangs in a declared
 fence and that a structure's `cell` exists; rule 10 checks that an enterable structure's footprint
 **contains** that cell's, because a shell that does not hold its own interior is a building drawn
 beside its inside.

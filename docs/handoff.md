@@ -1,6 +1,30 @@
 # Current owner-visible defect work — 2026-09-28
 
-## Current continuation: deterministic doorway regression accepted
+## Current continuation: six footstep categories accepted in normal gameplay
+
+R15/D7 and the owner's silent-bed report selected `HOUSE-01920`. The normal
+title/Start regression opens audio only after the gesture and then plays real
+controller footsteps. Actual PipeWire output is nonzero, peak -18.788821 dBFS /
+RMS -46.884028 dBFS; only the child PID's stream was privately routed and its
+temporary module removed. No owner volumes, defaults or other streams changed.
+
+The owner confirmed wood, carpet, tile, concrete and grass, but not the garden.
+Before-fix GPU/controller evidence proves `structure` contact and zero steps.
+Six raised beds now author `soil`; `mulch` and `lawn_worn` reuse the existing
+gravel/grass banks. Shape dimensions and the six direct-NOX sample sets/gains are
+unchanged. The world schema/collision writer/mapping gate now cover these actual
+contacts and all eight terrain materials (24 aliases total). No new assets,
+derivatives, runtime manager or format version. After fresh content deployment
+and restart the owner confirms **“Ano, v záhonu jsou nyní kroky slyšet”**.
+All six listening categories are therefore accepted, not inferred from dummy audio.
+
+Both physical audio regressions and the doorway regression pass five repeats.
+Complete final unit/integration/static results remain the successful snapshot
+below. Evidence and rejected drafts: `docs/audio-playback-review.md`.
+**32 MUST / 78 OPT remain, nominal 44.25 h** at this checkpoint. The owner's
+separate ambience confirmation is also ready for its own completion checkpoint.
+
+## Earlier continuation: deterministic doorway regression accepted
 
 Starting HEAD `9e937ca48415d81c1617d1c54302957131bab820`, clean `develop`.
 R15/R16/D11 selected `HOUSE-03682` after the full GPU suite exposed an input

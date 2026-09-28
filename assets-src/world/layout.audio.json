@@ -56,7 +56,7 @@
       "SOUND_NOX_FOOTSTEP_ROCK_WALK_FOOTSTEPS_ROCK_WALK_08"
     ] },
     { "id": "BANK_FOOTSTEP_GRAVEL", "gain": 0.72,
-      "surfaces": ["gravel", "mud", "soil"],
+      "surfaces": ["gravel", "mud", "mulch", "soil"],
       "samples": [
       "SOUND_NOX_FOOTSTEP_GRAVEL_WALK_FOOTSTEPS_GRAVEL_WALK_01",
       "SOUND_NOX_FOOTSTEP_GRAVEL_WALK_FOOTSTEPS_GRAVEL_WALK_02",
@@ -65,7 +65,7 @@
       "SOUND_NOX_FOOTSTEP_GRAVEL_WALK_FOOTSTEPS_GRAVEL_WALK_08",
       "SOUND_NOX_FOOTSTEP_GRAVEL_WALK_FOOTSTEPS_GRAVEL_WALK_09"
     ] },
-    { "id": "BANK_FOOTSTEP_GRASS", "gain": 0.68, "surfaces": ["grass"], "samples": [
+    { "id": "BANK_FOOTSTEP_GRASS", "gain": 0.68, "surfaces": ["grass", "lawn_worn"], "samples": [
       "SOUND_NOX_FOOTSTEP_GRASS_WALK_FOOTSTEPS_WALK_GRASS_MONO_09",
       "SOUND_NOX_FOOTSTEP_GRASS_WALK_FOOTSTEPS_WALK_GRASS_MONO_11",
       "SOUND_NOX_FOOTSTEP_GRASS_WALK_FOOTSTEPS_WALK_GRASS_MONO_26",

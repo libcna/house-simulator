@@ -501,6 +501,7 @@ def build() -> dict[str, dict]:
                 ["id", "footprint"],
                 {"id": ID, "cell": ID_OR_NULL, "footprint": BOX, "asset": ID_OR_NULL,
                  "eavesY": NUM, "ridgeY": NUM,
+                 "footstepSurface": {"type": "string", "minLength": 1},
                  "height": {"type": "number", "exclusiveMinimum": 0}})},
             # `HOUSE-00776`: §37.3's splash points and §37.4's trickle emitters. The pipes have
             # been drawn since `HOUSE-00468` and nothing outside the shell knew they existed;

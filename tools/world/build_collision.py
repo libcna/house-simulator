@@ -1441,7 +1441,7 @@ def build_exterior(layout, shapes: Shapes, per_cell: dict[str, list[int]], stats
                    for z in (z0, z1, (z0 + z1) / 2.0))
         place(((x0 + x1) / 2.0, base + height / 2.0, (z0 + z1) / 2.0),
               ((x1 - x0) / 2.0, height / 2.0, (z1 - z0) / 2.0), 0.0,
-              "structure", KIND_EXTERIOR, "structureObbs")
+              row.get("footstepSurface") or "structure", KIND_EXTERIOR, "structureObbs")
 
     # §49.2's tree TRUNKS. A canopy is not collision: a body walks under a maple.
     for group in exterior.get("vegetation", []):
@@ -3209,6 +3209,21 @@ def selftest() -> int:
             rows_exterior = layout_io.load_layout(authored, ["cells"])
             rows_exterior["exterior"] = layout_io.load_file(
                 authored / layout_io.FILES["exterior"][0], "exterior")
+            for structure in rows_exterior["exterior"].get("structures", []):
+                surface = structure.get("footstepSurface")
+                if not surface or structure.get("cell"):
+                    continue
+                footprint = structure["footprint"]
+                cx = sum(footprint["x"]) / 2.0
+                cz = sum(footprint["z"]) / 2.0
+                hx = (footprint["x"][1] - footprint["x"][0]) / 2.0
+                hz = (footprint["z"][1] - footprint["z"][0]) / 2.0
+                require(any(abs(record[0][0] - cx) < EPS and abs(record[0][2] - cz) < EPS
+                            and abs(record[1][0] - hx) < EPS and abs(record[1][2] - hz) < EPS
+                            and record[4] == KIND_EXTERIOR
+                            and house_shapes.surfaces[record[3]] == surface
+                            for record in house_shapes.obbs),
+                        f"{structure['id']} collision carries its authored {surface} footstep surface")
             outdoor = {row["id"] for row in house["cells"] if row["outdoors"]}
             open_cells = {cell_id for cell_id, _boxes in _exterior_cells(rows_exterior)}
             ground_open_cells = {
