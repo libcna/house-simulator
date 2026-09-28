@@ -1,0 +1,136 @@
+{
+  "renderer": "Radeon 780M / OPENGLES3 / SDL offscreen + surfaceless EGL",
+  "physicalDisplayUsed": false,
+  "beforeSceneCommit": "9ecd655",
+  "afterSceneBaseCommit": "b297bb4",
+  "baselineNote": "Matched vehicle poses; intervening foyer/corner repair is not a vehicle change. No whole-frame/FPS improvement is inferred.",
+  "gameBinarySha256": "a0e68e4113b7a343068b3df47da7d92ff320f1a20791c58cadda030f0d3a6ce4",
+  "pairs": [
+    {
+      "pose": "approach-property-day",
+      "before": "/tmp/house-03641/before/approach-property-day.png",
+      "after": "/tmp/house-03641/after/approach-property-day.png",
+      "beforeSha256": "a2cfd112d9b818fa5b119e04aad2948b38166e84686fbdf4a77f3e3c7ef1f59c",
+      "afterSha256": "dcf53eda8171501a2441b060a3aaf8dd07658cd87888b9408b24223674d55fee",
+      "pair": "approach-property-day-pair.webp"
+    },
+    {
+      "pose": "approach-property-night",
+      "before": "/tmp/house-03641/before/approach-property-night.png",
+      "after": "/tmp/house-03641/after/approach-property-night.png",
+      "beforeSha256": "3887605b7c9c8f06f9cab399c98d3f38c79b4edb07eac93c083a367f82816b45",
+      "afterSha256": "cb4246f1dd302272e7024a7bd2b019ef43c246e2282c587e33445275a027a994",
+      "pair": "approach-property-night-pair.webp"
+    },
+    {
+      "pose": "garage-front-quarter-day",
+      "before": "/tmp/house-03641/before/garage-front-quarter-day.png",
+      "after": "/tmp/house-03641/after/garage-front-quarter-day.png",
+      "beforeSha256": "bde5c665f5f444049e204818b4fffd2f66883f751b2e7680144cfb994c89f3c4",
+      "afterSha256": "762d54bc596dbf5a60b01cc45c3ba1926d9cf43504e0f3734185f963e0cb33ae",
+      "pair": "garage-front-quarter-day-pair.webp"
+    },
+    {
+      "pose": "garage-front-quarter-night",
+      "before": "/tmp/house-03641/before/garage-front-quarter-night.png",
+      "after": "/tmp/house-03641/after/garage-front-quarter-night.png",
+      "beforeSha256": "94177411ebbe41b3abe17e7f3235f4ae1111f9d1453f8669d3273c7d7c749ce4",
+      "afterSha256": "da87d7151e5b3bab93f91e91ec27db571251a3cf6713b3c27933d84a01b0f37d",
+      "pair": "garage-front-quarter-night-pair.webp"
+    },
+    {
+      "pose": "garage-rear-quarter-day",
+      "before": "/tmp/house-03641/before/garage-rear-quarter-day.png",
+      "after": "/tmp/house-03641/after/garage-rear-quarter-day.png",
+      "beforeSha256": "6f4875c32eced52972b8166d287223fe7364d82dac9656396c2dc9fff26ac306",
+      "afterSha256": "df05b0fb109b5f4301862a03df3423f35a2f810cb43ef30928cccbacd6479845",
+      "pair": "garage-rear-quarter-day-pair.webp"
+    },
+    {
+      "pose": "garage-rear-quarter-night",
+      "before": "/tmp/house-03641/before/garage-rear-quarter-night.png",
+      "after": "/tmp/house-03641/after/garage-rear-quarter-night.png",
+      "beforeSha256": "8d70520c5f267b9695beb1a72e2e1fff7183a06679f9a616b158b704df7b389b",
+      "afterSha256": "2a16ff2ab5bb9230a719b202afbb86174f78ca1eb3bddde05d6d91174b260873",
+      "pair": "garage-rear-quarter-night-pair.webp"
+    },
+    {
+      "pose": "road-blue-day",
+      "before": "/tmp/house-03641/before/road-blue-day.png",
+      "after": "/tmp/house-03641/after/road-blue-day.png",
+      "beforeSha256": "a667f744feb5a642134a39a8fdf238f6e750271de7ec1c522e6b43f5f04afd68",
+      "afterSha256": "39895aed6e23f5bb3d7be23144de4e50c38bc35b7c6100895d2a40daf0b74922",
+      "pair": "road-blue-day-pair.webp"
+    },
+    {
+      "pose": "road-blue-night",
+      "before": "/tmp/house-03641/before/road-blue-night.png",
+      "after": "/tmp/house-03641/after/road-blue-night.png",
+      "beforeSha256": "b265e752960fd11e038b68af272d69575ff045e56ce8ac2d5e8a1ba4e1bc4cf0",
+      "afterSha256": "e13d6bba4bbcba6cdcbc1464a5ba149905d233787950d5088556ba809353a60e",
+      "pair": "road-blue-night-pair.webp"
+    },
+    {
+      "pose": "road-red-day",
+      "before": "/tmp/house-03641/before/road-red-day.png",
+      "after": "/tmp/house-03641/after/road-red-day.png",
+      "beforeSha256": "58f933207578593bdcc3038773e03e7ef9770de0b97e8ab1bd5ce7282394cc4b",
+      "afterSha256": "80b92b47bc9f81abdab7c52009f56c9f30ec98954797b8e0347c95838075be8a",
+      "pair": "road-red-day-pair.webp"
+    },
+    {
+      "pose": "road-red-night",
+      "before": "/tmp/house-03641/before/road-red-night.png",
+      "after": "/tmp/house-03641/after/road-red-night.png",
+      "beforeSha256": "d04d024787ed52440e674394b60932ba8a9bf4ca0e4cd5505155ecd432abcb4f",
+      "afterSha256": "869de981993b643b4431ba8100633da997aeb5b7255e8c321a99cadabcf5c30b",
+      "pair": "road-red-night-pair.webp"
+    },
+    {
+      "pose": "road-silver-day",
+      "before": "/tmp/house-03641/before/road-silver-day.png",
+      "after": "/tmp/house-03641/after/road-silver-day.png",
+      "beforeSha256": "59bc1ac7b2313ea7beeb774ee172f6ebf837122754043ed8c526f894a0259971",
+      "afterSha256": "9899bd5b38d063c477b73d3d502d309e7f04c6d668d3f8dc21ffbcc3de08beb8",
+      "pair": "road-silver-day-pair.webp"
+    },
+    {
+      "pose": "road-silver-night",
+      "before": "/tmp/house-03641/before/road-silver-night.png",
+      "after": "/tmp/house-03641/after/road-silver-night.png",
+      "beforeSha256": "4e8a0c3c2dffbcb6f2826f1f3785edbf1bd3c7eb31c0b08bafe58e527a61978e",
+      "afterSha256": "1d4f2550ae4b28c4b3b5384ad19315192fcab072a56e5c32ecf9f0f4c64032a6",
+      "pair": "road-silver-night-pair.webp"
+    },
+    {
+      "pose": "road-van-day",
+      "before": "/tmp/house-03641/before/road-van-day.png",
+      "after": "/tmp/house-03641/after/road-van-day.png",
+      "beforeSha256": "0a3c02f6b66300026618b75742df46646ecbefb7bdc23c9da9a17208e796b197",
+      "afterSha256": "7523f1649d338ee5ce2047df5aad5d6bf25f1a43045e1d300266626d270b3967",
+      "pair": "road-van-day-pair.webp"
+    },
+    {
+      "pose": "road-van-night",
+      "before": "/tmp/house-03641/before/road-van-night.png",
+      "after": "/tmp/house-03641/after/road-van-night.png",
+      "beforeSha256": "d694eb6b5a9b269edac44f0a5f3667dd11dd0510c1c8282bf48a01f404b69627",
+      "afterSha256": "2d1a035920486b8224855bb8115f4c0854664ed8fc83b49acdb880a7e378e413",
+      "pair": "road-van-night-pair.webp"
+    }
+  ],
+  "additionalFinalVanViews": [
+    {
+      "pose": "van-unobstructed-day",
+      "after": "/tmp/house-03641/after/van-unobstructed-day.png",
+      "retained": "van-unobstructed-day.webp",
+      "sha256": "459776dd4693ae5306de6e9da1500cc32a1f97fbe7db8a2bb8173ef331db9a17"
+    },
+    {
+      "pose": "van-unobstructed-night",
+      "after": "/tmp/house-03641/after/van-unobstructed-night.png",
+      "retained": "van-unobstructed-night.webp",
+      "sha256": "4e17fe396415364b8a52b773f60427fdf0fba407b2f082cf7da9f27f859985cf"
+    }
+  ]
+}

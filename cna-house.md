@@ -2103,6 +2103,17 @@ becoming unlimited fragmentation:
 The exceptions are declared in `tools/world/build_chunks.py`'s `CHUNK_BUDGET_EXCEPTIONS`, which is
 where the partitioning is done and the only place that can measure them. Measured 2026-09-10:
 
+Owner-requested `HOUSE-03641` (2026-09-28) corrects the existing parked estate/van
+family, not its placements or 12-triangle collision proxies. Rounded separate tyres,
+real arch voids, tapered glazing and bounded body detail use the existing finishes;
+red rear lamps reuse `MAT_VEHICLE_BODY_RED`. The measured garage ceiling moves
+**20→21**, and the outer neighbourhood `EXT_WORLD` ceiling **30→31**, each exactly
+one additional reused material group. `EXT_ROAD` already batches that red finish.
+There is no vertex/Reach-cap split, new material definition, new variant or vehicle
+runtime. Normal six-chunk targets, stale exceptions and over-ceiling failures remain.
+The same four source models stay below 2200 visible triangles each (1980 estate,
+1852 van), with no additional textures.
+
 | Cell | Chunks | Why |
 |---|---|---|
 | `EXT_ROAD` | 13 | not a room: the residency key for the property's outdoors — the carriageway's six ground and marking materials, the fence and gate on it, and `HOUSE-00494`'s two roofs and chimney |

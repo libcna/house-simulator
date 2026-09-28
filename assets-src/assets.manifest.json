@@ -1394,13 +1394,13 @@
       "id": "MODEL_DELIVERY_VAN_WHITE",
       "category": "delivery-van",
       "sourceFile": "assets-src/Models/Furniture/Vehicles/delivery_van_white.glb",
-      "sourceSha256": "3b73ffc45b5227137cc5f96a3f1e93ac1209c449305cc30278f25432d4adfbdf",
+      "sourceSha256": "ff4f1b71d08a1057b8c444a97b3e65433bd24db105c935374f1f4b8a2e3bb3a3",
       "contentName": "Models/Furniture/Vehicles/delivery_van_white",
       "kind": "model",
       "residencyPack": "exterior",
       "origin": {
         "kind": "generated",
-        "name": "Low-detail delivery van family, white tint",
+        "name": "Shared residential delivery van family, white tint",
         "licence": "Ms-PL",
         "licenceFile": "LICENSE",
         "attribution": "",
@@ -1408,18 +1408,18 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Project-authored deterministic box/prism geometry from tools/world/neighbourhood_gen.py for HOUSE-00847. The van shares the estate family's wheels, glazing, lamps and construction; no third-party mesh or texture is used."
+        "note": "Project-authored static family from tools/world/neighbourhood_gen.py, introduced by HOUSE-00847 and corrected by HOUSE-03641. The van shares the estate's open wheel arches, rounded tyres, five-spoke rims, tapered glazing and lamps. Same placement and 12-triangle collision proxy; no third-party mesh, texture or new vehicle runtime is used."
       },
       "geometry": {
         "unitScale": 1,
         "upAxis": "Y",
         "boundsMetres": [
-          2.26,
+          2.272,
           2.4,
-          5.424
+          5.436
         ],
         "triangles": {
-          "LOD0": 212
+          "LOD0": 1852
         },
         "collision": "MODEL_DELIVERY_VAN_WHITE_COL"
       },
@@ -1427,6 +1427,7 @@
         "MAT_FURNITURE_PIANO_EBONITE": "MAT_FURNITURE_PIANO_EBONITE",
         "MAT_KITCHEN_HARDWARE_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
         "MAT_KITCHEN_OVEN_GLASS": "MAT_KITCHEN_OVEN_GLASS",
+        "MAT_VEHICLE_BODY_RED": "MAT_VEHICLE_BODY_RED",
         "MAT_VEHICLE_BODY_WHITE": "MAT_VEHICLE_BODY_WHITE",
         "MAT_WINDOW_FRAME_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
@@ -4696,13 +4697,13 @@
       "id": "MODEL_PARKED_CAR_BLUE",
       "category": "car",
       "sourceFile": "assets-src/Models/Furniture/Vehicles/estate_blue.glb",
-      "sourceSha256": "32fffa42f40ebaaa447b485dd4f549e73475970b7033e4e1bf44dab3b1d67ce6",
+      "sourceSha256": "abacc63f492dcfa266a833a4e1e9f8021eb5296cafd6ecb5061d786a6a00735a",
       "contentName": "Models/Furniture/Vehicles/estate_blue",
       "kind": "model",
       "residencyPack": "core",
       "origin": {
         "kind": "generated",
-        "name": "Low-detail estate vehicle family, blue tint",
+        "name": "Shared residential estate vehicle family, blue tint",
         "licence": "Ms-PL",
         "licenceFile": "LICENSE",
         "attribution": "",
@@ -4710,18 +4711,18 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Project-authored deterministic box/prism geometry from tools/world/neighbourhood_gen.py for HOUSE-00847. The household car reuses the same estate body as the three street tint variants and adds only the model-owned 12-triangle collision proxy; no third-party mesh or texture is used."
+        "note": "Project-authored static family from tools/world/neighbourhood_gen.py, introduced by HOUSE-00847 and corrected by HOUSE-03641: open wheel arches, rounded tyres/five-spoke rims, sloped glazing, painted pillars, bonnet, mirrors, seams and lamps. The garage and street reuse one estate body in three existing tints. Same placement and 12-triangle collision proxy; no third-party mesh, texture or new vehicle runtime is used."
       },
       "geometry": {
         "unitScale": 1,
         "upAxis": "Y",
         "boundsMetres": [
-          1.96,
+          1.98,
           1.5,
-          4.424
+          4.438
         ],
         "triangles": {
-          "LOD0": 248
+          "LOD0": 1980
         },
         "collision": "MODEL_PARKED_CAR_BLUE_COL"
       },
@@ -4730,6 +4731,7 @@
         "MAT_KITCHEN_HARDWARE_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
         "MAT_KITCHEN_OVEN_GLASS": "MAT_KITCHEN_OVEN_GLASS",
         "MAT_VEHICLE_BODY_BLUE": "MAT_VEHICLE_BODY_BLUE",
+        "MAT_VEHICLE_BODY_RED": "MAT_VEHICLE_BODY_RED",
         "MAT_WINDOW_FRAME_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
@@ -4741,13 +4743,13 @@
       "id": "MODEL_PARKED_CAR_RED",
       "category": "car",
       "sourceFile": "assets-src/Models/Furniture/Vehicles/estate_red.glb",
-      "sourceSha256": "82bc5258d2957c611eccc24d623292a25747785fbfb7da352e2aeb8d3beb07cd",
+      "sourceSha256": "9dcd884dd71fd8b16a5e4c54b2fd19a58c191620b0595d804dbeec85ee2bd14a",
       "contentName": "Models/Furniture/Vehicles/estate_red",
       "kind": "model",
       "residencyPack": "exterior",
       "origin": {
         "kind": "generated",
-        "name": "Low-detail estate vehicle family, red tint",
+        "name": "Shared residential estate vehicle family, red tint",
         "licence": "Ms-PL",
         "licenceFile": "LICENSE",
         "attribution": "",
@@ -4755,18 +4757,18 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Project-authored deterministic geometry from tools/world/neighbourhood_gen.py for HOUSE-00847. This is the shared estate body under a red paint material; no third-party mesh or texture is used."
+        "note": "The shared project-authored estate from tools/world/neighbourhood_gen.py, introduced by HOUSE-00847 and corrected by HOUSE-03641, under its existing red paint. Same static placement and 12-triangle collision proxy; no third-party mesh or texture is used."
       },
       "geometry": {
         "unitScale": 1,
         "upAxis": "Y",
         "boundsMetres": [
-          1.96,
+          1.98,
           1.5,
-          4.424
+          4.438
         ],
         "triangles": {
-          "LOD0": 248
+          "LOD0": 1980
         },
         "collision": "MODEL_PARKED_CAR_RED_COL"
       },
@@ -4785,13 +4787,13 @@
       "id": "MODEL_PARKED_CAR_SILVER",
       "category": "car",
       "sourceFile": "assets-src/Models/Furniture/Vehicles/estate_silver.glb",
-      "sourceSha256": "4e63b6d5ac66f283ac1ace6f3cdd34e600929d0d8548d55247f2d50eb0429430",
+      "sourceSha256": "50fff3dcae87d62b3824802e642574c82817bdb65202d9e272e6c81c245bae88",
       "contentName": "Models/Furniture/Vehicles/estate_silver",
       "kind": "model",
       "residencyPack": "exterior",
       "origin": {
         "kind": "generated",
-        "name": "Low-detail estate vehicle family, silver tint",
+        "name": "Shared residential estate vehicle family, silver tint",
         "licence": "Ms-PL",
         "licenceFile": "LICENSE",
         "attribution": "",
@@ -4799,18 +4801,18 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Project-authored deterministic geometry from tools/world/neighbourhood_gen.py for HOUSE-00847. This is the shared estate body under a silver paint material; no third-party mesh or texture is used."
+        "note": "The shared project-authored estate from tools/world/neighbourhood_gen.py, introduced by HOUSE-00847 and corrected by HOUSE-03641, under its existing silver paint. Same static placement and 12-triangle collision proxy; no third-party mesh or texture is used."
       },
       "geometry": {
         "unitScale": 1,
         "upAxis": "Y",
         "boundsMetres": [
-          1.96,
+          1.98,
           1.5,
-          4.424
+          4.438
         ],
         "triangles": {
-          "LOD0": 248
+          "LOD0": 1980
         },
         "collision": "MODEL_PARKED_CAR_SILVER_COL"
       },
@@ -4819,6 +4821,7 @@
         "MAT_KITCHEN_HARDWARE_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
         "MAT_KITCHEN_OVEN_GLASS": "MAT_KITCHEN_OVEN_GLASS",
         "MAT_VEHICLE_BODY_SILVER": "MAT_VEHICLE_BODY_SILVER",
+        "MAT_VEHICLE_BODY_RED": "MAT_VEHICLE_BODY_RED",
         "MAT_WINDOW_FRAME_WHITE": "MAT_WINDOW_FRAME_WHITE"
       },
       "usedIn": [
@@ -24492,7 +24495,7 @@
       "id": "TEXTURE_L0_GARAGE_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_GARAGE_LM_DAY.png",
-      "sourceSha256": "1e7fa78f84bb81372f1dfee6a2819427b0684ee387af357749acc9d38c449396",
+      "sourceSha256": "5cbf9543d4c65ec7faa9e835a7a894e90e299ad0b23d821d7909ea400a536be7",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24546,7 +24549,7 @@
       "id": "TEXTURE_L0_GARAGE_LM_LG_L0_GARAGE_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_GARAGE_LM_LG_L0_GARAGE_MAIN.png",
-      "sourceSha256": "c65bbe0ad5a353773bb10565e122559cbf2523a3173407b7168384a41bc1505e",
+      "sourceSha256": "4cee2017ac9300164b6e5504a138e41798ea527233027a498f2fe1fa00abe1b9",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24573,7 +24576,7 @@
       "id": "TEXTURE_L0_GARAGE_LM_LG_L0_GARAGE_OPENER",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_GARAGE_LM_LG_L0_GARAGE_OPENER.png",
-      "sourceSha256": "b6b906d64a73cef02bd9c7dfb517236ea45ae92d036d677472f9231fd188580b",
+      "sourceSha256": "1bdd3c5711f9a4b3dbc8331748fdc4465500f5867333585c7c429cad8858936c",
       "texture": {
         "width": 128,
         "height": 128,

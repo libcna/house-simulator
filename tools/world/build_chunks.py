@@ -903,6 +903,14 @@ CHUNK_BUDGET_EXCEPTIONS["L2_LIBRARY"] = (
     _library_hero_reason +
     "; HOUSE-03454 adds four measured plant and wall-art roles; ladder and books batch; no split")
 
+# `HOUSE-03641`: rear lamps reuse the existing red vehicle finish. It is already
+# batched on EXT_ROAD, but adds exactly one measured material group in the garage
+# and outer neighbourhood. The new bodies/tyres/rims remain within their existing
+# groups, with no vertex or Reach-cap split. Do not blanket-raise room budgets.
+CHUNK_BUDGET_EXCEPTIONS["EXT_WORLD"] = (
+    31, CHUNK_BUDGET_EXCEPTIONS["EXT_WORLD"][1] +
+    "; HOUSE-03641 adds one reused red rear-lamp role, with no split")
+
 # `HOUSE-03405`: ground-floor service rooms and the garage reuse the same bounded fixture
 # catalogue. Repeated fittings batch by their truthful source roles and independently switched
 # emitters remain separate. These are the exact post-build counts; none is a vertex- or Reach-cap
@@ -924,6 +932,10 @@ for _fixture_cell, _fixture_limit, _fixture_detail in (
     CHUNK_BUDGET_EXCEPTIONS[_fixture_cell] = (
         _fixture_limit,
         _fixture_reason + f"; HOUSE-03405 adds {_fixture_detail}; no split")
+
+CHUNK_BUDGET_EXCEPTIONS["L0_GARAGE"] = (
+    21, CHUNK_BUDGET_EXCEPTIONS["L0_GARAGE"][1] +
+    "; HOUSE-03641 adds one reused red rear-lamp role, with no split")
 
 #: The vertex layouts, one per stock effect, with the attributes that effect actually reads.
 #: `MaterialBinder`'s `MaterialKind` is the same closed list of four; `Skinned` never appears here
@@ -3093,6 +3105,12 @@ def selftest() -> int:
         require("L0_GARAGE" in CHUNK_BUDGET_EXCEPTIONS,
                 "and the garage is on the list rather than being redefined as something other "
                 "than a room, which is the decision `HOUSE-00487` records")
+        require(all(CHUNK_BUDGET_EXCEPTIONS[cell][0] == limit
+                    and "HOUSE-03641" in CHUNK_BUDGET_EXCEPTIONS[cell][1]
+                    and chunk_budget_problems({cell: limit + 1})
+                    for cell, limit in (("L0_GARAGE", 21), ("EXT_WORLD", 31))),
+                "the vehicle rear-lamp correction permits exactly one measured reused role "
+                "in each affected cell, never unlimited vehicle fragmentation")
 
         # `HOUSE-00780`: the EXTERIOR generators' output. Their files are named for the thing they
         # are -- `TERRAIN_R2C3`, `EXT_FENCE_N_W` -- so each is placed in the cell it stands in,

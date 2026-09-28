@@ -1135,11 +1135,11 @@
       "daylight": { "orientation": "E", "exposure": 0.26 },
       "lightGroups": ["LG_L0_GARAGE_MAIN", "LG_L0_GARAGE_OPENER"],
       "lightmaps": {
-        "shellHash": "sha256:163e6a17f8b738d4129b4e4cac2741db4dd4f039778bf1fc0219d4cf58ee9865",
+        "shellHash": "sha256:d9a11cfec268281aa4fa0092bfd536f873ae188601d7a6f0dc920b2f3e2d4e0a",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_GARAGE_LM_DAY",
           "scale": 1.0000001192092896,
-          "receiverMean": 0.3479668314282778
+          "receiverMean": 0.34793909867962725
         },
         "artificial": [
           {
@@ -1151,14 +1151,14 @@
           {
             "group": "LG_L0_GARAGE_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_GARAGE_LM_LG_L0_GARAGE_MAIN",
-            "scale": 0.9339394569396973,
-            "receiverMean": 0.19343838778015843
+            "scale": 0.9379023909568787,
+            "receiverMean": 0.19433984582770653
           },
           {
             "group": "LG_L0_GARAGE_OPENER",
             "contentName": "Textures/Lightmaps/Artificial/L0_GARAGE_LM_LG_L0_GARAGE_OPENER",
-            "scale": 0.06773874908685684,
-            "receiverMean": 0.007328498803350222
+            "scale": 0.06770572811365128,
+            "receiverMean": 0.007322803376611043
           }
         ]
       },

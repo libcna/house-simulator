@@ -1,5 +1,32 @@
 # Current owner-visible defect work — 2026-09-28
 
+## Accepted HOUSE-03641 — next HOUSE-03572 filming tour
+
+**34 ACTIVE/MUST / 78 OPT remain.** Selection follows the explicit owner additions
+after the S1/S2 repairs, not ordinary performance ordering. Existing parked estate
+and van geometry is corrected and visually reviewed: 14 matched day/night pairs,
+two additional final van views, no physical monitor windows. Same four models/five
+placements/material catalogue/textures and 12-triangle collision proxies; no runtime
+vehicle code. Estate 1980/van 1852 visible triangles, estate width 1.98 m. Rejected
+over-width and full-height van-glass drafts are not final evidence.
+
+Unit 1507/1507, 90-cell controller tour, generator/chunk/scale/content checks and
+344 strict-XNA units pass. Full static gate fails only owner-owned `.claude` layout.
+Garage atlases and provenance freshly regenerated sequentially. Resident chunks
+1389→1391, measured upload 93.636178970→94.231348038 MiB; documented exact reused
+red rear-lamp material groups, no new textures/blanket ceiling. No FPS claim.
+See `docs/visual-review/house-03641-cars.md` and its retained pair/index evidence.
+
+The old own stash `68a5ded130bb508a50b9c68ccab2cc647bc2056f` was already applied;
+its draft is superseded by this commit. **Do not restore it again.** Older audio/
+quality stashes remain untouched. Next implement HOUSE-03572 using existing input,
+controller and tour knowledge, one bounded data-authored route rather than a
+cutscene framework. Task remains OPEN until a complete actual GPU tour is reviewed.
+Owner requested forecast: remaining task estimates sum **53.25 agent-hours**;
+rough risk-adjusted forecast **55–70**, potentially around 80 if platform/final
+reviews expose more defects. This is not a reinstated aggregate budget ceiling.
+Two compile/strict workers, CPU affinity 0–3 and shared ccache continue.
+
 ## Accepted exact owner-screenshot corner correction — next HOUSE-03641
 
 **HOUSE-03640 is complete again; 35 ACTIVE/MUST / 78 OPT remain.** The additional

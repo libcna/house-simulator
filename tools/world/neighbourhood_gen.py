@@ -643,69 +643,238 @@ VEHICLE_SOURCES = {
 }
 
 
-def _wheel_faces(z: float, half_width: float, radius: float = 0.34, sides: int = 10) -> list:
-    """One deliberately low-poly wheel, its axle along X."""
+def _vehicle_face(corners: list, outward: tuple, material: str) -> tuple:
+    """A vehicle panel with its geometric normal and consistent outward winding."""
+    a = [corners[1][i] - corners[0][i] for i in range(3)]
+    b = [corners[2][i] - corners[0][i] for i in range(3)]
+    normal = [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2],
+              a[0] * b[1] - a[1] * b[0]]
+    length = math.sqrt(sum(value * value for value in normal))
+    if length < 1e-9:
+        raise ValueError("degenerate vehicle panel")
+    if sum(n * d for n, d in zip(normal, outward)) < 0.0:
+        corners = list(reversed(corners))
+        normal = [-value for value in normal]
+    return corners, tuple(value / length for value in normal), material
+
+
+def _wheel_faces(z: float, half_width: float, radius: float = 0.34, sides: int = 24) -> list:
+    """Two separate tyres on an axle line, with rounded shoulders and five-spoke rims.
+
+    No cylinder spans the whole vehicle. The old ten-sided axle-wide disc read as a
+    solid grey wheel and intersected the body instead of sitting inside its arch.
+    """
     tyre = "MAT_FURNITURE_PIANO_EBONITE"
     metal = "MAT_KITCHEN_HARDWARE_STEEL"
     faces = []
-    for side in range(sides):
-        a0 = 2.0 * math.pi * side / sides
-        a1 = 2.0 * math.pi * (side + 1) / sides
-        y0, z0 = radius + radius * math.cos(a0), z + radius * math.sin(a0)
-        y1, z1 = radius + radius * math.cos(a1), z + radius * math.sin(a1)
-        faces.append(([(-half_width, y0, z0), (half_width, y0, z0),
-                       (half_width, y1, z1), (-half_width, y1, z1)],
-                      (0.0, math.cos((a0 + a1) * 0.5), math.sin((a0 + a1) * 0.5)), tyre))
-    ring = [(radius + radius * math.cos(2.0 * math.pi * side / sides),
-             z + radius * math.sin(2.0 * math.pi * side / sides)) for side in range(sides)]
-    for x, normal in ((-half_width, (-1.0, 0.0, 0.0)), (half_width, (1.0, 0.0, 0.0))):
+    for sign in (-1.0, 1.0):
+        def point(x, r, angle):
+            return sign * x, radius + r * math.cos(angle), z + r * math.sin(angle)
+
+        profile = [(half_width - 0.22, radius * 0.68),
+                   (half_width - 0.22, radius * 0.89),
+                   (half_width - 0.18, radius), (half_width - 0.05, radius),
+                   (half_width, radius * 0.89), (half_width, radius * 0.68)]
+        for (x0, r0), (x1, r1) in zip(profile, profile[1:]):
+            for side in range(sides):
+                a0, a1 = (2.0 * math.pi * side / sides,
+                          2.0 * math.pi * (side + 1) / sides)
+                middle = (a0 + a1) * 0.5
+                faces.append(_vehicle_face(
+                    [point(x0, r0, a0), point(x1, r1, a0),
+                     point(x1, r1, a1), point(x0, r0, a1)],
+                    (sign * (r0 - r1), (x1 - x0) * math.cos(middle),
+                     (x1 - x0) * math.sin(middle)), tyre))
+        # The recessed dark disc is behind the metal rim/spokes, never coplanar.
         for side in range(sides):
-            y0, z0 = ring[side]
-            y1, z1 = ring[(side + 1) % sides]
-            corners = [(x, radius, z), (x, y0, z0), (x, y1, z1)]
-            if x < 0.0:
-                corners[1], corners[2] = corners[2], corners[1]
-            faces.append((corners, normal, metal))
+            a0, a1 = 2.0 * math.pi * side / sides, 2.0 * math.pi * (side + 1) / sides
+            faces.append(_vehicle_face(
+                [point(half_width, 0.0, 0.0), point(half_width, radius * 0.68, a0),
+                 point(half_width, radius * 0.68, a1)], (sign, 0.0, 0.0), tyre))
+            faces.append(_vehicle_face(
+                [point(half_width + 0.003, radius * 0.51, a0),
+                 point(half_width + 0.003, radius * 0.68, a0),
+                 point(half_width + 0.003, radius * 0.68, a1),
+                 point(half_width + 0.003, radius * 0.51, a1)], (sign, 0.0, 0.0), metal))
+            faces.append(_vehicle_face(
+                [point(half_width + 0.006, 0.0, 0.0),
+                 point(half_width + 0.006, radius * 0.22, a0),
+                 point(half_width + 0.006, radius * 0.22, a1)], (sign, 0.0, 0.0), metal))
+        for spoke in range(5):
+            angle = 2.0 * math.pi * spoke / 5.0
+            faces.append(_vehicle_face(
+                [point(half_width + 0.005, radius * 0.19, angle - 0.20),
+                 point(half_width + 0.005, radius * 0.56, angle - 0.10),
+                 point(half_width + 0.005, radius * 0.56, angle + 0.10),
+                 point(half_width + 0.005, radius * 0.19, angle + 0.20)],
+                (sign, 0.0, 0.0), metal))
+    return faces
+
+
+def _vehicle_lower(half_width: float, half_length: float, waist: float,
+                   wheel_z: tuple, radius: float, body: str) -> list:
+    """Shared lower shell with actual open semicircular wheel arches, not overlaid discs."""
+    bottom, arch = radius, radius + 0.045
+    contour = [(-half_length, bottom)]
+    for centre in wheel_z:
+        contour.extend((centre - arch * math.cos(math.pi * index / 12.0),
+                        bottom + arch * math.sin(math.pi * index / 12.0))
+                       for index in range(13))
+    contour.append((half_length, bottom))
+    faces = box((-half_width + 0.24, 0.24, -half_length + 0.06),
+                (half_width - 0.24, 0.44, half_length - 0.06),
+                "MAT_FURNITURE_PIANO_EBONITE")
+    for sign in (-1.0, 1.0):
+        x = sign * half_width
+        for (z0, y0), (z1, y1) in zip(contour, contour[1:]):
+            faces.append(_vehicle_face([(x, y0, z0), (x, y1, z1),
+                                        (x, waist, z1), (x, waist, z0)],
+                                       (sign, 0.0, 0.0), body))
+            # A shallow dark liner occupies only the arch, preserving its open void.
+            if y0 > bottom + 1e-6 or y1 > bottom + 1e-6:
+                faces.append(_vehicle_face(
+                    [(x, y0, z0), (x - sign * 0.18, y0, z0),
+                     (x - sign * 0.18, y1, z1), (x, y1, z1)],
+                    (0.0, -1.0, 0.0), "MAT_FURNITURE_PIANO_EBONITE"))
+    for z, normal in ((-half_length, (0.0, 0.0, -1.0)),
+                      (half_length, (0.0, 0.0, 1.0))):
+        faces.append(_vehicle_face([(-half_width, bottom, z), (half_width, bottom, z),
+                                    (half_width, waist, z), (-half_width, waist, z)],
+                                   normal, body))
+    faces.append(_vehicle_face([(-half_width, waist, -half_length),
+                                (half_width, waist, -half_length),
+                                (half_width, waist, half_length),
+                                (-half_width, waist, half_length)], (0.0, 1.0, 0.0), body))
+    return faces
+
+
+def _vehicle_cabin(lower: tuple, upper: tuple, body: str, *, cargo: bool = False) -> list:
+    """Tapered cabin: sloping windshield/hatch, side glazing and painted edge pillars."""
+    x0, y0, front0, back0 = lower
+    x1, y1, front1, back1 = upper
+    glass = "MAT_KITCHEN_OVEN_GLASS"
+    faces = []
+    for z0, z1, normal in ((front0, front1, (0.0, 0.0, -1.0)),
+                           (back0, back1, (0.0, 0.0, 1.0))):
+        faces.append(_vehicle_face([(-x0, y0, z0), (x0, y0, z0),
+                                    (x1, y1, z1), (-x1, y1, z1)], normal,
+                                   body if cargo and normal[2] > 0 else glass))
+    faces.append(_vehicle_face([(-x1, y1, front1), (x1, y1, front1),
+                                (x1, y1, back1), (-x1, y1, back1)], (0.0, 1.0, 0.0), body))
+    for sign in (-1.0, 1.0):
+        window_x, window_y, window_front, window_back = x0, y0, front0, back0
+        if cargo:
+            # Commercial cab doors are painted below their side windows; a
+            # full-height glass wedge reads as a toy, not an ordinary van.
+            window_x = x0 + (x1 - x0) * 0.4
+            window_y = y0 + (y1 - y0) * 0.4
+            window_front = front0 + (front1 - front0) * 0.4
+            window_back = back0 + (back1 - back0) * 0.4
+            faces.append(_vehicle_face(
+                [(sign * x0, y0, front0), (sign * x0, y0, back0),
+                 (sign * window_x, window_y, window_back),
+                 (sign * window_x, window_y, window_front)], (sign, 0.0, 0.0), body))
+        faces.append(_vehicle_face([(sign * window_x, window_y, window_front),
+                                    (sign * window_x, window_y, window_back),
+                                    (sign * x1, y1, back1), (sign * x1, y1, front1)],
+                                   (sign, 0.0, 0.0), glass))
+        # Surface strips follow the same sloping side, not upright boxes that cut through it.
+        pillars = [(front0, front1, 0.085), (back0 - 0.085, back1 - 0.085, 0.085)]
+        if not cargo:
+            pillars.append((0.24, 0.24, 0.075))
+        for low_z, high_z, width in pillars:
+            faces.append(_vehicle_face(
+                [(sign * (x0 + 0.003), y0, low_z),
+                 (sign * (x0 + 0.003), y0, low_z + width),
+                 (sign * (x1 + 0.003), y1, high_z + width),
+                 (sign * (x1 + 0.003), y1, high_z)], (sign, 0.0, 0.0), body))
+        # Narrow painted windshield/hatch borders lie 3 mm proud of their own glass plane.
+        for z0, z1, direction in ((front0 - 0.003, front1 - 0.003, -1.0),
+                                  (back0 + 0.003, back1 + 0.003, 1.0)):
+            faces.append(_vehicle_face(
+                [(sign * x0, y0, z0), (sign * (x0 - 0.085), y0, z0),
+                 (sign * (x1 - 0.085), y1, z1), (sign * x1, y1, z1)],
+                (0.0, 0.0, direction), body))
     return faces
 
 
 def _estate_faces(body: str) -> list:
-    """The 1.8 x 4.4 m estate body: massing, glazing, wheels and lamps only."""
-    glass = "MAT_KITCHEN_OVEN_GLASS"
+    """The retained 1.8 x 4.4 m estate, rebuilt for normal garage/street viewing."""
     metal = "MAT_KITCHEN_HARDWARE_STEEL"
     light = "MAT_WINDOW_FRAME_WHITE"
     dark = "MAT_FURNITURE_PIANO_EBONITE"
-    faces = box((-0.90, 0.34, -2.20), (0.90, 0.88, 2.20), body)
-    faces += box((-0.76, 0.88, -1.42), (0.76, 1.42, 1.34), body)
-    # Large dark cards break up the deliberately simple cabin into front/rear/side glazing.
-    for x in (-0.766, 0.766):
-        faces += box((x - 0.008, 0.98, -1.14), (x + 0.008, 1.34, -0.12), glass)
-        faces += box((x - 0.008, 0.98, 0.02), (x + 0.008, 1.34, 1.08), glass)
-    faces += box((-0.65, 0.98, -1.428), (0.65, 1.34, -1.412), glass)
-    faces += box((-0.65, 0.98, 1.332), (0.65, 1.34, 1.348), glass)
-    # Rails distinguish the estate silhouette from a saloon without close-detail modelling.
+    faces = _vehicle_lower(0.90, 2.20, 0.82, (-1.42, 1.42), 0.34, body)
+    # The bonnet rises to the cabin instead of a second rectangular body block.
+    faces.append(_vehicle_face([(-0.90, 0.82, -2.20), (0.90, 0.82, -2.20),
+                                (0.79, 0.93, -0.96), (-0.79, 0.93, -0.96)],
+                               (0.0, 1.0, 0.0), body))
+    for sign in (-1.0, 1.0):
+        faces.append(_vehicle_face([(sign * 0.90, 0.82, -2.20),
+                                    (sign * 0.90, 0.82, 2.20),
+                                    (sign * 0.79, 0.93, 1.97),
+                                    (sign * 0.79, 0.93, -0.96)], (sign, 0.0, 0.0), body))
+        for z in (-0.90, 0.24, 1.0):
+            faces += box((min(sign * 0.900, sign * 0.904), 0.39, z),
+                         (max(sign * 0.900, sign * 0.904), 0.80, z + 0.009), dark)
+        for z in (-0.12, 0.78):
+            faces += box((min(sign * 0.90, sign * 0.922), 0.75, z),
+                         (max(sign * 0.90, sign * 0.922), 0.785, z + 0.14), metal)
+        # Small mirrors are dressing, not a larger collision footprint.
+        faces += box((min(sign * 0.75, sign * 0.93), 1.00, -0.69),
+                     (max(sign * 0.75, sign * 0.93), 1.025, -0.65), dark)
+        faces += box((min(sign * 0.90, sign * 0.99), 0.98, -0.73),
+                     (max(sign * 0.90, sign * 0.99), 1.06, -0.56), body)
+    faces.append(_vehicle_face([(-0.79, 0.93, 1.97), (0.79, 0.93, 1.97),
+                                (0.90, 0.82, 2.20), (-0.90, 0.82, 2.20)],
+                               (0.0, 1.0, 0.0), body))
+    faces += _vehicle_cabin((0.79, 0.93, -0.96, 1.97),
+                            (0.64, 1.42, -0.38, 1.82), body)
     for x in (-0.56, 0.56):
-        faces += box((x - 0.025, 1.42, -1.10), (x + 0.025, 1.48, 1.10), metal)
-    for z in (-1.48, 1.48):
-        faces += _wheel_faces(z, 0.98)
-    faces += box((-0.72, 0.54, -2.212), (-0.18, 0.72, -2.196), light)
-    faces += box((0.18, 0.54, -2.212), (0.72, 0.72, -2.196), light)
-    faces += box((-0.72, 0.54, 2.196), (-0.18, 0.72, 2.212), dark)
-    faces += box((0.18, 0.54, 2.196), (0.72, 0.72, 2.212), dark)
+        faces += box((x - 0.022, 1.42, -0.20), (x + 0.022, 1.48, 1.65), metal)
+    for z in (-1.42, 1.42):
+        faces += _wheel_faces(z, 0.97)
+    for x0, x1 in ((-0.80, -0.37), (0.37, 0.80)):
+        faces += box((x0, 0.59, -2.216), (x1, 0.74, -2.200), light)
+        faces += box((x0, 0.61, 2.200), (x1, 0.79, 2.216), "MAT_VEHICLE_BODY_RED")
+    faces += box((-0.33, 0.49, -2.216), (0.33, 0.73, -2.200), dark)
+    for y in (0.53, 0.60, 0.67):
+        faces += box((-0.30, y, -2.220), (0.30, y + 0.012, -2.215), metal)
+    for z in (-2.216, 2.208):
+        faces += box((-0.75, 0.35, z), (0.75, 0.42, z + 0.008), dark)
+        faces += box((-0.22, 0.45, z - 0.005), (0.22, 0.54, z + 0.009), light)
     return faces
 
 
 def _van_faces(body: str) -> list:
-    """The same family's 2.1 x 5.4 m delivery body, kept intentionally boxy."""
-    glass = "MAT_KITCHEN_OVEN_GLASS"
+    """The retained 2.1 x 5.4 m delivery van, sharing arches, tyres/rims and cabin panels."""
     metal = "MAT_KITCHEN_HARDWARE_STEEL"
     light = "MAT_WINDOW_FRAME_WHITE"
     dark = "MAT_FURNITURE_PIANO_EBONITE"
-    faces = box((-1.05, 0.38, -2.70), (1.05, 1.02, 2.70), body)
-    faces += box((-0.98, 1.02, -1.62), (0.98, 2.40, 2.55), body)
-    faces += box((-0.99, 1.38, -1.58), (0.99, 2.20, -0.72), glass)
-    for x in (-0.986, 0.986):
-        faces += box((x - 0.008, 1.36, -1.48), (x + 0.008, 2.18, -0.68), glass)
+    faces = _vehicle_lower(1.05, 2.70, 1.02, (-1.72, 1.72), 0.38, body)
+    faces += _vehicle_cabin((0.96, 1.02, -2.20, -0.48),
+                            (0.84, 2.24, -1.53, -0.48), body, cargo=True)
+    faces.append(_vehicle_face([(-1.05, 1.02, -2.70), (1.05, 1.02, -2.70),
+                                (0.96, 1.08, -2.20), (-0.96, 1.08, -2.20)],
+                               (0.0, 1.0, 0.0), body))
+    faces += box((-0.98, 1.02, -0.47), (0.98, 2.30, 2.55), body)
+    # A shallow tapered roof shoulder, rather than an additional tall rectangular block.
+    for sign in (-1.0, 1.0):
+        faces.append(_vehicle_face([(sign * 0.98, 2.30, -0.47),
+                                    (sign * 0.98, 2.30, 2.55),
+                                    (sign * 0.87, 2.40, 2.45),
+                                    (sign * 0.87, 2.40, -0.37)], (sign, 1.0, 0.0), body))
+        faces += box((min(sign * 0.85, sign * 1.13), 1.32, -1.18),
+                     (max(sign * 0.85, sign * 1.13), 1.46, -0.94), dark)
+        faces += box((min(sign * 0.98, sign * 0.989), 1.10, -0.12),
+                     (max(sign * 0.98, sign * 0.989), 2.24, -0.10), dark)
+        faces += box((min(sign * 0.98, sign * 1.0), 1.25, 0.02),
+                     (max(sign * 0.98, sign * 1.0), 1.29, 0.20), metal)
+    faces.append(_vehicle_face([(-0.87, 2.40, -0.37), (0.87, 2.40, -0.37),
+                                (0.87, 2.40, 2.45), (-0.87, 2.40, 2.45)], (0.0, 1.0, 0.0), body))
+    for z0, z1, direction in ((-0.47, -0.37, -1.0), (2.55, 2.45, 1.0)):
+        faces.append(_vehicle_face([(-0.98, 2.30, z0), (0.98, 2.30, z0),
+                                    (0.87, 2.40, z1), (-0.87, 2.40, z1)],
+                                   (0.0, 1.0, direction), body))
     # Twin rear doors and a waist strip make the cargo body readable at street distance.
     faces += box((-0.035, 0.72, 2.552), (0.035, 2.28, 2.568), metal)
     faces += box((-0.99, 1.00, 2.552), (0.99, 1.08, 2.568), metal)
@@ -713,8 +882,11 @@ def _van_faces(body: str) -> list:
         faces += _wheel_faces(z, 1.13, radius=0.38)
     faces += box((-0.82, 0.62, -2.712), (-0.24, 0.84, -2.696), light)
     faces += box((0.24, 0.62, -2.712), (0.82, 0.84, -2.696), light)
-    faces += box((-0.82, 0.62, 2.696), (-0.24, 0.84, 2.712), dark)
-    faces += box((0.24, 0.62, 2.696), (0.82, 0.84, 2.712), dark)
+    faces += box((-0.98, 1.05, 2.552), (-0.82, 1.55, 2.568), "MAT_VEHICLE_BODY_RED")
+    faces += box((0.82, 1.05, 2.552), (0.98, 1.55, 2.568), "MAT_VEHICLE_BODY_RED")
+    for z in (-2.716, 2.708):
+        faces += box((-0.96, 0.40, z), (0.96, 0.50, z + 0.008), dark)
+        faces += box((-0.22, 0.54, z - 0.004), (0.22, 0.64, z + 0.008), light)
     return faces
 
 
@@ -1353,6 +1525,51 @@ def selftest() -> int:
                     and "MAT_KITCHEN_OVEN_GLASS" in materials
                     for materials in vehicle_materials.values()),
                 "every vehicle has wheels and glazing, not only an anonymous body box")
+        # HOUSE-03641: protect the visible correction, not just a larger triangle count.
+        for asset in VEHICLE_KINDS:
+            faces = vehicle_faces(asset)
+            body = ESTATE_ASSETS.get(asset, VAN_ASSETS.get(asset))
+            half_width = 0.90 if asset in ESTATE_ASSETS else 1.05
+            centres = (-1.42, 1.42) if asset in ESTATE_ASSETS else (-1.72, 1.72)
+            require(any(material == "MAT_KITCHEN_OVEN_GLASS"
+                        and abs(normal[1]) > 0.1 and abs(normal[2]) > 0.1
+                        for _corners, normal, material in faces),
+                    f"{asset} has a sloped windscreen, not an upright glass card on a box")
+            arch_panels = [corners for corners, normal, material in faces
+                           if material == body and abs(normal[0]) > 0.99
+                           and all(abs(abs(p[0]) - half_width) < 1e-6 for p in corners)
+                           and any(min(p[2] for p in corners) <= z + 0.02
+                                   <= max(p[2] for p in corners) for z in centres)]
+            require(len(arch_panels) == 4
+                    and all(min(p[1] for p in panel) > 0.70 for panel in arch_panels),
+                    f"{asset} has four real arch voids, with no painted panel across a tyre")
+            require(sum(1 if len(corners) == 3 else 2 for corners, _n, _m in faces) <= 2200,
+                    f"{asset} remains bounded at 2200 visible triangles")
+            side_windows = [corners for corners, normal, material in faces
+                            if material == "MAT_KITCHEN_OVEN_GLASS" and abs(normal[0]) > 0.9]
+            require(bool(side_windows) and
+                    (all(min(p[1] for p in corners) > 1.45 for corners in side_windows)
+                     if asset in VAN_ASSETS else
+                     all(max(p[2] for p in corners) > 1.9 for corners in side_windows)),
+                    f"{asset} has painted lower cab doors or an actual long estate cabin, "
+                    "not full-height van glass or a short sedan roof")
+            bad_normals = 0
+            for corners, normal, _material in faces:
+                triangles = [(0, 1, 2)] + ([(0, 2, 3)] if len(corners) == 4 else [])
+                for indices in triangles:
+                    points = [corners[index] for index in indices]
+                    a = [points[1][i] - points[0][i] for i in range(3)]
+                    b = [points[2][i] - points[0][i] for i in range(3)]
+                    cross = (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2],
+                             a[0] * b[1] - a[1] * b[0])
+                    if sum(n * c for n, c in zip(normal, cross)) <= 1e-10:
+                        bad_normals += 1
+            require(bad_normals == 0,
+                    f"{asset} has no degenerate or reverse-wound panel ({bad_normals})")
+        wheels = _wheel_faces(1.42, 0.97)
+        require(all(max(p[0] for p in corners) < 0.0 or min(p[0] for p in corners) > 0.0
+                    for corners, _normal, _material in wheels),
+                "separate tyres/rims never span the centre of the car like a solid axle")
         lanterns = sorted(lantern_world(row["position"], float(row.get("yawDeg", 0.0)))
                           for row in furniture if carries_lantern(str(row["asset"])))
         street_lights = sorted(tuple(float(c) for c in light["position"])
