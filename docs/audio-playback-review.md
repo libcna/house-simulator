@@ -1,5 +1,10 @@
 # Normal-game audio wiring — 2026-09-28
 
+**Current acceptance:** `HOUSE-01920` and `HOUSE-01922` are complete, with the
+owner's actual six-category and interior/exterior day/night listening below.
+`HOUSE-01925` weather layers and `HOUSE-01939` whole-zone weather listening remain
+open. Earlier blocked notes are historical, not missing-device claims.
+
 ## Current normal Start path, not only the CLI scene
 
 `AudioGateTests.NormalTitleAndStartOpenAudioAndPlayTheProductionWalk` now

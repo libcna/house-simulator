@@ -1,6 +1,54 @@
 # Current owner-visible defect work — 2026-09-28
 
-## Current continuation: six footstep categories accepted in normal gameplay
+## Current continuation: owner listening closes footsteps and ambience
+
+Starting clean `develop` HEAD `9e937ca48415d81c1617d1c54302957131bab820`.
+Completed `HOUSE-03681` (layout gate), `HOUSE-03682` (doorway sampling),
+`HOUSE-01920` (including reproduced silent-bed correction) and `HOUSE-01922`.
+Owner confirms all six footstep categories after the soil-contact repair, plus
+**“Ověřeno, ambience i přechody jsou v pořádku”** for indoors/outdoors by day and
+night. The latter supplies the previously missing ambience acceptance, not a
+claim that this agent can hear PCM or that audio boundary approval proves a
+rendering-flash fix. Runtime ambience foundation is tracked in `d22d9b0`.
+
+Final validation: **1530/1530 unit PASS**, **170 actual-GPU integration PASS /
+3 explicit opt-in SKIP / 0 FAIL**, 173 total (325181 ms); all full static gates
+green, **353 strict-XNA units / 109 destructor exemptions**. Garden/contact and
+forced four-step doorway tests pass five repetitions (15/15). Schema, mapping,
+collision selftests and canonical content/deployment pass. Logs are
+`/tmp/house-current-final-{units,integration,static}.log`,
+`/tmp/house-current-garden-threshold-focused.log` and the audio review below.
+The old single SawBand failure and deliberately failing pre-fix garden probes
+are reproduced/repaired evidence, not current failures. No runtime movement,
+geometry, rendering, sample/gain or owner preference changed this continuation.
+
+**31 MUST / 78 OPT remain.** Nominal estimate **45.25 h → 42.50 h**; current
+pessimistic formula **64.75 h** (1.10 × 42.50 + Android/Web/performance reserves
+8 + 6 + 4). Real execution/toolchain waits are not a wall-clock promise. The
+owner withdrew the 280 h ceiling; MUST-only scope remains unchanged.
+
+**Exact next dependency-unblocked MUST: HOUSE-01925.** R15/D7 selected the
+owner's actual sound failures first; normal Track B dependency order resumes
+with bounded rain/wind over the existing ambience, then `HOUSE-01939` listening.
+Use the existing `skyexposure.bin` v2, generator and geometric world data, not a
+replacement exposure subsystem. Runtime reader/weather voices are not yet
+implemented. XNA SoundEffectInstance has no public filter/PCM getter; internal
+CNA filters remain forbidden, pitch is not low-pass, and M8 forbids an offline
+derivative set. Investigate the smallest project-owned solution inside the
+existing audio path, preserving that requirement rather than silently dropping it.
+
+Existing Release `build-probe/` refresh is running with -j2/shared ccache,
+`/tmp/house-current-release-refresh.log`; no new performance result yet.
+`HOUSE-02404` remains open for repeatable reference measurements; do not let
+shared contention stop independent audio work. At most two build plus four
+strict compilers; graphics are always invisible Radeon surfaceless GPU, never
+monitor windows. Android emulator availability and prior readiness passes are
+unchanged; **no emulator was used this continuation**, and remaining House
+touch/content/performance tasks are not complete. No sibling source edited,
+CNA_CNAEXT remains OFF, no forbidden runtime calls or owner-local staging.
+The overall goal remains active, not DONE or maintenance mode.
+
+## Earlier continuation: six footstep categories accepted in normal gameplay
 
 R15/D7 and the owner's silent-bed report selected `HOUSE-01920`. The normal
 title/Start regression opens audio only after the gesture and then plays real
