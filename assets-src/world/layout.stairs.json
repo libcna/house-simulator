@@ -15,47 +15,52 @@
   "flights": [
     {
       // §12.4's 17 × 179.4 mm is 3.05 m / 17 exactly; the table rounds to a tenth of a
-      // millimetre and this is the number it rounds. The half-landing is riser 9, which puts it
-      // at +2.2147 -- §12.4 said +2.212, corrected there with this arithmetic.
+      // millimetre and this is the number it rounds. The turn follows riser 9, making the
+      // two flights comparable in length while retaining headroom over the basement run.
       "id": "STAIR_MAIN_L0_L1",
       "fromCell": "L0_STAIR_MAIN", "toCell": "L1_STAIR_MAIN",
       "risers": 17, "rise": 0.1794118, "going": 0.280, "width": 1.10,
-      // Leave a real approach landing between the north wall and the first tread. With the flight
-      // flush to z=-14.30 a standing capsule could only meet the ramp from its 0.28 m-high side.
-      "footprint": { "x": [2.20, 4.90], "z": [-20.20, -15.30] },
-      "run": "-Z", "shape": "u", "firstRunAt": "cross_hi", "topLandingToFoot": true,
-      "landings": [{ "at": 9, "depth": 1.10 }],
+      // The west first run faces the foyer, with a metre of level approach. The upper cross
+      // landing returns to the south wall and the west L1 doorway, not to the first tread.
+      "footprint": { "x": [2.20, 4.90], "z": [-20.20, -14.30] },
+      "run": "-Z", "shape": "u", "firstRunAt": "cross_lo", "approachDepth": 1.00,
+      "topLandingToFoot": true, "topCrossLandingDepth": 0.28,
+      "landings": [{ "at": 9, "depth": 2.38 }],
       "collisionRamp": true, "surface": "stair_carpet"
     },
     {
-      // 2.90 m / 16. The landing is riser 12, +2.175 above L1's FFL; §12.4 said +2.16.
+      // 2.90 m / 16. Two eight-riser flights keep the upper switchback equally legible.
       "id": "STAIR_MAIN_L1_L2",
       "fromCell": "L1_STAIR_MAIN", "toCell": "L2_STAIR_MAIN",
       "risers": 16, "rise": 0.1812500, "going": 0.280, "width": 1.10,
       "footprint": { "x": [2.20, 4.90], "z": [-20.20, -14.30] },
-      "run": "-Z", "shape": "u", "firstRunAt": "cross_hi", "topLandingToFoot": true,
-      "topCrossLandingDepth": 1.10,
-      "landings": [{ "at": 12, "depth": 1.10 }],
+      "run": "-Z", "shape": "u", "firstRunAt": "cross_lo", "approachDepth": 1.00,
+      "topLandingToFoot": true,
+      "topCrossLandingDepth": 0.00,
+      "landings": [{ "at": 8, "depth": 2.66 }],
       "collisionRamp": true, "surface": "stair_carpet"
     },
     {
       // 2.75 m / 15, straight, north-running, and narrower because it serves the attic.
+      // A 1.00 m level entry fits behind the L2 side door; the adjacent service bath
+      // gives up 1.00 m of its depth so the flight can start naturally and keep a
+      // domestic 250 mm going. The attic head has a separate level turning landing.
       "id": "STAIR_ATTIC_L2_L3",
       "fromCell": "L2_STAIR_ATTIC", "toCell": "L3_STAIR_HEAD",
-      "risers": 15, "rise": 0.1833333, "going": 0.235, "width": 0.90,
-      "footprint": { "x": [5.40, 8.20], "z": [-18.30, -14.30] },
-      "run": "-Z", "shape": "straight",
+      "risers": 15, "rise": 0.1833333, "going": 0.250, "width": 0.90,
+      "footprint": { "x": [5.40, 8.20], "z": [-19.30, -14.30] },
+      "run": "-Z", "shape": "straight", "approachDepth": 1.00,
       "landings": [],
       "collisionRamp": true, "surface": "stair_wood_open"
     },
     {
-      // Straight, north-running, directly beneath the main stair, and authored upward: `rise` is
-      // a magnitude, so the flight that §12.4 writes "L0 +0.60 → B1 −2.30" is the same flight.
+      // Straight, south-running beneath the main stair. The B1 hall enters near the north foot;
+      // the head reaches L0's free south approach strip instead of an open floor-well edge.
       "id": "STAIR_BASEMENT_L0_B1",
       "fromCell": "B1_STAIR", "toCell": "L0_STAIR_MAIN",
       "risers": 16, "rise": 0.1812500, "going": 0.275, "width": 1.00,
       "footprint": { "x": [2.20, 4.90], "z": [-20.20, -14.30] },
-      "run": "-Z", "shape": "straight",
+      "run": "+Z", "shape": "straight",
       "landings": [],
       "collisionRamp": true, "surface": "concrete"
     },

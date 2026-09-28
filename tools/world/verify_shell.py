@@ -211,7 +211,7 @@ def clear_heights(shell: dict, cells: dict, rafter_levels=()) -> list[dict]:
 
 
 def horizontal_quads(mesh: dict) -> list[tuple]:
-    """Every horizontal rectangle in @p mesh, as `(y, x0, x1, z0, z1)`.
+    """Every upward-facing horizontal rectangle in @p mesh, as `(y, x0, x1, z0, z1)`.
 
     NOT solids. The first version of this recovered boxes by connectivity, which is exactly wrong
     for a staircase: solid steps touch, so the whole flight came back as one 2.7 x 3.7 x 3.05 m
@@ -220,13 +220,18 @@ def horizontal_quads(mesh: dict) -> list[tuple]:
     and going are measurements of.
 
     A quad is two triangles over the same four corners, so the two share a bounding box exactly and
-    grouping by that box recovers the quad without any tolerance at all.
+    grouping by that box recovers the quad without any tolerance at all. An open timber flight
+    also has a downward-facing underside exactly one rise below each tread; counting both as
+    walking surfaces would report nearly twice the actual risers.
     """
     seen: dict[tuple, int] = {}
     for a, b, c in mesh["triangles"]:
         points = [mesh["positions"][a], mesh["positions"][b], mesh["positions"][c]]
         ys = [point[1] for point in points]
         if max(ys) - min(ys) > 1e-6:
+            continue
+        if ((points[1][2] - points[0][2]) * (points[2][0] - points[0][0])
+                - (points[1][0] - points[0][0]) * (points[2][2] - points[0][2])) <= 0.0:
             continue
         key = (round(ys[0], 5),
                round(min(p[0] for p in points), 5), round(max(p[0] for p in points), 5),
@@ -932,7 +937,10 @@ def selftest() -> int:
     require(sum(row["degenerate"] for row in winding) == 0,
             "not one face in the shell has zero area -- §70's black facet, which is invisible "
             "until something tries to light it")
-    require(sum(row["faces"] for row in slabs) > 400
+    # Well resizing changes subdivision, not winding. Use the minimum two triangles per
+    # floor/ceiling of each measured habitable room, rather than pinning the old opening's
+    # incidental 400-face tessellation and preserving its overhead slab lips.
+    require(sum(row["faces"] for row in slabs) >= 4 * len(habitable)
             and sum(row["wrong"] for row in slabs) == 0,
             f"and every one of the {sum(row['faces'] for row in slabs)} floor and ceiling faces "
             f"points INTO its room: a floor up, a ceiling down (§14's counter-clockwise front)")

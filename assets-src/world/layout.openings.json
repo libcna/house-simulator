@@ -549,7 +549,7 @@
     // It used to hang in `P_L0_STAIR__B1_STAIR`, which is the 2.30 x 3.30 hole in L0's floor, and
     // the note here said so: *"`hinge` is null -- a horizontal portal has no side to hang it on"*.
     // That was the tell. A floor opening over a flight is a stairwell, not a door; the door is in
-    // the wall at the foot of the flight, where it has a side, a hinge and a room to swing into.
+    // the wall beside the flight's north foot, where it has a side, a hinge and a room to swing into.
     // Same leaf, same type, same material -- moved, not invented.
     {
       "id": "DOOR_B1_STAIR__B1_HALL", "kind": "door", "type": "D_STAIRHEAD",

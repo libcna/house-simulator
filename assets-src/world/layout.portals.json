@@ -32,7 +32,7 @@
     {
       "id": "P_B1_STAIR__B1_HALL", "cellA": "B1_STAIR", "cellB": "B1_HALL",
       "plane": { "axis": "x", "value": 2.2 },
-      "rect": { "u": [-17.85, -16.65], "v": [-2.3, -0.1] },
+      "rect": { "u": [-20.15, -19.05], "v": [-2.3, -0.1] },
       "kind": "door", "aperture": "DOOR_B1_STAIR__B1_HALL", "opacity": "opaque_when_closed",
       "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
@@ -46,10 +46,9 @@
     {
       "id": "P_L0_FOYER__L0_STAIR", "cellA": "L0_FOYER", "cellB": "L0_STAIR_MAIN",
       "plane": { "axis": "x", "value": 2.2 },
-      // Keep the foyer entrance wholly north of the returning stair run. The former 1.60 m cased
-      // opening put its southern half straight into the solid stair support; this clear 1.00 m
-      // passage retains 0.20 m around the 0.60 m player capsule.
-      "rect": { "u": [-15.3, -14.3], "v": [0.6, 2.8] },
+      // The U-stair's return is now supported at the half-landing, not by a room-height solid
+      // column. Restore a broad foyer sightline and entry while keeping the north approach strip.
+      "rect": { "u": [-16.3, -14.3], "v": [0.6, 2.8] },
       "kind": "cased_opening", "aperture": null, "opacity": "open",
       "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
@@ -140,14 +139,14 @@
     {
       "id": "P_L2_STAIR__L2_LANDING", "cellA": "L2_STAIR_MAIN", "cellB": "L2_LANDING",
       "plane": { "axis": "x", "value": 2.2 },
-      "rect": { "u": [-17.1, -15.5], "v": [6.55, 8.75] },
+      "rect": { "u": [-15.4, -14.35], "v": [6.55, 8.75] },
       "kind": "cased_opening", "aperture": null, "opacity": "open",
       "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_L3_HEAD__L3_ROOM", "cellA": "L3_STAIR_HEAD", "cellB": "L3_ROOM",
       "plane": { "axis": "x", "value": 4.9 },
-      "rect": { "u": [-18.2, -17.1], "v": [9.3, 11.3] },
+      "rect": { "u": [-20.15, -19.20], "v": [9.3, 11.3] },
       "kind": "cased_opening", "aperture": null, "opacity": "open",
       "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
@@ -174,7 +173,7 @@
     },
     {
       "id": "P_L3_HEAD__L3_STORE_E", "cellA": "L3_STAIR_HEAD", "cellB": "L3_STORE_E",
-      "plane": { "axis": "z", "value": -18.3 },
+      "plane": { "axis": "z", "value": -20.2 },
       "rect": { "u": [5.35, 6.35], "v": [9.3, 11.1] },
       "kind": "cased_opening", "aperture": null, "opacity": "open", "crouch": true,
       "soundLoss": { "open": 0.000, "closed": 0.000 }
@@ -358,27 +357,26 @@
     {
       "id": "P_STAIR_L0_L1", "cellA": "L0_STAIR_MAIN", "cellB": "L1_STAIR_MAIN",
       "plane": { "axis": "y", "value": 3.65 },
-      "rect": { "u": [2.4, 4.7], "v": [-19.7, -14.8] },
+      // Flush with the stair-cell side and north walls: the former 100 mm slab lips caught a
+      // standing 300 mm-radius player capsule near the edges of the switchback landing.
+      "rect": { "u": [2.2, 4.9], "v": [-20.2, -14.8] },
       "kind": "stair_well", "aperture": null, "opacity": "open",
       "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_STAIR_L1_L2", "cellA": "L1_STAIR_MAIN", "cellB": "L2_STAIR_MAIN",
       "plane": { "axis": "y", "value": 6.55 },
-      "rect": { "u": [2.4, 4.7], "v": [-19.7, -14.8] },
+      "rect": { "u": [2.2, 4.9], "v": [-20.2, -14.8] },
       "kind": "stair_well", "aperture": null, "opacity": "open",
       "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
-    // `HOUSE-00484`: `v` reached -17.80 and the flight reaches -18.28, so the top two treads of
-    // `STAIR_ATTIC_L2_L3` passed under L3's floor with 0.18 m over them where §70.5 wants 2.00.
-    // The treads that need the hole span z -18.010 to -15.360 (measured, `verify_shell.py`), and
-    // the partition to `L3_STORE_E` has its inner face at -18.225, so -18.15 clears the last tread
-    // by 0.14 m and the wall by 0.075. `L3_STAIR_HEAD` did not have to grow: the room was long
-    // enough all along and the OPENING was short.
+    // The 15th tread ends at -19.05 after the level L2 approach; the well clears it by 0.15 m.
+    // The solid attic landing north of it extends to -20.20, so the west room doorway is
+    // approached from actual floor instead of a narrow strip beside a colliding well guard.
     {
       "id": "P_STAIR_L2_L3", "cellA": "L2_STAIR_ATTIC", "cellB": "L3_STAIR_HEAD",
       "plane": { "axis": "y", "value": 9.3 },
-      "rect": { "u": [5.2, 8.4], "v": [-18.15, -14.8] },
+      "rect": { "u": [4.9, 6.45], "v": [-19.20, -14.8] },
       "kind": "stair_well", "aperture": null, "opacity": "open",
       "soundLoss": { "open": 0.000, "closed": 0.000 }
     },

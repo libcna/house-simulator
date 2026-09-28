@@ -78,19 +78,27 @@ def segments(flight: dict, bottom: float):
         if depth > 0.0:
             walk.append({"kind": "landing", "along0": along, "along1": along + direction * depth,
                          "y0": y, "y1": y, "lane": -1, "risers": 0})
-            along += direction * depth
             if doubles_back:
+                # A switchback crosses the full-width pad at its *near* edge. Starting the
+                # returning treads at the pad's far edge puts them directly over the landing,
+                # including a balustrade across the only walking route to the second run.
+                # The pad extends beyond both flights to provide turning room; it does not
+                # consume more longitudinal run before the direction reverses.
                 direction = -direction
                 lane = 1 - lane
+            else:
+                along += direction * depth
     if doubles_back and flight.get("topLandingToFoot"):
         # The upper run ends short of the south wall. A level strip beside the incoming
         # run joins its top tread to the landing/doorway at that wall, without filling the
         # full stairwell or blocking headroom over the other run.
         cross_depth = float(flight.get("topCrossLandingDepth") or 0.0)
-        walk.append({"kind": "exit_landing", "along0": along, "along1": cross_depth,
-                     "y0": y, "y1": y, "lane": lane, "risers": 0})
-        if cross_depth > 0.0:
-            walk.append({"kind": "cross_landing", "along0": cross_depth, "along1": 0.0,
+        if abs(along - cross_depth) > 1.0e-6:
+            walk.append({"kind": "exit_landing", "along0": along, "along1": cross_depth,
+                         "y0": y, "y1": y, "lane": lane, "risers": 0})
+        if cross_depth + float(flight.get("approachDepth") or 0.0) > 1.0e-6:
+            walk.append({"kind": "cross_landing", "along0": cross_depth,
+                         "along1": -float(flight.get("approachDepth") or 0.0),
                          "y0": y, "y1": y, "lane": -1, "risers": 0})
     return walk
 
@@ -164,7 +172,8 @@ def frame(flight: dict, portals=()):
 
     `axis` is the world axis the flight travels along, `sign` the direction of travel, `start` the
     edge of the footprint the foot of the flight stands on. Lane 0 is `cross_lo` by default;
-    `firstRunAt: cross_hi` mirrors a U flight so the foyer approach can occupy the low side.
+    `firstRunAt: cross_hi` mirrors a U flight. `approachDepth` leaves a level entry strip
+    ahead of a flight without shortening its upper-floor exit bridge.
     Both shell and collision use this frame. The cross range is `well_cross`'s where the flight's
     own stairwell narrows it and the footprint's otherwise.
     """
@@ -175,6 +184,7 @@ def frame(flight: dict, portals=()):
     narrowed = well_cross(flight, portals)
     if narrowed is not None:
         cross_lo, cross_hi = narrowed
+    start += sign * float(flight.get("approachDepth") or 0.0)
     return (axis, sign, start, cross_lo, cross_hi, float(flight["width"]))
 
 
@@ -292,17 +302,21 @@ def selftest() -> int:
 
     walk = flight_runs(main, foot)
     kinds = [entry["kind"] for entry in walk]
-    require(kinds == ["run", "landing", "run", "exit_landing"],
-            f"the main U stair has two runs, a turn and an exit bridge ({kinds})")
-    require([e["risers"] for e in walk if e["kind"] == "run"] == [9, int(main["risers"]) - 9],
-            "nine risers to the half-landing and the rest after it")
+    require(kinds == ["run", "landing", "run", "cross_landing"],
+            f"the main U stair has two runs, a turn and a continuous upper exit ({kinds})")
+    require([e["risers"] for e in walk if e["kind"] == "run"] == [9, 8],
+            "the two main flights are balanced around the switchback landing")
     require(walk[0]["lane"] == 0 and walk[2]["lane"] == 1,
             "and the second run is on the other side of the well")
     actual = flight_runs(main, foot, portals)
-    require(all(abs(a - b) < 1e-6 for a, b in zip(actual[0]["box"], (3.6, 4.7, -17.82, -15.3)))
-            and all(abs(a - b) < 1e-6 for a, b in zip(actual[2]["box"], (2.4, 3.5, -18.92, -16.68))),
-            f"the foyer has the west floor lane and the first run is east ({actual[0]['box']}, "
-            f"{actual[2]['box']})")
+    require(all(abs(a - b) < 1e-6 for a, b in zip(actual[0]["box"], (2.2, 3.3, -17.82, -15.3)))
+            and all(abs(a - b) < 1e-6 for a, b in zip(actual[2]["box"], (3.8, 4.9, -17.82, -15.58)))
+            and all(abs(a - b) < 1e-6 for a, b in zip(actual[-1]["box"],
+                                                      (2.2, 4.9, -15.58, -14.3))),
+            f"the foyer directly meets the west first run and the L1 exit spans back to its "
+            f"west doorway ({actual[0]['box']}, {actual[2]['box']}, {actual[-1]['box']})")
+    require(actual[1]["box"][3] <= actual[2]["box"][2] + 1e-6,
+            "the returning treads begin beyond the north pad, never on top of its walking surface")
     basement = flights["STAIR_BASEMENT_L0_B1"]
     basement_walk = flight_runs(basement, foot_of(basement, cells, levels), portals)
     require(basement_walk[0]["box"][0:2] == (3.6, 4.6),
@@ -310,7 +324,8 @@ def selftest() -> int:
     upper = flights["STAIR_MAIN_L1_L2"]
     upper_walk = flight_runs(upper, foot_of(upper, cells, levels), portals)
     require(upper_walk[-1]["kind"] == "cross_landing"
-            and upper_walk[-1]["box"] == (2.4, 4.7, -15.4, -14.3),
+            and all(abs(a - b) < 1e-6 for a, b in zip(
+                upper_walk[-1]["box"], (2.2, 4.9, -15.3, -14.3))),
             f"the L2 east door meets a full-width cross landing ({upper_walk[-1]['box']})")
     require(walk[0]["up"] == -walk[2]["up"],
             f"the two runs of a `u` climb in OPPOSITE directions "
@@ -328,7 +343,7 @@ def selftest() -> int:
     landing_box, second = walk[1]["box"], walk[2]
     axis_index = 0 if second["axis"] == "x" else 2
     low_end = second["box"][axis_index] if second["up"] > 0 else second["box"][axis_index + 1]
-    require(abs(low_end - landing_box[axis_index + (0 if second["up"] > 0 else 1)]) < 1e-6,
+    require(abs(low_end - landing_box[axis_index + (1 if second["up"] > 0 else 0)]) < 1e-6,
             f"the second run's FOOT touches the landing, not its head ({low_end:.3f})")
 
     for identifier, flight in sorted(flights.items()):
@@ -375,6 +390,14 @@ def selftest() -> int:
     walk = flight_runs(straight, 6.55)
     require(len(walk) == 1 and walk[0]["kind"] == "run",
             "a straight flight is one run and no landing")
+    attic = flight_runs(straight, 6.55, portals)[0]["box"]
+    head = cells["L3_STAIR_HEAD"]["boxes"][0]["z"]
+    require(abs(attic[3] - (-14.30 - float(straight["approachDepth"]))) < 1e-6
+            and float(straight["approachDepth"]) >= 0.9,
+            f"the attic foot has a level entry before its first tread ({attic[3]:.3f})")
+    require(head[0] < attic[2] - 0.9,
+            f"the attic top has over 0.9 m of level landing before its north wall "
+            f"({head[0]:.3f}..{attic[2]:.3f})")
 
     garage = flights["STEPS_GARAGE"]
     gx0, gx1, gz0, gz1 = flight_runs(garage, 0.15)[0]["box"]

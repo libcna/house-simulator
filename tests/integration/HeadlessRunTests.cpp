@@ -1455,8 +1455,10 @@ namespace
         ASSERT_NE(stair, nullptr);
         const auto segments = cnahouse::tests::SegmentsOf(loaded.Value(), *stair, 0.60F, 3.65F);
         ASSERT_FALSE(segments.empty());
-        std::vector<Microsoft::Xna::Framework::Vector3> route{
-            {2.55F, 0.60F, -14.80F}, {2.75F, 0.60F, -14.70F}, {4.10F, 0.60F, -14.70F}};
+        // Enter the west first flight directly from the foyer. The old east-lane detour
+        // crossed the protected basement well edge and never represented a natural approach.
+        std::vector<Microsoft::Xna::Framework::Vector3> route{{2.55F, 0.60F, -15.25F},
+                                                              {2.85F, 0.60F, -15.10F}};
         const auto flight = cnahouse::tests::PathUp(segments);
         route.insert(route.end(), flight.begin(), flight.end());
 
@@ -1543,6 +1545,107 @@ namespace
         EXPECT_EQ(input.Reached(), route.size());
         EXPECT_GT(feet.Y, 3.25F);
         EXPECT_EQ(cnahouse::util::IdRegistry::NameOf(game.CellForTesting()), "L1_STAIR_MAIN");
+    }
+
+    TEST(HeadlessRunTests, TheMainStairRunRailsStopARealControllerWalkOff)
+    {
+        if (!std::filesystem::exists("content/world/collision.bin"))
+        {
+            GTEST_SKIP() << "no deployed collision; run tools/ci/build_content.py --only world";
+        }
+
+        struct Probe
+        {
+            std::array<float, 5> start;
+            float minimumFeetY;
+        };
+
+        // Both exposed sides face a deeper well. Earlier visible balusters had no collision:
+        // a held sideways input dropped 1-2 metres through them in the real game loop.
+        for (const Probe& probe : {Probe{{2.95F, 1.69F, -17.0F, 90.0F, 0.0F}, 1.35F},
+                                   Probe{{4.15F, 2.80F, -17.0F, 270.0F, 0.0F}, 2.45F}})
+        {
+            cnahouse::player::InputState forward;
+            forward.move.Y = 1.0F;
+            ScriptedInput input(forward);
+            Options options;
+            options.headless = true;
+            options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+            options.noAudio = true;
+            options.scene = "walk";
+            options.player = probe.start;
+            Settings settings = Settings::Defaults();
+            settings.backBufferWidth = 320;
+            settings.backBufferHeight = 180;
+            settings.verticalSync = false;
+            CnaHouseGame game(options, settings);
+            game.SetInputSourceForTesting(&input);
+            game.SetFixedStepLimit(180);
+            game.SetFrameLimit(4000);
+            game.Run();
+            const auto feet = game.PlayerForTesting().Feet();
+            EXPECT_EQ(game.ExitCode(), 0);
+            EXPECT_GT(feet.Y, probe.minimumFeetY) << "walked through a visible stair balustrade";
+        }
+    }
+
+    TEST(HeadlessRunTests, HoldingForwardTraversesTheAtticAndItsGuardStopsWalkoff)
+    {
+        // HOUSE-03638: no waypoint steering or test-supplied cell changes. The running game
+        // receives the same constant forward intent as a held W key and must track each exit.
+        struct Probe
+        {
+            const char* name;
+            std::array<float, 5> start;
+            std::uint64_t steps;
+            const char* endCell;
+            float floor;
+        };
+
+        for (const Probe& probe :
+             {Probe{"ascent", {5.85F, 6.55F, -14.85F, 0.0F, 0.0F}, 780, "L3_STORE_E", 9.30F},
+              Probe{"descent", {5.85F, 9.30F, -19.15F, 180.0F, 0.0F}, 780, "L2_STAIR_ATTIC", 6.55F},
+              Probe{"room", {5.85F, 9.30F, -19.65F, 270.0F, 0.0F}, 120, "L3_ROOM", 9.30F},
+              Probe{"store", {5.85F, 9.30F, -19.65F, 0.0F, 0.0F}, 120, "L3_STORE_E", 9.30F},
+              Probe{"guard", {7.20F, 9.30F, -18.0F, 270.0F, 0.0F}, 180, "L3_STAIR_HEAD", 9.30F}})
+        {
+            SCOPED_TRACE(probe.name);
+            cnahouse::util::Log::ResetForTesting();
+            cnahouse::player::InputState forward;
+            forward.move.Y = 1.0F;
+            ScriptedInput input(forward);
+            Options options;
+            options.headless = true;
+            options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+            options.noAudio = true;
+            options.scene = "walk";
+            options.player = probe.start;
+            options.timeOfDay = 10.5;
+            options.freezeTime = true;
+            Settings settings = Settings::Defaults();
+            settings.backBufferWidth = 320;
+            settings.backBufferHeight = 180;
+            settings.verticalSync = false;
+            CnaHouseGame game(options, settings);
+            game.SetInputSourceForTesting(&input);
+            game.SetFixedStepLimit(probe.steps);
+            game.SetFrameLimit(16000);
+            game.Run();
+            const auto feet = game.PlayerForTesting().Feet();
+            std::printf("  attic %s: %s, feet (%.3f, %.3f, %.3f)\n",
+                        probe.name,
+                        std::string(cnahouse::util::IdRegistry::NameOf(game.CellForTesting())).c_str(),
+                        static_cast<double>(feet.X),
+                        static_cast<double>(feet.Y),
+                        static_cast<double>(feet.Z));
+            EXPECT_EQ(game.ExitCode(), 0);
+            EXPECT_EQ(cnahouse::util::IdRegistry::NameOf(game.CellForTesting()), probe.endCell);
+            EXPECT_NEAR(feet.Y, probe.floor, 0.12F);
+            if (std::string_view(probe.name) == "guard")
+            {
+                EXPECT_GE(feet.X, 6.75F) << "the player crossed the visible well guard";
+            }
+        }
     }
 
     TEST(HeadlessRunTests, TheWalkSceneLoadsTheSunBakeAndPublishesDaylight)

@@ -44,8 +44,8 @@ LEGACY_POSES = (
     ("foyer-facing-front", "0.00,0.60,-16.70,180.0,0.0"),
     # HOUSE-00489: the foyer sees only the side of the U flight. Keep its actual foot and the
     # first-floor exit in the same fixed review set so a passable stair is not judged by one angle.
-    ("main-stair-foot", "4.10,0.60,-14.70,0.0,0.0"),
-    ("main-stair-l1-exit", "2.95,3.65,-14.65,270.0,0.0"),
+    ("main-stair-foot", "2.85,0.60,-14.90,0.0,0.0"),
+    ("main-stair-l1-exit", "4.20,3.65,-15.30,270.0,0.0"),
     ("central-hall", "0.00,0.60,-20.65,0.0,0.0"),
     # HOUSE-01065: the route view looks north through the hall and therefore only catches these
     # side-wall gallery clusters obliquely. Paired cross-hall views keep all nine frame positions,
@@ -124,16 +124,16 @@ NEW_POSES = (
     # zone-walk evidence) while exposing the deliberately low eaves and the view into the north bay.
     ("attic-store-west-eaves", "-8.20,9.30,-20.70,270.0,20.0"),
     ("attic-store-west-to-north", "-6.20,9.30,-25.55,90.0,8.0"),
-    ("main-stair-l2-exit", "3.55,6.55,-15.50,0.0,0.0"),
+    ("main-stair-l2-exit", "4.20,6.55,-15.30,270.0,0.0"),
     ("basement-stair", "4.30,-2.30,-19.50,180.0,0.0"),
     # HOUSE-03266: the inherited stair views miss several end-on silhouettes. These paired
     # standing-height views retain them as controls and explicitly show each interior flight from
     # its foot and head; the exterior three-step flights remain covered by their zone walks.
-    ("main-stair-l1-transition", "3.55,3.65,-15.50,0.0,0.0"),
+    ("main-stair-l1-transition", "2.85,3.65,-14.90,0.0,0.0"),
     ("basement-stair-foot", "4.10,-2.30,-14.70,0.0,10.0"),
     ("basement-stair-head", "4.10,0.60,-19.45,180.0,-10.0"),
     ("attic-stair-foot", "5.85,6.55,-14.70,0.0,10.0"),
-    ("attic-stair-head", "5.85,9.30,-18.05,180.0,-10.0"),
+    ("attic-stair-head", "5.85,9.30,-19.65,180.0,-10.0"),
     ("garden", "-15.00,-0.35,-42.80,180.0,0.0"),
     # HOUSE-03267: the inherited garden view stands beside the shed and sees only its black side
     # edge. This path-side position remains in the secondary garden cell and squarely reviews the

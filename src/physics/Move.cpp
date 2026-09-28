@@ -49,6 +49,9 @@ namespace cnahouse::physics
 
         Capsule moving = capsule;
         Xna::Vector3 remaining = motion;
+        Xna::Vector3 previousNormal;
+        bool previousWalkable = false;
+        bool previousContact = false;
 
         for (int i = 0; i < kSlideIterations; ++i)
         {
@@ -101,6 +104,29 @@ namespace cnahouse::physics
                                      remaining.Y - hit.normal.Y * Dot(remaining, hit.normal),
                                      remaining.Z - hit.normal.Z * Dot(remaining, hit.normal));
 
+            // At a ramp/rail contact, projecting onto one plane and then the other repeatedly
+            // spends all three iterations without taking a step. Slide along their shared
+            // crease instead. One plane must be walkable: this does not permit climbing walls.
+            bool supportedCrease = false;
+            const bool rampBesideWall =
+                (previousWalkable && previousNormal.Y < 0.9999F && std::fabs(hit.normal.Y) < 1.0e-4F) ||
+                (result.lastWalkable && hit.normal.Y < 0.9999F && std::fabs(previousNormal.Y) < 1.0e-4F);
+            if (previousContact && rampBesideWall)
+            {
+                const Xna::Vector3 crease(previousNormal.Y * hit.normal.Z - previousNormal.Z * hit.normal.Y,
+                                          previousNormal.Z * hit.normal.X - previousNormal.X * hit.normal.Z,
+                                          previousNormal.X * hit.normal.Y - previousNormal.Y * hit.normal.X);
+                const float squared = LengthSquared(crease);
+                if (squared > 1.0e-6F)
+                {
+                    remaining = Scaled(crease, Dot(remaining, crease) / squared);
+                    supportedCrease = true;
+                }
+            }
+            previousNormal = hit.normal;
+            previousWalkable = result.lastWalkable;
+            previousContact = true;
+
             if (hit.startedInside && !hit.touching)
             {
                 // Inside something. The way out of a VOLUME is not a surface normal, so there is
@@ -116,7 +142,7 @@ namespace cnahouse::physics
             if (!result.lastWalkable)
             {
                 ++result.steepContacts;
-                if (remaining.Y > 0.0F)
+                if (remaining.Y > 0.0F && !supportedCrease)
                 {
                     // §43.1's 46° limit. The projection above is happy to send a body up the face
                     // of a 70° bank, because a plane is a plane to it; a slope that steep is a

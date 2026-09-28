@@ -142,10 +142,10 @@
           "lights": [
             "LIGHT_B1_HALL_MAIN_C_1"
           ],
-          "mean": 0.009230192722202057,
-          "peak": 6.082326889038086,
-          "receiverMean": 0.022177365748079433,
-          "scale": 6.082326889038086
+          "mean": 0.03304524595718478,
+          "peak": 5.344671726226807,
+          "receiverMean": 0.07988981904712161,
+          "scale": 0.47125500440597534
         },
         {
           "group": "LG_B1_HALL_MAIN_N",
@@ -153,10 +153,10 @@
           "lights": [
             "LIGHT_B1_HALL_MAIN_N_1"
           ],
-          "mean": 0.009550514699673645,
-          "peak": 11.453234672546387,
-          "receiverMean": 0.022953735415405543,
-          "scale": 11.453234672546387
+          "mean": 0.03597497565093488,
+          "peak": 5.827173233032227,
+          "receiverMean": 0.08699837392609058,
+          "scale": 0.5080903172492981
         },
         {
           "group": "LG_B1_HALL_MAIN_S",
@@ -164,14 +164,13 @@
           "lights": [
             "LIGHT_B1_HALL_MAIN_S_1"
           ],
-          "mean": 0.009719154589497984,
-          "peak": 15.493486404418945,
-          "receiverMean": 0.023348769901974525,
-          "scale": 15.493486404418945
+          "mean": 0.03428212298369174,
+          "peak": 6.035844326019287,
+          "receiverMean": 0.08288007908672938,
+          "scale": 0.5202004313468933
         }
       ],
-      "lumensPerRadiantWatt": 683.0,
-      "shellHash": "sha256:8bacaaf8439f6d5802c63659097fb21fd7984d48485d17b9a956ad8a8aa07a00"
+      "shellHash": "sha256:2e1f5a7ca7c3bbcf380faede6dc68ff30b5d350def88acd78e9493af5db78b70"
     },
     {
       "cell": "B1_HOBBY",
@@ -255,7 +254,7 @@
     },
     {
       "cell": "B1_STAIR",
-      "cellPropsSha256": "2d302d380d3a3a0f1e531795244b66a2189b7d6e147c7392c2bb9f755e977089",
+      "cellPropsSha256": "f6a03c05cb6b463fb5e8b6b8a2b8fc400082ae814817c5746b600c72221626be",
       "daylight": null,
       "furnishedMeshes": 22,
       "furnishedProps": 2,
@@ -266,14 +265,13 @@
           "lights": [
             "LIGHT_B1_STAIR_MAIN_1"
           ],
-          "mean": 0.022271253673478663,
-          "peak": 16.703126907348633,
-          "receiverMean": 0.055982231955926276,
-          "scale": 16.703126907348633
+          "mean": 0.07229781751793059,
+          "peak": 57.0357666015625,
+          "receiverMean": 0.18159243226218016,
+          "scale": 0.952714741230011
         }
       ],
-      "lumensPerRadiantWatt": 683.0,
-      "shellHash": "sha256:57700a9f7af6c4a783985e79094c4bd136db8955d9ac3689348827a354b52282"
+      "shellHash": "sha256:e25327c2d5f9d15cb05579115fce4375c74da99e5b5b7f846490c0dab39e9c2e"
     },
     {
       "cell": "B1_STOR1",
@@ -562,7 +560,7 @@
     },
     {
       "cell": "L0_FOYER",
-      "cellPropsSha256": "45c5e7388d1c8f03eb27f0008e7fe39463e5cb3333593a1402624068a4012008",
+      "cellPropsSha256": "7cee495776841a42afdbc1872394e390b396965e4d47564e8a9cdbf84907fd9d",
       "daylight": null,
       "furnishedMeshes": 2,
       "furnishedProps": 2,
@@ -574,10 +572,10 @@
             "LIGHT_L0_FOYER_ACCENT_1",
             "LIGHT_L0_FOYER_ACCENT_2"
           ],
-          "mean": 0.002441423712078357,
-          "peak": 0.01869410276412964,
-          "receiverMean": 0.007049740590854556,
-          "scale": 0.01869410276412964
+          "mean": 0.00817404829813213,
+          "peak": 0.06376322358846664,
+          "receiverMean": 0.023992044806631644,
+          "scale": 0.06043088436126709
         },
         {
           "group": "LG_L0_FOYER_MAIN",
@@ -585,10 +583,10 @@
           "lights": [
             "LIGHT_L0_FOYER_MAIN_1"
           ],
-          "mean": 0.050481823945558016,
-          "peak": 0.44000592827796936,
-          "receiverMean": 0.14538481341607004,
-          "scale": 0.44000592827796936
+          "mean": 0.04972455598757521,
+          "peak": 0.43482252955436707,
+          "receiverMean": 0.14589669149363044,
+          "scale": 0.4121113419532776
         },
         {
           "group": "LG_L0_PORCH_LANTERN",
@@ -599,13 +597,13 @@
             "LIGHT_L0_PORCH_LANTERN_1",
             "LIGHT_L0_PORCH_LANTERN_2"
           ],
-          "mean": 0.004504880383405971,
-          "peak": 1.337039589881897,
-          "receiverMean": 0.010811153446170311,
-          "scale": 1.337039589881897
+          "mean": 0.006797735200380052,
+          "peak": 4.377318859100342,
+          "receiverMean": 0.016534119499390734,
+          "scale": 0.27578842639923096
         }
       ],
-      "shellHash": "sha256:a9a11bd918c887df339fe87375342a615b6fc682a6e9e91cbcc7cd06e97ed1a8"
+      "shellHash": "sha256:c3c7833619720fe4e2949d08aa563ee5601cc06edbd0af092992528c4000e29f"
     },
     {
       "cell": "L0_GARAGE",
@@ -936,10 +934,10 @@
     },
     {
       "cell": "L0_STAIR_MAIN",
-      "cellPropsSha256": "dd7745228c4868b4ecc3e57959aa52ca1cc96d9503eeca52e627cb228d96e51a",
+      "cellPropsSha256": "6defc10992e2aca0b67e50b5642bd979abe6ec5c15d1e09575fcf8191af8bcc5",
       "daylight": null,
-      "furnishedMeshes": 22,
-      "furnishedProps": 2,
+      "furnishedMeshes": 16,
+      "furnishedProps": 1,
       "groups": [
         {
           "group": "LG_L0_PORCH_LANTERN",
@@ -947,10 +945,10 @@
           "lights": [
             "LIGHT_L0_PORCH_CEILING_2"
           ],
-          "mean": 0.0014163285625128333,
-          "peak": 0.1752338409423828,
-          "receiverMean": 0.031230374910262933,
-          "scale": 0.1752338409423828
+          "mean": 0.0014992558043388793,
+          "peak": 0.1750720888376236,
+          "receiverMean": 0.03006446696864071,
+          "scale": 0.16962981224060059
         },
         {
           "group": "LG_L0_STAIR_MAIN_MAIN",
@@ -958,10 +956,10 @@
           "lights": [
             "LIGHT_L0_STAIR_MAIN_MAIN_1"
           ],
-          "mean": 0.003473255565374577,
-          "peak": 0.19222491979599,
-          "receiverMean": 0.014082034846374937,
-          "scale": 0.19222491979599
+          "mean": 0.03868846379132755,
+          "peak": 1.5921337604522705,
+          "receiverMean": 0.14879615022994921,
+          "scale": 1.1520915031433105
         },
         {
           "group": "LG_L0_STAIR_MAIN_STEP",
@@ -970,14 +968,14 @@
             "LIGHT_L0_STAIR_MAIN_STEP_1",
             "LIGHT_L0_STAIR_MAIN_STEP_2"
           ],
-          "mean": 0.0005655775582777005,
-          "peak": 0.19598403573036194,
-          "receiverMean": 0.0023310445079994936,
-          "scale": 0.19598403573036194
+          "mean": 0.020143065178870472,
+          "peak": 0.6043390035629272,
+          "receiverMean": 0.07811212454973417,
+          "scale": 0.4662742018699646
         }
       ],
-      "lumensPerRadiantWatt": 683.0,
-      "shellHash": "sha256:b89ac7b6401ca6d4e4a715250f577bab7546212286d07af696dee5663b7a00ae"
+      "lumensPerRadiantWatt": 200.0,
+      "shellHash": "sha256:6a6c7007b1948622a8d8b2c0ca1d40705b3c6afb08126dbe788f15b5916c776e"
     },
     {
       "cell": "L0_STOR",
@@ -1656,10 +1654,10 @@
     },
     {
       "cell": "L1_STAIR_MAIN",
-      "cellPropsSha256": "c849ff967b46ff6ce61e2d98f0cfb95a4a081faca86d710d3996b82e6cbf3c5c",
+      "cellPropsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "daylight": null,
-      "furnishedMeshes": 6,
-      "furnishedProps": 1,
+      "furnishedMeshes": 0,
+      "furnishedProps": 0,
       "groups": [
         {
           "group": "LG_EXT_FACADE_UPLIGHT",
@@ -1667,10 +1665,10 @@
           "lights": [
             "LIGHT_EXT_FACADE_UPLIGHT_E1"
           ],
-          "mean": 0.002648775213492927,
-          "peak": 0.39152103662490845,
-          "receiverMean": 0.08066431678042549,
-          "scale": 0.39152103662490845
+          "mean": 0.005415712582669946,
+          "peak": 0.38991910219192505,
+          "receiverMean": 0.031541994264938485,
+          "scale": 0.3839465379714966
         },
         {
           "group": "LG_L1_STAIR_MAIN_MAIN",
@@ -1678,14 +1676,14 @@
           "lights": [
             "LIGHT_L1_STAIR_MAIN_MAIN_1"
           ],
-          "mean": 0.003311017655398696,
-          "peak": 0.2347734272480011,
-          "receiverMean": 0.0155303596726609,
-          "scale": 0.2347734272480011
+          "mean": 0.01458996961502692,
+          "peak": 0.32997697591781616,
+          "receiverMean": 0.04625426899624633,
+          "scale": 0.29074156284332275
         }
       ],
-      "lumensPerRadiantWatt": 683.0,
-      "shellHash": "sha256:cc106d8df9b429162f4956fcc6f66713ff22829862c9221e96581c1f5cb6f744"
+      "lumensPerRadiantWatt": 200.0,
+      "shellHash": "sha256:4d53907caae63f678acfea3d21f58f8cd8aea7428c0b6400b604992e9ca12adb"
     },
     {
       "cell": "L1_STOR",
@@ -1789,7 +1787,7 @@
     },
     {
       "cell": "L2_BATH5",
-      "cellPropsSha256": "27cc4814e42bb6405724ae5fe9ef11681d091a2cd31e87fb4877422256119d84",
+      "cellPropsSha256": "2be7be161dacdbc32ca5525b74ac798277d3a09b018414f01223703a3d973de4",
       "daylight": null,
       "furnishedMeshes": 21,
       "furnishedProps": 5,
@@ -1801,10 +1799,10 @@
             "LIGHT_L2_BATH5_MAIN_1",
             "LIGHT_L2_BATH5_MAIN_2"
           ],
-          "mean": 0.011303702036946375,
-          "peak": 7.418280601501465,
-          "receiverMean": 0.030276239727859637,
-          "scale": 7.418280601501465
+          "mean": 0.06050122814219547,
+          "peak": 1.5929075479507446,
+          "receiverMean": 0.14318245296572737,
+          "scale": 0.8933634757995605
         },
         {
           "group": "LG_L2_BATH5_VANITY",
@@ -1812,14 +1810,14 @@
           "lights": [
             "LIGHT_L2_BATH5_VANITY_1"
           ],
-          "mean": 0.0036944243292157427,
-          "peak": 1.104170560836792,
-          "receiverMean": 0.009926094145740558,
-          "scale": 1.104170560836792
+          "mean": 0.01767949823013957,
+          "peak": 4.433658599853516,
+          "receiverMean": 0.04190089085841054,
+          "scale": 0.24058027565479279
         }
       ],
-      "lumensPerRadiantWatt": 683.0,
-      "shellHash": "sha256:830b6889610cb9e1fe1a9dacec6692390cbb1b8ef75b499d834e00fb9c04fcda"
+      "lumensPerRadiantWatt": 200.0,
+      "shellHash": "sha256:a2b485e8cfed1d16425beca751c1fa307d285bbc44870525c4d583f8a2966079"
     },
     {
       "cell": "L2_BED6",
@@ -2055,10 +2053,10 @@
           "lights": [
             "LIGHT_L2_LANDING_JULIET_1"
           ],
-          "mean": 0.001923817293127509,
-          "peak": 0.38868072628974915,
-          "receiverMean": 0.0054353692792763215,
-          "scale": 0.38868072628974915
+          "mean": 0.007341597262011525,
+          "peak": 1.3341203927993774,
+          "receiverMean": 0.020596689227189536,
+          "scale": 0.14540092647075653
         },
         {
           "group": "LG_L2_LANDING_MAIN",
@@ -2067,14 +2065,13 @@
             "LIGHT_L2_LANDING_MAIN_1",
             "LIGHT_L2_LANDING_MAIN_2"
           ],
-          "mean": 0.008316096456502484,
-          "peak": 13.195490837097168,
-          "receiverMean": 0.023402762872822478,
-          "scale": 13.195490837097168
+          "mean": 0.03245695134626784,
+          "peak": 1.4553231000900269,
+          "receiverMean": 0.09090165301443583,
+          "scale": 0.6097031831741333
         }
       ],
-      "lumensPerRadiantWatt": 683.0,
-      "shellHash": "sha256:9c8926711f051e03ab5687939b68907cd90df714186d2e001af6d572499cfd47"
+      "shellHash": "sha256:5ec4bbdac0c0b25cc7bcc94285520bbb531954a1fc155f80e4b2b351fbd19357"
     },
     {
       "cell": "L2_LIBRARY",
@@ -2196,7 +2193,7 @@
     },
     {
       "cell": "L2_STAIR_ATTIC",
-      "cellPropsSha256": "8f6e6ac10ba94eb7d6e53bb90eaeee0c38d73140b011de1620e374bf4e3f35cd",
+      "cellPropsSha256": "f317954db82bd09d73525cffdfe50fdd5fb09f184df348714b84efd44317ca67",
       "daylight": null,
       "furnishedMeshes": 22,
       "furnishedProps": 2,
@@ -2207,10 +2204,10 @@
           "lights": [
             "LIGHT_EXT_FACADE_UPLIGHT_E2"
           ],
-          "mean": 0.002295442915641861,
-          "peak": 0.06367821991443634,
-          "receiverMean": 0.029543223499604327,
-          "scale": 0.06367821991443634
+          "mean": 0.0018798061777151199,
+          "peak": 0.0651218444108963,
+          "receiverMean": 0.03022447755124397,
+          "scale": 0.06504624336957932
         },
         {
           "group": "LG_L2_STAIR_ATTIC_MAIN",
@@ -2218,21 +2215,21 @@
           "lights": [
             "LIGHT_L2_STAIR_ATTIC_MAIN_1"
           ],
-          "mean": 0.0054240499901722075,
-          "peak": 0.04585753753781319,
-          "receiverMean": 0.017165848980911388,
-          "scale": 0.04585753753781319
+          "mean": 0.08624471493209282,
+          "peak": 10.172258377075195,
+          "receiverMean": 0.27931081259036844,
+          "scale": 2.563990354537964
         }
       ],
-      "lumensPerRadiantWatt": 683.0,
-      "shellHash": "sha256:7bd5b0794861a621fa3b13ad3e938200549c4978d3e8b4c6ffaf33e4c0e10f12"
+      "lumensPerRadiantWatt": 200.0,
+      "shellHash": "sha256:4833d210b1322e2ef3fc5604dc528c60e0aedc743e399387e1f92cd921f73393"
     },
     {
       "cell": "L2_STAIR_MAIN",
-      "cellPropsSha256": "fa50fa8c201e3f65d24c385ae99cf81c59d9fbc78f1c78d1b782faf750e28aa8",
+      "cellPropsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "daylight": null,
-      "furnishedMeshes": 6,
-      "furnishedProps": 1,
+      "furnishedMeshes": 0,
+      "furnishedProps": 0,
       "groups": [
         {
           "group": "LG_EXT_FACADE_UPLIGHT",
@@ -2240,10 +2237,10 @@
           "lights": [
             "LIGHT_EXT_FACADE_UPLIGHT_E1"
           ],
-          "mean": 0.0096158091484537,
-          "peak": 0.17444579303264618,
-          "receiverMean": 0.024543607585023434,
-          "scale": 0.17444579303264618
+          "mean": 0.013720141518569337,
+          "peak": 0.1802014857530594,
+          "receiverMean": 0.030894832138570645,
+          "scale": 0.1652747243642807
         },
         {
           "group": "LG_L2_STAIR_MAIN_MAIN",
@@ -2251,14 +2248,14 @@
           "lights": [
             "LIGHT_L2_STAIR_MAIN_MAIN_1"
           ],
-          "mean": 0.01164072225373001,
-          "peak": 0.1383579820394516,
-          "receiverMean": 0.03286037102086707,
-          "scale": 0.1383579820394516
+          "mean": 0.048146510402538104,
+          "peak": 0.48451897501945496,
+          "receiverMean": 0.12308197860407594,
+          "scale": 0.4199509024620056
         }
       ],
-      "lumensPerRadiantWatt": 683.0,
-      "shellHash": "sha256:84b6223a01a8f4c8f072686b2df378040f020a35fc42011a22fa56a0188d43fe"
+      "lumensPerRadiantWatt": 200.0,
+      "shellHash": "sha256:fe4a39020fe2dcb85eba3de9ba7254b9005fc3e1cc21bfc36af02a7f8ff5640f"
     },
     {
       "cell": "L2_STOR2",
@@ -2339,10 +2336,10 @@
           "lights": [
             "LIGHT_L3_ROOM_DESK_1"
           ],
-          "mean": 0.00022193019838807397,
-          "peak": 0.03697653487324715,
-          "receiverMean": 0.001273037787142401,
-          "scale": 0.03697653487324715
+          "mean": 0.00022141036940136573,
+          "peak": 0.03697656840085983,
+          "receiverMean": 0.0012714043309779344,
+          "scale": 0.012137244455516338
         },
         {
           "group": "LG_L3_ROOM_MAIN",
@@ -2351,21 +2348,21 @@
             "LIGHT_L3_ROOM_MAIN_1",
             "LIGHT_L3_ROOM_MAIN_2"
           ],
-          "mean": 0.06166079991508041,
-          "peak": 0.9892725348472595,
-          "receiverMean": 0.16899473203143384,
-          "scale": 0.9892725348472595
+          "mean": 0.06147212020867191,
+          "peak": 0.9894886612892151,
+          "receiverMean": 0.16797184676407625,
+          "scale": 0.7424700260162354
         }
       ],
-      "lumensPerRadiantWatt": 683.0,
-      "shellHash": "sha256:a8a0c121cb756417ede68cc1061e4c7d4da2bcb6663e646e9336e9d8e34d0b04"
+      "lumensPerRadiantWatt": 200.0,
+      "shellHash": "sha256:ed4a22f1a233143b0ffb08f05bfb3141aa076546a477b47a61ad76a5b8c5fa2e"
     },
     {
       "cell": "L3_STAIR_HEAD",
-      "cellPropsSha256": "8ab6cd6601d1251a7d8bfb1502db1d75abb6582053b35e2164bacb4519e4445d",
+      "cellPropsSha256": "a9617fb09dda4b234bd066e04df65b29696c610c607f92d76eb18e1e984e7656",
       "daylight": null,
-      "furnishedMeshes": 18,
-      "furnishedProps": 3,
+      "furnishedMeshes": 15,
+      "furnishedProps": 2,
       "groups": [
         {
           "group": "LG_L3_STAIR_HEAD_MAIN",
@@ -2373,14 +2370,14 @@
           "lights": [
             "LIGHT_L3_STAIR_HEAD_MAIN_1"
           ],
-          "mean": 0.005550469613363177,
-          "peak": 0.1003672182559967,
-          "receiverMean": 0.02491476184887516,
-          "scale": 0.1003672182559967
+          "mean": 0.027843807856157077,
+          "peak": 0.5441336631774902,
+          "receiverMean": 0.08696013284808812,
+          "scale": 0.38688793778419495
         }
       ],
-      "lumensPerRadiantWatt": 683.0,
-      "shellHash": "sha256:f68d293583150471116c5a1737ed4eca992ca68ad536443fb963314cd1224503"
+      "lumensPerRadiantWatt": 200.0,
+      "shellHash": "sha256:2d43bece7157ec8fa824a3c2cd8e81bce9872fc744754731533b29d2b0d46781"
     },
     {
       "cell": "L3_STORE_E",
@@ -2395,14 +2392,14 @@
           "lights": [
             "LIGHT_L3_STORE_E_MAIN_1"
           ],
-          "mean": 0.002977908367637899,
-          "peak": 0.05220821872353554,
-          "receiverMean": 0.008007550651312385,
-          "scale": 0.05220821872353554
+          "mean": 0.08546875876412152,
+          "peak": 0.643483579158783,
+          "receiverMean": 0.235268839602746,
+          "scale": 0.5462766289710999
         }
       ],
-      "lumensPerRadiantWatt": 683.0,
-      "shellHash": "sha256:5ada49378501e3acb81eb114b0d95c138bac24be07edef6f9cbbba3ccd6f8f98"
+      "lumensPerRadiantWatt": 200.0,
+      "shellHash": "sha256:642e6b4b5df0bf68f8d56e4ffcbf202703f592e3438037ac4d8bd8423aa15494"
     },
     {
       "cell": "L3_STORE_N",

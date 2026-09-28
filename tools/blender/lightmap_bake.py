@@ -313,7 +313,9 @@ def light_objects():
 
 
 def create_light_objects(lights: list[dict],
-                         lumens_per_radiant_watt: float = LEGACY_LUMENS_PER_RADIANT_WATT) -> None:
+                         lumens_per_radiant_watt: float = LEGACY_LUMENS_PER_RADIANT_WATT,
+                         ceiling_y: float | None = None,
+                         receiver_cell: str | None = None) -> None:
     """Turn the authored XNA light rows into the white emitters the irradiance bake needs.
 
     The shell GLBs contain geometry, not fixtures.  The original tool filtered Blender light
@@ -365,7 +367,16 @@ def create_light_objects(lights: list[dict],
             inner = min(max(float(light.get("coneInnerDeg", 0.0)), 0.0), outer)
             data.spot_blend = max(0.0, min(1.0, 1.0 - inner / outer))
         obj = bpy.data.objects.new(name, data)
-        obj.location = blender_space(light["position"])
+        position = list(light["position"])
+        # A point source only 20 mm below the receiver ceiling creates one inverse-square
+        # firefly. Max-normalising its 8-bit atlas then rounds almost every wall texel to zero:
+        # the bulb glows but the room is black. Model the diffuser's emitting volume below the
+        # ceiling for the *bake* only; runtime fixture placement remains authored. Do not move
+        # a source illuminating a different receiver through `bakeCells`.
+        if (ceiling_y is not None and light.get("cell") == receiver_cell and kind == "point"
+                and 0.0 <= ceiling_y - float(position[1]) <= 0.07):
+            position[1] = ceiling_y - 0.25
+        obj.location = blender_space(position)
         if kind == "spot":
             direction = Vector(blender_space(light.get("direction", (0, -1, 0))))
             if direction.length_squared <= 1e-12:
@@ -412,15 +423,29 @@ def rgb_peak(pixels: list[float]) -> float:
                 for channel in range(3)), default=0.0)
 
 
+NORMALISATION_PERCENTILE = 0.995
+
+
+def normalisation_scale(pixels: list[float]) -> float:
+    """Preserve useful 8-bit precision when a tiny fixture-adjacent firefly dominates a bake."""
+    lit = sorted(max(pixels[i], pixels[i + 1], pixels[i + 2])
+                 for i in range(0, len(pixels), 4)
+                 if max(pixels[i], pixels[i + 1], pixels[i + 2]) > 1.0e-5)
+    if not lit:
+        return 1.0
+    value = lit[min(len(lit) - 1, int(NORMALISATION_PERCENTILE * len(lit)))]
+    return value if value > 1.0e-6 else 1.0
+
+
 def normalise_and_save(pixels: list[float], size: int, path: str) -> float:
-    """Scale to 0..1 by the image's own maximum, save as PNG, and return the scale.
+    """Scale by the 99.5th lit-texel percentile, save as PNG, and return the scale.
 
     An 8-bit PNG cannot hold irradiance -- the fixture bakes to 6.3 -- so saving straight clips
-    everything bright to flat white and loses exactly the shape §28.3 says the bake exists to
-    capture. The scale folds into §23.4's `artLevels` at runtime and costs nothing there.
+    everything bright to flat white. A single near-fixture firefly can also reduce ordinary
+    receiver texels to one quantisation step if it sets the image maximum. Saturate only the
+    brightest half-percent of lit texels; the scale still folds into §23.4's `artLevels`.
     """
-    peak = rgb_peak(pixels)
-    scale = peak if peak > 1e-6 else 1.0
+    scale = normalisation_scale(pixels)
     image = bpy.data.images.new(f"save_{os.path.basename(path)}", size, size, alpha=False)
     image.colorspace_settings.name = "Non-Color"
     scaled = list(pixels)
@@ -980,6 +1005,20 @@ def selftest() -> int:
                 "a per-fixture calibration crosses legacy receiver-cell calibrations without "
                 "changing the global bake default")
         bpy.data.objects.remove(overridden_object, do_unlink=True)
+        recessed = {**authored[0], "id": "RECESSED_POINT", "type": "point",
+                    "cell": "ROOM_A", "position": [0.0, 2.0, 0.0]}
+        create_light_objects([recessed], ceiling_y=2.02, receiver_cell="ROOM_A")
+        recessed_object = bpy.data.objects.get("RECESSED_POINT")
+        require(recessed_object is not None and
+                abs(recessed_object.location.z - 1.77) < 1e-6,
+                "a source 20 mm below its own ceiling bakes from the diffuser clearance")
+        bpy.data.objects.remove(recessed_object, do_unlink=True)
+        create_light_objects([recessed], ceiling_y=2.02, receiver_cell="ROOM_B")
+        neighbour_object = bpy.data.objects.get("RECESSED_POINT")
+        require(neighbour_object is not None and
+                abs(neighbour_object.location.z - 2.0) < 1e-6,
+                "a cross-cell source keeps its authored position")
+        bpy.data.objects.remove(neighbour_object, do_unlink=True)
         select_lightmap_uv()
         image = make_bake_target(size)
 
@@ -993,18 +1032,24 @@ def selftest() -> int:
                 f"8-bit PNG would clip the pendant's pool of light to flat white")
         path = os.path.join(workdir, "norm.png")
         scale = normalise_and_save(pixels, size, path)
-        require(abs(scale - peak) < 1e-4,
-                f"the recorded scale is the image's own peak ({scale:.4f} vs {peak:.4f})")
+        require(0.0 < scale <= peak + 1e-4,
+                f"the recorded scale does not exceed the peak ({scale:.4f} vs {peak:.4f})")
         saved = bpy.data.images.load(path)
         saved.colorspace_settings.name = "Non-Color"
         stored = list(saved.pixels)
         require(max(stored[0::4]) <= 1.0 + 1e-6,
                 "the saved PNG is inside 0..1, so nothing clips")
-        brightest = max(range(size * size), key=lambda i: luminance(pixels, i))
-        require(abs(stored[brightest * 4] * scale - pixels[brightest * 4]) < 0.02 * peak,
-                f"...and scale x png recovers the baked value to within 2 % at the brightest "
-                f"texel, so the shape survives the round trip through 8 bits")
+        lit = sorted((i for i in range(size * size) if luminance(pixels, i) > 1.0e-5),
+                     key=lambda i: luminance(pixels, i))
+        typical = lit[len(lit) * 9 // 10] if lit else 0
+        require(abs(stored[typical * 4] * scale - pixels[typical * 4]) < 0.02 * scale,
+                f"...and scale x png recovers the 90th-percentile lit texel to within 2 % of "
+                f"scale, preserving the room's useful light")
         bpy.data.images.remove(saved)
+        firefly = [0.2, 0.2, 0.2, 1.0] * 1024
+        firefly[0] = 80.0
+        require(abs(normalisation_scale(firefly) - 0.2) < 1.0e-5,
+                "one extreme fixture-adjacent texel cannot quantise the room to black")
 
         # 9. Determinism. §18.4: every tool takes a seed and the same seed is the same output.
         out_a = os.path.join(workdir, "a")
@@ -1176,6 +1221,7 @@ def main() -> int:
         else:
             index += 1
     for key in ("lights", "cell", "out", "size", "samples", "seed", "lumens-per-radiant-watt",
+                "ceiling-y",
                 "props", "manifest", "prop-signature"):
         positional = [p for p in positional if p != options.get(key)]
 
@@ -1230,7 +1276,11 @@ def main() -> int:
     # owner; `bakeCells` is an offline-only receiver list and never changes switching semantics.
     lights = [light for light in document.get("lights", [])
               if light.get("cell") == cell or cell in (light.get("bakeCells") or [])]
-    create_light_objects(lights, lumens_per_radiant_watt)
+    ceiling_y = float(options["ceiling-y"]) if "ceiling-y" in options else None
+    if ceiling_y is not None and not math.isfinite(ceiling_y):
+        print("lightmap_bake: --ceiling-y must be finite", file=sys.stderr)
+        return 2
+    create_light_objects(lights, lumens_per_radiant_watt, ceiling_y, cell)
 
     bake_cell(lights, cell, options["out"],
               int(options.get("size", DEFAULT_SIZE)),

@@ -745,24 +745,10 @@ def build_stairwell_guards(layout, shapes: Shapes, per_cell: dict[str, list[int]
         floor = layout_io.cell_extent(cell, level)[0]
         step_off = _step_off_rects(layout, cells_by_id, levels, portals, cell["id"], floor)
         holes = _slab_holes(portals_by_plane, cell["id"], floor, step_off)
-        # A rail goes BESIDE a flight, never across one. The main stair leaves the L0 floor at
-        # z -14.30 and crosses the basement well's north edge 1.24 m up, so a rail drawn round
-        # that well without this opening is a fence across the bottom of the staircase.
+        # Only the authored step-off strip may interrupt a floor-level guard. A flight can pass
+        # beside or beneath this well without providing a safe way through its edge: treating
+        # every run footprint as a guard opening left four real walk-off drops unprotected.
         through = list(step_off)
-        for flight in layout_io.rows(layout, "stairs"):
-            if cell["id"] not in (flight.get("fromCell"), flight.get("toCell")):
-                continue
-            placed = stair_geometry.flight_runs(
-                flight, stair_geometry.foot_of(flight, cells_by_id, levels), portals)
-            for entry in placed or ():
-                if entry["y1"] <= floor + 0.05:
-                    # A flight that tops out AT this floor or below it passes UNDER the rail, and
-                    # a rail with a gap over it is a gap you fall through. The way off such a
-                    # flight is its step-off strip, which is already in the list. Only a flight
-                    # that climbs ABOVE this floor is one you walk onto here.
-                    continue
-                x0, x1, z0, z1 = entry["box"]
-                through.append((x0, z0, x1, z1))
         for hx0, hz0, hx1, hz1 in holes:
             # The four edges of the well, each as (axis, plane value, span, which way the FLOOR is).
             edges = (
@@ -997,7 +983,10 @@ def build_stairs(layout, shapes: Shapes, per_cell: dict[str, list[int]], stats: 
                 if entry["kind"] == "run":
                     vertices, triangles = _wedge(entry["box"], entry["y0"],
                                                  entry["y1"] - entry["y0"],
-                                                 entry["axis"], entry["up"])
+                                                 entry["axis"], entry["up"],
+                                                 open_high_end=flight.get("shape") == "u",
+                                                 slab_thickness=(float(flight["rise"])
+                                                                 if flight.get("shape") == "u" else 0.0))
                     index = shapes.mesh(vertices, triangles, surface, KIND_STAIR)
                     _add_mesh(per_cell, from_cell["id"], index)
                     _add_mesh(per_cell, to_cell["id"], index)
@@ -1005,9 +994,14 @@ def build_stairs(layout, shapes: Shapes, per_cell: dict[str, list[int]], stats: 
                 else:
                     x0, x1, z0, z1 = entry["box"]
                     thickness = float(flight["rise"])
-                    _add(per_cell, from_cell["id"], shapes.obb(
+                    index = shapes.obb(
                         ((x0 + x1) / 2, entry["y0"] - thickness / 2, (z0 + z1) / 2),
-                        ((x1 - x0) / 2, thickness / 2, (z1 - z0) / 2), 0.0, surface, KIND_STAIR))
+                        ((x1 - x0) / 2, thickness / 2, (z1 - z0) / 2), 0.0, surface, KIND_STAIR)
+                    # The tracker can still name either stair cell at the turn. Both directions
+                    # must find the same pad under the body, just as both already find the run
+                    # wedges; owning it only from below strands a descending player at the toe.
+                    _add(per_cell, from_cell["id"], index)
+                    _add(per_cell, to_cell["id"], index)
                     stats["stairLandings"] += 1
         else:
             treads = stair_geometry.flight_steps(flight, base, portals)
@@ -1020,6 +1014,36 @@ def build_stairs(layout, shapes: Shapes, per_cell: dict[str, list[int]], stats: 
                     ((x0 + x1) / 2, tread["y1"] - rise / 2, (z0 + z1) / 2),
                     ((x1 - x0) / 2, rise / 2, (z1 - z0) / 2), 0.0, surface, KIND_STAIR))
                 stats["stairSteps"] += 1
+
+        # Match the exposed raked handrails in the generated shell. A floor-well guard only
+        # protects a level landing; it cannot stop a capsule walking through a flight's open
+        # side at intermediate height. One narrow upright OBB per tread follows the slope and
+        # leaves the actual walking width untouched.
+        if flight.get("fromY") is None and flight.get("toY") is None:
+            frame = stair_geometry.frame(flight, portals)
+            treads = stair_geometry.flight_steps(flight, base, portals)
+            guard_height = float((layout["levels"].get("construction") or {}).get("balustrade", 0.0))
+            if frame is not None and treads and guard_height > 0.0:
+                axis, _sign, _start, cross_lo, cross_hi, _width = frame
+                rise = float(flight["rise"])
+                for tread in treads:
+                    x0, x1, z0, z1 = tread["box"]
+                    low, high = (x0, x1) if axis == "z" else (z0, z1)
+                    for edge in (low, high):
+                        if abs(edge - cross_lo) < 1.0e-4 or abs(edge - cross_hi) < 1.0e-4:
+                            continue
+                        bottom = tread["y1"] - rise
+                        top = tread["y1"] + guard_height
+                        if axis == "z":
+                            centre = (edge, (bottom + top) / 2, (z0 + z1) / 2)
+                            half = (BALUSTRADE_THICK / 2, (top - bottom) / 2, (z1 - z0) / 2)
+                        else:
+                            centre = ((x0 + x1) / 2, (bottom + top) / 2, edge)
+                            half = ((x1 - x0) / 2, (top - bottom) / 2, BALUSTRADE_THICK / 2)
+                        index = shapes.obb(centre, half, 0.0, from_cell.get("wallMaterial"), KIND_WALL)
+                        _add(per_cell, from_cell["id"], index)
+                        _add(per_cell, to_cell["id"], index)
+                        stats["stairRunGuards"] = stats.get("stairRunGuards", 0) + 1
 
 
 def _guessed_walk(flight: dict, from_cell: dict, base: float, width: float):
@@ -1066,8 +1090,8 @@ _FRAMES = {
 }
 
 
-def _wedge(box, y, height, axis, up):
-    """A closed right-triangular prism over @p box, rising towards @p up along @p axis.
+def _wedge(box, y, height, axis, up, open_high_end=False, slab_thickness=0.0):
+    """A right-triangular prism over @p box, rising towards @p up along @p axis.
 
     Six vertices -- the bottom rectangle plus the two raised corners at the high end -- and eight
     triangles. `selftest` counts the edges rather than trusting this comment: in a closed surface
@@ -1085,6 +1109,31 @@ def _wedge(box, y, height, axis, up):
         return (along, cross) if axis == "x" else (cross, along)
 
     corners = [world(0.0, 0.0), world(width, 0.0), world(0.0, length), world(width, length)]
+    if slab_thickness > 0.0:
+        # A stacked switchback cannot use a floor-filled wedge: its flat underside at the
+        # lower level's FFL would leave under a metre above the previous flight's turn. The
+        # drawn treads are only one riser thick, so give the smooth collision ramp a matching
+        # raked underside. This preserves the controller's ramp behaviour and real headroom.
+        vertices = [
+            (corners[0][0], y - slab_thickness, corners[0][1]),
+            (corners[1][0], y - slab_thickness, corners[1][1]),
+            (corners[2][0], y + height - slab_thickness, corners[2][1]),
+            (corners[3][0], y + height - slab_thickness, corners[3][1]),
+            (corners[0][0], y, corners[0][1]),
+            (corners[1][0], y, corners[1][1]),
+            (corners[2][0], y + height, corners[2][1]),
+            (corners[3][0], y + height, corners[3][1]),
+        ]
+        triangles = [
+            (0, 1, 3), (0, 3, 2),      # raked underside
+            (4, 7, 5), (4, 6, 7),      # walking slope
+            (0, 2, 6), (0, 6, 4),      # left cheek
+            (1, 7, 3), (1, 5, 7),      # right cheek
+            (0, 4, 5), (0, 5, 1),      # low-end riser
+        ]
+        if not open_high_end:
+            triangles.extend(((2, 3, 7), (2, 7, 6)))
+        return vertices, triangles
     vertices = [
         (corners[0][0], y, corners[0][1]), (corners[1][0], y, corners[1][1]),
         (corners[2][0], y, corners[2][1]), (corners[3][0], y, corners[3][1]),
@@ -1098,10 +1147,14 @@ def _wedge(box, y, height, axis, up):
     triangles = [
         (0, 1, 3), (0, 3, 2),      # underside
         (0, 5, 1), (0, 4, 5),      # the sloped walking surface
-        (2, 3, 5), (2, 5, 4),      # the vertical face at the top of the run
         (0, 2, 4),                 # left
         (1, 5, 3),                 # right
     ]
+    if not open_high_end:
+        # The full-height cap is useful on a free-ended flight but would stop a descending
+        # capsule one radius before it reaches a switchback's flush landing. That landing owns
+        # the support at the high end; the ramp's underside and cheeks remain solid below it.
+        triangles.extend(((2, 3, 5), (2, 5, 4)))
     return vertices, triangles
 
 
@@ -2054,7 +2107,8 @@ def build(world_dir: Path, manifest_path: Path | None = None, *, include_props: 
 
     stats = {"wallPieces": 0, "floorPieces": 0, "ceilingPieces": 0, "stairMeshes": 0, "stairSteps": 0, "stairLandings": 0,
              "stairsGuessed": 0, "rafterMeshes": 0, "rafterArea": 0.0, "rafterAboveCeiling": 0,
-             "dormerFaces": 0, "dormersUnowned": 0, "guards": 0, "stairGuards": 0, "outerShared": 0,
+             "dormerFaces": 0, "dormersUnowned": 0, "guards": 0, "stairGuards": 0,
+             "stairRunGuards": 0, "outerShared": 0,
              "openingShared": 0, "openBoundaries": 0, "clippedToRoof": 0, "clippedAway": 0,
              "fencePieces": 0, "kerbPieces": 0,
              "structureObbs": 0, "trunks": 0, "vehicles": 0, "hedges": 0, "furniture": 0,
@@ -2349,7 +2403,8 @@ def report(world: dict) -> str:
         f"{stats['meanBucketOccupancy']} shapes, worst {stats['maxBucketOccupancy']}",
         f"  guards: {stats['guards']} at drops over {GUARD_DROP:.1f} m, which §70.5 asks for "
         f"and the layout has no way to state",
-        f"  stair rails: {stats['stairGuards']} round the wells, §12.3's 0.95 m balustrade, open "
+        f"  stair rails: {stats['stairGuards']} round the wells, {stats['stairRunGuards']} "
+        f"raked flight pieces, §12.3's 0.95 m balustrade, open "
         f"where a flight climbs from that floor ({stats['outerShared']} outer wall pieces shared "
         f"with the yard on the other side of them)",
         f"  rafters: {stats['rafterMeshes']} clipped roof planes over "
@@ -2828,7 +2883,18 @@ def selftest() -> int:
             require(stats_u["stairMeshes"] == 2 and stats_u["stairLandings"] == 1,
                     f"a `u` is two wedges and one landing box "
                     f"({stats_u['stairMeshes']}, {stats_u['stairLandings']})")
+            require(stats_u.get("stairRunGuards") == 17,
+                    f"both exposed inner edges have one collision guard per tread "
+                    f"({stats_u.get('stairRunGuards')})")
+            guard_indices = [index for index, guard in enumerate(shapes_u.obbs)
+                             if guard[4] == KIND_WALL]
+            require(all(index in per_cell_u.get(main["fromCell"], [])
+                        and index in per_cell_u.get(main["toCell"], [])
+                        for index in guard_indices),
+                    "the raked rail proxies remain solid during either stair-cell handoff")
             wedges = [m for m in shapes_u.meshes if m["kind"] == KIND_STAIR]
+            require(all(len(mesh["triangles"]) == 10 for mesh in wedges),
+                    "the switchback ramps have a raked underside and no high cap at the pad")
             spans = sorted((min(v[0] for v in m["vertices"]), max(v[0] for v in m["vertices"]))
                            for m in wedges)
             require(spans[0][1] <= spans[1][0] + 1e-6,
@@ -2846,6 +2912,10 @@ def selftest() -> int:
                     "...and they climb in OPPOSITE directions, because a `u` turns through 180 "
                     "degrees on its landing")
             landing = [o for o in shapes_u.obbs if o[4] == KIND_STAIR][0]
+            landing_index = shapes_u.obbs.index(landing)
+            require(landing_index in per_cell_u.get(main["fromCell"], [])
+                    and landing_index in per_cell_u.get(main["toCell"], []),
+                    "both stair cells retain the turn pad for ascent and descent during cell handoff")
             half = float(main["rise"]) * 9 + 0.60
             require(abs(landing[0][1] + float(main["rise"]) / 2 - half) < 1e-6,
                     f"the landing's walking surface is the top of the ninth riser, +{half:.4f} m "
@@ -3038,21 +3108,20 @@ def selftest() -> int:
                     f"the house has holes with something behind them "
                     f"({house['stats']['openingShared']} shape(s) shared)")
 
-            # `HOUSE-00489` puts the first run in the east lane, clear of the foyer's approach.
-            # Its east face is now 0.20 m behind the mudroom opening, so the same shared-shape
-            # invariant belongs to that doorway.
+            # The lower run is now directly opposite the foyer opening in the west lane.
+            # The ramp must be shared with the approach cell so the capsule meets its foot.
             first_run = [index for index in range(len(house_shapes.meshes))
-                         if abs(mesh_aabb(house_shapes.meshes[index])[0] - 3.60) < 1e-6
-                         and abs(mesh_aabb(house_shapes.meshes[index])[1] - 0.60) < 1e-6
+                         if abs(mesh_aabb(house_shapes.meshes[index])[0] - 2.20) < 1e-6
+                         and abs(mesh_aabb(house_shapes.meshes[index])[1]
+                                 - (0.60 - float(main["rise"]))) < 1e-6
                          and house_shapes.meshes[index]["kind"] == KIND_STAIR]
             require(len(first_run) == 1,
-                    f"the main stair's first run is one wedge starting at x +3.60, y +0.60 "
+                    f"the main stair's first run is one thin ramp at x +2.20, "
                     f"({len(first_run)})")
             if first_run:
                 run_index = offset + first_run[0]
-                require(run_index in references["L0_STAIR_MAIN"] and run_index in references["L0_MUDROOM"],
-                        "and it is in L0_MUDROOM's list as well as L0_STAIR_MAIN's: the opening is "
-                        "0.20 m from it and a body in the opening is standing in the staircase")
+                require(run_index in references["L0_STAIR_MAIN"] and run_index in references["L0_FOYER"],
+                        "and it is shared with L0_FOYER: the opening meets the run's foot")
 
             # The fridge, which is where the vertical band had to be the BODY's and not the hole's:
             # `CELL_FRIDGE_INTERIOR`'s ceiling slab starts exactly at the top of its own opening,

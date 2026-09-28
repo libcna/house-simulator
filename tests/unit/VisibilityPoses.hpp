@@ -194,7 +194,7 @@ namespace cnahouse::testsupport
          -14.70f,
          0.0f,
          false,
-         {"B1_STAIR", "L0_STAIR_MAIN", "L1_STAIR_MAIN"},
+         {"B1_STAIR", "L0_FOYER", "L0_HALL", "L0_STAIR_MAIN", "L1_STAIR_MAIN"},
          true},
         // the fire door to the mudroom and the sectional door are both shut
         {"l0-garage", "L0_GARAGE", 12.90f, 0.60f, -17.50f, 270.0f, false, {"L0_GARAGE"}},
@@ -236,7 +236,7 @@ namespace cnahouse::testsupport
          -16.30f,
          180.0f,
          false,
-         {"L1_BALCONY_FRONT", "L2_BALCONY_JULIET", "L2_LANDING"},
+         {"L1_BALCONY_FRONT", "L2_BALCONY_JULIET", "L2_LANDING", "L2_STAIR_MAIN"},
          true},
         // the library's door is shut and its windows face the other way
         {"l2-library", "L2_LIBRARY", -5.20f, 6.55f, -16.30f, 90.0f, false, {"L2_LIBRARY"}},

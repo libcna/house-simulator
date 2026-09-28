@@ -22869,7 +22869,7 @@
       "id": "TEXTURE_B1_HALL_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_HALL_LM_DAY.png",
-      "sourceSha256": "dfe39445a2456f576cf8ecaeba0d9c2b98f9c0f18e6d0b4e07e734e061f31622",
+      "sourceSha256": "57864632a6efb1df8a1eb1f71e6bad1661a0b3ba05c66e6fbe7a1f788ef8ba5b",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22896,7 +22896,7 @@
       "id": "TEXTURE_B1_HALL_LM_LG_B1_HALL_MAIN_C",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_HALL_LM_LG_B1_HALL_MAIN_C.png",
-      "sourceSha256": "4ac234df4bdae70ae78b287b4c264bc25d8f60de0dd05d07e0e5ae17fccb660a",
+      "sourceSha256": "07170ee449dfa81b4276c9cad5d498843239bbb4f34c8da8d93d5d81d9d6994e",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22923,7 +22923,7 @@
       "id": "TEXTURE_B1_HALL_LM_LG_B1_HALL_MAIN_N",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_HALL_LM_LG_B1_HALL_MAIN_N.png",
-      "sourceSha256": "2e99b5a4ee597d93d2ec5ee616f7a39045080e875c13cc9e8ca4e59bf34cd1e4",
+      "sourceSha256": "65aadf94fe0c6df668ff2274f6ad0cc3d9d6c69d1053f4dc1b64d34fa359fe1f",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22950,7 +22950,7 @@
       "id": "TEXTURE_B1_HALL_LM_LG_B1_HALL_MAIN_S",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_HALL_LM_LG_B1_HALL_MAIN_S.png",
-      "sourceSha256": "3fb11877c361fd83a90182e79421c6d8543060ef2b121ea64c5613e85d4a2e1b",
+      "sourceSha256": "dbf2abf1481add6b300cd22eeb442fbf3654623623fcdf212bae153efe0c85dc",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23166,7 +23166,7 @@
       "id": "TEXTURE_B1_STAIR_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_STAIR_LM_DAY.png",
-      "sourceSha256": "ca3f209ca121b9fa46db2b3e6d8191c44016dbb89b8bc06bf4fcba8accf8b165",
+      "sourceSha256": "1bf36a5401c8c50e777c467cfbc23bb729a896ba0221699ac606d23ab0db07a0",
       "texture": {
         "width": 128,
         "height": 128,
@@ -23193,7 +23193,7 @@
       "id": "TEXTURE_B1_STAIR_LM_LG_B1_STAIR_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_STAIR_LM_LG_B1_STAIR_MAIN.png",
-      "sourceSha256": "24d47ea741a25fc2fbc67b5742328350a34c94db5dca101d7458b61558cb852a",
+      "sourceSha256": "f23ff96538c07530789f13f78ea1c6486abfa932d62b341643761672566f4ebc",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24384,7 +24384,7 @@
       "id": "TEXTURE_L0_FOYER_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_FOYER_LM_DAY.png",
-      "sourceSha256": "85e6d4290de1f3a10c284e79de9d6c78ddad1fa7ff72db47d963c437352e506b",
+      "sourceSha256": "4748da453161c662f612aab7ef42f7c18897c4bf56afa1d56f9ff7ef453d45b5",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24411,7 +24411,7 @@
       "id": "TEXTURE_L0_FOYER_LM_LG_L0_FOYER_ACCENT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_FOYER_ACCENT.png",
-      "sourceSha256": "81fd440226a87dce84ac497b7775a23631711221cf5e97e75decbc69c1961b91",
+      "sourceSha256": "767a781ac90e3abd7c774abe067e5469b3511b52cfb50549ec1a4139cf8cf9a8",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24438,7 +24438,7 @@
       "id": "TEXTURE_L0_FOYER_LM_LG_L0_FOYER_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_FOYER_MAIN.png",
-      "sourceSha256": "c429893d9924f44144e901ad53fac2ecba562a66c5be6c409efd6b6bb564ac90",
+      "sourceSha256": "a60fe3228b1f689f68f46175932411b3871fafa367150d450b0d7ab8a2ccdbd5",
       "texture": {
         "width": 128,
         "height": 128,
@@ -24465,7 +24465,7 @@
       "id": "TEXTURE_L0_FOYER_LM_LG_L0_PORCH_LANTERN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_PORCH_LANTERN.png",
-      "sourceSha256": "220ff30633ae12e34bf64996e9f52759b23b0d67ff4fb03bd4853aabf91a6842",
+      "sourceSha256": "ad2dae95230fc06a3057140497d214a108453d844d476e8692f9b5a90e9bab6d",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25248,7 +25248,7 @@
       "id": "TEXTURE_L0_STAIR_MAIN_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_STAIR_MAIN_LM_DAY.png",
-      "sourceSha256": "f1ae23aa98e49696b2777b4ff94059a859066bcf720aad666e97353cb90535fb",
+      "sourceSha256": "5b474541bc69329c9ee7efb7186d632e205c72e2a61912c940841b2dd3866e4f",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25275,7 +25275,7 @@
       "id": "TEXTURE_L0_STAIR_MAIN_LM_LG_L0_PORCH_LANTERN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_PORCH_LANTERN.png",
-      "sourceSha256": "e88d8fc65a9f380c6c98286e16e4129e606b44fc917b0c02e0e666963cae1138",
+      "sourceSha256": "8363770b0e23c908f145ef724952bbd822675d6c06c6cc3d293c1eb85628ba21",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25302,7 +25302,7 @@
       "id": "TEXTURE_L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_MAIN.png",
-      "sourceSha256": "a87217651e68bc14ae38a19cb37870357c276d3b9d9e2bcc28a72164ff1f563a",
+      "sourceSha256": "753e64aa588fc3c877816bea33264f625437d31c6d64304d8aeb3523ea89d8cb",
       "texture": {
         "width": 128,
         "height": 128,
@@ -25329,7 +25329,7 @@
       "id": "TEXTURE_L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_STEP",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_STEP.png",
-      "sourceSha256": "c3c6e9e445badee32065f64b41dabcd5e9de7b998bf8b9b89b66a6fbf93477b2",
+      "sourceSha256": "2eb4577d83e8ee88b4f4db01faad648a308489baf5bb3c861da0568ad0cae893",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26949,7 +26949,7 @@
       "id": "TEXTURE_L1_STAIR_MAIN_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_STAIR_MAIN_LM_DAY.png",
-      "sourceSha256": "0a47d30a4af36fc96ce5949d1908cfbcb6b99627bfc03532e35e09f8b5e97b7c",
+      "sourceSha256": "32f1464d8efec5ae3ce72186f33fab0cc6e63a293f62e2a8b91ecd4b15109264",
       "texture": {
         "width": 128,
         "height": 128,
@@ -26976,7 +26976,7 @@
       "id": "TEXTURE_L1_STAIR_MAIN_LM_LG_EXT_FACADE_UPLIGHT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_STAIR_MAIN_LM_LG_EXT_FACADE_UPLIGHT.png",
-      "sourceSha256": "a418a724910350ea00ed138a4bd0a0c77f7490d5e220e532643df552c8a2eeee",
+      "sourceSha256": "189968361d3bbf2cad6bf93a352239c83f4697634e91b33897c47c9d95250eaa",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27003,7 +27003,7 @@
       "id": "TEXTURE_L1_STAIR_MAIN_LM_LG_L1_STAIR_MAIN_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_STAIR_MAIN_LM_LG_L1_STAIR_MAIN_MAIN.png",
-      "sourceSha256": "201a44212b01e2de60974cb1438a69cc5bd8bcd49d701a1d6a50cad2cebbd298",
+      "sourceSha256": "9bb3d41ff76045fea943efa64187f1ba078c1b539e2f5fadfc0d42ba2c152c8a",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27273,7 +27273,7 @@
       "id": "TEXTURE_L2_BATH5_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_BATH5_LM_DAY.png",
-      "sourceSha256": "e1e8b1a742abd0dbcd1ebb3a742d43655b36e878736f944bd1c606d859ee1002",
+      "sourceSha256": "e952825d8736f65f80025cdca8e14a7a1d987c1de854251d50d64f08afa52875",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27300,7 +27300,7 @@
       "id": "TEXTURE_L2_BATH5_LM_LG_L2_BATH5_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_BATH5_LM_LG_L2_BATH5_MAIN.png",
-      "sourceSha256": "cdb2059dad9f598f2c15a1a0b565718a72154ed55b9372ebcfe0a85ce4ff91be",
+      "sourceSha256": "795c9cbf20e8e6e168549648e77898823db3accb71f116a7aae25f404dec57f0",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27327,7 +27327,7 @@
       "id": "TEXTURE_L2_BATH5_LM_LG_L2_BATH5_VANITY",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_BATH5_LM_LG_L2_BATH5_VANITY.png",
-      "sourceSha256": "5ded1d60713158f889b7a0f94b193ae8b0f6991e8c583443de8f6da4408bc87a",
+      "sourceSha256": "9f6a47b5df82f635e183e9057354184203e2ee39bb0d5c6a6abbab62510fc681",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27867,7 +27867,7 @@
       "id": "TEXTURE_L2_LANDING_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_LANDING_LM_DAY.png",
-      "sourceSha256": "aeec93d59f8bb8f0f8c0daf454ad98fe85b15af87cee6747006bc1ba75838a34",
+      "sourceSha256": "33f6d974f72c8ccb5cd83f7c48de7a8ad9e19429394c1aa90dbf41072922d422",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27894,7 +27894,7 @@
       "id": "TEXTURE_L2_LANDING_LM_LG_L2_LANDING_JULIET",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_LANDING_LM_LG_L2_LANDING_JULIET.png",
-      "sourceSha256": "c9282cabc54b92b0241c4a3d0f973f485fbbc39c4dc6576cdc69d7e3c3e73417",
+      "sourceSha256": "f165e8f50540b578651f154a190bc5453b5e07f6b49cedeb12fa0b83ff8fb398",
       "texture": {
         "width": 128,
         "height": 128,
@@ -27921,7 +27921,7 @@
       "id": "TEXTURE_L2_LANDING_LM_LG_L2_LANDING_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_LANDING_LM_LG_L2_LANDING_MAIN.png",
-      "sourceSha256": "92947b26d823e34811958cb6005abae58ac643a615d540300ebb5683022194e2",
+      "sourceSha256": "7a006c0affc3ba6e71b478ff1be5c5f2594671f818a8cd62fa2aeb8749e22cf1",
       "texture": {
         "width": 128,
         "height": 128,
@@ -28218,7 +28218,7 @@
       "id": "TEXTURE_L2_STAIR_ATTIC_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_STAIR_ATTIC_LM_DAY.png",
-      "sourceSha256": "67e7ca7dea368249381e6d99eb968b2271bce0751963155032a340af78ad588d",
+      "sourceSha256": "db9a51e1970204c03c124355af0f555691580b1d131eb0b5f71086b76325b8b5",
       "texture": {
         "width": 128,
         "height": 128,
@@ -28245,7 +28245,7 @@
       "id": "TEXTURE_L2_STAIR_ATTIC_LM_LG_EXT_FACADE_UPLIGHT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_STAIR_ATTIC_LM_LG_EXT_FACADE_UPLIGHT.png",
-      "sourceSha256": "bd8a427c55a4d4089a49542749dbfa450f261df94f250e68c072454a4a235763",
+      "sourceSha256": "d0bb620a4c269a09a4ce176ac55cd364178478f2cd4628901c7245fde6c2ab2c",
       "texture": {
         "width": 128,
         "height": 128,
@@ -28272,7 +28272,7 @@
       "id": "TEXTURE_L2_STAIR_ATTIC_LM_LG_L2_STAIR_ATTIC_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_STAIR_ATTIC_LM_LG_L2_STAIR_ATTIC_MAIN.png",
-      "sourceSha256": "b2070273f8817e08ad6ee603a2351ac808a0652bdc1fdb3cdb0d104bcf1901b9",
+      "sourceSha256": "f33e80c8ac64e884800d015f6a012c105f3ef0f81d6b52438e3657b7395789ca",
       "texture": {
         "width": 128,
         "height": 128,
@@ -28299,7 +28299,7 @@
       "id": "TEXTURE_L2_STAIR_MAIN_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_STAIR_MAIN_LM_DAY.png",
-      "sourceSha256": "0d4893b751342f738b8ad6113e19d64a34ad958ab8470d3107e6225d378c40ad",
+      "sourceSha256": "bec663087587efd29dde3a3692825a1c4742db55f22e5d8b3f1193d5bd338cb9",
       "texture": {
         "width": 128,
         "height": 128,
@@ -28326,7 +28326,7 @@
       "id": "TEXTURE_L2_STAIR_MAIN_LM_LG_EXT_FACADE_UPLIGHT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_STAIR_MAIN_LM_LG_EXT_FACADE_UPLIGHT.png",
-      "sourceSha256": "974de5aa50b447c61afa061d924d5781f8c7e35640bd0c932f21092172b1e9b8",
+      "sourceSha256": "8e68a9d9e586f3ff406995b748c97a7b6e2049ae5c553b45a5d2c45dabb892ae",
       "texture": {
         "width": 128,
         "height": 128,
@@ -28353,7 +28353,7 @@
       "id": "TEXTURE_L2_STAIR_MAIN_LM_LG_L2_STAIR_MAIN_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_STAIR_MAIN_LM_LG_L2_STAIR_MAIN_MAIN.png",
-      "sourceSha256": "a5bfcad2ca7c49f724ab178d91eee836a87465f9adb8d2598180999669a0b144",
+      "sourceSha256": "d62a9329421fdf8d5d10a4ec8d0daff1435030e6db8eda048abecee8f6af112b",
       "texture": {
         "width": 128,
         "height": 128,
@@ -28542,7 +28542,7 @@
       "id": "TEXTURE_L3_ROOM_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L3_ROOM_LM_DAY.png",
-      "sourceSha256": "0912d1fb94cbcbd23110f0af8323641c498fad29f5cd6759ffb346e1fe28967f",
+      "sourceSha256": "65c91ee164697212a1f420b2551cea77a273c03942349ef529bd2f4763f18140",
       "texture": {
         "width": 128,
         "height": 128,
@@ -28569,7 +28569,7 @@
       "id": "TEXTURE_L3_ROOM_LM_LG_L3_ROOM_DESK",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L3_ROOM_LM_LG_L3_ROOM_DESK.png",
-      "sourceSha256": "b5fbb1a28b5f8e6246165f9db3e7aadb401a0b9bd1310129e746d3b016cc25ee",
+      "sourceSha256": "1ee185962f4c3ecfb5c7c9f3ee45e9ab576db4c6e334bd9b69f354a3c55661e8",
       "texture": {
         "width": 128,
         "height": 128,
@@ -28596,7 +28596,7 @@
       "id": "TEXTURE_L3_ROOM_LM_LG_L3_ROOM_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L3_ROOM_LM_LG_L3_ROOM_MAIN.png",
-      "sourceSha256": "fb759e2d5a7bac586f6de56b7d16568d06a5ba178905339dc59f2d26a114e616",
+      "sourceSha256": "33cc4c0f4d3f154e28456ac0ab26a5ad341b13d5dc448bdce1704fc9016d209e",
       "texture": {
         "width": 128,
         "height": 128,
@@ -28623,7 +28623,7 @@
       "id": "TEXTURE_L3_STAIR_HEAD_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L3_STAIR_HEAD_LM_DAY.png",
-      "sourceSha256": "e1009b8fd780494f34ec9ec73cc8088194afb47d1c54df7d51d2078c842bd576",
+      "sourceSha256": "11bdbd9b72782c55828718eeecb121bd36b5f27bf296c6ce826061b6f92c2f34",
       "texture": {
         "width": 128,
         "height": 128,
@@ -28650,7 +28650,7 @@
       "id": "TEXTURE_L3_STAIR_HEAD_LM_LG_L3_STAIR_HEAD_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L3_STAIR_HEAD_LM_LG_L3_STAIR_HEAD_MAIN.png",
-      "sourceSha256": "30ddeb7a5619e8d0984f4c96efcb49b3b2001e684a05bed64b7264469e8cd50d",
+      "sourceSha256": "ed348fa785b9b48d940c22e9c2d7ed200aa9061a1a0f104beb34232e065d8fab",
       "texture": {
         "width": 128,
         "height": 128,
@@ -28677,7 +28677,7 @@
       "id": "TEXTURE_L3_STORE_E_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L3_STORE_E_LM_DAY.png",
-      "sourceSha256": "be096733b9be3b1c7010b7a35b764c9f049f9b24edd7d1fd12b3c3942098a4df",
+      "sourceSha256": "daacf57b6867564d014204f5e838bf4e696ec5816a2518e1c6bc18dd36af43fb",
       "texture": {
         "width": 128,
         "height": 128,
@@ -28704,7 +28704,7 @@
       "id": "TEXTURE_L3_STORE_E_LM_LG_L3_STORE_E_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L3_STORE_E_LM_LG_L3_STORE_E_MAIN.png",
-      "sourceSha256": "4ab7c8b65e3e820bad5bcc26d57b222d1c2c3ac88b86761369c81d42c62a96da",
+      "sourceSha256": "94b8f8d72259412e404b4b3c99ee77cb811806b0bc87109f7a996eae44f9750a",
       "texture": {
         "width": 128,
         "height": 128,

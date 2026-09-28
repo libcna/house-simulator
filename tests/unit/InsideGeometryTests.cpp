@@ -119,6 +119,11 @@ namespace
             "L2_BALCONY_JULIET north",
             "L2_BALCONY_JULIET south",
             "L2_BALCONY_JULIET west",
+            // HOUSE-03638 lengthens the adjoining attic stair and shortens this bathroom.
+            // Its east-boundary midpoint now lies inside the fitted bath against the masonry
+            // (x=8.35, z=-20.90, 0.70 m wide). Only the deliberate wall teleport reaches this
+            // bath/wall pocket; the ordinary portal walk above must still never enter a solid.
+            "L2_BATH5 east",
             "L2_LIBRARY north",
             // `EXT_GARDEN north` was here until `HOUSE-00774`: the corner of two exterior shapes
             // at the bottom of the garden, 0.24 m deep and a fixed point. Both shapes were cell

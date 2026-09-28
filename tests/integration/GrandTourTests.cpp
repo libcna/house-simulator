@@ -53,6 +53,7 @@ namespace
 
     constexpr float kArrivalTolerance = 0.60F;
     constexpr float kWaypointTolerance = 0.14F;
+    constexpr float kSwitchbackToeTolerance = player::kPlayerRadius + 0.06F;
     constexpr float kNarrowStairEndTolerance = 0.50F;
     constexpr float kStairEndTolerance = 0.90F;
     constexpr float kPortalInset = 0.48F;
@@ -716,8 +717,39 @@ namespace
                              std::tie(right.low.Y, right.high.Y, right.low.X, right.low.Z);
                   });
         std::vector<Vector3> points;
-        for (const Segment& segment : segments)
+        for (std::size_t index = 0; index < segments.size(); ++index)
         {
+            const Segment& segment = segments[index];
+            if (!boxesOnly && index > 0)
+            {
+                const Segment& before = segments[index - 1];
+                const auto pad = std::find_if(boxSegments.begin(),
+                                              boxSegments.end(),
+                                              [&](const Segment& candidate)
+                                              {
+                                                  return std::fabs(candidate.low.Y - before.high.Y) < 0.02F &&
+                                                         std::fabs(candidate.low.Y - segment.low.Y) < 0.02F;
+                                              });
+                if (pad != boxSegments.end() &&
+                    std::hypot(segment.low.X - before.high.X, segment.low.Z - before.high.Z) > 0.5F)
+                {
+                    // The two switchback wedges meet a full-width turning pad. Cross through
+                    // its interior in orthogonal legs; a straight line between the two wedge
+                    // toes clips the cheek at the pad edge on the way back down.
+                    if (std::fabs(segment.low.X - before.high.X) > std::fabs(segment.low.Z - before.high.Z))
+                    {
+                        points.emplace_back(before.high.X, pad->low.Y, pad->low.Z);
+                        points.push_back(pad->low);
+                        points.emplace_back(segment.low.X, pad->low.Y, pad->low.Z);
+                    }
+                    else
+                    {
+                        points.emplace_back(pad->low.X, pad->low.Y, before.high.Z);
+                        points.push_back(pad->low);
+                        points.emplace_back(pad->low.X, pad->low.Y, segment.low.Z);
+                    }
+                }
+            }
             points.push_back(segment.low);
             if (Distance(segment.low, segment.high) > 0.01F)
             {
@@ -836,17 +868,43 @@ namespace
                     stair.back() = departure;
                 }
             }
+            if (ascending && stair.size() >= 2U && Name(edge.flight->id).starts_with("STAIR_MAIN_"))
+            {
+                // The basement flight arrives in the east lane. Cross the level south approach
+                // before entering the WEST first run; a diagonal toward its toe cuts across
+                // the protected basement well (and is not a natural way to enter the stair).
+                const Vector3 toe = stair.front();
+                const float approachZ = toe.Z + 0.60F;
+                route.push_back(
+                    Stop{Vector3(source.feet.X, source.feet.Y, approachZ), kWaypointTolerance, from, false});
+                route.push_back(
+                    Stop{Vector3(toe.X, source.feet.Y, approachZ), kWaypointTolerance, from, false});
+                // Stay in the returning lane until the body has cleared its inner rail at the
+                // top as well. A diagonal from the last tread to the full-width south bridge
+                // otherwise tries to pass through the rail half a metre below the landing.
+                const float exitZ = toe.Z + 0.45F;
+                const float returnX = stair[stair.size() - 2U].X;
+                stair.back().Z = exitZ;
+                stair.insert(stair.end() - 1, Vector3(returnX, destination.feet.Y, exitZ));
+            }
             for (std::size_t index = 0; index < stair.size(); ++index)
             {
                 const std::string expected = index == 0U ? from : (index + 1U == stair.size() ? to : "");
-                const bool lowRampEnd =
-                    stair.size() > 2U && (ascending ? index == 0U : index + 2U == stair.size());
+                const bool lowRampEnd = (stair.size() >= 2U && ascending && index == 0U) ||
+                                        (stair.size() > 2U && !ascending && index + 2U == stair.size());
                 const bool finalRampEnd = stair.size() > 2U && index + 2U == stair.size();
+                const bool descendingFromPad = !ascending && index > 0U && index + 1U < stair.size() &&
+                                               std::fabs(stair[index].Y - stair[index - 1U].Y) < 0.02F &&
+                                               stair[index + 1U].Y < stair[index].Y - 0.5F;
                 const float tolerance =
                     lowRampEnd ? (edge.flight->width < 1.0F ? kNarrowStairEndTolerance : kStairEndTolerance)
                     : finalRampEnd && ascending ? kNarrowStairEndTolerance
+                    : descendingFromPad         ? kSwitchbackToeTolerance
                                                 : kWaypointTolerance;
-                route.push_back(Stop{stair[index], tolerance, expected, false});
+                const bool mainExit = ascending && Name(edge.flight->id).starts_with("STAIR_MAIN_") &&
+                                      index + 2U >= stair.size();
+                route.push_back(
+                    Stop{stair[index], mainExit ? kWaypointTolerance : tolerance, expected, false});
             }
             if (!stair.empty())
             {

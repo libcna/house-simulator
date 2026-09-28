@@ -2186,7 +2186,7 @@
       "id": "PROP_B1_STAIR_BENCH",
       "asset": "MODEL_FURNITURE_PIANO_BENCH",
       "cell": "B1_STAIR",
-      "position": [2.42, -2.30, -19.45],
+      "position": [2.42, -2.30, -15.30],
       "yawDeg": 270,
       "scale": 1,
       "static": true,
@@ -3824,7 +3824,7 @@
       "id": "PROP_L2_BATH5_VANITY",
       "asset": "MODEL_BATHROOM_VANITY",
       "cell": "L2_BATH5",
-      "position": [5.18, 6.55, -19.25],
+      "position": [5.18, 6.55, -19.85],
       "yawDeg": 90,
       "scale": 1,
       "static": true,
@@ -3837,7 +3837,7 @@
       "id": "PROP_L2_BATH5_TOILET",
       "asset": "MODEL_BATHROOM_TOILET",
       "cell": "L2_BATH5",
-      "position": [6.05, 6.55, -18.61],
+      "position": [6.05, 6.55, -20.05],
       "yawDeg": 180,
       "scale": 1,
       "static": true,
@@ -3850,7 +3850,7 @@
       "id": "PROP_L2_BATH5_MIRROR",
       "asset": "MODEL_PROP_KIT_MIRROR",
       "cell": "L2_BATH5",
-      "position": [4.92, 7.82, -19.25],
+      "position": [4.92, 7.82, -19.85],
       "yawDeg": 90,
       "scale": 1,
       "static": true,
@@ -4383,7 +4383,7 @@
       "id": "PROP_B1_STAIR_ART",
       "asset": "MODEL_DECOR_WALL_ART_13",
       "cell": "B1_STAIR",
-      "position": [2.32, -1.10, -19.20],
+      "position": [2.32, -1.10, -17.80],
       "yawDeg": 270,
       "scale": 1,
       "static": true,
@@ -4427,7 +4427,7 @@
       "scale": 1,
       "static": true,
       "lodGroup": null,
-      "collision": "proxy",
+      "collision": "none",
       "material": null,
       "interactable": null
     },
@@ -4453,7 +4453,7 @@
       "scale": 1,
       "static": true,
       "lodGroup": null,
-      "collision": "proxy",
+      "collision": "none",
       "material": null,
       "interactable": null
     },
@@ -4479,7 +4479,7 @@
       "scale": 1,
       "static": true,
       "lodGroup": null,
-      "collision": "proxy",
+      "collision": "none",
       "material": null,
       "interactable": null
     },
@@ -4500,8 +4500,8 @@
       "id": "PROP_L2_STAIR_ATTIC_ART",
       "asset": "MODEL_DECOR_WALL_ART_14",
       "cell": "L2_STAIR_ATTIC",
-      "position": [5.02, 7.75, -17.20],
-      "yawDeg": 270,
+      "position": [8.58, 7.75, -16.60],
+      "yawDeg": 90,
       "scale": 1,
       "static": true,
       "lodGroup": null,
@@ -4513,9 +4513,9 @@
       "id": "PROP_L3_STAIR_HEAD_ART",
       "asset": "MODEL_DECOR_WALL_ART_16",
       "cell": "L3_STAIR_HEAD",
-      "position": [5.02, 10.50, -15.55],
-      "yawDeg": 270,
-      "scale": 1,
+      "position": [7.25, 10.15, -20.08],
+      "yawDeg": 180,
+      "scale": 0.75,
       "static": true,
       "lodGroup": null,
       "collision": "proxy",
@@ -5111,7 +5111,7 @@
       "id": "PROP_L3_STAIR_HEAD_STORAGE_SHELF",
       "asset": "MODEL_PROP_KIT_OPEN_SHELF",
       "cell": "L3_STAIR_HEAD",
-      "position": [6.70, 9.30, -14.52],
+      "position": [7.85, 9.30, -19.85],
       "yawDeg": 0,
       "scale": [0.75, 0.40, 0.75],
       "static": true,
@@ -5120,19 +5120,7 @@
       "material": null,
       "interactable": null
     },
-    {
-      "id": "PROP_L3_STAIR_HEAD_STORAGE_BOX",
-      "asset": "MODEL_PROP_KIT_STORAGE_BOX",
-      "cell": "L3_STAIR_HEAD",
-      "position": [7.65, 9.30, -14.52],
-      "yawDeg": 4,
-      "scale": 0.65,
-      "static": true,
-      "lodGroup": null,
-      "collision": "proxy",
-      "material": null,
-      "interactable": null
-    },
+
     {
       "id": "PROP_L3_STORE_E_HEADER_TANK",
       "asset": "MODEL_PROP_KIT_UTILITY_MODULE",
@@ -5146,19 +5134,7 @@
       "material": "MAT_KITCHEN_HARDWARE_STEEL",
       "interactable": null
     },
-    {
-      "id": "PROP_L3_STORE_E_DUCT_SOUTH",
-      "asset": "MODEL_PROP_KIT_DUCT_RUN",
-      "cell": "L3_STORE_E",
-      "position": [5.25, 11.35, -20.75],
-      "yawDeg": 90,
-      "scale": 1,
-      "static": true,
-      "lodGroup": null,
-      "collision": "none",
-      "material": "MAT_KITCHEN_HARDWARE_STEEL",
-      "interactable": null
-    },
+
     {
       "id": "PROP_L3_STORE_E_DUCT_NORTH",
       "asset": "MODEL_PROP_KIT_DUCT_RUN",
@@ -5198,19 +5174,7 @@
       "material": "MAT_KITCHEN_HARDWARE_STEEL",
       "interactable": null
     },
-    {
-      "id": "PROP_L3_STORE_E_CABLE_SOUTH",
-      "asset": "MODEL_PROP_KIT_CABLE_RUN",
-      "cell": "L3_STORE_E",
-      "position": [8.54, 10.05, -20.75],
-      "yawDeg": 90,
-      "scale": 1,
-      "static": true,
-      "lodGroup": null,
-      "collision": "none",
-      "material": "MAT_KITCHEN_HARDWARE_STEEL",
-      "interactable": null
-    },
+
     {
       "id": "PROP_L3_STORE_E_CABLE_NORTH",
       "asset": "MODEL_PROP_KIT_CABLE_RUN",
@@ -6935,7 +6899,7 @@
     {
       "id": "PROP_L2_BATH5_MAIN_2_FIXTURE",
       "asset": "MODEL_FIXTURE_FAMILY_CEILING", "cell": "L2_BATH5",
-      "position": [6.8, 8.98, -19.53], "yawDeg": 0, "scale": 1,
+      "position": [6.8, 8.98, -20.00], "yawDeg": 0, "scale": 1,
       "static": true, "lodGroup": null, "collision": "none", "material": null,
       "interactable": null
     },

@@ -186,12 +186,12 @@
       "id": "Z-STAIR",
       "name": "Vertical circulation",
       "cells": [
-        {"id": "B1_STAIR", "accessible": true, "standingPoint": [2.55, -2.3, -17.25], "tier": "S"},
-        {"id": "L0_STAIR_MAIN", "accessible": true, "standingPoint": [3.1, 0.6, -17.25], "standingPosture": "crouched", "tier": "M"},
-        {"id": "L1_STAIR_MAIN", "accessible": true, "standingPoint": [2.52, 3.65, -15.113], "tier": "M"},
-        {"id": "L2_STAIR_MAIN", "accessible": true, "standingPoint": [2.52, 6.55, -16.873], "tier": "M"},
-        {"id": "L2_STAIR_ATTIC", "accessible": true, "standingPoint": [6.8, 6.55, -16.3], "tier": "S"},
-        {"id": "L3_STAIR_HEAD", "accessible": true, "standingPoint": [5.85, 9.3, -17.99], "standingPosture": "crouched", "tier": "S"}
+        {"id": "B1_STAIR", "accessible": true, "standingPoint": [2.8, -2.3, -18.5], "tier": "S"},
+        {"id": "L0_STAIR_MAIN", "accessible": true, "standingPoint": [4.1, 0.6, -15.8], "tier": "M"},
+        {"id": "L1_STAIR_MAIN", "accessible": true, "standingPoint": [4.15, 3.65, -14.8], "tier": "M"},
+        {"id": "L2_STAIR_MAIN", "accessible": true, "standingPoint": [2.8, 6.55, -14.8], "tier": "M"},
+        {"id": "L2_STAIR_ATTIC", "accessible": true, "standingPoint": [6.8, 6.55, -14.85], "tier": "S"},
+        {"id": "L3_STAIR_HEAD", "accessible": true, "standingPoint": [5.85, 9.3, -19.55], "tier": "S"}
       ],
       "reviewPoses": [
         "main-stair-foot",

@@ -310,8 +310,9 @@ def build() -> dict[str, dict]:
          "run": {"enum": ["-X", "+X", "-Z", "+Z"]},
          "shape": {"enum": ["straight", "u"]},
          "firstRunAt": {"enum": ["cross_lo", "cross_hi"]},
+         "approachDepth": {"type": "number", "exclusiveMinimum": 0},
          "topLandingToFoot": BOOL,
-         "topCrossLandingDepth": {"type": "number", "exclusiveMinimum": 0},
+         "topCrossLandingDepth": {"type": "number", "minimum": 0},
          "landings": {"type": "array", "items": obj(
              ["at", "depth"], {"at": {"type": "integer", "minimum": 0}, "depth": NUM})},
          "collisionRamp": BOOL,

@@ -28,6 +28,7 @@ SHELL = REPO / "build" / "shell-lm"
 LIGHTS = REPO / "assets-src" / "world" / "layout.lights.json"
 PROPS = REPO / "assets-src" / "world" / "layout.props.json"
 CELLS = REPO / "assets-src" / "world" / "layout.cells.json"
+LEVELS = REPO / "assets-src" / "world" / "layout.levels.json"
 OUTPUT = REPO / "assets-src" / "Textures" / "Lightmaps"
 META = REPO / "build" / "visual-lightmap-meta"
 MANIFEST = REPO / "assets-src" / "assets.manifest.json"
@@ -377,7 +378,7 @@ def main() -> int:
     parser.add_argument("--cells", help="comma-separated subset for an inspection bake")
     parser.add_argument("--samples", type=int, default=SAMPLES)
     parser.add_argument("--seed", type=int, default=SEED)
-    parser.add_argument("--lumens-per-radiant-watt", type=float, default=683.0,
+    parser.add_argument("--lumens-per-radiant-watt", type=float, default=200.0,
                         help="explicit white-light calibration for selected receiver cells")
     parser.add_argument("--resume", action="store_true",
                         help="reuse matching completed sidecars after an interrupted house bake")
@@ -397,6 +398,10 @@ def main() -> int:
         return 1
 
     light_document = json.loads(layout_io.strip_jsonc(LIGHTS.read_text(encoding="utf-8")))
+    cell_document = json.loads(layout_io.strip_jsonc(CELLS.read_text(encoding="utf-8")))
+    level_document = json.loads(layout_io.strip_jsonc(LEVELS.read_text(encoding="utf-8")))
+    levels = {row["id"]: row["ceiling"] for row in level_document["levels"]}
+    ceiling_by_cell = {row["id"]: levels[row["level"]] for row in cell_document["cells"]}
     lights_by_cell = {
         cell: [row for row in light_document.get("lights", [])
                if row.get("cell") == cell or cell in (row.get("bakeCells") or [])]
@@ -472,6 +477,8 @@ def main() -> int:
                    "--samples", str(args.samples), "--seed", str(args.seed),
                    "--lumens-per-radiant-watt", str(args.lumens_per_radiant_watt),
                    "--daylight-only" if args.daylight else "--artificial-only"]
+        if ceiling_by_cell[cell] is not None:
+            command.extend(("--ceiling-y", str(ceiling_by_cell[cell])))
         completed = subprocess.run(command, cwd=REPO, check=False)
         if completed.returncode != 0:
             return completed.returncode
@@ -511,6 +518,7 @@ def main() -> int:
         "mode": mode,
         "seed": args.seed,
         "samples": args.samples,
+        "lumensPerRadiantWatt": args.lumens_per_radiant_watt,
         "cells": len(wanted),
         "atlases": len(selected_images),
         "groups": sum(len(row["groups"]) for row in sidecars),

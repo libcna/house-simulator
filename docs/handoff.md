@@ -1,3 +1,259 @@
+# Current owner-visible defect work — 2026-09-28
+
+## Accepted main/attic stair checkpoint
+
+`HOUSE-03635` and `HOUSE-03638` are now accepted, with 38 MUST tasks still open.
+Selection followed the owner's explicit S1/S2 priority override, not the normal performance/
+platform order. They share a checkpoint because the main orientation, basement arrival,
+attic well, generic guard generation and regenerated receivers cannot be split into useful
+standalone geometry states; `docs/workflow.md` permits this tightly coupled batch.
+
+The main stair is a clear two-flight U with a level entry and continuous turning runner.
+An actual W/D/mouse run on isolated Xvfb found a real off-centre ramp/rail stall at
+x=2.973 m that the old centre-line path did not test. `Move.cpp` now follows the crease of
+a walkable sloping plane and a vertical wall; the three slide iterations, slope bound and
+penetration tolerance are unchanged. The unsuccessful continuous-guard and sweep-tolerance
+experiments were removed. The current-source normal-input run reaches L1 at feet
+`(4.327,3.650,-14.750)`. These input runs use software Xvfb, **not the physical monitor**;
+the separate normal OPENGLES3 game tests and geometry captures use invisible Radeon GPU
+surfaces. Do not conflate those two kinds of evidence or claim human manual play occurred.
+
+The attic stair has a 1 m level entry, 250 mm going, solid 1.15 m upper turn and a narrowed
+well with visible/colliding guards. Both exits are on the level landing and pass through
+the production controller. L2 bath 5 retains its fixtures after giving the stair 1 m of depth.
+The east attic store remains accessible; three obstructing/now-intersecting decorative IDs
+are deliberately retired with reasons in the evidence report. The stair art is fully visible.
+Actual held-W input ascends/descends, passes both doors and cannot walk off the guarded edge.
+
+Retained evidence: `docs/visual-review/house-03635-stair-rebuild.md` and
+`docs/visual-review/house-03638-attic-stair.md`, with compact GPU views and input HUD captures.
+All **1502/1502** unit tests pass. The four current Radeon integration cases pass, including
+the 90-cell GrandTour (563 stops, 87,707 controller steps, 16 collision detours). Static checks
+pass except the inherited `.claude` root-layout exception. A latest full check found the
+old slab-face census stale after the well resize (382 inward faces, zero reversed faces);
+the coverage floor now follows the measured habitable-room count rather than incidental
+tessellation, and the shell selftest passes. The historically recorded refrigerator opening
+remains reported but is not a failing new shell claim. The collision builder's stair assertions
+pass; its legacy exterior-car assertion
+still reports zero because cars were moved out of that exterior collection. Do not claim
+that whole selftest is green. The shared shell triangle cap was preserved by omitting buried
+baluster cap faces; it was not raised. No performance or audio improvement is claimed.
+
+**Exact next priority: `HOUSE-03636`.** Whole-house lighting work is still uncommitted outside
+the rebuilt stairs and their affected neighbouring receivers. Its whole-house moving GPU
+day/night review is not complete, so its checkbox remains open. After that, continue the
+owner's basement/garage floor and visibility-hole corrections `HOUSE-03639`/`03640` before
+unrelated performance, audio, Android or filming-tour implementation. `HOUSE-03637` was
+already committed and accepted before this checkpoint. No new Android evidence is claimed.
+
+## Earlier investigation and remaining lighting work
+
+The owner subsequently reported additional normal-play failures: no audible sound with the
+setting enabled; a missing top-floor guard and fall; misjoined attic stairs with a roughly
+30 cm gap, clipped stair art and an impassable attic doorway; misplaced basement stairs;
+a transparent garage-loft floor; outdoor-visible wall seams; and interiors disappearing
+from upper-balcony and road-to-enclosed-garage viewpoints. The current plan now has
+`HOUSE-03638`–`03640` for those S1/S2 geometry/visibility defects, `HOUSE-03641` for the
+owner-requested car-quality correction and `HOUSE-03572` for a bounded whole-property
+Linux filming tour toggled by `C`. The sound report is assigned to already-open
+`HOUSE-01920`/`01922`; dummy-audio tests are not audible-play evidence. The owner explicitly
+withdrew the old 280-hour ceiling; R14/R15 and both agent instruction copies record that
+override. Other additions remain plan entries, not completed fixes. Finish the existing
+lighting work next, then investigate the other reported defects before unrelated
+performance/platform work. No game window may be opened on the real monitor.
+
+The owner explicitly stopped tests that open windows on the real monitor. **Do not use the
+desktop Wayland/X11 display again for House tests.** `SDL_VIDEODRIVER=offscreen` with `DISPLAY`
+and `WAYLAND_DISPLAY` unset runs the normal OPENGLES3 game on an invisible surface. In the
+restricted sandbox it selects Mesa llvmpipe; with GPU device access and `EGL_PLATFORM=surfaceless`
+the active process maps `/dev/dri/renderD128` and `libdrm_amdgpu.so`, so the same invisible
+path can exercise the Radeon 780M. Bound either with `taskset -c 0-3`, `LP_NUM_THREADS=4` and
+`GALLIUM_NUM_THREADS=4`. These shared-machine frames are for visual correctness, not a trusted
+performance baseline. The previous visible batch was stopped
+immediately; no `cna-house` process remained. The owner wants continued autonomous work on
+`HOUSE-03635`–`03637`, not unrelated roadmap tasks.
+
+`HOUSE-03636` remains **open** pending its complete acceptance;
+`HOUSE-03635`/`03638` are accepted above and `HOUSE-03637` was already checked. Earlier
+`HOUSE-03635` investigation produced a two-flight U stair with a clear 1 m ground-floor approach, 9+8 risers
+to L1 and 8+8 to L2, full turn pads, non-column tread undersides, correctly aligned
+stairwell holes and colliding exposed-edge run guards. The landing now has a continuous
+U-shaped wool runner to indicate the turn. Seven current Radeon/OPENGLES3 eye-height views,
+including the foyer, bottom and second flights, landing, exit and view down, are in
+`/tmp/house-03635-final-current/` (contact sheet `contact.png`). On a
+**dedicated virtual Xvfb display**, not the desktop, a normal `KeyboardMouseSource` route
+started in `L0_FOYER` at feet `(1.95,0.60,-14.90)` and used short held W/D inputs and mouse
+turns, no waypoint steering. An off-centre x=2.638 m approach reached the landing and ended
+standing in `L1_STAIR_MAIN` at `(4.421,3.650,-14.820)`; HUD screenshots are
+`/tmp/house-03635-virtual-controller-{before,after-foyer,after-w,after-d,after-look,after}.png`.
+An earlier near-wall run found auto-crouch from 100 mm upper-slab lips on both sides and at the
+north landing wall, plus a flat wall-art collision proxy. The stairwell hole is now flush with
+those walls and the three stair wall artworks no longer have redundant proxies. A focused
+regression checks standing headroom at both formerly caught edge positions and three points
+across the walking lane. The seven reviewed captures are also retained
+as compact WebP files in `docs/visual-review/house-03635/`, with findings in
+`docs/visual-review/house-03635-stair-rebuild.md`. The earlier 1498-test suite passed but was
+insufficient for acceptance; the off-centre input failure was found later and corrected above.
+The former attic descent stop 379 and audit BUG-012 doorway conflict are now corrected under
+`HOUSE-03638`; the complete 90-cell GrandTour currently passes.
+
+`HOUSE-03636` WIP: the independent audit's peak-normalised 8-bit bake finding is confirmed.
+`lightmap_bake.py` now uses the lit-texel 99.5th percentile (with a synthetic firefly test),
+and all 78 artificial plus 78 daylight cell atlases were rebaked. Near-ceiling source
+clearance and bounded fixture-dependent shell bounce were already in progress. Full 90-cell
+real-GPU fixed-view sweeps at 10:30 and 23:00 are under
+`/tmp/house-03636-percentile-all-{day,night}/`; the night sweep had one process segfault
+*after* saving `L2_LANDING.png` during shutdown, then resumed and completed. These sweeps
+showed a black daytime `L0_DINING` and very dark attic stores. Five deep-room **main**
+fixtures now stay on automatically in daylight while their accents keep evening schedules:
+`B1_CINEMA`, `L0_DINING`, `L2_LIBRARY`, `L2_SITTING`, `L3_ROOM`. The existing attic bulbs in
+`L3_STORE_E/N/S` have source-local bake calibrations; measured final receiver means are
+0.189/0.154/0.164. Windowless rooms now scale their existing LM_DAY atlas by the existing
+two-hop *daylight-only* portal transfer; night output for matched dining frames is identical.
+The corrected targeted virtual screenshots are under `/tmp/house-03636-virtual-after/`,
+`/tmp/house-03636-virtual-attic2/` and `/tmp/house-03636-borrowed-after/`. A final 90-cell
+invisible Radeon day sweep completed under `/tmp/house-03636-headless-all-day-final/`;
+four local dark-room outliers were recalibrated and their two modes promoted from selected-cell
+bakes (`B1_CELLAR`, `B1_STOR1`, `L0_STOR`, `L2_STAIR_ATTIC`). Receiver means rose from
+0.106/0.088/0.074/0.067 to 0.133/0.134/0.149/0.149. Updated actual-GPU clear-day views are
+`/tmp/house-03636-final4-*-day.png`; cellar views in three more directions are
+`/tmp/house-03636-final4-B1_CELLAR-yaw*.png`. The wine cellar remains deliberately dim but
+its shelves, stored items and exit are visible. **The first 90-cell sweeps used a stale
+`build/content/world/shading.bin` and must not be cited as final.** After
+`build_content.py --only world` and deployment through the existing `build/` targets, 90/90
+current-world screenshots at clear 10:30 and 90/90 at scheduled 23:00 completed under
+`/tmp/house-03636-current-world-{day,night}/`. `L0_LAUNDRY`'s two existing fixtures received
+a source-local bake calibration and its night centre-crop luminance rose 0.095→0.235 after the
+world metadata was refreshed. The kitchen's existing main group now uses `SC-CIRC`; a matched
+daytime capture is `/tmp/house-03636-kitchen-main-on-day.png`. The sweeps further exposed
+near-black day views of `L1_BED5`, `L2_BED7` and, from the lit walk-in closet,
+`L1_MASTER_BED`: their SC-BED main fixtures were off despite insufficient window illumination.
+Only those three existing main groups now use `SC-CIRC`; bedside/dresser/seating accents keep
+their prior timed schedules. Matched day centre-crop luminance rises 0.104→0.169 (BED5),
+0.240→0.318 (BED7 north view) and 0.080→0.122 (MASTER_BED seen from closet); evidence is
+`/tmp/house-03636-{L1_BED5,L2_BED7,L1_MASTER_CLOSET}-after-day.png` against the previous
+current-world images. The bedroom day/night schedule regression passes. A full moving visual
+walkthrough and a final review of low outliers are still needed; **do not close** while any
+room is unreadable. Focused lighting and stair tests pass. The fixed-pose night sweep for
+`L1_BED5` looked almost black because its camera faced a nearby wall. A reciprocal inward view
+from the same standing point (`yaw 270°`) shows the bed, dresser, doorway and lit ceiling at both
+10:30 and 23:00 in `/tmp/house-03636-L1_BED5-inward-after-{day,night}.png`. The
+`L0_LAUNDRY` sweep likewise faced a bare wall; a wider eye-height view from
+`(8.1,0.6,-20.15)` toward the appliances and exit shows both fixtures, the washer/dryer,
+floor and doorway readable at both times in
+`/tmp/house-03636-L0_LAUNDRY-wide-after-{day,night}.png`. These correct two misleading camera
+samples, not the still-missing moving whole-house walkthrough.
+After the last stair/content and bedroom-schedule edits, another current-world invisible
+OPENGLES3 sweep completed 90/90 clear-day views in `/tmp/house-03636-current-final-day/`
+and 90/90 scheduled-night views in `/tmp/house-03636-current-final-night/`. The night run
+was interrupted with exit 143 after 45 images, then resumed and completed; this is not a
+claim that the whole-house *moving* lighting walkthrough has passed. Current L1/L2/L3
+night contact sheets are `/tmp/house-03636-final-night-{L1,L2,L3}-contact.png`.
+The 2026-09-27 full static gate first found the user-owned `.claude/` root entry
+plus five task-owned problems: a JSON comment rejected by the prop-kit reader,
+stale generated credits/budget/floor-plan outputs, and a shell selftest's old
+`>400` slab-face count after the stairwell was enlarged. The comment was removed,
+the three outputs were regenerated, and the shell selftest now keeps a measured
+`>=390` coverage floor. All five focused gates pass; strict-XNA checked 344
+translation units with four workers. A full rerun after these repairs is still due.
+The content pipeline's global layout gate fails solely on user-owned ignored root `.claude/`;
+it must not be removed. Source manifest, licence and all 15 world rules pass, and targeted
+world deployment plus existing `build/` content targets have rebuilt the changed payload.
+
+`HOUSE-03637` is fixed: near-threshold portal rejection, not exposure, caused the one-frame sky
+flash (before frame: `build/test-output/threshold-movement/foyer-stair-day/`
+`cna-house-20260926-225458-823.png`, `visible=1`, `draw=0`). The visibility-only near plane
+is 5 mm and an aperture-bounded near-threshold seed retains the adjacent cell. The final
+20-case virtual moving-door matrix (10 thresholds × both day/night; each 36 frames) passes
+in `/tmp/house-03637-virtual-threshold.log`; latest 720 frames have no empty-sky frame, and
+the largest consecutive-frame mean absolute RGB change is 6.5/255 on llvmpipe. The 2026-09-27
+invisible Radeon retest (`/tmp/house-03637-radeon-drawcounts-all.log`) also passes all 20
+day/night directional cases: 720 new frames have no empty-sky frame, largest adjacent-frame
+change 8.53/255, and the real render draw list stays 5–274 rather than falling to zero
+(98–104 on the original defective foyer/stair transition). A focused unit regression
+covers eye positions on both sides of the portal plane. The opt-in movement capture now
+refuses to start unless SDL is offscreen and both desktop display variables are absent, so
+it cannot open a monitor window accidentally. The older independent
+audit measured this same principle at 0/192 flashed transitions on a full-house tour. Do
+not mistake a static screenshot for this movement-based proof. The latest full repository
+static gate passes all task-owned checks, including 344 strict-XNA translation units with four
+workers, but exits 1 solely for the pre-existing user-owned `.claude/` root-layout entry.
+`git diff --check` passes. No Android emulator or `adb` process was running at this checkpoint.
+
+The independent audit at `../house-simulator-audit/AUDIT.md` and `BUGS.md` was read. Its
+BUG-001/004/009/010/011/018/020 findings informed the urgent fixes above; patch 0002 is
+superseded by the current portal fix, and the useful percentile idea from patch 0003 was
+adapted. Do not apply its patches blindly to the moving worktree. Important later D2/D7/D8
+issues include the normal-speed porch barrier and gate leaf (BUG-024/025), attic doorway
+(BUG-012), missing runnable audio (BUG-003), unsaved desktop/Web settings (BUG-005),
+no-op presets (BUG-022), and non-reproducible world builds from a clean checkout (BUG-002).
+Those are evidence to reconcile with existing ACTIVE/MUST tasks after the three owner-priority
+defects; they do not authorize OPTIONAL feature work or an unplanned scope expansion.
+No CNA or sharp-runtime repository was modified.
+
+---
+
+# Superseded urgent owner-visible defect handoff — 2026-09-26
+
+The owner's current priority overrides the ordinary R11 task order: `HOUSE-03635`
+(main stair, D2/C1), `HOUSE-03636` (dark rooms, D6) and `HOUSE-03637`
+(doorway flash, D2/D6) are explicit, unchecked ACTIVE/MUST corrections in
+`plan.md`. `HOUSE-02404` remains paused. R15's targeted correction adds 11
+realistic / 12.1 pessimistic hours without crossing the 280-hour guard;
+36 MUST tasks remain at this checkpoint. None of the three defects is yet
+accepted as fixed.
+
+`HOUSE-03635`: the generated U-stair had an upper flight beginning over its
+cross-landing, a floor-height solid underside and duplicated inner balustrade.
+The current uncommitted reconstruction uses a 1 m approach, two separate
+flights, a full-width turn pad, thin tread undersides and a matching raked
+collision underside. The foyer opening is 2 m wide. All eight stair traversal
+tests, opening reach, 90-cell grand tour and world-content checks pass in the
+focused run; static OPENGLES3 screenshots are under
+`/tmp/house-03635-final-*` and `/tmp/house-03635-v2-*`. Those are not a
+human-control usability pass. A live X11/xdo test was confounded by large
+mouse-look drift after capture (`/tmp/house-03637-live-input-drift.png`), so
+the stair task remains open pending an actual controlled WASD/mouse walk and
+six final inspected views.
+
+`HOUSE-03636`: actual GPU night views showed effectively black `L1_WC3`,
+`L1_WC4`, `L2_WC5` and `L0_LAUNDRY` despite their automatic light schedules.
+Their ceiling sources were only 20 mm below the receiver, creating a single
+extreme bake firefly; max-normalised 8-bit atlases quantised the useful room
+lighting almost to black. Moving those four rooms' sources 250 mm lower and
+using per-source 200 lm/radiant-W calibration changed their measured receiver
+means to 0.143/0.123/0.142/0.103 respectively, without changing global
+exposure. Matched pre/post GPU frames for those cells are under
+`/tmp/house-03636-*`. The 90-cell real-GPU scheduled-night audit is now captured
+under `/tmp/house-03636-audit-night/`; basement, ground, L1, L2 and attic
+contact sheets are `/tmp/house-03636-*-night-contact.png`. It confirms the
+failure is much wider than four rooms: e.g. `B1_CELLAR`, `B1_STOR1/2`,
+`L0_CLOSET_W`, `L1_BED3/4/5` and many L2 rooms have almost black receiver
+walls despite visible lit fixtures. Source bakes with a 20 mm ceiling gap
+can have a single firefly peak many times brighter than the useful room
+lighting. The existing bake tool now conditionally gives near-ceiling point
+sources a 250 mm *bake-only* diffuser clearance (no runtime light movement or
+new lighting system); its selftest passes. A `L1_BED3` slice is being checked
+with the existing per-source calibration before a whole-house rebake. Clear-day
+and post-correction all-cell audits remain to be done. Do not treat bake
+metadata alone as readability proof.
+
+`HOUSE-03637`: the actual game showed a blue/white missing-geometry frame
+within 8 cm of the foyer/main-stair portal. The camera was still `L0_FOYER`
+with zero portal crossings and zero draws: the render frustum's 100 mm near
+plane had culled the portal before the body crossed it. A conservative 5 mm
+visibility-only near plane now keeps the neighbour visible; six same-pose
+GPU captures at x=2.08–2.32 m under `/tmp/house-03637-after-foyer-*` show
+geometry throughout, and the focused visibility regression passes. Moving
+day/night traversals at all requested threshold classes, exposure continuity
+and a draw-count comparison are still outstanding, so this task stays open.
+
+No sibling repository was modified. This section records in-progress evidence,
+not accepted DONE or a commit. Keep the three plan boxes unchecked until their
+full visual and controller criteria pass; do not resume unrelated work first.
+
+---
+
 # Corrected fixed-camera performance handoff — 2026-09-26 (`HOUSE-02403` / `HOUSE-02404`)
 
 R7/R11 select `HOUSE-02404` again before `HOUSE-02405`. The prior High

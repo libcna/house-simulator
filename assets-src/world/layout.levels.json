@@ -79,7 +79,7 @@
         "registers": [
           { "cell": "L0_FOYER", "position": [0.60, 0.62, -16.90], "kind": "floor" },
           { "cell": "L0_HALL", "position": [0.60, 0.62, -21.25], "kind": "floor" },
-          { "cell": "L0_STAIR_MAIN", "position": [4.15, 0.62, -17.85], "kind": "floor" }
+          { "cell": "L0_STAIR_MAIN", "position": [2.95, 0.62, -15.05], "kind": "floor" }
         ]
       },
       {

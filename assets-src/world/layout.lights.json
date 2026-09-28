@@ -73,7 +73,7 @@
     {"group": "LG_L0_FAMILY_MEDIA", "class": "SC-LIVING"},
     {"group": "LG_L0_FAMILY_READING", "class": "SC-LIVING"},
     {"group": "LG_L0_FOYER_ACCENT", "class": "SC-LIVING"},
-    {"group": "LG_L0_FOYER_MAIN", "class": "SC-LIVING"},
+    {"group": "LG_L0_FOYER_MAIN", "class": "SC-CIRC"},
     {"group": "LG_L0_GARAGE_LOFT_MAIN", "class": "SC-CIRC"},
     {"group": "LG_L0_GARAGE_MAIN", "class": "SC-CIRC"},
     {"group": "LG_L0_GARAGE_OPENER", "class": "SC-CIRC"},
@@ -166,7 +166,7 @@
     {"group": "LG_L2_WC5_MAIN", "class": "SC-WET"},
     {"group": "LG_L2_WC6_MAIN", "class": "SC-WET"},
     {"group": "LG_L3_ROOM_DESK", "class": "SC-LIVING"},
-    {"group": "LG_L3_ROOM_MAIN", "class": "SC-LIVING"},
+    {"group": "LG_L3_ROOM_MAIN", "class": "SC-CIRC"},
     {"group": "LG_L3_STAIR_HEAD_MAIN", "class": "SC-CIRC"},
     {"group": "LG_L3_STORE_E_MAIN", "class": "SC-CIRC"},
     {"group": "LG_L3_STORE_N_MAIN", "class": "SC-CIRC"},
@@ -553,7 +553,7 @@
       "type": "point", "position": [3.55, 2.80, -17.25],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 2200.0, "range": 4.42,
-      "bakeLumensPerRadiantWatt": 12.5,
+      "bakeLumensPerRadiantWatt": 50.0,
       "fixtureProp": "PROP_L0_STAIR_MAIN_CEILING_LIGHT", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1719,9 +1719,10 @@
     // ---- LG_L2_STAIR_ATTIC_MAIN x1 -- a bare bulb on a pull cord, per §13.5
     {
       "id": "LIGHT_L2_STAIR_ATTIC_MAIN_1", "cell": "L2_STAIR_ATTIC", "group": "LG_L2_STAIR_ATTIC_MAIN",
-      "type": "point", "position": [6.80, 9.28, -16.30],
+      "type": "point", "position": [6.80, 9.05, -16.30],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 2400.0, "range": 4.38,
+      "bakeLumensPerRadiantWatt": 90.0,
       "fixtureProp": "PROP_L2_STAIR_ATTIC_UTILITY_LIGHT", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -2125,7 +2126,7 @@
     },
     {
       "id": "LIGHT_L2_BATH5_MAIN_2", "cell": "L2_BATH5", "group": "LG_L2_BATH5_MAIN",
-      "type": "point", "position": [6.80, 8.98, -19.53],
+      "type": "point", "position": [6.80, 8.98, -20.00],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 700.0, "range": 4.45,
       "fixtureProp": "PROP_L2_BATH5_MAIN_2_FIXTURE", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
@@ -2212,6 +2213,7 @@
       "type": "point", "position": [6.80, 11.60, -22.70],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 6.86,
+      "bakeLumensPerRadiantWatt": 25.0,
       "fixtureProp": "PROP_L3_STORE_E_UTILITY_LIGHT", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },

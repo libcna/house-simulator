@@ -233,3 +233,79 @@ TEST(OpeningReachTests, TheFoyerOpeningHasStandingHeadroomBelowTheReturningFligh
     EXPECT_LT(inFoyer.depth, 0.01F) << "the foyer side of the stair entrance is blocked";
     EXPECT_LT(inStair.depth, 0.01F) << "the stair side of the foyer entrance is blocked";
 }
+
+TEST(OpeningReachTests, TheMainStairTurnHasStandingHeadroomAcrossItsWalkingLane)
+{
+    IdRegistry::ResetForTesting();
+    const std::string collisionPath = "content/world/collision.bin";
+    if (!std::filesystem::exists(collisionPath))
+    {
+        GTEST_SKIP() << "no deployed world; run tools/ci/build_content.py --only world";
+    }
+    const std::unique_ptr<System::IO::FileStream> stream(
+        new System::IO::FileStream(collisionPath, System::IO::FileMode::Open, System::IO::FileAccess::Read));
+    const auto loaded = CollisionLoader::Read(*stream, collisionPath);
+    ASSERT_TRUE(loaded) << loaded.Error().Message();
+    const CollisionWorld& statics = loaded.Value();
+    const CollisionCell* stair = statics.Cell("L0_STAIR_MAIN");
+    ASSERT_NE(stair, nullptr);
+
+    BroadPhase broad;
+    // The two outer samples reproduce ordinary off-centre approaches that previously
+    // auto-crouched against 100 mm slab lips or a wall-art collision proxy.
+    for (const Vector3 feet : {Vector3(2.595F, 2.215F, -18.095F),
+                               Vector3(2.70F, 2.215F, -18.55F),
+                               Vector3(2.85F, 2.215F, -18.55F),
+                               Vector3(3.00F, 2.215F, -18.55F),
+                               Vector3(4.525F, 2.215F, -19.135F)})
+    {
+        const Capsule body{Vector3(feet.X, feet.Y + kPlayerHalfHeight + kPlayerRadius, feet.Z),
+                           kPlayerHalfHeight,
+                           kPlayerRadius};
+        const CellOverlap overlap = OverlapCell(statics, *stair, broad, body);
+        EXPECT_LT(overlap.depth, 0.01F) << "standing body hits the turn at x=" << feet.X << ", z=" << feet.Z
+                                        << " (shape " << overlap.shape << ')';
+    }
+}
+
+TEST(OpeningReachTests, TheAtticLandingHasTwoClearStandingExits)
+{
+    // The original well rail left only 0.13 m of the west opening usable. A capsule must fit
+    // across the actual landing and both exits, not merely at the portal's centre plane.
+    IdRegistry::ResetForTesting();
+    const std::string collisionPath = "content/world/collision.bin";
+    if (!std::filesystem::exists(collisionPath))
+    {
+        GTEST_SKIP() << "no deployed world; run tools/ci/build_content.py --only world";
+    }
+    const std::unique_ptr<System::IO::FileStream> stream(
+        new System::IO::FileStream(collisionPath, System::IO::FileMode::Open, System::IO::FileAccess::Read));
+    const auto loaded = CollisionLoader::Read(*stream, collisionPath);
+    ASSERT_TRUE(loaded) << loaded.Error().Message();
+    const CollisionWorld& statics = loaded.Value();
+    const CollisionCell* head = statics.Cell("L3_STAIR_HEAD");
+    const CollisionCell* room = statics.Cell("L3_ROOM");
+    const CollisionCell* store = statics.Cell("L3_STORE_E");
+    ASSERT_NE(head, nullptr);
+    ASSERT_NE(room, nullptr);
+    ASSERT_NE(store, nullptr);
+
+    BroadPhase broad;
+    const auto clear = [&](const CollisionCell& cell, const Vector3& feet)
+    {
+        const Capsule body{Vector3(feet.X, feet.Y + kRise, feet.Z), kPlayerHalfHeight, kPlayerRadius};
+        const CellOverlap overlap = OverlapCell(statics, cell, broad, body);
+        EXPECT_LT(overlap.depth, 0.01F) << Where(feet) << " hits shape " << overlap.shape;
+    };
+    // Turn on the level landing beyond the well guard; the guard must stay intact at its rim.
+    for (const float x : {6.80F, 6.35F, 5.85F, 5.50F, 5.20F, 4.90F})
+    {
+        clear(*head, Vector3(x, 9.30F, -19.65F));
+    }
+    clear(*room, Vector3(4.60F, 9.30F, -19.65F));
+    for (const float z : {-19.55F, -19.85F, -20.10F, -20.20F})
+    {
+        clear(*head, Vector3(5.85F, 9.30F, z));
+    }
+    clear(*store, Vector3(5.85F, 9.30F, -20.50F));
+}

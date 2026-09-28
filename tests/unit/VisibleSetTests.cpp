@@ -157,9 +157,10 @@ TEST(VisibleSetTests, EveryOneOfTheTwentyFourPosesSeesExactlyWhatItSays)
         EXPECT_TRUE(extra.empty()) << pose.name << " also reached " << Join(extra) << " (over-drawing)";
     }
     std::printf("  24 poses reached %zu cell(s) between them, deepest chain %d\n", total, deepest);
-    // HOUSE-00489 moved the main-stair camera onto its usable east-side foot. HOUSE-00702
-    // reaches three glazed rooms around the garage from the driveway's exterior eye.
-    EXPECT_EQ(total, 101U) << "the poses no longer see what the authored layout records";
+    // The widened main-stair entrance now genuinely exposes the foyer and hall from its foot;
+    // the rebuilt upper approach exposes L2_STAIR_MAIN from L2_LANDING. Keep the exact sets,
+    // including those three additional visible rooms, so this is not a culling-free superset.
+    EXPECT_EQ(total, 104U) << "the poses no longer see what the authored layout records";
     // §25.2's interior cap is six and NOTHING in §12 reaches it: the deepest chain any of the
     // twenty-four produces is four, and the numbers that actually stop a walk here are the
     // back-face test and the area cutoff. Asserted so that a house whose chains got longer -- a

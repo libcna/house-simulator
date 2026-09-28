@@ -389,6 +389,29 @@ TEST(CollideAndSlideTests, ASixtyDegreeBankIsNotAStaircase)
     EXPECT_GT(step.position.X, start.centre.X) << "...but the body still gets to its foot";
 }
 
+TEST(CollideAndSlideTests, TouchingTheRailDoesNotFreezeAClimbAlongTheRamp)
+{
+    // HOUSE-03635: a ramp and a vertical guard meet at the body. Repeated single-plane
+    // projection used up three iterations without travelling; the wall case also discarded
+    // the upward component already justified by the walkable ramp.
+    const float radians = 30.0F * 3.14159265F / 180.0F;
+    const CollisionWorld world =
+        OneCell({Wall(Vector3(0.0F, 2.0F, 0.80F), Vector3(6.0F, 2.0F, 0.50F))}, {Ramp(30.0F)});
+    const Capsule start{
+        Vector3(0.0F, kBodyHalfHeight + kBodyRadius / std::cos(radians), 0.0F), kBodyHalfHeight, kBodyRadius};
+    BroadPhase broad;
+    const SlideResult step =
+        CollideAndSlide(world, world.cells[0], broad, start, Vector3(0.02F, 0.0F, 0.002F));
+    EXPECT_GT(step.position.X, 0.012F);
+    EXPECT_GT(step.position.Y - start.centre.Y, 0.007F);
+    EXPECT_LE(step.position.Z, 1.0e-4F);
+    EXPECT_LE(step.iterations, kSlideIterations);
+    EXPECT_FALSE(step.blocked);
+    Capsule end = start;
+    end.centre = step.position;
+    EXPECT_LE(OverlapCell(world, world.cells[0], broad, end).depth, 1.0e-4F);
+}
+
 // ---------------------------------------------------------------------------------------------
 // The real house
 // ---------------------------------------------------------------------------------------------

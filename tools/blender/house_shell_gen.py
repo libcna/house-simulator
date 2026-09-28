@@ -1301,9 +1301,10 @@ def build_flight(flight: dict, solid, bottom: float, *, add=None, construction=N
                  inner=None, portals=(), set_surface=None) -> None:
     """A flight's steps, nosings, landing, handrails and newels, as boxes, through @p solid.
 
-    Solid steps rather than treads on a carriage: a blockout wants the shape you walk on and the
-    volume you cannot walk through, and a closed string is both. The nosing is a separate board
-    because it overhangs, which is the one part of a step's profile you see from below.
+    On the main U flights each tread includes its riser-depth support, with the raked string below
+    its open edge. Extending the return run down to the flight's bottom floor made a room-height
+    solid column in front of the lower flight, despite collision beginning at the half-landing.
+    Other flights retain their established solid steps. The nosing is a separate overhanging board.
 
     Where every one of those boxes goes comes from `stair_geometry` (`HOUSE-00472`), so the shell
     and `build_collision.py` cannot disagree about it again.
@@ -1337,7 +1338,8 @@ def build_flight(flight: dict, solid, bottom: float, *, add=None, construction=N
                 centre + STAIR_RUNNER_WIDTH / 2.0, box[2], box[3])
 
     for tread in treads:
-        emit(tread["box"], bottom, tread["y1"])
+        tread_bottom = tread["y1"] - rise if flight.get("shape") == "u" else bottom
+        emit(tread["box"], tread_bottom, tread["y1"])
         # The nosing overhangs the riser below it: it projects from the tread's FRONT edge, which
         # is the end nearer the foot of the run, and a `u`'s second run faces the other way.
         low, high = along_of(tread["box"])
@@ -1395,6 +1397,8 @@ def build_flight(flight: dict, solid, bottom: float, *, add=None, construction=N
             for value in ((inner[4], inner[5]) if along_axis_x else (inner[0], inner[1])):
                 wall_edges.add(round(value, 4))
         for number in sorted({tread["run"] for tread in treads}):
+            # Both exposed well edges need their own guard. The widened main-stair well keeps
+            # the two switchback rails distinct instead of intersecting them in a 100 mm slot.
             run_treads = [tread for tread in treads if tread["run"] == number]
             first, last = run_treads[0], run_treads[-1]
             up = first["up"]
@@ -1447,7 +1451,9 @@ def build_flight(flight: dict, solid, bottom: float, *, add=None, construction=N
 
     for entry in placed:
         if entry["kind"] == "landing":
-            emit(entry["box"], bottom, entry["y0"])
+            # The half-landing is a suspended slab over the basement arrival, not a full-height
+            # timber column. Match the thin collision OBB's underside and preserve headroom.
+            emit(entry["box"], entry["y0"] - rise, entry["y0"])
         elif entry["kind"] in ("exit_landing", "cross_landing"):
             # A bridge at the ARRIVAL level, not a solid column from the lower floor.
             emit(entry["box"], entry["y0"] - rise, entry["y0"])
@@ -1465,6 +1471,40 @@ def build_flight(flight: dict, solid, bottom: float, *, add=None, construction=N
               z1, z1 + NOSING_PROJECT)
         solid(x0 - NOSING_PROJECT, x0, y0, y1, z0, z1)
         solid(x1, x1 + NOSING_PROJECT, y0, y1, z0, z1)
+
+    # Carry the main stair's wool runner through the switchback. Bare oak on a deep landing
+    # offered no visual cue that the route continues beside the first flight: a player walking
+    # straight up met an empty wall. Three non-overlapping strips describe the actual U turn,
+    # ending flush against the runner on each flight without introducing a collision lip.
+    if flight.get("shape") == "u" and flight.get("surface") == "stair_carpet":
+        landing = next((entry for entry in placed if entry["kind"] == "landing"), None)
+        runs = sorted({tread["run"] for tread in treads})
+        if landing is not None and len(runs) == 2:
+            first = next(tread for tread in treads if tread["run"] == runs[0])
+            second = next(tread for tread in treads if tread["run"] == runs[1])
+            across_index = (2, 3) if along_axis_x else (0, 1)
+            centres = sorted((sum(first["box"][index] for index in across_index) / 2.0,
+                              sum(second["box"][index] for index in across_index) / 2.0))
+            along_lo, along_hi = along_of(landing["box"])
+            far_lo, far_hi = ((along_hi - STAIR_RUNNER_WIDTH, along_hi)
+                              if first["up"] > 0 else
+                              (along_lo, along_lo + STAIR_RUNNER_WIDTH))
+            arm_lo, arm_hi = ((along_lo, far_lo) if first["up"] > 0 else
+                              (far_hi, along_hi))
+            runner_y = landing["y0"]
+            if set_surface is not None:
+                set_surface("stair_runner")
+            for centre in centres:
+                arm = (centre - STAIR_RUNNER_WIDTH / 2.0,
+                       centre + STAIR_RUNNER_WIDTH / 2.0)
+                box = (arm_lo, arm_hi, *arm) if along_axis_x else (*arm, arm_lo, arm_hi)
+                emit(box, runner_y, runner_y + STAIR_RUNNER_THICKNESS)
+            cross = (centres[0] - STAIR_RUNNER_WIDTH / 2.0,
+                     centres[1] + STAIR_RUNNER_WIDTH / 2.0)
+            box = (far_lo, far_hi, *cross) if along_axis_x else (*cross, far_lo, far_hi)
+            emit(box, runner_y, runner_y + STAIR_RUNNER_THICKNESS)
+            if set_surface is not None:
+                set_surface("stair")
 
 
 def rail_along(add, axis_x: bool, a0: float, a1: float, y0: float, y1: float,
@@ -3075,9 +3115,15 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                 continue
             arrivals = [box for row in flights or () if row.get("toCell") == cell["id"]
                         for box in arrival_boxes(row, float(row.get("fromY") or 0.0), list(portals))]
+            well_posts = set()
             for hx0, hx1, hz0, hz1, _identifier in wells:
                 for axis_x, fixed, span in ((True, hz0, (hx0, hx1)), (True, hz1, (hx0, hx1)),
                                             (False, hx0, (hz0, hz1)), (False, hx1, (hz0, hz1))):
+                    # A cell wall already closes an edge flush with the room boundary. Drawing
+                    # a second row of posts against it makes a false-looking, floating guard.
+                    if (axis_x and (abs(fixed - z0) < 1e-6 or abs(fixed - z1) < 1e-6)) or \
+                       (not axis_x and (abs(fixed - x0) < 1e-6 or abs(fixed - x1) < 1e-6)):
+                        continue
                     cuts = []
                     for tread in arrivals:
                         tx0, tx1, tz0, tz1, _top = tread
@@ -3087,10 +3133,44 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                             continue
                         cuts.append((tx0, tx1) if axis_x else (tz0, tz1))
                     for lo_at, hi_at in minus(span[0], span[1], cuts):
+                        guard_height = float(construction.get("railing", 0.0))
                         rail_along(add, axis_x, lo_at, hi_at,
-                                   level_y + float(construction.get("railing", 0.0)),
-                                   level_y + float(construction.get("railing", 0.0)),
+                                   level_y + guard_height,
+                                   level_y + guard_height,
                                    fixed, RAIL_SECTION)
+                        # A lone line at hand height reads as a missing guard and leaves the
+                        # owner's upper-floor well visually open. Match the existing stair
+                        # baluster grammar on the level edges, without filling the arrival gap.
+                        for at in (lo_at, hi_at):
+                            point = (round(at, 4), round(fixed, 4)) if axis_x else (round(fixed, 4), round(at, 4))
+                            if point in well_posts:
+                                continue
+                            well_posts.add(point)
+                            if axis_x:
+                                solid(at - NEWEL_SECTION / 2, at + NEWEL_SECTION / 2,
+                                      level_y, level_y + guard_height,
+                                      fixed - NEWEL_SECTION / 2, fixed + NEWEL_SECTION / 2, "trim")
+                            else:
+                                solid(fixed - NEWEL_SECTION / 2, fixed + NEWEL_SECTION / 2,
+                                      level_y, level_y + guard_height,
+                                      at - NEWEL_SECTION / 2, at + NEWEL_SECTION / 2, "trim")
+                        count = max(1, math.ceil((hi_at - lo_at) / STAIR_BALUSTER_MAX_PITCH))
+                        for index in range(count):
+                            at = lo_at + (hi_at - lo_at) * (index + 0.5) / count
+                            half = STAIR_BALUSTER_SECTION / 2
+                            if axis_x:
+                                bx0, bx1, bz0, bz1 = at - half, at + half, fixed - half, fixed + half
+                            else:
+                                bx0, bx1, bz0, bz1 = fixed - half, fixed + half, at - half, at + half
+                            top = level_y + guard_height - RAIL_SECTION / 2
+                            # The floor and upper rail close these ends. Four side faces avoid
+                            # buried caps and keep the existing shell triangle ceiling intact.
+                            for value, outward in ((bx0, (-1.0, 0.0, 0.0)), (bx1, (1.0, 0.0, 0.0))):
+                                add([(value, level_y, bz0), (value, top, bz0),
+                                     (value, top, bz1), (value, level_y, bz1)], outward, "trim")
+                            for value, outward in ((bz0, (0.0, 0.0, -1.0)), (bz1, (0.0, 0.0, 1.0))):
+                                add([(bx0, level_y, value), (bx1, level_y, value),
+                                     (bx1, top, value), (bx0, top, value)], outward, "trim")
 
         for member in basement_structure_boxes(cell, box, (ix0, ix1, iz0, iz1)):
             solid(*member, "structure")
@@ -4701,7 +4781,7 @@ def selftest(output: Path) -> int:
 
     # `HOUSE-00472`: the two runs of a `u` climb TOWARDS each other. This generator used to lay the
     # second one beyond the landing and climb back to it, so the top tread finished against the
-    # half-landing and you reached L1 in one stride from +2.2147.
+    # half-landing and you reached L1 in one stride from its intermediate elevation.
     first_run = [tread for tread in steps if tread["run"] == 0]
     second_run = [tread for tread in steps if tread["run"] == 1]
     require(first_run[0]["up"] == -second_run[0]["up"],
@@ -4712,8 +4792,9 @@ def selftest(output: Path) -> int:
     require(abs(second_run[0]["y1"] - landing_y - float(main["rise"])) < 1e-9,
             f"the second run's FIRST tread is one riser above the half-landing at "
             f"+{landing_y:.4f} ({second_run[0]['y1']:.4f})")
-    require(abs(foot - -17.92) < 1e-6,
-            f"and it starts at the landing's far edge, z = -17.92 ({foot:.3f})")
+    require(abs(foot - -17.82) < 1e-6,
+            f"and it starts at the landing's near edge without overlapping the pad, "
+            f"z = -17.82 ({foot:.3f})")
 
     # The steps are inside the footprint the flight declares, which rule 10 checks the SIZE of and
     # nothing checked the placement of until here.
@@ -4731,6 +4812,17 @@ def selftest(output: Path) -> int:
     require(boxes and inside,
             f"every one of the {len(boxes)} boxes of the main stair is inside its footprint, but "
             f"for the bottom nosing's {NOSING_PROJECT * 1000:.0f} mm overhang")
+    upper_first = second_run[0]
+    upper_tread_boxes = [box for box in boxes
+                         if abs(box[0] - upper_first["box"][0]) < 1e-6
+                         and abs(box[1] - upper_first["box"][1]) < 1e-6
+                         and abs(box[4] - upper_first["box"][2]) < 1e-6
+                         and abs(box[5] - upper_first["box"][3]) < 1e-6
+                         and abs(box[3] - upper_first["y1"]) < 1e-6]
+    require(any(abs(box[2] - landing_y) < 1e-6 for box in upper_tread_boxes)
+            and all(box[2] > 1.60 for box in upper_tread_boxes),
+            "the return run rests on its half-landing, not on a room-height visual support "
+            "blocking the foyer entrance")
     landing_trim_boxes = 4 * 2
     runner_boxes = [box for box in boxes
                     if abs((box[1] - box[0]) - STAIR_RUNNER_WIDTH) < 1e-9]
@@ -4738,14 +4830,16 @@ def selftest(output: Path) -> int:
                      if abs((box[3] - box[2]) - STAIR_RUNNER_THICKNESS) < 1e-9]
     runner_risers = [box for box in runner_boxes
                      if abs((box[5] - box[4]) - STAIR_RUNNER_THICKNESS) < 1e-9]
-    runner_count = 2 * int(main["risers"])
+    runner_count = 2 * int(main["risers"]) + 3
     require(len(boxes) == 2 * int(main["risers"]) + runner_count + 2
             + landing_trim_boxes,
-            f"a step, nosing, runner tread and runner riser per rise, the turn and exit bridge, "
+            f"a step, nosing, runner tread and runner riser per rise, the U-shaped runner "
+            f"across the turn, the upper exit, "
             f"and four landing-edge trims apiece ({len(boxes)})")
-    require(len(runner_treads) == int(main["risers"])
+    require(len(runner_treads) == int(main["risers"]) + 2
             and len(runner_risers) == int(main["risers"]),
-            f"the main flight's wool runner is continuous over all treads and risers "
+            f"the main flight's wool runner has one leg per lane on the landing as well as "
+            f"all treads and risers "
             f"({len(runner_treads)} tread, {len(runner_risers)} riser strips)")
     exposed_edge = (float(main["width"]) - STAIR_RUNNER_WIDTH) / 2.0
     lane_centres = {(tread["box"][0] + tread["box"][1]) / 2.0 for tread in steps}
@@ -4754,6 +4848,14 @@ def selftest(output: Path) -> int:
                         for centre in lane_centres)
                     for box in runner_boxes),
             f"and it is centred with {exposed_edge * 1000:.0f} mm of oak exposed at each edge")
+    cross_strips = [box for box in boxes
+                    if abs(box[2] - landing_y) < 1e-6
+                    and abs(box[3] - landing_y - STAIR_RUNNER_THICKNESS) < 1e-6
+                    and box[0] <= min(lane_centres) - STAIR_RUNNER_WIDTH / 2.0 + 1e-6
+                    and box[1] >= max(lane_centres) + STAIR_RUNNER_WIDTH / 2.0 - 1e-6]
+    require(len(cross_strips) == 1,
+            "the landing runner visibly crosses between the two flights once, so a player "
+            "can follow its U turn instead of meeting a blank wall")
     require(min(by0 for _a, _b, by0, _c, _d, _e in boxes) >= 0.60 - 1e-6
             and abs(max(by1 for _a, _b, _c, by1, _d, _e in boxes)
                     - float(levels["L1"]["ffl"]) - STAIR_RUNNER_THICKNESS) < 1e-6,
@@ -4801,6 +4903,25 @@ def selftest(output: Path) -> int:
                            list(cell_boxes(subject, extent))[0]),
             "while a room with no stair under it keeps its whole floor")
 
+    attic_head = cells["L3_STAIR_HEAD"]
+    attic_head_extent = extent_of(attic_head, levels[attic_head["level"]])[0]
+    reset_scene()
+    guarded_head = build_cell(attic_head, attic_head_extent, neighbours=neighbours,
+                              construction=construction, level=levels[attic_head["level"]],
+                              levels=levels, portals=list(portal_rows.values()),
+                              openings=openings_by_portal, cells_by_id=cells,
+                              flights=list(flight_rows.values()))
+    baluster_bottom = attic_head_extent[0]
+    baluster_top = attic_head_extent[0] + float(construction["railing"]) - RAIL_SECTION / 2
+    vertical_fill = 0
+    for polygon in guarded_head.data.polygons:
+        heights = [guarded_head.data.vertices[index].co.z for index in polygon.vertices]
+        if abs(min(heights) - baluster_bottom) < 1e-5 and abs(max(heights) - baluster_top) < 1e-5:
+            vertical_fill += 1
+    require(vertical_fill >= 20,
+            f"the attic's exposed well guard has visible vertical infill, not only a floating "
+            f"top line ({vertical_fill} side faces)")
+
     # ...and the cell that carries the flight actually gets it. The claims above call
     # `build_flight` directly, which a builder that never called it would satisfy perfectly.
     stair_cell = cells[main["fromCell"]]
@@ -4817,16 +4938,20 @@ def selftest(output: Path) -> int:
                             levels=levels, portals=list(portal_rows.values()),
                             openings=openings_by_portal, cells_by_id=cells,
                             flights=list(flight_rows.values()))
-    # The narrowed basement well leaves two separate rail pieces at the exit bridge. The flight
-    # has two open-side rails and matching strings, four newels, and two balusters per going.
+    # The narrowed basement well leaves two separate rail pieces at the exit bridge. The widened
+    # main well gives each exposed switchback edge its own non-intersecting balustrade.
     expected_balusters = sum(max(1, math.ceil(
         ((tread["box"][1] - tread["box"][0]) if tread["axis"] == "x"
          else (tread["box"][3] - tread["box"][2])) / STAIR_BALUSTER_MAX_PITCH - 1e-9))
-        for tread in steps)
+        for tread in first_run + second_run)
     expected_raked_members = 4
+    # The arrival removes four well-infill posts. Their two buried caps are now omitted,
+    # so removing those posts subtracts eight fewer faces than the old closed-box census.
+    arrival_infill_cap_savings = 4 * 2
     require(len(with_stair.data.polygons) == without_faces + 6 * (
-                len(boxes) + expected_raked_members + 4 + expected_balusters + 2),
-            f"{main['fromCell']} gains the flight's {len(boxes)} boxes, two handrails, two "
+                len(boxes) + expected_raked_members + 4 + expected_balusters + 2)
+            + arrival_infill_cap_savings,
+            f"{main['fromCell']} gains the flight's {len(boxes)} boxes, two handrails and "
             f"strings, four newels, {expected_balusters} balusters, and two railing pieces "
             f"beside the narrowed basement well "
             f"({without_faces} -> {len(with_stair.data.polygons)})")

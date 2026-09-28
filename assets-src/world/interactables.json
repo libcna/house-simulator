@@ -1147,7 +1147,7 @@
     {
       "id": "SWITCH_L3_STAIR_HEAD", "kind": "light_switch", "cell": "L3_STAIR_HEAD",
       "prop": null,
-      "focus": { "point": [5.95, 10.50, -18.24], "normal": [0.0, 0.0, 1.0], "radius": 0.30 },
+      "focus": { "point": [5.95, 10.50, -20.14], "normal": [0.0, 0.0, 1.0], "radius": 0.30 },
       "actions": [
         { "verb": "lights", "do": "toggle(state.LG_L3_STAIR_HEAD_MAIN)",
           "sound": "SFX_SWITCH_CLICK", "duration": 0.12 }
@@ -1161,7 +1161,7 @@
     {
       "id": "SWITCH_L3_STORE_E", "kind": "light_switch", "cell": "L3_STORE_E",
       "prop": null,
-      "focus": { "point": [5.95, 10.50, -18.36], "normal": [0.0, 0.0, -1.0], "radius": 0.30 },
+      "focus": { "point": [5.95, 10.50, -20.26], "normal": [0.0, 0.0, -1.0], "radius": 0.30 },
       "actions": [
         { "verb": "lights", "do": "toggle(state.LG_L3_STORE_E_MAIN)",
           "sound": "SFX_SWITCH_CLICK", "duration": 0.12 }

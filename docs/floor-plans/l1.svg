@@ -61,8 +61,8 @@
   <line x1="347.6" y1="274.8" x2="404.8" y2="274.8" stroke="#7f8c8d" stroke-width="3.2" stroke-linecap="round"/>
   <line x1="319.0" y1="224.1" x2="319.0" y2="265.7" stroke="#7f8c8d" stroke-width="3.2" stroke-linecap="round"/>
   <line x1="433.4" y1="350.2" x2="433.4" y2="377.5" stroke="#7f8c8d" stroke-width="3.2" stroke-linecap="round"/>
-  <rect x="438.6" y="238.4" width="59.8" height="127.4" fill="none" stroke="#8e44ad" stroke-width="1.6" stroke-dasharray="5 3"/>
-  <rect x="438.6" y="238.4" width="59.8" height="127.4" fill="none" stroke="#8e44ad" stroke-width="1.6" stroke-dasharray="5 3"/>
+  <rect x="433.4" y="225.4" width="70.2" height="140.4" fill="none" stroke="#8e44ad" stroke-width="1.6" stroke-dasharray="5 3"/>
+  <rect x="433.4" y="225.4" width="70.2" height="140.4" fill="none" stroke="#8e44ad" stroke-width="1.6" stroke-dasharray="5 3"/>
   <line x1="364.5" y1="178.6" x2="387.9" y2="178.6" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
   <line x1="194.2" y1="100.6" x2="194.2" y2="124.0" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
   <line x1="131.8" y1="100.6" x2="131.8" y2="124.0" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>

@@ -362,13 +362,104 @@ TEST(StairTraversalTests, FoyerApproachReachesTheFirstFloorHall)
     // switches cells at the opening plane; driving the old foyer cell further into the stair room
     // would intentionally leave its borrowed floor coverage and test a state the game cannot use.
     leg(*foyer, {Vector3(2.55F, 0.60F, -14.80F)}, 0.12F);
-    // Stay in the clear strip north of the returning run until the body is fully past it; the
-    // ordinary 0.60 m waypoint radius turns east too early for a 0.60 m-wide capsule.
-    leg(*lower, {Vector3(2.75F, 0.60F, -14.70F), Vector3(4.10F, 0.60F, -14.70F)}, 0.12F);
+    // The rebuilt first run is directly opposite the foyer, in the west lane. Walk straight
+    // through the opening and onto its foot without the old detour behind an upper-run guard.
+    leg(*lower, {Vector3(2.75F, 0.60F, -14.70F), Vector3(2.95F, 0.60F, -15.15F)}, 0.12F);
     leg(*lower, PathUp(segments));
     EXPECT_GT(state.position.Y - state.Rise(), 3.25F) << "the body never reached the first floor";
-    leg(*upper, {Vector3(2.95F, 3.65F, -14.45F), Vector3(1.90F, 3.65F, -14.85F)});
+    // Stay east along the upper bridge, then cross at its south end, beside the next storey's
+    // first tread. Both storeys now have matching lane orientation and clear stacked headroom.
+    leg(*upper,
+        {Vector3(4.15F, 3.65F, -14.65F), Vector3(2.95F, 3.65F, -14.65F), Vector3(1.90F, 3.65F, -14.85F)});
     leg(*landing, {Vector3(1.30F, 3.65F, -14.85F)});
     EXPECT_LT(state.position.X, 2.20F) << "the L1 hallway is still behind a stair or a rail";
     EXPECT_NEAR(state.position.Y - state.Rise(), 3.65F, 0.12F);
+}
+
+TEST(StairTraversalTests, TheMainFlightCanBeEnteredAcrossItsClearLane)
+{
+    IdRegistry::ResetForTesting();
+    const std::string path = "content/world/collision.bin";
+    if (!std::filesystem::exists(path))
+    {
+        GTEST_SKIP() << "no deployed collision";
+    }
+    System::IO::FileStream stream(path, System::IO::FileMode::Open, System::IO::FileAccess::Read);
+    const auto loaded = CollisionLoader::Read(stream, path);
+    ASSERT_TRUE(loaded);
+    const CollisionWorld& statics = loaded.Value();
+    const CollisionCell* stair = statics.Cell("L0_STAIR_MAIN");
+    ASSERT_NE(stair, nullptr);
+    InputState forward;
+    forward.move.Y = 1.0F;
+    for (const float x : {2.60F, 2.75F, 2.85F, 2.973F})
+    {
+        SCOPED_TRACE(x);
+        PlayerState state;
+        state.position = Vector3(x, 0.60F + kRise + 0.002F, -14.90F);
+        BroadPhase broad;
+        for (int step = 0; step < 1500 && state.position.Z > -18.30F; ++step)
+        {
+            static_cast<void>(PlayerStep(statics, *stair, broad, state, forward, kDt));
+        }
+        EXPECT_LT(state.position.Z, -18.30F) << "held W caught at the rail entrance";
+        EXPECT_NEAR(state.position.Y - state.Rise(), 2.215F, 0.05F);
+        EXPECT_FALSE(state.crouched);
+    }
+}
+
+TEST(StairTraversalTests, AtticSideDoorApproachClimbsWithoutSteering)
+{
+    // A path assembled from ramp waypoints can pass while the actual straight-on entrance
+    // misses the walking lane. Start on the level pad reached from the L2 side door and hold W.
+    IdRegistry::ResetForTesting();
+    const std::string collisionPath = "content/world/collision.bin";
+    if (!std::filesystem::exists(collisionPath))
+    {
+        GTEST_SKIP() << "no deployed world; run tools/ci/build_content.py --only world";
+    }
+    const std::unique_ptr<System::IO::FileStream> stream(
+        new System::IO::FileStream(collisionPath, System::IO::FileMode::Open, System::IO::FileAccess::Read));
+    const auto loaded = CollisionLoader::Read(*stream, collisionPath);
+    ASSERT_TRUE(loaded) << loaded.Error().Message();
+    const CollisionWorld& statics = loaded.Value();
+    const CollisionCell* stair = statics.Cell("L2_STAIR_ATTIC");
+    ASSERT_NE(stair, nullptr);
+
+    PlayerState state;
+    state.position = Vector3(5.85F, 6.55F + kRise + 0.05F, -14.85F);
+    state.yaw = 0.0F;
+    InputState input;
+    input.move.Y = 1.0F;
+    BroadPhase broad;
+    bool reached = false;
+    bool fellHard = false;
+    for (int step = 0; step < 1500; ++step)
+    {
+        const PlayerStepReport report = PlayerStep(statics, *stair, broad, state, input, kDt);
+        fellHard = fellHard || report.landing == Landing::Hard;
+        if (state.position.Y - state.Rise() >= 9.25F && state.position.Z < -19.0F)
+        {
+            reached = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(reached) << "holding forward stopped at (" << state.position.X << ", "
+                         << state.position.Y - state.Rise() << ", " << state.position.Z << ')';
+    EXPECT_NEAR(state.position.X, 5.85F, 0.12F);
+    EXPECT_FALSE(fellHard);
+
+    const CollisionCell* head = statics.Cell("L3_STAIR_HEAD");
+    ASSERT_NE(head, nullptr);
+    state = PlayerState{};
+    state.position = Vector3(7.20F, 9.30F + kRise + 0.05F, -18.0F);
+    state.yaw = -1.5707963F;
+    float lowestFeet = 9.30F;
+    for (int step = 0; step < 360; ++step)
+    {
+        static_cast<void>(PlayerStep(statics, *head, broad, state, input, kDt));
+        lowestFeet = std::min(lowestFeet, state.position.Y - state.Rise());
+    }
+    EXPECT_GE(lowestFeet, 9.25F) << "the exposed attic edge allowed a walk-off fall";
+    EXPECT_GE(state.position.X, 6.75F) << "the player crossed the well guard";
 }

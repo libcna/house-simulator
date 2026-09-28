@@ -4,9 +4,9 @@
   <rect x="46.0" y="178.6" width="78.0" height="96.2" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
   <text class="id" x="85.0" y="226.7" text-anchor="middle">L2_BATH4</text>
   <text class="name" x="85.0" y="236.7" text-anchor="middle">Bathroom 4</text>
-  <rect x="503.6" y="178.6" width="98.8" height="96.2" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
-  <text class="id" x="553.0" y="226.7" text-anchor="middle">L2_BATH5</text>
-  <text class="name" x="553.0" y="236.7" text-anchor="middle">Bathroom 5</text>
+  <rect x="503.6" y="178.6" width="98.8" height="70.2" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="553.0" y="213.7" text-anchor="middle">L2_BATH5</text>
+  <text class="name" x="553.0" y="223.7" text-anchor="middle">Bathroom 5</text>
   <rect x="46.0" y="274.8" width="117.0" height="104.0" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
   <text class="id" x="104.5" y="326.8" text-anchor="middle">L2_BED6</text>
   <text class="name" x="104.5" y="336.8" text-anchor="middle">Bedroom 6</text>
@@ -37,9 +37,9 @@
   <rect x="433.4" y="46.0" width="169.0" height="104.0" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
   <text class="id" x="517.9" y="98.0" text-anchor="middle">L2_SITTING</text>
   <text class="name" x="517.9" y="108.0" text-anchor="middle">Secondary Sitting Room</text>
-  <rect x="503.6" y="274.8" width="98.8" height="104.0" fill="#e8eef6" stroke="#2c3e50" stroke-width="1.4"/>
-  <text class="id" x="553.0" y="326.8" text-anchor="middle">L2_STAIR_ATTIC</text>
-  <text class="name" x="553.0" y="336.8" text-anchor="middle">Attic Stair</text>
+  <rect x="503.6" y="248.8" width="98.8" height="130.0" fill="#e8eef6" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="553.0" y="313.8" text-anchor="middle">L2_STAIR_ATTIC</text>
+  <text class="name" x="553.0" y="323.8" text-anchor="middle">Attic Stair</text>
   <rect x="433.4" y="225.4" width="70.2" height="153.4" fill="#e8eef6" stroke="#2c3e50" stroke-width="1.4"/>
   <text class="id" x="468.5" y="302.1" text-anchor="middle">L2_STAIR_MAIN</text>
   <text class="name" x="468.5" y="312.1" text-anchor="middle">Staircase L2 Head</text>
@@ -54,9 +54,9 @@
   <text class="name" x="468.5" y="212.0" text-anchor="middle">WC 6</text>
   <line x1="347.6" y1="274.8" x2="404.8" y2="274.8" stroke="#7f8c8d" stroke-width="3.2" stroke-linecap="round"/>
   <line x1="319.0" y1="224.1" x2="319.0" y2="265.7" stroke="#7f8c8d" stroke-width="3.2" stroke-linecap="round"/>
-  <line x1="433.4" y1="306.0" x2="433.4" y2="347.6" stroke="#7f8c8d" stroke-width="3.2" stroke-linecap="round"/>
-  <rect x="438.6" y="238.4" width="59.8" height="127.4" fill="none" stroke="#8e44ad" stroke-width="1.6" stroke-dasharray="5 3"/>
-  <rect x="511.4" y="278.7" width="83.2" height="87.1" fill="none" stroke="#8e44ad" stroke-width="1.6" stroke-dasharray="5 3"/>
+  <line x1="433.4" y1="350.2" x2="433.4" y2="377.5" stroke="#7f8c8d" stroke-width="3.2" stroke-linecap="round"/>
+  <rect x="433.4" y="225.4" width="70.2" height="140.4" fill="none" stroke="#8e44ad" stroke-width="1.6" stroke-dasharray="5 3"/>
+  <rect x="503.6" y="251.4" width="40.3" height="114.4" fill="none" stroke="#8e44ad" stroke-width="1.6" stroke-dasharray="5 3"/>
   <line x1="503.6" y1="354.1" x2="503.6" y2="377.5" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
   <line x1="319.0" y1="315.1" x2="319.0" y2="338.5" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
   <line x1="163.0" y1="315.1" x2="163.0" y2="338.5" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>

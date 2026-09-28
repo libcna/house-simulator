@@ -1189,23 +1189,27 @@ Every flight satisfies `2·rise + going ∈ [600, 650] mm` and a consistent rise
 
 | Stair | From → To | Total rise | Risers × rise | Going | Width | Shape | Footprint |
 |---|---|---|---|---|---|---|---|
-| `STAIR_MAIN_L0_L1` | L0 +0.60 → L1 +3.65 | 3.050 m | 17 × 179.4 mm | 280 mm | 1.10 m | U, half-landing at riser 9, **+2.2147** | X +2.20…+4.90, Z −20.20…−15.30; a 1.00 m clear foyer approach remains to the north wall |
-| `STAIR_MAIN_L1_L2` | L1 +3.65 → L2 +6.55 | 2.900 m | 16 × 181.3 mm | 280 mm | 1.10 m | U, landing at riser 12, **+2.175 rel.** | X +2.20…+4.90, Z −20.20…−14.30 |
-| `STAIR_ATTIC_L2_L3` | L2 +6.55 → L3 +9.30 | 2.750 m | 15 × 183.3 mm | 235 mm | 0.90 m | straight, north-running | X +5.40…+8.20, Z −18.30…−14.30 |
-| `STAIR_BASEMENT_L0_B1` | L0 +0.60 → B1 −2.30 | 2.900 m | 16 × 181.3 mm | 275 mm | 1.00 m | straight, north-running, **directly beneath the main stair** | X +2.20…+4.90, Z −20.20…−14.30 |
+| `STAIR_MAIN_L0_L1` | L0 +0.60 → L1 +3.65 | 3.050 m | 17 × 179.4 mm | 280 mm | 1.10 m | U, suspended turn at riser 9, **+2.2147** | X +2.20…+4.90, Z −20.20…−14.30; the first tread is set back 1.00 m from the south entry |
+| `STAIR_MAIN_L1_L2` | L1 +3.65 → L2 +6.55 | 2.900 m | 16 × 181.3 mm | 280 mm | 1.10 m | U, landing at riser 8, **+1.450 rel.** | X +2.20…+4.90, Z −20.20…−14.30 |
+| `STAIR_ATTIC_L2_L3` | L2 +6.55 → L3 +9.30 | 2.750 m | 15 × 183.3 mm | 250 mm | 0.90 m | straight, north-running, 1.00 m level entry | X +5.40…+8.20, Z −19.30…−14.30 |
+| `STAIR_BASEMENT_L0_B1` | B1 −2.30 → L0 +0.60 | 2.900 m | 16 × 181.3 mm | 275 mm | 1.00 m | straight, south-running, **beneath the main stair** | X +2.20…+4.90, Z −20.20…−14.30 |
 | `STEPS_PORCH` | grade 0.00 → porch +0.57 | 0.570 m | 3 × 190 mm | 300 mm | 3.00 m | straight | Z −11.60…−10.70 |
 | `STEPS_TERRACE_LAWN` | lawn 0.00 → terrace +0.45 | 0.450 m | 3 × 150 mm | 350 mm | 3.00 m | straight | Z −36.00, the terrace's south edge |
 | `STEPS_TERRACE` | terrace +0.45 → sunroom +0.60 | 0.150 m | 1 × 150 mm | 350 mm | 3.60 m | single step | Z −32.40 |
 | `STEPS_GARAGE` | garage +0.15 → mudroom +0.60 | 0.450 m | 3 × 150 mm | **300 mm** | 1.10 m | straight | inside the garage at the house wall |
 
-`HOUSE-00489` corrects the main-stair circulation within this unchanged footprint: both U
-flights ascend first in the east lane and return in the west. The basement flight uses an east
-1.10 m well instead of a 2.30 m hole, leaving a real west-side approach from the foyer. Thin
-upper-level exit strips connect the returning treads to the hall openings; L2 also has a
-full-width south cross landing for its attic-stair door. The shell, collision and railing gaps
-derive from the same flight placement, rather than moving a decorative stair mesh alone.
+`HOUSE-03635` corrects the visually obstructed stair: both U flights now ascend first in the
+west lane directly opposite the foyer/L1 landing and return in the east. A metre of south entry
+strip and full-width upper exit bridges keep the walking route legible. The lower suspended turn
+is at riser 9, the upper at riser 8. Both pads reach the north wall, leaving no unguarded
+slot behind the turn; the run lanes are separated by 500 mm, so exposed-edge rails do not
+overlap. Their visual slabs and collision are one riser thick, and raked flight-edge collision
+follows the visible rails. The two flights through L2 share this orientation, avoiding opposing
+slopes directly overhead. The L2 landing opening is at the south bridge. The basement flight
+starts beside its north hall door and arrives in L0's clear south approach strip. Shell,
+collision and railing gaps derive from the same flight placement.
 
-`2·179.4 + 280 = 638.8` ✔ · `2·181.3 + 280 = 642.6` ✔ · `2·183.3 + 235 = 601.6` ✔ ·
+`2·179.4 + 280 = 638.8` ✔ · `2·181.3 + 280 = 642.6` ✔ · `2·183.3 + 250 = 616.6` ✔ ·
 `2·181.3 + 275 = 637.6` ✔ · `2·150 + 350 = 650` ✔ (both terrace flights) ·
 `2·150 + 300 = 600` ✔ (garage) · `2·190 + 300 = 680` (exterior, permitted) ✔
 
@@ -1214,15 +1218,22 @@ derive from the same flight placement, rather than moving a decorative stair mes
 > steps between them that nothing scheduled — without them the terrace is a place you can see and
 > not reach. **The garage steps' going was 280 mm**, making `2·150 + 280 = 580`, below §70.5's
 > band; 300 mm makes it exactly 600 and the flight has the room. **The two landing heights** were
-> 2.7 mm and 15 mm off a riser boundary: a landing is where a riser ends, so it is 9 × 179.4 mm
-> above L0's floor and 12 × 181.3 mm above L1's, which is +2.2147 and +2.175 rel. The rises
-> themselves are exact — 3.05/17, 2.90/16, 2.75/15 — and this table's tenths of a millimetre are
-> those numbers rounded.
+> 2.7 mm and 15 mm off a riser boundary in the original layout. `HOUSE-03635` rebuilt both
+> turns at their exact ninth and eighth riser heights respectively. The rises themselves are
+> exact — 3.05/17,
+> 2.90/16, 2.75/15 — and this table's tenths of a millimetre are those numbers rounded.
 
 > Corrected 2026-09-23 by `HOUSE-03226`. The attic flight's 265 mm going left a 230 mm terminal
 > rise after the ramp, above the controller's 220 mm step-up limit. The 235 mm going reaches the L3
 > floor before capsule contact and remains inside the required Blondel band. The existing attic
 > store opening was shifted onto the resulting 0.90 m landing; no room or new route was added.
+
+> Corrected 2026-09-28 by `HOUSE-03638`. The attic flight now uses a 250 mm going and a
+> 1.00 m level approach. Its bay takes 1.00 m from the adjoining service bathroom, while the
+> upper head takes 1.90 m from the east attic store. The last tread ends at Z −19.05 and
+> joins the +9.30 floor directly; a 1.15 m level landing reaches Z −20.20. Both attic doors
+> open off that solid landing. The well covers only the walking flight, not the whole bay;
+> its exposed edges have visible infill and colliding guards. No cell or floor was removed.
 
 Headroom under every flight and at every landing nosing is ≥ 2.00 m, verified by
 `HOUSE-00360`'s automated check against the level heights.
@@ -1237,7 +1248,7 @@ schedule and is a first-class reason several rooms are where they are.
 | **STACK-A** (centre-east) | `L0_WC1`, `L1_WC4`, `L2_WC6` | X +2.20…+4.90, Z −22.00…−20.20 — perfectly aligned on all three floors | `B1_UTILITY` |
 | **STACK-B** (west) | `L0_WC2`, `L1_BATH2`, `L2_BATH4` | shared corner X −10.40…−9.70, Z −20.20…−18.30 | `B1_STOR1` chase → main drain |
 | **STACK-C** (master) | `L1_MASTER_BATH` | over `L0_PANTRY`/`L0_BUTLERS` (X −12.70…−8.20), chase in the west wall | `B1_STOR2` |
-| **STACK-D** (guest east) | `L0_LAUNDRY`, `L1_BATH3`, `L2_BATH5` | X +4.90…+8.70, Z −22.00…−18.30 — perfectly aligned | `B1_UTILITY` |
+| **STACK-D** (guest east) | `L0_LAUNDRY`, `L1_BATH3`, `L2_BATH5` | X +4.90…+8.70, common service strip Z −22.00…−19.30; L0/L1 extend to −18.30 | `B1_UTILITY` |
 | **STACK-E** (kitchen) | `L0_KITCHEN` sink + dishwasher, `L0_SUNROOM` wet bar | north wall of the kitchen, `x ≈ −4.0` | `B1_STOR2` |
 | **STACK-F** (basement) | `B1_WC7`, laundry tub in `B1_LAUNDRY2` | at the drain | ejector pit |
 | **STACK-G** (centre-west) | `L1_WC3`, `L2_WC5` | X −7.00…−6.40, Z −22.00…−21.30 — the two are directly above one another | `B1_HOBBY` ceiling void → main run |
@@ -1448,7 +1459,7 @@ garage's, already counted (`HOUSE-00377`).
 |---|---|---|---|---|---|---|---|---|
 | `L2_LANDING` | Stair landing | −2.20 … +2.20 | −18.30 … −14.30 | 17.6 | 2 | 2 | 2 | Juliet balcony over the front |
 | `L2_STAIR_MAIN` | Staircase L2 head | +2.20 … +4.90 | −20.20 … −14.30 | 15.9 | 1 | 1 | 1 |  |
-| `L2_STAIR_ATTIC` | Attic stair | +4.90 … +8.70 | −18.30 … −14.30 | 15.2 | 1 | — | 1 | Straight, narrow, painted timber, a bare bulb on a pull cord |
+| `L2_STAIR_ATTIC` | Attic stair | +4.90 … +8.70 | −19.30 … −14.30 | 19.0 | 1 | — | 1 | Straight timber flight with a level entry and upper landing |
 | `L2_HALL` | Upper hall | −2.20 … +2.20 | −22.00 … −18.30 | 16.3 | 2 | — | 2 |  |
 | `L2_HALL_W` | West corridor | −9.70 … −2.20 | −20.60 … −18.30 | 17.3 | 2 | — | 4 |  |
 | `L2_LIBRARY` | Library | −8.20 … −2.20 | −18.30 … −14.30 | 24.0 | 3 | 2 | 2 | Floor-to-ceiling shelves, reading chairs, a globe, a ladder |
@@ -1461,7 +1472,7 @@ garage's, already counted (`HOUSE-00377`).
 | `L2_GAMES` | Games / hobby room | −7.00 … +2.20 | −27.10 … −22.00 | 46.9 | 3 | 2 | 2 | Pool table, dartboard, sofa, arcade cabinet, model shelves |
 | `L2_SITTING` | Secondary sitting room | +2.20 … +8.70 | −27.10 … −23.10 | 26.0 | 2 | 2 | 1 | Sofa, coffee table, record player, plants |
 | `L2_STOR2` | Store | +2.20 … +8.70 | −23.10 … −22.00 | 7.2 | 1 | — | 3 | 1.10 m connector; all three leaves swing into their destination rooms |
-| `L2_BATH5` | Bathroom 5 | +4.90 … +8.70 | −22.00 … −18.30 | 14.1 | 2 | — | 1 | Bath, vanity, WC, STACK-D; no exterior wall (`HOUSE-00376`) |
+| `L2_BATH5` | Bathroom 5 | +4.90 … +8.70 | −22.00 … −19.30 | 10.3 | 2 | — | 1 | Bath, vanity, WC, STACK-D; no exterior wall (`HOUSE-00376`) |
 | `L2_WC6` | WC | +2.20 … +4.90 | −22.00 … −20.20 | 4.9 | 1 | — | 1 | STACK-A; no exterior wall (`HOUSE-00376`) |
 | `L2_BALCONY_JULIET` | Juliet balcony (exterior) | −1.00 … +1.00 | −14.30 … −13.85 | 0.9 | — | — | 1 | Doors open onto a railing; standing room only |
 
@@ -1486,10 +1497,10 @@ insulation batts between the joists in the unfinished bays, and rough boarding o
 
 | ID | Name | X | Z | Area | Head-room | Lights | Win | Notes |
 |---|---|---|---|---|---|---|---|---|
-| `L3_STAIR_HEAD` | Attic stair head | +4.90 … +8.70 | −18.30 … −14.30 | 15.2 | 2.2 → 3.4 m | 1 | — | Dormer above the head gives standing room |
+| `L3_STAIR_HEAD` | Attic stair head | +4.90 … +8.70 | −20.20 … −14.30 | 22.4 | 2.2 → 3.4 m | 1 | — | Dormer above the head gives standing room; both exits open onto the level landing |
 | `L3_ROOM` ∪ | Finished attic room | −6.00 … +4.90 | −24.00 … −17.00, plus two dormer bays to −14.30 | 86.3 | 2.4 → 5.0 m | 2 | 3 | Boarded floor, plastered collar ceiling, lit by three dormers; an old sofa, a desk, boxes, a rocking horse, a train set |
 | `L3_STORE_W` | West attic store | −12.70 … −6.00 | −27.10 … −14.30 | 85.8 | 1.2 → 4.6 m | 1 | — | Unfinished: rafters, insulation, walkway boards, 40 boxes, a wardrobe, suitcases. Ventilated by the eaves and the ridge, not by a window (`HOUSE-00491`) |
-| `L3_STORE_E` | East attic / services | +4.90 … +8.70 | −27.10 … −18.30 | 33.4 | 1.2 → 4.2 m | 1 | — | Header tank, HVAC branch ducts, an aerial mast, cable runs. Ventilated by the eaves and the ridge, not by a window (`HOUSE-00491`) |
+| `L3_STORE_E` | East attic / services | +4.90 … +8.70 | −27.10 … −20.20 | 26.2 | 1.2 → 4.2 m | 1 | — | Header tank, HVAC branch ducts, an aerial mast, cable runs. Ventilated by the eaves and the ridge, not by a window (`HOUSE-00491`) |
 | `L3_STORE_N` | North attic store | −6.00 … +4.90 | −27.10 … −24.00 | 33.8 | 1.2 → 3.2 m | 1 | 2 | Christmas decorations, a cot, framed pictures; two dormers |
 | `L3_STORE_S` | South attic store | −3.60 … +3.60 | −17.00 … −14.30 | 19.4 | 1.2 → 3.0 m | 1 | — | Roof-space void behind the front knee wall |
 
