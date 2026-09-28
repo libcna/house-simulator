@@ -250,3 +250,66 @@ it does not prove which individual spike it caused. `HOUSE-02404` stays open
 until a clean/repeatable reference run establishes whether any scene truly
 misses. No rendering or content technique is selected from these ambiguous
 timings; the restored R-C reserve is retained.
+
+### 2026-09-28 — repeatable current fixed-camera High acceptance (`HOUSE-02404`)
+
+House source `8c35252`; CNA HEAD during refresh/measurement `8bfb24a42`, built
+read-only here (other sessions' upstream changes were not modified). CNA advanced
+to `92d23c84d` at 15:55:53 after the three rounds, in network/gamer-services
+configuration and source; no graphics/House change. These numbers describe the
+measured binary, not an unbuilt promise about that later dependency revision.
+The next build must let the existing directory refresh normally. Existing `build-probe/`
+refreshed successfully: Release / OPENGLES3 / Tier S / debug off /
+**1920×1080**, VSync off. Root/deployed audio JSON and collision bytes match.
+The Release build emitted one upstream GCC `stl_algobase.h` stringop-overread
+warning in the content code; no House error or relaxed warning policy.
+
+All own builds/strict checks ended before measurement. Ordinary desktop/browser
+processes remained, but the competing heavy compiler/graphics jobs previously
+observed were no longer present. Each scenario has a fresh process, neutral
+real-input source, fixed time/weather/seed, 120 warm-up and 600 measured frames.
+Three complete eight-scenario rounds pass with **identical counts per scene**;
+no House rendering, content, culling, LOD or instancing change between them.
+
+Actual Radeon 780M hardware, Mesa 25.0.7; no monitor window: unset DISPLAY and
+WAYLAND_DISPLAY, SDL offscreen, EGL surfaceless, affinity 0–3 and four Gallium/LP
+workers. An additional StreetApproach process proved its own amdgpu client
+`1011593`, PCI `0000:c3:00.0`, from its own /proc fdinfo, not a runtime native
+handle call. The generic platform summary still describes the initial 1024×768
+configuration; the real back-buffer log and explicit harness target are
+1920×1080. Do not use that generic summary as the measured resolution.
+
+CPU is average fixed/update cost plus median render submission. GPU completion
+is the existing one-texel synchronized readback measure, not added to CPU to
+invent a combined number. The current overall High caps used by the baseline
+remain **9.5 ms CPU, 14 ms GPU, 1800 draws and 3.4 million triangles**, without
+a new headroom margin; p95 completion is also below the 16.67 ms frame target.
+Per-subsystem submission timings remain in each raw log for diagnosis.
+
+| Scenario | Draws | Triangles | CPU ms, runs 1 / 2 / 3 | GPU completion median ms, runs 1 / 2 / 3 | Highest GPU p95 ms | Verdict |
+|---|---:|---:|---|---|---:|---|
+| Kitchen | 73 | 172,940 | 2.187 / 2.161 / 2.226 | 4.033 / 3.779 / 3.954 | 5.556 | within |
+| Library | 78 | 559,128 | 3.504 / 2.003 / 3.105 | 5.705 / 3.876 / 5.044 | 8.689 | within |
+| MainStair | 67 | 27,315 | 2.791 / 2.457 / 2.680 | 4.774 / 4.209 / 4.402 | 7.663 | within |
+| StreetApproach | 513 | 1,032,468 | 7.449 / 5.516 / 5.557 | 8.493 / 6.681 / 6.800 | 11.408 | within |
+| RearGarden | 376 | 1,198,541 | 4.780 / 4.444 / 4.425 | 7.011 / 6.665 / 6.625 | 9.117 | within |
+| UpperWindow | 85 | 259,265 | 2.410 / 1.773 / 1.888 | 4.059 / 3.442 / 3.551 | 5.499 | within |
+| HeavyRain | 320 | 1,341,394 | 3.781 / 3.901 / 3.995 | 6.475 / 6.678 / 6.718 | 9.341 | within |
+| NightOutside | 513 | 1,035,472 | 6.133 / 5.989 / 6.528 | 7.107 / 7.097 / 7.371 | 9.342 | within |
+
+Worst across the 24 runs: **7.449 ms CPU**, **8.493 ms median completion**,
+**11.408 ms p95 completion**, **513 draws**, **1,341,394 triangles** (extrema
+occur in different scenes). The hardware-proof street repeat also passes:
+4.703 ms CPU / 6.030 ms completion median / 7.403 ms p95, 513 draws and
+1,032,468 triangles. This is current passing/repeatable evidence, **not a claim
+of a code-driven improvement over the old contended or moving-camera results**.
+
+Acceptance (3) closes `HOUSE-02404` with no technique selected and no optional
+optimisation; R-C's four-hour technique reserve is retired. The historical
+measurements above remain, but their environmental blocker is superseded by
+this current run. `HOUSE-02405` preset measurement is now dependency-unblocked;
+Web/Android performance remains required and is not claimed complete here.
+
+Logs: `/tmp/house-current-release-refresh.log`,
+`/tmp/house-02404-{current,repeat2,repeat3}-high.log`, the corresponding per-scene
+logs, and `/tmp/house-02404-hardware-{proof,street}.log`.

@@ -1,6 +1,64 @@
 # Current owner-visible defect work — 2026-09-28
 
-## Current continuation: owner listening closes footsteps and ambience
+## Current continuation: repeatable High acceptance, no speculative optimisation
+
+Starting clean `develop` HEAD `9e937ca48415d81c1617d1c54302957131bab820`.
+Completed this continuation: `HOUSE-03681`, `HOUSE-03682`, `HOUSE-01920`,
+`HOUSE-01922` and **HOUSE-02404**. After the owner-visible sound correction and
+its actual listening acceptance, Track B/D9 selected the existing High
+measurement path when the competing heavy jobs ended. The previous contention
+record was rechecked, not assumed. No code/content optimisation was selected.
+
+Existing `build-probe/` Release/OPENGLES3/Tier-S/debug-off refresh **PASS** (-j2,
+shared ccache); deployed audio/collision match source content. Three complete
+fresh-process rounds of eight fixed 1920×1080 High scenarios **24/24 PASS**,
+120 warm-up + 600 samples each, neutral input, fixed clock/weather/seed. Per-scene
+draw/triangle counts match across all rounds. Maximum measured CPU **7.449 ms**,
+completion median **8.493 ms**, highest p95 **11.408 ms**, draws **513**,
+triangles **1,341,394**; all overall High caps pass without a new headroom margin.
+Additional hardware-proof street test passes **4.703 / 6.030 ms CPU/completion**,
+7.403 ms p95; its own amdgpu client 1011593 is on PCI 0000:c3:00.0.
+No monitor windows, software rendering substitute, or concurrent own compilation.
+Typical browser/desktop processes remain: this is repeatably passing reference
+evidence, not a promise of an absolutely idle machine or improved code performance.
+
+Acceptance (3) explicitly stops optimisation when targets pass. R-C's four-hour
+technique reserve is retired. Historical moving-camera/contended rows stay in
+`docs/performance-log.md`, superseded rather than erased. Raw logs:
+`/tmp/house-current-release-refresh.log`,
+`/tmp/house-02404-{current,repeat2,repeat3}-high.log` and per-scene logs,
+`/tmp/house-02404-hardware-{proof,street}.log`. One upstream GCC warning originates
+in CNA's CnbModelCodec/std::vector comparator, not House; source/policy unchanged.
+CNA was `8bfb24a42` during refresh/measurement and advanced to `92d23c84d`
+after the three rounds, in network/gamer-services work by its other session.
+The next existing-directory build has a genuine CMake refresh pending; do not
+claim the measured binary already includes that later dependency revision.
+
+Full current validation remains **1530/1530 unit PASS**, **170 GPU integration
+PASS / 3 explicit opt-in SKIP / 0 FAIL**, all static gates green with **353 strict
+units / 109 destructor exemptions**, and five repeats of both physical-contact
+audio checks plus forced four-step doorway sampling. Owner confirms all six
+footstep categories and indoor/outdoor day/night ambience. No current test failure,
+missing-audio-hardware or missing-emulator blocker. No new visual change or fresh
+geometry/lighting acceptance is claimed by these performance tests.
+
+**30 MUST / 78 OPT remain, nominal 45.25 h → 38.50 h, pessimistic 56.35 h**
+(1.10 × 38.50 + Android/Web reserves 8 + 6). Owner withdrew the 280 h ceiling;
+no OPTIONAL work or platform/floor cuts. **Exact next MUST: HOUSE-01925**,
+already investigated but not implemented; reuse skyexposure.bin v2 and existing
+audio/banks. The missing public XNA filter/PCM getter is a design constraint,
+not a CNA blocker: preserve real low-pass without forbidden internal calls or
+an offline derivative set. The earlier section records the relevant source gap.
+Then `HOUSE-01939` listening; `HOUSE-02405` is also newly dependency-unblocked
+and enables Web/Android content/performance work. Never claim those platforms
+complete from desktop measurements. No emulator was used this continuation.
+
+Practical continuation checkpoint: no own validation/build job remains running,
+no source WIP or unstaged owner changes, no sibling source edits; shared ccache,
+closed build directories and six-compiler aggregate cap preserved. The overall
+goal remains active, not DONE or maintenance mode.
+
+## Earlier continuation: owner listening closes footsteps and ambience
 
 Starting clean `develop` HEAD `9e937ca48415d81c1617d1c54302957131bab820`.
 Completed `HOUSE-03681` (layout gate), `HOUSE-03682` (doorway sampling),
