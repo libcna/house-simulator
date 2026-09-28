@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "Microsoft/Xna/Framework/Graphics/BasicEffect.hpp"
 #include "Microsoft/Xna/Framework/Graphics/BlendState.hpp"
 #include "Microsoft/Xna/Framework/Graphics/CompareFunction.hpp"
 #include "Microsoft/Xna/Framework/Graphics/DepthStencilState.hpp"
@@ -54,6 +55,23 @@ namespace
     using cnahouse::world::CellRuntime;
     using cnahouse::world::ChunkLayout;
     using cnahouse::world::ChunkLibrary;
+
+    TEST(StaticGeometryPassTests, ArtificialShellBounceKeepsUnlitRoomsDarkAndCapsStrongFixtures)
+    {
+        using cnahouse::rendering::ArtificialShellBounceFor;
+        using Microsoft::Xna::Framework::Vector3;
+        const float floor = cnahouse::lighting::kAmbientFloor;
+        const Vector3 off = ArtificialShellBounceFor(Vector3(floor, floor, floor));
+        EXPECT_EQ(off, Vector3(floor, floor, floor)) << "no global ambient lift when lamps are off";
+        const Vector3 warm = ArtificialShellBounceFor(Vector3(0.10F, 0.06F, 0.03F));
+        EXPECT_NEAR(warm.X, floor + 0.5F * (0.10F - floor), 1.0e-6F);
+        EXPECT_GT(warm.X, warm.Y);
+        EXPECT_GT(warm.Y, warm.Z) << "fixture chroma must survive indirect fill";
+        const Vector3 strong = ArtificialShellBounceFor(Vector3(1.0F, 10.0F, 100.0F));
+        EXPECT_EQ(strong, Vector3(floor + 0.09F, floor + 0.09F, floor + 0.09F));
+        const Vector3 belowFloor = ArtificialShellBounceFor(Vector3(0.0F, 0.01F, -1.0F));
+        EXPECT_EQ(belowFloor, off);
+    }
 
     TEST(StaticGeometryPassTests, FixtureEmissionFollowsOnlyItsLinkedGroup)
     {
@@ -214,6 +232,98 @@ namespace
         ASSERT_EQ(host.Failure(), "");
         EXPECT_FALSE(activeWithNothing);
         EXPECT_FALSE(activeWithAnotherPassOnly) << "another pass's item made this one active";
+    }
+
+    TEST(StaticGeometryPassTests, AVisibleMoonDoesNotSwitchOffOutdoorPracticalLights)
+    {
+        const std::string worldPath = std::string(CNAHOUSE_TEST_CONTENT_ROOT) + "/world";
+        ASSERT_TRUE(std::filesystem::exists(worldPath + "/layout.cells.json"));
+        cnahouse::world::WorldData::Contents contents;
+        ASSERT_TRUE(cnahouse::world::WorldLoader::LoadLevels(worldPath, contents));
+        ASSERT_TRUE(cnahouse::world::WorldLoader::LoadMaterials(worldPath, contents));
+        ASSERT_TRUE(cnahouse::world::WorldLoader::LoadCells(worldPath, contents));
+        ASSERT_TRUE(cnahouse::world::WorldLoader::LoadPortals(worldPath, contents));
+        ASSERT_TRUE(cnahouse::world::WorldLoader::LoadOpenings(worldPath, contents));
+        ASSERT_TRUE(cnahouse::world::WorldLoader::LoadLights(worldPath, contents));
+        ASSERT_TRUE(cnahouse::world::WorldLoader::LoadInteractables(worldPath, contents));
+        ASSERT_TRUE(cnahouse::world::WorldLoader::LoadInitialState(worldPath, contents));
+        auto loaded = cnahouse::world::WorldData::Create(std::move(contents));
+        ASSERT_TRUE(loaded) << loaded.Error().ToString();
+        auto world = std::move(loaded.Value());
+        using Microsoft::Xna::Framework::Vector3;
+        const auto cellId = cnahouse::util::Id::Of("EXT_WALK");
+        const auto groupId = cnahouse::util::Id::Of("LG_EXT_WALK_PATH");
+        const auto materialId = cnahouse::util::Id::Of("MAT_OUTDOOR_BLUESTONE");
+        const Vector3 receiver(-0.75F, 0.02F, -3.2F); // below the first authored path bollard
+        auto library = TinyHouse();
+        library.cells = {"EXT_WALK"};
+        library.materials = {"MAT_OUTDOOR_BLUESTONE"};
+        library.chunks.resize(1);
+        library.chunks.front().bounds = Microsoft::Xna::Framework::BoundingBox(
+            receiver - Vector3(0.1F, 0.01F, 0.1F), receiver + Vector3(0.1F, 0.01F, 0.1F));
+        cnahouse::testsupport::DeviceHost host(
+            [&](Gfx::GraphicsDevice& device)
+            {
+                CellRuntime cells(device, library);
+                ASSERT_TRUE(cells.Load("EXT_WALK"));
+                cnahouse::visibility::VisibilitySystem visibility(world);
+                auto shading = cnahouse::lighting::ShadingGrid::Unshaded();
+                cnahouse::environment::SimClock clock;
+                clock.calendarDaysPerSimDay = 1.0;
+                cnahouse::environment::CivilTime time;
+                time.year = 2031;
+                time.month = 1;
+                time.day = 6;
+                time.hour = 19; // high, nearly full moon; no solar key
+                clock.SetStandard(time);
+                cnahouse::lighting::LightingSystem lighting(world, shading, clock, visibility.Portals());
+                ASSERT_TRUE(lighting.SetCloudCover(0.0F));
+                ASSERT_TRUE(lighting.SetGroupOn(groupId, true));
+                cnahouse::app::FrameContext frame;
+                frame.deltaSeconds = 1.0F;
+                lighting.Update(frame);
+                ASSERT_NE(lighting.MoonKeyForCell(cellId), nullptr);
+                ASSERT_TRUE(lighting.StaticFixtureLightsForObject(cellId, receiver).slots[0].has_value());
+                cnahouse::rendering::MaterialBinder binder(device);
+                ASSERT_TRUE(binder.RegisterAll(world.Materials()));
+                Gfx::Texture2D albedo(device, 2, 2);
+                cnahouse::rendering::DrawParams params;
+                params.diffuse = &albedo;
+                auto bound = binder.BindAs(materialId, cnahouse::rendering::MaterialKind::Basic, params);
+                ASSERT_TRUE(bound) << bound.Error().ToString();
+                auto* effect = dynamic_cast<Gfx::BasicEffect*>(bound.Value());
+                ASSERT_NE(effect, nullptr);
+                Camera camera;
+                RenderList list;
+                list.Add(StaticItem(0U, 0U));
+                StateTracker tracker(device);
+                cnahouse::debug::Counters counters;
+                StaticGeometryPass pass(library,
+                                        cells,
+                                        world,
+                                        lighting,
+                                        camera,
+                                        list,
+                                        binder,
+                                        [&](std::string_view) { return &albedo; });
+                cnahouse::rendering::PassContext context{device, tracker, counters, 1.0F / 60.0F};
+                pass.Draw(context);
+                // Inspect the actual shared effect written by the production pass, not a model
+                // of the desired selection. The old sky-open exclusion disabled slot 1 here.
+                EXPECT_TRUE(effect->getDirectionalLight0Property().getEnabledProperty());
+                EXPECT_TRUE(effect->getDirectionalLight1Property().getEnabledProperty());
+                EXPECT_GT(effect->getDirectionalLight1Property().getDiffuseColorProperty().X, 0.0F);
+                ASSERT_TRUE(lighting.SetGroupOn(groupId, false));
+                ++frame.frameIndex;
+                lighting.Update(frame);
+                pass.Draw(context);
+                EXPECT_TRUE(effect->getDirectionalLight0Property().getEnabledProperty());
+                EXPECT_FALSE(effect->getDirectionalLight1Property().getEnabledProperty())
+                    << "a later draw must not inherit an extinguished practical light";
+            });
+        host.Run();
+        ASSERT_TRUE(host.Ran());
+        ASSERT_EQ(host.Failure(), "");
     }
 
     TEST(StaticGeometryPassTests, ProductionComposesArtificialAndDaylightAtEqualDepth)

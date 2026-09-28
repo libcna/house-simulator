@@ -1,5 +1,70 @@
 # Current owner-visible defect work — 2026-09-28
 
+## Accepted lighting checkpoint and exact next work
+
+`HOUSE-03636` is accepted after actual invisible Radeon/OPENGLES3 day/night
+inspection of all **90 accessible cells**, not merely the old lighting scoreboard.
+There are **37 open MUST / 79 OPT tasks**. The owner S1/S2 priority override chooses
+**HOUSE-03639 next**, then `HOUSE-03640`: do not return to performance, Android,
+audio, car quality or cinema implementation before the remaining architecture/
+visibility failures are addressed. The former aggregate hour ceiling is withdrawn;
+task sizing and MUST/OPT boundaries still apply.
+
+First read-only `HOUSE-03639` reproduction after this checkpoint:
+`/tmp/house-03639-garage-loft-below-before.png` comes from the normal invisible
+GPU game at `(14,0.15,-19.5)`, yaw 270°, pitch 35°, clear 10:30, frame 600.
+The platform's stored boxes and upper room are visible from below where its
+opaque underside should be. `house_shell_gen.py` currently emits an upward
+floor for the child but no downward platform face in the parent's resident
+shell. Check both missing geometry and nested-cell visibility before fixing it;
+making the child's material two-sided alone may not solve parent-side culling.
+The basement flight still has no `approachDepth`, so its +Z foot is at its north
+footprint boundary z=-20.20; the previous orientation change did not provide a
+level foot approach. The existing shared stair geometry already supports
+`approachDepth`, so investigate a bounded data correction rather than another
+controller tolerance workaround. These are findings, not accepted fixes:
+`HOUSE-03639` remains open and no extra runtime/geometry change was made.
+
+Root causes and exact corrected IDs are in `docs/visual-review/house-03636-lighting.md`.
+The correction reuses the existing percentile baker, all-day light class, portal
+transfer, opaque ambient pass and stock BasicEffect slots. It fixes local weak
+receivers, a roof-embedded attic source and two zero-diffuse basement overrides.
+Sun/moon no longer displaces outdoor practical lamps. No exposure-model rewrite,
+global ambient lift, new subsystem or extra render pass was introduced. All 78
+indoor cells have current source hashes; atlas count/dimensions are unchanged.
+Retained evidence includes 112 historical-audit/current matched controls and
+180 four-view moving strips, indexed with source SHA-256 and 90-cell day/night
+coverage. BEFORE is the existing independent audit binary/content, not a newly
+built pristine HEAD baseline. Original PNGs and transition frames remain local
+under `build/test-output/lighting-walk-*`.
+
+The normal-controller GPU reviews cover the whole property across lower (32-cell)
+and upper (58-cell) sections at 10:30 and 23:00. Both upper reviews pass; final
+storage/laundry, garage and outdoor-path movement slices pass at both times.
+Neither interrupted full replay is called PASS: the first day replay stopped at
+a coarse trace corner beside the main stair's south bridge jamb. Its trace target
+now uses the clear approach centre. The full night replay stopped at **sample
+3623 in B1_STAIR**, feet `(3.301483,-2.281139,-19.770359)`, target
+`(3.368035,-2.111022,-19.803802)`. Investigate this real-controller/replay mismatch
+under `HOUSE-03639`; do not hide it or relax vertical clearance merely to pass.
+The lower section nevertheless supplied views of every lower cell, so no room
+was omitted from the lighting review. These are actual game/input-intent/GPU runs,
+not a claim of a human manually playing the whole house.
+
+Current exact checks: 1504/1504 unit tests; 9/9 StaticGeometryPass integration
+tests; complete collision GrandTour (90 cells, 563 stops, 87,718 steps, 16 detours).
+After final deployment, 55/55 focused lighting tests pass again. The post-lighting
+GPU threshold matrix passes 20 crossings / 720 frames: minimum 5 draws, maximum
+consecutive HUD-cropped RGB mean difference 8.192/255, no sky-only frame. Exact
+sequences and the report are retained under the lighting evidence folder.
+The full static gates pass except the inherited owner-owned `.claude` layout
+exception: 344 strict-XNA translation units clean (109 destructor hits exempt),
+two compiler workers and CPU affinity 0–3. Preserve the owner's settings. A stale
+generated licence/budget report was corrected after the last bake and both
+individual report checks pass. No physical-display windows or new build directory
+were used; shared ccache is `/rv/cnaccache`. No Android emulator was used in these
+stair/lighting changes. Earlier emulator evidence remains separate history.
+
 ## Accepted main/attic stair checkpoint
 
 `HOUSE-03635` and `HOUSE-03638` are now accepted, with 38 MUST tasks still open.
@@ -39,9 +104,9 @@ still reports zero because cars were moved out of that exterior collection. Do n
 that whole selftest is green. The shared shell triangle cap was preserved by omitting buried
 baluster cap faces; it was not raised. No performance or audio improvement is claimed.
 
-**Exact next priority: `HOUSE-03636`.** Whole-house lighting work is still uncommitted outside
+**At the stair checkpoint, the next priority was `HOUSE-03636`.** Whole-house lighting work was still uncommitted outside
 the rebuilt stairs and their affected neighbouring receivers. Its whole-house moving GPU
-day/night review is not complete, so its checkbox remains open. After that, continue the
+day/night review was not complete then; it is accepted in the later checkpoint above. Continue the
 owner's basement/garage floor and visibility-hole corrections `HOUSE-03639`/`03640` before
 unrelated performance, audio, Android or filming-tour implementation. `HOUSE-03637` was
 already committed and accepted before this checkpoint. No new Android evidence is claimed.

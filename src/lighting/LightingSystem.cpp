@@ -260,6 +260,7 @@ namespace cnahouse::lighting
         outdoorCells_.reserve(worldCells.size());
         daylightLevels_.resize(worldCells.size());
         borrowedLevels_.resize(worldCells.size());
+        borrowedDaylightLevels_.resize(worldCells.size());
         cellGroups_.reserve(worldCells.size());
         objectFixturesByCell_.resize(worldCells.size());
         staticDetailFixturesByCell_.resize(worldCells.size());
@@ -610,9 +611,21 @@ namespace cnahouse::lighting
                            : Microsoft::Xna::Framework::Vector3();
         }
         borrowed_.Evaluate(cells_, borrowedLevels_);
+        borrowed_.EvaluateDaylight(cells_, borrowedDaylightLevels_);
         for (std::size_t index = 0; index < cells_.size(); ++index)
         {
             cells_[index].borrowed = borrowedLevels_[index];
+            // Interior rooms without glazing still own an LM_DAY atlas: the bake sees sky
+            // arriving through their open doors. Scale it by the existing live two-hop portal
+            // transfer from windowed neighbours, not by artificial light or a global sky floor.
+            if (!outdoorCells_[index] && daylight_.GlazingRatioFor(cells_[index].cell) <= 0.0F)
+            {
+                const float borrowedDaylight = borrowedDaylightLevels_[index];
+                cells_[index].daylightTint =
+                    Microsoft::Xna::Framework::Vector3(skyColour.X * borrowedDaylight,
+                                                       skyColour.Y * borrowedDaylight,
+                                                       skyColour.Z * borrowedDaylight);
+            }
             cells_[index].exposureTarget = ExposureTargetFor(cells_[index], outdoorCells_[index]);
         }
         const RoomLightState* observed = FindCell(cameraCell_);

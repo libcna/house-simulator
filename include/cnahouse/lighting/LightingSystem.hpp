@@ -425,6 +425,7 @@ namespace cnahouse::lighting
         std::vector<bool> outdoorCells_;
         std::vector<float> daylightLevels_;
         std::vector<float> borrowedLevels_;
+        std::vector<float> borrowedDaylightLevels_;
         std::unique_ptr<rendering::SkyColourModel> skyColourModel_;
         DaylightModel daylight_;
         BorrowedLightModel borrowed_;

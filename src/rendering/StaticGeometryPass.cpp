@@ -59,10 +59,11 @@ namespace cnahouse::rendering
 
     Vector3 BakedReceiverAmbientFor(const world::Cell& cell,
                                     const lighting::RoomLightState& room,
-                                    const lighting::LightingSystem& lighting) noexcept
+                                    const lighting::LightingSystem& lighting,
+                                    bool includeDaylight) noexcept
     {
         Vector3 sampled(lighting::kAmbientFloor, lighting::kAmbientFloor, lighting::kAmbientFloor);
-        if (cell.lightmaps.daylight.has_value())
+        if (includeDaylight && cell.lightmaps.daylight.has_value())
         {
             const float mean = cell.lightmaps.daylight->receiverMean;
             sampled.X += mean * room.daylightTint.X;
@@ -90,6 +91,24 @@ namespace cnahouse::rendering
         return Vector3(std::clamp(sampled.X, 0.0F, 1.0F),
                        std::clamp(sampled.Y, 0.0F, 1.0F),
                        std::clamp(sampled.Z, 0.0F, 1.0F));
+    }
+
+    Vector3 BakedReceiverAmbientFor(const world::Cell& cell,
+                                    const lighting::RoomLightState& room,
+                                    const lighting::LightingSystem& lighting) noexcept
+    {
+        return BakedReceiverAmbientFor(cell, room, lighting, true);
+    }
+
+    Vector3 ArtificialShellBounceFor(const Vector3& fixtureIrradiance) noexcept
+    {
+        const auto bounced = [](float mean)
+        {
+            return lighting::kAmbientFloor +
+                   std::min(0.09F, 0.5F * std::max(mean - lighting::kAmbientFloor, 0.0F));
+        };
+        return Vector3(
+            bounced(fixtureIrradiance.X), bounced(fixtureIrradiance.Y), bounced(fixtureIrradiance.Z));
     }
 
     util::Id FixtureGroupForChunk(const world::Chunk& chunk, std::span<const world::Light> lights) noexcept
@@ -679,9 +698,18 @@ namespace cnahouse::rendering
                     // its authored UV2 bake in an additive depth-equal pass.
                     DrawParams ambient = common;
                     ambient.lightmap = textures_(kNeutralLightmap);
-                    ambient.colourMultiplier = Vector3(lighting::kAmbientFloor * exposure,
-                                                       lighting::kAmbientFloor * exposure,
-                                                       lighting::kAmbientFloor * exposure);
+                    // The direct UV2 bake has very small values on walls facing away from a
+                    // fixture. Give those receivers the same bounded, fixture-dependent indirect
+                    // fill as the non-lightmapped props; a global ambient lift would also brighten
+                    // rooms whose lamps are off and erase their intended day/night contrast.
+                    const Vector3 baked = room != nullptr
+                                              ? BakedReceiverAmbientFor(*cell, *room, *lighting_, false)
+                                              : Vector3(lighting::kAmbientFloor,
+                                                        lighting::kAmbientFloor,
+                                                        lighting::kAmbientFloor);
+                    const Vector3 bounce = ArtificialShellBounceFor(baked);
+                    ambient.colourMultiplier =
+                        Vector3(bounce.X * exposure, bounce.Y * exposure, bounce.Z * exposure);
                     if (!submit(ambient, false, true))
                     {
                         first = last;
@@ -810,13 +838,12 @@ namespace cnahouse::rendering
                         exteriorDoor && !celestial
                             ? lighting_->CrossCellReceiverLightsForObject(cell->id, objectCentre)
                             : lighting_->StaticDetailLightsForObject(cell->id, objectCentre);
-                    // A sunlit room may still have active table, ceiling or picture lights.
-                    // The sun occupies BasicEffect slot zero; keep its two other slots for the
-                    // local fixed-detail fixtures instead of dimming those fixtures with the
-                    // daylight key's deliberately small indoor scale. This only samples the
-                    // cell's authored bake/spill set, so a neighbour cannot light this prop.
+                    // Sun/moon in slot zero does not switch off practical lamps. Keep the two
+                    // other BasicEffect slots for active local fixtures, including outdoor paths.
+                    // Excluding sky-open cells made their lamps glow but left the ground black
+                    // whenever a weak moon key existed. Sample only the authored bake/spill set.
                     const lighting::ObjectLightAssignment fixtureFill =
-                        celestial && !skyOpen && !exteriorWindow && !exteriorDoor
+                        celestial && !exteriorWindow && !exteriorDoor
                             ? lighting_->StaticFixtureLightsForObject(cell->id, objectCentre)
                             : lighting::ObjectLightAssignment{};
                     // A weather-facing leaf may be paired either with a baked facade source
@@ -834,9 +861,10 @@ namespace cnahouse::rendering
                             objectLights = spillLights;
                         }
                     }
-                    if (!celestial)
+                    if (!celestial || skyOpen)
                     {
-                        const Vector3& spill = objectLights.spillDiffuseColor;
+                        const Vector3& spill =
+                            celestial ? fixtureFill.spillDiffuseColor : objectLights.spillDiffuseColor;
                         draw.ambientLight = Vector3(
                             std::min(1.0F, draw.ambientLight.X + exposure * kBasicFixtureAmbient * spill.X),
                             std::min(1.0F, draw.ambientLight.Y + exposure * kBasicFixtureAmbient * spill.Y),

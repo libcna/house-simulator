@@ -141,3 +141,24 @@ TEST(BorrowedLightModelTests, AmbientAndBorrowedInputsCannotManufactureANewSourc
     model.Evaluate(states, borrowed);
     EXPECT_EQ(borrowed, (std::vector<float>{0.0F, 0.0F, 0.0F, 0.0F}));
 }
+
+TEST(BorrowedLightModelTests, DaylightTransferDoesNotTreatAnArtificialLampAsSky)
+{
+    const world::WorldData data = Chain();
+    std::vector<PortalRuntime> portals = Runtimes(data);
+    for (PortalRuntime& portal : portals)
+    {
+        EXPECT_TRUE(portal.SetAperture(1.0F));
+    }
+    BorrowedLightModel model(data, portals);
+    std::vector<RoomLightState> states(data.Cells().size());
+    states[0].daylight = 1.0F;
+    states[3].artificial = 1.0F;
+    std::vector<float> borrowedDaylight(states.size());
+
+    model.EvaluateDaylight(states, borrowedDaylight);
+    EXPECT_NEAR(borrowedDaylight[0], 0.0F, 1e-6F);
+    EXPECT_NEAR(borrowedDaylight[1], 0.30F, 1e-6F);
+    EXPECT_NEAR(borrowedDaylight[2], 0.09F, 1e-6F);
+    EXPECT_NEAR(borrowedDaylight[3], 0.0F, 1e-6F);
+}

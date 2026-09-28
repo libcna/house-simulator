@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstdint>
 #include <cstdio>
 #include <filesystem>
 #include <limits>
@@ -370,6 +371,117 @@ TEST(LightingSystemTests, NoonScheduleLightsTheReportedHallPowderRoomAndStair)
     }
 }
 
+TEST(LightingSystemTests, DimBedroomsKeepTheirMainFixturesOnAtNoonAndNight)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    HouseLighting house;
+    cnahouse::environment::CivilTime time;
+    time.year = 2031;
+    time.month = 6;
+    time.day = 14;
+
+    struct Case
+    {
+        Id cell;
+        Id mainGroup;
+        Id accentGroup;
+    };
+
+    const std::array cases{
+        Case{Id::Of("L1_MASTER_BED"), Id::Of("LG_L1_MASTER_BED_MAIN"), Id::Of("LG_L1_MASTER_BED_BEDSIDE")},
+        Case{Id::Of("L1_BED5"), Id::Of("LG_L1_BED5_MAIN"), Id::Of("LG_L1_BED5_BEDSIDE")},
+        Case{Id::Of("L2_BED7"), Id::Of("LG_L2_BED7_MAIN"), Id::Of("LG_L2_BED7_BEDSIDE")}};
+    for (const int hour : {10, 23})
+    {
+        time.hour = hour;
+        house.clock.SetStandard(time);
+        house.lighting.Update(Frame(static_cast<std::uint64_t>(hour)));
+        for (const Case check : cases)
+        {
+            const SwitchGroupState* main = house.lighting.FindGroup(check.mainGroup);
+            const SwitchGroupState* accent = house.lighting.FindGroup(check.accentGroup);
+            const RoomLightState* room = house.lighting.FindCell(check.cell);
+            ASSERT_NE(main, nullptr);
+            ASSERT_NE(accent, nullptr);
+            ASSERT_NE(room, nullptr);
+            EXPECT_TRUE(main->on) << check.cell.Value() << " at " << hour << ":00";
+            EXPECT_GT(house.lighting.GroupOutputLevel(check.mainGroup), 0.0F);
+            EXPECT_GT(room->artificial, 0.0F);
+            EXPECT_EQ(accent->on,
+                      LightScheduleOn(world::LightScheduleClass::Bedroom, house.clock, check.accentGroup))
+                << "the bedside mood schedule is not part of the correction";
+        }
+    }
+}
+
+TEST(LightingSystemTests, TheMovingReviewOutliersHaveRealReceiverEnergy)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no deployed lighting world";
+    }
+    HouseLighting house;
+    cnahouse::environment::CivilTime time;
+    time.year = 2031;
+    time.month = 6;
+    time.day = 14;
+    for (const int hour : {10, 23})
+    {
+        time.hour = hour;
+        house.clock.SetStandard(time);
+        FrameContext settled = Frame(static_cast<std::uint64_t>(hour));
+        settled.deltaSeconds = 1.0F; // Do not mistake the normal incandescent warm-up for a dark bake.
+        house.lighting.Update(settled);
+        for (const auto& [cellId, group] :
+             {std::pair{Id::Of("B1_STOR2"), Id::Of("LG_B1_STOR2_MAIN")},
+              std::pair{Id::Of("B1_LAUNDRY2"), Id::Of("LG_B1_LAUNDRY2_MAIN")},
+              std::pair{Id::Of("L0_GARAGE"), Id::Of("LG_L0_GARAGE_MAIN")},
+              std::pair{Id::Of("L0_GARAGE_LOFT"), Id::Of("LG_L0_GARAGE_LOFT_MAIN")}})
+        {
+            const world::Cell* cell = house.world.FindCell(cellId);
+            ASSERT_NE(cell, nullptr);
+            const auto binding =
+                std::find_if(cell->lightmaps.artificial.begin(),
+                             cell->lightmaps.artificial.end(),
+                             [&](const world::CellLightmapGroup& row) { return row.group == group; });
+            ASSERT_NE(binding, cell->lightmaps.artificial.end());
+            EXPECT_GE(binding->texture.receiverMean * house.lighting.GroupLevelInCell(cellId, group), 0.10F)
+                << "switch-on alone is insufficient: the moving GPU review found dark receivers";
+        }
+    }
+}
+
+TEST(LightingSystemTests, CorrectedBasementPropsDoNotZeroTheirDiffuseResponse)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no deployed lighting world";
+    }
+    world::WorldData::Contents contents;
+    ASSERT_TRUE(world::WorldLoader::LoadProps("content/world", contents));
+    ASSERT_TRUE(world::WorldLoader::LoadMaterials("content/world", contents));
+    for (const Id id : {Id::Of("PROP_B1_LAUNDRY2_DRYER"), Id::Of("PROP_B1_WORKSHOP_PAINT_TIN")})
+    {
+        const auto prop = std::find_if(contents.props.begin(),
+                                       contents.props.end(),
+                                       [&](const world::Prop& row) { return row.id == id; });
+        ASSERT_NE(prop, contents.props.end());
+        const auto material =
+            std::find_if(contents.materials.begin(),
+                         contents.materials.end(),
+                         [&](const world::MaterialDef& row) { return row.id == prop->material; });
+        ASSERT_NE(material, contents.materials.end());
+        // A specular-only conductor override was black despite a readable, lit room.
+        // Reuse the existing Basic-compatible hardware finish, not a global material floor.
+        EXPECT_GT(material->tint.X, 0.0F);
+        EXPECT_GT(material->tint.Y, 0.0F);
+        EXPECT_GT(material->tint.Z, 0.0F);
+    }
+}
+
 TEST(LightScheduleTests, GroupOffsetsAreStableBoundedAndNotAllEqual)
 {
     const std::array groups{Id::Of("LG_B1_HALL_MAIN_C"),
@@ -403,22 +515,30 @@ TEST(LightScheduleTests, RepresentativeGroupOnEveryInteriorLevelFollowsItsAutoma
     time.year = 2031;
     time.month = 1;
     time.day = 15;
+
+    struct Case
+    {
+        Id group;
+        Id cell;
+        bool dayOn;
+    };
+
     const std::array cases{
-        std::pair{Id::Of("LG_B1_HALL_MAIN_C"), Id::Of("B1_HALL")},
-        std::pair{Id::Of("LG_L0_LIVING_MAIN"), Id::Of("L0_LIVING")},
-        std::pair{Id::Of("LG_L1_MASTER_BED_MAIN"), Id::Of("L1_MASTER_BED")},
-        std::pair{Id::Of("LG_L2_LIBRARY_MAIN"), Id::Of("L2_LIBRARY")},
-        std::pair{Id::Of("LG_L3_ROOM_MAIN"), Id::Of("L3_ROOM")},
+        Case{Id::Of("LG_B1_HALL_MAIN_C"), Id::Of("B1_HALL"), true},
+        Case{Id::Of("LG_L0_LIVING_MAIN"), Id::Of("L0_LIVING"), false},
+        Case{Id::Of("LG_L1_MASTER_BED_BEDSIDE"), Id::Of("L1_MASTER_BED"), false},
+        Case{Id::Of("LG_L2_LIBRARY_MAIN"), Id::Of("L2_LIBRARY"), true},
+        Case{Id::Of("LG_L3_ROOM_MAIN"), Id::Of("L3_ROOM"), true},
     };
 
     time.hour = 12;
     house.clock.SetStandard(time);
     house.lighting.Update(Frame(100));
-    std::array<float, 5> dayLevels{};
+    std::array<float, cases.size()> dayLevels{};
     for (std::size_t index = 0; index < cases.size(); ++index)
     {
-        EXPECT_EQ(house.lighting.FindGroup(cases[index].first)->on, index == 0U);
-        dayLevels[index] = house.lighting.FindCell(cases[index].second)->artificial;
+        EXPECT_EQ(house.lighting.FindGroup(cases[index].group)->on, cases[index].dayOn);
+        dayLevels[index] = house.lighting.FindCell(cases[index].cell)->artificial;
     }
 
     time.hour = 22;
@@ -428,16 +548,155 @@ TEST(LightScheduleTests, RepresentativeGroupOnEveryInteriorLevelFollowsItsAutoma
     house.lighting.Update(night);
     for (std::size_t index = 0; index < cases.size(); ++index)
     {
-        EXPECT_TRUE(house.lighting.FindGroup(cases[index].first)->on);
-        if (index == 0U)
+        EXPECT_TRUE(house.lighting.FindGroup(cases[index].group)->on);
+        if (cases[index].dayOn)
         {
-            EXPECT_FLOAT_EQ(house.lighting.FindCell(cases[index].second)->artificial, dayLevels[index]);
+            // The main fixture remains on, while the cell's accent groups may join it at night.
+            EXPECT_GE(house.lighting.FindCell(cases[index].cell)->artificial, dayLevels[index]);
         }
         else
         {
-            EXPECT_GT(house.lighting.FindCell(cases[index].second)->artificial, dayLevels[index]);
+            EXPECT_GT(house.lighting.FindCell(cases[index].cell)->artificial, dayLevels[index]);
         }
     }
+}
+
+TEST(LightScheduleTests, DeepShowcaseRoomsKeepTheirMainFixtureOnAtNoon)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    HouseLighting house;
+    house.clock.calendarDaysPerSimDay = 1.0;
+    house.clock.dstRulesUS = false;
+    cnahouse::environment::CivilTime time;
+    time.year = 2031;
+    time.month = 1;
+    time.day = 15;
+    time.hour = 12;
+    house.clock.SetStandard(time);
+    house.lighting.Update(Frame(100));
+
+    for (const Id group : {Id::Of("LG_B1_CINEMA_MAIN"),
+                           Id::Of("LG_L0_DINING_CHANDELIER"),
+                           Id::Of("LG_L2_LIBRARY_MAIN"),
+                           Id::Of("LG_L2_SITTING_MAIN"),
+                           Id::Of("LG_L3_ROOM_MAIN")})
+    {
+        const SwitchGroupState* state = house.lighting.FindGroup(group);
+        ASSERT_NE(state, nullptr);
+        EXPECT_TRUE(state->on) << "a deep showcase room needs its authored fixture by day";
+    }
+    for (const Id group : {Id::Of("LG_B1_CINEMA_AISLE"),
+                           Id::Of("LG_L0_DINING_SIDE"),
+                           Id::Of("LG_L2_LIBRARY_READING"),
+                           Id::Of("LG_L2_SITTING_READING"),
+                           Id::Of("LG_L3_ROOM_DESK")})
+    {
+        const SwitchGroupState* state = house.lighting.FindGroup(group);
+        ASSERT_NE(state, nullptr);
+        EXPECT_FALSE(state->on) << "the decorative and task accents retain their evening schedule";
+    }
+}
+
+TEST(LightingSystemTests, AWindowlessDiningRoomUsesBorrowedDaylightOnlyDuringDay)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    HouseLighting house;
+    house.clock.calendarDaysPerSimDay = 1.0;
+    house.clock.dstRulesUS = false;
+    cnahouse::environment::CivilTime time;
+    time.year = 2031;
+    time.month = 1;
+    time.day = 15;
+    time.hour = 12;
+    house.clock.SetStandard(time);
+    house.lighting.Update(Frame(100));
+    const RoomLightState* dining = house.lighting.FindCell(Id::Of("L0_DINING"));
+    ASSERT_NE(dining, nullptr);
+    EXPECT_FLOAT_EQ(dining->daylight, 0.0F) << "the dining room has no window of its own";
+    EXPECT_GT(dining->daylightTint.X, 0.0F) << "an open neighbour should reach its daylight bake";
+
+    time.hour = 23;
+    house.clock.SetStandard(time);
+    house.lighting.Update(Frame(101));
+    dining = house.lighting.FindCell(Id::Of("L0_DINING"));
+    ASSERT_NE(dining, nullptr);
+    EXPECT_EQ(dining->daylightTint, Microsoft::Xna::Framework::Vector3())
+        << "artificial light behind an open door must not masquerade as daylight";
+}
+
+TEST(LightScheduleTests, WindowlessBasementTaskRoomsKeepTheirMainFixturesOnAtNoon)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    HouseLighting house;
+    house.clock.calendarDaysPerSimDay = 1.0;
+    house.clock.dstRulesUS = false;
+    cnahouse::environment::CivilTime time;
+    time.year = 2031;
+    time.month = 1;
+    time.day = 15;
+    time.hour = 10;
+    time.minute = 30;
+    house.clock.SetStandard(time);
+    FrameContext day = Frame(200);
+    day.deltaSeconds = 1.0F;
+    house.lighting.Update(day);
+
+    const std::array mainGroups{
+        std::pair{Id::Of("LG_B1_GYM_MAIN"), Id::Of("B1_GYM")},
+        std::pair{Id::Of("LG_B1_HOBBY_MAIN"), Id::Of("B1_HOBBY")},
+        std::pair{Id::Of("LG_B1_WORKSHOP_MAIN"), Id::Of("B1_WORKSHOP")},
+    };
+    for (const auto& [group, cell] : mainGroups)
+    {
+        ASSERT_NE(house.lighting.FindGroup(group), nullptr);
+        EXPECT_TRUE(house.lighting.FindGroup(group)->on);
+        EXPECT_GT(house.lighting.FindCell(cell)->artificial, 0.40F);
+    }
+    // The task accents retain their authored evening schedule; only the functional room
+    // fixtures need to be on throughout the day in these windowless basement cells.
+    for (const Id group :
+         {Id::Of("LG_B1_GYM_MIRROR"), Id::Of("LG_B1_HOBBY_TABLE"), Id::Of("LG_B1_WORKSHOP_BENCH")})
+    {
+        ASSERT_NE(house.lighting.FindGroup(group), nullptr);
+        EXPECT_FALSE(house.lighting.FindGroup(group)->on);
+    }
+}
+
+TEST(LightScheduleTests, FoyerMainFixtureLightsTheStairApproachAtNoon)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    HouseLighting house;
+    house.clock.calendarDaysPerSimDay = 1.0;
+    house.clock.dstRulesUS = false;
+    cnahouse::environment::CivilTime time;
+    time.year = 2031;
+    time.month = 1;
+    time.day = 15;
+    time.hour = 10;
+    time.minute = 30;
+    house.clock.SetStandard(time);
+    FrameContext day = Frame(200);
+    day.deltaSeconds = 1.0F;
+    house.lighting.Update(day);
+
+    const Id mainGroup = Id::Of("LG_L0_FOYER_MAIN");
+    const RoomLightState* foyer = house.lighting.FindCell(Id::Of("L0_FOYER"));
+    ASSERT_NE(house.lighting.FindGroup(mainGroup), nullptr);
+    ASSERT_NE(foyer, nullptr);
+    EXPECT_TRUE(house.lighting.FindGroup(mainGroup)->on);
+    EXPECT_GT(foyer->artificial, 0.50F);
 }
 
 TEST(LightScheduleTests, EveryAccessibleLitCellHasAnAutomaticGroup)
@@ -1687,7 +1946,10 @@ TEST(LightingSystemTests, AuthoredSkyColoursDriveOutdoorAmbientAndTheLmDayTint)
     EXPECT_EQ(daylit->skyAmbientColor, daylit->daylightTint)
         << "interior ambient and LM_DAY sampled different skies";
     EXPECT_EQ(windowless->skyAmbientColor, Microsoft::Xna::Framework::Vector3());
-    EXPECT_EQ(windowless->daylightTint, Microsoft::Xna::Framework::Vector3());
+    EXPECT_GT(windowless->daylightTint.X, 0.0F)
+        << "the windowless receiver should retain sky borrowed through its open portal";
+    EXPECT_NEAR(windowless->daylightTint.Y, windowless->daylightTint.X * (0.400F / 0.370F), 1.0e-6F)
+        << "borrowed daylight changed the authored sky chroma";
 }
 
 TEST(LightingSystemTests, ClearSkyAmbientChangesContinuouslyFromWarmHorizonToBlueDay)

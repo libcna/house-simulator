@@ -9,12 +9,15 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <filesystem>
+#include <fstream>
 #include <limits>
 #include <memory>
+#include <set>
 #include <string>
 #include <string_view>
 #include <thread>
@@ -1381,6 +1384,266 @@ namespace
                     << crossing.name;
             }
         }
+    }
+
+    // A review-only replay of the collision-resolved GrandTour, through the actual game
+    // controller and renderer. No body/camera teleport, runtime tour feature or new manager.
+    // Static lighting samples miss a wrong view direction and state changes while moving.
+    TEST(HeadlessRunTests, GpuWholeHouseMovingLightingReview)
+    {
+        const char* tracePath = std::getenv("HOUSE_LIGHTING_WALK_TRACE");
+        if (tracePath == nullptr)
+        {
+            GTEST_SKIP() << "moving whole-house GPU review requires a GrandTour trace";
+        }
+        const char* driver = std::getenv("SDL_VIDEODRIVER");
+        ASSERT_TRUE(driver != nullptr && std::string_view(driver) == "offscreen");
+        ASSERT_EQ(std::getenv("DISPLAY"), nullptr) << "never open the owner's monitor";
+        ASSERT_EQ(std::getenv("WAYLAND_DISPLAY"), nullptr);
+
+        struct Sample
+        {
+            Microsoft::Xna::Framework::Vector3 feet;
+            std::string cell;
+            bool arrival = false;
+            bool crouched = false;
+        };
+
+        std::ifstream trace(tracePath);
+        ASSERT_TRUE(trace.is_open()) << tracePath;
+        std::vector<Sample> samples;
+        Sample sample;
+        while (trace >> sample.feet.X >> sample.feet.Y >> sample.feet.Z >> sample.cell >> sample.arrival >>
+               sample.crouched)
+        {
+            samples.push_back(sample);
+        }
+        ASSERT_TRUE(trace.eof()) << "malformed walk trace";
+        ASSERT_GT(samples.size(), 90U);
+        std::size_t end = samples.size();
+        if (const char* to = std::getenv("HOUSE_LIGHTING_WALK_TO"))
+        {
+            end = std::stoull(to);
+            ASSERT_LE(end, samples.size());
+            ASSERT_GT(end, 0U);
+            samples.resize(end);
+        }
+        std::size_t first = 0U;
+        if (const char* from = std::getenv("HOUSE_LIGHTING_WALK_FROM"))
+        {
+            first = std::stoull(from);
+            ASSERT_LT(first, samples.size());
+            samples.erase(samples.begin(), samples.begin() + static_cast<std::ptrdiff_t>(first));
+        }
+        std::set<std::string> expectedArrivals;
+        for (const Sample& point : samples)
+        {
+            if (point.arrival)
+            {
+                expectedArrivals.insert(point.cell);
+            }
+        }
+        const std::filesystem::path original = std::filesystem::current_path();
+        const std::filesystem::path buildRoot =
+            std::filesystem::path(CNAHOUSE_TEST_CONTENT_ROOT).parent_path();
+        std::filesystem::current_path(buildRoot);
+        const char* requestedTime = std::getenv("HOUSE_LIGHTING_WALK_TIME");
+        const float time = requestedTime == nullptr ? 10.5F : std::stof(requestedTime);
+        const std::filesystem::path output =
+            std::filesystem::path(CNAHOUSE_TEST_OUTPUT_DIR) /
+            ((time < 12.0F ? std::string("lighting-walk-day") : std::string("lighting-walk-night")) +
+             (first == 0U ? "" : "-from" + std::to_string(first)) +
+             (std::getenv("HOUSE_LIGHTING_WALK_TO") == nullptr ? "" : "-to" + std::to_string(end)));
+        std::filesystem::create_directories(output);
+
+        class WalkReviewInput final : public cnahouse::player::IInputSource
+        {
+        public:
+            WalkReviewInput(CnaHouseGame& game, const std::vector<Sample>& samples)
+                : game_(game)
+                , samples_(samples)
+            {
+            }
+
+            void Update(float) override
+            {
+                state_ = {};
+                const auto& body = game_.PlayerForTesting();
+                const auto feet = body.Feet();
+                const std::uint64_t steps = game_.FixedStepsForTesting();
+                const std::string cell(cnahouse::util::IdRegistry::NameOf(game_.CellForTesting()));
+                if (cell != observedCell_ && !cell.empty())
+                {
+                    observedCell_ = cell;
+                    entryFrames_ = 4U;
+                }
+                if (entryFrames_ > 0U)
+                {
+                    state_.screenshotPressed = true;
+                    captures_.push_back(cell + "-entry" + std::to_string(4U - entryFrames_--));
+                }
+                if (index_ >= samples_.size())
+                {
+                    game_.Exit();
+                    return;
+                }
+                if (steps - progressAt_ > 3600U)
+                {
+                    const auto target = samples_[index_].feet;
+                    std::printf(
+                        "  stuck sample %zu: feet (%.6f, %.6f, %.6f) toward (%.6f, %.6f, %.6f), crouch %d\n",
+                        index_,
+                        static_cast<double>(feet.X),
+                        static_cast<double>(feet.Y),
+                        static_cast<double>(feet.Z),
+                        static_cast<double>(target.X),
+                        static_cast<double>(target.Y),
+                        static_cast<double>(target.Z),
+                        body.crouched);
+                    stuck_ = true;
+                    game_.Exit();
+                    return;
+                }
+                constexpr float pi = 3.14159265F;
+                if (reviewing_)
+                {
+                    const std::uint64_t elapsed = steps - reviewAt_;
+                    const float yaw =
+                        elapsed <= 120U
+                            ? 0.0F
+                            : 2.0F * pi * static_cast<float>(std::min<std::uint64_t>(elapsed - 120U, 480U)) /
+                                  480.0F;
+                    state_.look.X = std::remainder(yaw - body.yaw, 2.0F * pi);
+                    state_.crouch = samples_[index_].crouched;
+                    if (elapsed >= 180U + 120U * reviewShot_ && reviewShot_ < 4U && !state_.screenshotPressed)
+                    {
+                        state_.screenshotPressed = true;
+                        captures_.push_back(samples_[index_].cell + "-view" + std::to_string(reviewShot_++));
+                    }
+                    if (elapsed >= 600U)
+                    {
+                        reviewing_ = false;
+                        ++index_;
+                        progressAt_ = steps;
+                    }
+                    return;
+                }
+                while (index_ < samples_.size())
+                {
+                    const Sample& target = samples_[index_];
+                    const float dx = target.feet.X - feet.X;
+                    const float dz = target.feet.Z - feet.Z;
+                    const float distance = std::hypot(dx, dz);
+                    if (distance < 0.10F && std::fabs(target.feet.Y - feet.Y) < 0.16F)
+                    {
+                        progressAt_ = steps;
+                        if (target.arrival)
+                        {
+                            reviewing_ = true;
+                            reviewAt_ = steps;
+                            reviewShot_ = 0U;
+                            arrived_.insert(
+                                std::string(cnahouse::util::IdRegistry::NameOf(game_.CellForTesting())));
+                            std::printf("  lighting review %zu: %s at (%.3f, %.3f, %.3f)\n",
+                                        arrived_.size(),
+                                        target.cell.c_str(),
+                                        static_cast<double>(feet.X),
+                                        static_cast<double>(feet.Y),
+                                        static_cast<double>(feet.Z));
+                            std::fflush(stdout);
+                            break;
+                        }
+                        ++index_;
+                        continue;
+                    }
+                    state_.look.X = std::remainder(-body.yaw, 2.0F * pi);
+                    state_.crouch = target.crouched;
+                    if (distance > 0.001F)
+                    {
+                        // The trace was generated in yaw-zero world steering. Keep that input
+                        // convention while walking; four inward/outward pans inspect every room.
+                        state_.move = {dx / distance, -dz / distance};
+                    }
+                    break;
+                }
+            }
+
+            [[nodiscard]] const cnahouse::player::InputState& Current() const noexcept override
+            {
+                return state_;
+            }
+
+            [[nodiscard]] bool LookAvailable() const noexcept override
+            {
+                return true;
+            }
+
+            CnaHouseGame& game_;
+            const std::vector<Sample>& samples_;
+            cnahouse::player::InputState state_;
+            std::size_t index_ = 0;
+            std::uint64_t progressAt_ = 0;
+            std::uint64_t reviewAt_ = 0;
+            unsigned int reviewShot_ = 0;
+            bool reviewing_ = false;
+            bool stuck_ = false;
+            std::set<std::string> arrived_;
+            std::vector<std::string> captures_;
+            std::string observedCell_;
+            unsigned int entryFrames_ = 0U;
+        };
+
+        std::set<std::filesystem::path> before;
+        for (const auto& file : std::filesystem::directory_iterator(buildRoot))
+        {
+            if (file.path().filename().string().starts_with("cna-house-") &&
+                file.path().extension() == ".png")
+            {
+                before.insert(file.path());
+            }
+        }
+        cnahouse::util::Log::ResetForTesting();
+        Options options;
+        options.scene = "walk";
+        options.player = {samples.front().feet.X, samples.front().feet.Y, samples.front().feet.Z, 0.0F, 0.0F};
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+        options.noAudio = true;
+        options.timeOfDay = time;
+        options.freezeTime = true;
+        options.weather = "W_CLEAR";
+        Settings settings = Settings::Defaults();
+        settings.fastWalk = true;
+        settings.backBufferWidth = 960;
+        settings.backBufferHeight = 540;
+        settings.verticalSync = false;
+        CnaHouseGame game(options, settings);
+        WalkReviewInput input(game, samples);
+        game.SetInputSourceForTesting(&input);
+        game.SetFixedStepLimit(200000U);
+        game.SetFrameLimit(300000U);
+        game.Run();
+        std::vector<std::filesystem::path> captures;
+        for (const auto& file : std::filesystem::directory_iterator(buildRoot))
+        {
+            if (file.path().filename().string().starts_with("cna-house-") &&
+                file.path().extension() == ".png" && !before.contains(file.path()))
+            {
+                captures.push_back(file.path());
+            }
+        }
+        std::sort(captures.begin(), captures.end());
+        for (std::size_t i = 0; i < std::min(captures.size(), input.captures_.size()); ++i)
+        {
+            std::filesystem::rename(captures[i],
+                                    output / (std::to_string(i) + "-" + input.captures_[i] + ".png"));
+        }
+        std::filesystem::current_path(original);
+        EXPECT_EQ(game.ExitCode(), 0);
+        EXPECT_FALSE(input.stuck_) << "trace sample " << input.index_ << " in "
+                                   << cnahouse::util::IdRegistry::NameOf(game.CellForTesting());
+        EXPECT_EQ(input.index_, samples.size());
+        EXPECT_EQ(input.arrived_, expectedArrivals);
+        EXPECT_EQ(captures.size(), input.captures_.size());
     }
 
     TEST(HeadlessRunTests, PowderRoomDoorwayIsTraversableInBothDirections)

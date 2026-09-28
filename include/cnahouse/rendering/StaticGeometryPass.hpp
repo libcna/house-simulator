@@ -71,6 +71,12 @@ namespace cnahouse::rendering
                             const lighting::RoomLightState& room,
                             const lighting::LightingSystem& lighting) noexcept;
 
+    /// @brief Bounded indirect shell fill from active owned fixtures, never from daylight.
+    /// An unlit receiver retains only the existing ambient floor; strong lamps cannot add
+    /// more than 0.09 per channel. The caller supplies the bake-derived fixture irradiance.
+    [[nodiscard]] Microsoft::Xna::Framework::Vector3
+    ArtificialShellBounceFor(const Microsoft::Xna::Framework::Vector3& fixtureIrradiance) noexcept;
+
     /// @brief The one switch group shared by every linked fixture prop in @p chunk.
     ///
     /// The content build keeps independently switched emissive slots in separate chunks. An

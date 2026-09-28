@@ -36,14 +36,14 @@
   "schedules": [
     {"group": "LG_B1_CELLAR_MAIN", "class": "SC-CIRC"},
     {"group": "LG_B1_CINEMA_AISLE", "class": "SC-LIVING"},
-    {"group": "LG_B1_CINEMA_MAIN", "class": "SC-LIVING"},
+    {"group": "LG_B1_CINEMA_MAIN", "class": "SC-CIRC"},
     {"group": "LG_B1_ELECTRICAL_MAIN", "class": "SC-CIRC"},
-    {"group": "LG_B1_GYM_MAIN", "class": "SC-TASK"},
+    {"group": "LG_B1_GYM_MAIN", "class": "SC-CIRC"},
     {"group": "LG_B1_GYM_MIRROR", "class": "SC-TASK"},
     {"group": "LG_B1_HALL_MAIN_C", "class": "SC-CIRC"},
     {"group": "LG_B1_HALL_MAIN_N", "class": "SC-CIRC"},
     {"group": "LG_B1_HALL_MAIN_S", "class": "SC-CIRC"},
-    {"group": "LG_B1_HOBBY_MAIN", "class": "SC-TASK"},
+    {"group": "LG_B1_HOBBY_MAIN", "class": "SC-CIRC"},
     {"group": "LG_B1_HOBBY_TABLE", "class": "SC-TASK"},
     {"group": "LG_B1_LAUNDRY2_MAIN", "class": "SC-CIRC"},
     {"group": "LG_B1_MECHANICAL_MAIN", "class": "SC-CIRC"},
@@ -54,7 +54,7 @@
     {"group": "LG_B1_UTILITY_MAIN", "class": "SC-CIRC"},
     {"group": "LG_B1_WC7_MAIN", "class": "SC-WET"},
     {"group": "LG_B1_WORKSHOP_BENCH", "class": "SC-TASK"},
-    {"group": "LG_B1_WORKSHOP_MAIN", "class": "SC-TASK"},
+    {"group": "LG_B1_WORKSHOP_MAIN", "class": "SC-CIRC"},
     {"group": "LG_CELL_FRIDGE_INTERIOR_LAMP", "class": "SC-OFF"},
     {"group": "LG_EXT_DRIVEWAY_EDGE", "class": "SC-DUSK"},
     {"group": "LG_EXT_DRIVEWAY_FLOOD", "class": "SC-DUSK"},
@@ -67,7 +67,7 @@
     {"group": "LG_EXT_WALK_PATH", "class": "SC-DUSK"},
     {"group": "LG_L0_BUTLERS_MAIN", "class": "SC-CIRC"},
     {"group": "LG_L0_CLOSET_W_MAIN", "class": "SC-CIRC"},
-    {"group": "LG_L0_DINING_CHANDELIER", "class": "SC-LIVING"},
+    {"group": "LG_L0_DINING_CHANDELIER", "class": "SC-CIRC"},
     {"group": "LG_L0_DINING_SIDE", "class": "SC-LIVING"},
     {"group": "LG_L0_FAMILY_MAIN", "class": "SC-LIVING"},
     {"group": "LG_L0_FAMILY_MEDIA", "class": "SC-LIVING"},
@@ -80,7 +80,7 @@
     {"group": "LG_L0_HALL_GALLERY", "class": "SC-CIRC"},
     {"group": "LG_L0_HALL_MAIN", "class": "SC-CIRC"},
     {"group": "LG_L0_KITCHEN_ISLAND", "class": "SC-TASK"},
-    {"group": "LG_L0_KITCHEN_MAIN", "class": "SC-TASK"},
+    {"group": "LG_L0_KITCHEN_MAIN", "class": "SC-CIRC"},
     {"group": "LG_L0_KITCHEN_SINK", "class": "SC-TASK"},
     {"group": "LG_L0_KITCHEN_UNDERCAB", "class": "SC-TASK"},
     {"group": "LG_L0_LAUNDRY_MAIN", "class": "SC-CIRC"},
@@ -113,7 +113,9 @@
     {"group": "LG_L1_BED4_DESK", "class": "SC-BED"},
     {"group": "LG_L1_BED4_MAIN", "class": "SC-BED"},
     {"group": "LG_L1_BED5_BEDSIDE", "class": "SC-BED"},
-    {"group": "LG_L1_BED5_MAIN", "class": "SC-BED"},
+    // Its window bake leaves the guest room's opposite wall unreadable at clear 10:30.
+    // Keep only the existing main fixture automatic, not the bedside accent.
+    {"group": "LG_L1_BED5_MAIN", "class": "SC-CIRC"},
     {"group": "LG_L1_CLOSET_2_MAIN", "class": "SC-CIRC"},
     {"group": "LG_L1_CLOSET_3_MAIN", "class": "SC-CIRC"},
     {"group": "LG_L1_HALL_ART", "class": "SC-CIRC"},
@@ -128,7 +130,9 @@
     {"group": "LG_L1_MASTER_BATH_VANITY", "class": "SC-WET"},
     {"group": "LG_L1_MASTER_BED_BEDSIDE", "class": "SC-BED"},
     {"group": "LG_L1_MASTER_BED_DRESSER", "class": "SC-BED"},
-    {"group": "LG_L1_MASTER_BED_MAIN", "class": "SC-BED"},
+    // From the lit walk-in closet, the bedroom beyond is almost black at clear 10:30;
+    // leave its accents timed but keep the existing four main sources automatic.
+    {"group": "LG_L1_MASTER_BED_MAIN", "class": "SC-CIRC"},
     {"group": "LG_L1_MASTER_BED_SEATING", "class": "SC-BED"},
     {"group": "LG_L1_MASTER_CLOSET_MAIN", "class": "SC-CIRC"},
     {"group": "LG_L1_MASTER_CLOSET_MIRROR", "class": "SC-CIRC"},
@@ -143,10 +147,11 @@
     {"group": "LG_L2_BED6_MAIN", "class": "SC-BED"},
     {"group": "LG_L2_BED6_SEWING", "class": "SC-BED"},
     {"group": "LG_L2_BED7_BEDSIDE", "class": "SC-BED"},
-    {"group": "LG_L2_BED7_MAIN", "class": "SC-BED"},
+    // Two windows still leave this bedroom's centre and east wall near-black at clear 10:30.
+    {"group": "LG_L2_BED7_MAIN", "class": "SC-CIRC"},
     {"group": "LG_L2_CLOSET_4_MAIN", "class": "SC-CIRC"},
     {"group": "LG_L2_GAMES_ARCADE", "class": "SC-TASK"},
-    {"group": "LG_L2_GAMES_MAIN", "class": "SC-TASK"},
+    {"group": "LG_L2_GAMES_MAIN", "class": "SC-CIRC"},
     {"group": "LG_L2_GAMES_TABLE", "class": "SC-TASK"},
     {"group": "LG_L2_HALL_MAIN", "class": "SC-CIRC"},
     {"group": "LG_L2_HALL_NIGHT", "class": "SC-CIRC"},
@@ -154,11 +159,11 @@
     {"group": "LG_L2_HALL_W_MAIN", "class": "SC-CIRC"},
     {"group": "LG_L2_LANDING_JULIET", "class": "SC-CIRC"},
     {"group": "LG_L2_LANDING_MAIN", "class": "SC-CIRC"},
-    {"group": "LG_L2_LIBRARY_MAIN", "class": "SC-TASK"},
+    {"group": "LG_L2_LIBRARY_MAIN", "class": "SC-CIRC"},
     {"group": "LG_L2_LIBRARY_READING", "class": "SC-TASK"},
     {"group": "LG_L2_LIBRARY_SHELVES", "class": "SC-TASK"},
     {"group": "LG_L2_LINEN2_MAIN", "class": "SC-CIRC"},
-    {"group": "LG_L2_SITTING_MAIN", "class": "SC-LIVING"},
+    {"group": "LG_L2_SITTING_MAIN", "class": "SC-CIRC"},
     {"group": "LG_L2_SITTING_READING", "class": "SC-LIVING"},
     {"group": "LG_L2_STAIR_ATTIC_MAIN", "class": "SC-CIRC"},
     {"group": "LG_L2_STAIR_MAIN_MAIN", "class": "SC-CIRC"},
@@ -389,9 +394,10 @@
     // ---- LG_B1_STOR1_MAIN x1
     {
       "id": "LIGHT_B1_STOR1_MAIN_1", "cell": "B1_STOR1", "group": "LG_B1_STOR1_MAIN",
-      "type": "point", "position": [-10.45, 0.23, -20.15],
+      "type": "point", "position": [-10.45, -0.02, -20.15],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 4.36,
+      "bakeLumensPerRadiantWatt": 65.0,
       "fixtureProp": "PROP_B1_STOR1_UTILITY_LIGHT", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -402,6 +408,7 @@
       "type": "point", "position": [-10.45, 0.23, -24.55],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 4.74,
+      "bakeLumensPerRadiantWatt": 50.0,
       "fixtureProp": "PROP_B1_STOR2_UTILITY_LIGHT", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -448,6 +455,7 @@
       "type": "point", "position": [-6.40, 0.23, -25.55],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 3.97,
+      "bakeLumensPerRadiantWatt": 80.0,
       "fixtureProp": "PROP_B1_CELLAR_UTILITY_LIGHT", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -458,6 +466,7 @@
       "type": "point", "position": [-3.40, 0.23, -25.55],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 3.70,
+      "bakeLumensPerRadiantWatt": 90.0,
       "fixtureProp": "PROP_B1_LAUNDRY2_UTILITY_LIGHT", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -465,7 +474,7 @@
     // ---- LG_B1_UNDERSTAIR_MAIN x1
     {
       "id": "LIGHT_B1_UNDERSTAIR_MAIN_1", "cell": "B1_UNDERSTAIR", "group": "LG_B1_UNDERSTAIR_MAIN",
-      "type": "point", "position": [4.35, -0.57, -21.60],
+      "type": "point", "position": [4.35, -0.80, -21.60],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 3.59,
       "fixtureProp": "PROP_B1_UNDERSTAIR_UTILITY_LIGHT", "emissiveMaterialSlot": "cream",
@@ -599,17 +608,19 @@
     // ---- LG_L0_LAUNDRY_MAIN x2
     {
       "id": "LIGHT_L0_LAUNDRY_MAIN_1", "cell": "L0_LAUNDRY", "group": "LG_L0_LAUNDRY_MAIN",
-      "type": "point", "position": [6.80, 3.28, -20.77],
+      "type": "point", "position": [6.80, 3.03, -20.77],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 700.0, "range": 4.61,
+      "bakeLumensPerRadiantWatt": 65.0,
       "fixtureProp": "PROP_L0_LAUNDRY_MAIN_1_FIXTURE", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
     {
       "id": "LIGHT_L0_LAUNDRY_MAIN_2", "cell": "L0_LAUNDRY", "group": "LG_L0_LAUNDRY_MAIN",
-      "type": "point", "position": [6.80, 3.28, -19.53],
+      "type": "point", "position": [6.80, 3.03, -19.53],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 700.0, "range": 4.61,
+      "bakeLumensPerRadiantWatt": 65.0,
       "fixtureProp": "PROP_L0_LAUNDRY_MAIN_2_FIXTURE", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -831,6 +842,7 @@
       "type": "point", "position": [-10.45, 3.28, -21.40],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 4.20,
+      "bakeLumensPerRadiantWatt": 100.0,
       "fixtureProp": "PROP_L0_STOR_MAIN_1_FIXTURE", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1037,6 +1049,7 @@
       "type": "point", "position": [11.50, 4.25, -18.90],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "bulbClass": "fluorescent", "intensityLm": 2400.0, "range": 9.42,
+      "bakeLumensPerRadiantWatt": 100.0,
       "fixtureProp": "PROP_L0_GARAGE_MAIN_1_FIXTURE", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1045,6 +1058,7 @@
       "type": "point", "position": [14.30, 4.25, -18.90],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "bulbClass": "fluorescent", "intensityLm": 2400.0, "range": 9.42,
+      "bakeLumensPerRadiantWatt": 100.0,
       "fixtureProp": "PROP_L0_GARAGE_MAIN_2_FIXTURE", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1053,6 +1067,7 @@
       "type": "point", "position": [11.50, 4.25, -16.10],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "bulbClass": "fluorescent", "intensityLm": 2400.0, "range": 9.42,
+      "bakeLumensPerRadiantWatt": 100.0,
       "fixtureProp": "PROP_L0_GARAGE_MAIN_3_FIXTURE", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1061,6 +1076,7 @@
       "type": "point", "position": [14.30, 4.25, -16.10],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "bulbClass": "fluorescent", "intensityLm": 2400.0, "range": 9.42,
+      "bakeLumensPerRadiantWatt": 100.0,
       "fixtureProp": "PROP_L0_GARAGE_MAIN_4_FIXTURE", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1081,6 +1097,7 @@
       "type": "point", "position": [12.90, 4.28, -19.35],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 4.86,
+      "bakeLumensPerRadiantWatt": 50.0,
       "fixtureProp": "PROP_L0_GARAGE_LOFT_MAIN_1_FIXTURE", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1518,9 +1535,10 @@
     // ---- LG_L1_WC3_MAIN x1
     {
       "id": "LIGHT_L1_WC3_MAIN_1", "cell": "L1_WC3", "group": "LG_L1_WC3_MAIN",
-      "type": "point", "position": [-5.70, 6.18, -21.30],
+      "type": "point", "position": [-5.70, 5.93, -21.30],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 3.43,
+      "bakeLumensPerRadiantWatt": 200.0,
       "fixtureProp": "PROP_L1_WC3_MAIN_1_FIXTURE", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1604,9 +1622,10 @@
     // ---- LG_L1_WC4_MAIN x1
     {
       "id": "LIGHT_L1_WC4_MAIN_1", "cell": "L1_WC4", "group": "LG_L1_WC4_MAIN",
-      "type": "point", "position": [3.55, 6.18, -21.10],
+      "type": "point", "position": [3.55, 5.93, -21.10],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 3.51,
+      "bakeLumensPerRadiantWatt": 200.0,
       "fixtureProp": "PROP_L1_WC4_MAIN_1_FIXTURE", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1954,9 +1973,10 @@
     // ---- LG_L2_WC5_MAIN x1
     {
       "id": "LIGHT_L2_WC5_MAIN_1", "cell": "L2_WC5", "group": "LG_L2_WC5_MAIN",
-      "type": "point", "position": [-5.70, 8.98, -21.30],
+      "type": "point", "position": [-5.70, 8.73, -21.30],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 3.34,
+      "bakeLumensPerRadiantWatt": 200.0,
       "fixtureProp": "PROP_L2_WC5_MAIN_1_FIXTURE", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -2199,9 +2219,10 @@
     // ---- LG_L3_STORE_W_MAIN x1 -- one bulb between the rafters
     {
       "id": "LIGHT_L3_STORE_W_MAIN_1", "cell": "L3_STORE_W", "group": "LG_L3_STORE_W_MAIN",
-      "type": "point", "position": [-9.35, 12.45, -20.70],
+      "type": "point", "position": [-9.35, 12.10, -20.70],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 9.05,
+      "bakeLumensPerRadiantWatt": 25.0,
       "fixtureProp": "PROP_L3_STORE_W_UTILITY_LIGHT", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -2224,6 +2245,7 @@
       "type": "point", "position": [-0.55, 11.40, -25.55],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 7.00,
+      "bakeLumensPerRadiantWatt": 5.0,
       "fixtureProp": "PROP_L3_STORE_N_UTILITY_LIGHT", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -2234,6 +2256,7 @@
       "type": "point", "position": [0.00, 11.28, -15.65],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 5.36,
+      "bakeLumensPerRadiantWatt": 10.0,
       "fixtureProp": "PROP_L3_STORE_S_UTILITY_LIGHT", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },

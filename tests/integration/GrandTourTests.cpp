@@ -8,7 +8,9 @@
 #include <chrono>
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <filesystem>
+#include <fstream>
 #include <iterator>
 #include <limits>
 #include <map>
@@ -874,7 +876,10 @@ namespace
                 // before entering the WEST first run; a diagonal toward its toe cuts across
                 // the protected basement well (and is not a natural way to enter the stair).
                 const Vector3 toe = stair.front();
-                const float approachZ = toe.Z + 0.60F;
+                // The old +0.60 route rode exactly against the south window jamb. Its 14 cm
+                // waypoint tolerance can then target a few mm inside that jamb when replayed
+                // with real frame timing. Cross the interior of the existing level approach.
+                const float approachZ = toe.Z + 0.45F;
                 route.push_back(
                     Stop{Vector3(source.feet.X, source.feet.Y, approachZ), kWaypointTolerance, from, false});
                 route.push_back(
@@ -1099,6 +1104,24 @@ TEST(GrandTourTests, EveryAccessibleCellIsReachedOnFoot)
     float deepestPenetration = 0.0F;
     std::string deepestCell;
     std::size_t deepestStop = 0U;
+    // Opt-in visual diagnostic: retain the actual collision-resolved walk, not a camera
+    // teleport itinerary. The game-loop lighting review replays it through IInputSource.
+    std::ofstream trace;
+    if (const char* path = std::getenv("HOUSE_WALK_TRACE"))
+    {
+        trace.open(path);
+        ASSERT_TRUE(trace.is_open()) << path;
+        trace.precision(9);
+    }
+    const auto record = [&](bool arrival)
+    {
+        if (trace.is_open())
+        {
+            const Vector3 feet = body.Feet();
+            trace << feet.X << ' ' << feet.Y << ' ' << feet.Z << ' ' << Name(tracker.Current()) << ' '
+                  << arrival << ' ' << body.crouched << '\n';
+        }
+    };
 
     // Settle the 20 mm spawn clearance exactly as the game does before accepting the first point.
     const player::InputState still;
@@ -1217,6 +1240,10 @@ TEST(GrandTourTests, EveryAccessibleCellIsReachedOnFoot)
             (void)player::PlayerStep(collision, *cell, broad, body, input, player::kFixedStepSeconds);
             tracker.Update(data, index, body.position);
             ++steps;
+            if (steps % 8U == 0U)
+            {
+                record(false);
+            }
 
             ASSERT_TRUE(tracker.Current().IsValid()) << "cell tracking lost the body at stop " << stopIndex;
             const physics::CollisionCell* now = collision.Cell(Name(tracker.Current()));
@@ -1284,6 +1311,7 @@ TEST(GrandTourTests, EveryAccessibleCellIsReachedOnFoot)
         }
         if (stop.arrival)
         {
+            record(true);
             arrived.insert(stop.expectedCell);
             EXPECT_LE(Distance(body.Feet(), standing.at(stop.expectedCell).feet), kArrivalTolerance)
                 << stop.expectedCell << " reached at (" << body.Feet().X << ", " << body.Feet().Y << ", "

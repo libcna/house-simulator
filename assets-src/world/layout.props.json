@@ -3726,7 +3726,7 @@
       "static": true,
       "lodGroup": null,
       "collision": "none",
-      "material": "MAT_APPLIANCE_STEEL",
+      "material": "MAT_KITCHEN_HARDWARE_STEEL",
       "interactable": null
     },
     {
@@ -4324,7 +4324,7 @@
       "static": true,
       "lodGroup": null,
       "collision": "proxy",
-      "material": "MAT_APPLIANCE_STEEL",
+      "material": "MAT_KITCHEN_HARDWARE_STEEL",
       "interactable": null
     },
     {
@@ -6069,7 +6069,7 @@
     {
       "id": "PROP_L3_STORE_W_UTILITY_LIGHT",
       "asset": "MODEL_FIXTURE_UTILITY_CEILING", "cell": "L3_STORE_W",
-      "position": [-9.35, 12.45, -20.70], "yawDeg": 90, "scale": 0.50,
+      "position": [-9.35, 12.10, -20.70], "yawDeg": 90, "scale": 0.50,
       "static": true, "lodGroup": null, "collision": "none", "material": null,
       "interactable": null
     },

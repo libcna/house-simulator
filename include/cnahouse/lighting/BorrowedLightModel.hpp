@@ -39,6 +39,12 @@ namespace cnahouse::lighting
         /// unbounded recurrence and would make an entirely dark chain manufacture light.
         void Evaluate(std::span<const RoomLightState> states, std::span<float> borrowed) noexcept;
 
+        /// @brief The same portal transfer with only direct daylight as a source.
+        ///
+        /// Windowless receivers have a daylight atlas, but no window of their own. This result
+        /// scales that atlas without mistaking neighbouring artificial fixtures for daylight.
+        void EvaluateDaylight(std::span<const RoomLightState> states, std::span<float> borrowed) noexcept;
+
     private:
         struct Edge
         {
@@ -50,6 +56,9 @@ namespace cnahouse::lighting
         };
 
         [[nodiscard]] float Transfer(const Edge& edge) const noexcept;
+        void EvaluateSources(std::span<const RoomLightState> states,
+                             std::span<float> borrowed,
+                             bool daylightOnly) noexcept;
 
         std::span<const visibility::PortalRuntime> portals_;
         std::vector<Edge> edges_;

@@ -79,11 +79,25 @@ namespace cnahouse::lighting
     void BorrowedLightModel::Evaluate(std::span<const RoomLightState> states,
                                       std::span<float> borrowed) noexcept
     {
+        EvaluateSources(states, borrowed, false);
+    }
+
+    void BorrowedLightModel::EvaluateDaylight(std::span<const RoomLightState> states,
+                                              std::span<float> borrowed) noexcept
+    {
+        EvaluateSources(states, borrowed, true);
+    }
+
+    void BorrowedLightModel::EvaluateSources(std::span<const RoomLightState> states,
+                                             std::span<float> borrowed,
+                                             bool daylightOnly) noexcept
+    {
         std::fill(borrowed.begin(), borrowed.end(), 0.0F);
         const std::size_t cellCount = std::min({states.size(), borrowed.size(), firstHop_.size()});
         for (std::size_t source = 0; source < cellCount; ++source)
         {
-            const float sourceBrightness = LocalBrightness(states[source]);
+            const float sourceBrightness = daylightOnly ? std::clamp(states[source].daylight, 0.0F, 1.0F)
+                                                        : LocalBrightness(states[source]);
             if (sourceBrightness <= 0.0F)
             {
                 continue;
