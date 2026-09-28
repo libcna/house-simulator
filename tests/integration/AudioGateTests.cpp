@@ -272,7 +272,10 @@ namespace
         ASSERT_EQ(game.ExitCode(), 0);
         ASSERT_EQ(game.Audio().State(), AudioState::Ready) << game.Audio().Summary();
         EXPECT_LT(game.PlayerForTesting().Feet().Z, -18.0F);
-        EXPECT_GE(game.Audio().OneShotsPlayed(), 4U);
-        EXPECT_LE(game.Audio().OneShotsPlayed(), 6U);
+        const float distance = -15.0F - game.PlayerForTesting().Feet().Z;
+        const auto expected =
+            static_cast<std::uint64_t>(distance / cnahouse::audio::FootstepDirector::kWalkStrideMeters);
+        EXPECT_GT(expected, 0U);
+        EXPECT_EQ(game.Audio().OneShotsPlayed(), expected);
     }
 } // namespace

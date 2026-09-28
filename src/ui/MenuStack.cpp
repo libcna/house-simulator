@@ -160,7 +160,6 @@ namespace cnahouse::ui
                                                                                      0.458F,
                                                                                      0.540F,
                                                                                      0.578F,
-                                                                                     0.616F,
                                                                                      0.698F,
                                                                                      0.736F,
                                                                                      0.774F};
@@ -447,8 +446,8 @@ namespace cnahouse::ui
             return "Touch: move stick · drag to look · pause button";
         }
         return scheme_ == ControlScheme::KeyboardMouseFilming
-                   ? "WASD move · mouse look · Shift walk speed · C filming tour · Esc pause"
-                   : "WASD move · mouse look · Shift walk speed · Esc pause";
+                   ? "WASD move · mouse look · Shift walk/run · C filming tour · Esc pause"
+                   : "WASD move · mouse look · Shift walk/run · Esc pause";
     }
 
     void ControlsHint::Draw(Microsoft::Xna::Framework::Graphics::SpriteBatch& batch,
@@ -489,8 +488,6 @@ namespace cnahouse::ui
                 return "Look sensitivity";
             case SettingsControl::InvertY:
                 return "Invert Y";
-            case SettingsControl::WalkSpeed:
-                return "Walk speed";
             case SettingsControl::TimeOfDay:
                 return "Time of day";
             case SettingsControl::TimeSpeed:
@@ -562,7 +559,6 @@ namespace cnahouse::ui
             case SettingsControl::Weather:
             case SettingsControl::LookSensitivity:
             case SettingsControl::InvertY:
-            case SettingsControl::WalkSpeed:
             case SettingsControl::TimeOfDay:
             case SettingsControl::TimeSpeed:
             case SettingsControl::EnvironmentWeather:
@@ -694,8 +690,6 @@ namespace cnahouse::ui
                                      StepSetting(settings_->mouseSensitivity, 0.1F, direction, 0.2F, 4.0F));
             case SettingsControl::InvertY:
                 return AssignChanged(settings_->invertY, direction > 0);
-            case SettingsControl::WalkSpeed:
-                return AssignChanged(settings_->fastWalk, direction > 0);
             case SettingsControl::TimeOfDay:
             {
                 const auto count = static_cast<int>(kFixedHours.size());
@@ -753,11 +747,6 @@ namespace cnahouse::ui
         if (selected_ == SettingsControl::InvertY)
         {
             settings_->invertY = !settings_->invertY;
-            return true;
-        }
-        if (selected_ == SettingsControl::WalkSpeed)
-        {
-            settings_->fastWalk = !settings_->fastWalk;
             return true;
         }
         return ChangeSelected(1);
@@ -850,8 +839,6 @@ namespace cnahouse::ui
                 return std::format("{:.1f}x", static_cast<double>(settings_->mouseSensitivity));
             case SettingsControl::InvertY:
                 return settings_->invertY ? "On" : "Off";
-            case SettingsControl::WalkSpeed:
-                return settings_->fastWalk ? "Fast" : "Normal";
             case SettingsControl::TimeOfDay:
                 return settings_->fixedTimeOfDayHours < 0.0F
                            ? "Automatic"

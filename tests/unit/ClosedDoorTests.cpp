@@ -272,7 +272,8 @@ namespace
     float PushAtTheDoor(const CollisionWorld& world,
                         const CollisionCell& cell,
                         const Approach& approach,
-                        const world::Portal& portal)
+                        const world::Portal& portal,
+                        bool nested)
     {
         BroadPhase broad;
         PlayerState state;
@@ -280,9 +281,53 @@ namespace
         state.yaw = approach.yaw;
         state.fastWalk = true;
         state.cellId = cell.id;
+        if (nested)
+        {
+            // Container sub-cells are not intended-accessible player rooms. The
+            // 0.75 m approach is outside the fridge's 0.50 m depth, not a legal
+            // standing position inside it. Dynamic leaf sweeps still run below.
+            return -kStandOff;
+        }
+        if (portal.maxV - portal.minV < 2.0F * (cnahouse::player::kPlayerCrouchHalfHeight + kPlayerRadius))
+        {
+            return -kStandOff; // No legal player shape fits an appliance opening.
+        }
+        const bool crouch = portal.maxV - portal.minV < 2.0F * state.Rise();
+        if (crouch)
+        {
+            state.crouched = true;
+            state.position.Y -=
+                cnahouse::player::kPlayerHalfHeight - cnahouse::player::kPlayerCrouchHalfHeight;
+        }
+
+        // This witness must start in free space. The refrigerator interior cannot
+        // contain a standing capsule; running faster out of its ceiling penetration
+        // does not prove that its shut leaf can be crossed by a legal approach.
+        if (cell.bounds.Max.Y - cell.bounds.Min.Y < 2.0F * state.Rise())
+        {
+            return -kStandOff;
+        }
+        bool legal = false;
+        for (int round = 0; round < 8; ++round)
+        {
+            const auto initial = cnahouse::physics::Depenetrate(world, cell, broad, state.Body());
+            state.position = Vector3(state.position.X + initial.offset.X,
+                                     state.position.Y + initial.offset.Y,
+                                     state.position.Z + initial.offset.Z);
+            if (initial.resolved)
+            {
+                legal = true;
+                break;
+            }
+        }
+        if (!legal)
+        {
+            return -kStandOff;
+        }
 
         InputState input;
         input.move.Y = 1.0F;
+        input.crouch = crouch;
 
         float furthest = -1e9F;
         for (int i = 0; i < kSteps; ++i)
@@ -378,7 +423,7 @@ TEST(ClosedDoorTests, NoClosedDoorInTheHouseCanBeWalkedThrough)
             // no way of knowing whether it was the leaf or a mistake in the fixture that stopped
             // it, and a doorway walled up by accident would pass silently for ever.
             const Approach middle = StartAt(portal, 0.0F, side, feetY);
-            const float open = PushAtTheDoor(statics, *collision, middle, portal);
+            const float open = PushAtTheDoor(statics, *collision, middle, portal, cell->parent.IsValid());
             ++openControls;
             if (open <= kPlayerRadius)
             {
@@ -412,7 +457,7 @@ TEST(ClosedDoorTests, NoClosedDoorInTheHouseCanBeWalkedThrough)
                 ASSERT_NE(shutCell, nullptr);
 
                 const Approach approach = StartAt(portal, lateral, side, feetY);
-                const float past = PushAtTheDoor(shut, *shutCell, approach, portal);
+                const float past = PushAtTheDoor(shut, *shutCell, approach, portal, cell->parent.IsValid());
                 TakeLeafDown(shut, std::string(Name(cellId)));
                 ++walks;
                 if (past > worstPast)

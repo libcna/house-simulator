@@ -95,13 +95,8 @@ namespace cnahouse::app
         /// millimetres, and a slider would offer them one that makes them ill.
         player::HeadBobLevel headBob = player::HeadBobLevel::Subtle;
 
-        /// @brief §43.2's walk mode: false is the 1.35 m/s walk, true the 2.05 m/s one.
-        ///
-        /// **A preference, not world state** (D-09, §77). `Shift` toggles it rather than holding
-        /// it, so it has to be remembered somewhere, and remembering it here means it survives a
-        /// save/load AND a *Reset House*. The save's player block records it too, so a save is a
-        /// self-consistent snapshot -- and settings wins on conflict, which is what makes this
-        /// the one place that decides.
+        /// @brief Retired Normal/Fast preference, retained only for version-11 JSON compatibility.
+        /// Gameplay ignores it: a new/reset player walks, and Shift toggles session running.
         bool fastWalk = false;
 
         /// @brief §35.2's day length, in REAL MINUTES per simulated day. 0 is the frozen clock.

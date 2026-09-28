@@ -54,6 +54,11 @@ namespace
         options.noAudio = true;
         options.effectRoot =
             (std::filesystem::path(CNAHOUSE_TEST_CONTENT_ROOT).parent_path() / "content-fx").string();
+        const auto directory = std::filesystem::path(CNAHOUSE_TEST_CONTENT_ROOT).parent_path();
+        const auto output = directory / "test-output/house-03645";
+        std::filesystem::create_directories(output);
+        options.screenshotFrame = 4;
+        options.screenshot = (output / "settings-page.png").string();
         app::Settings initial = app::Settings::Defaults();
         initial.backBufferWidth = 640;
         initial.backBufferHeight = 480;
@@ -74,9 +79,6 @@ namespace
         EXPECT_EQ(settings->backBufferHeight, 480);
         EXPECT_FALSE(settings->verticalSync);
 
-        const auto directory = std::filesystem::path(CNAHOUSE_TEST_CONTENT_ROOT).parent_path();
-        const auto output = directory / "test-output/house-03645";
-        std::filesystem::create_directories(output);
         ASSERT_EQ(directory.string().find('\''), std::string::npos);
         for (const bool overrideQuality : {false, true})
         {

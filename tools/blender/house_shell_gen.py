@@ -101,6 +101,7 @@ import gltf_validate  # noqa: E402
 import layout_io  # noqa: E402
 import roof_geometry  # noqa: E402
 import stair_geometry  # noqa: E402
+import build_collision  # noqa: E402
 import terrain_gen  # noqa: E402
 
 SOURCE = REPO / "assets-src" / "world"
@@ -1477,19 +1478,36 @@ def build_flight(flight: dict, solid, bottom: float, *, add=None, construction=N
             set_surface("stair")
 
     for entry in placed:
+        visible_box = entry["box"]
+        if entry["kind"] == "cross_landing":
+            # The arrival cell already draws the floor OUTSIDE its Y portal. Draw only
+            # the part of this bridge inside that hole; two coplanar tops flicker into
+            # striped patches on the window-side landing. Collision keeps the full
+            # continuous bridge, and the runner is slightly above the walking plane.
+            for portal in portals:
+                plane = portal.get("plane") or {}
+                if plane.get("axis") != "y" or abs(float(plane["value"]) - entry["y0"]) > 1e-6 \
+                   or flight["toCell"] not in (portal.get("cellA"), portal.get("cellB")):
+                    continue
+                rect = portal["rect"]
+                visible_box = (max(visible_box[0], float(rect["u"][0])),
+                               min(visible_box[1], float(rect["u"][1])),
+                               max(visible_box[2], float(rect["v"][0])),
+                               min(visible_box[3], float(rect["v"][1])))
+                break
         if entry["kind"] == "landing":
             # The half-landing is a suspended slab over the basement arrival, not a full-height
             # timber column. Match the thin collision OBB's underside and preserve headroom.
-            emit(entry["box"], entry["y0"] - rise, entry["y0"])
+            emit(visible_box, entry["y0"] - rise, entry["y0"])
         elif entry["kind"] in ("exit_landing", "cross_landing"):
             # A bridge at the ARRIVAL level, not a solid column from the lower floor.
-            emit(entry["box"], entry["y0"] - rise, entry["y0"])
+            emit(visible_box, entry["y0"] - rise, entry["y0"])
         else:
             continue
 
         # Four narrow fascia boards finish each landing edge. They project only by the same 25 mm
         # as a tread nosing, remain below the walking plane, and are visual shell detail only.
-        x0, x1, z0, z1 = entry["box"]
+        x0, x1, z0, z1 = visible_box
         y1 = entry["y0"]
         y0 = y1 - STAIR_LANDING_TRIM_HEIGHT
         solid(x0 - NOSING_PROJECT, x1 + NOSING_PROJECT, y0, y1,
@@ -3186,64 +3204,64 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
             # railing across the top of the flight would be a railing you have to climb.
             if level_y != y0 or not construction:
                 continue
-            arrivals = [box for row in flights or () if row.get("toCell") == cell["id"]
-                        for box in arrival_boxes(row, float(row.get("fromY") or 0.0), list(portals))]
+            # The same actual floor contour and walking gaps as collision, not the
+            # generous visibility portal rectangle or the full cross-landing width.
+            guard_layout = {"stairs": {"flights": list(flights or ())}}
+            guard_cells = dict(cells_by_id or {})
+            guard_cells[cell["id"]] = cell
             well_posts = set()
-            for hx0, hx1, hz0, hz1, _identifier in wells:
-                for axis_x, fixed, span in ((True, hz0, (hx0, hx1)), (True, hz1, (hx0, hx1)),
-                                            (False, hx0, (hz0, hz1)), (False, hx1, (hz0, hz1))):
-                    # A cell wall already closes an edge flush with the room boundary. Drawing
-                    # a second row of posts against it makes a false-looking, floating guard.
-                    if (axis_x and (abs(fixed - z0) < 1e-6 or abs(fixed - z1) < 1e-6)) or \
-                       (not axis_x and (abs(fixed - x0) < 1e-6 or abs(fixed - x1) < 1e-6)):
+            for normal_axis, fixed, lo_at, hi_at, _floor_side in build_collision.stair_guard_edges(
+                    guard_layout, guard_cells, levels or {}, list(portals), cell, level_y):
+                axis_x = normal_axis == "z"
+                if not ((z0 - 1e-6 <= fixed <= z1 + 1e-6) if axis_x
+                        else (x0 - 1e-6 <= fixed <= x1 + 1e-6)):
+                    continue
+                lo_at = max(lo_at, x0 if axis_x else z0)
+                hi_at = min(hi_at, x1 if axis_x else z1)
+                if hi_at - lo_at <= 1e-6:
+                    continue
+                # A wall already closes a boundary edge; do not duplicate it with a guard.
+                if (axis_x and (abs(fixed - z0) < 1e-6 or abs(fixed - z1) < 1e-6)) or \
+                   (not axis_x and (abs(fixed - x0) < 1e-6 or abs(fixed - x1) < 1e-6)):
+                    continue
+                guard_height = float(construction.get("railing", 0.0))
+                rail_along(add, axis_x, lo_at, hi_at,
+                           level_y + guard_height,
+                           level_y + guard_height,
+                           fixed, RAIL_SECTION)
+                # A lone line at hand height reads as a missing guard and leaves the
+                # owner's upper-floor well visually open. Match the existing stair
+                # baluster grammar on the level edges, without filling the arrival gap.
+                for at in (lo_at, hi_at):
+                    point = (round(at, 4), round(fixed, 4)) if axis_x else (round(fixed, 4), round(at, 4))
+                    if point in well_posts:
                         continue
-                    cuts = []
-                    for tread in arrivals:
-                        tx0, tx1, tz0, tz1, _top = tread
-                        near = (min(abs(tz0 - fixed), abs(tz1 - fixed)) if axis_x
-                                else min(abs(tx0 - fixed), abs(tx1 - fixed)))
-                        if near > float(flight_going(flights, cell)) + 1e-6:
-                            continue
-                        cuts.append((tx0, tx1) if axis_x else (tz0, tz1))
-                    for lo_at, hi_at in minus(span[0], span[1], cuts):
-                        guard_height = float(construction.get("railing", 0.0))
-                        rail_along(add, axis_x, lo_at, hi_at,
-                                   level_y + guard_height,
-                                   level_y + guard_height,
-                                   fixed, RAIL_SECTION)
-                        # A lone line at hand height reads as a missing guard and leaves the
-                        # owner's upper-floor well visually open. Match the existing stair
-                        # baluster grammar on the level edges, without filling the arrival gap.
-                        for at in (lo_at, hi_at):
-                            point = (round(at, 4), round(fixed, 4)) if axis_x else (round(fixed, 4), round(at, 4))
-                            if point in well_posts:
-                                continue
-                            well_posts.add(point)
-                            if axis_x:
-                                solid(at - NEWEL_SECTION / 2, at + NEWEL_SECTION / 2,
-                                      level_y, level_y + guard_height,
-                                      fixed - NEWEL_SECTION / 2, fixed + NEWEL_SECTION / 2, "trim")
-                            else:
-                                solid(fixed - NEWEL_SECTION / 2, fixed + NEWEL_SECTION / 2,
-                                      level_y, level_y + guard_height,
-                                      at - NEWEL_SECTION / 2, at + NEWEL_SECTION / 2, "trim")
-                        count = max(1, math.ceil((hi_at - lo_at) / STAIR_BALUSTER_MAX_PITCH))
-                        for index in range(count):
-                            at = lo_at + (hi_at - lo_at) * (index + 0.5) / count
-                            half = STAIR_BALUSTER_SECTION / 2
-                            if axis_x:
-                                bx0, bx1, bz0, bz1 = at - half, at + half, fixed - half, fixed + half
-                            else:
-                                bx0, bx1, bz0, bz1 = fixed - half, fixed + half, at - half, at + half
-                            top = level_y + guard_height - RAIL_SECTION / 2
-                            # The floor and upper rail close these ends. Four side faces avoid
-                            # buried caps and keep the existing shell triangle ceiling intact.
-                            for value, outward in ((bx0, (-1.0, 0.0, 0.0)), (bx1, (1.0, 0.0, 0.0))):
-                                add([(value, level_y, bz0), (value, top, bz0),
-                                     (value, top, bz1), (value, level_y, bz1)], outward, "trim")
-                            for value, outward in ((bz0, (0.0, 0.0, -1.0)), (bz1, (0.0, 0.0, 1.0))):
-                                add([(bx0, level_y, value), (bx1, level_y, value),
-                                     (bx1, top, value), (bx0, top, value)], outward, "trim")
+                    well_posts.add(point)
+                    if axis_x:
+                        solid(at - NEWEL_SECTION / 2, at + NEWEL_SECTION / 2,
+                              level_y, level_y + guard_height,
+                              fixed - NEWEL_SECTION / 2, fixed + NEWEL_SECTION / 2, "trim")
+                    else:
+                        solid(fixed - NEWEL_SECTION / 2, fixed + NEWEL_SECTION / 2,
+                              level_y, level_y + guard_height,
+                              at - NEWEL_SECTION / 2, at + NEWEL_SECTION / 2, "trim")
+                count = max(1, math.ceil((hi_at - lo_at) / STAIR_BALUSTER_MAX_PITCH))
+                for index in range(count):
+                    at = lo_at + (hi_at - lo_at) * (index + 0.5) / count
+                    half = STAIR_BALUSTER_SECTION / 2
+                    if axis_x:
+                        bx0, bx1, bz0, bz1 = at - half, at + half, fixed - half, fixed + half
+                    else:
+                        bx0, bx1, bz0, bz1 = fixed - half, fixed + half, at - half, at + half
+                    top = level_y + guard_height - RAIL_SECTION / 2
+                    # The floor and upper rail close these ends. Four side faces avoid
+                    # buried caps and keep the existing shell triangle ceiling intact.
+                    for value, outward in ((bx0, (-1.0, 0.0, 0.0)), (bx1, (1.0, 0.0, 0.0))):
+                        add([(value, level_y, bz0), (value, top, bz0),
+                             (value, top, bz1), (value, level_y, bz1)], outward, "trim")
+                    for value, outward in ((bz0, (0.0, 0.0, -1.0)), (bz1, (0.0, 0.0, 1.0))):
+                        add([(bx0, level_y, value), (bx1, level_y, value),
+                             (bx1, top, value), (bx0, top, value)], outward, "trim")
 
         for member in basement_structure_boxes(cell, box, (ix0, ix1, iz0, iz1)):
             solid(*member, "structure")
@@ -5122,6 +5140,27 @@ def selftest(output: Path) -> int:
             f"({overhangs})")
 
     # ---- `HOUSE-00460`: the stairwell openings ------------------------------------------------
+    for flight in (main, flight_rows["STAIR_MAIN_L1_L2"]):
+        bridge_boxes = []
+        owner = cells[flight["fromCell"]]
+        owner_extent = extent_of(owner, levels[owner["level"]])[0]
+        build_flight(flight, lambda *args: bridge_boxes.append(args), owner_extent[0],
+                     portals=list(portal_rows.values()))
+        arrival = next(entry for entry in stair_geometry.flight_runs(
+            flight, owner_extent[0], list(portal_rows.values()))
+                       if entry["kind"] == "cross_landing")
+        hole = next(portal for portal in portal_rows.values()
+                    if portal["plane"]["axis"] == "y"
+                    and abs(portal["plane"]["value"] - arrival["y0"]) < 1e-6
+                    and flight["toCell"] in (portal["cellA"], portal["cellB"]))
+        slab_boxes = [box for box in bridge_boxes
+                      if abs(box[3] - arrival["y0"]) < 1e-6
+                      and abs(box[2] - arrival["y0"] + flight["rise"]) < 1e-6
+                      and box[1] - box[0] > 2.0]
+        require(len(slab_boxes) == 1
+                and slab_boxes[0][5] <= hole["rect"]["v"][1] + 1e-6,
+                f"{flight['id']} bridge stops at the upper floor's portal boundary, "
+                "so its top cannot z-fight the window-side floor")
     #
     # A stairwell is a portal with a `y` plane. Until it was cut, the landing above every flight
     # had a floor across it and the stair arrived in a ceiling.
@@ -5167,6 +5206,34 @@ def selftest(output: Path) -> int:
     require(vertical_fill >= 20,
             f"the attic's exposed well guard has visible vertical infill, not only a floating "
             f"top line ({vertical_fill} side faces)")
+
+    for name, edge_z, span in (("L1_STAIR_MAIN", -15.58, (3.3, 3.8)),
+                              ("L2_STAIR_MAIN", -15.30, (2.2, 3.8))):
+        cell = cells[name]
+        guard_extent = extent_of(cell, levels[cell["level"]])[0]
+        reset_scene()
+        guarded = build_cell(cell, guard_extent, neighbours=neighbours,
+                             construction=construction, level=levels[cell["level"]],
+                             levels=levels, portals=list(portal_rows.values()),
+                             openings=openings_by_portal, cells_by_id=cells,
+                             flights=list(flight_rows.values()))
+        bottom = guard_extent[0]
+        top = bottom + float(construction["railing"]) - RAIL_SECTION / 2
+        actual_edge = false_edge = 0
+        for polygon in guarded.data.polygons:
+            points = [guarded.data.vertices[index].co for index in polygon.vertices]
+            if abs(min(p.z for p in points) - bottom) > 1e-5 or \
+               abs(max(p.z for p in points) - top) > 1e-5:
+                continue
+            mid_x = sum(p.x for p in points) / len(points)
+            mid_z = -sum(p.y for p in points) / len(points)
+            if span[0] <= mid_x <= span[1] and abs(mid_z - edge_z) < 0.03:
+                actual_edge += 1
+            if 2.2 <= mid_x <= 4.9 and abs(mid_z + 14.8) < 0.03:
+                false_edge += 1
+        require(actual_edge >= 8 and false_edge == 0,
+                f"{name} fills the real exposed edge, not the solid window-side landing "
+                f"({actual_edge} real / {false_edge} false baluster faces)")
 
     # ...and the cell that carries the flight actually gets it. The claims above call
     # `build_flight` directly, which a builder that never called it would satisfy perfectly.

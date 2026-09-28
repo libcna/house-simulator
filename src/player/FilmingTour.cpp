@@ -246,9 +246,9 @@ namespace cnahouse::player
                 input.crouch = target.crouched;
                 if (distance > 0.001F)
                 {
-                    // Slow towards each corner/stop; preserve the owner's fast-walk setting.
+                    // Slow towards each corner/stop without toggling the player's session run mode.
                     const float scale =
-                        std::min(0.70F, distance * 5.0F) / (body.fastWalk ? kFastWalkSpeed : kWalkSpeed);
+                        std::min(0.90F, distance * 5.0F) / (body.fastWalk ? kFastWalkSpeed : kWalkSpeed);
                     input.move = {(dx * std::cos(look.yaw) + dz * std::sin(look.yaw)) / distance * scale,
                                   (dx * std::sin(look.yaw) - dz * std::cos(look.yaw)) / distance * scale};
                 }

@@ -79,15 +79,18 @@
     },
     {
       // The single step up from the terrace into the sunroom -- §16.1's "one step down" beside
-      // the slider, from this side.
+      // the slider, from this side. Like the other exterior flights, its collision uses
+      // the authored run as a ramp: a slow approach must not balance repeatedly on the
+      // capsule's rounded contact with the single riser. Centre on the actual slider at
+      // X=-2.00, not the house origin; meet the sunroom's inner slab edge at Z=-32.25.
       "id": "STEPS_TERRACE",
       "fromCell": "EXT_TERRACE", "toCell": "L0_SUNROOM",
       "risers": 1, "rise": 0.150, "going": 0.350, "width": 3.60,
       "fromY": 0.45, "toY": 0.60,
-      "footprint": { "x": [-1.80, 1.80], "z": [-32.40, -32.05] },
+      "footprint": { "x": [-3.80, -0.20], "z": [-32.60, -32.25] },
       "run": "+Z", "shape": "straight",
       "landings": [],
-      "collisionRamp": false, "surface": "bluestone"
+      "collisionRamp": true, "surface": "bluestone"
     },
     {
       // `HOUSE-00379`. Not in §12.4, and the terrace cannot be reached without it: the deck is

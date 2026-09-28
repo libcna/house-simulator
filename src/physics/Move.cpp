@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include "cnahouse/physics/BroadPhase.hpp"
+#include "cnahouse/physics/Terrain.hpp"
 
 namespace cnahouse::physics
 {
@@ -29,6 +30,25 @@ namespace cnahouse::physics
         Xna::Vector3 Added(const Xna::Vector3& a, const Xna::Vector3& b)
         {
             return Xna::Vector3(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
+        }
+
+        SweepHit SupportSweep(const CollisionWorld& world,
+                              const CollisionCell& cell,
+                              BroadPhase& broad,
+                              const Capsule& body,
+                              float span)
+        {
+            const Xna::Vector3 down(0.0F, -span, 0.0F);
+            SweepHit hit = SweepCell(world, cell, broad, body, down);
+            if (cell.outdoors && hit.hit && IsWalkable(hit.normal))
+            {
+                const auto terrain = SweepCapsuleTerrain(world.terrain, body, down);
+                if (terrain.hit && IsWalkable(terrain.normal) && terrain.time < hit.time)
+                {
+                    hit = terrain;
+                }
+            }
+            return hit;
         }
 
     } // namespace
@@ -258,8 +278,11 @@ namespace cnahouse::physics
         // not a fall, and treating it as one makes a staircase a sequence of stumbles.
         Capsule settled = capsule;
         settled.centre = result.position;
-        const CellSweepHit ground =
-            SweepCell(world, cell, broad, settled, Xna::Vector3(0.0F, -kStepDownHeight, 0.0F));
+        // Match GroundProbe/Fall: never settle through the owned terrain onto a
+        // farther neighbour slab. Constructed decks exclude that terrain via the cell.
+        // Only replace a walkable lower slab. Preserve rounded kerb/wall edge
+        // contacts: replacing them with flat terrain undoes the edge approach.
+        const SweepHit ground = SupportSweep(world, cell, broad, settled, kStepDownHeight);
         if (!ground.hit)
         {
             result.airborne = true;

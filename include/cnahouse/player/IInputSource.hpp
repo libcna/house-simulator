@@ -36,7 +36,7 @@ namespace cnahouse::player
         bool run = false;
         /// @brief The walk-mode key went down this frame. An edge, not a level.
         ///
-        /// §43.2: *"Shift TOGGLES between normal and fast walk. It is not hold-to-sprint."* A
+        /// Shift toggles between walking and running; it is not hold-to-sprint. A
         /// consumer given only the level would have to remember last frame's, and this file
         /// already says why edges are the source's job and not the consumer's.
         bool runPressed = false;

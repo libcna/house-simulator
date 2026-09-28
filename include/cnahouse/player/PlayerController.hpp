@@ -24,13 +24,10 @@ namespace cnahouse::player
     /// @brief §43.1's crouched eye, measured from the feet.
     inline constexpr float kPlayerCrouchEyeHeight = 1.15F;
 
-    /// @brief §43.2's normal walk, in m/s: *"the measured average human walking speed"*.
-    inline constexpr float kWalkSpeed = 1.35F;
-    /// @brief §43.2's fast walk, in m/s.
-    ///
-    /// *"A brisk walk, not a run. Above ~2.2 m/s a human transitions to a jog, and the brief is
-    /// explicit that this is still walking."* -- which is why it is 2.05 and not 2.5.
-    inline constexpr float kFastWalkSpeed = 2.05F;
+    /// @brief Owner-selected brisk walking pace, in m/s (formerly Fast).
+    inline constexpr float kWalkSpeed = 2.05F;
+    /// @brief Running pace, in m/s. Legacy identifier retained for controller/audio compatibility.
+    inline constexpr float kFastWalkSpeed = 4.0F;
     /// @brief §43.2's directional and state modifiers.
     ///
     /// The three DIRECTIONAL ones are not multiplied together: a body backing away diagonally is
@@ -91,11 +88,9 @@ namespace cnahouse::player
         /// because §49.5's guarantee tests need a way to PUT a body somewhere no walk can reach.
         bool noclip = false;
 
-        /// @brief §43.2's walk mode. `Shift` TOGGLES it; it is not hold-to-sprint.
-        ///
-        /// D-09 makes it a PREFERENCE rather than world state, so the app mirrors it into
-        /// `Settings` and restores it from there -- it survives a save/load and a *Reset House*.
-        /// The controller owns the toggle and nothing else about it.
+        /// @brief Session walk/run toggle; Shift toggles it, rather than hold-to-sprint.
+        /// Starts walking, independent of the retired saved Normal/Fast preference.
+        /// Legacy field name retained for the existing controller/audio/input consumers.
         bool fastWalk = false;
         physics::FallState fall;
 

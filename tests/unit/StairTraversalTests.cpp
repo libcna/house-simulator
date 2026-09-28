@@ -408,6 +408,106 @@ TEST(StairTraversalTests, TheMainFlightCanBeEnteredAcrossItsClearLane)
     }
 }
 
+TEST(StairTraversalTests, UpperCrossLandingsGuardTheActualWellNotTheWindowWall)
+{
+    IdRegistry::ResetForTesting();
+    const std::string path = "content/world/collision.bin";
+    if (!std::filesystem::exists(path))
+    {
+        GTEST_SKIP() << "no deployed collision";
+    }
+    System::IO::FileStream stream(path, System::IO::FileMode::Open, System::IO::FileAccess::Read);
+    const auto loaded = CollisionLoader::Read(stream, path);
+    ASSERT_TRUE(loaded);
+    const auto& collision = *loaded;
+
+    struct Edge
+    {
+        const char* cell;
+        float x;
+        float floor;
+        float edgeZ;
+    };
+
+    for (const Edge edge :
+         {Edge{"L1_STAIR_MAIN", 3.55F, 3.65F, -15.58F}, Edge{"L2_STAIR_MAIN", 2.75F, 6.55F, -15.30F}})
+    {
+        const auto* cell = collision.Cell(edge.cell);
+        ASSERT_NE(cell, nullptr);
+        for (const bool running : {false, true})
+        {
+            SCOPED_TRACE(edge.cell);
+            SCOPED_TRACE(running);
+            PlayerState state;
+            state.position = Vector3(edge.x, edge.floor + kRise + 0.002F, -14.75F);
+            state.fastWalk = running;
+            InputState forward;
+            forward.move.Y = 1.0F;
+            BroadPhase broad;
+            float lowest = state.Feet().Y;
+            for (int step = 0; step < 360; ++step)
+            {
+                static_cast<void>(PlayerStep(collision, *cell, broad, state, forward, kDt));
+                lowest = std::min(lowest, state.Feet().Y);
+                // A slide around the short L1 guard may reach its legitimate incoming
+                // stair lane. Stop there; descending that staircase is not a guard failure.
+                if (std::string_view(edge.cell) == "L1_STAIR_MAIN" && state.Feet().X >= 3.8F)
+                {
+                    break;
+                }
+            }
+            EXPECT_GE(lowest, edge.floor - 0.05F) << "crossed the formerly missing level guard";
+            EXPECT_GT(state.Feet().Z, edge.edgeZ);
+        }
+    }
+}
+
+TEST(StairTraversalTests, TerraceThresholdWorksAtSlowWalkNormalWalkAndRun)
+{
+    IdRegistry::ResetForTesting();
+    const std::string path = "content/world/collision.bin";
+    ASSERT_TRUE(std::filesystem::exists(path));
+    System::IO::FileStream stream(path, System::IO::FileMode::Open, System::IO::FileAccess::Read);
+    const auto loaded = CollisionLoader::Read(stream, path);
+    ASSERT_TRUE(loaded);
+    const auto* terrace = loaded->Cell("EXT_TERRACE");
+    const auto* sunroom = loaded->Cell("L0_SUNROOM");
+    ASSERT_NE(terrace, nullptr);
+    ASSERT_NE(sunroom, nullptr);
+    for (const float speed : {0.35F, cnahouse::player::kWalkSpeed, cnahouse::player::kFastWalkSpeed})
+    {
+        for (const bool up : {true, false})
+        {
+            SCOPED_TRACE(speed);
+            SCOPED_TRACE(up);
+            PlayerState body;
+            body.fastWalk = speed > cnahouse::player::kWalkSpeed;
+            body.yaw = up ? 3.14159265F : 0.0F;
+            // The low-U sash is fixed; enter the visibly open high-U half, not its glass.
+            body.position = Vector3(-1.40F, (up ? 0.45F : 0.60F) + kRise + 0.002F, up ? -33.10F : -31.60F);
+            InputState input;
+            input.move.Y =
+                speed / (body.fastWalk ? cnahouse::player::kFastWalkSpeed : cnahouse::player::kWalkSpeed);
+            BroadPhase broad;
+            for (int step = 0; step < 1800; ++step)
+            {
+                const auto* cell = body.position.Z < -32.10F ? terrace : sunroom;
+                const auto report = PlayerStep(*loaded, *cell, broad, body, input, kDt);
+                ASSERT_TRUE(report.depenetrated) << "step " << step << " feet " << body.Feet().X << ", "
+                                                 << body.Feet().Y << ", " << body.Feet().Z;
+                ASSERT_NE(report.landing, Landing::Hard);
+                if ((up && body.position.Z > -31.80F) || (!up && body.position.Z < -32.95F))
+                {
+                    break;
+                }
+            }
+            EXPECT_TRUE(up ? body.position.Z > -31.80F : body.position.Z < -32.95F)
+                << "feet " << body.Feet().X << ", " << body.Feet().Y << ", " << body.Feet().Z;
+            EXPECT_NEAR(body.Feet().Y, up ? 0.60F : 0.45F, 0.05F);
+        }
+    }
+}
+
 TEST(StairTraversalTests, AtticSideDoorApproachClimbsWithoutSteering)
 {
     // A path assembled from ramp waypoints can pass while the actual straight-on entrance

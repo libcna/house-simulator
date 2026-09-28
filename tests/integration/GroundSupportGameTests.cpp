@@ -42,6 +42,12 @@ TEST(GroundSupportGameTests, SlowGarageStepsAndNormalPorchUseTheRealController)
         {"porch-normal-up", {0.0F, 0.0F, -9.9F, 0.0F, -5.0F}, 1.0F, "L0_FOYER", true},
         {"gate-road-to-walk", {0.0F, 0.0F, 5.2F, 0.0F, -5.0F}, 1.0F, "EXT_WALK"},
         {"gate-walk-to-road", {0.0F, 0.0F, -3.0F, 180.0F, -5.0F}, 1.0F, "EXT_ROAD"},
+        {"terrace-slow-up",
+         {-1.4F, 0.45F, -33.1F, 180.0F, -5.0F},
+         0.35F / cnahouse::player::kWalkSpeed,
+         "L0_SUNROOM"},
+        {"terrace-normal-up", {-1.4F, 0.45F, -33.1F, 180.0F, -5.0F}, 1.0F, "L0_SUNROOM"},
+        {"terrace-normal-down", {-1.4F, 0.6F, -31.6F, 0.0F, -5.0F}, 1.0F, "EXT_TERRACE"},
     };
     const auto original = std::filesystem::current_path();
     const auto buildRoot = std::filesystem::path(CNAHOUSE_TEST_CONTENT_ROOT).parent_path();
@@ -54,8 +60,9 @@ TEST(GroundSupportGameTests, SlowGarageStepsAndNormalPorchUseTheRealController)
         {
             continue;
         }
-        const auto output =
-            std::filesystem::path(CNAHOUSE_TEST_OUTPUT_DIR) / ("house-03642-" + phase) / crossing.name;
+        const std::string task =
+            std::string_view(crossing.name).starts_with("terrace-") ? "house-03646-" : "house-03642-";
+        const auto output = std::filesystem::path(CNAHOUSE_TEST_OUTPUT_DIR) / (task + phase) / crossing.name;
         std::filesystem::create_directories(output);
         std::set<std::filesystem::path> before;
         for (const auto& entry : std::filesystem::directory_iterator(buildRoot))

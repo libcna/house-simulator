@@ -845,7 +845,7 @@ A translucent HUD, only shown when `Platform::hasTouch && !hasKeyboard`:
 | Movement stick | bottom-left, 180 vu radius, floating origin | analogue direction, magnitude → walk speed |
 | Look region | whole right half minus buttons | drag = look, sensitivity settings-controlled |
 | Interact button | bottom-right, 110 vu | shows the same verb text as the desktop prompt |
-| Walk-mode toggle | above interact | normal / fast |
+| Walk/run toggle | above interact | walk / run |
 | Camera toggle | top-right | first / third person |
 | Menu | top-left | pause menu |
 
@@ -1205,7 +1205,7 @@ Every flight satisfies `2·rise + going ∈ [600, 650] mm` and a consistent rise
 | `STAIR_BASEMENT_L0_B1` | B1 −2.30 → L0 +0.60 | 2.900 m | 16 × 181.3 mm | 250 mm | 1.00 m | straight, south-running, **beneath the main stair**, with a 1.00 m north approach and 0.90 m south exit | X +2.20…+4.90, Z −20.20…−14.30 |
 | `STEPS_PORCH` | grade 0.00 → porch +0.57 | 0.570 m | 3 × 190 mm | 300 mm | 3.00 m | straight | Z −11.60…−10.70 |
 | `STEPS_TERRACE_LAWN` | lawn 0.00 → terrace +0.45 | 0.450 m | 3 × 150 mm | 350 mm | 3.00 m | straight | Z −36.00, the terrace's south edge |
-| `STEPS_TERRACE` | terrace +0.45 → sunroom +0.60 | 0.150 m | 1 × 150 mm | 350 mm | 3.60 m | single step | Z −32.40 |
+| `STEPS_TERRACE` | terrace +0.45 → sunroom +0.60 | 0.150 m | 1 × 150 mm | 350 mm | 3.60 m | single step, centred on the slider at X −2.00 | Z −32.60; top meets the sunroom inner slab edge at −32.25 |
 | `STEPS_GARAGE` | garage +0.15 → mudroom +0.60 | 0.450 m | 3 × 150 mm | **300 mm** | 1.10 m | straight | inside the garage at the house wall |
 
 `HOUSE-03635` corrects the visually obstructed stair: both U flights now ascend first in the
@@ -4960,21 +4960,23 @@ holds thunder just above that boundary until the protected phase switch has comp
 
 | Mode | Speed | Notes |
 |---|---|---|
-| **Normal walk** | **1.35 m/s** | The measured average human walking speed. |
-| **Fast walk** | **2.05 m/s** | A brisk walk, not a run. Above ~2.2 m/s a human transitions to a jog, and the brief is explicit that this is still walking. |
+| **Walk** | **2.05 m/s** | Owner-selected default: former Fast pace (2026-09-28). |
+| **Run** | **4.00 m/s** | Distinctly faster, toggled with Shift; same collision/controller. |
 | Backwards | ×0.72 | |
 | Strafe | ×0.85 | |
 | On stairs | ×0.72 | |
 | Crouched (attic) | ×0.55 | |
 | Carrying an item | ×0.94 | |
 | Deep snow (`snowDepth > 0.12`) | ×0.80 | |
-| Acceleration / deceleration | 9.0 / 13.0 m/s² | Reaches full speed in ~0.15 s — responsive, not floaty |
+| Acceleration / deceleration | 9.0 / 13.0 m/s² | Walk reaches full speed in ~0.23 s; run in ~0.44 s. |
 
-**Shift toggles** between normal and fast walk. It is not hold-to-sprint. Pressing it plays a
-subtle UI tick and the HUD briefly shows a walk-mode glyph. The mode is stored in **settings**
-(a preference, not world state) and therefore survives both a save/load and a *Reset House*;
-the player block in the save also records it so a save carries a self-consistent snapshot, and
-settings wins on conflict. That resolves the brief's open question explicitly (D-09, §77).
+**Shift toggles** walking/running; it is not hold-to-sprint. Either Shift shares one
+edge, so holding both does not toggle twice. Android's existing touch speed button
+shows WALK/RUN. New/reset players start walking; changing audio/look Settings does
+not reset a session's running state. The owner explicitly removed Normal/Fast from
+Settings on 2026-09-28 (plan R15 / HOUSE-03573), superseding D-09's preference rule.
+Version-11 JSON still reads/writes the legacy `fastWalk` field for compatibility,
+but gameplay ignores it. Filming uses 0.90 m/s (formerly 0.70), independent of run.
 
 ### 43.3 Input map (Linux desktop)
 

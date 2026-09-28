@@ -2170,9 +2170,17 @@ namespace
                     walked,
                     walked / simulated);
         ASSERT_GT(simulated, 1.9) << "the game ran no steps to measure";
-        // §43.2's 1.35 m/s, minus the 0.15 s the body spends reaching it (§43.2's 9.0 m/s²).
-        EXPECT_LT(walked / simulated, 1.35 * 1.05) << "the body covered more ground than it had time for";
-        EXPECT_GT(walked / simulated, 1.35 * 0.80) << "it walked slower than §43.2's speed";
+        // Integrate the actual fixed-step acceleration, not an obsolete fixed speed bound.
+        double expectedTravel = 0.0;
+        double speed = 0.0;
+        const double dt = static_cast<double>(cnahouse::player::kFixedStepSeconds);
+        for (std::uint64_t step = 0; step < game.FixedStepsForTesting(); ++step)
+        {
+            speed = std::min(static_cast<double>(cnahouse::player::kWalkSpeed),
+                             speed + static_cast<double>(cnahouse::player::kAcceleration) * dt);
+            expectedTravel += speed * dt;
+        }
+        EXPECT_NEAR(walked, expectedTravel, 0.02) << "actual travel differs from walk/acceleration policy";
         EXPECT_NEAR(player.Feet().Y, -2.30f, 0.02f) << "it left §12's basement floor";
         EXPECT_TRUE(game.CellForTesting().IsValid());
 
@@ -2395,7 +2403,7 @@ namespace
             settings.backBufferWidth = 320;
             settings.backBufferHeight = 180;
             settings.verticalSync = false;
-            settings.fastWalk = onZeroStep;
+            settings.fastWalk = true; // A legacy preference must not start the game running.
 
             CnaHouseGame game(options, settings);
             RunPulseInput input(game, onZeroStep);
@@ -2415,9 +2423,10 @@ namespace
                 EXPECT_GE(input.PulseSteps(), 2U);
                 EXPECT_EQ(input.PulseSteps() % 2U, 0U);
             }
-            EXPECT_EQ(game.PlayerForTesting().fastWalk, !onZeroStep)
+            EXPECT_TRUE(game.PlayerForTesting().fastWalk)
                 << (onZeroStep ? "Shift edge was lost before a physics tick"
                                : "Shift edge toggled more than once in a multi-step frame");
+            EXPECT_FALSE(game.UserSettings().fastWalk) << "running is not a saved preference";
         }
     }
 

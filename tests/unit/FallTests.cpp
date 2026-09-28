@@ -393,6 +393,7 @@ TEST(FallTests, ALandingOnTheLAWNIsALandingTooAndNotASilentStop)
     CollisionWorld world = OneCell({});
     world.surfaces = {"grass"};
     world.terrain.present = true;
+    world.cells[0].outdoors = true;
     world.terrain.samplesX = 8u;
     world.terrain.samplesZ = 8u;
     world.terrain.originX = -4.0F;
@@ -441,6 +442,7 @@ TEST(FallTests, TheNEARERofTheSlabAndTheLawnIsWhatItLandsOn)
     CollisionWorld world =
         OneCell({Box(Vector3(0.0F, 0.85F, 0.0F), Vector3(2.0F, 0.15F, 2.0F), CollisionKind::Floor)});
     world.terrain.present = true;
+    world.cells[0].outdoors = true;
     world.terrain.samplesX = 8u;
     world.terrain.samplesZ = 8u;
     world.terrain.originX = -4.0F;
@@ -466,4 +468,22 @@ TEST(FallTests, TheNEARERofTheSlabAndTheLawnIsWhatItLandsOn)
     }
     ASSERT_NE(landing, Landing::None);
     EXPECT_NEAR(body.Bottom(), 1.0F, 0.01F) << "it landed on the lawn under the terrace";
+}
+
+TEST(FallTests, AConstructedFloorDoesNotLandOnSmoothedTerrainAboveIt)
+{
+    CollisionWorld world = Floor();
+    world.terrain.present = true;
+    world.terrain.samplesX = 8u;
+    world.terrain.samplesZ = 8u;
+    world.terrain.originX = -4.0F;
+    world.terrain.originZ = -4.0F;
+    world.terrain.step = 1.0F;
+    world.terrain.heights.assign(64u, 0.40F);
+    world.terrain.materials = {0u};
+    world.terrain.materialIndex.assign(64u, 0u);
+    ASSERT_FALSE(world.cells[0].outdoors);
+    const auto fell = DropFrom(world, 2.0F);
+    EXPECT_TRUE(fell.state.onGround);
+    EXPECT_NEAR(fell.position.Y - kStand, 0.0F, 0.01F);
 }

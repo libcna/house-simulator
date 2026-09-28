@@ -1,5 +1,67 @@
 # Current owner-visible defect work — 2026-09-28
 
+## Accepted owner walking/running, reopened guard/art and terrace corrections
+
+This is the current state; older sections below are checkpoint history, not
+current task status. **33 MUST / 78 OPT remain, nominal 45.25 h**. Practical
+roughly 50–65 h, conservative pessimistic ~80 h; the owner withdrew the ceiling.
+R15 selected the owner's exact screenshots/walk-run instruction; R7 split its
+newly reproduced terrace dependency. No OPTIONAL or unrelated platform/perf work.
+
+Completed `HOUSE-03573`, reopened `HOUSE-03638`, and `HOUSE-03646`. Settings has
+no Normal/Fast row. New/reset player walks at 2.05 m/s; Shift toggles 4.00 m/s
+running, session-only, old JSON compatible. Cinema 0.90 m/s (~35.69 min fixed-step
+circuit, 90 views), not a new speed-setting system. Actual 20 m measurements
+2.049989/4.000013 m/s. Audio/look Settings edits preserve session running.
+
+Actual floor-void contours replace false window-side guards; L1/L2 edges are
+Z=-15.58/-15.30 with true flight lanes clear. Bottom-origin L0/L1 art bottoms
+2.60/5.55 clear half-landings and ceilings. Cross-landing rendering no longer
+duplicates upper floor faces. Current bakes/content deployment pass. Normal
+W/D+mouse reaches L1 (4.525,3.650,-15.533); W reaches both attic exits and ascends/
+descends, on private software Xvfb as additional input evidence. Six main views
+and sixteen day/night guard/art/attic views reviewed on the actual surfaceless
+OPENGLES3 GPU. All original PNGs under build/test-output/stair-owner-reopen/;
+durable reviewed images/hashes and full causes/rejected drafts:
+`docs/visual-review/house-03638-owner-corrections.md`.
+
+Terrace owns its visible slab; ground/fall respect the same terrain flag as
+depenetration. Step/ramp centres on the actual slider and joins the sunroom;
+two loungers move 0.8 m south. Open-lane 0.35/2.05/4 m/s both-way regressions and
+actual GPU slow/normal crossings pass. Fixed glass stays. Step-down guards
+walkable lower slabs against terrain tunnelling but preserves rounded kerb
+contacts; measured road-edge regression rejected broader support replacements.
+GrandTour preserves its original 2.05 m/s pace (now walking), rather than treating
+an unbraked 4 m/s robot as natural walking acceptance. Collision limits unchanged.
+
+Validation: normal fresh build (-j2), 14 focused physical checks, both whole
+controller tours PASS; full GPU integration 167 PASS/3 explicit opt-in SKIP/0
+FAIL. Full unit 1530: 1529 PASS, unchanged SkySystem max-wall-clock assertion
+9.05 ms versus 5 ms FAIL under shared load; exact isolated rerun PASS, no weakened
+test or sky change. Actual Settings-page capture/restart rerun PASS. Required
+run_checks.sh passes all but inherited owner-owned .claude layout; 353 strict
+units clean/109 destructor exemptions. Our temporary test Vector3 += strict
+violation was corrected, not exempted. Transient sibling CNA syntax failure was
+fixed there by its other session before the successful final build; no sibling
+source changed here. Rejected too-early/incorrect-landing captures are not evidence.
+Logs `/tmp/house-03573-{focused12-units,focused12-gpu,final12-units,final12-integration,
+final13-focused,static13-final,settings-page}.log`. Shared ccache/existing build/;
+at most -j2 build plus four strict workers, never monitor windows.
+
+Next MUST: **HOUSE-01920**, then HOUSE-01922, responding to the owner's silent
+normal-play report. Production output/nonzero private PCM already exists; do not
+claim subjective listening complete or resurrect the false no-/dev/snd blocker.
+Check the owner's actual launch/build/arguments as well as default live playback,
+never change their default sink or preferences. No emulator is currently used;
+Android availability and previously passed CNA/clear-color gates remain distinct
+from still-open House content/touch/traversal/performance acceptance. HOUSE-02404
+timing remains paused for repeatable shared-machine evidence, not an excuse to
+defer owner defects. Practical continuation limit is the reason for this handoff.
+
+The three acceptance tasks share geometry/receiver manifests, collision/support
+and the changed route: the workflow inseparable-batch exception keeps the
+checkpoint usable rather than committing a route into old guards/glass.
+
 ## Desktop restart fixed; latest walk/run and exact stair screenshots in progress
 
 R15 / current owner reports selected `HOUSE-03645`: it is complete from actual

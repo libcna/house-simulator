@@ -157,7 +157,7 @@ TEST(WorldOverlayTests, TheMoveLineSaysWhichOfSectionFortyThreesModesIsOn)
 
     snapshot.fastWalk = true;
     snapshot.speed = 2.05F;
-    EXPECT_NE(LineStartingWith(overlay.Lines(snapshot), "move").find("fast"), std::string::npos);
+    EXPECT_NE(LineStartingWith(overlay.Lines(snapshot), "move").find("run"), std::string::npos);
     EXPECT_NE(LineStartingWith(overlay.Lines(snapshot), "move").find("2.05"), std::string::npos);
 
     snapshot.crouched = true;

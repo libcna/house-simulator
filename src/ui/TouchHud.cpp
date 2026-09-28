@@ -92,6 +92,6 @@ namespace cnahouse::ui
                  fastWalk ? Color(0.6F, 0.9F, 0.3F, 0.85F) : Color(0.25F, 0.75F, 0.9F, 0.7F));
         text.DrawShadowed(batch, "MENU", Vector2(1496.0F, 70.0F), Anchor::TopLeft, Color::White);
         text.DrawShadowed(
-            batch, fastWalk ? "FAST" : "WALK", Vector2(1496.0F, 810.0F), Anchor::TopLeft, Color::White);
+            batch, fastWalk ? "RUN" : "WALK", Vector2(1496.0F, 810.0F), Anchor::TopLeft, Color::White);
     }
 } // namespace cnahouse::ui

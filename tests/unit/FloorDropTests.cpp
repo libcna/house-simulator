@@ -61,7 +61,8 @@ namespace
     constexpr float kDt = 1.0F / 120.0F;
     /// The seed is the ticket, so a failure is reproducible by running the test again.
     constexpr std::uint64_t kSeed = 614u;
-    constexpr int kDrops = 2000;
+    // Keep >=900 actual falls after excluding phantom terrain beneath interior voids.
+    constexpr int kDrops = 2200;
     /// The tallest drop §49.5 asks for. 0.78 s of falling, 7.7 m/s at the bottom.
     constexpr float kTallest = 3.0F;
     /// Long enough for the tallest drop and half again: 3 m takes 94 steps.
@@ -85,7 +86,7 @@ namespace
     {
         float best = -1e9F;
         const cnahouse::physics::TerrainSample sample = cnahouse::physics::TerrainAt(world.terrain, x, z);
-        if (world.terrain.present && sample.over && sample.height <= below)
+        if (cell.outdoors && world.terrain.present && sample.over && sample.height <= below)
         {
             best = sample.height;
         }
@@ -126,7 +127,7 @@ namespace
 
 } // namespace
 
-TEST(FloorDropTests, TwoThousandDropsAllLandOnTheFloorTheyWereDroppedOnto)
+TEST(FloorDropTests, TwentyTwoHundredDropsAllLandOnTheFloorTheyWereDroppedOnto)
 {
     IdRegistry::ResetForTesting();
     const std::string directory = "content/world";

@@ -292,7 +292,6 @@ namespace cnahouse::ui
         Weather,
         LookSensitivity,
         InvertY,
-        WalkSpeed,
         TimeOfDay,
         TimeSpeed,
         EnvironmentWeather,

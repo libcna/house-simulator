@@ -102,7 +102,7 @@ namespace cnahouse::debug
 
         lines.push_back(std::format("move     {:.2f} m/s  {}{}{}",
                                     snapshot.speed,
-                                    snapshot.fastWalk ? "fast" : "walk",
+                                    snapshot.fastWalk ? "run" : "walk",
                                     snapshot.crouched ? "  crouched" : "",
                                     snapshot.onGround ? "" : "  AIRBORNE"));
 

@@ -463,7 +463,7 @@
       "cellPropsSha256": "6defc10992e2aca0b67e50b5642bd979abe6ec5c15d1e09575fcf8191af8bcc5",
       "daylight": {
         "image": "L0_STAIR_MAIN_LM_DAY.png",
-        "receiverMean": 0.4723959686622744,
+        "receiverMean": 0.46399737379935446,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -471,7 +471,7 @@
       "furnishedProps": 1,
       "groups": [],
       "lumensPerRadiantWatt": 200.0,
-      "shellHash": "sha256:b88def2dfccb4b3d82e069a9abc1763210dc8320d6019e34338d03a87b5b184e"
+      "shellHash": "sha256:43ffc76af026e4c63e5dda2fbf143e244ec528eabf527e90de7d03e74abcd867"
     },
     {
       "cell": "L0_STOR",
@@ -747,7 +747,7 @@
       "cellPropsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "daylight": {
         "image": "L1_STAIR_MAIN_LM_DAY.png",
-        "receiverMean": 0.644371113431767,
+        "receiverMean": 0.6506888161321778,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -755,7 +755,7 @@
       "furnishedProps": 0,
       "groups": [],
       "lumensPerRadiantWatt": 200.0,
-      "shellHash": "sha256:1506273e364d98f40fc76e5dc34613093ec745e42673f34c1d46aaa79fe4bce4"
+      "shellHash": "sha256:2f1a537e036ae1fc8e41f87b02b65799496b89aeea94f12ad8c87f96a102ac38"
     },
     {
       "cell": "L1_STOR",
@@ -989,7 +989,7 @@
       "cellPropsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
       "daylight": {
         "image": "L2_STAIR_MAIN_LM_DAY.png",
-        "receiverMean": 0.6680592638378381,
+        "receiverMean": 0.6910237050229292,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -997,7 +997,7 @@
       "furnishedProps": 0,
       "groups": [],
       "lumensPerRadiantWatt": 200.0,
-      "shellHash": "sha256:3565f338c098ac39860629a3acdb62e4569ef99fc30d381fda9bfc33644b2bcc"
+      "shellHash": "sha256:961f4d80e707abe37f344a33405aba1bf8743276157d46fce798ec50ad55b2b1"
     },
     {
       "cell": "L2_STOR2",
@@ -1062,7 +1062,7 @@
       "cellPropsSha256": "a9617fb09dda4b234bd066e04df65b29696c610c607f92d76eb18e1e984e7656",
       "daylight": {
         "image": "L3_STAIR_HEAD_LM_DAY.png",
-        "receiverMean": 0.36477066695223564,
+        "receiverMean": 0.3685543668495608,
         "scale": 1.0000001192092896,
         "skyStrength": 1.0
       },
@@ -1070,7 +1070,7 @@
       "furnishedProps": 2,
       "groups": [],
       "lumensPerRadiantWatt": 200.0,
-      "shellHash": "sha256:82465c8dde8bb447431f1e67c724bf27c17eaca3009499028f98873a79e0eb3a"
+      "shellHash": "sha256:5e02880e72a558e60889a8fba2946ef60de027fedccea4441e4f2c7467efeb02"
     },
     {
       "cell": "L3_STORE_E",
@@ -1131,12 +1131,13 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_GARAGE"
+    "L0_STAIR_MAIN",
+    "L1_STAIR_MAIN"
   ],
   "reusedCells": 77,
   "rgba8Bytes": 5111808,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 1139471,
+  "sourceBytes": 1142229,
   "tool": "bake_house_lightmaps.py"
 }

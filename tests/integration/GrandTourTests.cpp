@@ -538,6 +538,42 @@ namespace
             }
             for (const float u : candidates)
             {
+                if (portal.kind == world::PortalKind::Slider)
+                {
+                    // Reject a candidate intersecting fixed glazing at eye/body
+                    // height. SegmentReach's raised sweeps are not a clearance
+                    // proof when the two floors have different heights.
+                    const auto centrePoint =
+                        PortalCentre(portal, std::max(source.feet.Y, destination.feet.Y));
+                    const float half =
+                        source.crouched ? player::kPlayerCrouchHalfHeight : player::kPlayerHalfHeight;
+                    Vector3 centreBody = centrePoint;
+                    centreBody.Y += half + player::kPlayerRadius + 0.01F;
+                    if (portal.axis == world::PlaneAxis::Z)
+                    {
+                        centreBody.X = u;
+                    }
+                    else
+                    {
+                        centreBody.Z = u;
+                    }
+                    physics::BroadPhase broad;
+                    const physics::Capsule body{centreBody, half, player::kPlayerRadius};
+                    bool blocked = false;
+                    for (const world::Cell* side : {&fromCell, &toCell})
+                    {
+                        if (const auto* owner = collision.Cell(Name(side->id)); owner != nullptr)
+                        {
+                            const auto overlap = physics::OverlapCell(collision, *owner, broad, body);
+                            blocked =
+                                blocked || (overlap.overlapped && overlap.depth > physics::kContactTolerance);
+                        }
+                    }
+                    if (blocked)
+                    {
+                        continue;
+                    }
+                }
                 const Vector3 before = InsidePortal(fromCell, portal, source.feet.Y, u, inset);
                 const Vector3 after = InsidePortal(toCell, portal, destination.feet.Y, u, inset);
                 if (!InFootprint(fromCell, before) || !InFootprint(toCell, after))
@@ -826,7 +862,20 @@ namespace
                 {
                     const float reference =
                         edge.portal->axis == world::PlaneAxis::Z ? stair.back().X : stair.back().Z;
-                    const float crossing = std::clamp(reference, safeLow, safeHigh);
+                    float crossing = std::clamp(reference, safeLow, safeHigh);
+                    if (edge.portal->kind == world::PortalKind::Slider)
+                    {
+                        // The centre of a two-panel slider is fixed glass, not its
+                        // open lane. Use the existing capsule-clear portal search.
+                        const auto passage = PortalRoute(*data.FindCell(cnahouse::util::Intern(from)),
+                                                         *data.FindCell(cnahouse::util::Intern(to)),
+                                                         *edge.portal,
+                                                         source,
+                                                         destination,
+                                                         collision);
+                        crossing =
+                            edge.portal->axis == world::PlaneAxis::Z ? passage.before.X : passage.before.Z;
+                    }
                     for (Vector3& point : stair)
                     {
                         if (edge.portal->axis == world::PlaneAxis::Z)
@@ -1090,7 +1139,10 @@ TEST(GrandTourTests, EveryAccessibleCellIsReachedOnFoot)
 
     player::PlayerState body;
     body.position = data.GetInitialState().player.position + Vector3(0.0F, body.Rise() + 0.02F, 0.0F);
-    body.fastWalk = true;
+    // Preserve this route's established 2.05 m/s pace: it is now ordinary
+    // walking. The new 4 m/s run is covered by the stair/threshold regressions;
+    // this robot does not anticipate braking before every room's corners.
+    body.fastWalk = false;
     player::CellTracker tracker;
     tracker.Update(data, index, body.position);
     ASSERT_EQ(Name(tracker.Current()), "EXT_ROAD") << "the authored new-game spawn is not on the road";

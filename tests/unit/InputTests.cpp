@@ -347,7 +347,7 @@ namespace
 
     TEST(InputTests, TheWalkModeKeyIsAnEdgeBesideThatLevel)
     {
-        // §43.2: *"Shift TOGGLES between normal and fast walk. It is not hold-to-sprint."* So the
+        // §43.2: Shift toggles walking/running, rather than hold-to-sprint. So the
         // same key is reported twice -- as the level `run`, which a replay records and a gamepad
         // trigger may one day want, and as the edge `runPressed`, which is the one the toggle
         // reads. A consumer handed only the level would have to remember last frame's, and this
@@ -362,6 +362,20 @@ namespace
         EXPECT_FALSE(source.Current().runPressed);
         source.Apply(KeyboardState{Keys::LeftShift}, At(0, 0), 0.016f);
         EXPECT_TRUE(source.Current().runPressed) << "released and pressed again is a second edge";
+    }
+
+    TEST(InputTests, EitherShiftTogglesRunButHoldingBothDoesNotToggleTwice)
+    {
+        KeyboardMouseSource source;
+        source.Apply(KeyboardState{Keys::RightShift}, At(0, 0), 0.016F);
+        EXPECT_TRUE(source.Current().runPressed);
+        source.Apply(KeyboardState{Keys::RightShift, Keys::LeftShift}, At(0, 0), 0.016F);
+        EXPECT_FALSE(source.Current().runPressed);
+        source.Apply(KeyboardState{Keys::LeftShift}, At(0, 0), 0.016F);
+        EXPECT_FALSE(source.Current().runPressed);
+        source.Apply(KeyboardState({}), At(0, 0), 0.016F);
+        source.Apply(KeyboardState{Keys::LeftShift}, At(0, 0), 0.016F);
+        EXPECT_TRUE(source.Current().runPressed);
     }
 
 } // namespace

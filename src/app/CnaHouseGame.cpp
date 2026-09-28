@@ -211,6 +211,8 @@ namespace cnahouse::app
         , renderer_(tier_)
         , audio_(!options_.noAudio)
     {
+        // Read old JSON without restoring its retired Normal/Fast preference.
+        settings_.fastWalk = false;
         audio_.SetMasterVolume(settings_.masterVolume);
         audio_.SetCategoryVolume(audio::Category::Footsteps, settings_.footstepsVolume);
         audio_.SetCategoryVolume(audio::Category::Ambience, settings_.ambienceVolume);
@@ -710,7 +712,6 @@ namespace cnahouse::app
         player_.position =
             Microsoft::Xna::Framework::Vector3(feet.X, feet.Y + player_.Rise() + 0.02F, feet.Z);
         player_.yaw = look_.yaw;
-        player_.fastWalk = settings_.fastWalk;
         tracker_.Forget();
         tracker_.Update(*world_, *index_, player_.position);
         if (!tracker_.Current().IsValid())
@@ -995,15 +996,6 @@ namespace cnahouse::app
             const player::PlayerStepReport report =
                 player::PlayerStep(*collision_, *cell, broad_, player_, stepInput, player::kFixedStepSeconds);
             pendingRunToggle_ = false;
-            if (report.walkModeChanged)
-            {
-                // D-09: the walk mode is a SETTING, so the game writes it back rather than the
-                // controller keeping a second copy of it.
-                settings_.fastWalk = player_.fastWalk;
-#if !defined(__EMSCRIPTEN__)
-                PersistSettings(settings_);
-#endif
-            }
             tracker_.Update(*world_, *index_, player_.position);
             if (footsteps_.has_value())
             {
@@ -1126,10 +1118,6 @@ namespace cnahouse::app
         inputConfig.invertY = settings_.invertY;
         input_.SetConfig(inputConfig);
         ConfigureTouchInput();
-        if (walking_)
-        {
-            player_.fastWalk = settings_.fastWalk;
-        }
     }
 
     void CnaHouseGame::ApplyGraphicsSettings(ui::SettingsControl control)

@@ -711,6 +711,52 @@ def _guard_obb(shapes: Shapes, axis: str, value: float, u0: float, u1: float, ou
     return shapes.obb(centre, half, 0.0, surface, KIND_WALL)
 
 
+def stair_guard_edges(layout, cells, levels, portals, cell, floor):
+    """Actual floor-well edges, interrupted only by an incoming/outgoing tread lane.
+
+    Visibility apertures include solid cross-landings. Their rectangles cannot
+    locate guards, and the whole landing is not a safe stair entrance gap either.
+    This contour is shared by collision and visible shell generation.
+    """
+    by_plane = {}
+    for portal in portals:
+        plane = portal.get("plane") or {}
+        by_plane.setdefault((plane.get("axis"), snap(float(plane.get("value", 0.0)))), []).append(portal)
+    step_off = _step_off_rects(layout, cells, levels, portals, cell["id"], floor)
+    holes = _slab_holes(by_plane, cell["id"], floor, step_off)
+    passages = []
+    for flight in layout_io.rows(layout, "stairs"):
+        bottom = stair_geometry.foot_of(flight, cells, levels)
+        top = bottom + int(flight["risers"]) * float(flight["rise"])
+        from_here = flight.get("fromCell") == cell["id"] and abs(bottom - floor) < 0.05
+        to_here = flight.get("toCell") == cell["id"] and abs(top - floor) < 0.05
+        if not (from_here or to_here):
+            continue
+        treads = stair_geometry.flight_steps(flight, bottom, portals)
+        if not treads:
+            continue
+        tread = treads[0] if from_here else treads[-1]
+        x0, x1, z0, z1 = tread["box"]
+        passages.append((tread["axis"], (x0, x1) if tread["axis"] == "x" else (z0, z1),
+                         (z0, z1) if tread["axis"] == "x" else (x0, x1)))
+    for hx0, hz0, hx1, hz1 in holes:
+        for axis, value, u0, u1, outward in (
+                ("z", hz0, hx0, hx1, -1), ("z", hz1, hx0, hx1, +1),
+                ("x", hx0, hz0, hz1, -1), ("x", hx1, hz0, hz1, +1)):
+            cuts = [(max(u0, cross[0]), 0.0, min(u1, cross[1]), 1.0)
+                    for normal_axis, along, cross in passages
+                    if axis == normal_axis and along[0] - EPS <= value <= along[1] + EPS
+                    and min(u1, cross[1]) - max(u0, cross[0]) > EPS]
+            for a0, _, a1, _ in subtract_rects((u0, 0.0, u1, 1.0), cuts):
+                probe_u = (a0 + a1) / 2
+                probe_v = value + outward * 0.01
+                probe = (probe_v, probe_u) if axis == "x" else (probe_u, probe_v)
+                if any(x0 - EPS <= probe[0] <= x1 + EPS and z0 - EPS <= probe[1] <= z1 + EPS
+                       for x0, z0, x1, z1 in holes):
+                    continue
+                yield axis, value, a0, a1, outward
+
+
 def build_stairwell_guards(layout, shapes: Shapes, per_cell: dict[str, list[int]],
                            stats: dict) -> None:
     """A rail round the hole in a floor, with a gap where the flight comes up (`HOUSE-00567`).
@@ -733,59 +779,17 @@ def build_stairwell_guards(layout, shapes: Shapes, per_cell: dict[str, list[int]
     if height <= 0.0:
         return
 
-    portals_by_plane: dict[tuple[str, float], list[dict]] = {}
-    for portal in portals:
-        plane = portal.get("plane") or {}
-        portals_by_plane.setdefault((plane.get("axis"), snap(float(plane.get("value", 0.0)))), []).append(
-            portal)
-
     for cell in sorted(cells, key=lambda row: row["id"]):
         level = levels.get(cell["level"])
         if level is None:
             continue
         floor = layout_io.cell_extent(cell, level)[0]
-        step_off = _step_off_rects(layout, cells_by_id, levels, portals, cell["id"], floor)
-        holes = _slab_holes(portals_by_plane, cell["id"], floor, step_off)
-        # Only the authored step-off strip may interrupt a floor-level guard. A flight can pass
-        # beside or beneath this well without providing a safe way through its edge: treating
-        # every run footprint as a guard opening left four real walk-off drops unprotected.
-        through = list(step_off)
-        for hx0, hz0, hx1, hz1 in holes:
-            # The four edges of the well, each as (axis, plane value, span, which way the FLOOR is).
-            edges = (
-                ("x", hx0, (hz0, hz1), -1),
-                ("x", hx1, (hz0, hz1), +1),
-                ("z", hz0, (hx0, hx1), -1),
-                ("z", hz1, (hx0, hx1), +1),
-            )
-            for axis, value, (u0, u1), outward in edges:
-                # Where a flight steps off across this edge there is no rail, or the rail is a wall
-                # round a staircase. `_step_off_rects` is the same strip the floor was given back.
-                openings = []
-                for sx0, sz0, sx1, sz1 in through:
-                    if axis == "x":
-                        touches = sx0 - 1e-6 <= value <= sx1 + 1e-6
-                        span = (max(sz0, u0), min(sz1, u1))
-                    else:
-                        touches = sz0 - 1e-6 <= value <= sz1 + 1e-6
-                        span = (max(sx0, u0), min(sx1, u1))
-                    if touches and span[1] - span[0] > 1e-6:
-                        openings.append((span[0], 0.0, span[1], 1.0))
-                for a0, _v0, a1, _v1 in subtract_rects((u0, 0.0, u1, 1.0), openings):
-                    # Is the other side of this edge FLOOR, or more well? Taking the step-off strip
-                    # out of the portal rect leaves the well as two rectangles, and the seam
-                    # between them is not an edge of anything: a rail there is a rail across the
-                    # middle of the hole. Asked of a point a centimetre outside the edge.
-                    probe_u = 0.5 * (a0 + a1)
-                    probe_v = value + outward * 0.01
-                    probe = (probe_v, probe_u) if axis == "x" else (probe_u, probe_v)
-                    if any(hx0 - 1e-9 <= probe[0] <= hx1 + 1e-9 and hz0 - 1e-9 <= probe[1] <= hz1 + 1e-9
-                           for hx0, hz0, hx1, hz1 in holes):
-                        continue
-                    _add(per_cell, cell["id"],
-                         _guard_obb(shapes, axis, value, a0, a1, -outward, floor, height,
-                                    cell.get("wallMaterial"), BALUSTRADE_THICK))
-                    stats["stairGuards"] += 1
+        for axis, value, a0, a1, outward in stair_guard_edges(
+                layout, cells_by_id, levels, portals, cell, floor):
+            _add(per_cell, cell["id"],
+                 _guard_obb(shapes, axis, value, a0, a1, -outward, floor, height,
+                            cell.get("wallMaterial"), BALUSTRADE_THICK))
+            stats["stairGuards"] += 1
 
 
 def build_mezzanine_guards(layout, shapes: Shapes, per_cell: dict[str, list[int]],
@@ -2155,7 +2159,10 @@ def build(world_dir: Path, manifest_path: Path | None = None, *, include_props: 
     # lot -- including the ground the house's basement is under. A body on the basement stair is
     # 0.1 m from that surface and must not be pushed by it, so the file says which cells are the
     # open outdoors and the runtime asks the ground only there.
-    outdoor_ids = {cell_id for cell_id, _boxes in _exterior_cells(layout)}
+    # A constructed deck owns its real slab; a smoothed terrain pad beneath/through
+    # it must not depenetrate a capsule back off that slab or away from its steps.
+    outdoor_ids = {cell_id for cell_id, _boxes in _exterior_cells(layout)
+                   if cell_rows[cell_id].get("floorSupport") != "slab"}
     outdoor_ids.add("EXT_WORLD")
 
     cells = []
@@ -2889,6 +2896,21 @@ def selftest() -> int:
         #     `layout.stairs.json`, which is data this repository owns.
         authored = Path(__file__).resolve().parents[2] / "assets-src" / "world"
         if (authored / "layout.stairs.json").is_file():
+            guard_layout = layout_io.load_layout(authored, ["levels", "cells", "stairs", "portals"])
+            guard_cells = layout_io.by_id(layout_io.rows(guard_layout, "cells"), "cell")
+            guard_levels = layout_io.by_id(layout_io.rows(guard_layout, "levels"), "level")
+            for name, edge_z, span in (("L1_STAIR_MAIN", -15.58, (3.3, 3.8)),
+                                      ("L2_STAIR_MAIN", -15.30, (2.2, 3.8))):
+                cell = guard_cells[name]
+                floor = layout_io.cell_extent(cell, guard_levels[cell["level"]])[0]
+                edges = list(stair_guard_edges(guard_layout, guard_cells, guard_levels,
+                                              layout_io.rows(guard_layout, "portals"), cell, floor))
+                front = [row for row in edges if row[0] == "z" and row[4] == 1]
+                require(len(front) == 1 and abs(front[0][1] - edge_z) < EPS
+                        and abs(front[0][2] - span[0]) < EPS and abs(front[0][3] - span[1]) < EPS,
+                        f"{name} guards the actual void, leaving only real tread lanes open ({front})")
+                require(not any(row[0] == "z" and abs(row[1] + 14.8) < EPS for row in edges),
+                        f"{name} has no false guard across the solid window-side landing")
             real = layout_io.load_layout(authored, ["levels", "cells", "stairs"])
             main = [f for f in layout_io.rows(real, "stairs") if f["id"] == "STAIR_MAIN_L0_L1"][0]
             real["stairs"] = {"schema": "cna-house/stairs/1", "flights": [main]}
@@ -3194,8 +3216,11 @@ def selftest() -> int:
                 if abs(float(house_levels[house_cells[cell_id]["level"]]["ffl"])
                        - grade_of_house) <= EPS
             }
-            require(outdoor == open_cells | {"EXT_WORLD"},
-                    f"exactly the open exterior cells carry §11.5's ground, and every room is "
+            constructed = {cell_id for cell_id in open_cells
+                           if house_cells[cell_id].get("floorSupport") == "slab"}
+            require(outdoor == (open_cells - constructed) | {"EXT_WORLD"},
+                    f"open exterior terrain cells carry §11.5's ground; constructed decks own "
+                    f"their slabs, and every room is "
                     f"without it ({sorted(outdoor.symmetric_difference(open_cells | {'EXT_WORLD'}))[:3]})")
             require("EXT_SHED" not in outdoor and "L0_HALL" not in outdoor,
                     "the shed is a BUILDING and the hall is a room: neither stands on the lawn")
@@ -3208,6 +3233,13 @@ def selftest() -> int:
             require(house_cells["L0_PORCH"].get("floorSupport") == "slab" and deck_support,
                     "HOUSE-03642: the authored timber porch has a real +0.57 deck support, "
                     "not the heightfield's rounded/dipped front edge")
+            terrace = next(row for row in house["cells"] if row["id"] == "EXT_TERRACE")
+            terrace_support = [house_shapes.obbs[i] for i in terrace["shapes"]
+                               if i < len(house_shapes.obbs)
+                               and house_shapes.obbs[i][4] == KIND_FLOOR
+                               and abs(sum((house_shapes.obbs[i][0][1], house_shapes.obbs[i][1][1])) - 0.45) < EPS]
+            require(house_cells["EXT_TERRACE"].get("floorSupport") == "slab" and terrace_support,
+                    "the paver terrace likewise retains its real +0.45 deck at brisk walking pace")
 
             require(house["stats"]["openBoundaries"] > 50,
                     f"the boundaries between one open yard and another are grass, not wall "

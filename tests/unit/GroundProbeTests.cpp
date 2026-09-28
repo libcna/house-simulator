@@ -90,6 +90,7 @@ namespace
         world.terrain = std::move(terrain);
 
         CollisionCell cell;
+        cell.outdoors = world.terrain.present;
         cell.id = "L0_PROBE";
         cell.bounds = BoundingBox(Vector3(-8.0F, -8.0F, -8.0F), Vector3(8.0F, 8.0F, 8.0F));
         cell.nx = 16u;
@@ -264,6 +265,23 @@ TEST(GroundProbeTests, TheLawnIsGroundToo)
     EXPECT_EQ(world.SurfaceName(ground.surface), "grass");
     EXPECT_NEAR(ground.height, 0.0F, 2e-3F);
     EXPECT_NEAR(ground.normal.Y, 1.0F, 1e-4F);
+}
+
+TEST(GroundProbeTests, ASlabOwnedCellCannotStandOnPhantomTerrainAboveItsFloor)
+{
+    auto world = OneCell({Slab(0.45F, -4.0F, 4.0F, CollisionKind::Floor)}, {}, Lawn(0.55F, 2u));
+    BroadPhase broad;
+    const auto body = Body(0.0F, 0.452F);
+    world.cells[0].outdoors = false;
+    const auto ground = GroundProbe(world, world.cells[0], broad, body);
+    ASSERT_TRUE(ground.onGround);
+    EXPECT_FALSE(ground.terrain);
+    EXPECT_EQ(ground.kind, CollisionKind::Floor);
+    EXPECT_NEAR(ground.height, 0.45F, 0.002F);
+    // No floor and no terrain ownership really is a hole, not an invisible lawn.
+    auto indoors = OneCell({}, {}, Lawn(0.55F, 2u));
+    indoors.cells[0].outdoors = false;
+    EXPECT_FALSE(GroundProbe(indoors, indoors.cells[0], broad, Body(0.0F, 0.552F)).onGround);
 }
 
 TEST(GroundProbeTests, ATerraceIsTheTerraceAndNotTheLawnThreeCentimetresUnderIt)

@@ -167,6 +167,9 @@ default remains the heightfield for open ground cells; `"terrain"` states that
 default explicitly. This does not add a terrain/floor runtime system or change the
 visible floor. L0_PORCH uses a slab because its +0.57 m timber deck is flat while
 the smoothed heightfield edge dips below the top tread and traps slow walkers.
+EXT_TERRACE likewise owns its +0.45 m paver deck. These constructed slabs exclude
+the heightfield from their collision cell's `outdoors` flag: ground probing,
+falling and depenetration must all agree on the same actual supporting surface.
 
 A cell is the unit of visibility, audio, lighting and residency. One row per room, corridor,
 stair, closet, garage bay and exterior region.

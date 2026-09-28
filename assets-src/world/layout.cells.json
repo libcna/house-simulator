@@ -605,30 +605,30 @@
       "daylight": { "orientation": "E", "exposure": 0.28 },
       "lightGroups": ["LG_L0_STAIR_MAIN_MAIN", "LG_L0_STAIR_MAIN_STEP"],
       "lightmaps": {
-        "shellHash": "sha256:b88def2dfccb4b3d82e069a9abc1763210dc8320d6019e34338d03a87b5b184e",
+        "shellHash": "sha256:43ffc76af026e4c63e5dda2fbf143e244ec528eabf527e90de7d03e74abcd867",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_STAIR_MAIN_LM_DAY",
           "scale": 1.0000001192092896,
-          "receiverMean": 0.4723959686622744
+          "receiverMean": 0.46399737379935446
         },
         "artificial": [
           {
             "group": "LG_L0_PORCH_LANTERN",
             "contentName": "Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_PORCH_LANTERN",
-            "scale": 0.1715843379497528,
-            "receiverMean": 0.03173765857078027
+            "scale": 0.1705990731716156,
+            "receiverMean": 0.029438932288778943
           },
           {
             "group": "LG_L0_STAIR_MAIN_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_MAIN",
-            "scale": 1.0208438634872437,
-            "receiverMean": 0.15018011306124648
+            "scale": 1.2150261402130127,
+            "receiverMean": 0.16521692078586933
           },
           {
             "group": "LG_L0_STAIR_MAIN_STEP",
             "contentName": "Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_STEP",
-            "scale": 0.5063003897666931,
-            "receiverMean": 0.09108424133681611
+            "scale": 0.49422094225883484,
+            "receiverMean": 0.09538091016499801
           }
         ]
       },
@@ -1285,24 +1285,24 @@
       "daylight": { "orientation": "E", "exposure": 0.26 },
       "lightGroups": ["LG_L1_STAIR_MAIN_MAIN"],
       "lightmaps": {
-        "shellHash": "sha256:1506273e364d98f40fc76e5dc34613093ec745e42673f34c1d46aaa79fe4bce4",
+        "shellHash": "sha256:2f1a537e036ae1fc8e41f87b02b65799496b89aeea94f12ad8c87f96a102ac38",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L1_STAIR_MAIN_LM_DAY",
           "scale": 1.0000001192092896,
-          "receiverMean": 0.644371113431767
+          "receiverMean": 0.6506888161321778
         },
         "artificial": [
           {
             "group": "LG_EXT_FACADE_UPLIGHT",
             "contentName": "Textures/Lightmaps/Artificial/L1_STAIR_MAIN_LM_LG_EXT_FACADE_UPLIGHT",
-            "scale": 0.3839465379714966,
-            "receiverMean": 0.03167163634395978
+            "scale": 0.38655081391334534,
+            "receiverMean": 0.02857674773521898
           },
           {
             "group": "LG_L1_STAIR_MAIN_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L1_STAIR_MAIN_LM_LG_L1_STAIR_MAIN_MAIN",
-            "scale": 0.29074156284332275,
-            "receiverMean": 0.046283010880039166
+            "scale": 0.2914310693740845,
+            "receiverMean": 0.04678475857273652
           }
         ]
       },
@@ -1979,24 +1979,24 @@
       "daylight": { "orientation": "E", "exposure": 0.24 },
       "lightGroups": ["LG_L2_STAIR_MAIN_MAIN"],
       "lightmaps": {
-        "shellHash": "sha256:3565f338c098ac39860629a3acdb62e4569ef99fc30d381fda9bfc33644b2bcc",
+        "shellHash": "sha256:961f4d80e707abe37f344a33405aba1bf8743276157d46fce798ec50ad55b2b1",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L2_STAIR_MAIN_LM_DAY",
           "scale": 1.0000001192092896,
-          "receiverMean": 0.6680592638378381
+          "receiverMean": 0.6910237050229292
         },
         "artificial": [
           {
             "group": "LG_EXT_FACADE_UPLIGHT",
             "contentName": "Textures/Lightmaps/Artificial/L2_STAIR_MAIN_LM_LG_EXT_FACADE_UPLIGHT",
-            "scale": 0.1650853008031845,
-            "receiverMean": 0.030922895201938756
+            "scale": 0.16310787200927734,
+            "receiverMean": 0.03121324394367626
           },
           {
             "group": "LG_L2_STAIR_MAIN_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L2_STAIR_MAIN_LM_LG_L2_STAIR_MAIN_MAIN",
-            "scale": 0.41999202966690063,
-            "receiverMean": 0.12318632762433872
+            "scale": 0.425243079662323,
+            "receiverMean": 0.12672828270797623
           }
         ]
       },
@@ -2552,18 +2552,18 @@
       "thermal": { "heated": false, "ductBranch": null },
       "lightGroups": ["LG_L3_STAIR_HEAD_MAIN"],
       "lightmaps": {
-        "shellHash": "sha256:82465c8dde8bb447431f1e67c724bf27c17eaca3009499028f98873a79e0eb3a",
+        "shellHash": "sha256:5e02880e72a558e60889a8fba2946ef60de027fedccea4441e4f2c7467efeb02",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L3_STAIR_HEAD_LM_DAY",
           "scale": 1.0000001192092896,
-          "receiverMean": 0.36477066695223564
+          "receiverMean": 0.3685543668495608
         },
         "artificial": [
           {
             "group": "LG_L3_STAIR_HEAD_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L3_STAIR_HEAD_LM_LG_L3_STAIR_HEAD_MAIN",
-            "scale": 0.3868882358074188,
-            "receiverMean": 0.08696643510204467
+            "scale": 0.2502748370170593,
+            "receiverMean": 0.08266252013857157
           }
         ]
       },
@@ -2882,6 +2882,8 @@
     },
     {
       "id": "EXT_TERRACE", "level": "L0", "name": "Rear Terrace", "kind": "exterior",
+      // Retain the constructed +0.45 m paver deck, not the smoothed terrain pad's dipped edge.
+      "floorSupport": "slab",
       // Flagged, one step down from the sunroom's slider (§16.1), and under the rear balcony's
       // outer edge -- which is why `build_coverage.py` has anything to measure here.
       // To Z -32.10, the sunroom's interior face: the slider needs a plane both cells reach.
@@ -2890,6 +2892,8 @@
       // up into the sunroom at +0.60, so the terrace itself stands 0.45 m above the lawn and
       // `STEPS_TERRACE_LAWN` is how you get onto it (`HOUSE-00379`).
       "yOverride": [0.45, 20.0],
+      // Constructed paver deck, not the smoothed heightfield underneath it.
+      "floorSupport": "slab",
       "footstepSurface": "bluestone",
       "floorMaterial": "MAT_BLUESTONE_PAVER",
       "acoustic": { "roomTone": "AMB_OUTDOOR", "absorption": 0.86, "reverbHint": "outdoor_open" },

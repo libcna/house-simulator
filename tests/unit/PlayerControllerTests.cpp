@@ -5,9 +5,9 @@
 // ground is probed, and whatever is left is pushed out. Every one of those pieces has its own
 // tests; what is tested here is that they add up to a body that walks.
 //
-// §43.2's two numbers are the ones to hold on to: 1.35 m/s and 9.0 m/s² are one decision written
-// twice, because *"reaches full speed in ~0.15 s"* is 1.35 / 9.0.
+// The owner-selected walk/run speeds retain the existing acceleration and collision policy.
 #include <cmath>
+#include <cstdio>
 #include <memory>
 #include <string>
 
@@ -20,6 +20,7 @@
 #include "cnahouse/app/Settings.hpp"
 #include "cnahouse/physics/BroadPhase.hpp"
 #include "cnahouse/physics/CollisionLoader.hpp"
+#include "cnahouse/physics/Terrain.hpp"
 #include "cnahouse/player/PlayerController.hpp"
 
 #include "CellFloor.hpp"
@@ -124,20 +125,16 @@ namespace
 
 TEST(PlayerControllerTests, TheTwoNumbersInTheSpeedTableAreOneDecision)
 {
-    // §43.2 gives 1.35 m/s and 9.0 m/s² and then says "reaches full speed in ~0.15 s". That is
-    // not a third number: it is the first two divided. If somebody tunes either, this says so.
-    EXPECT_FLOAT_EQ(kWalkSpeed, 1.35F);
+    // The owner selected former Fast as the ordinary walk and a distinctly faster run.
+    // Acceleration/deceleration and all collision tolerances are unchanged.
+    EXPECT_FLOAT_EQ(kWalkSpeed, 2.05F);
     EXPECT_FLOAT_EQ(kAcceleration, 9.0F);
-    EXPECT_NEAR(kWalkSpeed / kAcceleration, 0.15F, 1e-6F);
+    EXPECT_NEAR(kWalkSpeed / kAcceleration, 0.2278F, 1e-4F);
     // ...and stopping is quicker than starting, which is what keeps it from feeling floaty.
     EXPECT_GT(kDeceleration, kAcceleration);
-    EXPECT_NEAR(kWalkSpeed / kDeceleration, 0.1038F, 1e-3F);
-
-    // §43.2's fast walk is 2.05 and the sentence next to it says why: *"a brisk walk, not a run.
-    // Above ~2.2 m/s a human transitions to a jog, and the brief is explicit that this is still
-    // walking."* That upper bound is the reason for the number, so it is asserted beside it.
-    EXPECT_FLOAT_EQ(cnahouse::player::kFastWalkSpeed, 2.05F);
-    EXPECT_LT(cnahouse::player::kFastWalkSpeed, 2.2F) << "that is a jog, and the brief says walk";
+    EXPECT_NEAR(kWalkSpeed / kDeceleration, 0.1577F, 1e-3F);
+    EXPECT_FLOAT_EQ(cnahouse::player::kFastWalkSpeed, 4.0F);
+    EXPECT_GT(cnahouse::player::kFastWalkSpeed, kWalkSpeed * 1.9F);
     EXPECT_GT(cnahouse::player::kFastWalkSpeed, kWalkSpeed);
 }
 
@@ -147,8 +144,8 @@ TEST(PlayerControllerTests, AWalkReachesFullSpeedInTheTimeTheTableSays)
     BroadPhase broad;
     PlayerState state = Standing(0.0F, 0.0F);
 
-    // 18 steps is 0.15 s.
-    for (int i = 0; i < 18; ++i)
+    const int accelerationTicks = static_cast<int>(std::ceil(kWalkSpeed / kAcceleration / kDt));
+    for (int i = 0; i < accelerationTicks; ++i)
     {
         PlayerStep(world, world.cells[0], broad, state, Forward(), kDt);
     }
@@ -156,11 +153,11 @@ TEST(PlayerControllerTests, AWalkReachesFullSpeedInTheTimeTheTableSays)
 
     // Half way there, it is half way: the ramp is linear, not eased.
     PlayerState half = Standing(0.0F, 0.0F);
-    for (int i = 0; i < 9; ++i)
+    for (int i = 0; i < accelerationTicks / 2; ++i)
     {
         PlayerStep(world, world.cells[0], broad, half, Forward(), kDt);
     }
-    EXPECT_NEAR(Speed(half), kWalkSpeed * 0.5F, 2e-2F);
+    EXPECT_NEAR(Speed(half), static_cast<float>(accelerationTicks / 2) * kDt * kAcceleration, 1e-4F);
 
     // And it does not run away past the top.
     for (int i = 0; i < 240; ++i)
@@ -182,7 +179,7 @@ TEST(PlayerControllerTests, LettingGoStopsTheBodyAtTheOtherRate)
     ASSERT_NEAR(Speed(state), kWalkSpeed, 1e-3F);
 
     const InputState idle;
-    for (int i = 0; i < 13; ++i) // 0.108 s, just past 1.35 / 13.0
+    for (int i = 0; i < static_cast<int>(std::ceil(kWalkSpeed / kDeceleration / kDt)); ++i)
     {
         PlayerStep(world, world.cells[0], broad, state, idle, kDt);
     }
@@ -313,8 +310,8 @@ TEST(PlayerControllerTests, TheProbeKeepsTheBodyTellingTheTruthAboutTheGround)
 
 TEST(PlayerControllerTests, BothWalkSpeedsAreMeasuredOverTwentyMetres)
 {
-    // The acceptance criterion `HOUSE-00556` was written with: 1.35 and 2.05 m/s over a 20 m run,
-    // within 1 %. Measured over the RUN and not read off the velocity, because a controller that
+    // Measure the owner-selected 2.05 m/s walk and 4.00 m/s run within 1 %, over actual travel,
+    // not read off the velocity, because a controller that
     // reported the right speed while moving a different distance would pass the easier check.
     const CollisionWorld world = OneCell({Slab(0.0F, -40.0F, 40.0F)});
     BroadPhase broad;
@@ -326,7 +323,7 @@ TEST(PlayerControllerTests, BothWalkSpeedsAreMeasuredOverTwentyMetres)
         state.fastWalk = fast;
         const float want = fast ? cnahouse::player::kFastWalkSpeed : kWalkSpeed;
 
-        // Up to speed first, so the 0.15 s ramp is not part of what is being measured.
+        // Up to speed first, so acceleration is not part of what is being measured.
         for (int i = 0; i < 60; ++i)
         {
             PlayerStep(world, world.cells[0], broad, state, Forward(), kDt);
@@ -340,13 +337,17 @@ TEST(PlayerControllerTests, BothWalkSpeedsAreMeasuredOverTwentyMetres)
         }
         ASSERT_LT(ticks, 4000) << "it never covered the 20 m";
         const float measured = (state.position.X - from) / (static_cast<float>(ticks) * kDt);
+        std::printf("%s: 20 m in %d fixed steps; measured %.6f m/s\n",
+                    fast ? "run" : "walk",
+                    ticks,
+                    static_cast<double>(measured));
         EXPECT_NEAR(measured, want, want * 0.01F) << (fast ? "fast" : "normal");
     }
 }
 
 TEST(PlayerControllerTests, ShiftTOGGLESTheWalkModeAndDoesNotHoldIt)
 {
-    // §43.2: *"Shift toggles between normal and fast walk. It is not hold-to-sprint."* Which
+    // Shift toggles walking/running; it is not hold-to-sprint. Which
     // means the EDGE decides, and the level does not: holding the key down for a second must
     // change the mode once, not 120 times.
     const CollisionWorld world = OneCell({Slab(0.0F, -40.0F, 40.0F)});
@@ -941,6 +942,26 @@ TEST(PlayerControllerTests, ASecondOfWalkingInEveryCellOfTheRealHouseEndsSomewhe
                     << cell.id;
                 if (!step.depenetrated)
                 {
+                    const auto overlap = OverlapCell(*world, cell, broad, state.Body());
+                    const auto ground =
+                        cnahouse::physics::OverlapCapsuleTerrain(world->terrain, state.Body());
+                    std::printf("  unresolved contact %s tick %d direction %d at %.5f %.5f %.5f\n",
+                                cell.id.c_str(),
+                                t,
+                                i,
+                                static_cast<double>(state.position.X),
+                                static_cast<double>(state.position.Y),
+                                static_cast<double>(state.position.Z));
+                    std::printf("  shape %u depth %.8f normal %.5f %.5f %.5f; terrain %.8f %.5f %.5f %.5f\n",
+                                overlap.shape,
+                                static_cast<double>(overlap.depth),
+                                static_cast<double>(overlap.normal.X),
+                                static_cast<double>(overlap.normal.Y),
+                                static_cast<double>(overlap.normal.Z),
+                                static_cast<double>(ground.depth),
+                                static_cast<double>(ground.normal.X),
+                                static_cast<double>(ground.normal.Y),
+                                static_cast<double>(ground.normal.Z));
                     ++inside;
                 }
             }

@@ -23,6 +23,7 @@
 #include "cnahouse/physics/CollisionLoader.hpp"
 #include "cnahouse/physics/Ground.hpp"
 #include "cnahouse/physics/Move.hpp"
+#include "cnahouse/physics/Terrain.hpp"
 
 #include "CellFloor.hpp"
 
@@ -350,6 +351,53 @@ TEST(StepAssistTests, ThereIsNothingToSettleOntoOnTheSideOfABank)
 // The real house
 // ---------------------------------------------------------------------------------------------
 
+TEST(StepAssistTests, StepDownCannotSettleThroughOwnedTerrainOntoAFartherSlab)
+{
+    auto world = OneCell({Ground(0.0F)});
+    world.cells[0].outdoors = true;
+    auto& terrain = world.terrain;
+    terrain.present = true;
+    terrain.samplesX = 8U;
+    terrain.samplesZ = 8U;
+    terrain.originX = -4.0F;
+    terrain.originZ = -4.0F;
+    terrain.step = 1.0F;
+    terrain.heights.assign(64U, 0.20F);
+    terrain.materials = {0U};
+    terrain.materialIndex.assign(64U, 0U);
+    BroadPhase broad;
+    const auto body = Body(0.0F, 0.20F);
+    const auto step = MoveWithStepAssist(world, world.cells[0], broad, body, Vector3(0.01F, 0.0F, 0.0F));
+    EXPECT_NEAR(step.position.Y - kStand, 0.20F, 0.001F);
+    EXPECT_FALSE(step.airborne);
+    Capsule ended = body;
+    ended.centre = step.position;
+    EXPECT_TRUE(Depenetrate(world, world.cells[0], broad, ended).resolved);
+}
+
+TEST(StepAssistTests, TerrainDoesNotUndoARoundedKerbEdgeApproach)
+{
+    auto world =
+        OneCell({Box(Vector3(0.0F, 0.025F, -1.0F), Vector3(1.0F, 0.125F, 1.0F), CollisionKind::Floor)});
+    world.cells[0].outdoors = true;
+    auto& terrain = world.terrain;
+    terrain.present = true;
+    terrain.samplesX = 8U;
+    terrain.samplesZ = 8U;
+    terrain.originX = -4.0F;
+    terrain.originZ = -4.0F;
+    terrain.step = 1.0F;
+    terrain.heights.assign(64U, 0.0F);
+    terrain.materials = {0U};
+    terrain.materialIndex.assign(64U, 0U);
+    BroadPhase broad;
+    auto body = Body(0.0F, 0.017F);
+    body.centre.Z = 0.31F;
+    const auto step = MoveWithStepAssist(world, world.cells[0], broad, body, Vector3(0.0F, 0.0F, -0.01F));
+    EXPECT_FALSE(step.steppedDown);
+    EXPECT_NEAR(step.position.Y, body.centre.Y, 1.0e-5F);
+}
+
 TEST(StepAssistTests, WalkingTheRealHouseTickByTick)
 {
     // Not one step but a WALK: a full second of §49.3's 1/120 s ticks at §43.2's 1.35 m/s --
@@ -464,11 +512,16 @@ TEST(StepAssistTests, WalkingTheRealHouseTickByTick)
 
                 body.centre = step.position;
                 const CellOverlap overlap = OverlapCell(*world, cell, broad, body);
-                if (overlap.overlapped)
+                // PlayerStep always performs step 5, including owned terrain; waiting
+                // for an OBB overlap let terrain penetration accumulate on a slope.
+                if (overlap.overlapped || cell.outdoors)
                 {
                     const Depenetration out = Depenetrate(*world, cell, broad, body);
-                    ASSERT_TRUE(out.resolved) << cell.id << ": tick " << t << " left the body "
-                                              << overlap.depth << " m inside shape " << overlap.shape;
+                    const auto terrain = cnahouse::physics::OverlapCapsuleTerrain(world->terrain, body);
+                    ASSERT_TRUE(out.resolved)
+                        << cell.id << ": tick " << t << " left the body " << overlap.depth
+                        << " m inside shape " << overlap.shape << "; terrain depth " << terrain.depth
+                        << ", body " << body.centre.X << ',' << body.centre.Y << ',' << body.centre.Z;
                     body.centre = Vector3(body.centre.X + out.offset.X,
                                           body.centre.Y + out.offset.Y,
                                           body.centre.Z + out.offset.Z);

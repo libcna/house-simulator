@@ -473,7 +473,6 @@ namespace
                                          SettingsControl::Weather,
                                          SettingsControl::LookSensitivity,
                                          SettingsControl::InvertY,
-                                         SettingsControl::WalkSpeed,
                                          SettingsControl::TimeOfDay,
                                          SettingsControl::TimeSpeed,
                                          SettingsControl::EnvironmentWeather};
@@ -507,7 +506,7 @@ namespace
         EXPECT_TRUE(desktopScreen.Shows(SettingsControl::DisplaySize));
         EXPECT_TRUE(desktopScreen.Shows(SettingsControl::Fullscreen));
         EXPECT_TRUE(desktopScreen.Shows(SettingsControl::VerticalSync));
-        EXPECT_EQ(desktopScreen.VisibleControlCount(), 15U);
+        EXPECT_EQ(desktopScreen.VisibleControlCount(), SettingsScreen::ControlCount());
 
         platform.target = cnahouse::app::BuildTarget::Web;
         SettingsFeatures web = SettingsFeatures::Resolve(platform, tier, settings);
@@ -632,8 +631,10 @@ namespace
         EXPECT_TRUE(settings.invertY);
 
         screen.Update(down, 0.016F);
+        EXPECT_EQ(screen.Selected(), SettingsControl::TimeOfDay)
+            << "the retired Normal/Fast preference is not a Settings control";
         screen.Update(accept, 0.016F);
-        EXPECT_TRUE(settings.fastWalk);
+        EXPECT_FALSE(settings.fastWalk);
         EXPECT_EQ(applied, 4);
     }
 
@@ -666,7 +667,7 @@ namespace
 
         InputState down;
         down.uiDownPressed = true;
-        for (int row = 0; row < 12; ++row)
+        for (int row = 0; row < 11; ++row)
         {
             screen.Update(down, 0.016F);
         }
@@ -725,7 +726,6 @@ namespace
                                          SettingsControl::Weather,
                                          SettingsControl::LookSensitivity,
                                          SettingsControl::InvertY,
-                                         SettingsControl::WalkSpeed,
                                          SettingsControl::TimeOfDay,
                                          SettingsControl::TimeSpeed,
                                          SettingsControl::EnvironmentWeather};

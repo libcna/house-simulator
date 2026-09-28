@@ -150,7 +150,9 @@ one surface over the whole lot and the house stands on it, so the ground runs th
 and a tenth of a metre under `L0`'s floor: a body on the basement stair is beside it and must not
 be pushed by it, and a body on the lawn must. The flag is what tells §49.3's step 5 and the ground
 probe which of the two they are looking at. It is 1 for §15's open exterior cells and for
-`EXT_WORLD`, and 0 for every room — including `EXT_SHED`, which is an `exterior` cell that is a
+`EXT_WORLD`, except an authored `floorSupport: "slab"` constructed deck, which owns
+its actual floor instead of the smoothed terrain pad. It is 0 for every room — including
+`EXT_SHED`, which is an `exterior` cell that is a
 BUILDING (§15.7 rule 5 draws the same line).
 
 The flag stays, and so does the field it guards. `HOUSE-00786` cut the ground the basement stands

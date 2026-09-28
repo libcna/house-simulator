@@ -46,7 +46,8 @@ namespace cnahouse::physics
         // sound, §45's camera dip and §43.1's hard landing all went missing outdoors, and a body
         // arriving at 12 m/s settled a few centimetres INSIDE the ground, where the depenetration
         // (which reads shapes and not the field) could not push it out.
-        const SweepHit ground = SweepCapsuleTerrain(world.terrain, capsule, down);
+        const SweepHit ground =
+            cell.outdoors ? SweepCapsuleTerrain(world.terrain, capsule, down) : SweepHit{};
 
         // Whichever is nearer, the same rule `GroundProbe` uses: a body over a terrace has the
         // slab under it and the lawn under that, and the one it lands on is the slab.

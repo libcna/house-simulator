@@ -28,7 +28,8 @@ namespace cnahouse::physics
 
         const Xna::Vector3 down(0.0F, -reach, 0.0F);
         const CellSweepHit shapes = SweepCell(world, cell, broad, capsule, down);
-        const SweepHit ground = SweepCapsuleTerrain(world.terrain, capsule, down);
+        const SweepHit ground =
+            cell.outdoors ? SweepCapsuleTerrain(world.terrain, capsule, down) : SweepHit{};
 
         // Whichever is nearer. A body on a terrace has the slab under it and the lawn under that,
         // and the one it is standing on is the slab.
