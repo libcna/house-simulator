@@ -160,6 +160,14 @@ cell.
 
 ## `layout.cells.json`
 
+`HOUSE-03642`: an open ground-storey cell can explicitly declare
+`floorSupport: "slab"` for an actual constructed deck. Its existing floor rectangle,
+height, thickness and aperture cuts then generate the normal floor collider. The
+default remains the heightfield for open ground cells; `"terrain"` states that
+default explicitly. This does not add a terrain/floor runtime system or change the
+visible floor. L0_PORCH uses a slab because its +0.57 m timber deck is flat while
+the smoothed heightfield edge dips below the top tread and traps slow walkers.
+
 A cell is the unit of visibility, audio, lighting and residency. One row per room, corridor,
 stair, closet, garage bay and exterior region.
 

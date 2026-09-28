@@ -383,42 +383,44 @@
     // posts under the nine street lights: they were
     // lights and nothing else until now, and a lantern at +8.00 with no post under it is a light
     // shining out of the air. `layout.lights.json`'s `LIGHT_EXT_STREET_1`…`_9` hang at
-    // [x, 8.00, 1.50] for x = -100…100 every 25 m, and the geometry below puts a lantern at
+    // [x, 8.00, 1.50] for x = -97.6…102.4 every 25 m, and the geometry below puts a lantern at
     // exactly those nine points -- on a 0.70 m outreach arm from a post line at Z +0.80.
     //
     // All five of §11.4's utility poles stand at an X that also wants a street light, so those
     // five carry the lantern themselves (`MODEL_UTILITY_POLE_LAMP`), the way a suburban street
     // actually does it: two separate posts 0.70 m apart read as one doubled pole from the garden.
     // The remaining four lanterns are standalone columns. Nine lanterns, five poles, nine lights.
-    { "id": "NB_POLE_01", "asset": "MODEL_UTILITY_POLE_LAMP", "position": [-100.00, 0.00, 0.80],
+    { "id": "NB_POLE_01", "asset": "MODEL_UTILITY_POLE_LAMP", "position": [-97.60, 0.00, 0.80],
       "yawDeg": 0.0, "lodGroup": "LODG_STREET_FURNITURE", "impostorFrom": 60.0 },
-    { "id": "NB_POLE_02", "asset": "MODEL_UTILITY_POLE_LAMP", "position": [-50.00, 0.00, 0.80],
+    { "id": "NB_POLE_02", "asset": "MODEL_UTILITY_POLE_LAMP", "position": [-47.60, 0.00, 0.80],
       "yawDeg": 0.0, "lodGroup": "LODG_STREET_FURNITURE", "impostorFrom": 60.0 },
-    { "id": "NB_POLE_03", "asset": "MODEL_UTILITY_POLE_LAMP", "position": [0.00, 0.00, 0.80],
+    { "id": "NB_POLE_03", "asset": "MODEL_UTILITY_POLE_LAMP", "position": [2.40, 0.00, 0.80],
       "yawDeg": 0.0, "lodGroup": "LODG_STREET_FURNITURE", "impostorFrom": 60.0 },
-    { "id": "NB_POLE_04", "asset": "MODEL_UTILITY_POLE_LAMP", "position": [50.00, 0.00, 0.80],
+    { "id": "NB_POLE_04", "asset": "MODEL_UTILITY_POLE_LAMP", "position": [52.40, 0.00, 0.80],
       "yawDeg": 0.0, "lodGroup": "LODG_STREET_FURNITURE", "impostorFrom": 60.0 },
-    { "id": "NB_POLE_05", "asset": "MODEL_UTILITY_POLE_LAMP", "position": [100.00, 0.00, 0.80],
+    { "id": "NB_POLE_05", "asset": "MODEL_UTILITY_POLE_LAMP", "position": [102.40, 0.00, 0.80],
       "yawDeg": 0.0, "lodGroup": "LODG_STREET_FURNITURE", "impostorFrom": 60.0 },
-    { "id": "NB_LAMP_01", "asset": "MODEL_STREET_LIGHT", "position": [-75.00, 0.00, 0.80],
+    { "id": "NB_LAMP_01", "asset": "MODEL_STREET_LIGHT", "position": [-72.60, 0.00, 0.80],
       "yawDeg": 0.0, "lodGroup": "LODG_STREET_FURNITURE", "impostorFrom": 60.0 },
-    { "id": "NB_LAMP_02", "asset": "MODEL_STREET_LIGHT", "position": [-25.00, 0.00, 0.80],
+    { "id": "NB_LAMP_02", "asset": "MODEL_STREET_LIGHT", "position": [-22.60, 0.00, 0.80],
       "yawDeg": 0.0, "lodGroup": "LODG_STREET_FURNITURE", "impostorFrom": 60.0 },
-    { "id": "NB_LAMP_03", "asset": "MODEL_STREET_LIGHT", "position": [25.00, 0.00, 0.80],
+    { "id": "NB_LAMP_03", "asset": "MODEL_STREET_LIGHT", "position": [27.40, 0.00, 0.80],
       "yawDeg": 0.0, "lodGroup": "LODG_STREET_FURNITURE", "impostorFrom": 60.0 },
-    { "id": "NB_LAMP_04", "asset": "MODEL_STREET_LIGHT", "position": [75.00, 0.00, 0.80],
+    { "id": "NB_LAMP_04", "asset": "MODEL_STREET_LIGHT", "position": [77.40, 0.00, 0.80],
       "yawDeg": 0.0, "lodGroup": "LODG_STREET_FURNITURE", "impostorFrom": 60.0 },
+    // HOUSE-03643: translate the whole grid +2.4 m so its central pole is
+    // beside, not directly in, the pedestrian approach. Keep wire/light alignment.
     // The catenary between them. A span is anchored at its WEST pole and runs 50 m to the next,
-    // so four spans reach from x -100 to x +100 and no wire ends in mid-air. It stays real
+    // so four spans reach from x -97.6 to x +102.4 and no wire ends in mid-air. It stays real
     // geometry further out than anything else here because the impostor of a hanging wire is a
     // hanging wire, and 50 m of it is not at one distance from the camera anyway.
-    { "id": "NB_SPAN_01", "asset": "MODEL_UTILITY_SPAN", "position": [-100.00, 0.00, 0.80],
+    { "id": "NB_SPAN_01", "asset": "MODEL_UTILITY_SPAN", "position": [-97.60, 0.00, 0.80],
       "yawDeg": 0.0, "lodGroup": "LODG_STREET_FURNITURE", "impostorFrom": 120.0 },
-    { "id": "NB_SPAN_02", "asset": "MODEL_UTILITY_SPAN", "position": [-50.00, 0.00, 0.80],
+    { "id": "NB_SPAN_02", "asset": "MODEL_UTILITY_SPAN", "position": [-47.60, 0.00, 0.80],
       "yawDeg": 0.0, "lodGroup": "LODG_STREET_FURNITURE", "impostorFrom": 120.0 },
-    { "id": "NB_SPAN_03", "asset": "MODEL_UTILITY_SPAN", "position": [0.00, 0.00, 0.80],
+    { "id": "NB_SPAN_03", "asset": "MODEL_UTILITY_SPAN", "position": [2.40, 0.00, 0.80],
       "yawDeg": 0.0, "lodGroup": "LODG_STREET_FURNITURE", "impostorFrom": 120.0 },
-    { "id": "NB_SPAN_04", "asset": "MODEL_UTILITY_SPAN", "position": [50.00, 0.00, 0.80],
+    { "id": "NB_SPAN_04", "asset": "MODEL_UTILITY_SPAN", "position": [52.40, 0.00, 0.80],
       "yawDeg": 0.0, "lodGroup": "LODG_STREET_FURNITURE", "impostorFrom": 120.0 },
     { "id": "NB_SIGN_01", "asset": "MODEL_STREET_SIGN", "position": [-34.00, 0.00, 2.40],
       "yawDeg": 90.0, "lodGroup": "LODG_STREET_FURNITURE", "impostorFrom": 45.0 },

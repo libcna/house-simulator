@@ -527,7 +527,7 @@ def build_shell(layout, shapes: Shapes, stats: dict, has_ground: bool = False) -
 
     def on_the_ground(row: dict) -> bool:
         """An open exterior cell standing on §11.5's ground rather than on a storey of the house."""
-        return (has_ground and open_air(row)
+        return (has_ground and open_air(row) and row.get("floorSupport") != "slab"
                 and abs(level_ffl.get(row.get("level"), 0.0) - grade) < 1e-6)
 
     out: dict[str, list[int]] = {}
@@ -579,8 +579,9 @@ def build_shell(layout, shapes: Shapes, stats: dict, has_ground: bool = False) -
         # here", and where they differed the slab won: `EXT_ORCHARD` declares `yOverride` 0.00 and
         # the lawn under it falls to -0.30, so the orchard stood on a 0.30 m plinth with a step
         # round it that §43.1's 0.22 m step-up could not climb. The orchard was unreachable, and
-        # so was half the east side yard. A deck -- the terrace at +0.45, the porch at +0.57 -- is
-        # in the height field too, as `terrain_gen`'s pad.
+        # so was half the east side yard. Raised built decks can explicitly name
+        # floorSupport=slab: a smoothed pad's front edge is not their actual floor
+        # and can strand normal/slow walkers just after the top tread (HOUSE-03642).
         for box in boxes_by_cell[cell["id"]]:
             x0, x1, z0, z1 = box
             for rx0, rz0, rx1, rz1 in ([] if on_the_ground(cell)
@@ -3199,6 +3200,15 @@ def selftest() -> int:
             require("EXT_SHED" not in outdoor and "L0_HALL" not in outdoor,
                     "the shed is a BUILDING and the hall is a room: neither stands on the lawn")
 
+            porch = next(row for row in house["cells"] if row["id"] == "L0_PORCH")
+            deck_support = [house_shapes.obbs[i] for i in porch["shapes"]
+                            if i < len(house_shapes.obbs)
+                            and house_shapes.obbs[i][4] == KIND_FLOOR
+                            and abs(sum((house_shapes.obbs[i][0][1], house_shapes.obbs[i][1][1])) - 0.57) < EPS]
+            require(house_cells["L0_PORCH"].get("floorSupport") == "slab" and deck_support,
+                    "HOUSE-03642: the authored timber porch has a real +0.57 deck support, "
+                    "not the heightfield's rounded/dipped front edge")
+
             require(house["stats"]["openBoundaries"] > 50,
                     f"the boundaries between one open yard and another are grass, not wall "
                     f"({house['stats']['openBoundaries']} of them)")
@@ -3317,31 +3327,58 @@ def selftest() -> int:
                     f"the stubbiest is {min(record[1][1] * 2 / max(record[1][0], record[1][2]) / 2 for record in trunks):.1f} "
                     f"times its own width, which is a trunk and not a canopy dropped on the lawn")
 
-            cars = [house_shapes.obbs[index] for index in range(len(house_shapes.obbs))
-                    if house_shapes.obbs[index][4] == KIND_EXTERIOR
-                    and house_shapes.surfaces[house_shapes.obbs[index][3]] == "vehicle"]
-            require(len(cars) == house["stats"]["vehicles"] and cars
-                    and any(abs(record[2]) > 1e-6 for record in cars),
-                    f"§11.4's parked cars are OBBs with the yaw the layout gives them "
-                    f"({len(cars)} of them, yaws "
-                    f"{sorted(round(math.degrees(record[2])) for record in cars)})")
+            # HOUSE-00847 moved vehicles into the ordinary static-prop path. Check
+            # their actual owner/proxy/yaw, not the now-empty legacy vehicle table.
+            car_rows = [row for row in layout_io.rows(layout_io.load_layout(authored, ["props"]), "props")
+                        if row["asset"].startswith(("MODEL_PARKED_CAR_", "MODEL_DELIVERY_VAN_"))]
+            missing_cars = []
+            for row in car_rows:
+                position, yaw_deg, _scale = layout_io.prop_transform(row)
+                matches = [house_shapes.obbs[index] for index in references[row["cell"]]
+                           if index < offset and house_shapes.obbs[index][4] == KIND_PROP
+                           and abs(house_shapes.obbs[index][0][0] - position[0]) < 1e-5
+                           and abs(house_shapes.obbs[index][0][2] - position[2]) < 1e-5
+                           and abs(house_shapes.obbs[index][2] - math.radians(yaw_deg)) < 1e-5]
+                if len(matches) != 1:
+                    missing_cars.append(row["id"])
+            require(len(car_rows) == 5 and not missing_cars,
+                    f"all five parked vehicles retain their owner, solid prop OBB and authored yaw "
+                    f"({missing_cars} missing/ambiguous)")
 
-            # `HOUSE-00857`: §11.4's street furniture. The claim that matters is not the count --
-            # it is that the thing outside the gate is solid.
+            # `HOUSE-00857`/`HOUSE-03643`: street furniture stays solid, but must not
+            # stand in the pedestrian gate's continuation onto the pavement.
             furniture = [house_shapes.obbs[index] for index in range(len(house_shapes.obbs))
                          if house_shapes.obbs[index][4] == KIND_EXTERIOR
                          and house_shapes.surfaces[house_shapes.obbs[index][3]] == "furniture"]
             require(len(furniture) == house["stats"]["furniture"] and furniture,
                     f"§11.4's street furniture is solid ({len(furniture)} piece(s))")
+            authored_pole = next(row for row in rows_exterior["exterior"]["neighbourhood"]
+                                 if row["id"] == "NB_POLE_03")
+            pole_x, _pole_y, pole_z = authored_pole["position"]
             pole = [record for record in furniture
-                    if abs(record[0][0]) < 0.5 and abs(record[0][2] - 0.80) < 0.5]
+                    if abs(record[0][0] - pole_x) < 0.01
+                    and abs(record[0][2] - pole_z) < 0.01]
             require(len(pole) == 1,
-                    f"...including `NB_POLE_03`, which stands 0.80 m outside §11.2's pedestrian "
-                    f"gate and is the first thing a player walks at on leaving the property "
+                    f"...including `NB_POLE_03` at its authored position ({pole_x}, {pole_z}) "
                     f"({len(pole)} shape(s) there)")
             require(pole and pole[0][1][1] * 2.0 > 3.0,
                     f"and it is a POLE: {pole[0][1][1] * 2.0:.1f} m of it, not a kerb a body walks "
                     f"over" if pole else "and it is a pole")
+
+            def blocks_gate_approach(record):
+                centre, half, yaw = record[:3]
+                across = abs(math.cos(yaw)) * half[0] + abs(math.sin(yaw)) * half[2]
+                along = abs(math.sin(yaw)) * half[0] + abs(math.cos(yaw)) * half[2]
+                return (centre[0] + across > -0.6 and centre[0] - across < 0.6
+                        and centre[2] + along > 0.0 and centre[2] - along < 2.0
+                        and centre[1] - half[1] < 1.8 and centre[1] + half[1] > 0.0)
+
+            blocked_approach = [record[0] for record in furniture if blocks_gate_approach(record)]
+            require(not blocked_approach,
+                    f"HOUSE-03643: the whole 1.20 m pedestrian approach stays clear of solid "
+                    f"street furniture ({blocked_approach})")
+            require(blocks_gate_approach(((0.0, 5.25, 0.8), (0.13, 5.25, 0.13), 0.0)),
+                    "...the clearance check rejects the original NB_POLE_03 placement")
             # Every proxy fits inside what the generator draws. The size table is the SOLID part
             # and the asset's box is everything -- a lamp's reaches 1.76 m out to a lantern 8 m up
             # -- so the test is containment and not equality, which is the direction that matters:
@@ -3387,6 +3424,8 @@ def selftest() -> int:
                 cell_row = house_cells.get(row["id"])
                 if cell_row is None or not open_air(cell_row):
                     continue
+                if cell_row.get("floorSupport") == "slab":
+                    continue          # an explicitly authored constructed deck, not terrain
                 if abs(float(house_levels[cell_row["level"]].get("ffl", 0.0)) - grade_of_house) > 1e-6:
                     continue          # a balcony: its floor is a storey up and no field carries it
                 for index in row["shapes"]:
@@ -3394,8 +3433,8 @@ def selftest() -> int:
                             and (row["id"], index) not in house["borrowed"]):
                         slabbed.append((row["id"], index))
             require(not slabbed,
-                    f"no open exterior cell on the ground storey has a floor slab: the height "
-                    f"field is what it stands on ({slabbed[:3]})")
+                    f"no terrain-supported ground exterior has a floor slab; explicitly authored "
+                    f"constructed decks alone keep one ({slabbed[:3]})")
             require(any(house_shapes.obbs[index][4] == KIND_FLOOR
                         for index in references["L1_BALCONY_REAR"] if index < offset),
                     "...and a BALCONY still has one, because its floor is 3.65 m over the lawn "

@@ -1201,6 +1201,9 @@
     },
     {
       "id": "L0_PORCH", "level": "L0", "name": "Front Porch", "kind": "exterior",
+      // A built timber deck, not the smoothed terrain pad. Its collider must meet
+      // the top tread at +0.57 even where the heightfield edge rounds down.
+      "floorSupport": "slab",
       // To Z -14.30, the foyer's interior face, and not §13.3's -14.00: the 0.30 m exterior wall
       // between them is drawn by the building and belongs to no cell, so an outdoor cell that
       // abuts the house runs to the face the front door is in. Without that the door has no plane

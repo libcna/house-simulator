@@ -1,5 +1,64 @@
 # Current owner-visible defect work — 2026-09-28
 
+## Accepted HOUSE-03642 / HOUSE-03643 — full GPU filming review running
+
+**34 ACTIVE/MUST / 78 OPT remain; next HOUSE-03572 is still OPEN.** Selection
+follows R15: the slow filming walk exposed an S1 support defect, and its required
+full regression exposed a utility pole directly in the pedestrian gate axis.
+These tightly related corrections share one checkpoint; the filming draft must
+not be staged into it or declared accepted from pure route coverage.
+
+Garage: confirm only an actual **sloping stair face** beneath a rounded edge/wall
+contact; preserve 46°/220 mm/50 mm limits and terrain/flat-step response. A broad
+support replacement regressed the terrace slider and was rejected. The recorded
+garage pose fails with old ground code; flat-step/wall, holes/reach and stair
+controls protect the boundary. Porch: `floorSupport: slab` retains its real flat
++0.57 m timber-deck collider using the existing floor builder/schema. Gate:
+NB_POLE_03's full-height column was at x=0/z=0.8, stopping the capsule at z=1.23.
+The existing pole/lantern/span grid and nine emitters move +2.4 m in X, retaining
+assets, spacing, endpoints and solid collision. Do not relax the route test.
+
+Final six real-game Radeon/OPENGLES3 input crossings pass and were visually
+reviewed: garage slow/normal up/down, centred normal porch entry, gate both ways.
+Retained **89 frames** with before/after sequences and hashes:
+`docs/visual-review/house-03642/index.json`; explanation:
+`docs/visual-review/house-03642-support.md`. Porch before uses x=0.5, after x=0:
+not a falsely claimed pixel-matched pair. The pole is invisible because the
+separate neighbourhood renderer is **OPTIONAL**, explicitly noted by HOUSE-00847;
+the correction does not activate that scope. Stale collision selftest claims now
+check the five real prop-owned vehicle proxies and the explicit deck exception.
+
+Fast GrandTour **90 cells / 564 stops / 92798 steps / 19 detours**, unchanged test;
+slow filming policy **90 views / 294080 steps**. Current combined draft tree unit
+**1513/1513**, strict-XNA **349 units** clean; full static gate fails only inherited
+owner-owned `.claude` layout. World rebuild: 14 built/2 fresh, collision and
+neighbourhood selftests/deployment green. Logs `/tmp/house-03643-{sloping-tours,
+final-focused,final-gpu,final-units,static,world,collision,neighbourhood}.log`.
+No FPS claim, sibling change, new build directory or physical monitor window.
+
+HOUSE-03572 draft: one optional-compatible data route in initialstate.json,
+2422 points/90 room panoramas, existing capsule/controller and camera only.
+C joins the nearest capsule-clear same-cell point and walks one **forward circuit**;
+C stops in place, Esc pauses/stops, head bob/HUD are suppressed only while active.
+12 s no-progress stop never teleports/skips. Pure route and short GPU C/control-
+return checks pass; **complete GPU capture is running, not yet accepted** under
+`/tmp/house-03572-final-gpu.log`, session 55878. Do not start another GPU capture
+while it runs (shared screenshot root). Its output will become
+`build/test-output/cinema-review/{frames.tsv,*.png}`. Review the full sequence,
+every room panorama and stair/threshold movement before closing the task.
+Rejected reverse-start and intentionally interrupted old-grid drafts remain
+local under `cinema-review-rejected-reverse` / `cinema-review-interrupted-grid-before`.
+
+Remaining nominal **53.25 agent-hours**, rough **55–70** with a pessimistic case
+around 77–80. Owner withdrew the aggregate ceiling; this is not a new budget gate.
+Compilers/strict use **two workers**, CPU affinity 0–3, shared ccache/existing build.
+The original car/quality/audio stashes are untouched. Read-only current audio
+discovery: `pactl info` **succeeds** on owner PipeWire/PulseAudio; default real
+speaker sink exists. The old blanket no-audio-server assumption is false now.
+Production HEAD still has no footstep playback/ambience wiring; keep both audio
+tasks open and restore/review their existing draft after filming, not blame the
+owner's silence solely on absent `/dev/snd`. No sound has been played by this probe.
+
 ## Accepted HOUSE-03641 — next HOUSE-03572 filming tour
 
 **34 ACTIVE/MUST / 78 OPT remain.** Selection follows the explicit owner additions

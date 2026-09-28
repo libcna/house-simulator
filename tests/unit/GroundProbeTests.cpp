@@ -155,6 +155,55 @@ TEST(GroundProbeTests, OverAHoleIsNotOnTheGround)
     EXPECT_EQ(ground.cellId, "L0_PROBE") << "the cell is known whether or not the ground is";
 }
 
+TEST(GroundProbeTests, WallContactCannotHideTheRealSupportingFloor)
+{
+    const auto wall = Box(Vector3(0.55F, 1.0F, 0.0F), Vector3(0.25F, 1.0F, 3.0F), CollisionKind::Wall);
+    const auto world = OneCell({wall, Slab(0.0F, -6.0F, 6.0F, CollisionKind::Floor, 1u)});
+    BroadPhase broad;
+    const auto ground = GroundProbe(world, world.cells[0], broad, Body(0.0F, 0.002F));
+    ASSERT_TRUE(ground.onGround);
+    EXPECT_FALSE(ground.steep);
+    EXPECT_EQ(ground.kind, CollisionKind::Floor);
+    EXPECT_EQ(ground.surface, 1u);
+    EXPECT_NEAR(ground.height, 0.0F, 1.0e-4F);
+    const auto hole = OneCell({wall});
+    EXPECT_FALSE(GroundProbe(hole, hole.cells[0], broad, Body(0.0F, 0.002F)).onGround);
+    const auto tooFar = OneCell({wall, Slab(-0.10F, -6.0F, 6.0F, CollisionKind::Floor)});
+    EXPECT_FALSE(GroundProbe(tooFar, tooFar.cells[0], broad, Body(0.0F, 0.002F)).onGround);
+}
+
+TEST(GroundProbeTests, SlowGarageStepEdgeKeepsItsWalkableSupport)
+{
+    const std::string path = std::string(CNAHOUSE_TEST_CONTENT_ROOT) + "/world/collision.bin";
+    System::IO::FileStream stream(path, System::IO::FileMode::Open, System::IO::FileAccess::Read);
+    const auto world = CollisionLoader::Read(stream, path);
+    ASSERT_TRUE(world);
+    const auto* cell = world->Cell("L0_GARAGE");
+    ASSERT_NE(cell, nullptr);
+    BroadPhase broad;
+    const Capsule body{Vector3(9.087337494F, 1.345744252F, -16.36265945F), kBodyHalfHeight, kBodyRadius};
+    const auto ground = GroundProbe(*world, *cell, broad, body);
+    ASSERT_TRUE(ground.onGround);
+    EXPECT_FALSE(ground.steep);
+    EXPECT_EQ(ground.kind, CollisionKind::Stair);
+    EXPECT_GT(ground.normal.Y, 0.89F);
+    EXPECT_LT(ground.distance, cnahouse::physics::kGroundProbeReach);
+}
+
+TEST(GroundProbeTests, FlatStepTopDoesNotOverrideTheEstablishedWallContact)
+{
+    // The ramp correction must not reinterpret a doorway contact merely because
+    // a flat step is under its centre. That changed the terrace slider response
+    // in the full controller tour. Only a genuinely sloping stair face qualifies.
+    const auto wall = Box(Vector3(0.52F, 1.0F, 0.0F), Vector3(0.25F, 1.0F, 3.0F), CollisionKind::Wall);
+    const auto world = OneCell({wall, Slab(0.0F, -6.0F, 6.0F, CollisionKind::Stair, 1u)});
+    BroadPhase broad;
+    const auto ground = GroundProbe(world, world.cells[0], broad, Body(0.0F, 0.002F));
+    EXPECT_FALSE(ground.onGround);
+    EXPECT_TRUE(ground.steep);
+    EXPECT_EQ(ground.kind, CollisionKind::Wall);
+}
+
 TEST(GroundProbeTests, JustOutOfReachIsNotOnTheGroundEither)
 {
     // 0.05 m is the whole of the question. At 0.04 m over the floor the body is standing; at

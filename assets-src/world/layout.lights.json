@@ -2533,12 +2533,13 @@
     },
 
     // ---- LG_EXT_STREET x9 -- §11.4's street lights on the dusk sensor, 25 m apart along the
+    // ---- HOUSE-03643 shifts the coherent row +2.4 m clear of the pedestrian gate;
     // ---- kerb at Z +1.50 and 8.00 m up. One of them stands in front of the house, in `EXT_ROAD`;
     // ---- the other eight are past the plot boundary and belong to `EXT_WORLD`, which is where
     // ---- the road actually continues.
     {
       "id": "LIGHT_EXT_STREET_1", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
-      "type": "point", "position": [-100.00, 8.00, 1.50],
+      "type": "point", "position": [-97.60, 8.00, 1.50],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "bulbClass": "led", "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
@@ -2547,7 +2548,7 @@
     },
     {
       "id": "LIGHT_EXT_STREET_2", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
-      "type": "point", "position": [-75.00, 8.00, 1.50],
+      "type": "point", "position": [-72.60, 8.00, 1.50],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "bulbClass": "led", "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
@@ -2556,7 +2557,7 @@
     },
     {
       "id": "LIGHT_EXT_STREET_3", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
-      "type": "point", "position": [-50.00, 8.00, 1.50],
+      "type": "point", "position": [-47.60, 8.00, 1.50],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "bulbClass": "led", "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
@@ -2565,7 +2566,7 @@
     },
     {
       "id": "LIGHT_EXT_STREET_4", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
-      "type": "point", "position": [-25.00, 8.00, 1.50],
+      "type": "point", "position": [-22.60, 8.00, 1.50],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "bulbClass": "led", "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
@@ -2574,7 +2575,7 @@
     },
     {
       "id": "LIGHT_EXT_STREET_5", "cell": "EXT_ROAD", "group": "LG_EXT_STREET",
-      "type": "point", "position": [0.00, 8.00, 1.50],
+      "type": "point", "position": [2.40, 8.00, 1.50],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "bulbClass": "led", "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
@@ -2583,7 +2584,7 @@
     },
     {
       "id": "LIGHT_EXT_STREET_6", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
-      "type": "point", "position": [25.00, 8.00, 1.50],
+      "type": "point", "position": [27.40, 8.00, 1.50],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "bulbClass": "led", "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
@@ -2592,7 +2593,7 @@
     },
     {
       "id": "LIGHT_EXT_STREET_7", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
-      "type": "point", "position": [50.00, 8.00, 1.50],
+      "type": "point", "position": [52.40, 8.00, 1.50],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "bulbClass": "led", "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
@@ -2601,7 +2602,7 @@
     },
     {
       "id": "LIGHT_EXT_STREET_8", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
-      "type": "point", "position": [75.00, 8.00, 1.50],
+      "type": "point", "position": [77.40, 8.00, 1.50],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "bulbClass": "led", "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
@@ -2610,7 +2611,7 @@
     },
     {
       "id": "LIGHT_EXT_STREET_9", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
-      "type": "point", "position": [100.00, 8.00, 1.50],
+      "type": "point", "position": [102.40, 8.00, 1.50],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "bulbClass": "led", "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",

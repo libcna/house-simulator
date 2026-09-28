@@ -4,6 +4,7 @@
 #include <algorithm>
 
 #include "cnahouse/physics/BroadPhase.hpp"
+#include "cnahouse/physics/RayCast.hpp"
 
 namespace cnahouse::physics
 {
@@ -32,6 +33,7 @@ namespace cnahouse::physics
         // Whichever is nearer. A body on a terrace has the slab under it and the lawn under that,
         // and the one it is standing on is the slab.
         bool useTerrain = false;
+        std::uint32_t shape = shapes.shape;
         SweepHit best;
         if (shapes.hit)
         {
@@ -45,6 +47,36 @@ namespace cnahouse::physics
         if (!best.hit)
         {
             return result; // over nothing within reach: §43.1's gravity is the caller's next move
+        }
+
+        // The capsule can touch a rounded step edge or adjacent wall before its
+        // downward sweep reaches a supporting stair ramp. Confirm that actual
+        // ramp within the SAME probe reach; never widen the slope limit. Do not
+        // change terrain or flat-doorway contact response: overriding those
+        // contacts changes the controller's established step/slide behaviour.
+        if (!useTerrain && !IsWalkable(best.normal))
+        {
+            constexpr float lift = 0.002F;
+            const auto support =
+                RayCastCell(world,
+                            cell,
+                            broad,
+                            Xna::Vector3(capsule.centre.X, capsule.Bottom() + lift, capsule.centre.Z),
+                            Xna::Vector3(0.0F, -1.0F, 0.0F),
+                            reach + lift);
+            const std::size_t obbCount = world.obbs.size();
+            const bool stairSupport =
+                support.shape < obbCount
+                    ? world.obbs[support.shape].kind == CollisionKind::Stair
+                    : support.shape - obbCount < world.meshes.size() &&
+                          world.meshes[support.shape - obbCount].kind == CollisionKind::Stair;
+            if (support.hit && stairSupport && IsWalkable(support.normal) && support.normal.Y < 0.9999F)
+            {
+                best.normal = support.normal;
+                best.startedInside = false;
+                best.time = std::max(0.0F, support.distance - lift) / reach;
+                shape = support.shape;
+            }
         }
 
         result.normal = best.normal;
@@ -65,15 +97,14 @@ namespace cnahouse::physics
         else
         {
             const std::size_t obbCount = world.obbs.size();
-            if (shapes.shape < obbCount)
+            if (shape < obbCount)
             {
-                result.surface = world.obbs[shapes.shape].surface;
-                result.kind = world.obbs[shapes.shape].kind;
+                result.surface = world.obbs[shape].surface;
+                result.kind = world.obbs[shape].kind;
             }
-            else if (shapes.shape != CellSweepHit::kNothing &&
-                     (shapes.shape - obbCount) < world.meshes.size())
+            else if (shape != CellSweepHit::kNothing && (shape - obbCount) < world.meshes.size())
             {
-                const CollisionMesh& mesh = world.meshes[shapes.shape - obbCount];
+                const CollisionMesh& mesh = world.meshes[shape - obbCount];
                 result.surface = mesh.surface;
                 result.kind = mesh.kind;
             }

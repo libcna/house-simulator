@@ -141,6 +141,12 @@
           "floorMaterial": {
             "$ref": "#/$defs/idOrNull"
           },
+          "floorSupport": {
+            "enum": [
+              "terrain",
+              "slab"
+            ]
+          },
           "footstepSurface": {
             "anyOf": [
               {

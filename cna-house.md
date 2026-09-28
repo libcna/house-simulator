@@ -1025,6 +1025,9 @@ Neighbourhood composition (all non-enterable):
 * Street furniture: 9 street lights (on a dusk sensor), 5 utility poles with catenary wires,
   4 stop/street signs, 12 mailboxes, 3 parked cars, 2 rubbish-bin clusters (only on the
   in-fiction collection day), a basketball hoop on a neighbour's drive.
+  `HOUSE-03643` translates the existing pole/lantern/span grid +2.4 m along X:
+  the central pole must stand beside, not on, the pedestrian gate approach at X=0.
+  Spacing, models, wire endpoints and lantern/emitter alignment remain unchanged.
 * Vegetation: 34 street trees, 60 shrubs, hedges as extruded strips.
 * Far background: a low tree-line ridge and a distant water tower on the horizon ring.
 

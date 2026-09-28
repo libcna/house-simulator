@@ -12,7 +12,7 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers and a reusable kit), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (2026-09-22 reduction, retained breadth and maintenance mode; its former hour ceiling is superseded below) |
 | Scope policy | The owner explicitly superseded the former 280-hour ceiling on 2026-09-27 and requested further targeted corrections and a filming tour. Keep MUST/OPT boundaries explicit; do not infer other features |
-| Active plan | **34 open MUST tasks** in 16 milestones, including the owner-requested filming tour. Every active task's title and acceptance states the current work |
+| Active plan | **34 open MUST tasks** in 16 milestones, including the owner-requested filming tour. Its reproduced grounding/entrance blockers are corrected. Every active task's title and acceptance states the current work |
 | Estimate to DONE | The old **44.84 / 52.75 / 76.03 agent-hour** forecast is a historical snapshot before the 2026-09-27 owner additions, not a current forecast or scheduling gate. Per-task `est:` remains for task sizing; see [Planning corrections](#planning-corrections) |
 | Current gate | **G5, M7 and M12 passed; M9 reopened for the owner-requested filming tour. CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator.** Main/attic/basement stairs, garage-loft floor and whole-house lighting are corrected under `HOUSE-03635`/`03638`/`03639`/`03636`; doorway flashes and visibility/wall holes are corrected under `HOUSE-03637`/`03640`, including the owner's precise foyer/stair corner-gap screenshot after reopening and new GPU verification. The existing car family is corrected under `HOUSE-03641`; next is filming tour `HOUSE-03572`. Desktop performance `HOUSE-02404` stays paused. `HOUSE-01920`/`HOUSE-01922` remain open; the owner reports the normal game is silent despite enabled audio |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
@@ -1277,7 +1277,7 @@ existing walk/controller path, not another menu or a reusable cinematic framewor
       note: (2026-09-25) `SettingsRoundTripTests` now prove all 22 persisted fields through the production JSON writer/reader, both endpoints of every bounded numeric setting plus the empty fixed-weather fallback, and all 15 retained settings-page rows. Each page row is mutated before its existing live-apply callback sees the committed value; no second application path or settings subsystem was introduced. The focused 3/3 tests and complete 1,471/1,471 unit suite pass.
 
 - [ ] HOUSE-03572 — `C` toggles a complete Linux filming tour of the property
-      dep: HOUSE-03638, HOUSE-03639, HOUSE-03640, HOUSE-03635, HOUSE-03636 · sys: player, app · plat: LNX · pri: MUST · zone: all · adv: D8 · est: 8
+      dep: HOUSE-03638, HOUSE-03639, HOUSE-03640, HOUSE-03635, HOUSE-03636, HOUSE-03642, HOUSE-03643 · sys: player, app · plat: LNX · pri: MUST · zone: all · adv: D8 · est: 8
       accept: (1) from normal play, `C` starts/stops a camera-friendly automatic walk; (2) a deliberate sequence shows the street, front and rear grounds, garage, basement, ground floor, both upper floors, attic and every intended-accessible room without teleporting, clipping, getting stuck or omitting a zone; (3) view direction and pace make each space legible for a recorded video, without a new gameplay framework or generalized cutscene editor; (4) ordinary controls return cleanly when stopped or completed; (5) Linux capture proves one complete tour, and a focused route test protects zone/cell coverage
       verify: actual offscreen-rendered full tour with frame/video review, coverage log and a focused input/route regression
       note: (2026-09-27 owner addition) This filming mode was formerly an unnumbered optional idea, but the owner explicitly requested it for a whole-house YouTube walkthrough. Reuse the existing player input, navigation and grand-tour knowledge; implement only this one bounded route, not a generic cinematic system. Schedule after the reported traversal and visibility defects.
@@ -1407,6 +1407,20 @@ There is no zone rotation, no "polish everything" pass and no screenshot → twe
       verify: deterministic asset/provenance and prop-placement checks, actual offscreen GPU garage/street screenshots
       note: (2026-09-27 owner request) The previous `HOUSE-00847` deliberately delivered 248/212-triangle low-detail bodies for C3 breadth. The owner now reports they noticeably spoil the finished house; this is a targeted visual correction, not permission to add vehicle gameplay or a large asset family.
       done: (2026-09-28) Existing three estate tints/one van now have separate rounded tyres/rims, true arch voids, tapered glazing, painted cab/cargo proportions and bounded existing-material detail. Same placements, 12-triangle collision proxies, textures and static behaviour; 1980/1852 visible triangles, estate width 1.98 m. Final normal Radeon GPU day/night garage/street/approach captures (14 matched pairs plus two van views) are reviewed; excessive van glazing and an over-width draft were rejected before acceptance. Fresh garage artificial/day bakes, manifest/licence/budget reports and complete content deployment pass. Unit 1507/1507, 90-cell controller tour, source/chunk/scale regressions and 344 strict-XNA units pass; full static gate retains only owner-owned .claude layout failure. Measured resident chunks 1389→1391 and upload 93.636178970→94.231348038 MiB; exactly one reused red-lamp group in each of L0_GARAGE/EXT_WORLD is documented/tested, not a blanket budget relaxation. No FPS improvement claim or monitor window. Evidence: docs/visual-review/house-03641-cars.md.
+
+- [x] HOUSE-03642 — Keep real supporting floors when a slow capsule meets a step edge
+      dep: HOUSE-03639 · sys: physics, player · plat: ALL · pri: MUST · zone: Z-GAR, Z-EXT · adv: D2, D11 · est: 1.5
+      accept: slow/normal controller movement must cross the garage→mudroom steps without the reproduced repeated backwards depenetration; support detection must not confuse a rounded edge/wall normal with the real floor below the capsule; retain the 46° slope, 0.22 m step and 0.05 m probe limits, reject real holes/steep slopes, and check the representative porch route at normal walk too
+      verify: before-failing support claims, complete controller tour, current normal GPU movement through the garage steps and porch, unit/static checks
+      note: (2026-09-28 R15 correction) HOUSE-03572's slow real-controller walk stops after 36 views at garage route point 850, feet x≈9.10/y≈0.44. Current captured fixed steps repeatedly advance then push back by the existing 20 mm depenetration. This is D2/C1/S1, not a filming feature or permission to increase physical tolerances. The fast GrandTour missed it. Diagnose/fix this dependency before closing the filming task.
+      done: (2026-09-28) GroundProbe confirms an actual sloping stair face beneath a rounded edge/wall contact, within the unchanged 50 mm probe; slope 46°, step 220 mm, terrain and flat-step responses stay unchanged. A broader replacement regressed the terrace slider and was rejected; a flat-step/wall claim protects the final narrow boundary. L0_PORCH now explicitly retains its real +0.57 m constructed floor collider instead of relying on a smoothed heightfield edge. The recorded garage pose fails before/passes after; six actual Radeon/OPENGLES3 normal-input crossings pass (garage slow/normal up/down, porch, gate both ways), with complete before/after sequences reviewed and retained. Complete fast tour passes 90 cells/564 stops/92798 steps/19 detours; slow controller tour passes 90 views/294080 steps. Current tree unit 1513/1513 and 349 strict-XNA units pass; full static gate retains only inherited owner-owned .claude layout failure. No GrandTour steering/tolerance or sibling source changed. Evidence: docs/visual-review/house-03642-support.md. Shares the checkpoint with HOUSE-03643, discovered by its required full-route validation; filming itself remains OPEN.
+
+- [x] HOUSE-03643 — Clear the pedestrian approach of the misplaced utility pole
+      dep: HOUSE-03640 · sys: content · plat: ALL · pri: MUST · zone: Z-STR · adv: D2, D13 · est: 0.75
+      accept: the existing NB_POLE_03 must not stand directly in the gate's walking axis; move the existing coherent pole/lantern/wire row rather than weaken collision or add assets; keep lantern/emitter and span endpoints aligned; normal controller entry/exit and the whole-house tour pass; inspect actual GPU road/gate views
+      verify: before-failing placement clearance claim, generated neighbourhood/collision/content checks, normal-input GPU crossings and complete controller tour
+      note: (2026-09-28 R15 correction) Current GrandTour stops on global OBB 1966, centre (0,5.25005,0.8), half extents (0.13,5.25,0.13), at feet z=1.23. This is NB_POLE_03, not a curb or a grounding defect. The original Ground.cpp also fails against this placement. D2/C1/S1 requires a naturally clear pedestrian approach; do not repair this by weakening the tour or removing the column collider.
+      done: (2026-09-28) Existing five-pole/four-lantern/four-span grid and all nine corresponding emitters move +2.4 m in X, preserving spacing, wire endpoints, assets and full-height solid collision. The full 1.20 m pedestrian approach clearance claim rejects the original column placement; collision and neighbourhood selftests, content rebuild/deployment and complete controller tours pass. Actual before GPU W-equivalent input stops at z=1.23; identical starting pose after crosses into EXT_WALK, and the reverse reaches EXT_ROAD at normal walk. Frames are reviewed and retained with source hashes. The separate neighbourhood renderer remains explicitly OPTIONAL, as HOUSE-00847 records; this task clears the existing invisible collider from the required path, not activates that renderer. Shared checkpoint checks are recorded above; no asset addition, collision waiver, benchmark claim or monitor window. Evidence: docs/visual-review/house-03642-support.md.
 
 - [ ] HOUSE-03631 — The bounded fix pass
       dep: HOUSE-02714, HOUSE-03634 · sys: — · plat: LNX · pri: MUST · zone: all · adv: D2, D4, D13, D14 · est: 1.25
@@ -2286,6 +2300,25 @@ under R5.
 ---
 
 ## Planning corrections
+
+### PC-2026-09-28 — Real contact measurement finds a utility pole in the gate approach
+
+* Add ACTIVE/MUST `HOUSE-03643` (0.75 h), a D2/C1/S1 placement correction and
+  dependency of `HOUSE-03572`. The measured road obstruction is the 0.26 m-wide
+  NB_POLE_03 at x=0/z=0.8, directly on the pedestrian gate/front-walk axis.
+  Shift the existing coherent street-furniture grid rather than invent new assets,
+  break wire/lantern alignment, waive traversal, or change collision tolerances.
+  Temporary detour/query experiments did not solve it and will not be retained.
+
+### PC-2026-09-28 — Slow filming walk exposes incorrect grounding at a step edge
+
+* Add ACTIVE/MUST `HOUSE-03642` (1.5 h) and make it a dependency of `HOUSE-03572`.
+  The actual controller's slow garage return reaches a repeating advance/fall/
+  20 mm pushback cycle, despite the fast historical tour. This violates D2/C1/S1.
+  A steep rounded capsule contact must not hide a real walkable supporting face
+  directly below it within the unchanged probe reach. Check the audit's normal
+  porch report too; no teleport, fast-walk-only workaround or slope/step inflation.
+  This is a targeted existing-DONE correction, not an optional expansion.
 
 ### PC-2026-09-28 — Owner screenshot reopens the foyer/stair wall seam
 

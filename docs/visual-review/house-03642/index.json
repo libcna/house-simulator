@@ -1,0 +1,718 @@
+{
+  "renderer": "Radeon 780M / OPENGLES3, SDL offscreen/EGL surfaceless",
+  "note": "Final sloping-ramp-only support, constructed porch deck, translated pole grid. Porch before uses x=0.5 and after x=0: approach evidence, not pixel-matched frames. Before deck edge trap precedes the doorway jamb. Gate before/after start at the same pose; before stops z=1.23, after crosses both ways. Neighbourhood meshes are not drawn by the current runtime: the original pole obstruction is invisible. HOUSE-00847 explicitly records that renderer as OPTIONAL; clearing the required walking axis does not activate it.",
+  "frames": [
+    {
+      "case": "garage-before",
+      "sequence": 0,
+      "source": "build/test-output/house-03642-before/garage-slow-up/0.png",
+      "sourceSha256": "3f30eb2d50077189d7158cd9a8e3bda031fc20edb954ead82ea4d846f097bc9d",
+      "retained": "docs/visual-review/house-03642/garage-before/000.webp",
+      "retainedSha256": "a420e7af60832dea6ec39509fe9b8090957eb4cc816a23a169293b048f589ba6"
+    },
+    {
+      "case": "garage-before",
+      "sequence": 1,
+      "source": "build/test-output/house-03642-before/garage-slow-up/1.png",
+      "sourceSha256": "8d03399f9697c37489fb89decf8e14dd69ae7da2b1de20b863571f67836ef6b3",
+      "retained": "docs/visual-review/house-03642/garage-before/001.webp",
+      "retainedSha256": "f093dd0af20edb33cb5a40d3084d9d4d9d0c57c6f9573fe492318238ba8caf82"
+    },
+    {
+      "case": "garage-before",
+      "sequence": 2,
+      "source": "build/test-output/house-03642-before/garage-slow-up/2.png",
+      "sourceSha256": "acaa0b95c8342203c10a9af9143de24d6e8caca530f4c2e3057ab46ce195795b",
+      "retained": "docs/visual-review/house-03642/garage-before/002.webp",
+      "retainedSha256": "8288c0a850d6be9fc5173f65b05ee87c3780c3187f46d7af0359602636b26a8e"
+    },
+    {
+      "case": "garage-before",
+      "sequence": 3,
+      "source": "build/test-output/house-03642-before/garage-slow-up/3.png",
+      "sourceSha256": "d426ba4f42b8c93483bbdbdd0c45381efe3b22c6bfdd1ee40059ea704fbd56f6",
+      "retained": "docs/visual-review/house-03642/garage-before/003.webp",
+      "retainedSha256": "856abfc0d432eb076909811fa32fd6cd82d36386252bca66541ce8cf33108bd4"
+    },
+    {
+      "case": "garage-before",
+      "sequence": 4,
+      "source": "build/test-output/house-03642-before/garage-slow-up/4.png",
+      "sourceSha256": "33e3094d51c80b2dd71b373eea30826b29fc9eda54982b5d6436cb97f86163c8",
+      "retained": "docs/visual-review/house-03642/garage-before/004.webp",
+      "retainedSha256": "feb67e8e3100c95830e6e2f42fe4a58f42a344f34eaa04d7330fb5a82182e797"
+    },
+    {
+      "case": "garage-before",
+      "sequence": 5,
+      "source": "build/test-output/house-03642-before/garage-slow-up/5.png",
+      "sourceSha256": "39f086e821bd98acb6fb5baf6c58d680d366d85ed3d570d9624bae5732c6f799",
+      "retained": "docs/visual-review/house-03642/garage-before/005.webp",
+      "retainedSha256": "477008b8d4157fd5bd09233d7314d626ed005f00a9bb49110a7b119dddc85618"
+    },
+    {
+      "case": "garage-before",
+      "sequence": 6,
+      "source": "build/test-output/house-03642-before/garage-slow-up/6.png",
+      "sourceSha256": "07380f8b251853452ecdd65a0ceb311283c41c52de430886b7981dcdd7c19017",
+      "retained": "docs/visual-review/house-03642/garage-before/006.webp",
+      "retainedSha256": "177cc353214176ce57f65ca231166f43c84a0a91cd86dfacdb0414651d296c13"
+    },
+    {
+      "case": "garage-before",
+      "sequence": 7,
+      "source": "build/test-output/house-03642-before/garage-slow-up/7.png",
+      "sourceSha256": "62ea3c03906ed3883be80935934f58dceef2353383cac48f6cd80a6df398a5f3",
+      "retained": "docs/visual-review/house-03642/garage-before/007.webp",
+      "retainedSha256": "42c9461d3239fab385decb8c993ae514b5ebd7a9753da236f913e3ce48cb228b"
+    },
+    {
+      "case": "garage-before",
+      "sequence": 8,
+      "source": "build/test-output/house-03642-before/garage-slow-up/8.png",
+      "sourceSha256": "876caf8d4649727a90410f496511c40bf73192a6f0afc33064427f6ccf6e1397",
+      "retained": "docs/visual-review/house-03642/garage-before/008.webp",
+      "retainedSha256": "90ba6b68d3f07f35941ec7d03757aad78d8a366d7a7574f2ef2211342564b7bb"
+    },
+    {
+      "case": "garage-before",
+      "sequence": 9,
+      "source": "build/test-output/house-03642-before/garage-slow-up/9.png",
+      "sourceSha256": "2bad30812f3314045d1e1d9c6cb7e06e858e58ec900eecfe9047aca34f8a3794",
+      "retained": "docs/visual-review/house-03642/garage-before/009.webp",
+      "retainedSha256": "2a75885dbca1003dc2e4ea2b32e7e3e88ddd53bb6e881e653475bb18578c809e"
+    },
+    {
+      "case": "garage-before",
+      "sequence": 10,
+      "source": "build/test-output/house-03642-before/garage-slow-up/10.png",
+      "sourceSha256": "e81caaefcdfc8c6273901839410542290b5c3a8ddc175bb069acf2bac4ff9b50",
+      "retained": "docs/visual-review/house-03642/garage-before/010.webp",
+      "retainedSha256": "155ae43a0d7f44348852b27212d4fa39df93298efb92e2e6a1e84451f2f328fe"
+    },
+    {
+      "case": "garage-before",
+      "sequence": 11,
+      "source": "build/test-output/house-03642-before/garage-slow-up/11.png",
+      "sourceSha256": "29f6c96f67d49f9354e091e18bcca3f0195105b8e9d6ace3228e3c1ab698246f",
+      "retained": "docs/visual-review/house-03642/garage-before/011.webp",
+      "retainedSha256": "08a744846bd2b6aa5bbeccb180dd5671815f90cb555791f9e5e0d0ab8de171f6"
+    },
+    {
+      "case": "garage-before",
+      "sequence": 12,
+      "source": "build/test-output/house-03642-before/garage-slow-up/12.png",
+      "sourceSha256": "5db508581b9cc6dc13796ed3ccbcca5d940fa29ce83a6b80d494d92e811e2cfe",
+      "retained": "docs/visual-review/house-03642/garage-before/012.webp",
+      "retainedSha256": "21c358ac44d14e4fac2fdcffe0b5ead7a0d3f103a04a8035dbff438917d50057"
+    },
+    {
+      "case": "garage-before",
+      "sequence": 13,
+      "source": "build/test-output/house-03642-before/garage-slow-up/13.png",
+      "sourceSha256": "496bf49873bc6a790a87160641927c5a3179d5051d4534106f9d89efddb359ff",
+      "retained": "docs/visual-review/house-03642/garage-before/013.webp",
+      "retainedSha256": "45aacc96a9fc575f4f81efe9454c1299d7e0385e5005fce2f1a3bf411f3a1ed9"
+    },
+    {
+      "case": "garage-before",
+      "sequence": 14,
+      "source": "build/test-output/house-03642-before/garage-slow-up/14.png",
+      "sourceSha256": "a2c76c694b4c29f04d7210169be98877a62424421e2a729ccb1097a1e79ebbe7",
+      "retained": "docs/visual-review/house-03642/garage-before/014.webp",
+      "retainedSha256": "df323e4e94b715625d0cf2cbb345eaa0fa1652d9cfdb84d821a22cd558f9cd0b"
+    },
+    {
+      "case": "garage-before",
+      "sequence": 15,
+      "source": "build/test-output/house-03642-before/garage-slow-up/15.png",
+      "sourceSha256": "5434d7c06622e18ea70a3158140c7756240e9a60b9d0629980251876a575b6d1",
+      "retained": "docs/visual-review/house-03642/garage-before/015.webp",
+      "retainedSha256": "fc3879396ac7f9f7ee7231a26c23d5ab371494386e68f4eadf76e407feaf9bdb"
+    },
+    {
+      "case": "garage-before",
+      "sequence": 16,
+      "source": "build/test-output/house-03642-before/garage-slow-up/16.png",
+      "sourceSha256": "0b4d932d65c297e020f5f22bba7b6cf914824c1b3d852966bc8c590658c07938",
+      "retained": "docs/visual-review/house-03642/garage-before/016.webp",
+      "retainedSha256": "7a7db6349b2344f79d53399f59903fea3ac47aa323f499ca6df61492d200a848"
+    },
+    {
+      "case": "garage-before",
+      "sequence": 17,
+      "source": "build/test-output/house-03642-before/garage-slow-up/17.png",
+      "sourceSha256": "c466a3c936c08656290a9561ea650e2b6d5348c10656a75415617b30d44817e2",
+      "retained": "docs/visual-review/house-03642/garage-before/017.webp",
+      "retainedSha256": "f4c51d781f8d2231c08fea770dcb3b2f1aaf0617db11d5c27439c25afacfdd74"
+    },
+    {
+      "case": "garage-before",
+      "sequence": 18,
+      "source": "build/test-output/house-03642-before/garage-slow-up/18.png",
+      "sourceSha256": "88682615e6444f14ea6e1ad7ef923c33705401cfeceaf88290638b2900c8223a",
+      "retained": "docs/visual-review/house-03642/garage-before/018.webp",
+      "retainedSha256": "6504817d05be2e260fbacd1c7e7f2fd2bf75a15759a77b95a88a78382944b651"
+    },
+    {
+      "case": "garage-before",
+      "sequence": 19,
+      "source": "build/test-output/house-03642-before/garage-slow-up/19.png",
+      "sourceSha256": "52ff417478e0c7b8a80fe75ac0a55233e9ca002f77897e5986665eb097be4c5f",
+      "retained": "docs/visual-review/house-03642/garage-before/019.webp",
+      "retainedSha256": "75c297412e23bfb51ce0814279ccfd5903169b80ecc4da6049de961e0162e3db"
+    },
+    {
+      "case": "porch-before-offset-approach",
+      "sequence": 0,
+      "source": "build/test-output/house-03642-ground-only-intermediate/porch-normal-up/0.png",
+      "sourceSha256": "4c64ce5383b124f37130557c9aaedb80cc90ae154899d9fbbe38dc472665a748",
+      "retained": "docs/visual-review/house-03642/porch-before-offset-approach/000.webp",
+      "retainedSha256": "82928111e1d5ec4b6ccf69518b871ddef83f848f8ee5d19b7e85d661761cc889"
+    },
+    {
+      "case": "porch-before-offset-approach",
+      "sequence": 1,
+      "source": "build/test-output/house-03642-ground-only-intermediate/porch-normal-up/1.png",
+      "sourceSha256": "ff256cefc6358e53a2d6c81444af93e83f7c8995a377b7407046a31d6a742d78",
+      "retained": "docs/visual-review/house-03642/porch-before-offset-approach/001.webp",
+      "retainedSha256": "1f7fe8740d9ecb90d91b8af7e5eb1f71987e453fc722b4e5d9f8518a27731db9"
+    },
+    {
+      "case": "porch-before-offset-approach",
+      "sequence": 2,
+      "source": "build/test-output/house-03642-ground-only-intermediate/porch-normal-up/2.png",
+      "sourceSha256": "cb7857200caaf041463c79dd800708ca19fd31d77edac304df2e8787aa0e8090",
+      "retained": "docs/visual-review/house-03642/porch-before-offset-approach/002.webp",
+      "retainedSha256": "f6d932ddcec2faae8a8bbf6a46ecbda4214cd8ad09b3fded0c5614f8a2780d37"
+    },
+    {
+      "case": "porch-before-offset-approach",
+      "sequence": 3,
+      "source": "build/test-output/house-03642-ground-only-intermediate/porch-normal-up/3.png",
+      "sourceSha256": "64ea95e997adfe9f2433f3faee48b6ce3afcb33a7e89cd3a5d6707c4bd31118f",
+      "retained": "docs/visual-review/house-03642/porch-before-offset-approach/003.webp",
+      "retainedSha256": "cd5f56c9dc283ba8f108498cf9134727d621ca6646d3486706dbf9d74c1fc74e"
+    },
+    {
+      "case": "porch-before-offset-approach",
+      "sequence": 4,
+      "source": "build/test-output/house-03642-ground-only-intermediate/porch-normal-up/4.png",
+      "sourceSha256": "5c4266b5a55be71215f66a92f2ed1a19952662f011795ef292864220bcbb8561",
+      "retained": "docs/visual-review/house-03642/porch-before-offset-approach/004.webp",
+      "retainedSha256": "8bb4e7dd22c14d96a2cd167b47cb3c50ac23a81c361f228816d63aac9bb7fe2a"
+    },
+    {
+      "case": "porch-before-offset-approach",
+      "sequence": 5,
+      "source": "build/test-output/house-03642-ground-only-intermediate/porch-normal-up/5.png",
+      "sourceSha256": "292b965140ce59658be5ceafd3be84558bb5328675ad156cd204c299defeeb91",
+      "retained": "docs/visual-review/house-03642/porch-before-offset-approach/005.webp",
+      "retainedSha256": "debaf73caa2f54d7ab84787a3791e94d78b4b5824bf4242869e31b8b5df9489b"
+    },
+    {
+      "case": "porch-before-offset-approach",
+      "sequence": 6,
+      "source": "build/test-output/house-03642-ground-only-intermediate/porch-normal-up/6.png",
+      "sourceSha256": "3c0331fab4839d2b0416eb0859fff5f31949b91e5c18457c268cab02b83911a7",
+      "retained": "docs/visual-review/house-03642/porch-before-offset-approach/006.webp",
+      "retainedSha256": "1381d027144c3c14e32cd8fc421f724ad19aeb98bcad9ab76639c78d772fada9"
+    },
+    {
+      "case": "porch-before-offset-approach",
+      "sequence": 7,
+      "source": "build/test-output/house-03642-ground-only-intermediate/porch-normal-up/7.png",
+      "sourceSha256": "056175874ab73ed7340b8b876203f44d110f74d5237462922fecd47f1360238c",
+      "retained": "docs/visual-review/house-03642/porch-before-offset-approach/007.webp",
+      "retainedSha256": "698ef08ada42e7dffdbda200afcb94e949932f0b45ee5615ca98bd0c44b5e88f"
+    },
+    {
+      "case": "porch-before-offset-approach",
+      "sequence": 8,
+      "source": "build/test-output/house-03642-ground-only-intermediate/porch-normal-up/8.png",
+      "sourceSha256": "ad8b4392e64497ecb4599e46603dd587235410ab796a5c3a5feef67e71052b93",
+      "retained": "docs/visual-review/house-03642/porch-before-offset-approach/008.webp",
+      "retainedSha256": "a571bcc62c3357a0818422b076bc06bc3321239b2b0f9658bf3ad4077667a048"
+    },
+    {
+      "case": "porch-before-offset-approach",
+      "sequence": 9,
+      "source": "build/test-output/house-03642-ground-only-intermediate/porch-normal-up/9.png",
+      "sourceSha256": "171a9bd5da0e1eaa436330ecb48c90b9a6302b0590c08acd141328ad0a1364b6",
+      "retained": "docs/visual-review/house-03642/porch-before-offset-approach/009.webp",
+      "retainedSha256": "2efbb906815f7c0d313c0aa22832a111a5ba3c8d49d41a609b92f40051fb90cf"
+    },
+    {
+      "case": "porch-before-offset-approach",
+      "sequence": 10,
+      "source": "build/test-output/house-03642-ground-only-intermediate/porch-normal-up/10.png",
+      "sourceSha256": "5a1a3bdb18dbe8f54aae010b84a7c2c1f38c3359a799b49e8fb6435f98916c2c",
+      "retained": "docs/visual-review/house-03642/porch-before-offset-approach/010.webp",
+      "retainedSha256": "b3e18356c50aa9f3299a56aa89d515896c503a31085ae782b139c76b1aff24ac"
+    },
+    {
+      "case": "porch-before-offset-approach",
+      "sequence": 11,
+      "source": "build/test-output/house-03642-ground-only-intermediate/porch-normal-up/11.png",
+      "sourceSha256": "d6ee7fe50653e445d7a3feb208aec8f9a945015f3ccefac5b2ee91fd98e2bb66",
+      "retained": "docs/visual-review/house-03642/porch-before-offset-approach/011.webp",
+      "retainedSha256": "c553c9c4e0cafb854278366efad24ac45098694b8384778e2582d36335160857"
+    },
+    {
+      "case": "porch-before-offset-approach",
+      "sequence": 12,
+      "source": "build/test-output/house-03642-ground-only-intermediate/porch-normal-up/12.png",
+      "sourceSha256": "86afaf73f4316474658607c2b09f69354af8604f12b6ef9f6b9e3689028eda4b",
+      "retained": "docs/visual-review/house-03642/porch-before-offset-approach/012.webp",
+      "retainedSha256": "abae1160889973a124b61bcca2e0869d2065f3c3cfbf5a278ed98f9088e14af4"
+    },
+    {
+      "case": "porch-before-offset-approach",
+      "sequence": 13,
+      "source": "build/test-output/house-03642-ground-only-intermediate/porch-normal-up/13.png",
+      "sourceSha256": "74ffcfd7afacdcca918e01ee1ccff04367e3ba47a7cee7d3b942de3607d60027",
+      "retained": "docs/visual-review/house-03642/porch-before-offset-approach/013.webp",
+      "retainedSha256": "2477c8a51010c35e62746732f63d133cf190e73521ad8872f3d3a277dfb31a5b"
+    },
+    {
+      "case": "porch-before-offset-approach",
+      "sequence": 14,
+      "source": "build/test-output/house-03642-ground-only-intermediate/porch-normal-up/14.png",
+      "sourceSha256": "8004fa9f32312f61e76600aa03d41eac558fe9bfe98cd4fc0840da9e4de76898",
+      "retained": "docs/visual-review/house-03642/porch-before-offset-approach/014.webp",
+      "retainedSha256": "43c60786e78f70ade7f84a719161a15015c5faeeb7fca1654e0d72df0adf12ab"
+    },
+    {
+      "case": "porch-before-offset-approach",
+      "sequence": 15,
+      "source": "build/test-output/house-03642-ground-only-intermediate/porch-normal-up/15.png",
+      "sourceSha256": "19f9eae33de074723438d03d8f281c54274c899de932ebc9b977a26318e5d2a9",
+      "retained": "docs/visual-review/house-03642/porch-before-offset-approach/015.webp",
+      "retainedSha256": "ff68a1da44c93185b6714e0bfa7a3b0a2c903f54479929e3b73e62d2247e2d4f"
+    },
+    {
+      "case": "porch-before-offset-approach",
+      "sequence": 16,
+      "source": "build/test-output/house-03642-ground-only-intermediate/porch-normal-up/16.png",
+      "sourceSha256": "046f6e3939fb4af88cac789825f03fcf4794a1368f16aed3bf53e49e0260aa0e",
+      "retained": "docs/visual-review/house-03642/porch-before-offset-approach/016.webp",
+      "retainedSha256": "f110dc0af6c48e4e9322cb96a32607e1ce693ac6a6a577a5fb9a45dde5919461"
+    },
+    {
+      "case": "porch-before-offset-approach",
+      "sequence": 17,
+      "source": "build/test-output/house-03642-ground-only-intermediate/porch-normal-up/17.png",
+      "sourceSha256": "599c0295c6936eb8da2f8b64613092bfb73c19546ef07e1863c52da192fe55fd",
+      "retained": "docs/visual-review/house-03642/porch-before-offset-approach/017.webp",
+      "retainedSha256": "b3b715fc50493570366768313e1251135b143db76aeff259b7525e075cbfaa5c"
+    },
+    {
+      "case": "porch-before-offset-approach",
+      "sequence": 18,
+      "source": "build/test-output/house-03642-ground-only-intermediate/porch-normal-up/18.png",
+      "sourceSha256": "2f3bc37f7c1eca63d45533c6867a14e1b825ea6eba652a4b91a211fdadef669e",
+      "retained": "docs/visual-review/house-03642/porch-before-offset-approach/018.webp",
+      "retainedSha256": "c4bc6262013c2ae13459502e770982504f447d8f71662da92620ec19a16ed628"
+    },
+    {
+      "case": "porch-before-offset-approach",
+      "sequence": 19,
+      "source": "build/test-output/house-03642-ground-only-intermediate/porch-normal-up/19.png",
+      "sourceSha256": "59d8df8f6ac3827883c33a6601a10f1a942f9541b348cf92ca218d0798a6c872",
+      "retained": "docs/visual-review/house-03642/porch-before-offset-approach/019.webp",
+      "retainedSha256": "4cce933f22b9c9995e1f85de7125a5d1df6a3065c250160947b14a84865a6e7f"
+    },
+    {
+      "case": "garage-slow-after",
+      "sequence": 0,
+      "source": "build/test-output/house-03642-after/garage-slow-up/0.png",
+      "sourceSha256": "34caf9c047672c3cf162d7da24a6638ded5bc7476ba69b1784f901717e03d9e0",
+      "retained": "docs/visual-review/house-03642/garage-slow-after/000.webp",
+      "retainedSha256": "06891654d18a8f9faf132d5fa53b3848846940ccb57ea80d3c0e4c477c01a234"
+    },
+    {
+      "case": "garage-slow-after",
+      "sequence": 1,
+      "source": "build/test-output/house-03642-after/garage-slow-up/1.png",
+      "sourceSha256": "4bcb605588e93ed1e19479c49f7fdad2dc3ad4610cd3e0c70c51bc2d49d12402",
+      "retained": "docs/visual-review/house-03642/garage-slow-after/001.webp",
+      "retainedSha256": "c22ab252415ae108ce12429cca2374a138a183d3f1c0f8205416c1daff3037bc"
+    },
+    {
+      "case": "garage-slow-after",
+      "sequence": 2,
+      "source": "build/test-output/house-03642-after/garage-slow-up/2.png",
+      "sourceSha256": "509459dea61799bdd2485947bca0dc4bd304b171331f9850f8b3f73cefe50f9d",
+      "retained": "docs/visual-review/house-03642/garage-slow-after/002.webp",
+      "retainedSha256": "8328033a4908ed4c307de1d89dafcc4844713a622b281a9253b4e26ba49ecdf2"
+    },
+    {
+      "case": "garage-slow-after",
+      "sequence": 3,
+      "source": "build/test-output/house-03642-after/garage-slow-up/3.png",
+      "sourceSha256": "3566e28d5de2ff744c533427ad2b1b252198a9ed626d132ddf97034a433e5363",
+      "retained": "docs/visual-review/house-03642/garage-slow-after/003.webp",
+      "retainedSha256": "131ca8e4c40c79e7daea0958e48451b03a7ef95f7706becc90e2e2fb38332fd6"
+    },
+    {
+      "case": "garage-up-after",
+      "sequence": 0,
+      "source": "build/test-output/house-03642-after/garage-normal-up/0.png",
+      "sourceSha256": "34caf9c047672c3cf162d7da24a6638ded5bc7476ba69b1784f901717e03d9e0",
+      "retained": "docs/visual-review/house-03642/garage-up-after/000.webp",
+      "retainedSha256": "06891654d18a8f9faf132d5fa53b3848846940ccb57ea80d3c0e4c477c01a234"
+    },
+    {
+      "case": "garage-up-after",
+      "sequence": 1,
+      "source": "build/test-output/house-03642-after/garage-normal-up/1.png",
+      "sourceSha256": "300d364f837dc3247c84ab70a1fb53bd5601b9ade6ec703ae6621936135608fb",
+      "retained": "docs/visual-review/house-03642/garage-up-after/001.webp",
+      "retainedSha256": "8478b13e186acde2739ea84ef74ce5b174cf9c821268fc328255f65463b662fd"
+    },
+    {
+      "case": "garage-up-after",
+      "sequence": 2,
+      "source": "build/test-output/house-03642-after/garage-normal-up/2.png",
+      "sourceSha256": "0fe6ae36fc626b781d047add58cbff1640c7357f4245052174c4bfc3d25d07af",
+      "retained": "docs/visual-review/house-03642/garage-up-after/002.webp",
+      "retainedSha256": "e6e79275b7d21c0dc755032faf97e6499489df0aa10e3a44a44d31491dbbe356"
+    },
+    {
+      "case": "garage-down-after",
+      "sequence": 0,
+      "source": "build/test-output/house-03642-after/garage-normal-down/0.png",
+      "sourceSha256": "664627a9185633745682627055c9cc083b56628dfbfd71a010c339322f2144c1",
+      "retained": "docs/visual-review/house-03642/garage-down-after/000.webp",
+      "retainedSha256": "a600c5d113243628dd54e58a52a1cda7d191b06981c1313d1497e147c674d7a7"
+    },
+    {
+      "case": "garage-down-after",
+      "sequence": 1,
+      "source": "build/test-output/house-03642-after/garage-normal-down/1.png",
+      "sourceSha256": "2740b7bed081d90cf123b18604520b5d9dfc78bf180a881b024a86b9aa006623",
+      "retained": "docs/visual-review/house-03642/garage-down-after/001.webp",
+      "retainedSha256": "90d0e98af894bb1d75b1e6749f71a5de68e1901663a4a580ee1f99ebbc1c5db8"
+    },
+    {
+      "case": "porch-after-centred-approach",
+      "sequence": 0,
+      "source": "build/test-output/house-03642-after/porch-normal-up/0.png",
+      "sourceSha256": "6409c43c1ceee466fe9b87b323b9483b6e489a6aeb6d93b8009aa46ebbce76a7",
+      "retained": "docs/visual-review/house-03642/porch-after-centred-approach/000.webp",
+      "retainedSha256": "2f2ef048e5aa76edb052350d853751c8063c9a3cb18bad58995f0300d58d9f80"
+    },
+    {
+      "case": "porch-after-centred-approach",
+      "sequence": 1,
+      "source": "build/test-output/house-03642-after/porch-normal-up/1.png",
+      "sourceSha256": "26bf6940d7c31d1ce29b4c2acea762c148eaca41a27de7dd15e81fc9987c3978",
+      "retained": "docs/visual-review/house-03642/porch-after-centred-approach/001.webp",
+      "retainedSha256": "122a1a5298db2ae56bb05d782c96310a6b25e1e6de3debf0e347143f7f8db98e"
+    },
+    {
+      "case": "porch-after-centred-approach",
+      "sequence": 2,
+      "source": "build/test-output/house-03642-after/porch-normal-up/2.png",
+      "sourceSha256": "fa402d7b45bec909d2bfb02004d3f9bdcd3b402e3df31f785f3adf704b28c9ba",
+      "retained": "docs/visual-review/house-03642/porch-after-centred-approach/002.webp",
+      "retainedSha256": "2447f340929bd6729216186c317730683ef8bcd2ef55937c25701d2f8ccef88c"
+    },
+    {
+      "case": "porch-after-centred-approach",
+      "sequence": 3,
+      "source": "build/test-output/house-03642-after/porch-normal-up/3.png",
+      "sourceSha256": "a9c8b6c565251bc2ba2608758d17dcd3135aca3781189c4f43e32a92e01d0465",
+      "retained": "docs/visual-review/house-03642/porch-after-centred-approach/003.webp",
+      "retainedSha256": "15a89669748c6a5f47024f80ac07499088b9e0c21ec8cb0ffde12f231b01ff13"
+    },
+    {
+      "case": "porch-after-centred-approach",
+      "sequence": 4,
+      "source": "build/test-output/house-03642-after/porch-normal-up/4.png",
+      "sourceSha256": "92972b30bf53926b9a5f2fe7b60024095f445e9bd6e008fd2d2e3da3fd8d31d9",
+      "retained": "docs/visual-review/house-03642/porch-after-centred-approach/004.webp",
+      "retainedSha256": "634cb4a7ef4efe0585ffed168a63ed17e8a7bb251c66f7273ed9ea26638bf3d2"
+    },
+    {
+      "case": "porch-after-centred-approach",
+      "sequence": 5,
+      "source": "build/test-output/house-03642-after/porch-normal-up/5.png",
+      "sourceSha256": "fd727d4ddbd9530ce46f8ca899917f4f7febffa6a41752001d7f2a2873fc363b",
+      "retained": "docs/visual-review/house-03642/porch-after-centred-approach/005.webp",
+      "retainedSha256": "e25d3bee3c9075b3d9777f797ef1f93b977845911a0efd980703edb28955e7fe"
+    },
+    {
+      "case": "gate-before",
+      "sequence": 0,
+      "source": "build/test-output/house-03642-before/gate-road-to-walk/0.png",
+      "sourceSha256": "002f108b7474bc13f398156a382872102a5718eaa92e056bf43d15db994a7b7f",
+      "retained": "docs/visual-review/house-03642/gate-before/000.webp",
+      "retainedSha256": "9c14fbc641c69423031dc7511eee48adc303d3d859fb0fcd68a34f53e0e9ec40"
+    },
+    {
+      "case": "gate-before",
+      "sequence": 1,
+      "source": "build/test-output/house-03642-before/gate-road-to-walk/1.png",
+      "sourceSha256": "e476cf8b208aa8ac154767f46dca531cf2548ab5e618ca9485c71435e1273d01",
+      "retained": "docs/visual-review/house-03642/gate-before/001.webp",
+      "retainedSha256": "cb24a0ba38e9ea8fa84107793554bea0dd5e57ec5b10752c9f8005be5c7f118e"
+    },
+    {
+      "case": "gate-before",
+      "sequence": 2,
+      "source": "build/test-output/house-03642-before/gate-road-to-walk/2.png",
+      "sourceSha256": "87dc8ce5bbc6d5211977e0353e4fbc5fb8fbb01abb8785f676274645bde00191",
+      "retained": "docs/visual-review/house-03642/gate-before/002.webp",
+      "retainedSha256": "ba165469424a67a858ff98d37b6cd83b4c51c820b2724d76e3e83cceb6bdbcba"
+    },
+    {
+      "case": "gate-before",
+      "sequence": 3,
+      "source": "build/test-output/house-03642-before/gate-road-to-walk/3.png",
+      "sourceSha256": "b7bbdbbd949afaeb56a622f50919a8ec4d9307f8c3e7ba98271d79f584d26f94",
+      "retained": "docs/visual-review/house-03642/gate-before/003.webp",
+      "retainedSha256": "b443ea1b365458378b2cafcf55f02df10d93e646448b7478c243345e0bde7ecc"
+    },
+    {
+      "case": "gate-before",
+      "sequence": 4,
+      "source": "build/test-output/house-03642-before/gate-road-to-walk/4.png",
+      "sourceSha256": "f1f925d41c43c1011041515fc08c797634f43f3cc0f558e3d1662c7f030ff698",
+      "retained": "docs/visual-review/house-03642/gate-before/004.webp",
+      "retainedSha256": "0d3244d77ec577903729b87d782cf0458eee56a681ec014311e4ebfa6b6d90fb"
+    },
+    {
+      "case": "gate-before",
+      "sequence": 5,
+      "source": "build/test-output/house-03642-before/gate-road-to-walk/5.png",
+      "sourceSha256": "a159841a142563e7fc8ed1b753d04b70e743719d0b38c1e3edf07c31d21f22b5",
+      "retained": "docs/visual-review/house-03642/gate-before/005.webp",
+      "retainedSha256": "517280178e319e40c65576665c6304a2d5deaf26307d7f9ee52ff221be2933e5"
+    },
+    {
+      "case": "gate-before",
+      "sequence": 6,
+      "source": "build/test-output/house-03642-before/gate-road-to-walk/6.png",
+      "sourceSha256": "bf275307e45731599c108718c2779efee5adb62d82f8f5671fabfb737fdde6dc",
+      "retained": "docs/visual-review/house-03642/gate-before/006.webp",
+      "retainedSha256": "e8a36ff140025e4d9a1817ff654d92e13e4aaf9d9e96b99427fec7496f2e5cf9"
+    },
+    {
+      "case": "gate-before",
+      "sequence": 7,
+      "source": "build/test-output/house-03642-before/gate-road-to-walk/7.png",
+      "sourceSha256": "81d1ecb037e707f3d886791d0711952c407332878afdc633bb8cab70d6898a86",
+      "retained": "docs/visual-review/house-03642/gate-before/007.webp",
+      "retainedSha256": "43188c7c8c165dddedb70c1df2dba881037d3bd72e6742b6e49f1160499f2efa"
+    },
+    {
+      "case": "gate-before",
+      "sequence": 8,
+      "source": "build/test-output/house-03642-before/gate-road-to-walk/8.png",
+      "sourceSha256": "7163f7e0c823967d6b61fefe84be35beb2327b3b0349607d7624cd2364c0a58e",
+      "retained": "docs/visual-review/house-03642/gate-before/008.webp",
+      "retainedSha256": "8f487f39864842799d99a04d9e7a30e1f294e07a0e2e97e4574d12aae2c8d132"
+    },
+    {
+      "case": "gate-before",
+      "sequence": 9,
+      "source": "build/test-output/house-03642-before/gate-road-to-walk/9.png",
+      "sourceSha256": "114232b9e3142db494797227bf763a8a554b2a5b8b66ac0b11b05b393ca2afcf",
+      "retained": "docs/visual-review/house-03642/gate-before/009.webp",
+      "retainedSha256": "bd4831c3bb57979a9630541c86132b78e64e7ea393fb7163852d475cd1bde7fa"
+    },
+    {
+      "case": "gate-before",
+      "sequence": 10,
+      "source": "build/test-output/house-03642-before/gate-road-to-walk/10.png",
+      "sourceSha256": "39e08008b8292695a222b2ee805b9e8938487a6d76e7e0df23ce1d50e287c493",
+      "retained": "docs/visual-review/house-03642/gate-before/010.webp",
+      "retainedSha256": "aa0f2124b7c4bf7eb6dce1ea88fbb61c52d70a4f50432264354df6da52a1503b"
+    },
+    {
+      "case": "gate-before",
+      "sequence": 11,
+      "source": "build/test-output/house-03642-before/gate-road-to-walk/11.png",
+      "sourceSha256": "c1eb74829ed480a751ac86668189fee2486051d46873c4372629269693edc14d",
+      "retained": "docs/visual-review/house-03642/gate-before/011.webp",
+      "retainedSha256": "21f9eb9b86bc06fce5e7a8f983d0e89ebc3cd40ed768faf3d6cc7be2ef7313f2"
+    },
+    {
+      "case": "gate-before",
+      "sequence": 12,
+      "source": "build/test-output/house-03642-before/gate-road-to-walk/12.png",
+      "sourceSha256": "71a978c468aebe9589893fc753a4159e19f34b7bafd8b1880bad12b5bc1c3892",
+      "retained": "docs/visual-review/house-03642/gate-before/012.webp",
+      "retainedSha256": "b3da506c2531cf47a5e14642c6b5ce87950396f2c1a244cece3f475599f4a79a"
+    },
+    {
+      "case": "gate-before",
+      "sequence": 13,
+      "source": "build/test-output/house-03642-before/gate-road-to-walk/13.png",
+      "sourceSha256": "82dceb3b5e6855acb814a4deae42049219fd97e7590c0f51caa3dccc6fca6ebf",
+      "retained": "docs/visual-review/house-03642/gate-before/013.webp",
+      "retainedSha256": "7ba972c836413c3b50caac28097ec1d042d8b153db452e483f1e68409e122fde"
+    },
+    {
+      "case": "gate-before",
+      "sequence": 14,
+      "source": "build/test-output/house-03642-before/gate-road-to-walk/14.png",
+      "sourceSha256": "3c3465835985e250c85d33bd6fdfd643c120d01b8fbe9193af7f470f3218e304",
+      "retained": "docs/visual-review/house-03642/gate-before/014.webp",
+      "retainedSha256": "b318f9b175b7aa6bba881973d828cffc623b282af9c810f5783f0a21581cf2f1"
+    },
+    {
+      "case": "gate-before",
+      "sequence": 15,
+      "source": "build/test-output/house-03642-before/gate-road-to-walk/15.png",
+      "sourceSha256": "58912af9e128b08b80cce7edcd1caa0a6f92e18a3e887b2477f0fb91329d48a4",
+      "retained": "docs/visual-review/house-03642/gate-before/015.webp",
+      "retainedSha256": "0cc5d841f84c2f622c66f2f4a54649f8e0ae5802c1e018d3547c55960487facd"
+    },
+    {
+      "case": "gate-before",
+      "sequence": 16,
+      "source": "build/test-output/house-03642-before/gate-road-to-walk/16.png",
+      "sourceSha256": "c0e9b2b443f68ebff70d2e3f59f6f7c068dc0325551bb7c024bf9fc71251516c",
+      "retained": "docs/visual-review/house-03642/gate-before/016.webp",
+      "retainedSha256": "70d3079e70e76862c206b8e62829dada05e3b3ccd54a63fe7ac30a3c7fb01220"
+    },
+    {
+      "case": "gate-before",
+      "sequence": 17,
+      "source": "build/test-output/house-03642-before/gate-road-to-walk/17.png",
+      "sourceSha256": "af908e1d8e68211295d4e38eed86db2eeaa0e0c359ccae87643d07a97de195eb",
+      "retained": "docs/visual-review/house-03642/gate-before/017.webp",
+      "retainedSha256": "38088d224659ff8f03a0cb09e2a9b39ce0c7f30d6ae71e7fbd7c0c11d2b8d876"
+    },
+    {
+      "case": "gate-before",
+      "sequence": 18,
+      "source": "build/test-output/house-03642-before/gate-road-to-walk/18.png",
+      "sourceSha256": "aba11f5753226c661e0f98137683801e0a5f152420debd74fa6a20adb8a50542",
+      "retained": "docs/visual-review/house-03642/gate-before/018.webp",
+      "retainedSha256": "5d6390e931ff1e11a3b8b0fa14f9b8c695449061183ef69fe0d8259723a46687"
+    },
+    {
+      "case": "gate-before",
+      "sequence": 19,
+      "source": "build/test-output/house-03642-before/gate-road-to-walk/19.png",
+      "sourceSha256": "2d9537c436774a9e11dfcb323d2f91c116fbe255bc1252a4aafd47a7c2c28104",
+      "retained": "docs/visual-review/house-03642/gate-before/019.webp",
+      "retainedSha256": "b0823d2bbee67034e1d4eb1ddfc85f36b113616c519f7700dfe4cf06e0d5f3e0"
+    },
+    {
+      "case": "gate-entry-after",
+      "sequence": 0,
+      "source": "build/test-output/house-03642-after/gate-road-to-walk/0.png",
+      "sourceSha256": "104ac1c407a45d0e0b8e51b83975e1d4f367b65d16eae6248aa494df6da1fb82",
+      "retained": "docs/visual-review/house-03642/gate-entry-after/000.webp",
+      "retainedSha256": "028ac866846812e991bd6eb6f2782a528106ef585e6a04e6adc5be9f1740f312"
+    },
+    {
+      "case": "gate-entry-after",
+      "sequence": 1,
+      "source": "build/test-output/house-03642-after/gate-road-to-walk/1.png",
+      "sourceSha256": "b99b53e61750bfdb0db7579b60a1f1fd280da0a5ffe19afd3fecd05d9f56fb32",
+      "retained": "docs/visual-review/house-03642/gate-entry-after/001.webp",
+      "retainedSha256": "05b41909b67490d4e11a715964dab4a0e3e939bedd93a170d58df45c6e79e7c9"
+    },
+    {
+      "case": "gate-entry-after",
+      "sequence": 2,
+      "source": "build/test-output/house-03642-after/gate-road-to-walk/2.png",
+      "sourceSha256": "b979ff5693cb324a8043d25dfa239e28e91e6cfaaf01df19c6fbae97bb65abc4",
+      "retained": "docs/visual-review/house-03642/gate-entry-after/002.webp",
+      "retainedSha256": "a23576f0c296f9e781520f4b1eb269387b5f5deb84dc694a536f34d4713ec339"
+    },
+    {
+      "case": "gate-entry-after",
+      "sequence": 3,
+      "source": "build/test-output/house-03642-after/gate-road-to-walk/3.png",
+      "sourceSha256": "c3b8e19bb45a918ff36beecb275327bd061c198d06a56a21fc1706c29b890605",
+      "retained": "docs/visual-review/house-03642/gate-entry-after/003.webp",
+      "retainedSha256": "e5922786d2345550b454ec82c53c9e7a935ed10be5bcbebb37dddd2370c1c305"
+    },
+    {
+      "case": "gate-entry-after",
+      "sequence": 4,
+      "source": "build/test-output/house-03642-after/gate-road-to-walk/4.png",
+      "sourceSha256": "0917eed9373ff96ba4b6277c2b65b6274ec77ddad1ff0f0cdda33f14b59f8fe9",
+      "retained": "docs/visual-review/house-03642/gate-entry-after/004.webp",
+      "retainedSha256": "7b5f1ee752979baff1b55825fc14ed6e836f5a696f1a60c2f0da3b0a5192d4dc"
+    },
+    {
+      "case": "gate-entry-after",
+      "sequence": 5,
+      "source": "build/test-output/house-03642-after/gate-road-to-walk/5.png",
+      "sourceSha256": "3adda54cf046aa608bed4a8f89ccb045b8bbc312f8ce1135388257517c383a54",
+      "retained": "docs/visual-review/house-03642/gate-entry-after/005.webp",
+      "retainedSha256": "284ef8803f6982298b22713759577254cf68b8be33a780b4f5d7a6d94d990940"
+    },
+    {
+      "case": "gate-entry-after",
+      "sequence": 6,
+      "source": "build/test-output/house-03642-after/gate-road-to-walk/6.png",
+      "sourceSha256": "37863b2b64a35356b4389aed127beba002570c9ac9b3029f6082fe4d1ccd53b1",
+      "retained": "docs/visual-review/house-03642/gate-entry-after/006.webp",
+      "retainedSha256": "9513c4cd0fc9450b0af1c5c10911fb2a83d39113e2bbfd7ba7dc03f20f491919"
+    },
+    {
+      "case": "gate-exit-after",
+      "sequence": 0,
+      "source": "build/test-output/house-03642-after/gate-walk-to-road/0.png",
+      "sourceSha256": "1ab4c576ee0380e6c0cff3373340431e8e574d768926e98380aa5651dbf6a238",
+      "retained": "docs/visual-review/house-03642/gate-exit-after/000.webp",
+      "retainedSha256": "b32937829ed34fb8a93b25d7fadf05a3d3d8bfc686f7b79c6af11308cd75dd1a"
+    },
+    {
+      "case": "gate-exit-after",
+      "sequence": 1,
+      "source": "build/test-output/house-03642-after/gate-walk-to-road/1.png",
+      "sourceSha256": "7a028cc2714b8f1d994b6925878d5398fda38c221d4f29e56c19cf1d80069cc7",
+      "retained": "docs/visual-review/house-03642/gate-exit-after/001.webp",
+      "retainedSha256": "4fc94b69bc7f130630985d40f1706107abcf0a779d8c766e381421e3435531bd"
+    },
+    {
+      "case": "gate-exit-after",
+      "sequence": 2,
+      "source": "build/test-output/house-03642-after/gate-walk-to-road/2.png",
+      "sourceSha256": "eadee950e86eee8f459d1ec6138ae07d2a62ca7ad4ece7d73260b73d389059b7",
+      "retained": "docs/visual-review/house-03642/gate-exit-after/002.webp",
+      "retainedSha256": "402383b28263254100dbca291e1d599e75406d544977c4690e26a99c9ae1df2e"
+    },
+    {
+      "case": "gate-exit-after",
+      "sequence": 3,
+      "source": "build/test-output/house-03642-after/gate-walk-to-road/3.png",
+      "sourceSha256": "360712708b96f727ed4fbb34ae46babace687dc8497c059590df1165c483f7c0",
+      "retained": "docs/visual-review/house-03642/gate-exit-after/003.webp",
+      "retainedSha256": "8dcbc1e55aefb6ad4570119d3013c9cb48c93b8d0eaaffba976503c64cfefcef"
+    },
+    {
+      "case": "gate-exit-after",
+      "sequence": 4,
+      "source": "build/test-output/house-03642-after/gate-walk-to-road/4.png",
+      "sourceSha256": "c0bd0ba6960fe41f31d164056622bfd25f07f6429bab822ab48c99e64e983d9b",
+      "retained": "docs/visual-review/house-03642/gate-exit-after/004.webp",
+      "retainedSha256": "cbcdfd9038a73a0567ef59eb5ebae227ce4aae63eb5a4e4a8c1e488829552fd9"
+    },
+    {
+      "case": "gate-exit-after",
+      "sequence": 5,
+      "source": "build/test-output/house-03642-after/gate-walk-to-road/5.png",
+      "sourceSha256": "ee3de63d60e4deccf9cf09215f7dba3a04f1659073c9caebd26316830b75d473",
+      "retained": "docs/visual-review/house-03642/gate-exit-after/005.webp",
+      "retainedSha256": "3f380ebf0927a8edaa967c1773a71b0368c78c44d56063e0767b7619b1bd2124"
+    },
+    {
+      "case": "gate-exit-after",
+      "sequence": 6,
+      "source": "build/test-output/house-03642-after/gate-walk-to-road/6.png",
+      "sourceSha256": "b531407e2d72a94481015ed78510e00abe72556858bdb5bac31f49393f362602",
+      "retained": "docs/visual-review/house-03642/gate-exit-after/006.webp",
+      "retainedSha256": "8a4ee16dcf9395f49362e63e07c96edbda5dd35441fa4d388854c264284e5df1"
+    }
+  ]
+}

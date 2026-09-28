@@ -195,6 +195,7 @@ def build() -> dict[str, dict]:
          "boxes": {"type": "array", "items": BOX, "minItems": 1},
          "yOverride": nullable(INTERVAL),
          "floorMaterial": ID_OR_NULL, "wallMaterial": ID_OR_NULL,
+         "floorSupport": {"enum": ["terrain", "slab"]},
          "ceilingMaterial": ID_OR_NULL, "trimMaterial": ID_OR_NULL,
          "footstepSurface": {"anyOf": [STR, {"type": "null"}]},
          "acoustic": obj([], {"roomTone": ID_OR_NULL, "absorption": UNIT,
