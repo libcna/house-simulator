@@ -96,12 +96,16 @@ namespace cnahouse::persistence
             // 2. the current save becomes the backup, so there is always one good file on disk
             if (impl_->container->FileExists(std::string(name)))
             {
-                const std::string previous = *Read(name);
+                const auto previous = Read(name);
+                if (!previous)
+                {
+                    return previous.Error();
+                }
                 {
                     auto stream = impl_->container->CreateFile(backup);
-                    stream->Write(reinterpret_cast<const std::uint8_t*>(previous.data()),
+                    stream->Write(reinterpret_cast<const std::uint8_t*>(previous->data()),
                                   0,
-                                  static_cast<int>(previous.size()));
+                                  static_cast<int>(previous->size()));
                     stream->Flush();
                 }
                 impl_->container->DeleteFile(std::string(name));

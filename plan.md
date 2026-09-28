@@ -400,7 +400,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M8](#m8--atmospheric-audio-essentials) — Atmospheric audio essentials | B | 03541–03570 | 4 | `HOUSE-01939` | D7 | 5 |
 | [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 1 | `HOUSE-03573` | D8 | 0.75 |
 | [M10](#m10--performance-measurement-driven) — Performance, measurement-driven | B | 03601–03630 | 2 | `HOUSE-02404` | D9 | 6 |
-| [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 5 | `HOUSE-03638` | D1, D2, D4, D6, D8, D9, D11, D13, D14 | 5.5 |
+| [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 4 | `HOUSE-03638` | D1, D2, D4, D6, D8, D9, D11, D13, D14 | 4.75 |
 | [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 0 | **done** · `HOUSE-02598` | D11 | 0 |
 | [M13](#m13--linux-desktop-release) — Linux desktop release | after M11 | 03701–03720 | 8 | `HOUSE-02797` | D9–D13 | 10.25 |
 | [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 5 | `HOUSE-02904` | D10b | 7.25 |
@@ -1287,11 +1287,11 @@ existing walk/controller path, not another menu or a reusable cinematic framewor
 
 ---
 
-- [ ] HOUSE-03573 — Increase ordinary, fast and filming walking pace
+- [ ] HOUSE-03573 — Replace Normal/Fast settings with brisk walking and Shift running; increase filming pace
       dep: HOUSE-03572 · sys: player, app · plat: ALL · pri: MUST · zone: all · adv: D8, C1 · est: 0.75
-      accept: normal walking is slightly faster, fast walking clearly faster and the Linux filming tour modestly faster; retain the ordinary collision controller and unchanged step/slope limits; normal and filming traversal remain reliable through stairs, doors and the complete authored tour; document the measured new pace
+      accept: default walking is the former Fast pace (2.05 m/s); Shift toggles walk/run, with running distinctly faster than former Fast; remove Normal/Fast from Settings and start walking regardless of the legacy saved fastWalk preference; keep old JSON readable; the Linux filming tour is modestly faster; retain the ordinary collision controller and unchanged step/slope limits; normal and filming traversal remain reliable through stairs, doors and the complete authored tour; document the measured new pace
       verify: speed/cadence regressions, complete normal/filming controller tours and current offscreen GPU stair/threshold movement
-      note: (2026-09-28 explicit owner request) Adjust existing speed constants, not physics tolerances or cinematic infrastructure. A separate cinema-speed preference is an alternative, not necessary scope for this correction.
+      note: (2026-09-28 explicit owner request, refined by latest walk/run instruction) Adjust existing speed constants and existing toggle/UI, not physics tolerances or cinematic infrastructure. Running is session movement state, not a saved speed preference. A separate cinema-speed preference is an alternative, not necessary scope for this correction.
 
 ## M10 — Performance (measurement-driven)
 
@@ -1425,11 +1425,12 @@ There is no zone rotation, no "polish everything" pass and no screenshot → twe
       note: (2026-09-28 R15 correction) HOUSE-03572's slow real-controller walk stops after 36 views at garage route point 850, feet x≈9.10/y≈0.44. Current captured fixed steps repeatedly advance then push back by the existing 20 mm depenetration. This is D2/C1/S1, not a filming feature or permission to increase physical tolerances. The fast GrandTour missed it. Diagnose/fix this dependency before closing the filming task.
       done: (2026-09-28) GroundProbe confirms an actual sloping stair face beneath a rounded edge/wall contact, within the unchanged 50 mm probe; slope 46°, step 220 mm, terrain and flat-step responses stay unchanged. A broader replacement regressed the terrace slider and was rejected; a flat-step/wall claim protects the final narrow boundary. L0_PORCH now explicitly retains its real +0.57 m constructed floor collider instead of relying on a smoothed heightfield edge. The recorded garage pose fails before/passes after; six actual Radeon/OPENGLES3 normal-input crossings pass (garage slow/normal up/down, porch, gate both ways), with complete before/after sequences reviewed and retained. Complete fast tour passes 90 cells/564 stops/92798 steps/19 detours; slow controller tour passes 90 views/294080 steps. Current tree unit 1513/1513 and 349 strict-XNA units pass; full static gate retains only inherited owner-owned .claude layout failure. No GrandTour steering/tolerance or sibling source changed. Evidence: docs/visual-review/house-03642-support.md. Shares the checkpoint with HOUSE-03643, discovered by its required full-route validation; filming itself remains OPEN.
 
-- [ ] HOUSE-03645 — Persist changed desktop Settings through application restart
+- [x] HOUSE-03645 — Persist changed desktop Settings through application restart
       dep: HOUSE-02528, HOUSE-00131 · sys: app, persistence · plat: LNX · pri: MUST · zone: all · adv: D8, D11 · est: 0.75
-      accept: (1) normal Linux startup reads existing settings using the current standard-XNA save store; (2) each Settings-page change and Shift/Alt+Enter setting change is persisted; (3) a second normal application process sees those values; (4) no owner preferences are overwritten by tests; missing/corrupt/unwritable storage stays a supported reported fallback; Web/Android behaviour and JSON version remain compatible
+      accept: (1) normal Linux startup reads existing settings using the current standard-XNA save store; (2) each Settings-page change and Alt+Enter setting change is persisted; (3) a second normal application process sees those values; (4) no owner preferences are overwritten by tests; missing/corrupt/unwritable storage stays a supported reported fallback; Web/Android behaviour and JSON version remain compatible; Shift-persistence superseded by the owner's walk/run correction in HOUSE-03573
       verify: actual offscreen application Settings edit/exit/restart with an isolated existing storage path, plus corruption and save-error regressions
       note: (2026-09-28 owner report; audit BUG-005) Values revert to defaults on restart. Main's load/save and ApplySettings/Shift persistence are Android-only compile branches; the JSON round-trip tests never exercise the desktop game/store wiring. Reuse DesktopSaveStore; do not invent another settings format or persistence subsystem.
+      done: (2026-09-28) Desktop and Android reuse the standard-XNA store at startup and every live Settings/Alt+Enter edit. Saved quality survives auto-detection; explicit CLI quality overrides do not rewrite preferences. First-run defaults save only after a successful run and resolved preset. An unreadable current generation returns an error instead of dereferencing a failed Result. All integration processes use a uniquely owned XDG profile before opening StorageDevice. Actual GPU Settings edit and two normal application restarts pass, including quality/640x480/vsync, corrupt JSON and non-directory storage fallback; unreadable-file and Alt+Enter regressions pass. Full unit 1523/1523 and GPU integration 167 PASS / 3 intentional SKIP / 0 FAIL pass before the separate movement changes; strict XNA 353 units pass. Required full static run retains owner-owned .claude layout and exposes the independent draft stair-art envelope error, corrected and rechecked in the current geometry work. Logs: /tmp/house-03645-{focused-final,integration,units,static}.log; actual restart images/logs: build/test-output/house-03645/. No owner settings or sibling changed.
 
 - [x] HOUSE-03644 — Keep rendering diagnostics owned by their current game
       dep: HOUSE-03572 · sys: rendering, debug · plat: ALL · pri: MUST · zone: all · adv: D9, D11 · est: 0.5
@@ -2323,6 +2324,17 @@ under R5.
 ---
 
 ## Planning corrections
+
+### 2026-09-28 — Owner replaces persistent Normal/Fast with walking/running
+
+* Refine the already-open `HOUSE-03573`: remove the Settings speed selector;
+  walking becomes the former 2.05 m/s Fast pace, and Shift toggles a distinctly
+  faster run. Start/reset in walking; ignore the legacy saved `fastWalk` value
+  without breaking JSON compatibility. This explicitly supersedes §43.2/D-09's
+  persistent brisk-walk preference and `HOUSE-03645`'s Shift-persistence clause.
+  Actual Settings edits and Alt+Enter still persist; no extra subsystem or
+  new configurable movement preference is authorized. Estimate stays 0.75 h
+  pending current-controller validation, not an estimate silently enlarged.
 
 ### 2026-09-28 — Owner rejects guard/art placement and requests faster movement
 

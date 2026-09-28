@@ -103,6 +103,11 @@ namespace cnahouse::app
             return exitCode_;
         }
 
+        [[nodiscard]] const Settings& UserSettings() const noexcept
+        {
+            return settings_;
+        }
+
         /// @brief Frames drawn. Used by the headless integration tests.
         [[nodiscard]] std::uint64_t FramesDrawn() const noexcept
         {

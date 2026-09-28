@@ -87,19 +87,17 @@ namespace cnahouse::app
             clock.SetStandard(environment::CivilFromEpochSeconds(requestedStandard));
         }
 
-#if defined(__ANDROID__)
-        void PersistAndroidSettings(const Settings& settings)
+#if !defined(__EMSCRIPTEN__)
+        void PersistSettings(const Settings& settings)
         {
             auto store = persistence::DesktopSaveStore::Open();
             if (!store)
             {
-                Log::Warn(
-                    LogCat::Persistence, "Android settings store unavailable: {}", store.Error().ToString());
+                Log::Warn(LogCat::Persistence, "settings store unavailable: {}", store.Error().ToString());
             }
             else if (auto saved = (*store)->Write("settings.json", settings.ToJson()); !saved)
             {
-                Log::Warn(
-                    LogCat::Persistence, "Android settings could not be saved: {}", saved.Error().ToString());
+                Log::Warn(LogCat::Persistence, "settings could not be saved: {}", saved.Error().ToString());
             }
         }
 #endif
@@ -1002,8 +1000,8 @@ namespace cnahouse::app
                 // D-09: the walk mode is a SETTING, so the game writes it back rather than the
                 // controller keeping a second copy of it.
                 settings_.fastWalk = player_.fastWalk;
-#if defined(__ANDROID__)
-                PersistAndroidSettings(settings_);
+#if !defined(__EMSCRIPTEN__)
+                PersistSettings(settings_);
 #endif
             }
             tracker_.Update(*world_, *index_, player_.position);
@@ -1264,22 +1262,22 @@ namespace cnahouse::app
 
     void CnaHouseGame::ApplyChangedSetting(ui::SettingsControl control)
     {
-#if defined(__ANDROID__)
-        // The settings page mutates settings_ before this callback. Persist each
-        // change now: Android may kill the process after it enters the background.
-        PersistAndroidSettings(settings_);
-#endif
         if (control <= ui::SettingsControl::FieldOfView)
         {
             ApplyGraphicsSettings(control);
-            return;
         }
-        if (control >= ui::SettingsControl::TimeOfDay)
+        else if (control >= ui::SettingsControl::TimeOfDay)
         {
             ApplyEnvironmentSettings(control);
-            return;
         }
-        ApplyAudioAndControlSettings();
+        else
+        {
+            ApplyAudioAndControlSettings();
+        }
+#if !defined(__EMSCRIPTEN__)
+        // Save the committed live value, not the pre-apply graphics snapshot.
+        PersistSettings(settings_);
+#endif
     }
 
     void CnaHouseGame::OpenSettings()
@@ -1688,6 +1686,9 @@ namespace cnahouse::app
             {
                 graphics_.ToggleFullScreen();
                 settings_.fullscreen = graphics_.getIsFullScreenProperty();
+#if !defined(__EMSCRIPTEN__)
+                PersistSettings(settings_);
+#endif
                 Log::Info(LogCat::App, "display {}", settings_.fullscreen ? "fullscreen" : "windowed");
             }
             const bool openedPauseMenu = menus_.Empty() && walking_ &&

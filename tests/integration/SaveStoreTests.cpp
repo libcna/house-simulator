@@ -4,6 +4,7 @@
 // stub would test the stub -- and because the behaviour under test IS the atomic sequence, which
 // only exists on a real filesystem.
 #include <cstdio>
+#include <filesystem>
 #include <random>
 #include <string>
 
@@ -91,6 +92,39 @@ namespace
         auto read = store_->Read(SaveName());
         ASSERT_TRUE(read) << read.Error().ToString();
         EXPECT_EQ(*read, kPayload);
+    }
+
+    TEST_F(SaveStoreTest, AnUnreadableCurrentFileReportsSaveFailureRatherThanAborting)
+    {
+#if defined(__linux__) && !defined(__ANDROID__)
+        ASSERT_TRUE(store_->Write(SaveName(), "preserve me"));
+        std::filesystem::path path;
+        for (const auto& entry : std::filesystem::recursive_directory_iterator(store_->Location()))
+        {
+            if (entry.path().filename() == SaveName())
+            {
+                path = entry.path();
+                break;
+            }
+        }
+        ASSERT_FALSE(path.empty());
+        const auto mode = std::filesystem::status(path).permissions();
+        std::filesystem::permissions(path, std::filesystem::perms::none);
+        const auto unreadable = store_->Read(SaveName());
+        if (unreadable)
+        {
+            std::filesystem::permissions(path, mode);
+            GTEST_SKIP() << "this process can read permission-denied files";
+        }
+        const auto failed = store_->Write(SaveName(), "do not replace it");
+        std::filesystem::permissions(path, mode);
+        ASSERT_FALSE(failed);
+        const auto preserved = store_->Read(SaveName());
+        ASSERT_TRUE(preserved);
+        EXPECT_EQ(*preserved, "preserve me");
+#else
+        GTEST_SKIP() << "Linux file-permission regression";
+#endif
     }
 
     TEST_F(SaveStoreTest, TheSecondWriteLeavesTheFirstAsABackup)

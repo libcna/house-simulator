@@ -77,15 +77,13 @@ int main(int argc, char** argv)
     }
 
     app::Settings settings = app::Settings::Defaults();
-#if defined(__ANDROID__)
-    // CNA's standard XNA StorageDevice resolves beneath this package's private
-    // files directory on Android. The same store also serves crash reports.
+#if !defined(__EMSCRIPTEN__)
+    // Standard-XNA storage serves both desktop and Android; no second format/store.
     auto settingsStore = persistence::DesktopSaveStore::Open();
     if (!settingsStore)
     {
-        util::Log::Warn(util::LogCat::Persistence,
-                        "Android settings store unavailable: {}",
-                        settingsStore.Error().ToString());
+        util::Log::Warn(
+            util::LogCat::Persistence, "settings store unavailable: {}", settingsStore.Error().ToString());
     }
     else if ((*settingsStore)->Exists("settings.json"))
     {
@@ -96,18 +94,25 @@ int main(int argc, char** argv)
             if (parsed)
             {
                 settings = std::move(*parsed);
+                // A saved preference wins over auto-detection; an explicit CLI override still wins.
+                if (!options->quality.has_value())
+                {
+                    options->quality = settings.quality;
+                }
+                util::Log::Info(
+                    util::LogCat::Persistence, "loaded settings from {}", (*settingsStore)->Location());
             }
             else
             {
                 util::Log::Warn(util::LogCat::Persistence,
-                                "Android settings invalid; using defaults: {}",
+                                "settings invalid; using defaults: {}",
                                 parsed.Error().ToString());
             }
         }
         else
         {
             util::Log::Warn(util::LogCat::Persistence,
-                            "Android settings unreadable; using defaults: {}",
+                            "settings unreadable; using defaults: {}",
                             saved.Error().ToString());
         }
     }
@@ -126,22 +131,24 @@ int main(int argc, char** argv)
     {
         util::Log::Warn(util::LogCat::App, "settings clamped into range: {}", clamped);
     }
-#if defined(__ANDROID__)
-    if (settingsStore && !(*settingsStore)->Exists("settings.json"))
-    {
-        if (auto written = (*settingsStore)->Write("settings.json", settings.ToJson()); !written)
-        {
-            util::Log::Warn(util::LogCat::Persistence,
-                            "Android defaults could not be saved: {}",
-                            written.Error().ToString());
-        }
-    }
-#endif
-
     try
     {
         app::CnaHouseGame game(*options, settings);
         game.Run();
+#if !defined(__EMSCRIPTEN__)
+        // Persist first-run defaults only after the actual render tier/preset is resolved.
+        // Settings edits already save immediately, including before Android process suspension.
+        if (game.ExitCode() == 0 && settingsStore && !(*settingsStore)->Exists("settings.json"))
+        {
+            if (auto written = (*settingsStore)->Write("settings.json", game.UserSettings().ToJson());
+                !written)
+            {
+                util::Log::Warn(util::LogCat::Persistence,
+                                "initial settings could not be saved: {}",
+                                written.Error().ToString());
+            }
+        }
+#endif
         return game.ExitCode();
     }
     catch (const std::exception& e)

@@ -1,5 +1,43 @@
 # Current owner-visible defect work — 2026-09-28
 
+## Desktop restart fixed; latest walk/run and exact stair screenshots in progress
+
+R15 / current owner reports selected `HOUSE-03645`: it is complete from actual
+Settings UI and normal-process restart, not serializer-only tests. **35 MUST /
+78 OPT remain**, nominal **47.5 h**; practical roughly 50–65 h, pessimistic ~80 h,
+not the withdrawn ceiling. Full pre-movement unit 1523 PASS; isolated Radeon GPU
+integration 167 PASS / 3 opt-in SKIP / 0 FAIL. New private-profile environment
+uses existing XDG_DATA_HOME support, never HOME or the owner's preferences.
+Restart tests additionally prove corrupt/unwritable fallback and CLI precedence.
+Unreadable-current-file backup now reports failure rather than aborting.
+Logs `/tmp/house-03645-{focused-final,integration,units,static}.log`; real restart
+PNGs/logs `build/test-output/house-03645/`. Strict 353 clean / 109 exemptions.
+Full static run found inherited `.claude` plus a draft artwork envelope violation
+in separate geometry WIP (bottom-origin asset, not centred); corrected placement
+is being rebaked/rechecked. Do not claim that draft was accepted.
+
+Latest owner instruction refines still-OPEN `HOUSE-03573`: remove Normal/Fast
+from Settings; walk 2.05 m/s, Shift toggles 4.00 m/s run, start/reset walking,
+ignore legacy saved mode while retaining JSON compatibility. Cinema 0.90 m/s.
+Current implementation/tests are WIP, not this persistence commit's completion.
+
+Both owner images `Screenshot From 2026-09-28 12-{01-50,03-18}.png` inspected.
+Wrong main-stair guard follows raw visibility aperture z=-14.8 across solid
+cross-landing, leaving actual L2 edge z=-15.3 open. Shared offline contour fix
+puts guards on true floor edges and keeps incoming/outgoing tread lanes open;
+no runtime system/physics tolerance changes. Current source/mesh regressions
+pass, but **HOUSE-03638 stays OPEN until current rendered/input review**.
+L0/L1 art is genuinely buried under half-landings; its bottom-origin envelopes
+need bottoms 2.60 / 5.55 (not rejected 3.00 / 6.00 draft). Corrected bakes pending.
+Filming route must stay on the solid L2 bridge before entering its east descending
+lane; original eight points cut through the restored guard. A new-speed unit
+finds the terrace's missing real floor support; reuse porch `floorSupport=slab`,
+not a solver rewrite. Reject stale captures/tests until current content deployment.
+
+Next: finish these owner guard/art/walk-run corrections before unrelated work.
+All graphics offscreen/surfaceless, never monitor; compile -j2 / strict 4 workers,
+shared ccache, existing build/. No Android emulator is being run by this work.
+
 ## Current audio checkpoint and newly reopened owner corrections
 
 **36 ACTIVE/MUST / 78 OPT remain**, nominal **48.25 h** including the newly
