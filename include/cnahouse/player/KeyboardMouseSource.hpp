@@ -116,6 +116,7 @@ namespace cnahouse::player
             WalkMode,
             Cancel,
             Menu,
+            Cinema,
             ToggleFullscreen,
             ToggleOverlay,
             ToggleWorldOverlay,

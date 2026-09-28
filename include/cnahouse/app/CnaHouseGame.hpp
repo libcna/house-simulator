@@ -33,6 +33,7 @@
 #include "cnahouse/physics/BroadPhase.hpp"
 #include "cnahouse/physics/CollisionData.hpp"
 #include "cnahouse/player/CellTracker.hpp"
+#include "cnahouse/player/FilmingTour.hpp"
 #include "cnahouse/player/FirstPersonView.hpp"
 #include "cnahouse/player/FixedStep.hpp"
 #include "cnahouse/player/KeyboardMouseSource.hpp"
@@ -151,6 +152,13 @@ namespace cnahouse::app
             fixedStepLimit_ = steps;
         }
 
+        /// Deterministic 30 fps review only, with the same four 120 Hz physics steps per frame.
+        /// Normal play always uses GameTime. A synthetic input source must also be supplied.
+        void SetReviewFrameStepForTesting(bool enabled) noexcept
+        {
+            reviewFrameStep_ = enabled;
+        }
+
         /// @brief Drives the game from a scripted input source instead of the devices.
         ///
         /// The one seam the player wiring needs to be testable without a window: everything after
@@ -255,6 +263,11 @@ namespace cnahouse::app
         [[nodiscard]] const player::FirstPersonView& ViewForTesting() const noexcept
         {
             return view_;
+        }
+
+        [[nodiscard]] const player::FilmingTour& FilmingTourForTesting() const noexcept
+        {
+            return filmingTour_;
         }
 
         /// @brief The cell the body was last found in, or an invalid id if it is not walking.
@@ -663,6 +676,7 @@ namespace cnahouse::app
         player::PlayerState player_;
         player::LookAngles look_;
         player::FirstPersonView view_;
+        player::FilmingTour filmingTour_;
         player::CellTracker tracker_;
         debug::WorldOverlay worldOverlay_;
         /// §25.8's `F3`, and the walk it reports. Both exist only in the walk scene: the blockout
@@ -732,6 +746,7 @@ namespace cnahouse::app
         /// @brief A frame-edge survives zero-step frames and reaches exactly one physics step.
         bool pendingRunToggle_ = false;
         bool walking_ = false;
+        bool reviewFrameStep_ = false;
         std::uint64_t fixedSteps_ = 0;
         /// @brief Set by `SetInputSourceForTesting`; null selects the platform's normal source.
         player::IInputSource* scriptedInput_ = nullptr;

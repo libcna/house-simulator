@@ -442,8 +442,13 @@ namespace cnahouse::ui
 
     std::string_view ControlsHint::Text() const noexcept
     {
-        return scheme_ == ControlScheme::Touch ? "Touch: move stick · drag to look · pause button"
-                                               : "WASD move · mouse look · Shift walk speed · Esc pause";
+        if (scheme_ == ControlScheme::Touch)
+        {
+            return "Touch: move stick · drag to look · pause button";
+        }
+        return scheme_ == ControlScheme::KeyboardMouseFilming
+                   ? "WASD move · mouse look · Shift walk speed · C filming tour · Esc pause"
+                   : "WASD move · mouse look · Shift walk speed · Esc pause";
     }
 
     void ControlsHint::Draw(Microsoft::Xna::Framework::Graphics::SpriteBatch& batch,

@@ -65,6 +65,7 @@ add_library(cnahouse_core STATIC
     player/EyeSpring.cpp
     player/FirstPersonCamera.cpp
     player/FirstPersonView.cpp
+    player/FilmingTour.cpp
     player/HeadBob.cpp
     player/LandingDip.cpp
     player/MouseCapture.cpp

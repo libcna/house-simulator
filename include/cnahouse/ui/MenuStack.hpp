@@ -163,6 +163,7 @@ namespace cnahouse::ui
     {
         KeyboardMouse,
         Touch,
+        KeyboardMouseFilming,
     };
 
     using MenuRequested = std::function<void(MenuCommand, ControlScheme)>;

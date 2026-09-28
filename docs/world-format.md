@@ -1018,6 +1018,20 @@ The fresh-world `rngState` is a single 64-bit seed (16 hexadecimal digits), expa
 SplitMix64 into xoshiro256++'s four-word state. Saves carry the expanded 64-digit state instead;
 conflating the two would make the first save/load change the future sequence.
 
+`HOUSE-03572` adds an optional `filmingTour` object to this same version (old worlds
+remain compatible). Its `route` is an ordered array of `{feet:[x,y,z], cell:id,
+crouched:bool, pauseSeconds:0..20}`. Feet use metres; zero pause means a transit
+point, a positive pause means a room/grounds panorama. This is immutable content,
+not household persistence or a reusable cutscene format. The deployed manifest
+already hashes initialstate.json, so route changes cannot escape content provenance.
+The bounded Linux player policy steers the ordinary capsule through these points;
+it never assigns player positions or bypasses headroom/collision. C stops at the
+current position; Esc stops and opens pause. Starting elsewhere joins the nearest
+capsule-reachable same-cell point and follows one full forward circuit. A failed/stuck
+route returns control rather than silently skipping or teleporting. Current whole-property coverage is
+checked against the accessible cells in docs/zones.json and by actual controller
+and GPU review, not by this structural schema alone.
+
 ## `docs/zones.json`
 
 The zone manifest is the complete planning and traversal ledger for authored cells. Every source

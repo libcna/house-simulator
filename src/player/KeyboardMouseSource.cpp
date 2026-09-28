@@ -138,6 +138,7 @@ namespace cnahouse::player
         state_.runPressed = edge(Edge::WalkMode, keyboard.IsKeyDown(Keys::LeftShift));
         state_.cancelPressed = edge(Edge::Cancel, keyboard.IsKeyDown(Keys::Escape));
         state_.menuPressed = edge(Edge::Menu, keyboard.IsKeyDown(Keys::Tab));
+        state_.cinemaPressed = edge(Edge::Cinema, keyboard.IsKeyDown(Keys::C));
         state_.toggleFullscreenPressed =
             edge(Edge::ToggleFullscreen, keyboard.IsKeyDown(Keys::Enter)) && state_.freeCursorHeld;
         state_.toggleOverlayPressed = edge(Edge::ToggleOverlay, keyboard.IsKeyDown(Keys::F1));

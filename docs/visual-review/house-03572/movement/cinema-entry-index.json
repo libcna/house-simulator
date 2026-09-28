@@ -1,0 +1,291 @@
+[
+  {
+    "capture": 2066,
+    "frame": 30990,
+    "point": 480,
+    "cell": "B1_HALL",
+    "feet": [
+      2.1634,
+      -2.3,
+      -25.0945
+    ],
+    "yaw": 1.6544,
+    "pitch": -1.8866e-07,
+    "source": "build/test-output/cinema-review/002066.png",
+    "sourceSha256": "70413af8a8f21afaebc2b54b4357a079c5f1db361c737a82fd34eb9d19c32e5a",
+    "review": "cinema-entry-030990.webp",
+    "reviewSha256": "1f61752b108b7d447da97f062dfbfbd0695d7aac01b3f45b8bfd778fa5471846"
+  },
+  {
+    "capture": 2067,
+    "frame": 31005,
+    "point": 482,
+    "cell": "B1_CINEMA",
+    "feet": [
+      2.4925,
+      -2.3,
+      -25.0638
+    ],
+    "yaw": 1.98652,
+    "pitch": -2.55716e-07,
+    "source": "build/test-output/cinema-review/002067.png",
+    "sourceSha256": "9b5b8b716ed64c00da2eb857ea9b42d4cca60a533348ec5897cd80ceabd45679",
+    "review": "cinema-entry-031005.webp",
+    "reviewSha256": "eef6174df32f5eb1b4609325e2f7cfccf8fc961602212ebfa969e6306545a8d8"
+  },
+  {
+    "capture": 2068,
+    "frame": 31020,
+    "point": 483,
+    "cell": "B1_CINEMA",
+    "feet": [
+      2.80587,
+      -2.3,
+      -24.9343
+    ],
+    "yaw": 2.03067,
+    "pitch": -3.56e-07,
+    "source": "build/test-output/cinema-review/002068.png",
+    "sourceSha256": "7fd794c0a7845fd6a45d604246cb1bc10ff77e1f92fef0d81a9dae947c6fc73a",
+    "review": "cinema-entry-031020.webp",
+    "reviewSha256": "d4194ce126a4e5215fc83e1e4d1f5fe1a8d748d93f7ed364f0dc36039636711c"
+  },
+  {
+    "capture": 2069,
+    "frame": 31035,
+    "point": 483,
+    "cell": "B1_CINEMA",
+    "feet": [
+      3.11995,
+      -2.3,
+      -24.7879
+    ],
+    "yaw": 2.40447,
+    "pitch": -3.53488e-07,
+    "source": "build/test-output/cinema-review/002069.png",
+    "sourceSha256": "f472d6fcf8da7db218de8d5b4b91a37d9a48eb521a031df0acfec20e1b23026b",
+    "review": "cinema-entry-031035.webp",
+    "reviewSha256": "31d2b7095b3ae435039bbff1e06d9d5bb44fa0b4a9ec3d8c0995fff2f6f46cbb"
+  },
+  {
+    "capture": 2070,
+    "frame": 31050,
+    "point": 486,
+    "cell": "B1_CINEMA",
+    "feet": [
+      3.36329,
+      -2.3,
+      -24.608
+    ],
+    "yaw": 2.18708,
+    "pitch": -1.24382e-07,
+    "source": "build/test-output/cinema-review/002070.png",
+    "sourceSha256": "a31312ea318f7103c09265909b7a7033302cf4187266e4640924ce6fe495cc23",
+    "review": "cinema-entry-031050.webp",
+    "reviewSha256": "9328ad22b76a40aa4aad87c2dc0d1b711bc43e343a206fddd9023dd3d08d4d36"
+  },
+  {
+    "capture": 2071,
+    "frame": 31065,
+    "point": 490,
+    "cell": "B1_CINEMA",
+    "feet": [
+      3.49195,
+      -2.3,
+      -24.3601
+    ],
+    "yaw": 1.9171,
+    "pitch": -1.45859e-07,
+    "source": "build/test-output/cinema-review/002071.png",
+    "sourceSha256": "e705c44d3ea9e6a81113ce68f5268ed50c0b4dfefbba3b58b22920c5906fed00",
+    "review": "cinema-entry-031065.webp",
+    "reviewSha256": "726e9a9053328019dd29511ac860dec0cb71c4e02ac45778e0cbfdd27cf1f126"
+  },
+  {
+    "capture": 2072,
+    "frame": 31080,
+    "point": 491,
+    "cell": "B1_CINEMA",
+    "feet": [
+      3.7856,
+      -2.3,
+      -24.2309
+    ],
+    "yaw": 1.89859,
+    "pitch": -1.81638e-07,
+    "source": "build/test-output/cinema-review/002072.png",
+    "sourceSha256": "fc7673b60ca6559b66bfa606c98a26a315acfed15b70517ca8da2e7d8c172c5b",
+    "review": "cinema-entry-031080.webp",
+    "reviewSha256": "0bac42feef544310b819e09a3162c35272cba85340c049c5f68c6527e112a494"
+  },
+  {
+    "capture": 2073,
+    "frame": 31095,
+    "point": 491,
+    "cell": "B1_CINEMA",
+    "feet": [
+      4.11696,
+      -2.3,
+      -24.1181
+    ],
+    "yaw": 1.89855,
+    "pitch": -2.47684e-07,
+    "source": "build/test-output/cinema-review/002073.png",
+    "sourceSha256": "794427a3e963cceacc64679321d21a1409480505905217959604d89556273a2d",
+    "review": "cinema-entry-031095.webp",
+    "reviewSha256": "e29e90e65f57a52756c1201b11950c97f75bcb2b194292e3721426ae08b24490"
+  },
+  {
+    "capture": 2074,
+    "frame": 31110,
+    "point": 491,
+    "cell": "B1_CINEMA",
+    "feet": [
+      4.44832,
+      -2.3,
+      -24.0055
+    ],
+    "yaw": 1.89849,
+    "pitch": -3.56098e-07,
+    "source": "build/test-output/cinema-review/002074.png",
+    "sourceSha256": "debd2138b07e6d6b78a8d86e37aae59d442267e5582b2c7b973035789ba6cdb8",
+    "review": "cinema-entry-031110.webp",
+    "reviewSha256": "e8d91facd5ca34db83567d7ed66392cce2e16a8e8e72e3343c1359dd32b486e2"
+  },
+  {
+    "capture": 2075,
+    "frame": 31125,
+    "point": 491,
+    "cell": "B1_CINEMA",
+    "feet": [
+      4.77969,
+      -2.3,
+      -23.8928
+    ],
+    "yaw": 1.89844,
+    "pitch": -7.46135e-07,
+    "source": "build/test-output/cinema-review/002075.png",
+    "sourceSha256": "36a909d2fe0364f992ba8bd56d0e81e93c7d816bfacafd003cef2e832a7e7b0d",
+    "review": "cinema-entry-031125.webp",
+    "reviewSha256": "21e369d0c5c1080b195a130b3bf7a0559ffa941cf72d36fc08d1bc14d2606b67"
+  },
+  {
+    "capture": 2092,
+    "frame": 31380,
+    "point": 493,
+    "cell": "B1_CINEMA",
+    "feet": [
+      5.0751,
+      -2.3,
+      -23.8055
+    ],
+    "yaw": 1.77398,
+    "pitch": -0.0397665,
+    "source": "build/test-output/cinema-review/002092.png",
+    "sourceSha256": "76766dcc758779a05c7ea5d47939c42c1d4766103d9430ee5c2f83ebc2c6f0bb",
+    "review": "cinema-entry-031380.webp",
+    "reviewSha256": "c8cbab4ebfb7351df8f38aac50c899d2268ae26468eb41bc77629602d8f7287d"
+  },
+  {
+    "capture": 2093,
+    "frame": 31395,
+    "point": 493,
+    "cell": "B1_CINEMA",
+    "feet": [
+      5.41883,
+      -2.3,
+      -23.7396
+    ],
+    "yaw": 1.76056,
+    "pitch": -1.79336e-07,
+    "source": "build/test-output/cinema-review/002093.png",
+    "sourceSha256": "a5c59328d5b7a09f25c7d591f9aca6dd1b32a80257eefdd7bc29839653c69de4",
+    "review": "cinema-entry-031395.webp",
+    "reviewSha256": "92cede35aeaa377cce02434dc8f16d2a45aa5ae8b60bcb15fe20655029af001d"
+  },
+  {
+    "capture": 2094,
+    "frame": 31410,
+    "point": 493,
+    "cell": "B1_CINEMA",
+    "feet": [
+      5.76256,
+      -2.3,
+      -23.6736
+    ],
+    "yaw": 1.76055,
+    "pitch": -2.43422e-07,
+    "source": "build/test-output/cinema-review/002094.png",
+    "sourceSha256": "4e524af3115a803a61efa0e1000958e8bdd7755bfe69092ed1e3ca538e45b073",
+    "review": "cinema-entry-031410.webp",
+    "reviewSha256": "2ae458a4a5f52f0e13452874b39f555f50fb42e76b7f71954e8d3ad7859d781f"
+  },
+  {
+    "capture": 2095,
+    "frame": 31425,
+    "point": 493,
+    "cell": "B1_CINEMA",
+    "feet": [
+      6.10625,
+      -2.3,
+      -23.6074
+    ],
+    "yaw": 1.78671,
+    "pitch": -3.30702e-07,
+    "source": "build/test-output/cinema-review/002095.png",
+    "sourceSha256": "63ed4872be8352ce2a66bc3c4c724c927777762eee03161d7d752225db1c7302",
+    "review": "cinema-entry-031425.webp",
+    "reviewSha256": "4a61a39aa98df7f0c9811206bbb7973b3d68b2da3a87aafed9923c6004bbbfce"
+  },
+  {
+    "capture": 2096,
+    "frame": 31440,
+    "point": 493,
+    "cell": "B1_CINEMA",
+    "feet": [
+      6.44723,
+      -2.3,
+      -23.5406
+    ],
+    "yaw": 2.12032,
+    "pitch": -2.84041e-07,
+    "source": "build/test-output/cinema-review/002096.png",
+    "sourceSha256": "1f5194189dc259c627c49231c2debccd9875aa0fc6e11cae3a2f599bc1de41f9",
+    "review": "cinema-entry-031440.webp",
+    "reviewSha256": "435f247df21ca13b6920ea8afd98cbc7809a1a99fd6727a6cb17c510f96ba1e4"
+  },
+  {
+    "capture": 2097,
+    "frame": 31455,
+    "point": 495,
+    "cell": "B1_CINEMA",
+    "feet": [
+      6.74863,
+      -2.3,
+      -23.4468
+    ],
+    "yaw": 2.51303,
+    "pitch": -2.64657e-07,
+    "source": "build/test-output/cinema-review/002097.png",
+    "sourceSha256": "aca497020dae36c88df8768d89ee79d93df4193f35e918ceffb8beeff68d0879",
+    "review": "cinema-entry-031455.webp",
+    "reviewSha256": "252c112c6564a617874185edec7f571d04cf854c85f834a9e57ac0342d683996"
+  },
+  {
+    "capture": 2098,
+    "frame": 31470,
+    "point": 497,
+    "cell": "B1_CINEMA",
+    "feet": [
+      6.82333,
+      -2.3,
+      -23.1418
+    ],
+    "yaw": 2.90573,
+    "pitch": -2.09598e-07,
+    "source": "build/test-output/cinema-review/002098.png",
+    "sourceSha256": "87193a7333743e254e18c740b43588904e2e62a579f0b83077ea06488ad2e661",
+    "review": "cinema-entry-031470.webp",
+    "reviewSha256": "5d5a605f4d8af676374f3d26fbc10310321624c366cd59ae7d8f3e19438cbac1"
+  }
+]

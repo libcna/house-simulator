@@ -660,6 +660,11 @@ def build() -> dict[str, dict]:
         "required": ["player", "clock"],
         "properties": {
             "player": obj(["cell", "position"], {"cell": ID, "position": VEC3, "yawDeg": NUM}),
+            "filmingTour": obj(["route"], {
+                "route": {"type": "array", "minItems": 2,
+                          "items": obj(["feet", "cell", "crouched", "pauseSeconds"], {
+                              "feet": VEC3, "cell": ID, "crouched": {"type": "boolean"},
+                              "pauseSeconds": {"type": "number", "minimum": 0, "maximum": 20}})}}),
             "clock": obj(["epochSeconds", "timeScale"], {
                 "epochSeconds": NUM, "timeScale": {"type": "number", "minimum": 0},
                 "latitudeDeg": {"type": "number", "minimum": -90, "maximum": 90},

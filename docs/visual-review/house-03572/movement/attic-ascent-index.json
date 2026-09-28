@@ -1,0 +1,325 @@
+[
+  {
+    "capture": 4443,
+    "frame": 66645,
+    "point": 1633,
+    "cell": "L2_STAIR_ATTIC",
+    "feet": [
+      6.30312,
+      6.55,
+      -14.9173
+    ],
+    "yaw": 1.18299,
+    "pitch": 0.0502335,
+    "source": "build/test-output/cinema-review/004443.png",
+    "sourceSha256": "3276b6f48155fdecd64c7f0762f1c99cf290378153390efae8365fc16ef6d638",
+    "review": "attic-ascent-066645.webp",
+    "reviewSha256": "434fa848194dd5b4feb08fbfa42c329438c4fa0e871a169b54133eef9129370d"
+  },
+  {
+    "capture": 4444,
+    "frame": 66660,
+    "point": 1636,
+    "cell": "L2_STAIR_ATTIC",
+    "feet": [
+      6.09588,
+      6.55,
+      -15.0557
+    ],
+    "yaw": 0.790291,
+    "pitch": 0.200233,
+    "source": "build/test-output/cinema-review/004444.png",
+    "sourceSha256": "23042177d1f63f222359fb2edea364979441ed47bcb0df43dc71f97f72624e08",
+    "review": "attic-ascent-066660.webp",
+    "reviewSha256": "598604b1fb85d89ab2a8b2f3a006364d2c2925f1efd0ef7031cb31f876326572"
+  },
+  {
+    "capture": 4445,
+    "frame": 66675,
+    "point": 1639,
+    "cell": "L2_STAIR_ATTIC",
+    "feet": [
+      5.98246,
+      6.55927,
+      -15.2144
+    ],
+    "yaw": 0.397591,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/004445.png",
+    "sourceSha256": "189eef37558c5a97a027f5ea0bcbed59ffcb1b74d4e50ca651166bb86bb0f5a3",
+    "review": "attic-ascent-066675.webp",
+    "reviewSha256": "818c350dbc6d902335c97b780df035a8c619274579a0521559754e9834f0e951"
+  },
+  {
+    "capture": 4446,
+    "frame": 66690,
+    "point": 1639,
+    "cell": "L2_STAIR_ATTIC",
+    "feet": [
+      5.96944,
+      6.62808,
+      -15.3083
+    ],
+    "yaw": 0.00489151,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/004446.png",
+    "sourceSha256": "1301cf166f8906c585490c3193afd66ca5e0f3c516f1359dc2896b76a189fc25",
+    "review": "attic-ascent-066690.webp",
+    "reviewSha256": "85844800f62596b13870c2910187c47e5b2c4db08ad553bee3b0c7716bffd8c5"
+  },
+  {
+    "capture": 4447,
+    "frame": 66705,
+    "point": 1639,
+    "cell": "L2_STAIR_ATTIC",
+    "feet": [
+      5.96122,
+      6.81279,
+      -15.5601
+    ],
+    "yaw": -0.0320547,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/004447.png",
+    "sourceSha256": "e77bb2bfe7e0a179a7b390dd0a5316dd2a56942a6c90e403723099a1f6cd66d3",
+    "review": "attic-ascent-066705.webp",
+    "reviewSha256": "d5c090a163df2f2b87bb79464ab2c614f5b80c1fdb9905c367bf21f6c4d69b64"
+  },
+  {
+    "capture": 4448,
+    "frame": 66720,
+    "point": 1639,
+    "cell": "L2_STAIR_ATTIC",
+    "feet": [
+      5.95315,
+      6.99751,
+      -15.812
+    ],
+    "yaw": -0.0320592,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/004448.png",
+    "sourceSha256": "444d286590a44c3a047ad67bd0c7878dde9e44b983842d4476d2afe4fb3631c1",
+    "review": "attic-ascent-066720.webp",
+    "reviewSha256": "e08210537c398b7bbdde2d56a2f63f31bbce40f8f0996d5d4b0e1191776ffdfc"
+  },
+  {
+    "capture": 4449,
+    "frame": 66735,
+    "point": 1639,
+    "cell": "L2_STAIR_ATTIC",
+    "feet": [
+      5.94508,
+      7.18222,
+      -16.0639
+    ],
+    "yaw": -0.0320649,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/004449.png",
+    "sourceSha256": "9cc7fe9d89a533c1c56e72eb326eb64cf3f51a6ccba48c77e5ee12a738c17337",
+    "review": "attic-ascent-066735.webp",
+    "reviewSha256": "48c8396a769a7f082d4f674fbe7a6aac1399df98695b707ece57be2e5e7a86dc"
+  },
+  {
+    "capture": 4450,
+    "frame": 66750,
+    "point": 1639,
+    "cell": "L2_STAIR_ATTIC",
+    "feet": [
+      5.93701,
+      7.36694,
+      -16.3158
+    ],
+    "yaw": -0.0320727,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/004450.png",
+    "sourceSha256": "d0af9c7a445c6eb49ee75226d691e34da015756cba9288c0cbf0c0f7bfdd720f",
+    "review": "attic-ascent-066750.webp",
+    "reviewSha256": "901b7788eb92c9f57e6232aadef713a45e6ca91e6bba6b2ab3f52beea1e46451"
+  },
+  {
+    "capture": 4451,
+    "frame": 66765,
+    "point": 1639,
+    "cell": "L2_STAIR_ATTIC",
+    "feet": [
+      5.92894,
+      7.55165,
+      -16.5677
+    ],
+    "yaw": -0.0320783,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/004451.png",
+    "sourceSha256": "6d7b106af8a8b1ee892376cffe681b467e688f016ff4031e8da48230dcb19d62",
+    "review": "attic-ascent-066765.webp",
+    "reviewSha256": "2f710320cfd4102d428ec4fadef5148f620e64dc7c86d3b0c1687c7036285e41"
+  },
+  {
+    "capture": 4452,
+    "frame": 66780,
+    "point": 1639,
+    "cell": "L2_STAIR_ATTIC",
+    "feet": [
+      5.92085,
+      7.73637,
+      -16.8196
+    ],
+    "yaw": -0.0320787,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/004452.png",
+    "sourceSha256": "648824d1339712a96e5b7a18d2bd242838b2195196c86cf8aa8d8f5b5a7b1e95",
+    "review": "attic-ascent-066780.webp",
+    "reviewSha256": "d988c76e52352479ce0a25bdf7fb8568ccb2113ed642700edf9a1ab9887a5208"
+  },
+  {
+    "capture": 4453,
+    "frame": 66795,
+    "point": 1639,
+    "cell": "L2_STAIR_ATTIC",
+    "feet": [
+      5.91277,
+      7.92108,
+      -17.0714
+    ],
+    "yaw": -0.0320787,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/004453.png",
+    "sourceSha256": "6d6af96cf2430ab7204c3c95900484abcf892709f377a365dfdb1360588b3850",
+    "review": "attic-ascent-066795.webp",
+    "reviewSha256": "23642e0c13f117941fcb4cbb04cf4d9279507ec26040286257965421873f3635"
+  },
+  {
+    "capture": 4454,
+    "frame": 66810,
+    "point": 1639,
+    "cell": "L2_STAIR_ATTIC",
+    "feet": [
+      5.9047,
+      8.1058,
+      -17.3233
+    ],
+    "yaw": -0.028295,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/004454.png",
+    "sourceSha256": "2e5c82fa3d0aebcbe15a07714bdf5f787bcc9710e32bc0df1e4328f57a203b9a",
+    "review": "attic-ascent-066810.webp",
+    "reviewSha256": "b4dada6082c236999d5cc56a745e1fcffcdd62a41c776222883913bc19a278b7"
+  },
+  {
+    "capture": 4455,
+    "frame": 66825,
+    "point": 1639,
+    "cell": "L2_STAIR_ATTIC",
+    "feet": [
+      5.89661,
+      8.29051,
+      -17.5752
+    ],
+    "yaw": -0.0275409,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/004455.png",
+    "sourceSha256": "f34e2d5c04995d460fcc03c24edcf91c21132a206b0cd82d75b33ab93ddcc4fb",
+    "review": "attic-ascent-066825.webp",
+    "reviewSha256": "ab80cbb7ee61b7d14a3efad41bc57d83026539b2d515a2aaad0b55068265de12"
+  },
+  {
+    "capture": 4456,
+    "frame": 66840,
+    "point": 1641,
+    "cell": "L3_STAIR_HEAD",
+    "feet": [
+      5.88927,
+      8.46464,
+      -17.8127
+    ],
+    "yaw": -0.0267524,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/004456.png",
+    "sourceSha256": "403d197370445849b108a9e13ff06c2703ac8ce7f7e91fd118fbf207a7b4256b",
+    "review": "attic-ascent-066840.webp",
+    "reviewSha256": "0ce9f821ea56bbe79e140de417a0792995fdd7471c1274367920cc4ecfad30b5"
+  },
+  {
+    "capture": 4457,
+    "frame": 66855,
+    "point": 1641,
+    "cell": "L3_STAIR_HEAD",
+    "feet": [
+      5.88252,
+      8.64936,
+      -18.0645
+    ],
+    "yaw": -0.0267403,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/004457.png",
+    "sourceSha256": "01d8ef6c34edff9fa227189e4a553b38712420b83572c13f639698ae5cbd6571",
+    "review": "attic-ascent-066855.webp",
+    "reviewSha256": "dee49c530becd60e8806a132a7e1905af83213a36a1cab4adc8e795f5d0dd6dc"
+  },
+  {
+    "capture": 4458,
+    "frame": 66870,
+    "point": 1641,
+    "cell": "L3_STAIR_HEAD",
+    "feet": [
+      5.8758,
+      8.83407,
+      -18.3164
+    ],
+    "yaw": -0.0233014,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/004458.png",
+    "sourceSha256": "701b2d45983dc0f3b978c227d90b246a20c9d6770717ab401ff06020395dc118",
+    "review": "attic-ascent-066870.webp",
+    "reviewSha256": "aedb80dbcfe5d9d6c34c511cc3449270710aad0e819a5722f739743ccd687c13"
+  },
+  {
+    "capture": 4459,
+    "frame": 66885,
+    "point": 1641,
+    "cell": "L3_STAIR_HEAD",
+    "feet": [
+      5.86906,
+      9.01879,
+      -18.5683
+    ],
+    "yaw": -0.0181106,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/004459.png",
+    "sourceSha256": "764e92dd8d6843c9de46a10ac66ac2bc8fa08c203cd5e227e5ef202cc1252e75",
+    "review": "attic-ascent-066885.webp",
+    "reviewSha256": "8cdcd3c666f659445c66edc166281f4ba9110f63ae349ab0c1d45bb1825e79c9"
+  },
+  {
+    "capture": 4460,
+    "frame": 66900,
+    "point": 1642,
+    "cell": "L3_STAIR_HEAD",
+    "feet": [
+      5.86293,
+      9.19815,
+      -18.8129
+    ],
+    "yaw": -0.015111,
+    "pitch": 0.178186,
+    "source": "build/test-output/cinema-review/004460.png",
+    "sourceSha256": "a8508585350e0e8b2c2b26a7a81fc1efee0703701e13d2c28d1e8b4d3426e260",
+    "review": "attic-ascent-066900.webp",
+    "reviewSha256": "94022382fd1a00bbe23889ed0ae592ae4f7d6b40590707f0bbf61b8e7f456494"
+  },
+  {
+    "capture": 4461,
+    "frame": 66915,
+    "point": 1644,
+    "cell": "L3_STAIR_HEAD",
+    "feet": [
+      5.85902,
+      9.3,
+      -19.0509
+    ],
+    "yaw": -0.0144342,
+    "pitch": 0.028186,
+    "source": "build/test-output/cinema-review/004461.png",
+    "sourceSha256": "65affefc14d5340078ba7d373b956b2d01ae2a6b534b194066ec5fe7505351c0",
+    "review": "attic-ascent-066915.webp",
+    "reviewSha256": "c8411101c5070b82110ac55d8d3c54b72940879c7e3c31abd41e201143080b4f"
+  }
+]

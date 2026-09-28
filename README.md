@@ -167,6 +167,14 @@ paths and `fxc` reads a leading `/` as an option. The preset already points at i
 
 `Alt+Enter` switches between windowed and fullscreen display.
 
+In normal Linux play, `C` starts or stops the automatic whole-property filming walk.
+Allow approximately 41 minutes for the complete circuit; use your usual recorder.
+It joins the route from your current room, shows all accessible rooms and grounds,
+and returns ordinary controls without teleporting. `Esc` stops it and opens Pause.
+The active tour hides the HUD and head bob; recording uses your usual screen recorder.
+Time/weather still follow your Environment settings, so choose a fixed state there
+if you want a consistent video.
+
 | Option | Effect |
 |---|---|
 | `--tier=s` | Force Tier S (stock XNA effects only), whatever the build supports |

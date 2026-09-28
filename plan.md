@@ -14,7 +14,7 @@ renumbered.
 | Scope policy | The owner explicitly superseded the former 280-hour ceiling on 2026-09-27 and requested further targeted corrections and a filming tour. Keep MUST/OPT boundaries explicit; do not infer other features |
 | Active plan | **34 open MUST tasks** in 16 milestones, including the owner-requested filming tour. Its reproduced grounding/entrance blockers are corrected. Every active task's title and acceptance states the current work |
 | Estimate to DONE | The old **44.84 / 52.75 / 76.03 agent-hour** forecast is a historical snapshot before the 2026-09-27 owner additions, not a current forecast or scheduling gate. Per-task `est:` remains for task sizing; see [Planning corrections](#planning-corrections) |
-| Current gate | **G5, M7 and M12 passed; M9 reopened for the owner-requested filming tour. CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator.** Main/attic/basement stairs, garage-loft floor and whole-house lighting are corrected under `HOUSE-03635`/`03638`/`03639`/`03636`; doorway flashes and visibility/wall holes are corrected under `HOUSE-03637`/`03640`, including the owner's precise foyer/stair corner-gap screenshot after reopening and new GPU verification. The existing car family is corrected under `HOUSE-03641`; next is filming tour `HOUSE-03572`. Desktop performance `HOUSE-02404` stays paused. `HOUSE-01920`/`HOUSE-01922` remain open; the owner reports the normal game is silent despite enabled audio |
+| Current gate | **G5, M7, M9 and M12 passed. CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator.** Main/attic/basement stairs, garage-loft floor and whole-house lighting are corrected under `HOUSE-03635`/`03638`/`03639`/`03636`; doorway flashes and visibility/wall holes under `HOUSE-03637`/`03640`, including the owner's precise foyer/stair corner-gap screenshot. The existing car family is corrected under `HOUSE-03641`; full GPU filming circuit accepted under `HOUSE-03572`. Next fix diagnostic ownership defect `HOUSE-03644`, then resume `HOUSE-01920`/`HOUSE-01922`: the normal game is silent despite enabled audio. Desktop performance `HOUSE-02404` stays paused |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -398,9 +398,9 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M6](#m6--main-cells-and-hero-areas-c4-c5--gates-g4-and-g5) — Main cells and hero areas | A | 03441–03500 | 0 | **G4** · `HOUSE-03452`, **G5** · `HOUSE-03480` | D4 | 0 |
 | [M7](#m7--a-compact-environment) — A compact environment | B | 03501–03540 | 0 | `HOUSE-03520` | D5 | 0 |
 | [M8](#m8--atmospheric-audio-essentials) — Atmospheric audio essentials | B | 03541–03570 | 4 | `HOUSE-01939` | D7 | 5 |
-| [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 1 | `HOUSE-03572` | D8 | 8 |
+| [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 0 | **done** · `HOUSE-03572` | D8 | 0 |
 | [M10](#m10--performance-measurement-driven) — Performance, measurement-driven | B | 03601–03630 | 2 | `HOUSE-02404` | D9 | 6 |
-| [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 3 | `HOUSE-02714` | D1, D2, D4, D6, D13, D14 | 3.25 |
+| [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 4 | `HOUSE-02714` | D1, D2, D4, D6, D9, D11, D13, D14 | 3.75 |
 | [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 0 | **done** · `HOUSE-02598` | D11 | 0 |
 | [M13](#m13--linux-desktop-release) — Linux desktop release | after M11 | 03701–03720 | 8 | `HOUSE-02797` | D9–D13 | 10.25 |
 | [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 5 | `HOUSE-02904` | D10b | 7.25 |
@@ -1276,11 +1276,12 @@ existing walk/controller path, not another menu or a reusable cinematic framewor
       verify: unit SettingsRoundTripTests.*
       note: (2026-09-25) `SettingsRoundTripTests` now prove all 22 persisted fields through the production JSON writer/reader, both endpoints of every bounded numeric setting plus the empty fixed-weather fallback, and all 15 retained settings-page rows. Each page row is mutated before its existing live-apply callback sees the committed value; no second application path or settings subsystem was introduced. The focused 3/3 tests and complete 1,471/1,471 unit suite pass.
 
-- [ ] HOUSE-03572 — `C` toggles a complete Linux filming tour of the property
+- [x] HOUSE-03572 — `C` toggles a complete Linux filming tour of the property
       dep: HOUSE-03638, HOUSE-03639, HOUSE-03640, HOUSE-03635, HOUSE-03636, HOUSE-03642, HOUSE-03643 · sys: player, app · plat: LNX · pri: MUST · zone: all · adv: D8 · est: 8
       accept: (1) from normal play, `C` starts/stops a camera-friendly automatic walk; (2) a deliberate sequence shows the street, front and rear grounds, garage, basement, ground floor, both upper floors, attic and every intended-accessible room without teleporting, clipping, getting stuck or omitting a zone; (3) view direction and pace make each space legible for a recorded video, without a new gameplay framework or generalized cutscene editor; (4) ordinary controls return cleanly when stopped or completed; (5) Linux capture proves one complete tour, and a focused route test protects zone/cell coverage
       verify: actual offscreen-rendered full tour with frame/video review, coverage log and a focused input/route regression
       note: (2026-09-27 owner addition) This filming mode was formerly an unnumbered optional idea, but the owner explicitly requested it for a whole-house YouTube walkthrough. Reuse the existing player input, navigation and grand-tour knowledge; implement only this one bounded route, not a generic cinematic system. Schedule after the reported traversal and visibility defects.
+      done: (2026-09-28) Optional-compatible authored 2422-point route, ordinary collision/controller/look intent only, nearest capsule-clear same-cell join and one forward circuit. C stops in place; Esc/Tab stop into Pause, then ordinary input resumes without teleporting. Actual offscreen Radeon/OPENGLES3 Debug game completes 90 panoramas / 73534 rendered frames / 294140 fixed steps / 4903 original PNGs; all ten final panorama contact pages and seven moving sequences (209 retained full-resolution frames) are reviewed. Pace is approximately 41 minutes in normal play. Real ApplyLook pitch-sign regression, route/solid-join/no-progress/input/menu tests and three actual-game C/Esc/Tab control-return cases pass. Unit 1516/1516, both 90-cell controller tours and 349 strict-XNA units pass. Broader GPU integration passes 162, skips three opt-in reviews, exposes independent pre-existing counter ownership failure now HOUSE-03644. Initial SDL-dummy GPU invocation and wrong-sign/live-log-index preview drafts are explicitly rejected, not acceptance. Static gates retain only owner-owned .claude layout failure. Evidence/hashes: docs/visual-review/house-03572-filming.md and house-03572/. No monitor window, sibling change, new build directory, FPS or human-manual-walk claim.
 
 ---
 
@@ -1414,6 +1415,12 @@ There is no zone rotation, no "polish everything" pass and no screenshot → twe
       verify: before-failing support claims, complete controller tour, current normal GPU movement through the garage steps and porch, unit/static checks
       note: (2026-09-28 R15 correction) HOUSE-03572's slow real-controller walk stops after 36 views at garage route point 850, feet x≈9.10/y≈0.44. Current captured fixed steps repeatedly advance then push back by the existing 20 mm depenetration. This is D2/C1/S1, not a filming feature or permission to increase physical tolerances. The fast GrandTour missed it. Diagnose/fix this dependency before closing the filming task.
       done: (2026-09-28) GroundProbe confirms an actual sloping stair face beneath a rounded edge/wall contact, within the unchanged 50 mm probe; slope 46°, step 220 mm, terrain and flat-step responses stay unchanged. A broader replacement regressed the terrace slider and was rejected; a flat-step/wall claim protects the final narrow boundary. L0_PORCH now explicitly retains its real +0.57 m constructed floor collider instead of relying on a smoothed heightfield edge. The recorded garage pose fails before/passes after; six actual Radeon/OPENGLES3 normal-input crossings pass (garage slow/normal up/down, porch, gate both ways), with complete before/after sequences reviewed and retained. Complete fast tour passes 90 cells/564 stops/92798 steps/19 detours; slow controller tour passes 90 views/294080 steps. Current tree unit 1513/1513 and 349 strict-XNA units pass; full static gate retains only inherited owner-owned .claude layout failure. No GrandTour steering/tolerance or sibling source changed. Evidence: docs/visual-review/house-03642-support.md. Shares the checkpoint with HOUSE-03643, discovered by its required full-route validation; filming itself remains OPEN.
+
+- [ ] HOUSE-03644 — Keep rendering diagnostics owned by their current game
+      dep: HOUSE-03572 · sys: rendering, debug · plat: ALL · pri: MUST · zone: all · adv: D9, D11 · est: 0.5
+      accept: (1) static/alpha pass counters resolve in each independent counter table; (2) a preceding walking game cannot remove/corrupt a subsequent game's diagnostics; (3) draw/state counts and rendering remain unchanged
+      verify: two-table real-device regressions for both passes; ordered walk/opaque reproduction; full isolated GPU integration
+      note: (2026-09-28 R15 correction) Function-static handles retain indices into the first game's Counters vector; a subsequent instance misses static.chunks. Reproduced in current source. Do not weaken the failing assertion or conceal the defect with isolated-only runs.
 
 - [x] HOUSE-03643 — Clear the pedestrian approach of the misplaced utility pole
       dep: HOUSE-03640 · sys: content · plat: ALL · pri: MUST · zone: Z-STR · adv: D2, D13 · est: 0.75
@@ -2300,6 +2307,20 @@ under R5.
 ---
 
 ## Planning corrections
+
+### 2026-09-28 — Per-game rendering counters cannot share process-static handles
+
+* Add ACTIVE/MUST `HOUSE-03644` (0.5 h), a D9/D11 diagnostic correctness repair.
+  Current full integration fails after a walking game has drawn, then a new game
+  asks for `static.chunks`; its counter is absent. The ordered two-test probe
+  reproduces this; a content-smoke/opaque pair passes because smoke does not draw
+  the static pass. `StaticGeometryPass` and `AlphaTestPass` cache counter-vector
+  indices in function statics, although indices belong to one `Counters` instance.
+* Preserve rendering and counter meaning, remove cross-instance ownership, protect
+  both passes with independent counter tables, and rerun the real GPU suite.
+  This is not speculative optimisation, new infrastructure or optional polish.
+  Evidence: `/tmp/house-03644-ordered-walk-before.log` and
+  `/tmp/house-03572-final-integration-gpu.log`.
 
 ### PC-2026-09-28 — Real contact measurement finds a utility pole in the gate approach
 

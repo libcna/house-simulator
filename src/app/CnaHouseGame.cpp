@@ -853,6 +853,10 @@ namespace cnahouse::app
         view_.Camera().SetViewport(settings_.backBufferWidth, settings_.backBufferHeight);
         view_.Bob().SetLevel(settings_.headBob);
         walking_ = true;
+        if (const auto loaded = filmingTour_.Load("content/world/initialstate.json"); !loaded)
+        {
+            Log::Error(LogCat::Content, "filming route: {}", loaded.Error().ToString());
+        }
 
         // Half a second of standing still before anything is drawn: the body was spawned 20 mm
         // clear of the floor and §49.3's step is what puts it down. A screenshot taken on frame
@@ -891,17 +895,21 @@ namespace cnahouse::app
 
     void CnaHouseGame::UpdateWalk(float deltaSeconds)
     {
+        view_.Bob().SetLevel(filmingTour_.Active() ? player::HeadBobLevel::Off : settings_.headBob);
         // A command-line capture is a fixed authored pose. Desktop pointer events can arrive
         // while its window opens and turn the camera before --screenshot-frame is reached.
         const player::InputState frameInput =
             options_.screenshot.has_value() ? player::InputState{} : Input().Current();
         // §44's mouse look, from the source that owns the devices (`HOUSE-00622`).
-        player::ApplyLook(look_, frameInput, !options_.screenshot.has_value() && Input().LookAvailable());
+        player::ApplyLook(look_,
+                          frameInput,
+                          !filmingTour_.Active() && !options_.screenshot.has_value() &&
+                              Input().LookAvailable());
         player_.yaw = look_.yaw;
 
         // Shift is a one-frame edge, but a frame can contain zero or several physics steps.
         // Preserve its parity until a step can consume it, then never replay it in that frame.
-        if (frameInput.runPressed)
+        if (frameInput.runPressed && !filmingTour_.Active())
         {
             pendingRunToggle_ = !pendingRunToggle_;
         }
@@ -922,6 +930,12 @@ namespace cnahouse::app
             player_.cellId = cell->id;
             player::InputState stepInput = frameInput;
             stepInput.runPressed = pendingRunToggle_;
+            if (filmingTour_.Active())
+            {
+                stepInput = filmingTour_.Step(player_, look_, player::kFixedStepSeconds);
+                player::ApplyLook(look_, stepInput, true);
+                player_.yaw = look_.yaw;
+            }
             const player::PlayerStepReport report =
                 player::PlayerStep(*collision_, *cell, broad_, player_, stepInput, player::kFixedStepSeconds);
             pendingRunToggle_ = false;
@@ -1201,7 +1215,10 @@ namespace cnahouse::app
         menus_.Clear();
         if (!controlsHintShown_)
         {
-            controlsHint_.Start(scheme);
+            controlsHint_.Start(platform_.target == BuildTarget::Desktop &&
+                                        scheme == ui::ControlScheme::KeyboardMouse
+                                    ? ui::ControlScheme::KeyboardMouseFilming
+                                    : scheme);
             controlsHintShown_ = true;
         }
     }
@@ -1510,7 +1527,9 @@ namespace cnahouse::app
             Game::Update(gameTime);
 
             const auto elapsed =
-                static_cast<float>(gameTime.getElapsedGameTimeProperty().getTotalSecondsProperty());
+                reviewFrameStep_ && scriptedInput_ != nullptr
+                    ? 1.0F / 30.0F
+                    : static_cast<float>(gameTime.getElapsedGameTimeProperty().getTotalSecondsProperty());
             const FrameContext frame = timer_.Advance(elapsed);
             Log::BeginFrame(frame.frameIndex);
             // §35.1: *"`Update` accumulates `gameTime.ElapsedGameTime · timeScale`"*, from the
@@ -1545,7 +1564,23 @@ namespace cnahouse::app
                                          (Input().Current().menuPressed || Input().Current().cancelPressed);
             if (openedPauseMenu)
             {
+                filmingTour_.Stop();
                 OpenPauseMenu();
+            }
+            if (walking_ && menus_.Empty() && Input().Current().cinemaPressed &&
+                platform_.target == BuildTarget::Desktop)
+            {
+                pendingRunToggle_ = false;
+                if (filmingTour_.Active())
+                {
+                    filmingTour_.Stop();
+                    Log::Info(LogCat::App, "filming tour stopped; ordinary controls restored");
+                }
+                else if (!filmingTour_.Start(
+                             player_, util::IdRegistry::NameOf(tracker_.Current()), *collision_, broad_))
+                {
+                    Log::Warn(LogCat::App, "no filming route through the current cell");
+                }
             }
 
             if (weather_.has_value())
@@ -1723,7 +1758,8 @@ namespace cnahouse::app
             // sites, because whichever ran last would otherwise have the final say.
             player::CaptureRequest capture;
             capture.windowActive = getIsActiveProperty();
-            capture.menuOpen = !menus_.Empty() || TouchHudVisible() || options_.screenshot.has_value();
+            capture.menuOpen = !menus_.Empty() || TouchHudVisible() || options_.screenshot.has_value() ||
+                               filmingTour_.Active();
             capture.freeCursorHeld = Input().Current().freeCursorHeld;
             if (mouseCapture_.Update(capture))
             {
@@ -2185,6 +2221,10 @@ namespace cnahouse::app
 
     void CnaHouseGame::DrawPhysicsOverlay()
     {
+        if (filmingTour_.Active())
+        {
+            return;
+        }
 #if CNAHOUSE_DEBUG_TOOLS
         if (!walking_ || debugDraw_ == nullptr)
         {
@@ -2260,7 +2300,7 @@ namespace cnahouse::app
                              touchInput_.StickOrigin(),
                              touchInput_.StickPosition());
         }
-        if (!hud_->font.has_value())
+        if (!hud_->font.has_value() || filmingTour_.Active())
         {
             hud_->batch.End();
             return;

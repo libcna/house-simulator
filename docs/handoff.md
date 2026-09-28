@@ -1,5 +1,51 @@
 # Current owner-visible defect work — 2026-09-28
 
+## Accepted HOUSE-03572 — next diagnostic repair, then audible normal play
+
+**34 ACTIVE/MUST / 78 OPT remain**, nominal **45.75 h** (including newly opened
+HOUSE-03644); practical risk-adjusted estimate roughly **50–65 h**, pessimistic
+around **77 h**. Owner withdrew the aggregate ceiling. Selection follows R15's
+explicit filming addition after its S1 dependencies, then the freshly reproduced
+D9/D11 counter defect; do not resume unrelated performance/platform work ahead
+of the reported silent normal game.
+
+Film mode is accepted from a fresh complete **Debug**, Radeon 780M/OPENGLES3
+offscreen/surfaceless run: **90 panoramas, 73534 frames, 294140 physics steps,
+4903 original PNGs**, 1731623 ms elapsed. All ten final contact sheets and all
+seven moving sequences were reviewed. Retained 90 four-angle panorama strips
+and 209 full-resolution moving frames with source/hash indices are under
+`docs/visual-review/house-03572/`; explanation and commands:
+`docs/visual-review/house-03572-filming.md`. Normal circuit approximately 41 min.
+No teleport, headless-only acceptance, manual-keyboard or FPS claim. Three
+actual-game C/Esc/Tab stop/resume/ordinary-W checks pass. Every rendered frame
+checks actual pitch; wrong-sign ceiling draft was rejected. Mixed stdout/stderr
+lost 23 filenames in early live previews; final indexing uses all actual files
+and the matching TSV, not those incorrect live room labels.
+
+Unit **1516/1516**, two complete 90-cell controller tours, focused controls and
+**349 strict-XNA units** pass. Full GPU integration: **162 pass / 3 explicit
+opt-in skips / 1 independently reproduced pre-existing failure**. Ordered
+`GroundSupportGameTests.SlowGarageStepsAndNormalPorchUseTheRealController` then
+`HeadlessRunTests.TheOpaquePassDrawsTheSortedListAndNotTheResidencyMap` reproduces
+the latter's absent `static.chunks`. Function-static counter handles belong to
+the first game's table, not subsequent tables. **HOUSE-03644 OPEN**, estimate
+0.5 h: protect both static/alpha tables, repair ownership, rerun GPU integration.
+Logs `/tmp/house-03644-ordered-walk-before.log` and
+`/tmp/house-03572-final-integration-gpu.log`. Initial SDL dummy video invocation
+was an invalid GPU runner, not a product defect. Full static only fails inherited
+owner-owned `.claude` layout. Compilers/strict two workers, affinity 0–3, existing
+build/shared ccache; GPU serial and never a physical monitor window.
+
+Then **HOUSE-01920**, followed by **HOUSE-01922**: audio drafts are still in own
+stashes a1285ca7 / 55899cf8. Inspect/merge deliberately, never blindly pop their
+overlapping CnaHouseGame changes over the cinema commit. Current `pactl info`
+succeeds on PipeWire/PulseAudio with a real speaker sink. Silence is presently
+missing production playback wiring, not proof of absent hardware. Subjective
+listening criteria stay open until actually heard; an isolated null sink can
+first measure real backend output without disturbing the owner's speakers.
+
+The earlier entries below are chronological context, not current run status.
+
 ## Accepted HOUSE-03642 / HOUSE-03643 — full GPU filming review running
 
 **34 ACTIVE/MUST / 78 OPT remain; next HOUSE-03572 is still OPEN.** Selection
@@ -42,12 +88,21 @@ C joins the nearest capsule-clear same-cell point and walks one **forward circui
 C stops in place, Esc pauses/stops, head bob/HUD are suppressed only while active.
 12 s no-progress stop never teleports/skips. Pure route and short GPU C/control-
 return checks pass; **complete GPU capture is running, not yet accepted** under
-`/tmp/house-03572-final-gpu.log`, session 55878. Do not start another GPU capture
+`/tmp/house-03572-final-gpu.log`, current session 21546. Do not start another GPU capture
 while it runs (shared screenshot root). Its output will become
 `build/test-output/cinema-review/{frames.tsv,*.png}`. Review the full sequence,
 every room panorama and stair/threshold movement before closing the task.
 Rejected reverse-start and intentionally interrupted old-grid drafts remain
 local under `cinema-review-rejected-reverse` / `cinema-review-interrupted-grid-before`.
+The subsequent first complete-review attempt was stopped/rejected after 24 views:
+actual panoramas looked at the ceiling/sky. `ApplyLook` subtracts screen-Y while
+the new policy had emitted the opposite sign, diverging to +85°. This is now
+corrected, with a before-failing real-ApplyLook convergence test and per-rendered-
+frame actual camera-pitch assertion. Rejected 3445 captures stay under
+`cinema-review-rejected-pitch`, log `/tmp/house-03572-rejected-pitch-gpu.log`.
+Final review retains two PNGs per simulated second while still GPU-rendering and
+checking pitch on every 30-fps frame; same 120-Hz collision/controller. It is not
+claimed complete until that fresh full walk and image review finish.
 
 Remaining nominal **53.25 agent-hours**, rough **55–70** with a pessimistic case
 around 77–80. Owner withdrew the aggregate ceiling; this is not a new budget gate.

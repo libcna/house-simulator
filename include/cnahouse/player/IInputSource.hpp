@@ -50,6 +50,8 @@ namespace cnahouse::player
         bool interactPressed = false;
         bool cancelPressed = false;
         bool menuPressed = false;
+        /// @brief Toggles the owner's bounded Linux filming walk.
+        bool cinemaPressed = false;
 
         /// @brief Device-independent one-frame UI navigation edges.
         ///

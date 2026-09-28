@@ -366,6 +366,22 @@ namespace
 
 } // namespace
 
+TEST(InputTests, CinemaIsOneEdgeAndDoesNotChangeMovementOrCrouchBindings)
+{
+    KeyboardMouseSource source;
+    source.Apply(KeyboardState({Keys::C}), At(0, 0), 0.016F);
+    EXPECT_TRUE(source.Current().cinemaPressed);
+    EXPECT_FALSE(source.Current().crouch);
+    EXPECT_FLOAT_EQ(source.Current().move.X, 0.0F);
+    source.Apply(KeyboardState({Keys::C}), At(0, 0), 0.016F);
+    EXPECT_FALSE(source.Current().cinemaPressed);
+    source.Apply(KeyboardState({}), At(0, 0), 0.016F);
+    source.Apply(KeyboardState({Keys::C, Keys::W, Keys::LeftControl}), At(0, 0), 0.016F);
+    EXPECT_TRUE(source.Current().cinemaPressed);
+    EXPECT_TRUE(source.Current().crouch);
+    EXPECT_FLOAT_EQ(source.Current().move.Y, 1.0F);
+}
+
 TEST(InputTests, TwoFrameSmoothingIsOffByDefaultAndAveragesWhenItIsOn)
 {
     // `HOUSE-00625`, §44: *"optional raw-ish smoothing over 2 frames, default off"*. Off by

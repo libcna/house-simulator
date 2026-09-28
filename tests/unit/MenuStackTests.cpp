@@ -441,6 +441,10 @@ namespace
         EXPECT_NE(hint.Text().find("WASD"), std::string_view::npos);
         EXPECT_NE(hint.Text().find("mouse"), std::string_view::npos);
         EXPECT_NE(hint.Text().find("Esc"), std::string_view::npos);
+        EXPECT_EQ(hint.Text().find("C filming"), std::string_view::npos);
+        ControlsHint filming;
+        filming.Start(cnahouse::ui::ControlScheme::KeyboardMouseFilming);
+        EXPECT_NE(filming.Text().find("C filming"), std::string_view::npos);
         hint.Update(9.0F);
         EXPECT_FLOAT_EQ(hint.Alpha(), 1.0F);
         hint.Update(1.5F);

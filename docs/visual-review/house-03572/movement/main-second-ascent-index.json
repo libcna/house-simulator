@@ -1,0 +1,529 @@
+[
+  {
+    "capture": 3736,
+    "frame": 56040,
+    "point": 1312,
+    "cell": "L1_STAIR_MAIN",
+    "feet": [
+      2.6639,
+      3.65,
+      -15.1178
+    ],
+    "yaw": -1.81371,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/003736.png",
+    "sourceSha256": "5a553873b32ba4bb950edf561b43ea761bf7f8aa32278bbcf697715b971326c0",
+    "review": "main-second-ascent-056040.webp",
+    "reviewSha256": "ce3afcf241e100b1e56b2badf82abf28ebe77ba3f39a467ad7a5835b18208e27"
+  },
+  {
+    "capture": 3737,
+    "frame": 56055,
+    "point": 1313,
+    "cell": "L1_STAIR_MAIN",
+    "feet": [
+      2.66175,
+      3.73436,
+      -15.3417
+    ],
+    "yaw": -1.42101,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/003737.png",
+    "sourceSha256": "0be4a2da658de56b31cfe741306f912d9e114a5b733f758249ac5323c5286a8b",
+    "review": "main-second-ascent-056055.webp",
+    "reviewSha256": "a7a35ed18fd63a6ec9e1a8ec7243b05121fba12224e7ce0b9828bac96a80b497"
+  },
+  {
+    "capture": 3738,
+    "frame": 56070,
+    "point": 1313,
+    "cell": "L1_STAIR_MAIN",
+    "feet": [
+      2.6716,
+      3.86079,
+      -15.537
+    ],
+    "yaw": -1.02832,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/003738.png",
+    "sourceSha256": "f1ed47f26a0bb1c2abb9502c3801ef5dcf43224739d681d2e09d2ba61afeab90",
+    "review": "main-second-ascent-056070.webp",
+    "reviewSha256": "f4d80cf1baa2b557f90b917a16165edcca8e1b3a5093b9a7c9e0d466c7393312"
+  },
+  {
+    "capture": 3739,
+    "frame": 56085,
+    "point": 1313,
+    "cell": "L1_STAIR_MAIN",
+    "feet": [
+      2.68169,
+      4.00811,
+      -15.7646
+    ],
+    "yaw": -0.635617,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/003739.png",
+    "sourceSha256": "f458ddd9da89b07a312159c075e4e260b21e7cfe130350cef28d0edb297f4f88",
+    "review": "main-second-ascent-056085.webp",
+    "reviewSha256": "5d44fcde89ebef042e80bffd8b80937408483d95aa24f457ee21e8ddc1abea3d"
+  },
+  {
+    "capture": 3740,
+    "frame": 56100,
+    "point": 1313,
+    "cell": "L1_STAIR_MAIN",
+    "feet": [
+      2.69218,
+      4.16467,
+      -16.0064
+    ],
+    "yaw": -0.242918,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/003740.png",
+    "sourceSha256": "f3b52a95950db801e40c18d4f940b1e9d36012c6fff279e1d3d092d61e394ddb",
+    "review": "main-second-ascent-056100.webp",
+    "reviewSha256": "d1a4be1618b0bf41358cab9846504bbd31010012d88b8a414bc26aa35c108b50"
+  },
+  {
+    "capture": 3741,
+    "frame": 56115,
+    "point": 1313,
+    "cell": "L1_STAIR_MAIN",
+    "feet": [
+      2.70229,
+      4.32709,
+      -16.2574
+    ],
+    "yaw": 0.0352919,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/003741.png",
+    "sourceSha256": "5ea7e589f4680732b38f328f10448490c9a84c66ce12ad0958761c53a51e0dda",
+    "review": "main-second-ascent-056115.webp",
+    "reviewSha256": "3e36a37add0012fb99cb05f6222d4271e5e2d7cf229132711c8e160ddcdb9f83"
+  },
+  {
+    "capture": 3742,
+    "frame": 56130,
+    "point": 1313,
+    "cell": "L1_STAIR_MAIN",
+    "feet": [
+      2.71118,
+      4.49014,
+      -16.5092
+    ],
+    "yaw": 0.0352876,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/003742.png",
+    "sourceSha256": "d81570811d0853939cc2c100757f1580a01ffa122efa4431cf6099dee6f114e6",
+    "review": "main-second-ascent-056130.webp",
+    "reviewSha256": "87bcd337f72acb7e35fb9c8a69be05fe098f93c33b4f3af3056f06f8f29911c7"
+  },
+  {
+    "capture": 3743,
+    "frame": 56145,
+    "point": 1313,
+    "cell": "L1_STAIR_MAIN",
+    "feet": [
+      2.7201,
+      4.65318,
+      -16.7611
+    ],
+    "yaw": 0.0432337,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/003743.png",
+    "sourceSha256": "02d7d9ded0ff8dc0fac8f3caca4b71c8c3c3e1c1f550ef97d7fbd6f66a5dd0a0",
+    "review": "main-second-ascent-056145.webp",
+    "reviewSha256": "bd746fc477078373737afd2f845462b38eaa7f7b693892c6e80077f6a86f8dd5"
+  },
+  {
+    "capture": 3744,
+    "frame": 56160,
+    "point": 1313,
+    "cell": "L1_STAIR_MAIN",
+    "feet": [
+      2.72977,
+      4.81577,
+      -17.0123
+    ],
+    "yaw": 0.283278,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/003744.png",
+    "sourceSha256": "66b556106f78d6a748fa881ae8b2c0a1e6af10384b6f6a633e34a264de0872ac",
+    "review": "main-second-ascent-056160.webp",
+    "reviewSha256": "5a8fd2adaf6637841a43ca6d3920ad289b529c6f9cedbc6c6c270794f0c65bd5"
+  },
+  {
+    "capture": 3745,
+    "frame": 56175,
+    "point": 1313,
+    "cell": "L1_STAIR_MAIN",
+    "feet": [
+      2.73812,
+      4.97003,
+      -17.2506
+    ],
+    "yaw": 0.555552,
+    "pitch": 0.208584,
+    "source": "build/test-output/cinema-review/003745.png",
+    "sourceSha256": "83796c0a531b0b0f5f017e00615930f77f58bf91bc9299f8f69deda7e9c74898",
+    "review": "main-second-ascent-056175.webp",
+    "reviewSha256": "d9b587f62c608e55066d1d9cafdd068176b2e70d01102afb5e9aca9ac343153a"
+  },
+  {
+    "capture": 3746,
+    "frame": 56190,
+    "point": 1316,
+    "cell": "L1_STAIR_MAIN",
+    "feet": [
+      2.78636,
+      5.08884,
+      -17.4589
+    ],
+    "yaw": 0.880186,
+    "pitch": 0.0585837,
+    "source": "build/test-output/cinema-review/003746.png",
+    "sourceSha256": "bde4e88994ef29cc4b0f578cea5c9ce44f0dcb19ebbdb60128a55e60cf5d305c",
+    "review": "main-second-ascent-056190.webp",
+    "reviewSha256": "f58006248a4ddf05a426f54c014e065e5d31e617c54bfc59a52f583dc5faa793"
+  },
+  {
+    "capture": 3747,
+    "frame": 56205,
+    "point": 1320,
+    "cell": "L1_STAIR_MAIN",
+    "feet": [
+      2.94818,
+      5.10001,
+      -17.5992
+    ],
+    "yaw": 1.18305,
+    "pitch": -1.06957e-05,
+    "source": "build/test-output/cinema-review/003747.png",
+    "sourceSha256": "cfa75affd652fc78c29b04e9fdd7edc86e652493b3bf22b16f40974a17c4c478",
+    "review": "main-second-ascent-056205.webp",
+    "reviewSha256": "998e3c217206c89047664fcc03983f43f2249550d0cdc113ef069a19b28b6c80"
+  },
+  {
+    "capture": 3748,
+    "frame": 56220,
+    "point": 1323,
+    "cell": "L1_STAIR_MAIN",
+    "feet": [
+      3.06819,
+      5.10001,
+      -17.762
+    ],
+    "yaw": 1.46168,
+    "pitch": -1.1711e-05,
+    "source": "build/test-output/cinema-review/003748.png",
+    "sourceSha256": "53666f60feecff058d85bdce123c8a18fadb97a2b833b521611aac36443c6ec2",
+    "review": "main-second-ascent-056220.webp",
+    "reviewSha256": "190a1b70772b894bb9d73a87c8f373035e9580d342ccb012be4ee5d314776dce"
+  },
+  {
+    "capture": 3749,
+    "frame": 56235,
+    "point": 1325,
+    "cell": "L1_STAIR_MAIN",
+    "feet": [
+      3.25314,
+      5.10001,
+      -17.8395
+    ],
+    "yaw": 1.58655,
+    "pitch": -1.13159e-05,
+    "source": "build/test-output/cinema-review/003749.png",
+    "sourceSha256": "262788b1d9bb521534e60719c52188f4d958900d8b6df620062458842799729c",
+    "review": "main-second-ascent-056235.webp",
+    "reviewSha256": "4d88710d9798815f4bed2358cd207177c0cb5f17a3de324097b4809c289da2a0"
+  },
+  {
+    "capture": 3750,
+    "frame": 56250,
+    "point": 1327,
+    "cell": "L1_STAIR_MAIN",
+    "feet": [
+      3.47883,
+      5.10001,
+      -17.8113
+    ],
+    "yaw": 1.81393,
+    "pitch": 0.00371013,
+    "source": "build/test-output/cinema-review/003750.png",
+    "sourceSha256": "b1267c568dbda9b5227b7c3cb2f3eaaf2518edc236b7fa25057f6ed13af71778",
+    "review": "main-second-ascent-056250.webp",
+    "reviewSha256": "a8526bbed49a26557281e342459f147371de78be75af9582009c5e46bf47e0d1"
+  },
+  {
+    "capture": 3751,
+    "frame": 56265,
+    "point": 1330,
+    "cell": "L1_STAIR_MAIN",
+    "feet": [
+      3.69949,
+      5.10001,
+      -17.8316
+    ],
+    "yaw": 1.98298,
+    "pitch": 0.0372311,
+    "source": "build/test-output/cinema-review/003751.png",
+    "sourceSha256": "bef7301368f3f5898bf443f82d513d62e2c637c69e36755e91dc5c06df8104e8",
+    "review": "main-second-ascent-056265.webp",
+    "reviewSha256": "9843499b0bdfba4fd7c3e1bb407c891912a799bc9388f040eaad1c5bd934e9a7"
+  },
+  {
+    "capture": 3752,
+    "frame": 56280,
+    "point": 1333,
+    "cell": "L1_STAIR_MAIN",
+    "feet": [
+      3.91243,
+      5.10001,
+      -17.8285
+    ],
+    "yaw": 2.35929,
+    "pitch": 0.187231,
+    "source": "build/test-output/cinema-review/003752.png",
+    "sourceSha256": "b8ae178628527706d0f27973114561562abe0fb5694dace24f17aa1149071590",
+    "review": "main-second-ascent-056280.webp",
+    "reviewSha256": "cebe56313971fa5163c0d0401a1a841fafc2025714fd9d727f73cc7dc85b1ebe"
+  },
+  {
+    "capture": 3753,
+    "frame": 56295,
+    "point": 1333,
+    "cell": "L1_STAIR_MAIN",
+    "feet": [
+      4.11942,
+      5.10001,
+      -17.7027
+    ],
+    "yaw": 2.752,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/003753.png",
+    "sourceSha256": "3b6e546ca5b56da5904c930549cb90e3d1b2e1aa444a2983d1fbc464dd8cd8ab",
+    "review": "main-second-ascent-056295.webp",
+    "reviewSha256": "b58d90b74c330a6c8e8ff1d1bdfd48d710746abc9c7df70a8b7d99d1b4fd6a76"
+  },
+  {
+    "capture": 3754,
+    "frame": 56310,
+    "point": 1336,
+    "cell": "L1_STAIR_MAIN",
+    "feet": [
+      4.24354,
+      5.15867,
+      -17.538
+    ],
+    "yaw": 3.05504,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/003754.png",
+    "sourceSha256": "398cdffc5cb92690cb31be1c105cecc7b14c50e7782720b800b5d547a54b7267",
+    "review": "main-second-ascent-056310.webp",
+    "reviewSha256": "be2bde39c75a7b543f54b08ed013fa28c18d6b01f5bb5deefabf6d677f52dd78"
+  },
+  {
+    "capture": 3755,
+    "frame": 56325,
+    "point": 1336,
+    "cell": "L1_STAIR_MAIN",
+    "feet": [
+      4.26527,
+      5.32121,
+      -17.2869
+    ],
+    "yaw": 3.06831,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/003755.png",
+    "sourceSha256": "44f56100417adffec7a062e3f9d342da67ed17ce3f9c36d820a2064d35c52dfb",
+    "review": "main-second-ascent-056325.webp",
+    "reviewSha256": "bc90272fa7ed980962b37db285bf7bb8ab8fa3bf0a5fce4c7bb194a95ebb1976"
+  },
+  {
+    "capture": 3756,
+    "frame": 56340,
+    "point": 1336,
+    "cell": "L1_STAIR_MAIN",
+    "feet": [
+      4.28698,
+      5.48368,
+      -17.0359
+    ],
+    "yaw": 3.10411,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/003756.png",
+    "sourceSha256": "929df64042b9d457e7799600d03244c8eb0629ac5e1d1722e6d1e43298dc78fb",
+    "review": "main-second-ascent-056340.webp",
+    "reviewSha256": "4e5fa2b6b7c2e802e90595faf8dcc618abeb0d9f2a3b418523f38024147d9c12"
+  },
+  {
+    "capture": 3757,
+    "frame": 56355,
+    "point": 1337,
+    "cell": "L1_STAIR_MAIN",
+    "feet": [
+      4.30732,
+      5.64166,
+      -16.7919
+    ],
+    "yaw": 3.11252,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/003757.png",
+    "sourceSha256": "4a39f39fd04a0f03dea691c3d1a3c3870c5307a66c2f146bbdb1ea34ab00b3b0",
+    "review": "main-second-ascent-056355.webp",
+    "reviewSha256": "c9ad0fea4de60edc30d9194900a727b630c0223bb3469495600b7d3b56f71abf"
+  },
+  {
+    "capture": 3758,
+    "frame": 56370,
+    "point": 1338,
+    "cell": "L2_STAIR_MAIN",
+    "feet": [
+      4.31538,
+      5.79983,
+      -16.5475
+    ],
+    "yaw": 3.11352,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/003758.png",
+    "sourceSha256": "fe1b41dcadf3d955b319460997935ee6c4dd8fd6459ea7ffe1e21f18b7790b9a",
+    "review": "main-second-ascent-056370.webp",
+    "reviewSha256": "4ac640c83ff31f2c6ebf507f2aed76983f80bbefd1e6e470e35bb14b3771104b"
+  },
+  {
+    "capture": 3759,
+    "frame": 56385,
+    "point": 1338,
+    "cell": "L2_STAIR_MAIN",
+    "feet": [
+      4.32245,
+      5.96288,
+      -16.2956
+    ],
+    "yaw": 3.11351,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/003759.png",
+    "sourceSha256": "a782927f3579062555ec2f9e9e30cc56d3554ed80985e0818cf394a5fcf41c9b",
+    "review": "main-second-ascent-056385.webp",
+    "reviewSha256": "e73e096d07ced92c581bd6b6d311159e2d8bcb69798e20b344d98a67129c81d9"
+  },
+  {
+    "capture": 3760,
+    "frame": 56400,
+    "point": 1338,
+    "cell": "L2_STAIR_MAIN",
+    "feet": [
+      4.32952,
+      6.1193,
+      -16.054
+    ],
+    "yaw": 3.11575,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/003760.png",
+    "sourceSha256": "8fddd84cfa7d92bb732a4657e52b45dea77a8eca42fa4b5b120a2d0923155d3b",
+    "review": "main-second-ascent-056400.webp",
+    "reviewSha256": "b2ebdfde8723a0d4b4e2332ba9ce9da50fcdb4958211cf8c64577b490fabcfea"
+  },
+  {
+    "capture": 3761,
+    "frame": 56415,
+    "point": 1338,
+    "cell": "L2_STAIR_MAIN",
+    "feet": [
+      4.33634,
+      6.27572,
+      -15.8123
+    ],
+    "yaw": 3.13243,
+    "pitch": 0.25,
+    "source": "build/test-output/cinema-review/003761.png",
+    "sourceSha256": "aaaaa2444de369696d4163abc3a09f972bccab18b52acda580b0205590b6d2f1",
+    "review": "main-second-ascent-056415.webp",
+    "reviewSha256": "35d371e4bf267bcf0dec54b2236fb5690119d3e3322473755ebc3f59b8c847c5"
+  },
+  {
+    "capture": 3762,
+    "frame": 56430,
+    "point": 1338,
+    "cell": "L2_STAIR_MAIN",
+    "feet": [
+      4.34294,
+      6.4311,
+      -15.5723
+    ],
+    "yaw": -3.13097,
+    "pitch": 0.186895,
+    "source": "build/test-output/cinema-review/003762.png",
+    "sourceSha256": "6d982e4f97292d5f01d0f651d6e01b830cdbc22a9aaf85a9950921481f8a13ba",
+    "review": "main-second-ascent-056430.webp",
+    "reviewSha256": "182eca74d7e2f6f67eb668fb83c63ff7ceefb7ece4e047904e80ab82482bde0d"
+  },
+  {
+    "capture": 3763,
+    "frame": 56445,
+    "point": 1341,
+    "cell": "L2_STAIR_MAIN",
+    "feet": [
+      4.34531,
+      6.54229,
+      -15.3676
+    ],
+    "yaw": -2.88264,
+    "pitch": 0.0368947,
+    "source": "build/test-output/cinema-review/003763.png",
+    "sourceSha256": "75ece486b8458f4cacbae51321c3ee1eb30b73749d43c0bbbe28b09e8ebd53c8",
+    "review": "main-second-ascent-056445.webp",
+    "reviewSha256": "528e399b9c11f0bf4fe5cddfd040b551327c22c4b18e7dad378c2e252572e3e0"
+  },
+  {
+    "capture": 3764,
+    "frame": 56460,
+    "point": 1341,
+    "cell": "L2_STAIR_MAIN",
+    "feet": [
+      4.34355,
+      6.55001,
+      -15.0599
+    ],
+    "yaw": -2.48994,
+    "pitch": -1.31385e-05,
+    "source": "build/test-output/cinema-review/003764.png",
+    "sourceSha256": "19c0b58bc3a0aaace852e79c9fca6171efb534be0e110b962b0f8608a5859ca0",
+    "review": "main-second-ascent-056460.webp",
+    "reviewSha256": "da19c5f7688804dfa9964ddd45eecaa732e0187067914effb434ba80f3275e39"
+  },
+  {
+    "capture": 3765,
+    "frame": 56475,
+    "point": 1345,
+    "cell": "L2_STAIR_MAIN",
+    "feet": [
+      4.18194,
+      6.55001,
+      -14.8462
+    ],
+    "yaw": -2.09724,
+    "pitch": -1.31643e-05,
+    "source": "build/test-output/cinema-review/003765.png",
+    "sourceSha256": "02a1b39847bd62ce5f973fae2f150d1ae8f14ea8457efe112f8f6f9c6485d902",
+    "review": "main-second-ascent-056475.webp",
+    "reviewSha256": "357907898f9aa3650b18a50b2d9bd57255703109ea6c224101f8124e003cb559"
+  },
+  {
+    "capture": 3766,
+    "frame": 56490,
+    "point": 1347,
+    "cell": "L2_STAIR_MAIN",
+    "feet": [
+      3.85438,
+      6.55001,
+      -14.832
+    ],
+    "yaw": -1.70454,
+    "pitch": -2.03363e-05,
+    "source": "build/test-output/cinema-review/003766.png",
+    "sourceSha256": "bc9dc955b1682f42c3361863d11f09f5ee00aa44fe492534268a3774843268db",
+    "review": "main-second-ascent-056490.webp",
+    "reviewSha256": "a43204f65f8fb69d9c040a8e07903a8ae93a99699d79c7a5fcb949b3dade5a97"
+  }
+]

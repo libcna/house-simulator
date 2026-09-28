@@ -68,6 +68,13 @@ the ledger.
 > is the requirement;** where any section of this document, or an earlier amendment, asks for more,
 > `plan.md` governs.
 
+The owner's explicit `HOUSE-03572` addition is one Linux filming walk toggled by C.
+Its immutable route lives in `initialstate.json`; `player::FilmingTour` is only a
+small intent policy over the existing capsule/controller and first-person view.
+There is no second camera, collision bypass, runtime navigation framework or
+cutscene editor. Existing manual input alone cannot provide this requested automatic
+whole-property video tour; the policy is confined to that DONE D8 requirement.
+
 ---
 
 ## Table of contents

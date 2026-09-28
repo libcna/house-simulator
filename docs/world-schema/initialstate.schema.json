@@ -110,6 +110,45 @@
       ],
       "type": "object"
     },
+    "filmingTour": {
+      "additionalProperties": false,
+      "properties": {
+        "route": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "cell": {
+                "$ref": "#/$defs/id"
+              },
+              "crouched": {
+                "type": "boolean"
+              },
+              "feet": {
+                "$ref": "#/$defs/vector3"
+              },
+              "pauseSeconds": {
+                "maximum": 20,
+                "minimum": 0,
+                "type": "number"
+              }
+            },
+            "required": [
+              "feet",
+              "cell",
+              "crouched",
+              "pauseSeconds"
+            ],
+            "type": "object"
+          },
+          "minItems": 2,
+          "type": "array"
+        }
+      },
+      "required": [
+        "route"
+      ],
+      "type": "object"
+    },
     "interactables": {
       "additionalProperties": {
         "type": "object"
