@@ -3,7 +3,7 @@
 **Current acceptance:** `HOUSE-01920` and `HOUSE-01922` are complete, with the
 owner's actual six-category and interior/exterior day/night listening below.
 `HOUSE-01925` is complete with actual owner acceptance of the corrected indoor
-rain and final automated gates green. `HOUSE-01939` whole-zone weather listening remains open. Earlier blocked
+rain and final automated gates green. `HOUSE-01939` whole-zone weather listening is accepted by the owner below. Earlier blocked
 notes are historical, not missing-device claims.
 
 ## Retained weather loops and the owner's indoor-rain correction
@@ -169,6 +169,16 @@ weights cross-fade over 0.8 s; sun altitude blends day/night over -6°..+3°.
 Master volume is applied once globally, category/bank gains once per voice.
 Unload releases loop instances before cached SoundEffects. Web/Android still
 require a real gesture; explicit desktop walk scenes can open the device.
+
+## Whole-zone listening acceptance — 2026-09-28
+
+For HOUSE-01939 the owner was explicitly asked to walk the basement, ground
+floor, both upper floors, attic, garage and garden/street in clear day, clear
+night, rain day and rain night, checking footsteps, ambience and excessive or
+missing sound, with rain absent in the basement. The reply is **“vse je ok”**.
+No additional audio defect was reported. This completes the listening criterion,
+not a claim that the agent heard the recordings or that static tests replace
+subjective listening. No additional mixing matrix or asset is introduced.
 
 ## Actual backend output, distinct from subjective listening
 

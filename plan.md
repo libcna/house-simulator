@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers and a reusable kit), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (2026-09-22 reduction, retained breadth and maintenance mode; its former hour ceiling is superseded below) |
 | Scope policy | The owner explicitly superseded the former 280-hour ceiling on 2026-09-27 and requested further targeted corrections and a filming tour. Keep MUST/OPT boundaries explicit; do not infer other features |
-| Active plan | **29 open MUST tasks** in 16 milestones. Owner walk/run, reopened guard/art, terrace, local-settings layout gate, doorway-test sampling, six-category footsteps, interior/exterior ambience, indoor rain and repeatable desktop High scenarios are accepted; whole-zone listening, measured presets, platform and release work remain. Every active task's title and acceptance states the current work |
-| Estimate to DONE | Current open-task sum **37.00 agent-hours**; pessimistic **54.70 h** = 1.10 × 37.00 + the still-active Android/Web reserves (8 + 6 h); High performance reserve R-C is retired after repeatable acceptance. The old **44.84 / 52.75 / 76.03 h** table below is historical, not a current forecast or scheduling gate. Per-task `est:` remains for task sizing; platform/dependency waiting is not promised wall-clock completion |
-| Current gate | **G5, M7, M9 and M12 passed. CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator.** Main/attic/basement stairs, garage-loft floor and whole-house lighting are corrected under `HOUSE-03635`/`03638`/`03639`/`03636`; doorway flashes and visibility/wall holes under `HOUSE-03637`/`03640`, including the owner's precise foyer/stair corner-gap screenshot. The existing car family is corrected under `HOUSE-03641`; full GPU filming circuit accepted under `HOUSE-03572`. Normal title/Start audio produces real backend PCM; owner listening accepts all six footstep categories and interior/exterior day/night ambience under `HOUSE-01920`/`01922`. Weather layers and the indoor-rain correction are accepted under `HOUSE-01925`; whole-zone listening `HOUSE-01939` is next. Desktop High scenarios pass three complete current hardware-GPU rounds under `HOUSE-02404`; measured quality presets `HOUSE-02405` remain open |
+| Active plan | **29 open MUST tasks** in 16 milestones. Owner audio listening is accepted; windowed menu pointer correction, measured presets, platform and release work remain. Every active task's title and acceptance states the current work |
+| Estimate to DONE | Current open-task sum **37.25 agent-hours**; pessimistic **54.98 h** = 1.10 × 37.25 + the still-active Android/Web reserves (8 + 6 h); High performance reserve R-C is retired after repeatable acceptance. The old **44.84 / 52.75 / 76.03 h** table below is historical, not a current forecast or scheduling gate. Per-task `est:` remains for task sizing; platform/dependency waiting is not promised wall-clock completion |
+| Current gate | **G5, M7, M8, M9 and M12 passed. CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator.** Main/attic/basement stairs, garage-loft floor and whole-house lighting are corrected under `HOUSE-03635`/`03638`/`03639`/`03636`; doorway flashes and visibility/wall holes under `HOUSE-03637`/`03640`, including the owner's precise foyer/stair corner-gap screenshot. The existing car family is corrected under `HOUSE-03641`; full GPU filming circuit accepted under `HOUSE-03572`. Normal title/Start audio produces real backend PCM; owner listening accepts all six footstep categories and interior/exterior day/night ambience under `HOUSE-01920`/`01922`. Weather layers and the indoor-rain correction are accepted under `HOUSE-01925`; whole-zone four-state listening passes `HOUSE-01939`. Desktop High scenarios pass three complete current hardware-GPU rounds under `HOUSE-02404`; measured quality presets `HOUSE-02405` remain open |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -397,8 +397,8 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M5](#m5--baseline-lighting-everywhere-the-lighting-half-of-c3--gate-g3) — Baseline lighting everywhere | A | 03401–03440 | 0 | **G3 passed** · `HOUSE-03420` | D3, D6 | 0 |
 | [M6](#m6--main-cells-and-hero-areas-c4-c5--gates-g4-and-g5) — Main cells and hero areas | A | 03441–03500 | 0 | **G4** · `HOUSE-03452`, **G5** · `HOUSE-03480` | D4 | 0 |
 | [M7](#m7--a-compact-environment) — A compact environment | B | 03501–03540 | 0 | `HOUSE-03520` | D5 | 0 |
-| [M8](#m8--atmospheric-audio-essentials) — Atmospheric audio essentials | B | 03541–03570 | 2 | `HOUSE-01939` | D7 | 2.25 |
-| [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 0 | **done** · `HOUSE-03573` | D8 | 0 |
+| [M8](#m8--atmospheric-audio-essentials) — Atmospheric audio essentials | B | 03541–03570 | 0 | **done** · `HOUSE-01939` | D7 | 0 |
+| [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 1 | `HOUSE-03574` corrective exit | D8 | 1 |
 | [M10](#m10--performance-measurement-driven) — Performance, measurement-driven | B | 03601–03630 | 1 | `HOUSE-02405` | D9 | 2 |
 | [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 3 | `HOUSE-03631` | D1, D2, D4, D6, D8, D9, D11, D13, D14 | 3.25 |
 | [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 0 | **done** · `HOUSE-03682` | D11 | 0 |
@@ -1226,10 +1226,11 @@ derivative set, no positional source, no special zone loop and no room-aware rou
       earlier: (2026-09-28 first snapshot) Four retained banks and original/in-memory-low-pass pairs passed 1536 unit / 171 GPU integration checks (3 opt-in skips), but owner listening FAILED: indoor/attic rain was far too quiet. Isolated backend captures confirmed attic -50.559543 dBFS RMS versus outdoor -38.978439. The checkbox stayed open; those tests were insufficient audibility evidence.
       done: (2026-09-28 corrected current source) Owner confirms "nyni je vse ok" for strong attic rain, muffled audible above-ground rooms, silent basement and sunroom stronger than hall. Four existing rain/wind banks blend by intensity/speed with eight retained standard-XNA original/900 Hz filtered voices. Bounded filtered-loop RMS matching, sky exposure, coverage roof proximity and collision terrain versus authored cell floor correct the failed indoor level without new assets/layers or internal APIs. Actual PCM: attic -40.990206, sunroom -41.342621, hall -47.087331 dBFS RMS; final B1_CINEMA silence. Current 1537/1537 unit PASS; 171 hardware-GPU integration PASS / 3 opt-in SKIP / 0 FAIL; 25 focused unit PASS; all static gates green, 356 strict units / 109 existing exemptions. The intermediate eye-height basement leak was caught and fixed; no threshold was weakened. Evidence and failed drafts: docs/audio-playback-review.md. HOUSE-01939 is dependency-unblocked; its four-state whole-zone listening is not inferred from this acceptance.
 
-- [ ] HOUSE-01939 — Listening walk of every zone; fix what is wrong, missing or too loud
+- [x] HOUSE-01939 — Listening walk of every zone; fix what is wrong, missing or too loud
       dep: HOUSE-01920, HOUSE-01925 · sys: audio · plat: LNX · pri: MUST · zone: all · adv: D7 · est: 0.75
       accept: one walk of each zone by day and at night, in clear weather and in rain; every S1/S2 audio defect fixed; no per-room or per-weather mixing matrix
       verify: the walk's findings in the ledger
+      done: (2026-09-28 owner listening) Owner replies "vse je ok" to the explicit basement, ground floor, both upper floors, attic, garage and garden/street walk in clear day, clear night, rain day and rain night, including silent basement rain. No further missing or excessive audio reported. This is subjective whole-zone acceptance of the deployed current source, distinct from the earlier three-cell check and automated PCM/voice tests. Existing current snapshot remains 1537 unit PASS / 171 GPU integration PASS / 3 opt-in SKIP / all static gates green; no new runtime/content change or optional mixing work. Findings: docs/audio-playback-review.md.
 
 ---
 
@@ -1299,6 +1300,12 @@ existing walk/controller path, not another menu or a reusable cinematic framewor
       current: (2026-09-28 R7) UI/constants/toggle are implemented. Validation exceeded twice the original 0.75 h slice because the faster complete walk exposed a separate constructed-deck/slider defect; split that physical/content correction into HOUSE-03646 rather than silently enlarge this task or weaken traversal acceptance. Full current-source rebuild also encountered a transient concurrent CNA Game.cpp syntax error; existing-binary evidence is not a substitute for the final rebuild.
       done: (2026-09-28) Settings speed selector removed; new/reset player walks at 2.05 m/s, either Shift toggles 4.00 m/s session running without double-toggle, old version-11 JSON stays readable but does not restore running. Actual 20 m travel measures 2.049989/4.000013 m/s. Existing touch control labels WALK/RUN, without claiming fresh Android device acceptance. Cinema 0.90 m/s completes all 90 views/2422 points in 256959 fixed steps (~35.69 min versus old ~40.85). Complete normal controller tour, current real W/D+mouse stair traversal and actual GPU threshold/Settings checks pass. Acceleration, collision limits and room breadth unchanged. No optional speed setting. Evidence: docs/visual-review/house-03638-owner-corrections.md. Coupled to HOUSE-03638/03646 under the inseparable-batch workflow exception.
 
+- [ ] HOUSE-03574 — Windowed mouse clicks target the rendered menu and settings rows
+      dep: HOUSE-02527 · sys: ui, player, app · plat: ALL · pri: MUST · zone: all · adv: D8, D11 · est: 1
+      accept: mouse and touch pointer hit coordinates use the same safe virtual canvas as menu drawing; clicking a displayed row activates that row at 16:9, 4:3 and wide window aspects, including after resolution/fullscreen changes; letterbox padding must not activate rows; preserve ordinary mouse look and settings compatibility
+      verify: focused transform/menu regressions, actual application windowed pointer input on a private virtual display and current hardware-GPU menu captures; broader unit/integration and static gates
+      current: (2026-09-28 owner report) Mouse clicks sometimes target a different location in windowed mode; fullscreen appears correct. KeyboardMouseSource divides by the whole requested back buffer while TextRenderer fits a centred safe 1600x900 canvas. Runtime layout is refreshed only at load or explicit settings changes. Investigate current presentation/input semantics before adding any client-coordinate scaling; do not double-scale CNA's logical mouse coordinates. No fix or visual acceptance is claimed yet.
+
 ## M10 — Performance (measurement-driven)
 
 Track B. House Simulator is a CNA stress test, so performance work is kept, but it is **driven by
@@ -1337,6 +1344,7 @@ numbers and no code. No speculative optimisation infrastructure is built (rule R
       accept: High (desktop), Web and Android presets, selectable with `--quality` and in the Graphics section; each measured on desktop against its documented budget in the harness
       verify: the harness under each preset
       trace: absorbs `HOUSE-02406`, `HOUSE-02407`, `HOUSE-02852` and `HOUSE-02957`
+      current: (2026-09-28 source inspection) The UI already labels internal Low/Medium as Android/Web, but CLI/settings names still use low/medium. Only particle quality is consumed by the normal renderer; the existing ExteriorCuller view-distance argument is not supplied. Static cooking explicitly excludes auxiliary LOD meshes. Reuse the current quality table, culler and cooking mechanisms; first measure effective lower profiles before deciding whether additional cooked LOD depth is necessary. No implementation or preset-budget acceptance is claimed yet, and no optional shadow/post-processing work is activated.
 
 ---
 
@@ -2353,6 +2361,15 @@ under R5.
 ---
 
 ## Planning corrections
+
+### 2026-09-28 — Owner reports displaced windowed menu clicks
+
+* Add ACTIVE/MUST HOUSE-03574 (1 h), D8/D11, in M9's next free reserved ID.
+  Pointer hit-testing disagrees with the already-required safe virtual layout;
+  this is a corrective defect, not a new UI subsystem or optional polish.
+* Reuse TextRenderer's canvas, the existing desktop/touch sources and live XNA
+  viewport. Reproduce real pointer input privately; never open monitor windows.
+  Keep the correction visibly open until current-source input/render checks pass.
 
 ### 2026-09-28 — Retained weather low-pass without internal APIs or derivative assets
 

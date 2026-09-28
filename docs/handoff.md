@@ -1,5 +1,22 @@
 # Current owner-visible defect work — 2026-09-28
 
+## Whole-zone listening accepted; windowed pointer report next
+
+The owner replies **“vse je ok”** to the explicit HOUSE-01939 seven-zone
+clear-day/clear-night/rain-day/rain-night listening walk, including silent
+basement rain. This closes the D7 listening task; no further audio issue was
+reported. Findings are in `docs/audio-playback-review.md`. No code changed after
+the accepted 1537-unit / 171-GPU / all-static snapshot below.
+
+After listening: 28 MUST / 78 OPT, nominal 36.25 h. The newly reported D8 defect
+adds ACTIVE/MUST HOUSE-03574 (1 h): **29 MUST / 78 OPT**, nominal **37.25 h**,
+pessimistic **54.98 h**.
+The next owner report is occasional mouse hit-target displacement in windowed
+mode while fullscreen seems correct. HOUSE-03574 is the exact next task by the
+owner defect report and D8 corrective priority. Investigate it in the existing input/UI
+transform before unrelated work. No visible monitor tests are permitted.
+HOUSE-02405 is independently unblocked; its read-only source findings follow.
+
 ## Current continuation: retained weather and indoor-rain audibility accepted
 
 Starting clean `develop` HEAD `b38cac50f0b499d158883efcac48d19da5e7cec4`.
@@ -43,6 +60,18 @@ the 280-hour ceiling; MUST/OPT and retained-platform/floor boundaries remain.
 Exact next MUST: **HOUSE-01939**, one listening walk per zone by
 day/night in clear/rain. Do not infer it from the three-cell owner response.
 **HOUSE-02405** is independent and dependency-unblocked; it remains unimplemented.
+Read-only investigation is complete enough to avoid repeating the entry audit:
+`src/ui/MenuStack.cpp` already labels Low/Medium as Android/Web;
+`src/app/CommandLine.cpp` and `src/app/Settings.cpp` still parse legacy names.
+`src/rendering/Quality.cpp` has the profile table, but `CnaHouseGame` only consumes
+its particle field. `CullExterior` omits the existing culler's fourth view-scale
+argument. `tools/world/build_chunks.py` explicitly excludes auxiliary LOD nodes
+and cooks LOD0; the standalone LodSelection/DetailSets helpers do not select
+alternate geometry in normal rendering. First wire/reuse the effective existing
+knobs and measure lower-profile draw/triangle budgets. Do not assume a new LOD
+subsystem or activate optional shadow/post-processing passes just because legacy
+quality fields mention them. `tests/perf/RepresentativeScenarioTests.cpp` is the
+existing eight-scenario harness and currently fixes Tier S / High / 1920×1080.
 No emulator, Web/Android build, sanitizer, soak or new trustworthy performance
 baseline was run in this continuation. None is claimed unavailable or DONE.
 
