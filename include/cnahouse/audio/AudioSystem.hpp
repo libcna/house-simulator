@@ -181,6 +181,31 @@ namespace cnahouse::audio
 
         [[nodiscard]] std::size_t AmbienceVoiceCount() const noexcept;
 
+        struct WeatherBankSound
+        {
+            Microsoft::Xna::Framework::Audio::SoundEffect* sound = nullptr;
+            std::string contentName;
+            float gain = 0.0F;
+        };
+
+        void StartWeather(const std::array<WeatherBankSound, 4>& banks,
+                          std::string_view contentRoot) noexcept;
+        void UpdateWeather(const WeatherMix& mix) noexcept;
+
+        [[nodiscard]] bool WeatherAttempted() const noexcept
+        {
+            return weatherAttempted_;
+        }
+
+        [[nodiscard]] std::size_t WeatherVoiceCount() const noexcept;
+
+        [[nodiscard]] const std::string& WeatherProblem() const noexcept
+        {
+            return weatherProblem_;
+        }
+
+        [[nodiscard]] WeatherMix CurrentWeatherMix() const noexcept;
+
         [[nodiscard]] std::size_t BankCount() const noexcept
         {
             return banks_.size();
@@ -201,6 +226,7 @@ namespace cnahouse::audio
         void RecordDeviceLoss(const std::exception& error) noexcept;
 
         struct AmbienceVoices;
+        struct WeatherVoices;
 
         struct ResolvedBank
         {
@@ -221,6 +247,9 @@ namespace cnahouse::audio
         std::vector<std::string> bankProblems_;
         mutable std::unordered_set<util::Id> missingBanksReported_;
         std::unique_ptr<AmbienceVoices> ambience_;
+        std::unique_ptr<WeatherVoices> weather_;
+        bool weatherAttempted_ = false;
+        std::string weatherProblem_;
     };
 
 } // namespace cnahouse::audio

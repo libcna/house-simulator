@@ -365,7 +365,7 @@ Tier-P subsystems and, for each, what XNA 4.0 lacks and what we wrote instead:
 | OWN-02 | `cnahouse::anim::ClipPlayer` | No blending, layering, masking or rate control anywhere in XNA (BL-10) | §47.3 |
 | OWN-03 | `cnahouse::visibility` portal traversal with frustum reduction | XNA has `BoundingFrustum` and nothing above it | §25 |
 | OWN-04 | `cnahouse::physics` kinematic capsule collision | XNA 4.0 has no collision or physics | §49 |
-| OWN-05 | `cnahouse::audio` portal-path gain, occlusion and muffling | `Apply3D` is pan + attenuation only (BL-11) | §64 |
+| OWN-05 | `cnahouse::audio` compact ambience/weather mix and in-memory muffling | No public low-pass or loaded PCM getter; House filters four retained loops once, then uses standard raw-PCM `SoundEffect` | §64 |
 | OWN-06 | `cnahouse::render::RenderTier` | Tier selection is a build configuration plus a guarded content load; XNA has no capability query and CNA's is forbidden. It is one term of the project-owned effective feature set (§68) | §7.3, §68 |
 | OWN-07 | `cnahouse::content` `.chanim` sidecar format and reader | XNA's answer was a custom content processor writing a custom type into `Model.Tag`; we cannot add a processor to CNA's pipeline without changing CNA, so the same custom data travels beside the model | §47.0 |
 
@@ -6570,35 +6570,41 @@ direction*, which is right.
 
 ### 64.5 Muffling without a filter
 
-CNA exposes no per-instance filter. The approximation: for the **22 sounds where it matters** —
-rain, wind, thunder, the television, the washing machine, the dishwasher, the shower, the toilet
-flush, the furnace, the dog's bark, the vacuum, the music from a radio, the garage motor, the
-compressor, the doorbell, the hall clock chime, the range hood, the kettle, hail, the gate motor,
-a car passing, the lawnmower — two variants of the sample are shipped: the original and a
-pre-filtered "dull" version (a 4th-order low-pass at 900 Hz plus a −3 dB tilt, produced offline by
-`ffmpeg`). Two `SoundEffectInstance`s play in sync with complementary gains
-`(1 − muffle)` and `muffle`. Cost: one extra voice for those sounds only, and a doubling of their
-content size (they are 22 sounds).
-
-For everything else, `muffle` is applied as an additional −4 dB per unit, which is a crude but
-perceptually reasonable stand-in.
+**Current reduced M8 (`HOUSE-01925`):** XNA supplies no public per-instance filter or PCM getter.
+`WeatherPcm` reads only the four existing stored PCM16/PCM8 weather-loop containers, bounds and
+CRC-checks header/table/chunks, widens PCM8 if present and applies a 900 Hz Butterworth low-pass
+once at load. Stereo channels have independent state; warming over the loop avoids a zero-state
+seam. The filtered retained loop matches the original loop's RMS, bounded to 8× and 90% PCM
+headroom: muffling must not accidentally add another gain loss to shelter attenuation.
+Standard raw-PCM `SoundEffect` constructors own the filtered copy. Two standard looping
+instances per bank use complementary original/filtered gains; instances die before their sounds.
+Eight weather voices plus the four accepted ambience voices remain bounded, respect live Weather
+volume and global master/mute, and never call an internal CNA filter. Content errors report weather
+unavailable without silencing the other beds. No offline derivative set, new asset, DSP framework,
+room-tone matrix, positional emitter, reverb or revival of the superseded 22-sound system.
 
 ### 64.6 Ambience routing
 
 Weather and exterior ambience are not point sources. Each cell has a precomputed
 **sky exposure** (the solid angle of open sky reachable from the cell's centre through its
 windows and doors, computed offline by ray casting) and a **facade exposure** per orientation.
-The open-air rain and wind layers are gained by `skyExposure(cell) + Σ aperture-weighted window
-contributions`, which updates live as windows open. `L3_STORE_W` under the roof gets the
-rain-on-roof layer at full strength; `B1_CINEMA` gets essentially nothing; the sunroom with its
-slider open gets almost the outdoor level.
+Reduced M8 reads CSKY v2 bound to the loaded chunk world hash. Rain calm/strong blend by
+precipitation intensity; wind calm/forest blend by wind speed. Outdoors are unfiltered. Indoors
+sky exposure sets attenuation and complementary muffling. A bounded transmitted rain bed also
+survives in above-ground windowless rooms. The same rain layer transmits through the existing
+coverage-mask roof with proximity `max(0,1-distance/8)`. Existing collision terrain height versus
+the listener cell's authored floor fades rain/wind out below ground over 0.8 m; no room id or assumed ground
+datum selects the basement. The top-floor store hears its roof strongly while the basement
+cinema hears essentially nothing. The glazed sunroom hears clearly more than the hall.
+There is no per-window/per-roof extra voice or dynamic window gameplay.
+A 0.8 s fade prevents cell/weather changes cutting loops.
 
 > Corrected 2026-09-09 by `HOUSE-00779`. **"The cell's centre" is the mean over the cell's floor**,
 > not one point in it. A centre can be free, inside the room, and still see none of the room's own
 > windows: `L3_ROOM` is a T whose three dormers are at the ends of its arms, and every straight
 > line from its centroid to any of them leaves through `L3_STORE_S` — a room §13.6 calls "lit by
-> three dormers" measured 0.000. The figure is now the mean over a 1 m grid at ear height, capped
-> at 16 points a cell, with the centre first and still the point the file carries;
+> three dormers" measured 0.000. The figure is now the mean over a 1 m grid at ear height, using
+> roughly 16 points as a spacing target (not a wire cap), with the centre first and still the point the file carries;
 > `docs/skyexposure-format.md` §5 is normative. Measured over this house: 96 cells, 997 listening
 > points, `EXT_WORLD` 0.970 down to nine sealed basement rooms at exactly 0.000.
 

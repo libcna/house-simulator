@@ -12,6 +12,7 @@
 #include "System/IO/StreamReader.hpp"
 
 #include "cnahouse/physics/CollisionLoader.hpp"
+#include "cnahouse/physics/Terrain.hpp"
 #include "cnahouse/world/WorldLoader.hpp"
 
 #include <cmath>
@@ -686,6 +687,21 @@ namespace cnahouse::app
         }
         coverageMask_.emplace(std::move(coverage.Value()));
 
+        auto exposure = audio::SkyExposure::ReadFromTitle(
+            "content/world/skyexposure.bin", blockoutChunks_ != nullptr ? blockoutChunks_->worldHash : "");
+        if (exposure && exposure->CellCount() == world_->Cells().size() &&
+            std::ranges::all_of(world_->Cells(),
+                                [&exposure](const world::Cell& cell) { return exposure->Contains(cell.id); }))
+        {
+            skyExposure_.emplace(std::move(exposure.Value()));
+        }
+        else
+        {
+            Log::Error(LogCat::Audio,
+                       "weather exposure unavailable: {}",
+                       exposure ? "cell count differs from world" : exposure.Error().ToString());
+        }
+
         // §12's front hall, unless `--player` says otherwise. The middle of a named cell rather
         // than a coordinate somebody measured off a plan: a spawn that is 20 mm inside a wall
         // spends its first frames being shoved out, and the shove is the first thing a screenshot
@@ -1076,6 +1092,44 @@ namespace cnahouse::app
                                  {exteriorNight.sounds, exteriorNight.gain});
         }
         audio_.UpdateAmbience(mix);
+        if (audio_.IsReady() && !audio_.WeatherAttempted() && caches_ != nullptr && skyExposure_.has_value())
+        {
+            std::array<audio::AudioSystem::WeatherBankSound, 4> banks;
+            const std::array names{"BANK_WEATHER_RAIN_CALM",
+                                   "BANK_WEATHER_RAIN_STRONG",
+                                   "BANK_WEATHER_WIND_CALM",
+                                   "BANK_WEATHER_WIND_STRONG"};
+            for (std::size_t index = 0; index < names.size(); ++index)
+            {
+                const auto id = util::Intern(names[index]);
+                const auto samples = audio_.Bank(id);
+                if (!samples.empty())
+                {
+                    banks[index] = {
+                        caches_->sounds.Get(samples.front()), samples.front(), audio_.BankGain(id)};
+                }
+            }
+            audio_.StartWeather(banks, options_.contentRoot);
+        }
+        if (weather_.has_value() && skyExposure_.has_value())
+        {
+            const auto& eye = blockoutCamera_.eye;
+            const float roofDistance = coverageMask_.has_value()
+                                           ? coverageMask_->HeightAt(eye.X, eye.Z) - eye.Y
+                                           : std::numeric_limits<float>::infinity();
+            const auto terrain = collision_.has_value()
+                                     ? physics::TerrainAt(collision_->terrain, eye.X, eye.Z)
+                                     : physics::TerrainSample{};
+            const auto extent = world_->ExtentOf(*listener);
+            const float undergroundDepth = terrain.over && extent ? terrain.height - extent->floorY
+                                                                  : std::numeric_limits<float>::infinity();
+            audio_.UpdateWeather(ambience_.AdvanceWeather(listener->kind,
+                                                          skyExposure_->At(listener->id),
+                                                          roofDistance,
+                                                          undergroundDepth,
+                                                          weather_->State(),
+                                                          deltaSeconds));
+        }
     }
 
     void CnaHouseGame::ApplyPlayerCamera()
@@ -1590,6 +1644,7 @@ namespace cnahouse::app
         // whose decoder must stop while its `Video` is still alive.
         smoke_.reset();
         audio_.StopAmbience();
+        skyExposure_.reset();
         ambience_.Reset();
         footsteps_.reset();
         hud_.reset();

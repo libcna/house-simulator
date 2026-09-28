@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
+#include "cnahouse/weather/WeatherState.hpp"
 #include "cnahouse/world/WorldTypes.hpp"
+#include <array>
 
 namespace cnahouse::audio
 {
@@ -12,6 +14,13 @@ namespace cnahouse::audio
         float interior = 0.0F;
         float exteriorDay = 0.0F;
         float exteriorNight = 0.0F;
+    };
+
+    struct WeatherMix
+    {
+        /// Rain calm/strong, wind calm/forest. Weights include shelter attenuation.
+        std::array<float, 4> layers{};
+        float dull = 0.0F;
     };
 
     /// @brief Selects the one interior bed or the exterior day/night pair.
@@ -30,6 +39,14 @@ namespace cnahouse::audio
         [[nodiscard]] AmbienceMix
         Advance(world::CellKind listenerKind, double sunAltitudeDeg, float deltaSeconds) noexcept;
 
+        /// Roof distance uses eye height; underground depth uses the cell's authored floor.
+        [[nodiscard]] WeatherMix AdvanceWeather(world::CellKind listenerKind,
+                                                float skyExposure,
+                                                float roofDistance,
+                                                float undergroundDepth,
+                                                const weather::WeatherState& weather,
+                                                float deltaSeconds) noexcept;
+
         void Reset() noexcept;
 
         [[nodiscard]] static float DayMix(double sunAltitudeDeg) noexcept;
@@ -37,6 +54,8 @@ namespace cnahouse::audio
     private:
         bool initialized_ = false;
         float exterior_ = 0.0F;
+        bool weatherInitialized_ = false;
+        WeatherMix weatherMix_;
     };
 
 } // namespace cnahouse::audio

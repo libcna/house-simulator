@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers and a reusable kit), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (2026-09-22 reduction, retained breadth and maintenance mode; its former hour ceiling is superseded below) |
 | Scope policy | The owner explicitly superseded the former 280-hour ceiling on 2026-09-27 and requested further targeted corrections and a filming tour. Keep MUST/OPT boundaries explicit; do not infer other features |
-| Active plan | **30 open MUST tasks** in 16 milestones. Owner walk/run, reopened guard/art, terrace, local-settings layout gate, doorway-test sampling, six-category footsteps, interior/exterior ambience and repeatable desktop High scenarios are accepted; weather audio, measured presets, platform and release work remain. Every active task's title and acceptance states the current work |
-| Estimate to DONE | Current open-task sum **38.50 agent-hours**; pessimistic **56.35 h** = 1.10 × 38.50 + the still-active Android/Web reserves (8 + 6 h); High performance reserve R-C is retired after repeatable acceptance. The old **44.84 / 52.75 / 76.03 h** table below is historical, not a current forecast or scheduling gate. Per-task `est:` remains for task sizing; platform/dependency waiting is not promised wall-clock completion |
-| Current gate | **G5, M7, M9 and M12 passed. CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator.** Main/attic/basement stairs, garage-loft floor and whole-house lighting are corrected under `HOUSE-03635`/`03638`/`03639`/`03636`; doorway flashes and visibility/wall holes under `HOUSE-03637`/`03640`, including the owner's precise foyer/stair corner-gap screenshot. The existing car family is corrected under `HOUSE-03641`; full GPU filming circuit accepted under `HOUSE-03572`. Normal title/Start audio produces real backend PCM; owner listening accepts all six footstep categories and interior/exterior day/night ambience under `HOUSE-01920`/`01922`. Weather layers `HOUSE-01925` are next. Desktop High scenarios pass three complete current hardware-GPU rounds under `HOUSE-02404`; measured quality presets `HOUSE-02405` remain open |
+| Active plan | **29 open MUST tasks** in 16 milestones. Owner walk/run, reopened guard/art, terrace, local-settings layout gate, doorway-test sampling, six-category footsteps, interior/exterior ambience, indoor rain and repeatable desktop High scenarios are accepted; whole-zone listening, measured presets, platform and release work remain. Every active task's title and acceptance states the current work |
+| Estimate to DONE | Current open-task sum **37.00 agent-hours**; pessimistic **54.70 h** = 1.10 × 37.00 + the still-active Android/Web reserves (8 + 6 h); High performance reserve R-C is retired after repeatable acceptance. The old **44.84 / 52.75 / 76.03 h** table below is historical, not a current forecast or scheduling gate. Per-task `est:` remains for task sizing; platform/dependency waiting is not promised wall-clock completion |
+| Current gate | **G5, M7, M9 and M12 passed. CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator.** Main/attic/basement stairs, garage-loft floor and whole-house lighting are corrected under `HOUSE-03635`/`03638`/`03639`/`03636`; doorway flashes and visibility/wall holes under `HOUSE-03637`/`03640`, including the owner's precise foyer/stair corner-gap screenshot. The existing car family is corrected under `HOUSE-03641`; full GPU filming circuit accepted under `HOUSE-03572`. Normal title/Start audio produces real backend PCM; owner listening accepts all six footstep categories and interior/exterior day/night ambience under `HOUSE-01920`/`01922`. Weather layers and the indoor-rain correction are accepted under `HOUSE-01925`; whole-zone listening `HOUSE-01939` is next. Desktop High scenarios pass three complete current hardware-GPU rounds under `HOUSE-02404`; measured quality presets `HOUSE-02405` remain open |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -1218,11 +1218,13 @@ derivative set, no positional source, no special zone loop and no room-aware rou
       current: (2026-09-28) Production normal walk starts four retained standard-XNA loop voices; listener/sun weights and 0.8 s boundary fade are wired into the game and live category volume. Real application PCM is nonzero indoors, outdoors by day and outdoors at night, with private sink routing proved. Full unit/integration pass. Old absent-device block is superseded; subjective indoor/outdoor listening remains unperformed, so the checkbox stays OPEN. Evidence: docs/audio-playback-review.md. No weather-layer or optional audio activation.
       done: (2026-09-28 owner listening) Owner explicitly confirms interior/exterior day/night ambience and smooth doorway cross-fades: "Ověřeno, ambience i přechody jsou v pořádku". This supplies the required subjective walk, independently of real backend PCM and dummy tests. The tracked runtime foundation was implemented in d22d9b0: one interior tone, forest-birds by day and night/cicadas by night, four retained XNA loop voices, 0.8 s cell fade and shared-sun blend. Existing director/cross-fade tests and the new normal title/Start path pass in the complete 1530-unit/173-integration snapshot (170 PASS/3 opt-in SKIP/0 FAIL); all static gates pass with 353 strict units/109 exemptions. No new loop, per-cell bed, filter or optional audio. Historical unavailable-device/listening records are superseded. Evidence: docs/audio-playback-review.md. HOUSE-01925 is now dependency-unblocked.
 
-- [ ] HOUSE-01925 — Weather layers: rain and wind over the exterior bed, quieter and duller indoors by sky exposure
+- [x] HOUSE-01925 — Weather layers: rain and wind over the exterior bed, quieter and duller indoors by sky exposure
       dep: HOUSE-01922, HOUSE-00779 · sys: audio · plat: ALL · pri: MUST · zone: all · adv: D7 · est: 1.5
       accept: (1) rain (NOX `rain-calm`/`rain-strong` by intensity) and wind (`wind-calm`/`wind-forest` by wind speed); (2) indoors both are attenuated and low-passed by the listener cell's sky exposure: `L3_STORE_W` hears strong rain on the roof, `B1_CINEMA` essentially nothing, the glazed sunroom clearly more than an interior room; (3) no seasonal layer, no per-window or per-roof layer
       verify: unit tests of the attenuation; a listening check in those three cells
       trace: absorbs `HOUSE-02000` (sky-exposure routing), `HOUSE-01750` and `HOUSE-01883`
+      earlier: (2026-09-28 first snapshot) Four retained banks and original/in-memory-low-pass pairs passed 1536 unit / 171 GPU integration checks (3 opt-in skips), but owner listening FAILED: indoor/attic rain was far too quiet. Isolated backend captures confirmed attic -50.559543 dBFS RMS versus outdoor -38.978439. The checkbox stayed open; those tests were insufficient audibility evidence.
+      done: (2026-09-28 corrected current source) Owner confirms "nyni je vse ok" for strong attic rain, muffled audible above-ground rooms, silent basement and sunroom stronger than hall. Four existing rain/wind banks blend by intensity/speed with eight retained standard-XNA original/900 Hz filtered voices. Bounded filtered-loop RMS matching, sky exposure, coverage roof proximity and collision terrain versus authored cell floor correct the failed indoor level without new assets/layers or internal APIs. Actual PCM: attic -40.990206, sunroom -41.342621, hall -47.087331 dBFS RMS; final B1_CINEMA silence. Current 1537/1537 unit PASS; 171 hardware-GPU integration PASS / 3 opt-in SKIP / 0 FAIL; 25 focused unit PASS; all static gates green, 356 strict units / 109 existing exemptions. The intermediate eye-height basement leak was caught and fixed; no threshold was weakened. Evidence and failed drafts: docs/audio-playback-review.md. HOUSE-01939 is dependency-unblocked; its four-state whole-zone listening is not inferred from this acceptance.
 
 - [ ] HOUSE-01939 — Listening walk of every zone; fix what is wrong, missing or too loud
       dep: HOUSE-01920, HOUSE-01925 · sys: audio · plat: LNX · pri: MUST · zone: all · adv: D7 · est: 0.75
@@ -2351,6 +2353,27 @@ under R5.
 ---
 
 ## Planning corrections
+
+### 2026-09-28 — Retained weather low-pass without internal APIs or derivative assets
+
+* `HOUSE-01925` requires actual low-pass indoors; XNA's public `SoundEffectInstance`
+  supplies no filter and `SoundEffect` supplies no PCM getter. Existing internal CNA
+  filters are forbidden, and the retired offline-derived sample sets stay retired.
+* Extend OWN-05 inside the existing audio path: a bounded stored-PCM reader for only
+  the four retained weather loops, one load-time 900 Hz filter and standard raw-PCM
+  `SoundEffect` loop pairs. Reuse existing sky/coverage bakes and categories. No new
+  subsystem, general DSP/codec framework, asset or sibling edit. This is the smallest
+  D7/R9 implementation gap, not feature expansion or an upstream blocker.
+* Runtime inspection also proves the writer's `MAX_SAMPLES=16` is a spacing target,
+  not a serialized cap: the current rear yard has 22 centre/grid points. Correct
+  the format/architecture wording and accept bounded positive metadata without
+  rebaking or changing the existing exposure fractions.
+* Owner listening rejects the initial indoor level despite green tests. Measurements
+  show another 3.7 dB loss in the strong-rain low-pass, on top of shelter attenuation;
+  the initial sky-only/far-roof formula also silences windowless above-ground rooms.
+  Correct these in the same task with bounded loop-level matching and a transmitted
+  bed, using existing collision terrain to suppress underground weather. Keep the
+  checkbox open; successful voice state or nonzero PCM is not subjective acceptance.
 
 ### 2026-09-28 — Faster walking exposes a frame-rate-dependent doorway regression
 

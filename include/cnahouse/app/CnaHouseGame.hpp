@@ -17,6 +17,7 @@
 #include "cnahouse/audio/AmbienceDirector.hpp"
 #include "cnahouse/audio/AudioSystem.hpp"
 #include "cnahouse/audio/FootstepDirector.hpp"
+#include "cnahouse/audio/SkyExposure.hpp"
 #include "cnahouse/content/SmokeScene.hpp"
 #include "cnahouse/debug/Console.hpp"
 #include "cnahouse/debug/Counters.hpp"
@@ -484,6 +485,7 @@ namespace cnahouse::app
         /// everywhere rather than only in the build that needs it.
         audio::AudioSystem audio_;
         audio::AmbienceDirector ambience_;
+        std::optional<audio::SkyExposure> skyExposure_;
         /// Distance/riser cadence from the existing collision/controller facts.
         std::optional<audio::FootstepDirector> footsteps_;
         player::KeyboardMouseSource input_;

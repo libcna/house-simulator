@@ -1,6 +1,65 @@
 # Current owner-visible defect work — 2026-09-28
 
-## Current continuation: repeatable High acceptance, no speculative optimisation
+## Current continuation: retained weather and indoor-rain audibility accepted
+
+Starting clean `develop` HEAD `b38cac50f0b499d158883efcac48d19da5e7cec4`.
+Track B/D7 and the completed `HOUSE-01922` / `HOUSE-00779` dependencies selected
+`HOUSE-01925`. The owner's current report that indoor/attic rain is inaudible
+remained authoritative despite the first snapshot's green tests; it was corrected
+inside that existing MUST task, not deferred or expanded into new audio scope.
+
+Ordinary Start/walk now retains four existing rain/wind banks as eight standard-XNA
+original/900 Hz filtered loop voices. Existing CSKY v2/coverage/collision terrain
+data determine muffling, roof transmission and underground exclusion. Bounded
+filtered-loop RMS matching prevents an extra 3.69 dB loss in strong rain. No new
+asset, offline derivative set, per-window/per-roof voice, generic DSP system,
+native/internal CNA call, sibling edit or owner-settings mutation.
+
+Actual private-PipeWire/invisible hardware-GPU captures show attic rain
+**-50.559543 → -40.990206 dBFS RMS**, sunroom **-46.200800 → -41.342621**,
+hall **-47.087331**, outside **-38.978439 → -38.843998** (startup/duration
+variation, not a claimed outdoor change), and final B1_CINEMA **silence**.
+The intermediate eye-height underground test leaked rain into the cinema and
+failed its GPU regression; final exclusion uses the authored cell floor and the
+current four-room GPU test passes. The owner confirms **“nyni je vse ok”** for
+the explicit Heavy-rain attic/ordinary rooms/basement/sunroom-versus-hall check.
+This is actual listening acceptance, not an inferred four-state whole-zone walk.
+Details, failed drafts, source/capture metrics and screenshots are recorded in
+`docs/audio-playback-review.md`.
+
+Current **1537/1537 unit PASS**, 172 suites, 202353 ms; **171 actual-GPU integration
+PASS / 3 explicit opt-in SKIP / 0 FAIL**, 174 total, 545592 ms; **25/25 focused
+audio/mixer tests PASS**. Full `run_checks.sh` **all gates green**, **356 strict
+units / 109 existing destructor exemptions**. An earlier contended unit snapshot
+exceeded the unchanged SkySystem
+wall-time test (9.182943 ms vs 5 ms, mean 1.611915 ms); the final full suite passes
+without weakening the assertion or touching sky code. Invalid `--weather=W_WINDY`
+probe is rejected because it is a modifier, not a complete weather state.
+
+Completed this continuation: **HOUSE-01925**. Remaining **29 MUST / 78 OPT**;
+nominal **38.50 → 37.00 h**, pessimistic **54.70 h** (1.10 × 37 + 8 + 6).
+The owner withdrew
+the 280-hour ceiling; MUST/OPT and retained-platform/floor boundaries remain.
+Exact next MUST: **HOUSE-01939**, one listening walk per zone by
+day/night in clear/rain. Do not infer it from the three-cell owner response.
+**HOUSE-02405** is independent and dependency-unblocked; it remains unimplemented.
+No emulator, Web/Android build, sanitizer, soak or new trustworthy performance
+baseline was run in this continuation. None is claimed unavailable or DONE.
+
+Builds reuse `build/`, shared `/rv/cnaccache`, `CCACHE_BASEDIR=/rv`, two compile
+workers with six-CPU affinity. Static strict validation uses four workers with
+four-CPU affinity. Monitor windows and speaker output are not used; only owned
+private audio streams/sinks are routed, then removed. No optional work or new
+house content. The goal remains ACTIVE, not maintenance mode.
+
+No own build/validation job remains running at this coherent checkpoint. No
+source WIP is knowingly broken. Current CNA/sharp-runtime heads inspected read-only:
+`92d23c84d` / `007280bd`; neither repository was modified by this continuation.
+Logs: `/tmp/house-01925-floor-{build,focused-unit,unit,integration}.log`,
+`/tmp/house-01925-audibility-static.log` and the private PCM paths in the audio
+review. The earlier High baseline is not claimed remeasured after this audio change.
+
+## Earlier continuation: repeatable High acceptance, no speculative optimisation
 
 Starting clean `develop` HEAD `9e937ca48415d81c1617d1c54302957131bab820`.
 Completed this continuation: `HOUSE-03681`, `HOUSE-03682`, `HOUSE-01920`,

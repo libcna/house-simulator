@@ -222,6 +222,48 @@ namespace
         ASSERT_EQ(game.Audio().State(), AudioState::Ready) << game.Audio().Summary();
         EXPECT_TRUE(game.Audio().AmbienceStarted());
         EXPECT_EQ(game.Audio().AmbienceVoiceCount(), 4U);
+        EXPECT_EQ(game.Audio().WeatherVoiceCount(), 8U) << game.Audio().WeatherProblem();
+        EXPECT_TRUE(game.Audio().WeatherProblem().empty());
+    }
+
+    TEST(AudioGateTests, RainUsesTheActualListenerCellAndTheExistingRoofCover)
+    {
+        const auto original = std::filesystem::current_path();
+        std::filesystem::current_path(std::filesystem::path(CNAHOUSE_TEST_CONTENT_ROOT).parent_path());
+
+        struct Case
+        {
+            const char* cell;
+            std::array<float, 5> feet;
+            float minimum;
+            float maximum;
+        };
+
+        for (const auto& probe :
+             std::array{Case{"B1_CINEMA", {5.45F, -2.30F, -25.05F, 0.0F, 0.0F}, 0.0F, 0.001F},
+                        Case{"L3_STORE_W", {-9.35F, 9.30F, -20.70F, 0.0F, 0.0F}, 0.85F, 0.93F},
+                        Case{"L0_SUNROOM", {-2.0F, 0.60F, -29.6F, 0.0F, 0.0F}, 0.7F, 0.93F},
+                        Case{"L0_HALL", {0.0F, 0.60F, -20.65F, 0.0F, 0.0F}, 0.4F, 0.6F}})
+        {
+            SCOPED_TRACE(probe.cell);
+            Options options;
+            options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+            options.scene = "walk";
+            options.timeOfDay = 12.0F;
+            options.weather = "W_HEAVY_RAIN";
+            options.player = probe.feet;
+            CnaHouseGame game(options, SmallSettings());
+            game.SetFrameLimit(8);
+            game.Run();
+            EXPECT_EQ(game.ExitCode(), 0);
+            EXPECT_EQ(cnahouse::util::IdRegistry::NameOf(game.CellForTesting()), probe.cell);
+            EXPECT_EQ(game.Audio().WeatherVoiceCount(), 8U) << game.Audio().WeatherProblem();
+            const auto mix = game.Audio().CurrentWeatherMix();
+            EXPECT_GE(mix.layers[0] + mix.layers[1], probe.minimum);
+            EXPECT_LE(mix.layers[0] + mix.layers[1], probe.maximum);
+            EXPECT_GT(mix.dull, 0.85F);
+        }
+        std::filesystem::current_path(original);
     }
 
     TEST(AudioGateTests, EveryPhysicalTerrainMaterialHasFootsteps)
@@ -387,6 +429,8 @@ namespace
         EXPECT_TRUE(game.Menus().Empty());
         EXPECT_TRUE(game.Audio().AmbienceStarted());
         EXPECT_EQ(game.Audio().AmbienceVoiceCount(), 4U);
+        EXPECT_EQ(game.Audio().WeatherVoiceCount(), 8U) << game.Audio().WeatherProblem();
+        EXPECT_TRUE(game.Audio().WeatherProblem().empty());
         EXPECT_TRUE(game.Audio().BankProblems().empty());
         EXPECT_GT(game.Audio().OneShotsPlayed(), 0U);
         EXPECT_LT(game.PlayerForTesting().Feet().Z, -18.0F);

@@ -1,8 +1,10 @@
 # `skyexposure.bin` — how much sky each room can hear
 
 *`HOUSE-00213`. Normative. The writer is `tools/world/build_skyexposure.py`; there is no other. The
-runtime reader is `HOUSE-02000`'s ambience routing and does not exist yet — the writer's own
-`read_back` is the round trip that keeps the format honest until it does.*
+runtime reader is `cnahouse::audio::SkyExposure` (`HOUSE-01925`, which absorbs `HOUSE-02000`).
+It checks v2, flags, bounded strings/counts, finite fractions/origins, orientation order,
+duplicates, trailing bytes and agreement with the loaded chunk world's hash. The writer's
+`read_back` and current runtime tests retain the cross-language contract.*
 
 ---
 
@@ -10,17 +12,19 @@ runtime reader is `HOUSE-02000`'s ambience routing and does not exist yet — th
 
 `cna-house.md` §64.6: each cell has a precomputed **sky exposure** — *"the solid angle of open sky
 reachable from the cell's centre through its windows and doors, computed offline by ray casting"* —
-and a **facade exposure** per orientation. The open-air rain and wind layers are gained by
-`skyExposure(cell) + Σ aperture-weighted window contributions`.
+and a **facade exposure** per orientation. Reduced M8 uses only geometric sky exposure for
+four retained rain/wind loops; facade fields are validated but not routed. Historical
+per-window contributions and open-window gameplay are not active requirements.
 
-So this file holds the part that does not change, and the runtime adds the part that does. The
+So this file holds the geometric part that does not change. The
 baked figure is deliberately the **geometric** opening, aperture-independent: `HOUSE-00210` punched
 every portal out of its wall, so a ray leaving through a doorway meets no geometry and escapes on
-its own, and nothing here needs to know what a portal is. Whether the window is *open* is the
-runtime's multiplier, not this file's.
+its own, and nothing here needs to know what a portal is. Current windows remain closed/static;
+the compact audio mix is not a portal-path or per-window acoustic simulation.
 
-§64.6's own worked examples are the acceptance test: `B1_CINEMA` gets "essentially nothing", the
-sunroom with its slider open gets "almost the outdoor level", and `L3_STORE_W` sits under the roof.
+Current M8's listening cases are `B1_CINEMA` (essentially nothing), `L0_SUNROOM` (clearly more
+than an interior hall) and `L3_STORE_W` (strong rain transmitted through its nearby roof).
+The historic open-slider/full-outdoor example is not window gameplay or an extra layer.
 
 ## 2. Conventions
 
@@ -96,9 +100,12 @@ only ever be one point in a room.
 
 So the figure is the **mean over the cell's floor**. The listening points are a grid at
 `SAMPLE_STEP` = 1.0 m over the cell's boxes at ear height, with the centre first; a point standing
-inside geometry is dropped rather than measured as silence, and the step grows with the cell so
-that no cell exceeds `MAX_SAMPLES` = 16 of them — `EXT_WORLD` is 200 m across and a metre grid over
-it would be 40 000 points. This house comes to **997 points over 96 cells**. `origin` is still the
+inside geometry is dropped rather than measured as silence. The step grows with the cell,
+using `MAX_SAMPLES` = 16 as a spacing target — `EXT_WORLD` is 200 m across and a metre grid over
+it would be 40 000 points. This is not a wire cap: centre plus per-box grids can exceed 16 in thin
+or multi-box cells (the current rear yard has 22). Runtime accepts 1–4096 samples; this is confidence
+metadata, not an allocation or runtime ray-casting count. The historical bake came to
+**997 points over 96 cells**. `origin` is still the
 centre and `samples` says how many points the figure averages, so a number can still be reproduced;
 what it can no longer be is traced to a single place, because it no longer comes from one.
 

@@ -12,6 +12,7 @@
 #include "Microsoft/Xna/Framework/Audio/SoundEffectInstance.hpp"
 #include "Microsoft/Xna/Framework/Audio/SoundState.hpp"
 
+#include "cnahouse/audio/WeatherPcm.hpp"
 #include "cnahouse/content/ContentRegistry.hpp"
 #include "cnahouse/util/Log.hpp"
 #include "cnahouse/world/WorldTypes.hpp"
@@ -38,6 +39,22 @@ namespace cnahouse::audio
         };
 
         AmbienceMix mix;
+        std::vector<Voice> voices;
+    };
+
+    struct AudioSystem::WeatherVoices
+    {
+        struct Voice
+        {
+            std::size_t layer = 0;
+            bool dull = false;
+            float gain = 0.0F;
+            std::unique_ptr<Microsoft::Xna::Framework::Audio::SoundEffectInstance> instance;
+        };
+
+        WeatherMix mix;
+        // Reverse destruction order: instances must die before their owned filtered sounds.
+        std::vector<std::unique_ptr<Microsoft::Xna::Framework::Audio::SoundEffect>> filtered;
         std::vector<Voice> voices;
     };
 
@@ -182,6 +199,10 @@ namespace cnahouse::audio
         {
             UpdateAmbience(ambience_->mix);
         }
+        if (category == Category::Weather && weather_ != nullptr)
+        {
+            UpdateWeather(weather_->mix);
+        }
     }
 
     float AudioSystem::CategoryVolume(Category category) const noexcept
@@ -235,6 +256,7 @@ namespace cnahouse::audio
     void AudioSystem::RecordDeviceLoss(const std::exception& error) noexcept
     {
         ambience_.reset();
+        weather_.reset();
         state_ = AudioState::Silent;
         silentReason_ = error.what();
         Log::Warn(LogCat::Audio, "the audio device was lost: {}", silentReason_);
@@ -244,6 +266,9 @@ namespace cnahouse::audio
                                 const content::ContentRegistry& registry)
     {
         ambience_.reset();
+        weather_.reset();
+        weatherAttempted_ = false;
+        weatherProblem_.clear();
         banks_.clear();
         bankProblems_.clear();
         missingBanksReported_.clear();
@@ -426,6 +451,118 @@ namespace cnahouse::audio
     void AudioSystem::StopAmbience() noexcept
     {
         ambience_.reset();
+        weather_.reset();
+        weatherAttempted_ = false;
+        weatherProblem_.clear();
+    }
+
+    void AudioSystem::StartWeather(const std::array<WeatherBankSound, 4>& banks,
+                                   std::string_view contentRoot) noexcept
+    {
+        if (!IsReady() || weatherAttempted_)
+        {
+            return;
+        }
+        weatherAttempted_ = true;
+        try
+        {
+            auto weather = std::make_unique<WeatherVoices>();
+            for (std::size_t layer = 0; layer < banks.size(); ++layer)
+            {
+                const auto& bank = banks[layer];
+                if (bank.sound == nullptr)
+                {
+                    throw std::runtime_error("missing retained weather bank");
+                }
+                auto decoded =
+                    WeatherPcm::ReadFromTitle(std::string(contentRoot) + "/" + bank.contentName + ".cnb");
+                if (!decoded)
+                {
+                    throw std::runtime_error(decoded.Error().ToString());
+                }
+                auto& pcm = decoded.Value();
+                const float filteredGain = pcm.LowPass(true);
+                Log::Info(LogCat::Audio,
+                          "weather loop {}: filtered level compensation {}",
+                          bank.contentName,
+                          filteredGain);
+                const auto channels = pcm.channels == 1
+                                          ? Microsoft::Xna::Framework::Audio::AudioChannels::Mono
+                                          : Microsoft::Xna::Framework::Audio::AudioChannels::Stereo;
+                weather->filtered.push_back(std::make_unique<Microsoft::Xna::Framework::Audio::SoundEffect>(
+                    pcm.samples,
+                    0,
+                    static_cast<int>(pcm.samples.size()),
+                    pcm.sampleRate,
+                    channels,
+                    pcm.loopStart,
+                    pcm.loopLength));
+                for (const bool dull : {false, true})
+                {
+                    auto* sound = dull ? weather->filtered.back().get() : bank.sound;
+                    auto instance = std::make_unique<Microsoft::Xna::Framework::Audio::SoundEffectInstance>(
+                        sound->CreateInstance());
+                    const bool looped = true;
+                    const float silent = 0.0F;
+                    instance->setIsLoopedProperty(looped);
+                    instance->setVolumeProperty(silent);
+                    instance->Play();
+                    if (instance->getStateProperty() != Microsoft::Xna::Framework::Audio::SoundState::Playing)
+                    {
+                        throw std::runtime_error("a weather loop did not enter the playing state");
+                    }
+                    weather->voices.push_back({layer, dull, bank.gain, std::move(instance)});
+                }
+            }
+            weather_ = std::move(weather);
+            Log::Info(LogCat::Audio,
+                      "started {} retained weather loop voices (original/900 Hz low-pass)",
+                      weather_->voices.size());
+        }
+        catch (const Microsoft::Xna::Framework::Audio::NoAudioHardwareException& error)
+        {
+            RecordDeviceLoss(error);
+        }
+        catch (const std::exception& error)
+        {
+            weatherProblem_ = error.what();
+            Log::Warn(LogCat::Audio, "weather audio is unavailable: {}", weatherProblem_);
+        }
+    }
+
+    void AudioSystem::UpdateWeather(const WeatherMix& mix) noexcept
+    {
+        if (weather_ == nullptr || !IsReady())
+        {
+            return;
+        }
+        weather_->mix = mix;
+        try
+        {
+            for (auto& voice : weather_->voices)
+            {
+                const float blend = voice.dull ? mix.dull : 1.0F - mix.dull;
+                const float volume = std::clamp(CategoryVolume(Category::Weather) * voice.gain *
+                                                    mix.layers[voice.layer] * blend,
+                                                0.0F,
+                                                1.0F);
+                voice.instance->setVolumeProperty(volume);
+            }
+        }
+        catch (const std::exception& error)
+        {
+            RecordDeviceLoss(error);
+        }
+    }
+
+    std::size_t AudioSystem::WeatherVoiceCount() const noexcept
+    {
+        return weather_ == nullptr ? 0U : weather_->voices.size();
+    }
+
+    WeatherMix AudioSystem::CurrentWeatherMix() const noexcept
+    {
+        return weather_ == nullptr ? WeatherMix{} : weather_->mix;
     }
 
     std::string AudioSystem::Summary() const
