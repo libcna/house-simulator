@@ -110,6 +110,24 @@ namespace cnahouse::world
             return id;
         };
 
+        // Open-air volumes can extend above their own storey and overlap a balcony
+        // on the next one. Membership there must not depend on file order: choose
+        // the highest containing storey. Same-storey nested cells keep their authored
+        // order, and incremental hysteresis remains unchanged.
+        const auto prefer = [&world](const Cell* candidate, const Cell* selected)
+        {
+            if (selected == nullptr)
+            {
+                return candidate;
+            }
+            const Level* candidateLevel = world.FindLevel(candidate->level);
+            const Level* selectedLevel = world.FindLevel(selected->level);
+            return candidateLevel != nullptr && selectedLevel != nullptr &&
+                           candidateLevel->ffl > selectedLevel->ffl
+                       ? candidate
+                       : selected;
+        };
+
         // 1. Incremental. The hysteresis is here and nowhere else: staying put is sticky, arriving
         //    is not. A margin on the grid step below would let two cells claim one point with no
         //    way to choose between them.
@@ -123,26 +141,36 @@ namespace cnahouse::world
             // 2. Neighbour walk, through the portals of the cell just left. A player who left a
             //    room is almost always in the room next door, and this answers without touching
             //    the grid at all.
+            const Cell* selected = nullptr;
             for (const std::uint32_t index : world.PortalsOf(current))
             {
                 const util::Id other = world.OtherSide(world.Portals()[index], current);
                 const Cell* neighbour = world.FindCell(other);
                 if (neighbour != nullptr && world.CellContains(*neighbour, point))
                 {
-                    return answer(Step::Neighbour, other);
+                    selected = prefer(neighbour, selected);
                 }
+            }
+            if (selected != nullptr)
+            {
+                return answer(Step::Neighbour, selected->id);
             }
         }
 
         // 3. The grid. Also the entry point for spawning, teleporting and loading a save, where
         //    there is no last cell to start from.
+        const Cell* selected = nullptr;
         for (const std::uint32_t index : Bucket(point.X, point.Z))
         {
             const Cell& cell = world.Cells()[index];
             if (world.CellContains(cell, point))
             {
-                return answer(Step::Grid, cell.id);
+                selected = prefer(&cell, selected);
             }
+        }
+        if (selected != nullptr)
+        {
+            return answer(Step::Grid, selected->id);
         }
 
         // 4. No cell. §16.4 assigns `EXT_WORLD` here; that is a room name and belongs to the

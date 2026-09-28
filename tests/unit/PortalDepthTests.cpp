@@ -108,11 +108,20 @@ namespace
         ASSERT_TRUE(built);
         const world::WorldData& house = built.Value();
 
-        // The sunroom's slider is glass onto the terrace and its `kind` says `slider`, so a rule
-        // that keyed off the kind alone would give it a door's depth.
+        // A clear slider must keep the sightline behind its room, shut or open. Frosted glazing
+        // remains shallow while shut, but an open leaf exposes an ordinary doorway.
         const world::Portal slider =
             Between("ROOM", "EXT_YARD", world::PortalKind::Slider, world::PortalOpacity::Glass);
-        EXPECT_EQ(MaxDepthFor(slider, house, CameraSide::Exterior), 1);
+        EXPECT_EQ(MaxDepthFor(slider, house, CameraSide::Exterior), 6);
+        EXPECT_EQ(MaxDepthFor(slider, house, CameraSide::Exterior, true), 6);
+        EXPECT_EQ(MaxDepthFor(slider, house, CameraSide::Interior, true), 6);
+        const world::Portal window =
+            Between("ROOM", "EXT_YARD", world::PortalKind::Window, world::PortalOpacity::Glass);
+        EXPECT_EQ(MaxDepthFor(window, house, CameraSide::Exterior, true), 1);
+        const world::Portal frosted =
+            Between("ROOM", "EXT_YARD", world::PortalKind::Slider, world::PortalOpacity::Translucent);
+        EXPECT_EQ(MaxDepthFor(frosted, house, CameraSide::Exterior), 1);
+        EXPECT_EQ(MaxDepthFor(frosted, house, CameraSide::Exterior, true), 6);
 
         // ...and an INTERIOR glazed door is not a window onto outside: borrowed light between two
         // rooms is a door, and the chain through it is a door's.

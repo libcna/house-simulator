@@ -160,7 +160,8 @@ TEST(VisibleSetTests, EveryOneOfTheTwentyFourPosesSeesExactlyWhatItSays)
     // The widened main-stair entrance now genuinely exposes the foyer and hall from its foot;
     // the rebuilt upper approach exposes L2_STAIR_MAIN from L2_LANDING. Keep the exact sets,
     // including those three additional visible rooms, so this is not a culling-free superset.
-    EXPECT_EQ(total, 104U) << "the poses no longer see what the authored layout records";
+    // Clear patio glazing additionally retains EXT_BACKYARD behind L0_HALL's sunroom view.
+    EXPECT_EQ(total, 105U) << "the poses no longer see what the authored layout records";
     // §25.2's interior cap is six and NOTHING in §12 reaches it: the deepest chain any of the
     // twenty-four produces is four, and the numbers that actually stop a walk here are the
     // back-face test and the area cutoff. Asserted so that a house whose chains got longer -- a

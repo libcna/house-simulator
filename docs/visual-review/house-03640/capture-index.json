@@ -1,0 +1,186 @@
+{
+  "review": "HOUSE-03640 partial checkpoint",
+  "status": "OPEN: wall strips not yet reproduced",
+  "renderer": "Radeon 780M / OPENGLES3; SDL offscreen; EGL surfaceless",
+  "binary_sha256": "a0e68e4113b7a343068b3df47da7d92ff320f1a20791c58cadda030f0d3a6ce4",
+  "motion_log": "/tmp/house-03640-movement-serial-final.log",
+  "motion_frames": 1224,
+  "motion_cases": 34,
+  "comparison_region": {
+    "x": [
+      480,
+      950
+    ],
+    "y": [
+      170,
+      520
+    ],
+    "metric": "mean absolute RGB difference / 255 between consecutive raw PNG frames"
+  },
+  "comparisons": [
+    "foyer-stair day frames 36 maxRGB 5.114 worst cna-house-20260928-060013-473.png -> cna-house-20260928-060013-716.png",
+    "foyer-stair night frames 36 maxRGB 2.665 worst cna-house-20260928-060320-660.png -> cna-house-20260928-060321-306.png",
+    "stair-foyer day frames 36 maxRGB 3.012 worst cna-house-20260928-060024-062.png -> cna-house-20260928-060024-265.png",
+    "stair-foyer night frames 36 maxRGB 4.266 worst cna-house-20260928-060331-101.png -> cna-house-20260928-060332-237.png",
+    "hall-wc1 day frames 36 maxRGB 1.382 worst cna-house-20260928-060028-216.png -> cna-house-20260928-060028-450.png",
+    "hall-wc1 night frames 36 maxRGB 1.38 worst cna-house-20260928-060341-707.png -> cna-house-20260928-060341-948.png",
+    "wc1-hall day frames 36 maxRGB 3.048 worst cna-house-20260928-060044-150.png -> cna-house-20260928-060044-413.png",
+    "wc1-hall night frames 36 maxRGB 2.357 worst cna-house-20260928-060357-228.png -> cna-house-20260928-060357-454.png",
+    "wc3-hall day frames 36 maxRGB 5.767 worst cna-house-20260928-060050-071.png -> cna-house-20260928-060050-516.png",
+    "wc3-hall night frames 36 maxRGB 5.774 worst cna-house-20260928-060400-489.png -> cna-house-20260928-060400-893.png",
+    "hall-wc3 day frames 36 maxRGB 2.085 worst cna-house-20260928-060100-283.png -> cna-house-20260928-060100-488.png",
+    "hall-wc3 night frames 36 maxRGB 2.273 worst cna-house-20260928-060409-704.png -> cna-house-20260928-060409-891.png",
+    "wc7-hall day frames 36 maxRGB 2.633 worst cna-house-20260928-060115-128.png -> cna-house-20260928-060115-410.png",
+    "wc7-hall night frames 36 maxRGB 2.518 worst cna-house-20260928-060423-678.png -> cna-house-20260928-060423-935.png",
+    "hall-wc7 day frames 36 maxRGB 2.842 worst cna-house-20260928-060120-994.png -> cna-house-20260928-060121-213.png",
+    "hall-wc7 night frames 36 maxRGB 2.842 worst cna-house-20260928-060429-003.png -> cna-house-20260928-060429-202.png",
+    "porch-foyer day frames 36 maxRGB 3.016 worst cna-house-20260928-060136-685.png -> cna-house-20260928-060136-914.png",
+    "porch-foyer night frames 36 maxRGB 1.558 worst cna-house-20260928-060438-202.png -> cna-house-20260928-060438-409.png",
+    "foyer-porch day frames 36 maxRGB 1.878 worst cna-house-20260928-060148-780.png -> cna-house-20260928-060149-084.png",
+    "foyer-porch night frames 36 maxRGB 1.097 worst cna-house-20260928-060448-279.png -> cna-house-20260928-060448-527.png",
+    "juliet-inward-view day frames 36 maxRGB 1.378 worst cna-house-20260928-060152-347.png -> cna-house-20260928-060153-397.png",
+    "juliet-inward-view night frames 36 maxRGB 1.365 worst cna-house-20260928-060457-509.png -> cna-house-20260928-060458-115.png",
+    "front-balcony-landing day frames 36 maxRGB 2.065 worst cna-house-20260928-060207-475.png -> cna-house-20260928-060207-758.png",
+    "front-balcony-landing night frames 36 maxRGB 2.108 worst cna-house-20260928-060508-503.png -> cna-house-20260928-060508-718.png",
+    "landing-front-balcony day frames 36 maxRGB 6.893 worst cna-house-20260928-060227-158.png -> cna-house-20260928-060227-411.png",
+    "landing-front-balcony night frames 36 maxRGB 1.707 worst cna-house-20260928-060524-148.png -> cna-house-20260928-060524-347.png",
+    "rear-balcony-bedroom day frames 36 maxRGB 2.163 worst cna-house-20260928-060239-047.png -> cna-house-20260928-060239-297.png",
+    "rear-balcony-bedroom night frames 36 maxRGB 2.564 worst cna-house-20260928-060526-743.png -> cna-house-20260928-060528-093.png",
+    "bedroom-rear-balcony day frames 36 maxRGB 6.125 worst cna-house-20260928-060250-305.png -> cna-house-20260928-060250-580.png",
+    "bedroom-rear-balcony night frames 36 maxRGB 1.512 worst cna-house-20260928-060543-737.png -> cna-house-20260928-060543-936.png",
+    "garage-road-west day frames 36 maxRGB 1.898 worst cna-house-20260928-060258-526.png -> cna-house-20260928-060258-835.png",
+    "garage-road-west night frames 36 maxRGB 0.469 worst cna-house-20260928-060551-390.png -> cna-house-20260928-060551-697.png",
+    "garage-road-east day frames 36 maxRGB 2.403 worst cna-house-20260928-060311-794.png -> cna-house-20260928-060312-083.png",
+    "garage-road-east night frames 36 maxRGB 1.485 worst cna-house-20260928-060605-607.png -> cna-house-20260928-060605-931.png"
+  ],
+  "retained": [
+    {
+      "sha256": "06f52565d353bc52e366fbf29cb185baa4210f1a5237bfb65822d3998fd5b76e",
+      "path": "docs/visual-review/house-03640/bedroom-rear-balcony-day-frames.webp"
+    },
+    {
+      "sha256": "de5141d4319a3215babe6069f7f16f0b99d6ebe33ec24cbd2151a703049dd0f5",
+      "path": "docs/visual-review/house-03640/bedroom-rear-balcony-night-frames.webp"
+    },
+    {
+      "sha256": "0438651037a4bd2d8d69dc6100c48f117099061022d6bbf1de608edc7d7b2f0d",
+      "path": "docs/visual-review/house-03640/front-balcony-in-day.webp"
+    },
+    {
+      "sha256": "123d9c5f3cb0051b00ec21d29e0cd0d5bc5d8f6312c1208dcc374acd50135957",
+      "path": "docs/visual-review/house-03640/front-balcony-in-night.webp"
+    },
+    {
+      "sha256": "bb35a1325d2b1c5648ec4f1acf2eb20cacc660572814a216741ec3aaca20b8c9",
+      "path": "docs/visual-review/house-03640/front-balcony-landing-day-frames.webp"
+    },
+    {
+      "sha256": "f834a0cd037636b404aed5b47c368ef5f482f4f84bd49f1acd19bdd15bd9010c",
+      "path": "docs/visual-review/house-03640/front-balcony-landing-night-frames.webp"
+    },
+    {
+      "sha256": "7090d7919dfa0bfc9fcb3bc0f82e55155f0da2c25e997bc24506b3471af73fa6",
+      "path": "docs/visual-review/house-03640/garage-east-day.webp"
+    },
+    {
+      "sha256": "9b0e561f061a01c138665a98dde8c6d3e7eb23e68892cf32459417cdd02532fa",
+      "path": "docs/visual-review/house-03640/garage-east-night.webp"
+    },
+    {
+      "sha256": "10e16aa45f950e1232597a4de8e6597b026a7630672b1e282bbdc4cc052dbdf2",
+      "path": "docs/visual-review/house-03640/garage-road-east-day-frames.webp"
+    },
+    {
+      "sha256": "4a58d6e09afbea2f714ad06e28a3207de42beae25ec3fbb5086eb203c14ebda9",
+      "path": "docs/visual-review/house-03640/garage-road-east-night-frames.webp"
+    },
+    {
+      "sha256": "52f2c7889ea31d3c0948792dc5838966157bad39faca7c072482c263d3278259",
+      "path": "docs/visual-review/house-03640/garage-road-west-day-frames.webp"
+    },
+    {
+      "sha256": "cdf495323a1a414183ba1083abbdffea3370d05f66082c86d616d7eaa66b8e70",
+      "path": "docs/visual-review/house-03640/garage-road-west-night-frames.webp"
+    },
+    {
+      "sha256": "e9f003bf404ed9acaab01251714cddb1c76eb27dc2e5299898e931f3eaaaf80f",
+      "path": "docs/visual-review/house-03640/garage-west-after.webp"
+    },
+    {
+      "sha256": "1a27deaba7aa5b0e582a2a8f61fd9bfba29905d5652a56b20345897fe754b932",
+      "path": "docs/visual-review/house-03640/garage-west-before.webp"
+    },
+    {
+      "sha256": "5caea1e37169e133e65c55f73d3ffaf5192e13b28ffd3479b3b19bc8c443fbe2",
+      "path": "docs/visual-review/house-03640/garage-west-day.webp"
+    },
+    {
+      "sha256": "091a3b53f7965a414bee661025e9c243673245a2aae6c52636ecfd9aa00ba2ac",
+      "path": "docs/visual-review/house-03640/garage-west-night.webp"
+    },
+    {
+      "sha256": "ee0026e265176e4e34b05595081f26e85766e1bd63ea10ce1befc4443f305fa3",
+      "path": "docs/visual-review/house-03640/garage-west-nocull.webp"
+    },
+    {
+      "sha256": "9293f7b81de528291545e4192d414a1849df3c06cd58b98c48e52ab5ca85ee8b",
+      "path": "docs/visual-review/house-03640/juliet-depth-before.webp"
+    },
+    {
+      "sha256": "19a806da0917c7d6dc74f34a16ae770dd677718bbf1799a24044524e0bf470a6",
+      "path": "docs/visual-review/house-03640/juliet-inside-out-day.webp"
+    },
+    {
+      "sha256": "66fee4860e583f13e153d759be7f9963c2fc188daebd528c72985ca6db12357d",
+      "path": "docs/visual-review/house-03640/juliet-inside-out-night.webp"
+    },
+    {
+      "sha256": "6423b498d96e49f5de6393e6f93d6083c673416909a48e5b721ada4720854b43",
+      "path": "docs/visual-review/house-03640/juliet-inward-view-day-frames.webp"
+    },
+    {
+      "sha256": "24493357ab3cccaf095827ab935ebbad0539854bc257be425680d463e37223cc",
+      "path": "docs/visual-review/house-03640/juliet-inward-view-night-frames.webp"
+    },
+    {
+      "sha256": "2ae9e13e5bd47a711916d6b4d0aa61e3b70de3f7b609b8d1359a4ade073d75fa",
+      "path": "docs/visual-review/house-03640/juliet-left-day.webp"
+    },
+    {
+      "sha256": "6127a9c01c587d83be16479297821dec7c5887680a0b428afc611ad8ec29ccdc",
+      "path": "docs/visual-review/house-03640/juliet-left-night.webp"
+    },
+    {
+      "sha256": "c4512b2432ef460991670675aacc8c0f652b4f036b6a4aba6a9de8e00b323f0b",
+      "path": "docs/visual-review/house-03640/juliet-right-day.webp"
+    },
+    {
+      "sha256": "c3ac01c958a20f0874a0525ae41a8b67ae402b90eeda2e697760a4254a28c566",
+      "path": "docs/visual-review/house-03640/juliet-right-night.webp"
+    },
+    {
+      "sha256": "37541522c8843cf5b9ca79d4de71a5f5891fd5bdb596ca7f1804ec205f8584c7",
+      "path": "docs/visual-review/house-03640/landing-front-balcony-day-frames.webp"
+    },
+    {
+      "sha256": "0f2c719eedbbd556fe02f407273b42c06d54b39647f97db92b949a76b17a17a5",
+      "path": "docs/visual-review/house-03640/landing-front-balcony-night-frames.webp"
+    },
+    {
+      "sha256": "de0dc37410cf977ca04cfbdd9bc3be0dab12c9b3d758f3c863a1319cc513a017",
+      "path": "docs/visual-review/house-03640/rear-balcony-bedroom-day-frames.webp"
+    },
+    {
+      "sha256": "216b14d4b530c25566349445569c1066505112450aaf7bbc5f4065475cdef078",
+      "path": "docs/visual-review/house-03640/rear-balcony-bedroom-night-frames.webp"
+    },
+    {
+      "sha256": "5fd2ac1ea59a2b9e5d31e7e8e4a44c199f9989d1b4bb1842ccdda72f86987ddd",
+      "path": "docs/visual-review/house-03640/rear-balcony-in-day.webp"
+    },
+    {
+      "sha256": "4b9d1eb92c339c8c4641f2c72158ba37aae4cb815ca8d99aa0e5fd65b00e6664",
+      "path": "docs/visual-review/house-03640/rear-balcony-in-night.webp"
+    }
+  ]
+}

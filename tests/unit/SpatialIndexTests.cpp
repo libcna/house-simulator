@@ -156,6 +156,22 @@ namespace
         EXPECT_GT(outside, 5000U) << "...and outside them, which is the answer the grid can get wrong";
     }
 
+    TEST_F(SpatialIndexTest, AnOpenLowerBalconyDoesNotCaptureTheStoreyAbove)
+    {
+        // HOUSE-03640: open-air extents intentionally reach above their own storey.
+        // First-hit grid selection assigned the upper balcony to the lower balcony,
+        // so its collision and portal set lost the upper floor/interior altogether.
+        auto contents = Fixture();
+        contents.cells[0].kind = world::CellKind::Exterior;
+        contents.cells[0].yOverride = world::Extent{0.60F, 9.00F};
+        auto loaded = world::WorldData::Create(std::move(contents));
+        ASSERT_TRUE(loaded);
+        const auto& data = loaded.Value();
+        const auto index = world::SpatialIndex::Build(data);
+        EXPECT_EQ(index.Find(data, Vector3(0.0F, 4.55F, 2.0F)), Intern("L1_BED"));
+        EXPECT_EQ(index.Find(data, Vector3(0.0F, 1.50F, 2.0F)), Intern("L0_FOYER"));
+    }
+
     TEST_F(SpatialIndexTest, ABucketHoldsAtMostSixCells)
     {
         // §16.4's number. It holds because cells on one level do not overlap, so a 2 m square sees

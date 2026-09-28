@@ -1309,6 +1309,17 @@ namespace
             Crossing{"hall-wc7", {2.03F, -2.30F, -22.10F, 90.0F, 0.0F}, "B1_WC7"},
             Crossing{"porch-foyer", {0.00F, 0.57F, -14.10F, 0.0F, 0.0F}, "L0_FOYER"},
             Crossing{"foyer-porch", {0.00F, 0.60F, -14.48F, 180.0F, 0.0F}, "L0_PORCH"},
+            // The Juliet is facade-only and its door is authored shut. Review the moving view
+            // from that inspection pose, but do not claim a new accessible balcony/door route.
+            Crossing{"juliet-inward-view", {-0.55F, 6.55F, -14.10F, 0.0F, 0.0F}, "L2_BALCONY_JULIET"},
+            Crossing{"front-balcony-landing", {0.10F, 3.65F, -14.10F, 0.0F, 0.0F}, "L1_LANDING"},
+            Crossing{"landing-front-balcony", {0.10F, 3.65F, -14.50F, 180.0F, 0.0F}, "L1_BALCONY_FRONT"},
+            // Use the slider's open half, not its fixed glass/stile, and put the threshold in
+            // the short frame-capture interval. This is a view-transition test, not a tour route.
+            Crossing{"rear-balcony-bedroom", {-1.65F, 3.65F, -27.35F, 180.0F, 0.0F}, "L1_MASTER_BED"},
+            Crossing{"bedroom-rear-balcony", {-1.65F, 3.65F, -26.90F, 0.0F, 0.0F}, "L1_BALCONY_REAR"},
+            Crossing{"garage-road-west", {0.00F, 0.00F, 3.00F, 39.0F, 0.0F}, "EXT_ROAD"},
+            Crossing{"garage-road-east", {22.00F, 0.00F, 3.00F, 335.5F, 0.0F}, "EXT_ROAD"},
         };
         const char* requestedCase = std::getenv("HOUSE_THRESHOLD_CASE");
         const std::filesystem::path original = std::filesystem::current_path();

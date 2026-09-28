@@ -24,9 +24,9 @@ namespace cnahouse::visibility
     ///
     /// | Portal kind | From inside | From outside |
     /// |---|---|---|
-    /// | cased opening, door, stair well | 6 | 6 |
-    /// | window or glass, interior → `EXT_WORLD` | 3 | — |
-    /// | window or glass, `EXT_WORLD` → interior | — | **1** |
+    /// | cased opening, door, stair well; clear or open glazed door | 6 | 6 |
+    /// | window or closed frosted glazing, interior → `EXT_WORLD` | 3 | — |
+    /// | window or closed frosted glazing, `EXT_WORLD` → interior | — | **1** |
     /// | garage door | 4 | 2 |
     ///
     /// **The asymmetry is the point.** Standing in the garden you should see *one* room through a
@@ -36,10 +36,12 @@ namespace cnahouse::visibility
     /// the garden is worth three because the garden is where the neighbourhood, terrain and sky
     /// are.
     ///
-    /// A portal is "a window onto outside" when one of its cells is an exterior one, which is read
-    /// from the world rather than from the portal's own kind: a glazed door between the sunroom and
-    /// the terrace is the same case as a window, and its `kind` says `slider`.
-    [[nodiscard]] int
-    MaxDepthFor(const world::Portal& portal, const world::WorldData& world, CameraSide camera) noexcept;
+    /// Clear glazed doors and latched-open doors use the door row: their visible sightline must
+    /// not expose the sky instead of a culled room behind an interior opening. Closed frosted
+    /// doors retain the glazing row, as do windows regardless of their aperture state.
+    [[nodiscard]] int MaxDepthFor(const world::Portal& portal,
+                                  const world::WorldData& world,
+                                  CameraSide camera,
+                                  bool open = false) noexcept;
 
 } // namespace cnahouse::visibility

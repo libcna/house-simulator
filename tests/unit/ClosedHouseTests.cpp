@@ -173,6 +173,8 @@ TEST(ClosedHouseTests, TheGoldenListFromTheFoyerLookingIn)
     // `L0_LIVING` is west behind a shut double door; `L0_PORCH`, `EXT_ROAD` and the front yards
     // are through the sidelights BEHIND the camera. What is here is the hall through its cased
     // opening and the open plan beyond it.
-    const std::set<std::string> golden{"L0_FOYER", "L0_HALL", "L0_KITCHEN", "L0_SUNROOM"};
+    // Clear patio glazing keeps the outdoor end of this unobstructed sightline too.
+    const std::set<std::string> golden{
+        "EXT_BACKYARD", "EXT_TERRACE", "L0_FOYER", "L0_HALL", "L0_KITCHEN", "L0_SUNROOM"};
     EXPECT_EQ(reached, golden);
 }

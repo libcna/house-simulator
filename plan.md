@@ -1397,6 +1397,7 @@ There is no zone rotation, no "polish everything" pass and no screenshot → twe
       accept: (1) reproduce the reported missing interior from an upper balcony and from the road looking into the enclosed garage, plus striped wall holes that show outdoors; (2) identify whether each is a portal/culling, missing shell or material error and correct the actual cause; (3) movement through and views from both sides remain complete by day and night, without reintroducing threshold flashes; (4) retain consecutive-frame or matched-pose before/after evidence and a focused regression for the root cause
       verify: actual offscreen GPU moving-view captures at the balcony, garage-road sightline and affected wall joins; visibility/shell tests
       note: (2026-09-27 owner report) The garage is an enclosed room inside the house, not a carport. A momentary view through it to the rear landscape is an S1/S2 rendering/architecture defect even when the interior appears after stepping closer.
+      progress: (2026-09-28, not complete) Real GPU reproduction isolates the west-road garage aperture, overlapping-storey balcony membership and the shallow clear-glass-door cap that discards the hall behind a landing. Existing lookup/traversal/depth code is corrected; ordinary-window and closed-opaque-door limits remain. Unit 1507/1507, focused visibility 36/36, renderer integration 9/9 and the complete 90-cell collision tour pass. Serial day/night motion covers 34 cases / 1224 frames (draws 5–433; largest HUD-cropped RGB mean difference 6.893/255). Matched views, 14 new motion sheets and exact failure/validation history are in `docs/visual-review/house-03640-visibility.md`. The reported striped wall holes still need a concrete affected join and actual reproduction/fix; the checkbox remains open and is the next priority. Shell selftests alone do not close that report.
 
 - [ ] HOUSE-03641 — Bring the existing static car family up to the property's visual standard
       dep: HOUSE-00847, HOUSE-03640 · sys: content · plat: ALL · pri: MUST · zone: Z-GAR, Z-STR · adv: D4, D13 · est: 2.5
@@ -2282,6 +2283,25 @@ under R5.
 ---
 
 ## Planning corrections
+
+### PC-2026-09-28 — Exterior sightlines and overlapping balcony membership
+
+* `HOUSE-03640` reproduces the enclosed garage disappearing from the west road pose
+  `(0,0,3)`, yaw 39°, and the upper balcony being assigned to the lower balcony's tall
+  open-air volume. Highest-containing-storey selection corrects neighbour/grid lookup
+  without changing incremental hysteresis or same-storey nested ownership.
+* A clipped exterior doorway can seed its interior even when the outdoor gate graph
+  misses its adjacent yard. Keep closed-door, facing, aperture/frustum, depth and cell
+  budgets; keep direct-window and attic-receiver safeguards. No global no-cull workaround.
+* Actual GPU balcony views additionally show sky and floating exterior frames through
+  the landing's open hall doorway. §25.2's old one-room cap for clear glazed doors
+  contradicts D13 at this visible sightline. Clear glazed doors, shut or open, use the
+  existing six-hop door allowance; ordinary windows and shut frosted glazing retain
+  their old limits. Leaves still draw/occlude normally. This is a local correctness
+  correction, not new content or a new visibility subsystem. Wall-seam investigation
+  and current movement/day/night validation are still required before closing the task.
+  [ADR-0017](docs/decisions/ADR-0017-exterior-sightline-correctness.md) records the bounded
+  amendment to ADR-0004; the original accepted record is not rewritten.
 
 ### PC-2026-09-28 — Basement approach dimensions and garage platform ownership
 

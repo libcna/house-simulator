@@ -107,8 +107,12 @@ TEST(WindowDepthTests, TheTableSaysOneFromOutsideAndThreeFromInside)
             continue;
         }
         ++glazed;
-        EXPECT_EQ(MaxDepthFor(portal, data, CameraSide::Exterior), 1) << IdRegistry::NameOf(portal.id);
-        EXPECT_EQ(MaxDepthFor(portal, data, CameraSide::Interior), 3) << IdRegistry::NameOf(portal.id);
+        const bool clearDoor =
+            world::IsPassable(portal.kind) && portal.opacity == world::PortalOpacity::Glass;
+        EXPECT_EQ(MaxDepthFor(portal, data, CameraSide::Exterior), clearDoor ? 6 : 1)
+            << IdRegistry::NameOf(portal.id);
+        EXPECT_EQ(MaxDepthFor(portal, data, CameraSide::Interior), clearDoor ? 6 : 3)
+            << IdRegistry::NameOf(portal.id);
     }
     std::printf("  %d glazed opening(s) between the outdoors and a room\n", glazed);
     EXPECT_GT(glazed, 40) << "§12.6 schedules 66 windows and the house has almost none";
@@ -153,12 +157,12 @@ TEST(WindowDepthTests, StandingOutsideAWindowShowsOneRoomAndNothingBehindIt)
         const std::string window = std::string(IdRegistry::NameOf(portal.id));
         const std::string room = std::string(IdRegistry::NameOf(inside));
 
-        // With every door SHUT, glass is the only way in -- so every interior cell the walk
-        // reached came through glazing, and every one of them must be one room deep.
+        // With every door SHUT, window/frosted chains stay one room deep. Clear glazed doors
+        // can keep a longer sightline; their door allowance must not be confused with a window.
         WalkFrom(data, system, stand, outside, false);
         for (const VisibleCell& cell : system.Visible())
         {
-            if (IsExterior(data, cell.cell))
+            if (IsExterior(data, cell.cell) || cell.allowance != 1)
             {
                 continue;
             }
@@ -187,7 +191,7 @@ TEST(WindowDepthTests, StandingOutsideAWindowShowsOneRoomAndNothingBehindIt)
         }
         WalkFrom(data, system, stand, outside, false);
         // ...and the room the window looks into is one of them, or the pose is looking at a wall.
-        if (system.IsVisible(inside))
+        if (system.IsVisible(inside) && system.Find(inside)->allowance == 1)
         {
             EXPECT_EQ(system.Find(inside)->depth, 1)
                 << window << " reached " << room << " at the wrong depth";

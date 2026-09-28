@@ -96,7 +96,7 @@ namespace cnahouse::testsupport
          -20.65f,
          0.0f,
          false,
-         {"EXT_TERRACE", "L0_FAMILY", "L0_HALL", "L0_KITCHEN", "L0_SUNROOM"},
+         {"EXT_BACKYARD", "EXT_TERRACE", "L0_FAMILY", "L0_HALL", "L0_KITCHEN", "L0_SUNROOM"},
          true},
         // the same pose with every door open -- including the fridge's, which §54 makes a cell with a portal
         // like any other

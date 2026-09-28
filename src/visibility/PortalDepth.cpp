@@ -29,15 +29,24 @@ namespace cnahouse::visibility
         }
     } // namespace
 
-    int MaxDepthFor(const world::Portal& portal, const world::WorldData& world, CameraSide camera) noexcept
+    int MaxDepthFor(const world::Portal& portal,
+                    const world::WorldData& world,
+                    CameraSide camera,
+                    bool open) noexcept
     {
         const bool inside = camera == CameraSide::Interior;
         if (portal.kind == world::PortalKind::GarageDoor)
         {
             return inside ? kGarageFromInside : kGarageFromOutside;
         }
-        // Glazed onto the outdoors: a window, or anything with glass in it between a room and an
-        // exterior cell. The kind alone is not enough -- the sunroom's slider is a `slider`.
+        if (world::IsPassable(portal.kind) && (open || portal.opacity == world::PortalOpacity::Glass))
+        {
+            // Clear balcony-door glazing and an open leaf both expose a continuous sightline.
+            // Treating either as a one-room window discards the hall beyond the landing and
+            // shows the sky through its open doorway. Closed frosted glazing retains its cap.
+            return inside ? kDoorFromInside : kDoorFromOutside;
+        }
+        // Shallow glazing onto the outdoors: a window, or a shut frosted door leaf.
         const bool glazed = portal.kind == world::PortalKind::Window ||
                             portal.opacity == world::PortalOpacity::Glass ||
                             portal.opacity == world::PortalOpacity::Translucent;

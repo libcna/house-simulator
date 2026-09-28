@@ -63,6 +63,13 @@ and above `kOpenAbove` it is open, and between those two it stays as it was. Tha
 a door swinging past 0.06 does not make the room behind it flicker in and out of the frame. A leaf
 occludes *inside* the target cell; it does not shrink the portal.
 
+Clear glazed doors retain the existing six-hop door allowance even while shut; an open frosted
+leaf also becomes an ordinary doorway. A one-room balcony-door cap otherwise discarded the
+hall behind its landing and exposed sky through the hall opening. Windows and shut frosted
+leaves retain their shallow allowances. Exterior vertical doorways may seed a facing, clipped
+interior cone without first traversing the narrow driveway/gate graph. Closed opaque leaves,
+window safeguards and all clipping/depth/cell limits still apply. See `HOUSE-03640` evidence.
+
 **§25.7, going outside.** Crossing an exterior door is an ordinary portal crossing. What is not
 ordinary is the join: the cones that arrive in the yards are collected (`ExteriorCones`) and
 §25.6's hierarchy is culled against **all of them at once**, in one descent carrying a bit per cone.

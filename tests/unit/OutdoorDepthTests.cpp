@@ -101,13 +101,12 @@ namespace
         return row != nullptr && row->kind == world::CellKind::Exterior;
     }
 
-    /// §25.2's own words for "a window onto the outdoors", re-derived here rather than asked of
+    /// §25.2's shallow window/frosted row, re-derived here rather than asked of
     /// `MaxDepthFor`: a test that read the answer off the thing under test would say nothing.
-    bool IsGlazedToOutside(const world::WorldData& data, const world::Portal& portal)
+    bool IsShallowGlazingToOutside(const world::WorldData& data, const world::Portal& portal)
     {
-        const bool glazed = portal.kind == world::PortalKind::Window ||
-                            portal.opacity == world::PortalOpacity::Glass ||
-                            portal.opacity == world::PortalOpacity::Translucent;
+        const bool glazed =
+            portal.kind == world::PortalKind::Window || portal.opacity == world::PortalOpacity::Translucent;
         return glazed && (IsExterior(data, portal.cellA) || IsExterior(data, portal.cellB));
     }
 
@@ -128,7 +127,7 @@ namespace
             for (const std::uint32_t index : data.PortalsOf(cell))
             {
                 const world::Portal& portal = data.Portals()[index];
-                if (IsGlazedToOutside(data, portal))
+                if (IsShallowGlazingToOutside(data, portal))
                 {
                     continue;
                 }
@@ -178,7 +177,7 @@ TEST(OutdoorDepthTests, RoadEyeSeesRoomsBehindFrontGlazing)
     for (const VisibleCell& cell : system.Visible())
     {
         visible.insert(std::string(IdRegistry::NameOf(cell.cell)));
-        if (cell.cell != view.cell && !IsExterior(data, cell.cell))
+        if (cell.cell != view.cell && !IsExterior(data, cell.cell) && cell.allowance == 1)
         {
             EXPECT_EQ(cell.depth, 1) << IdRegistry::NameOf(cell.cell)
                                      << " is deeper than the exterior glazing allowance";
@@ -311,7 +310,7 @@ TEST(OutdoorDepthTests, TheWindowsOwnCapIsWhatStopsIt)
     int doors = 0;
     for (const world::Portal& portal : data.Portals())
     {
-        if (IsGlazedToOutside(data, portal))
+        if (IsShallowGlazingToOutside(data, portal))
         {
             ++glazed;
             EXPECT_EQ(MaxDepthFor(portal, data, CameraSide::Exterior), 1) << IdRegistry::NameOf(portal.id);
@@ -336,60 +335,62 @@ TEST(OutdoorDepthTests, TheAllowanceIsTheBestOfTwoWaysIn)
     // from there on: the walk keeps the larger allowance, because refusing to continue down a
     // chain that is allowed to continue would be over-culling.
     IdRegistry::ResetForTesting();
-    if (!ContentIsBuilt())
-    {
-        GTEST_SKIP() << "no deployed world";
-    }
-    const world::WorldData data = LoadWorld();
+    // Isolate the two actual visible apertures. A world sweep cannot infer a cell's largest
+    // allowance from its shallowest depth: a later long door chain can improve that allowance,
+    // including through an exterior opening seeded independently of the yard movement graph.
+    world::WorldData::Contents contents;
+    world::Level level;
+    level.id = cnahouse::util::Intern("L0");
+    level.ffl = 0.60F;
+    level.ceiling = 3.30F;
+    contents.levels.push_back(level);
+    world::Cell room;
+    room.id = cnahouse::util::Intern("ROOM");
+    room.level = level.id;
+    room.boxes.push_back(world::Footprint{-2.0F, 2.0F, -4.0F, 0.0F});
+    world::Cell yard = room;
+    yard.id = cnahouse::util::Intern("YARD");
+    yard.kind = world::CellKind::Exterior;
+    yard.boxes = {world::Footprint{-2.0F, 2.0F, 0.0F, 4.0F}};
+    contents.cells = {room, yard};
+    world::Portal door;
+    door.id = cnahouse::util::Intern("DOOR");
+    door.cellA = room.id;
+    door.cellB = yard.id;
+    door.axis = world::PlaneAxis::Z;
+    door.planeValue = 0.0F;
+    door.minU = -1.0F;
+    door.maxU = 1.0F;
+    door.minV = 0.6F;
+    door.maxV = 2.8F;
+    door.kind = world::PortalKind::ExteriorDoor;
+    door.opacity = world::PortalOpacity::OpaqueWhenClosed;
+    door.aperture = cnahouse::util::Intern("DOOR_LEAF");
+    world::Portal window = door;
+    window.id = cnahouse::util::Intern("WINDOW");
+    window.minU = 1.1F;
+    window.maxU = 1.8F;
+    window.minV = 1.5F;
+    window.kind = world::PortalKind::Window;
+    window.opacity = world::PortalOpacity::Glass;
+    window.aperture = cnahouse::util::Intern("WINDOW_SASH");
+    contents.portals = {window, door};
+    auto built = world::WorldData::Create(std::move(contents));
+    ASSERT_TRUE(built);
+    const world::WorldData& data = built.Value();
     VisibilitySystem system(data);
-    for (const world::Portal& portal : data.Portals())
-    {
-        system.SetAperture(portal.id, 1.0F);
-    }
-
-    bool sawBoth = false;
-    for (const char* yard : {"EXT_BACKYARD", "EXT_TERRACE", "L0_PORCH", "EXT_DRIVEWAY"})
-    {
-        for (const float yaw : {0.0F, 45.0F, 90.0F, 135.0F, 180.0F, 225.0F, 270.0F, 315.0F})
-        {
-            const CameraView view = Standing(data, yard, yaw);
-            system.SetCamera(view);
-            system.Update(Frame(3));
-            for (const VisibleCell& cell : system.Visible())
-            {
-                if (IsExterior(data, cell.cell) || cell.depth != 1)
-                {
-                    continue;
-                }
-                // Is there a NON-glazed portal straight from the camera's cell to this one?
-                int doorAllowance = 0;
-                for (const std::uint32_t index : data.PortalsOf(view.cell))
-                {
-                    const world::Portal& portal = data.Portals()[index];
-                    const Id other = portal.cellA == view.cell ? portal.cellB : portal.cellA;
-                    if (other == cell.cell && !IsGlazedToOutside(data, portal))
-                    {
-                        doorAllowance =
-                            std::max(doorAllowance, portal.kind == world::PortalKind::GarageDoor ? 2 : 6);
-                    }
-                }
-                if (doorAllowance != 0)
-                {
-                    sawBoth = true;
-                    EXPECT_EQ(cell.allowance, doorAllowance)
-                        << IdRegistry::NameOf(cell.cell)
-                        << " is reachable by a door but kept a window's allowance";
-                }
-                else
-                {
-                    EXPECT_EQ(cell.allowance, 1)
-                        << IdRegistry::NameOf(cell.cell) << " came through glazing only";
-                }
-            }
-        }
-    }
-    EXPECT_TRUE(sawBoth) << "no room in the house is entered directly from a yard, so the "
-                            "better-of-two rule was never exercised";
+    system.SetAperture(door.id, 1.0F);
+    system.SetCamera(Standing(data, "YARD", 0.0F));
+    system.Update(Frame(1));
+    ASSERT_NE(system.Find(room.id), nullptr);
+    EXPECT_EQ(system.Find(room.id)->depth, 1);
+    EXPECT_EQ(system.Find(room.id)->allowance, 6);
+    EXPECT_GE(system.Find(room.id)->frustumCount, 2) << "both apertures must actually contribute";
+    system.SetAperture(door.id, 0.0F);
+    system.Update(Frame(2));
+    ASSERT_NE(system.Find(room.id), nullptr);
+    EXPECT_EQ(system.Find(room.id)->depth, 1);
+    EXPECT_EQ(system.Find(room.id)->allowance, 1);
 }
 
 TEST(OutdoorDepthTests, FromInsideTheHouseTheChainIsStillSixDoorsDeep)

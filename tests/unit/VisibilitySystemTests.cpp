@@ -296,6 +296,89 @@ TEST(VisibilitySystemTests, ACameraInTheGardenIsTreatedAsBeingOutside)
     EXPECT_GT(insideCells, outsideCells);
 }
 
+TEST(VisibilitySystemTests, AnOpenGarageIsVisibleFromAnObliqueRoadSightline)
+{
+    IdRegistry::ResetForTesting();
+    if (!WorldIsDeployed())
+    {
+        GTEST_SKIP() << "no deployed world";
+    }
+    const auto data = Load();
+    VisibilitySystem system(data);
+    for (const auto& portal : data.Portals())
+    {
+        system.SetAperture(portal.id, 1.0F);
+    }
+    PlayerState state;
+    state.position = Vector3(0.0F, state.Rise(), 3.0F);
+    state.yaw = 39.0F * 3.14159265F / 180.0F;
+    FirstPersonCamera camera;
+    camera.SetAspect(16.0F / 9.0F);
+    camera.Update(state, kPlayerEyeHeight, 0.0F);
+    CameraView view;
+    view.cell = cnahouse::util::Intern("EXT_ROAD");
+    view.eye = camera.Pose().eye;
+    view.viewProjection = camera.View() * camera.Projection();
+    view.frustum = ClipFrustum(camera.Frustum());
+    view.nearPlane = camera.Frustum().getNearProperty();
+    view.farPlane = camera.Frustum().getFarProperty();
+    system.SetCamera(view);
+    system.Update(Frame(1));
+    const auto garage = cnahouse::util::Intern("L0_GARAGE");
+    EXPECT_TRUE(
+        std::ranges::any_of(system.Visible(), [garage](const auto& cell) { return cell.cell == garage; }));
+    for (const auto& portal : data.Portals())
+    {
+        if (portal.kind == world::PortalKind::GarageDoor)
+        {
+            system.SetAperture(portal.id, 0.0F);
+        }
+    }
+    system.Update(Frame(2));
+    EXPECT_FALSE(
+        std::ranges::any_of(system.Visible(), [garage](const auto& cell) { return cell.cell == garage; }));
+}
+
+TEST(VisibilitySystemTests, AClearGlazedBalconyDoorKeepsTheInteriorSightlineComplete)
+{
+    IdRegistry::ResetForTesting();
+    if (!WorldIsDeployed())
+    {
+        GTEST_SKIP() << "no deployed world";
+    }
+    const auto data = Load();
+    VisibilitySystem system(data);
+    for (const auto& portal : data.Portals())
+    {
+        system.SetAperture(portal.id, 1.0F);
+    }
+    PlayerState state;
+    state.position = Vector3(-0.55F, 6.55F + state.Rise(), -14.10F);
+    FirstPersonCamera camera;
+    camera.SetAspect(16.0F / 9.0F);
+    camera.Update(state, kPlayerEyeHeight, 0.0F);
+    CameraView view;
+    view.cell = cnahouse::util::Intern("L2_BALCONY_JULIET");
+    view.eye = camera.Pose().eye;
+    view.viewProjection = camera.View() * camera.Projection();
+    view.frustum = ClipFrustum(camera.Frustum());
+    view.nearPlane = camera.Frustum().getNearProperty();
+    view.farPlane = camera.Frustum().getFarProperty();
+    system.SetCamera(view);
+    system.Update(Frame(1));
+    const auto landing = cnahouse::util::Intern("L2_LANDING");
+    const auto hall = cnahouse::util::Intern("L2_HALL");
+    EXPECT_TRUE(system.IsVisible(landing));
+    EXPECT_TRUE(system.IsVisible(hall));
+    for (const auto& portal : data.Portals())
+    {
+        system.SetAperture(portal.id, 0.0F);
+    }
+    system.Update(Frame(2));
+    EXPECT_TRUE(system.IsVisible(landing));
+    EXPECT_TRUE(system.IsVisible(hall)) << "closed clear glazing must not turn the hallway into sky";
+}
+
 TEST(VisibilitySystemTests, AFrameBeforeAnyoneSaysWhereTheCameraIsIsEmptyRatherThanWrong)
 {
     IdRegistry::ResetForTesting();

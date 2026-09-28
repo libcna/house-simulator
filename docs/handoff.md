@@ -1,5 +1,51 @@
 # Current owner-visible defect work — 2026-09-28
 
+## Exterior visibility correction checkpoint — task still open
+
+**HOUSE-03640 remains OPEN; 36 MUST / 78 OPT remain.** Selection is the explicit
+owner S1/S2 priority override, not ordinary performance/Android ordering. Continue
+the owner's striped wall-hole reproduction and actual affected joins next. Do not
+tick this task merely because its balcony/garage cases or shell checks now pass.
+The optional backlog was recounted directly: 78 unchecked task rows; the previous
+79 was a reporting error, not a removed or completed optional task.
+
+Current normal offscreen Radeon/OPENGLES3 reproductions prove three House-owned
+causes: west-road garage `(0,0,3)`, yaw 39° loses its room because open opaque doors
+are excluded from direct exterior seeding; the lower balcony's tall open volume
+captures the upper Juliet camera; a one-room clear-glass-door cap then drops the
+hall behind the landing. Existing aperture seeding, highest-storey neighbour/grid
+selection and the six-hop clear-door allowance correct these. Ordinary windows,
+closed opaque doors, frusta/depth/cell limits and same-storey nesting remain intact.
+The facade-only Juliet stays shut/non-player-accessible. No content/model/collision
+or sibling changes. ADR-0017 and a targeted R15 entry document the correction.
+
+Do not repeat the solved garage investigation: matched before/no-cull/after views
+and 14 new day/night motion sheets are in
+`docs/visual-review/house-03640-visibility.md` and its evidence folder. Source PNGs
+remain in `/tmp/house-03640*` / `build/test-output/threshold-movement/`; use the final
+serial run's latest 36 files per case, not mixed earlier captures. Parallel capture
+processes stole each other's files from the shared build root; those are invalid.
+Early new route starts were too far from the threshold or aimed at the fixed slider
+half. Final rear crossing uses x=-1.65, its authored open half, with no collision
+tolerance changes. These failed drafts are explicitly recorded, not claimed PASS.
+
+Current results: **1507/1507 units**, **36/36 focused visibility**, **9/9 renderer
+integration**, full 90-cell collision tour (564 stops, 86,635 steps, 14 detours),
+background shell selftest and **34 serial GPU motion cases / 1224 frames PASS**.
+No zero draws; measured draws 5–433, largest cropped consecutive RGB mean difference
+6.893/255. These are visual/correctness observations, not a contention-free timing
+baseline or an FPS improvement. Full static gates pass except inherited owner-owned
+`.claude` layout; strict XNA 344 units clean with two compiler workers. Shared cache
+and existing build directory only, all work pinned to CPU 0–3. No monitor window or
+Android emulator was used. The old aggregate ceiling remains withdrawn by the owner.
+The post-build visibility/spatial subset also passes **49/49**; final full strict
+recheck passes all 344 units again. No House-owned failure remains in these checks.
+
+**Not an external blocker:** the exact wall-strip location is still unknown. A
+non-blocking request for a screenshot/room ID was sent while work continued. Keep
+investigating current GPU joins; passing old screenshots or geometry checks does not
+prove this defect absent. Cars, cinema, audio and performance stay behind this priority.
+
 ## Basement/garage correction checkpoint
 
 `HOUSE-03639` is accepted; **36 MUST / 79 OPT tasks remain**. The final basement data uses sixteen

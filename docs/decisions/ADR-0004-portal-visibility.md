@@ -7,6 +7,7 @@
 | **Task** | `HOUSE-00010` |
 | **Depends on** | [ADR-0001](ADR-0001-xna-only.md), [ADR-0002](ADR-0002-renderer-selection.md) |
 | **Owns** | `cna-house.md` §25 |
+| **Superseded in part by** | [ADR-0017](ADR-0017-exterior-sightline-correctness.md): clear glazed doors retain a continuous doorway sightline rather than the shallow window cap |
 
 ## Context
 

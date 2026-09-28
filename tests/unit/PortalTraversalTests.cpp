@@ -240,7 +240,20 @@ TEST(PortalTraversalTests, TheDepthCapStopsTheChain)
     {
         EXPECT_LE(cell.depth, 6) << IdRegistry::NameOf(cell.cell);
     }
-    EXPECT_GT(walk.Stats().skippedDepth, 0) << "the cap never bit, so it is untested here";
+    // One hall heading need not exercise a cap after clear balcony doors keep their sightline.
+    // Sweep the actual world, without changing any allowance, to ensure a cap really stops work.
+    int capped = 0;
+    for (const auto& cell : data.Cells())
+    {
+        for (const float yaw : {0.0F, 90.0F, 180.0F, 270.0F})
+        {
+            PortalTraversal probe;
+            probe.Run(InputFor(data, open, StandIn(data, IdRegistry::NameOf(cell.id), yaw)));
+            EXPECT_LE(probe.Stats().maxDepth, 6);
+            capped += probe.Stats().skippedDepth;
+        }
+    }
+    EXPECT_GT(capped, 0) << "the cap never bit in the world sweep";
 }
 
 TEST(PortalTraversalTests, NoCellKeepsMoreThanFourFrusta)

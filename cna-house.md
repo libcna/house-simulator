@@ -1962,10 +1962,14 @@ A point→cell lookup runs on every physics step and every camera move. Implemen
 1. **Incremental**: the controller keeps `currentCell`. Each step, test the point against
    `currentCell`'s boxes (expanded by 5 cm hysteresis). Hit → done, O(1), the case 99.9 % of the
    time.
-2. **Neighbour walk**: else test the cells reachable through `currentCell`'s portals. Hit → done.
+2. **Neighbour walk**: else test the cells reachable through `currentCell`'s portals. If several
+   contain the point, select the highest declared storey; same-storey ties retain authored order.
 3. **Grid fallback**: else look up a **uniform 2 m × 2 m × level grid** built at load time mapping
    each bucket to the ≤ 6 cells overlapping it, and test those. This is also the entry point for
    spawning, teleporting and save-loading.
+   Use the same highest-storey tie-break: an open-air balcony volume can extend above its own
+   floor and overlap the next balcony. File order must not assign a top-floor view to the lower
+   balcony. This does not change incremental hysteresis or same-storey nested-cell ownership.
 4. **Failure**: no cell → the player is outside the house shell; assign `EXT_WORLD`. If the point
    is inside the shell but in no cell, that is a **world-data bug** and the validator (§15.7 rule
    3) is supposed to have caught it; at runtime it raises a diagnostic and clamps to the last good
@@ -3298,9 +3302,9 @@ one edge of the clipped polygon, keeping the original near and far planes. Imple
 
 | Portal kind | Max depth from an interior camera | From an exterior camera |
 |---|---|---|
-| cased opening, door, stair well | 6 | **6** |
-| window / glass (interior → `EXT_WORLD`) | 3 | — |
-| window / glass (`EXT_WORLD` → interior) | — | **1** |
+| cased opening, door, stair well; clear glazed door or latched-open glazed door | 6 | **6** |
+| window / closed frosted glazing (interior → `EXT_WORLD`) | 3 | — |
+| window / closed frosted glazing (`EXT_WORLD` → interior) | — | **1** |
 | garage door | 4 | 2 |
 
 The glazing asymmetry matters: standing in the garden you should see *one* room through a window,
@@ -3308,6 +3312,16 @@ not that room plus everything behind its open door. Depth 1 from outside deliver
 An authored-open entrance door can expose a long sightline through the house, so doors use six
 from either camera side; the former exterior limit of two assumed the superseded all-doors-shut
 start and over-culled the porch view once `HOUSE-03221` gave the entrance its static-open pose.
+Clear glazed balcony doors also retain the door allowance when shut: the glass exposes the hall
+behind its landing, and a one-room cap made that hall turn into sky instead of opaque walls.
+The leaf still occludes through the ordinary depth buffer, and a closed opaque door still stops
+the walk. Ordinary windows and closed frosted leaves retain the shallow glazing allowance.
+
+For an exterior camera, an actual front-facing vertical doorway may seed its clipped interior
+cone even when the narrow driveway/gate graph has not visited the door's exterior cell. Outdoor
+movement partitions do not occlude the road-to-garage view. Facing, latch, frustum, pixel-area,
+depth and visible-cell limits still apply; no whole-house/no-cull fallback is used. Direct window
+seeding retains the outdoor-walk restriction and the attic receiver exclusion.
 
 **`kMinPortalNdcArea = 1.2e-5`** — about 2 × 2 pixels at 1280 × 720. Below that the target cell
 contributes nothing and the chain stops. This single cutoff is what keeps a corridor of eight open

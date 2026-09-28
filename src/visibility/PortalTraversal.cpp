@@ -135,14 +135,14 @@ namespace cnahouse::visibility
                                  whole,
                                  ClippedPolygon{},
                                  1,
-                                 MaxDepthFor(portal, *input.world, input.side),
+                                 MaxDepthFor(portal, *input.world, input.side, runtime.IsOpen()),
                                  flags}))
             {
                 ++stats_.portalsCrossed;
             }
         }
 
-        const auto seedExteriorGlazing = [&]()
+        const auto seedExteriorOpenings = [&]()
         {
             if (input.side != CameraSide::Exterior)
             {
@@ -151,7 +151,7 @@ namespace cnahouse::visibility
             // Outdoor cells divide movement and simulation, but do not occlude one another.
             // From the road a front window can be on a yard cell that the narrow gate portal
             // never put in the walk. The outdoor root already gives §25.6 the camera's whole
-            // cone; use the actual glazed aperture to seed its ONE room
+            // cone; use the actual exterior aperture to seed its ONE room
             // directly, without making the yard cell or every room behind it visible.
             const std::span<const Xna::Plane> planes = visibilityFrustum.Planes();
             const std::span<const world::Portal> portals = input.world->Portals();
@@ -162,7 +162,8 @@ namespace cnahouse::visibility
                 const world::Cell* b = input.world->FindCell(portal.cellB);
                 const bool aOutside = a != nullptr && a->kind == world::CellKind::Exterior;
                 const bool bOutside = b != nullptr && b->kind == world::CellKind::Exterior;
-                if (aOutside == bOutside || (portal.kind != world::PortalKind::Window &&
+                const bool doorway = portal.axis != world::PlaneAxis::Y && world::IsPassable(portal.kind);
+                if (aOutside == bOutside || (!doorway && portal.kind != world::PortalKind::Window &&
                                              portal.opacity != world::PortalOpacity::Glass &&
                                              portal.opacity != world::PortalOpacity::Translucent))
                 {
@@ -188,13 +189,17 @@ namespace cnahouse::visibility
                     // geometry has an aperture-sized exterior draw role.
                     continue;
                 }
-                if (Find(outside) == nullptr)
+                if (!doorway && Find(outside) == nullptr)
                 {
                     // An exterior cell not reached by the ordinary outdoor walk can be on the
                     // far side of the house. Its projected window alone does not prove an
                     // unobstructed sightline through the building from this camera.
                     continue;
                 }
+                // An open entrance can be seen obliquely from the road without the narrow
+                // driveway/gate portal reaching its outdoor cell. Its facing, clipped aperture
+                // supplies the sightline; a closed opaque door was rejected above. Windows
+                // retains the outdoor-walk restriction to avoid far-side receiver leaks.
                 if (PlaneFacesAway(portal, *input.world, outside, input.eye))
                 {
                     ++stats_.skippedFacing;
@@ -222,7 +227,7 @@ namespace cnahouse::visibility
                                      rect,
                                      clipped,
                                      1,
-                                     MaxDepthFor(portal, *input.world, input.side),
+                                     MaxDepthFor(portal, *input.world, input.side, runtime.IsOpen()),
                                      flags}))
                 {
                     ++stats_.portalsCrossed;
@@ -298,10 +303,10 @@ namespace cnahouse::visibility
                     // *"Standing in the garden you should see one room through a window, not that room
                     // plus everything behind its open door"* -- and a per-portal cap gives exactly
                     // that: the window admits the chain at depth 1, and the room's own door, whose cap
-                    // is 2, then carries it on. Taking the minimum of every cap the chain has crossed
+                    // is 6, then carries it on. Taking the minimum of every cap the chain has crossed
                     // is what makes the window's 1 mean what §25.2 says it means.
-                    const int allowance =
-                        std::min(work.allowance, MaxDepthFor(portal, *input.world, input.side));
+                    const int allowance = std::min(
+                        work.allowance, MaxDepthFor(portal, *input.world, input.side, runtime.IsOpen()));
                     if (work.depth >= allowance)
                     {
                         ++stats_.skippedDepth;
@@ -359,7 +364,7 @@ namespace cnahouse::visibility
         };
 
         expandQueue();
-        seedExteriorGlazing();
+        seedExteriorOpenings();
         expandQueue();
 
         stats_.queuePeak = static_cast<int>(queue_.Peak());
