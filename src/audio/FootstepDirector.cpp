@@ -5,6 +5,8 @@
 #include <cmath>
 #include <utility>
 
+#include "cnahouse/world/WorldTypes.hpp"
+
 namespace cnahouse::audio
 {
 
@@ -26,6 +28,20 @@ namespace cnahouse::audio
             return;
         }
         surfaceBanks_.push_back(SurfaceBinding{std::move(surface), bank});
+    }
+
+    void FootstepDirector::BindBanks(std::span<const world::AudioBank> banks)
+    {
+        surfaceBanks_.clear();
+        nextSamples_.clear();
+        Reset();
+        for (const world::AudioBank& bank : banks)
+        {
+            for (const std::string& surface : bank.surfaces)
+            {
+                BindSurface(surface, bank.id);
+            }
+        }
     }
 
     std::optional<Footstep> FootstepDirector::Advance(const FootstepStep& step)

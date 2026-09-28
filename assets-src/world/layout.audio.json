@@ -13,7 +13,9 @@
   // §15.7 rule 6 checks every portal against its class, so the two cannot drift.
   "schema": "cna-house/audio/1",
   "banks": [
-    { "id": "BANK_FOOTSTEP_WOOD", "gain": 0.85, "samples": [
+    { "id": "BANK_FOOTSTEP_WOOD", "gain": 0.85,
+      "surfaces": ["hardwood", "painted_wood", "stair_wood", "stair_wood_open", "wood"],
+      "samples": [
       "SOUND_NOX_FOOTSTEP_WOOD_WALK_FOOTSTEPS_WOOD_WALK_02",
       "SOUND_NOX_FOOTSTEP_WOOD_WALK_FOOTSTEPS_WOOD_WALK_04",
       "SOUND_NOX_FOOTSTEP_WOOD_WALK_FOOTSTEPS_WOOD_WALK_07",
@@ -23,7 +25,9 @@
     ] },
     // NOX has no carpet-labelled set. Its sand walk is the softest retained pack; the lower bank
     // gain keeps it from reading as loose outdoor sand on carpet.
-    { "id": "BANK_FOOTSTEP_CARPET", "gain": 0.55, "samples": [
+    { "id": "BANK_FOOTSTEP_CARPET", "gain": 0.55,
+      "surfaces": ["carpet", "snow", "stair_carpet"],
+      "samples": [
       "SOUND_NOX_FOOTSTEP_SAND_WALK_FOOTSTEPS_SAND_WALK_01",
       "SOUND_NOX_FOOTSTEP_SAND_WALK_FOOTSTEPS_SAND_WALK_02",
       "SOUND_NOX_FOOTSTEP_SAND_WALK_FOOTSTEPS_SAND_WALK_03",
@@ -31,7 +35,9 @@
       "SOUND_NOX_FOOTSTEP_SAND_WALK_FOOTSTEPS_SAND_WALK_16",
       "SOUND_NOX_FOOTSTEP_SAND_WALK_FOOTSTEPS_SAND_WALK_17"
     ] },
-    { "id": "BANK_FOOTSTEP_TILE", "gain": 0.78, "samples": [
+    { "id": "BANK_FOOTSTEP_TILE", "gain": 0.78,
+      "surfaces": ["ceramic", "glass", "metal", "tile", "vinyl", "water"],
+      "samples": [
       "SOUND_NOX_FOOTSTEP_TILE_WALK_FOOTSTEPS_TILE_WALK_01",
       "SOUND_NOX_FOOTSTEP_TILE_WALK_FOOTSTEPS_TILE_WALK_02",
       "SOUND_NOX_FOOTSTEP_TILE_WALK_FOOTSTEPS_TILE_WALK_03",
@@ -39,7 +45,9 @@
       "SOUND_NOX_FOOTSTEP_TILE_WALK_FOOTSTEPS_TILE_WALK_05",
       "SOUND_NOX_FOOTSTEP_TILE_WALK_FOOTSTEPS_TILE_WALK_06"
     ] },
-    { "id": "BANK_FOOTSTEP_STONE", "gain": 0.80, "samples": [
+    { "id": "BANK_FOOTSTEP_STONE", "gain": 0.80,
+      "surfaces": ["asphalt", "bluestone", "concrete", "rock"],
+      "samples": [
       "SOUND_NOX_FOOTSTEP_ROCK_WALK_FOOTSTEPS_ROCK_WALK_01",
       "SOUND_NOX_FOOTSTEP_ROCK_WALK_FOOTSTEPS_ROCK_WALK_02",
       "SOUND_NOX_FOOTSTEP_ROCK_WALK_FOOTSTEPS_ROCK_WALK_04",
@@ -47,7 +55,9 @@
       "SOUND_NOX_FOOTSTEP_ROCK_WALK_FOOTSTEPS_ROCK_WALK_06",
       "SOUND_NOX_FOOTSTEP_ROCK_WALK_FOOTSTEPS_ROCK_WALK_08"
     ] },
-    { "id": "BANK_FOOTSTEP_GRAVEL", "gain": 0.72, "samples": [
+    { "id": "BANK_FOOTSTEP_GRAVEL", "gain": 0.72,
+      "surfaces": ["gravel", "mud", "soil"],
+      "samples": [
       "SOUND_NOX_FOOTSTEP_GRAVEL_WALK_FOOTSTEPS_GRAVEL_WALK_01",
       "SOUND_NOX_FOOTSTEP_GRAVEL_WALK_FOOTSTEPS_GRAVEL_WALK_02",
       "SOUND_NOX_FOOTSTEP_GRAVEL_WALK_FOOTSTEPS_GRAVEL_WALK_04",
@@ -55,7 +65,7 @@
       "SOUND_NOX_FOOTSTEP_GRAVEL_WALK_FOOTSTEPS_GRAVEL_WALK_08",
       "SOUND_NOX_FOOTSTEP_GRAVEL_WALK_FOOTSTEPS_GRAVEL_WALK_09"
     ] },
-    { "id": "BANK_FOOTSTEP_GRASS", "gain": 0.68, "samples": [
+    { "id": "BANK_FOOTSTEP_GRASS", "gain": 0.68, "surfaces": ["grass"], "samples": [
       "SOUND_NOX_FOOTSTEP_GRASS_WALK_FOOTSTEPS_WALK_GRASS_MONO_09",
       "SOUND_NOX_FOOTSTEP_GRASS_WALK_FOOTSTEPS_WALK_GRASS_MONO_11",
       "SOUND_NOX_FOOTSTEP_GRASS_WALK_FOOTSTEPS_WALK_GRASS_MONO_26",

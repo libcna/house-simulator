@@ -631,6 +631,7 @@ no edge at all: a person can climb through a hatch and a pet cannot.
 {
   "schema": "cna-house/audio/1",
   "banks": [ { "id": "BANK_FOOTSTEP_WOOD", "gain": 0.85,
+               "surfaces": ["hardwood", "stair_wood", "stair_wood_open", "wood"],
                "samples": ["SOUND_NOX_FOOTSTEP_WOOD_WALK_FOOTSTEPS_WOOD_WALK_02"] } ],
   "zones":    [ { "id": "AZ_L0_KITCHEN", "cell": "L0_KITCHEN", "bed": "AMB_KITCHEN",
                   "gain": 0.55 } ],
@@ -641,6 +642,11 @@ no edge at all: a person can climb through a hatch and a pet cannot.
                     "door_solid":  { "open": 0.05, "closed": 0.78 } }
 }
 ```
+
+`surfaces` is optional because ambience and weather banks are not selected by collision material.
+On a footstep bank it lists the authored cell/material/stair spellings routed to that broad sound
+category. A spelling may occur in only one bank; the active six-category coverage is checked by
+`tools/assets/footstep_map.py` against all three world tables.
 
 Each bank is a bounded set of interchangeable sound asset ids. The ids resolve through
 `assets.manifest.json`; `gain` is the bank's authored linear gain. A missing bank or a row whose

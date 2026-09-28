@@ -96,6 +96,14 @@
             },
             "minItems": 1,
             "type": "array"
+          },
+          "surfaces": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
           }
         },
         "required": [

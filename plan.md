@@ -398,9 +398,9 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M6](#m6--main-cells-and-hero-areas-c4-c5--gates-g4-and-g5) — Main cells and hero areas | A | 03441–03500 | 0 | **G4** · `HOUSE-03452`, **G5** · `HOUSE-03480` | D4 | 0 |
 | [M7](#m7--a-compact-environment) — A compact environment | B | 03501–03540 | 0 | `HOUSE-03520` | D5 | 0 |
 | [M8](#m8--atmospheric-audio-essentials) — Atmospheric audio essentials | B | 03541–03570 | 4 | `HOUSE-01939` | D7 | 5 |
-| [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 0 | **done** · `HOUSE-03572` | D8 | 0 |
+| [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 1 | `HOUSE-03573` | D8 | 0.75 |
 | [M10](#m10--performance-measurement-driven) — Performance, measurement-driven | B | 03601–03630 | 2 | `HOUSE-02404` | D9 | 6 |
-| [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 3 | `HOUSE-02714` | D1, D2, D4, D6, D9, D11, D13, D14 | 3.25 |
+| [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 5 | `HOUSE-03638` | D1, D2, D4, D6, D8, D9, D11, D13, D14 | 5.5 |
 | [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 0 | **done** · `HOUSE-02598` | D11 | 0 |
 | [M13](#m13--linux-desktop-release) — Linux desktop release | after M11 | 03701–03720 | 8 | `HOUSE-02797` | D9–D13 | 10.25 |
 | [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 5 | `HOUSE-02904` | D10b | 7.25 |
@@ -1205,6 +1205,7 @@ derivative set, no positional source, no special zone loop and no room-aware rou
       trace: was *Wire the 20 footstep surface sets (12 from NOX, 8 sourced)*, then six with an offline-derived carpet set (`HOUSE-03206`)
       blocked: (2026-09-25) Implementation and automated validation are ready locally: all 22 authored surface spellings map exactly once to the six retained direct-NOX banks, 20 focused unit tests, five audio-gate integration tests and the real-controller silent walk pass. The required subjective listening check cannot be performed in this execution environment: `/dev/snd` is absent, `aplay -l` reports no soundcards, PulseAudio refuses the connection, and the Codex runtime rejects audio input. A 48 kHz mono six-category review montage was produced under `/tmp` and measured at 4.628 s / -8.07 dBFS peak, but it was not claimed as listened to. The box remains open until a human-capable audio session listens in one representative location per category; no requirement is weakened.
       note: (2026-09-27 owner report) The ordinary game remains completely silent although sound is enabled in Settings. Recheck the current tracked runtime and packaging before relying on the 2026-09-25 "ready locally" note; test-only dummy/silent runs do not prove audible normal play. This task stays open and active even if subjective listening later needs the owner.
+      current: (2026-09-28) Production footsteps are now wired from real fixed-step movement through six direct NOX banks/22 surface aliases. Full unit 1523/1523 and actual-GPU integration 165 PASS/3 opt-in SKIP pass. A working PipeWire server is proved; the old unavailable-hardware block is superseded. Correctly routed real backend walking PCM is nonzero (-19.659 dBFS peak). The initial silent capture monitored the wrong sink and is rejected. Keep OPEN for the required six-category subjective listening, not a missing-device assumption. Evidence: docs/audio-playback-review.md.
 
 - [ ] HOUSE-01922 — Ambience: one interior tone and the exterior day and night beds, cross-faded by listener cell and sun
       dep: HOUSE-01911, HOUSE-00559 · sys: audio · plat: ALL · pri: MUST · zone: all · adv: D7 · est: 1.75
@@ -1213,6 +1214,7 @@ derivative set, no positional source, no special zone loop and no room-aware rou
       trace: absorbs `HOUSE-01923` and `HOUSE-01924`; was *per-cell room tone with an 0.8 s cross-fade* plus two special zone loops (`HOUSE-03206`)
       blocked: (2026-09-25) The bounded implementation and automated evidence are ready locally: listener cell selection, the 0.8 s indoor/outdoor cross-fade and the -6°..+3° sun-elevation day/night blend pass four focused director tests; the real `--scene=walk` path opens exactly the four retained loop voices (interior, forest-birds, night and cicadas) under SDL dummy audio. All 1,453 unit tests pass; 137/145 serial integration tests pass, with the other eight isolated to the sandbox refusing SaveStore writes under `/home/robertvokac/.local/share`; strict-XNA compiles 342 translation units clean. The required indoor/outdoor listening walk cannot be performed here because `/dev/snd` is absent, ALSA reports no soundcards, PulseAudio refuses the connection and the Codex runtime rejects audio input. The task remains open until an audio-capable session performs that walk; no acceptance criterion is weakened.
       note: (2026-09-27 owner report) Enabled sound is absent in the normal application. Verify that the tracked production build actually starts and retains the ambience voices before attributing this solely to this agent environment's missing `/dev/snd`; the owner has an audio-capable playback path.
+      current: (2026-09-28) Production normal walk starts four retained standard-XNA loop voices; listener/sun weights and 0.8 s boundary fade are wired into the game and live category volume. Real application PCM is nonzero indoors, outdoors by day and outdoors at night, with private sink routing proved. Full unit/integration pass. Old absent-device block is superseded; subjective indoor/outdoor listening remains unperformed, so the checkbox stays OPEN. Evidence: docs/audio-playback-review.md. No weather-layer or optional audio activation.
 
 - [ ] HOUSE-01925 — Weather layers: rain and wind over the exterior bed, quieter and duller indoors by sky exposure
       dep: HOUSE-01922, HOUSE-00779 · sys: audio · plat: ALL · pri: MUST · zone: all · adv: D7 · est: 1.5
@@ -1284,6 +1286,12 @@ existing walk/controller path, not another menu or a reusable cinematic framewor
       done: (2026-09-28) Optional-compatible authored 2422-point route, ordinary collision/controller/look intent only, nearest capsule-clear same-cell join and one forward circuit. C stops in place; Esc/Tab stop into Pause, then ordinary input resumes without teleporting. Actual offscreen Radeon/OPENGLES3 Debug game completes 90 panoramas / 73534 rendered frames / 294140 fixed steps / 4903 original PNGs; all ten final panorama contact pages and seven moving sequences (209 retained full-resolution frames) are reviewed. Pace is approximately 41 minutes in normal play. Real ApplyLook pitch-sign regression, route/solid-join/no-progress/input/menu tests and three actual-game C/Esc/Tab control-return cases pass. Unit 1516/1516, both 90-cell controller tours and 349 strict-XNA units pass. Broader GPU integration passes 162, skips three opt-in reviews, exposes independent pre-existing counter ownership failure now HOUSE-03644. Initial SDL-dummy GPU invocation and wrong-sign/live-log-index preview drafts are explicitly rejected, not acceptance. Static gates retain only owner-owned .claude layout failure. Evidence/hashes: docs/visual-review/house-03572-filming.md and house-03572/. No monitor window, sibling change, new build directory, FPS or human-manual-walk claim.
 
 ---
+
+- [ ] HOUSE-03573 — Increase ordinary, fast and filming walking pace
+      dep: HOUSE-03572 · sys: player, app · plat: ALL · pri: MUST · zone: all · adv: D8, C1 · est: 0.75
+      accept: normal walking is slightly faster, fast walking clearly faster and the Linux filming tour modestly faster; retain the ordinary collision controller and unchanged step/slope limits; normal and filming traversal remain reliable through stairs, doors and the complete authored tour; document the measured new pace
+      verify: speed/cadence regressions, complete normal/filming controller tours and current offscreen GPU stair/threshold movement
+      note: (2026-09-28 explicit owner request) Adjust existing speed constants, not physics tolerances or cinematic infrastructure. A separate cinema-speed preference is an alternative, not necessary scope for this correction.
 
 ## M10 — Performance (measurement-driven)
 
@@ -1379,12 +1387,13 @@ There is no zone rotation, no "polish everything" pass and no screenshot → twe
       note: owner-reported S2 rendering defect; this is not optional weather lightning. Static screenshots and the camera-cell hysteresis test alone cannot close it.
       done: (2026-09-27) Moving first-person GPU frames reproduced the fault at the foyer/stair threshold: at eye x=2.199 m the camera was still L0_FOYER, the adjacent cell vanished, visible=1 and draw=0, exposing a full-screen sky for one frame. The 100 mm rendering near plane rejected the portal before the eye crossed it. Visibility now uses a conservative 5 mm near plane behind the eye and seeds an open neighbour only inside its actual aperture within 5 cm of the plane; the render projection, camera cell, lighting and door state are unchanged. An invisible Radeon 780M/OPENGLES3 run, with no desktop display, captured 36 consecutive frames at each of ten directional ground/upper/basement/exterior thresholds at both 10:30 and 23:00 (720 frames); no sky-only frame appeared. The largest consecutive HUD-cropped RGB mean difference was 8.53/255, at the moving foyer/stair view. The renderer's draw-count regression measured 5–274 draws across the full matrix, never zero; at the original foyer/stair transition it remained 98–104, compared with the defective frame's zero. The focused near-plane/threshold regression and the full movement matrix pass. Before/after evidence: `build/test-output/threshold-movement/foyer-stair-day/cna-house-20260926-225458-823.png` and the 2026-09-27 offscreen sequences in the same tree. No meaningful overdraw increase is visible in those counts; desktop performance benchmarking remains owned by `HOUSE-02404`.
 
-- [x] HOUSE-03638 — Repair the upper/attic stair approach, guard and blocked attic doorway
+- [ ] HOUSE-03638 — Repair the upper/attic stair approach, guard and blocked attic doorway
       dep: HOUSE-03634 · sys: world-content, collision · plat: LNX · pri: MUST · zone: Z-STAIR, Z-L2, Z-L3 · adv: D1, D2, D4, D13 · est: 3.5
       accept: (1) from L2, the attic stair has a level approach before its first riser and joins the attic floor without the reported roughly 30 cm gap; (2) every exposed edge at the top floor has a complete visible and colliding guard, with no walk-off fall; (3) both intended-accessible attic exits/doorways are visibly and physically passable with the normal controller; (4) stair-side wall art remains wholly on its wall, not partly inside the well; (5) capture eye-height approaches, flight, head and both exits, and protect headroom/guard/door clearance with focused regression tests
       verify: real-controller ascent/descent and doorway walk on an invisible GPU surface, day/night screenshots, stair and collision tests
       note: (2026-09-27 owner report) The missing guard, awkward stair start/floor gap, clipped art and impassable attic-room opening are observed in normal play; audit BUG-011/012/016 independently supports the guard, doorway and attic-step concerns. Old scripted stair paths do not close this defect.
       done: (2026-09-28) The retained 15-riser flight now has a 1 m level entry, 250 mm going and a 1.15 m solid upper turning landing. Its narrowed well preserves the rest of the head's floor; the west room doorway and north store doorway both open from the landing. Exposed guards have visible newels/infill and collision, with no redundant rail against walls. Both artworks are wholly on their walls. The adjacent bath remains fitted; the east attic store retains its north service dressing. Three obstructing/intersecting prop IDs are deliberately retired in the golden list with reasons in the evidence report. Actual W-key input independently ascends, descends, enters both exits and stops at the guard on virtual Xvfb; the same five intents pass in the current Radeon game loop. Ten reviewed GPU day/night views and five input HUD captures are retained in `docs/visual-review/house-03638/`, with root causes and exact results in `docs/visual-review/house-03638-attic-stair.md`. The complete 1502-test unit suite and 90-cell tour pass. This coupled geometry/data correction shares the main-stair checkpoint; no task was closed solely from scripted waypoints.
+      reopened: (2026-09-28 owner report) A new guard is against a wall rather than a real exposed edge and stair-side art still disappears into the staircase. The previous captures are historical evidence, not current acceptance. Re-inspect all upper/main/attic guards and artwork at normal eye height; remove wall-side guards, protect actual drops, and move clipped art to unobstructed wall areas. Remaining correction estimate: 1.5 h. Keep this checkbox open until fresh game captures and clearance regressions pass.
 
 - [x] HOUSE-03639 — Correct basement stair placement and garage-loft floor integrity
       dep: HOUSE-03634 · sys: world-content, collision · plat: LNX · pri: MUST · zone: Z-STAIR, Z-GAR · adv: D1, D2, D4, D13 · est: 2.5
@@ -1415,6 +1424,12 @@ There is no zone rotation, no "polish everything" pass and no screenshot → twe
       verify: before-failing support claims, complete controller tour, current normal GPU movement through the garage steps and porch, unit/static checks
       note: (2026-09-28 R15 correction) HOUSE-03572's slow real-controller walk stops after 36 views at garage route point 850, feet x≈9.10/y≈0.44. Current captured fixed steps repeatedly advance then push back by the existing 20 mm depenetration. This is D2/C1/S1, not a filming feature or permission to increase physical tolerances. The fast GrandTour missed it. Diagnose/fix this dependency before closing the filming task.
       done: (2026-09-28) GroundProbe confirms an actual sloping stair face beneath a rounded edge/wall contact, within the unchanged 50 mm probe; slope 46°, step 220 mm, terrain and flat-step responses stay unchanged. A broader replacement regressed the terrace slider and was rejected; a flat-step/wall claim protects the final narrow boundary. L0_PORCH now explicitly retains its real +0.57 m constructed floor collider instead of relying on a smoothed heightfield edge. The recorded garage pose fails before/passes after; six actual Radeon/OPENGLES3 normal-input crossings pass (garage slow/normal up/down, porch, gate both ways), with complete before/after sequences reviewed and retained. Complete fast tour passes 90 cells/564 stops/92798 steps/19 detours; slow controller tour passes 90 views/294080 steps. Current tree unit 1513/1513 and 349 strict-XNA units pass; full static gate retains only inherited owner-owned .claude layout failure. No GrandTour steering/tolerance or sibling source changed. Evidence: docs/visual-review/house-03642-support.md. Shares the checkpoint with HOUSE-03643, discovered by its required full-route validation; filming itself remains OPEN.
+
+- [ ] HOUSE-03645 — Persist changed desktop Settings through application restart
+      dep: HOUSE-02528, HOUSE-00131 · sys: app, persistence · plat: LNX · pri: MUST · zone: all · adv: D8, D11 · est: 0.75
+      accept: (1) normal Linux startup reads existing settings using the current standard-XNA save store; (2) each Settings-page change and Shift/Alt+Enter setting change is persisted; (3) a second normal application process sees those values; (4) no owner preferences are overwritten by tests; missing/corrupt/unwritable storage stays a supported reported fallback; Web/Android behaviour and JSON version remain compatible
+      verify: actual offscreen application Settings edit/exit/restart with an isolated existing storage path, plus corruption and save-error regressions
+      note: (2026-09-28 owner report; audit BUG-005) Values revert to defaults on restart. Main's load/save and ApplySettings/Shift persistence are Android-only compile branches; the JSON round-trip tests never exercise the desktop game/store wiring. Reuse DesktopSaveStore; do not invent another settings format or persistence subsystem.
 
 - [x] HOUSE-03644 — Keep rendering diagnostics owned by their current game
       dep: HOUSE-03572 · sys: rendering, debug · plat: ALL · pri: MUST · zone: all · adv: D9, D11 · est: 0.5
@@ -2308,6 +2323,28 @@ under R5.
 ---
 
 ## Planning corrections
+
+### 2026-09-28 — Owner rejects guard/art placement and requests faster movement
+
+* Reopen `HOUSE-03638` under D2/D4/D13: the owner's current guard/art report contradicts
+  its accepted visual claims. Existing traversal tests cannot dismiss it. Keep previous evidence
+  for traceability; budget 1.5 h of remaining focused geometry/content correction.
+* Add ACTIVE/MUST `HOUSE-03573` (0.75 h), D8/C1, for the explicit request to increase normal
+  walking slightly, fast walking more substantially and the filming camera modestly. Reuse
+  the existing controller/tour speed constants. A separate cinema-speed setting was suggested
+  as an alternative, not required when the bounded default-speed correction suffices.
+
+
+### 2026-09-28 — Desktop settings must survive the owner's application restart
+
+* Add ACTIVE/MUST `HOUSE-03645` (0.75 h), D8/D11 correction for the owner's current
+  Linux report, also independently identified in audit BUG-005. The production
+  entry point and Settings callbacks compiled persistence only on Android;
+  successful serializer tests did not cover that absent desktop wiring.
+* Reuse the existing standard-XNA DesktopSaveStore and unchanged serialized
+  Settings. Verify two actual application processes in an isolated profile,
+  including a real menu edit; never mutate the owner's own settings for testing.
+  This is required persistence, not household state or optional session resume.
 
 ### 2026-09-28 — Per-game rendering counters cannot share process-static handles
 

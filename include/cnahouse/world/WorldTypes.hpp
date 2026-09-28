@@ -774,6 +774,8 @@ namespace cnahouse::world
     struct AudioBank
     {
         util::Id id;
+        /// Collision/material surface spellings routed to this bank. Empty for ambience/weather.
+        std::vector<std::string> surfaces;
         std::vector<util::Id> samples;
         float gain = 1.0F;
     };

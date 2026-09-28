@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <optional>
+#include <span>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -59,6 +60,9 @@ namespace cnahouse::audio
 
         /// @brief Maps one collision surface spelling to a resolved audio bank.
         void BindSurface(std::string surface, util::Id bank);
+
+        /// @brief Replaces the surface map from the authored bank rows.
+        void BindBanks(std::span<const world::AudioBank> banks);
 
         /// @brief Advances cadence and returns the sound for a foot plant, if one occurred.
         [[nodiscard]] std::optional<Footstep> Advance(const FootstepStep& step);

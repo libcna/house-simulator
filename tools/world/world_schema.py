@@ -418,6 +418,8 @@ def build() -> dict[str, dict]:
             "banks": {"type": "array", "items": obj(
                 ["id", "samples"],
                 {"id": ID, "samples": {"type": "array", "items": ID, "minItems": 1},
+                 "surfaces": {"type": "array", "items": STR, "minItems": 1,
+                              "uniqueItems": True},
                  "gain": UNIT})},
             "zones": {"type": "array", "items": obj(
                 ["id", "cell"], {"id": ID, "cell": ID, "bed": ID_OR_NULL, "gain": UNIT})},

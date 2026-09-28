@@ -22,6 +22,7 @@ add_library(cnahouse_core STATIC
     app/CommandLine.cpp
     app/FrameTimer.cpp
     app/Platform.cpp
+    audio/AmbienceDirector.cpp
     audio/AudioSystem.cpp
     audio/FootstepDirector.cpp
 

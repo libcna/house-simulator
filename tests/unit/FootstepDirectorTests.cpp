@@ -48,6 +48,7 @@ namespace
 
             cnahouse::world::AudioBank wood;
             wood.id = Intern("BANK_WOOD");
+            wood.surfaces = {"hardwood"};
             for (int i = 1; i <= 6; ++i)
             {
                 wood.samples.push_back(Intern("STEP_WOOD_" + std::to_string(i)));
@@ -56,14 +57,14 @@ namespace
 
             cnahouse::world::AudioBank tile;
             tile.id = Intern("BANK_TILE");
+            tile.surfaces = {"tile"};
             for (int i = 1; i <= 6; ++i)
             {
                 tile.samples.push_back(Intern("STEP_TILE_" + std::to_string(i)));
             }
             banks = {wood, tile};
             audio.LoadBanks(banks, registry);
-            director.BindSurface("hardwood", wood.id);
-            director.BindSurface("tile", tile.id);
+            director.BindBanks(banks);
         }
 
         [[nodiscard]] std::vector<Footstep>

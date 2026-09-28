@@ -5,6 +5,7 @@
 // drawing frames and exiting cleanly with no sound anywhere in it.
 #include <gtest/gtest.h>
 
+#include <filesystem>
 #include <format>
 #include <fstream>
 #include <sstream>
@@ -13,6 +14,7 @@
 #include "cnahouse/app/CommandLine.hpp"
 #include "cnahouse/app/Settings.hpp"
 #include "cnahouse/audio/AudioSystem.hpp"
+#include "cnahouse/audio/FootstepDirector.hpp"
 #include "cnahouse/content/ContentRegistry.hpp"
 #include "cnahouse/ui/MenuStack.hpp"
 #include "cnahouse/util/Log.hpp"
@@ -173,5 +175,104 @@ namespace
         EXPECT_TRUE(audio.BankProblems().empty());
         EXPECT_EQ(audio.State(), AudioState::Silent)
             << "resolving bank metadata must not open the audio device";
+
+        cnahouse::audio::FootstepDirector footsteps(audio, 0x01920ULL);
+        footsteps.BindBanks(contents.audioBanks);
+        std::size_t mappedBanks = 0U;
+        std::size_t mappedSurfaces = 0U;
+        for (const cnahouse::world::AudioBank& bank : contents.audioBanks)
+        {
+            if (bank.surfaces.empty())
+            {
+                continue;
+            }
+            ++mappedBanks;
+            mappedSurfaces += bank.surfaces.size();
+            footsteps.Reset();
+            cnahouse::audio::FootstepStep step;
+            step.surface = bank.surfaces.front();
+            step.distanceMeters = cnahouse::audio::FootstepDirector::kWalkStrideMeters;
+            step.onGround = true;
+            const auto selected = footsteps.Advance(step);
+            ASSERT_TRUE(selected.has_value()) << bank.surfaces.front();
+            EXPECT_EQ(selected->bank, bank.id) << bank.surfaces.front();
+        }
+        EXPECT_EQ(mappedBanks, 6U);
+        EXPECT_EQ(mappedSurfaces, 22U);
+    }
+
+    TEST(AudioGateTests, TheWalkStartsOnlyTheFourRetainedAmbienceVoices)
+    {
+        const auto original = std::filesystem::current_path();
+        std::filesystem::current_path(std::filesystem::path(CNAHOUSE_TEST_CONTENT_ROOT).parent_path());
+        Options options;
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+        options.scene = "walk";
+        options.timeOfDay = 12.0F;
+        CnaHouseGame game(options, SmallSettings());
+        game.SetFrameLimit(4);
+        game.Run();
+        std::filesystem::current_path(original);
+        ASSERT_EQ(game.ExitCode(), 0);
+        ASSERT_EQ(game.Audio().State(), AudioState::Ready) << game.Audio().Summary();
+        EXPECT_TRUE(game.Audio().AmbienceStarted());
+        EXPECT_EQ(game.Audio().AmbienceVoiceCount(), 4U);
+    }
+
+    TEST(AudioGateTests, OrdinaryControllerWalkPlaysFootstepsButStandingDoesNot)
+    {
+        const auto original = std::filesystem::current_path();
+        std::filesystem::current_path(std::filesystem::path(CNAHOUSE_TEST_CONTENT_ROOT).parent_path());
+        Options options;
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+        options.scene = "walk";
+        options.player = std::array<float, 5>{0.0F, -2.30F, -15.0F, 0.0F, 0.0F};
+        CnaHouseGame game(options, SmallSettings());
+
+        class WalkInput final : public cnahouse::player::IInputSource
+        {
+        public:
+            explicit WalkInput(CnaHouseGame& game)
+                : game_(game)
+            {
+            }
+
+            void Update(float) override
+            {
+                state_ = {};
+                if (game_.FixedStepsForTesting() >= 120U)
+                {
+                    state_.move.Y = 1.0F;
+                }
+                else
+                {
+                    EXPECT_EQ(game_.Audio().OneShotsPlayed(), 0U);
+                }
+            }
+
+            const cnahouse::player::InputState& Current() const noexcept override
+            {
+                return state_;
+            }
+
+            bool LookAvailable() const noexcept override
+            {
+                return false;
+            }
+
+            CnaHouseGame& game_;
+            cnahouse::player::InputState state_;
+        } input(game);
+
+        game.SetInputSourceForTesting(&input);
+        game.SetFixedStepLimit(480U);
+        game.SetFrameLimit(4000U);
+        game.Run();
+        std::filesystem::current_path(original);
+        ASSERT_EQ(game.ExitCode(), 0);
+        ASSERT_EQ(game.Audio().State(), AudioState::Ready) << game.Audio().Summary();
+        EXPECT_LT(game.PlayerForTesting().Feet().Z, -18.0F);
+        EXPECT_GE(game.Audio().OneShotsPlayed(), 4U);
+        EXPECT_LE(game.Audio().OneShotsPlayed(), 6U);
     }
 } // namespace

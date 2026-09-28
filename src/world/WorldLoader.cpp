@@ -3081,6 +3081,7 @@ namespace cnahouse::world
             }
 
             std::unordered_set<util::Id> bankIds;
+            std::unordered_set<std::string> bankSurfaces;
             for (const JsonValue& row : rows.Value())
             {
                 AudioBank bank;
@@ -3095,6 +3096,47 @@ namespace cnahouse::world
                     return Err(ErrorCode::Duplicate,
                                "audio bank " + Name(bank.id) + " appears twice",
                                "layout.audio.json/" + row.Path() + "/id");
+                }
+
+                if (row.Has("surfaces") && !row.IsNull("surfaces"))
+                {
+                    const Result<JsonValue> surfaces = row.RequireArray("surfaces");
+                    if (!surfaces)
+                    {
+                        return surfaces.Error().WithContext("layout.audio.json");
+                    }
+                    const Result<std::vector<JsonValue>> surfaceRows = surfaces.Value().Elements();
+                    if (!surfaceRows)
+                    {
+                        return surfaceRows.Error().WithContext("layout.audio.json");
+                    }
+                    if (surfaceRows.Value().empty())
+                    {
+                        return Err(ErrorCode::InvalidData,
+                                   "an authored surface map needs at least one surface",
+                                   "layout.audio.json/" + row.Path() + "/surfaces");
+                    }
+                    for (const JsonValue& surface : surfaceRows.Value())
+                    {
+                        const Result<std::string> name = surface.AsString();
+                        if (!name)
+                        {
+                            return name.Error().WithContext("layout.audio.json");
+                        }
+                        if (name.Value().empty())
+                        {
+                            return Err(ErrorCode::InvalidData,
+                                       "an audio-bank surface cannot be empty",
+                                       "layout.audio.json/" + surface.Path());
+                        }
+                        if (!bankSurfaces.insert(name.Value()).second)
+                        {
+                            return Err(ErrorCode::Duplicate,
+                                       "footstep surface " + name.Value() + " appears in two banks",
+                                       "layout.audio.json/" + surface.Path());
+                        }
+                        bank.surfaces.push_back(name.Value());
+                    }
                 }
 
                 const Result<JsonValue> samples = row.RequireArray("samples");

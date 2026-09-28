@@ -3,6 +3,8 @@
 
 #include <array>
 #include <cstdint>
+#include <exception>
+#include <memory>
 #include <span>
 #include <string>
 #include <string_view>
@@ -10,7 +12,13 @@
 #include <unordered_set>
 #include <vector>
 
+#include "cnahouse/audio/AmbienceDirector.hpp"
 #include "cnahouse/util/Ids.hpp"
+
+namespace Microsoft::Xna::Framework::Audio
+{
+    class SoundEffect;
+}
 
 namespace cnahouse::content
 {
@@ -70,6 +78,10 @@ namespace cnahouse::audio
     public:
         /// @brief M8's compact mix: master 80 %, footsteps 85 %, ambience/weather 75 %.
         explicit AudioSystem(bool enabled) noexcept;
+        ~AudioSystem();
+
+        AudioSystem(const AudioSystem&) = delete;
+        AudioSystem& operator=(const AudioSystem&) = delete;
 
         /// @brief Records that the user has interacted, and opens the device if it can be opened.
         ///
@@ -82,7 +94,7 @@ namespace cnahouse::audio
             return state_;
         }
 
-        /// @brief True only when sound will actually be heard.
+        /// @brief The device accepted playback; this is not proof of audible speaker output.
         [[nodiscard]] bool IsReady() const noexcept
         {
             return state_ == AudioState::Ready;
@@ -123,6 +135,22 @@ namespace cnahouse::audio
         ///        device that is not there.
         [[nodiscard]] float EffectiveVolume(Category category) const noexcept;
 
+        /// @brief Plays one cached fire-and-forget sound through the compact mix.
+        ///
+        /// The XNA master is already applied globally, so @p gain is multiplied by the category
+        /// only. A missing/lost device remains a supported silent state.
+        [[nodiscard]] bool PlayOneShot(Microsoft::Xna::Framework::Audio::SoundEffect* sound,
+                                       Category category,
+                                       float gain,
+                                       float pitch = 0.0F,
+                                       float pan = 0.0F) noexcept;
+
+        /// @brief Accepted one-shot requests, not a claim that a speaker was heard.
+        [[nodiscard]] std::uint64_t OneShotsPlayed() const noexcept
+        {
+            return oneShotsPlayed_;
+        }
+
         /// @brief Resolves authored bank sample ids through the asset manifest.
         ///
         /// A bad bank is omitted, reported and therefore silent. Other banks remain available.
@@ -132,6 +160,26 @@ namespace cnahouse::audio
         [[nodiscard]] std::span<const std::string> Bank(util::Id id) const noexcept;
 
         [[nodiscard]] float BankGain(util::Id id) const noexcept;
+
+        struct AmbienceBankSounds
+        {
+            std::span<Microsoft::Xna::Framework::Audio::SoundEffect* const> sounds;
+            float gain = 0.0F;
+        };
+
+        /// Fixed interior/day/night loops, using cached standard-XNA SoundEffects.
+        void StartAmbience(AmbienceBankSounds interior,
+                           AmbienceBankSounds exteriorDay,
+                           AmbienceBankSounds exteriorNight) noexcept;
+        void UpdateAmbience(const AmbienceMix& mix) noexcept;
+        void StopAmbience() noexcept;
+
+        [[nodiscard]] bool AmbienceStarted() const noexcept
+        {
+            return ambience_ != nullptr;
+        }
+
+        [[nodiscard]] std::size_t AmbienceVoiceCount() const noexcept;
 
         [[nodiscard]] std::size_t BankCount() const noexcept
         {
@@ -150,6 +198,9 @@ namespace cnahouse::audio
         /// @brief Opens the mixer, or records why it could not be opened. Called once, on gesture.
         void OpenDevice();
         void ApplyDeviceVolume() noexcept;
+        void RecordDeviceLoss(const std::exception& error) noexcept;
+
+        struct AmbienceVoices;
 
         struct ResolvedBank
         {
@@ -164,10 +215,12 @@ namespace cnahouse::audio
         std::string silentReason_;
         float master_ = 0.80f;
         bool muted_ = false;
+        std::uint64_t oneShotsPlayed_ = 0U;
         std::array<float, kCategoryCount> categories_{};
         std::unordered_map<util::Id, ResolvedBank> banks_;
         std::vector<std::string> bankProblems_;
         mutable std::unordered_set<util::Id> missingBanksReported_;
+        std::unique_ptr<AmbienceVoices> ambience_;
     };
 
 } // namespace cnahouse::audio

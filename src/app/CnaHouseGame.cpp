@@ -16,6 +16,7 @@
 
 #include <cmath>
 #include <format>
+#include <limits>
 #include <optional>
 #include <stdexcept>
 
@@ -102,6 +103,54 @@ namespace cnahouse::app
             }
         }
 #endif
+
+        [[nodiscard]] std::optional<float>
+        StairEndpointY(const world::WorldData& data, const world::StairFlight& flight, bool from)
+        {
+            const auto& authored = from ? flight.fromY : flight.toY;
+            if (authored.has_value())
+            {
+                return authored;
+            }
+            const auto* cell = data.FindCell(from ? flight.fromCell : flight.toCell);
+            if (cell == nullptr)
+            {
+                return std::nullopt;
+            }
+            const auto extent = data.ExtentOf(*cell);
+            return extent ? std::optional<float>(extent->floorY) : std::nullopt;
+        }
+
+        [[nodiscard]] float
+        StairRiserHeight(const world::WorldData& data, util::Id cell, std::string_view surface, float feetY)
+        {
+            const world::StairFlight* best = nullptr;
+            float bestScore = std::numeric_limits<float>::max();
+            for (const auto& flight : data.Stairs())
+            {
+                if (flight.surface != surface)
+                {
+                    continue;
+                }
+                const auto from = StairEndpointY(data, flight, true);
+                const auto to = StairEndpointY(data, flight, false);
+                if (!from || !to)
+                {
+                    continue;
+                }
+                const float low = std::min(*from, *to);
+                const float high = std::max(*from, *to);
+                const float outside = feetY < low ? low - feetY : (feetY > high ? feetY - high : 0.0F);
+                const float cellPenalty = cell == flight.fromCell || cell == flight.toCell ? 0.0F : 1000.0F;
+                const float score = cellPenalty + outside * 10.0F + std::fabs(feetY - (low + high) * 0.5F);
+                if (score < bestScore)
+                {
+                    best = &flight;
+                    bestScore = score;
+                }
+            }
+            return best == nullptr ? 0.0F : best->rise;
+        }
 
     } // namespace
 
@@ -379,6 +428,12 @@ namespace cnahouse::app
             if (*options_.scene == kWalkScene)
             {
                 LoadWalk();
+                // A desktop CLI review has no title click. Web/Android still require
+                // their real input gesture, never an automatic autoplay bypass.
+                if (platform_.target == BuildTarget::Desktop && audio_.NoteUserGesture())
+                {
+                    Log::Info(LogCat::Audio, "{}", audio_.Summary());
+                }
             }
             LoadHudFont();
             contentLoaded_ = true;
@@ -479,6 +534,8 @@ namespace cnahouse::app
                 LogCat::Audio, "audio asset manifest is unavailable; banks remain silent: {}", error.what());
         }
         audio_.LoadBanks(world_->AudioBanks(), registry);
+        footsteps_.emplace(audio_);
+        footsteps_->BindBanks(world_->AudioBanks());
 
         // Establish the one shared clock before weather is sampled: a forced clear review at 10:30
         // must derive its temperature and daylight from 10:30, not from the zero-initialised epoch.
@@ -928,6 +985,7 @@ namespace cnahouse::app
                 break;
             }
             player_.cellId = cell->id;
+            const Microsoft::Xna::Framework::Vector3 before = player_.Feet();
             player::InputState stepInput = frameInput;
             stepInput.runPressed = pendingRunToggle_;
             if (filmingTour_.Active())
@@ -949,6 +1007,30 @@ namespace cnahouse::app
 #endif
             }
             tracker_.Update(*world_, *index_, player_.position);
+            if (footsteps_.has_value())
+            {
+                const auto after = player_.Feet();
+                const auto delta = after - before;
+                const std::string_view surface = collision_->SurfaceName(player_.surface);
+                const float riser = player_.OnStairs()
+                                        ? StairRiserHeight(*world_, tracker_.Current(), surface, after.Y)
+                                        : 0.0F;
+                audio::FootstepStep footstep;
+                footstep.surface = surface;
+                footstep.distanceMeters = delta.Length();
+                footstep.verticalDistanceMeters = delta.Y;
+                footstep.riserHeightMeters = riser;
+                footstep.onGround = player_.onGround;
+                footstep.fastWalk = player_.fastWalk;
+                if (const auto sound = footsteps_->Advance(footstep);
+                    sound.has_value() && caches_ != nullptr && audio_.IsReady())
+                {
+                    (void)audio_.PlayOneShot(caches_->sounds.Get(sound->sample),
+                                             audio::Category::Footsteps,
+                                             sound->volume,
+                                             sound->pitch);
+                }
+            }
             view_.Update(player_, report, look_.pitch, player::kFixedStepSeconds);
             if (const physics::CollisionCell* now =
                     collision_->Cell(util::IdRegistry::NameOf(tracker_.Current()));
@@ -959,6 +1041,51 @@ namespace cnahouse::app
             }
         }
         ApplyPlayerCamera();
+    }
+
+    void CnaHouseGame::UpdateAmbience(float deltaSeconds)
+    {
+        if (!world_.has_value())
+        {
+            return;
+        }
+        const world::Cell* listener = world_->FindCell(VisualCell());
+        if (listener == nullptr)
+        {
+            return;
+        }
+
+        const double sunAltitude = environment::SunPositionFor(clock_).altitudeDeg;
+        const audio::AmbienceMix mix = ambience_.Advance(listener->kind, sunAltitude, deltaSeconds);
+
+        if (audio_.IsReady() && !audio_.AmbienceStarted() && caches_ != nullptr)
+        {
+            struct LoadedBank
+            {
+                std::vector<Microsoft::Xna::Framework::Audio::SoundEffect*> sounds;
+                float gain = 0.0F;
+            };
+
+            const auto load = [this](std::string_view name)
+            {
+                LoadedBank loaded;
+                const util::Id id = util::Intern(name);
+                loaded.gain = audio_.BankGain(id);
+                for (const std::string& contentName : audio_.Bank(id))
+                {
+                    loaded.sounds.push_back(caches_->sounds.Get(contentName));
+                }
+                return loaded;
+            };
+
+            LoadedBank interior = load("BANK_AMBIENCE_INTERIOR");
+            LoadedBank exteriorDay = load("BANK_AMBIENCE_EXTERIOR_DAY");
+            LoadedBank exteriorNight = load("BANK_AMBIENCE_EXTERIOR_NIGHT");
+            audio_.StartAmbience({interior.sounds, interior.gain},
+                                 {exteriorDay.sounds, exteriorDay.gain},
+                                 {exteriorNight.sounds, exteriorNight.gain});
+        }
+        audio_.UpdateAmbience(mix);
     }
 
     void CnaHouseGame::ApplyPlayerCamera()
@@ -1476,6 +1603,9 @@ namespace cnahouse::app
         // BEFORE `hud_`, and before the content manager unloads: the scene holds a `VideoPlayer`
         // whose decoder must stop while its `Video` is still alive.
         smoke_.reset();
+        audio_.StopAmbience();
+        ambience_.Reset();
+        footsteps_.reset();
         hud_.reset();
         effectContent_.reset();
         contentLoaded_ = false;
@@ -1667,6 +1797,10 @@ namespace cnahouse::app
                         }
                     }
                 }
+            }
+            if (walking_)
+            {
+                UpdateAmbience(frame.deltaSeconds);
             }
             if (walking_ && visibility_.has_value())
             {

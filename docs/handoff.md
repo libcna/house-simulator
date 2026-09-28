@@ -1,5 +1,43 @@
 # Current owner-visible defect work — 2026-09-28
 
+## Current audio checkpoint and newly reopened owner corrections
+
+**36 ACTIVE/MUST / 78 OPT remain**, nominal **48.25 h** including the newly
+reported settings reset, faster pace request and 1.5 h reopened stair correction.
+Practical estimate remains roughly 50–65 h, pessimistic around 80 h; these are
+forecasts, not the withdrawn 280-hour scheduling ceiling. R15 / explicit current
+owner reports select the work, not task-count reduction or unrelated performance.
+
+Footsteps and four retained ambience loops are now in the production game, not
+only stashes. Full current unit **1523/1523** and serial offscreen Radeon GPU
+integration **165 PASS / 3 opt-in SKIP / 0 FAIL** pass. Working PipeWire audio is
+proved by PID-routed private-sink **nonzero PCM** for ordinary walking and normal
+application indoor/day/night ambience. See `docs/audio-playback-review.md` for
+precise output numbers, source path and rejected stale-data/capture drafts.
+Old statements that this environment has no playback path are superseded.
+PULSE_SINK did not control SDL's chosen device; earlier all-zero private-monitor
+captures were invalid output evidence. Move only the own application's stream,
+never the owner's default device or other streams. Subjective listening is still
+unperformed; **HOUSE-01920/01922 remain OPEN**. Weather remains unimplemented.
+
+**HOUSE-03638 reopened**: owner says new guard is against a wall and painting
+still partly hidden in stairs. Previous claims do not dismiss that observation.
+Fresh baseline poses under `build/test-output/stair-owner-reopen/` are investigation,
+not acceptance; inspect the complete main/attic route and each artwork, including
+L0/L1 main-stair artworks that the previous attic review did not fix.
+**HOUSE-03645 OPEN**: desktop persistence is Android-only, and quality auto-detect
+overwrites a saved selection. Reuse standard-XNA DesktopSaveStore and validate
+normal UI change / second application process with isolated XDG_DATA_HOME;
+current upstream StorageDevice explicitly supports this path. Never overwrite
+owner preferences. **HOUSE-03573 OPEN**: slightly faster ordinary walk, clearly
+faster fast walk, modestly faster cinema; no controller tolerance changes or
+optional new preference is required. Continue these owner defects before
+unrelated performance/platform/release work.
+
+Audio builds reuse build/ and shared ccache, -j2; strict two workers. Graphics
+runs serially with DISPLAY/WAYLAND_DISPLAY unset, SDL offscreen and EGL
+surfaceless, affinity 0–3. No physical monitor window or sibling source change.
+
 ## HOUSE-03644 validated — audible normal play next
 
 **33 ACTIVE/MUST / 78 OPT remain**, nominal **45.25 h**, practical estimate

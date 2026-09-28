@@ -507,7 +507,8 @@ namespace
             return R"({
               "schema": "cna-house/audio/1",
               "banks": [
-                { "id": "BANK_STEPS", "samples": ["SOUND_STEP_A", "SOUND_STEP_B"],
+                { "id": "BANK_STEPS", "surfaces": ["hardwood", "stair_wood"],
+                  "samples": ["SOUND_STEP_A", "SOUND_STEP_B"],
                   "gain": 0.65 }
               ],
               "zones": [
@@ -2494,6 +2495,9 @@ namespace
 
         ASSERT_EQ(contents.audioBanks.size(), 1U);
         EXPECT_EQ(contents.audioBanks[0].id, Intern("BANK_STEPS"));
+        ASSERT_EQ(contents.audioBanks[0].surfaces.size(), 2U);
+        EXPECT_EQ(contents.audioBanks[0].surfaces[0], "hardwood");
+        EXPECT_EQ(contents.audioBanks[0].surfaces[1], "stair_wood");
         ASSERT_EQ(contents.audioBanks[0].samples.size(), 2U);
         EXPECT_EQ(contents.audioBanks[0].samples[0], Intern("SOUND_STEP_A"));
         EXPECT_FLOAT_EQ(contents.audioBanks[0].gain, 0.65F);
@@ -2537,6 +2541,21 @@ namespace
         const auto audio = world::WorldLoader::LoadAudio(directory_, contents);
         ASSERT_FALSE(audio);
         EXPECT_NE(audio.Error().Context().find("cell"), std::string::npos) << audio.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, AFootstepSurfaceCannotBelongToTwoBanks)
+    {
+        Write("layout.audio.json",
+              R"({"schema": "cna-house/audio/1", "zones": [],
+                  "banks": [
+                    {"id": "BANK_A", "surfaces": ["tile"], "samples": ["SOUND_A"]},
+                    {"id": "BANK_B", "surfaces": ["tile"], "samples": ["SOUND_B"]}
+                  ]})");
+        world::WorldData::Contents contents;
+        const auto audio = world::WorldLoader::LoadAudio(directory_, contents);
+        ASSERT_FALSE(audio);
+        EXPECT_EQ(audio.Error().Code(), ErrorCode::Duplicate);
+        EXPECT_NE(audio.Error().Message().find("tile"), std::string::npos) << audio.Error().ToString();
     }
 
     TEST_F(WorldLoaderTest, AGainOutsideZeroToOneIsRefused)

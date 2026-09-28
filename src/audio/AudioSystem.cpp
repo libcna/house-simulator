@@ -4,10 +4,13 @@
 #include <algorithm>
 #include <exception>
 #include <format>
+#include <stdexcept>
 #include <unordered_set>
 
 #include "Microsoft/Xna/Framework/Audio/NoAudioHardwareException.hpp"
 #include "Microsoft/Xna/Framework/Audio/SoundEffect.hpp"
+#include "Microsoft/Xna/Framework/Audio/SoundEffectInstance.hpp"
+#include "Microsoft/Xna/Framework/Audio/SoundState.hpp"
 
 #include "cnahouse/content/ContentRegistry.hpp"
 #include "cnahouse/util/Log.hpp"
@@ -17,6 +20,26 @@ namespace cnahouse::audio
 {
     using util::Log;
     using util::LogCat;
+
+    struct AudioSystem::AmbienceVoices
+    {
+        enum class Bed : std::uint8_t
+        {
+            Interior,
+            ExteriorDay,
+            ExteriorNight,
+        };
+
+        struct Voice
+        {
+            Bed bed = Bed::Interior;
+            float gain = 0.0F;
+            std::unique_ptr<Microsoft::Xna::Framework::Audio::SoundEffectInstance> instance;
+        };
+
+        AmbienceMix mix;
+        std::vector<Voice> voices;
+    };
 
     std::string_view CategoryName(Category category) noexcept
     {
@@ -64,6 +87,8 @@ namespace cnahouse::audio
             silentReason_ = "audio was disabled with --no-audio";
         }
     }
+
+    AudioSystem::~AudioSystem() = default;
 
     bool AudioSystem::NoteUserGesture()
     {
@@ -142,9 +167,7 @@ namespace cnahouse::audio
         catch (const std::exception& e)
         {
             // The device was there and has gone. Recorded, and the game keeps running.
-            state_ = AudioState::Silent;
-            silentReason_ = e.what();
-            Log::Warn(LogCat::Audio, "the audio device was lost: {}", silentReason_);
+            RecordDeviceLoss(e);
         }
     }
 
@@ -155,6 +178,10 @@ namespace cnahouse::audio
             return;
         }
         categories_[static_cast<std::size_t>(category)] = std::clamp(volume, 0.0f, 1.0f);
+        if (category == Category::Ambience && ambience_ != nullptr)
+        {
+            UpdateAmbience(ambience_->mix);
+        }
     }
 
     float AudioSystem::CategoryVolume(Category category) const noexcept
@@ -177,9 +204,46 @@ namespace cnahouse::audio
         return master_ * CategoryVolume(category);
     }
 
+    bool AudioSystem::PlayOneShot(Microsoft::Xna::Framework::Audio::SoundEffect* sound,
+                                  Category category,
+                                  float gain,
+                                  float pitch,
+                                  float pan) noexcept
+    {
+        if (!IsReady() || muted_ || sound == nullptr || category == Category::Count)
+        {
+            return false;
+        }
+        try
+        {
+            const float volume = std::clamp(gain, 0.0F, 1.0F) * CategoryVolume(category);
+            const bool played =
+                sound->Play(volume, std::clamp(pitch, -1.0F, 1.0F), std::clamp(pan, -1.0F, 1.0F));
+            if (played)
+            {
+                ++oneShotsPlayed_;
+            }
+            return played;
+        }
+        catch (const std::exception& error)
+        {
+            RecordDeviceLoss(error);
+            return false;
+        }
+    }
+
+    void AudioSystem::RecordDeviceLoss(const std::exception& error) noexcept
+    {
+        ambience_.reset();
+        state_ = AudioState::Silent;
+        silentReason_ = error.what();
+        Log::Warn(LogCat::Audio, "the audio device was lost: {}", silentReason_);
+    }
+
     void AudioSystem::LoadBanks(std::span<const world::AudioBank> banks,
                                 const content::ContentRegistry& registry)
     {
+        ambience_.reset();
         banks_.clear();
         bankProblems_.clear();
         missingBanksReported_.clear();
@@ -265,6 +329,103 @@ namespace cnahouse::audio
     {
         const auto found = banks_.find(id);
         return found == banks_.end() ? 0.0F : found->second.gain;
+    }
+
+    void AudioSystem::StartAmbience(AmbienceBankSounds interior,
+                                    AmbienceBankSounds exteriorDay,
+                                    AmbienceBankSounds exteriorNight) noexcept
+    {
+        if (!IsReady() || ambience_ != nullptr)
+        {
+            return;
+        }
+
+        try
+        {
+            auto voices = std::make_unique<AmbienceVoices>();
+            const auto add = [&voices](AmbienceVoices::Bed bed, AmbienceBankSounds bank)
+            {
+                if (bank.sounds.empty())
+                {
+                    return;
+                }
+                const float perVoiceGain = bank.gain / static_cast<float>(bank.sounds.size());
+                for (Microsoft::Xna::Framework::Audio::SoundEffect* sound : bank.sounds)
+                {
+                    if (sound == nullptr)
+                    {
+                        continue;
+                    }
+                    auto instance = std::make_unique<Microsoft::Xna::Framework::Audio::SoundEffectInstance>(
+                        sound->CreateInstance());
+                    const bool looped = true; // lvalue selects the XNA overload; see ADR-0001
+                    instance->setIsLoopedProperty(looped);
+                    const float silent = 0.0F; // same overload rule for Volume
+                    instance->setVolumeProperty(silent);
+                    instance->Play();
+                    if (instance->getStateProperty() != Microsoft::Xna::Framework::Audio::SoundState::Playing)
+                    {
+                        throw std::runtime_error("an ambience loop did not enter the playing state");
+                    }
+                    voices->voices.push_back(AmbienceVoices::Voice{bed, perVoiceGain, std::move(instance)});
+                }
+            };
+
+            add(AmbienceVoices::Bed::Interior, interior);
+            add(AmbienceVoices::Bed::ExteriorDay, exteriorDay);
+            add(AmbienceVoices::Bed::ExteriorNight, exteriorNight);
+            ambience_ = std::move(voices);
+            Log::Info(LogCat::Audio, "started {} retained ambience loop voice(s)", ambience_->voices.size());
+        }
+        catch (const std::exception& error)
+        {
+            RecordDeviceLoss(error);
+        }
+    }
+
+    void AudioSystem::UpdateAmbience(const AmbienceMix& mix) noexcept
+    {
+        if (ambience_ == nullptr || !IsReady())
+        {
+            return;
+        }
+        ambience_->mix = mix;
+        try
+        {
+            const float category = CategoryVolume(Category::Ambience);
+            for (AmbienceVoices::Voice& voice : ambience_->voices)
+            {
+                float bed = 0.0F;
+                switch (voice.bed)
+                {
+                    case AmbienceVoices::Bed::Interior:
+                        bed = mix.interior;
+                        break;
+                    case AmbienceVoices::Bed::ExteriorDay:
+                        bed = mix.exteriorDay;
+                        break;
+                    case AmbienceVoices::Bed::ExteriorNight:
+                        bed = mix.exteriorNight;
+                        break;
+                }
+                const float volume = std::clamp(category * voice.gain * bed, 0.0F, 1.0F);
+                voice.instance->setVolumeProperty(volume);
+            }
+        }
+        catch (const std::exception& error)
+        {
+            RecordDeviceLoss(error);
+        }
+    }
+
+    std::size_t AudioSystem::AmbienceVoiceCount() const noexcept
+    {
+        return ambience_ == nullptr ? 0U : ambience_->voices.size();
+    }
+
+    void AudioSystem::StopAmbience() noexcept
+    {
+        ambience_.reset();
     }
 
     std::string AudioSystem::Summary() const

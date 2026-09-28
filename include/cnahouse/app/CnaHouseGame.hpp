@@ -14,7 +14,9 @@
 #include "cnahouse/app/FrameTimer.hpp"
 #include "cnahouse/app/Platform.hpp"
 #include "cnahouse/app/Settings.hpp"
+#include "cnahouse/audio/AmbienceDirector.hpp"
 #include "cnahouse/audio/AudioSystem.hpp"
+#include "cnahouse/audio/FootstepDirector.hpp"
 #include "cnahouse/content/SmokeScene.hpp"
 #include "cnahouse/debug/Console.hpp"
 #include "cnahouse/debug/Counters.hpp"
@@ -476,6 +478,9 @@ namespace cnahouse::app
         /// browser requires and what the desktop build therefore does too, so the path is exercised
         /// everywhere rather than only in the build that needs it.
         audio::AudioSystem audio_;
+        audio::AmbienceDirector ambience_;
+        /// Distance/riser cadence from the existing collision/controller facts.
+        std::optional<audio::FootstepDirector> footsteps_;
         player::KeyboardMouseSource input_;
         player::TouchSource touchInput_;
         player::MouseCapturePolicy mouseCapture_;
@@ -561,6 +566,7 @@ namespace cnahouse::app
 
         /// @brief §49.3's fixed steps for one frame, then §44's view over them.
         void UpdateWalk(float deltaSeconds);
+        void UpdateAmbience(float deltaSeconds);
 
         /// @brief Copies §44's camera into the renderer's, which is what the pass draws through.
         void ApplyPlayerCamera();

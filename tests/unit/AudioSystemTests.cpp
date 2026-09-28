@@ -57,6 +57,15 @@ namespace
         EXPECT_FLOAT_EQ(off.EffectiveVolume(Category::Weather), 0.0f);
     }
 
+    TEST(AudioSystemTests, AOneShotIsANoopBeforeTheDeviceIsReady)
+    {
+        AudioSystem waiting(true);
+        EXPECT_FALSE(waiting.PlayOneShot(nullptr, Category::Footsteps, 1.0F));
+
+        AudioSystem off(false);
+        EXPECT_FALSE(off.PlayOneShot(nullptr, Category::Footsteps, 1.0F));
+    }
+
     TEST(AudioSystemTests, TheCategoryDefaultsAreTheCompactM8Mix)
     {
         const AudioSystem audio(true);
@@ -64,6 +73,16 @@ namespace
         EXPECT_FLOAT_EQ(audio.CategoryVolume(Category::Footsteps), 0.85f);
         EXPECT_FLOAT_EQ(audio.CategoryVolume(Category::Ambience), 0.75f);
         EXPECT_FLOAT_EQ(audio.CategoryVolume(Category::Weather), 0.75f);
+    }
+
+    TEST(AudioSystemTests, AmbienceNeverStartsBeforeTheDeviceGate)
+    {
+        AudioSystem waiting(true);
+        waiting.StartAmbience({}, {}, {});
+        EXPECT_FALSE(waiting.AmbienceStarted());
+        AudioSystem off(false);
+        off.StartAmbience({}, {}, {});
+        EXPECT_EQ(off.AmbienceVoiceCount(), 0U);
     }
 
     TEST(AudioSystemTests, VolumesAreClampedRatherThanTrusted)
