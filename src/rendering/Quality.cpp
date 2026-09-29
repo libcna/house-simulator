@@ -156,7 +156,19 @@ namespace cnahouse::rendering
             return app::QualityPreset::Low;
         }
 
-        // 2. The HEADLESS renderer rasterises nothing, so the preset is a formality -- but it must
+        // 2. A platform with its own §71.3 row starts on it (`HOUSE-02898`): the browser on Web,
+        //    a phone or tablet on Android. Their content ships only that preset's LOD level, and
+        //    their budgets are written against that row, not against the desktop's.
+        if (platform.target == app::BuildTarget::Web)
+        {
+            return app::QualityPreset::Medium;
+        }
+        if (platform.target == app::BuildTarget::Android)
+        {
+            return app::QualityPreset::Low;
+        }
+
+        // 3. The HEADLESS renderer rasterises nothing, so the preset is a formality -- but it must
         //    be the cheap one, because an integration test that ran the expensive paths would be
         //    measuring work no one asked for.
         if (platform.rendererName == "HEADLESS")
@@ -164,7 +176,7 @@ namespace cnahouse::rendering
             return app::QualityPreset::Low;
         }
 
-        // 3. A display 3 840 pixels wide or more asks the same GPU to fill four times the pixels of
+        // 4. A display 3 840 pixels wide or more asks the same GPU to fill four times the pixels of
         //    1080p, and this project has no dynamic resolution to absorb that. Stepping down one row
         //    is the cheapest correct guess. A zero width means the adapter was not queried -- a
         //    headless or very early call -- and is not evidence of anything.
@@ -173,7 +185,7 @@ namespace cnahouse::rendering
             return app::QualityPreset::Medium;
         }
 
-        // 4. Everything else. NOT `Ultra`: guessing a machine into the top row from a name string is
+        // 5. Everything else. NOT `Ultra`: guessing a machine into the top row from a name string is
         //    exactly the confidence the available facts do not support, and being wrong there costs
         //    a first session that stutters. `Ultra` is reachable only by asking for it.
         return tier.IsTierE() ? app::QualityPreset::High : app::QualityPreset::Medium;

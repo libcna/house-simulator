@@ -66,6 +66,9 @@
 
     var Module = {
       canvas: canvas,
+      // HOUSE-02898: `?arg=--scene=walk&arg=--player=...` passes the desktop command line, so a
+      // measurement or CI smoke run starts where it needs to without clicking through the menus.
+      arguments: new URLSearchParams(window.location.search).getAll('arg'),
       setStatus: setStatus,
       totalDependencies: 0,
       monitorRunDependencies: function (left) {

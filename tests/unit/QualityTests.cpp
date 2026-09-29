@@ -220,6 +220,19 @@ namespace
         }
     }
 
+    TEST(QualityTests, AWebOrAndroidBuildStartsOnItsOwnPreset)
+    {
+        // `HOUSE-02898`: the browser ships the Web preset's LOD level and budgets, a phone the
+        // Android one, whatever GPU name either reports.
+        Platform platform = GoodMachine();
+        platform.target = cnahouse::app::BuildTarget::Web;
+        EXPECT_EQ(AutoDetect(platform, TierE()), QualityPreset::Medium);
+        platform.target = cnahouse::app::BuildTarget::Android;
+        EXPECT_EQ(AutoDetect(platform, TierE()), QualityPreset::Low);
+        platform.target = cnahouse::app::BuildTarget::Desktop;
+        EXPECT_NE(AutoDetect(platform, TierE()), QualityPreset::Low) << "the desktop keeps its own rules";
+    }
+
     TEST(QualityTests, AutoDetectNeverPicksTheTopRow)
     {
         // Standard XNA 4.0 offers no VRAM figure, no GPU class and no feature level, and ADR-0001

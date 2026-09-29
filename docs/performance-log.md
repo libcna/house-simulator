@@ -348,3 +348,26 @@ targets are measured in Chrome and on the device by those tasks.
 
 Logs: scratchpad `perf-02405b.log` (the table; an earlier run had identical counts),
 `perf-02405-proof.log`, `perf-02405-nolod.log`.
+
+### 2026-09-29 — the Web preset in Chrome on the reference machine (`HOUSE-02898`)
+
+The full Web build (`build-consumer/`, WEBGL2, Tier E, the HOUSE-02850 level-1 preload) served on
+localhost to headless Chrome 152 with `--enable-gpu --ignore-gpu-blocklist --use-angle=gl-egl`,
+whose WebGL renderer reports ANGLE on the AMD Radeon 780M (radeonsi); no window on the desktop.
+Each scene starts straight into the walk through the page's `?arg=` command line, auto-detects the
+Web preset (Medium row: blob shadows, lod +1, view 0.85×, no post-processing) at 1280×720, warms up
+15 s after the world loads and then times 20 s of `requestAnimationFrame` intervals, which the
+game's Emscripten main loop runs in.
+
+| Scene | Frames | Median ms | p95 ms | Max ms |
+|---|---:|---:|---:|---:|
+| StreetApproach (10:30) | 1206 | 16.7 | 16.7 | 16.8 |
+| Kitchen (12:00) | 1203 | 16.7 | 16.8 | 16.8 |
+| RearGarden (10:30) | 1204 | 16.7 | 16.8 | 16.8 |
+| NightOutside (22:00) | 1197 | 16.7 | 16.7 | 33.4 |
+
+Every scene holds the browser's 60 Hz frame against §71.3's 30 FPS Web target. The desktop
+harness's counts for the same preset stand: triangles 163 k–712 k against 900 k, and draw calls
+within 500 except StreetApproach and NightOutside at 509 (1.8 % over §71.4's figure) with the frame
+at the vsync cap -- no content was reduced for them (R9: measured target met, no headroom work).
+Captures and per-scene console logs: scratchpad `web-02898/`.
