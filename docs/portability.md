@@ -3,6 +3,31 @@
 This is a running validation record, not a claim that the Linux, Web or Android DONE checklists
 have passed. `plan.md` remains the release authority.
 
+## The Web release — HOUSE-02904 (2026-09-29)
+
+`tools/ci/package_web.py --build-dir build-consumer` writes the deployable directory
+`build-consumer/package/cna-house-1.0.0-web/`: `index.html` (and `cna-house.html`), the script,
+the wasm and the 375.8 MB preload, LICENSE, NOTICE.md, licenses/ and a README on serving it. Any
+static server works if it sends `.wasm` as `application/wasm`; served gzipped, the whole download
+is 178.1 MB (`tools/ci/web_budget.py`). `tools/ci/web_smoke.py` passes against the directory.
+
+Readiness (`cna-house.md` §80.1), as it stands:
+
+| Criterion | State |
+|---|---|
+| No POSIX file use outside `SaveStore`; no threads; `Game::Run()` owns the loop | `check_xna_only.py` gates, green |
+| GPU resources rebuilt after a context loss | not implemented: a lost WebGL context needs a reload (limitation) |
+| Audio starts only after a gesture | yes, on every platform (HOUSE-02895) |
+| Video behind `ITvSource` | out of scope: the showcase plays no video |
+| Packs ≤ 60 MB, download ≤ 180 MB compressed | largest pack 50.0 MB, 178.1 MB; the Web build fails otherwise (HOUSE-02850) |
+| Web tier defined and reachable | the Web preset, auto-detected in the browser and `--quality=web` on the desktop (HOUSE-02405/02898) |
+| Sampled textures `SurfaceFormat::Color` only | `check_web_materials.py`, green |
+| Built and run in real browsers | Chrome 152 and Firefox 140 ESR: DONE checklist and the whole filming tour (HOUSE-02900) |
+
+Known limitations: a lost WebGL context means a reload; settings are not kept across a reload;
+the download is 178.1 of the 180 MB budget, so added content needs room made for it; Chrome paces
+at the display rate and Firefox at ~39 FPS on the test machine.
+
 ## Web DONE checklist in Chrome and Firefox — HOUSE-02900 (2026-09-29)
 
 The full Web build (1.0.0, WEBGL2, the HOUSE-02850 level-1 preload) served on localhost, in

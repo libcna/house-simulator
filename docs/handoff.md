@@ -6,8 +6,9 @@ Linux package HOUSE-02789, its clean-profile runs HOUSE-02790, the ASAN/UBSAN pa
 the 2-hour run HOUSE-02784 are accepted, the desktop release is tagged `v1.0.0` (HOUSE-02797) and
 the Web download fits (HOUSE-02850), the Web preset holds 60 FPS in Chrome (HOUSE-02898) and the
 Web DONE checklist passed in Chrome and Firefox (HOUSE-02900) with its smoke test and nightly CI
-job (HOUSE-02901); M10, M11 and M13 are complete. **12 open MUST / 78 OPT**, nominal **14.25 h**,
-pessimistic **29.7 h** (1.10 × 14.25 + 8 h Android + 6 h Web). House Simulator is **not DONE**.
+job (HOUSE-02901) and its deployable package (HOUSE-02904) -- M14 is complete, as are M10, M11
+and M13. **11 open MUST / 78 OPT**, nominal **13.5 h**, pessimistic **28.9 h** (1.10 × 13.5 + 8 h
+Android + 6 h Web). House Simulator is **not DONE**.
 
 **Presets (HOUSE-02405).** `--quality=android|web|high|ultra` (low/medium still accepted). The
 chunk library now cooks the authored `_LOD1`/`_LOD2` vegetation per preset level (flag bit 0, one
@@ -31,7 +32,7 @@ then `DISPLAY=:141 SDL_VIDEODRIVER=x11 LIBGL_ALWAYS_SOFTWARE=1 build/cnahouse_re
 the Xvfb afterwards.
 
 **Next MUST.** The Android path from `HOUSE-03033` (content-path helper and Gradle staging written,
-APK build pending), and the Web package `HOUSE-02904`.
+APK build pending), then the final release M16.
 Firefox runs inside `tools/platform/run_gpu_tests_private.sh --exec` (headless Firefox has no
 WebGL2); `--filming-tour` walks any build through the property from its command line. GPU Chrome: `--headless=new --enable-gpu --ignore-gpu-blocklist --use-angle=gl-egl`. The Web build (`source ~/emsdk/emsdk_env.sh;
 cmake --build --preset web` in build-consumer/) stages its preload with `stage_content.py
