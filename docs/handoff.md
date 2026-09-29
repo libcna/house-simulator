@@ -1,10 +1,11 @@
-# Handoff — 2026-09-29 (DONE audit; HOUSE-02405 measured presets; Round 180 bounded fixes)
+# Handoff — 2026-09-29 (desktop release v1.0.0; DONE audit; measured presets)
 
 **State.** HOUSE-03683, HOUSE-03574, HOUSE-02714, HOUSE-03631, HOUSE-02713, HOUSE-02405, the
 desktop DONE audit HOUSE-02781, its gap fix HOUSE-02782, the licence check HOUSE-02788, the
 Linux package HOUSE-02789, its clean-profile runs HOUSE-02790, the ASAN/UBSAN pass HOUSE-02783 and
-the 2-hour run HOUSE-02784 are accepted; M10 and M11 are complete. **17 open MUST / 78 OPT**,
-nominal **21.25 h**, pessimistic **37.4 h** (1.10 × 21.25 + 8 h Android + 6 h Web). House Simulator is **not DONE**.
+the 2-hour run HOUSE-02784 are accepted, and the desktop release is tagged `v1.0.0` (HOUSE-02797);
+M10, M11 and M13 are complete. **16 open MUST / 78 OPT**, nominal **20.75 h**, pessimistic
+**36.8 h** (1.10 × 20.75 + 8 h Android + 6 h Web). House Simulator is **not DONE**.
 
 **Presets (HOUSE-02405).** `--quality=android|web|high|ultra` (low/medium still accepted). The
 chunk library now cooks the authored `_LOD1`/`_LOD2` vegetation per preset level (flag bit 0, one
@@ -27,9 +28,9 @@ private Xvfb (offscreen EGL with `LIBGL_ALWAYS_SOFTWARE=1` segfaults): `Xvfb :14
 then `DISPLAY=:141 SDL_VIDEODRIVER=x11 LIBGL_ALWAYS_SOFTWARE=1 build/cnahouse_render_tests`. Stop
 the Xvfb afterwards.
 
-**Next MUST.** The desktop tag `HOUSE-02797` (`docs/versioning.md`: VERSION 1.0.0, CHANGELOG.md,
-`release: 1.0.0`, tag `v1.0.0`), then the Web pack budget `HOUSE-02850`. The 2-hour run passed:
-1.423 MiB/h worst RSS growth, no crash, no starvation. Sanitizer runs: `build-asan/`/`build-ubsan/` exist,
+**Next MUST.** The Web pack budget `HOUSE-02850` (staging + budget tools written, Web build pending),
+then Web measurement and the Android path. The 2-hour run passed: 1.423 MiB/h worst RSS growth, no
+crash, no starvation. Sanitizer runs: `build-asan/`/`build-ubsan/` exist,
 their `content` and `content-fx` are symlinks to `build/`'s; run with `LD_PRELOAD="libEGL_mesa.so.0
 libGLX_mesa.so.0" ASAN_OPTIONS=verify_asan_link_order=0 LSAN_OPTIONS=suppressions=tools/ci/lsan.supp`
 (a dlclose'd Mesa driver's memory otherwise reads as leaked); the Web/Android paths as their `dep:` lines

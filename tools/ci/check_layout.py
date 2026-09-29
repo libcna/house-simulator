@@ -82,6 +82,8 @@ ALLOWED_ROOT_ENTRIES = {
     "README.md", "LICENSE", "NOTICE.md", "AGENTS.md", "CLAUDE.md", "VERSION",
     "cna-house.md", "plan.md", "CMakeLists.txt", "CMakePresets.json", "CMakeUserPresets.json",
     ".gitignore", ".gitattributes", ".clang-format", ".editorconfig",
+    # `docs/versioning.md`'s release step writes it beside `VERSION` (HOUSE-02797).
+    "CHANGELOG.md",
     # directories
     "docs", "include", "src", "tools", "tests", "assets-src", "content", "licenses",
     "android",

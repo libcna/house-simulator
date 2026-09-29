@@ -11,7 +11,7 @@
 cmake_minimum_required(VERSION 3.24)
 
 project(cna_house
-        VERSION 0.1.0
+        VERSION 1.0.0
         DESCRIPTION "A house you can walk around in, built on XNA 4.0 as CNA implements it"
         LANGUAGES CXX C)
 
