@@ -7,8 +7,9 @@ the 2-hour run HOUSE-02784 are accepted, the desktop release is tagged `v1.0.0` 
 the Web download fits (HOUSE-02850), the Web preset holds 60 FPS in Chrome (HOUSE-02898) and the
 Web DONE checklist passed in Chrome and Firefox (HOUSE-02900) with its smoke test and nightly CI
 job (HOUSE-02901) and its deployable package (HOUSE-02904) -- M14 is complete, as are M10, M11
-and M13. Android content delivery is accepted (HOUSE-03033). **10 open MUST / 78 OPT**, nominal
-**12.0 h**, pessimistic **21.2 h** (1.10 × 12.0 + 8 h Android). House Simulator is **not DONE**.
+and M13. Android content delivery (HOUSE-03033) and the emulator measurement (HOUSE-03037) are
+accepted. **9 open MUST / 78 OPT**, nominal **9.5 h**, pessimistic **18.5 h** (1.10 × 9.5 + 8 h
+Android). House Simulator is **not DONE**.
 
 **Presets (HOUSE-02405).** `--quality=android|web|high|ultra` (low/medium still accepted). The
 chunk library now cooks the authored `_LOD1`/`_LOD2` vegetation per preset level (flag bit 0, one
@@ -32,7 +33,7 @@ private Xvfb (offscreen EGL with `LIBGL_ALWAYS_SOFTWARE=1` segfaults): `Xvfb :14
 then `DISPLAY=:141 SDL_VIDEODRIVER=x11 LIBGL_ALWAYS_SOFTWARE=1 build/cnahouse_render_tests`. Stop
 the Xvfb afterwards.
 
-**Next MUST.** Android `HOUSE-03037`, `03038`, `03039`, `03041`, then the final release M16.
+**Next MUST.** Android `HOUSE-03038`, `03039`, `03041`, then the final release M16.
 
 **Android (HOUSE-03033 accepted).** `util/ContentFile` reads a relative content path through
 `TitleContainer` (on Android the APK's AssetManager), an absolute one as a file; Android's content
@@ -48,8 +49,11 @@ rotating launch (`016c588bf`). **Emulator recipe:** `kvm_amd` is loaded (owner, 
 waits. `adb install -r build-probe/android-gradle/app/outputs/apk/debug/app-debug.apk`; touch with
 `adb shell input swipe X Y X Y 600` (a plain `input tap` is shorter than a frame poll and missed;
 keys are ignored on the title); logs `adb logcat -s cna-house`. Start is at (1200, 395) on the
-2400×1080 screen. Measured: walk ~21.5 FPS under arm64 translation; Start freezes the menu ~35 s
-while loading (no loading frame drawn) -- a defect for HOUSE-03038/03039.
+2400×1080 screen. Measure with release builds: `./gradlew assembleRelease` (debug-key signed;
+`-PhouseAbi=x86_64` builds for the x86_64 emulator, which then runs natively), start a scene with
+`am start -n com.libcna.house/.HouseActivity --es args "--scene=walk --player=…"`; the
+`assembleDebug` native code is -O0 and under arm64 translation took 35 s to load the walk and ran
+~21 FPS -- never measure it. Results: `docs/performance-log.md` (HOUSE-03037).
 Firefox runs inside `tools/platform/run_gpu_tests_private.sh --exec` (headless Firefox has no
 WebGL2); `--filming-tour` walks any build through the property from its command line. GPU Chrome: `--headless=new --enable-gpu --ignore-gpu-blocklist --use-angle=gl-egl`. The Web build (`source ~/emsdk/emsdk_env.sh;
 cmake --build --preset web` in build-consumer/) stages its preload with `stage_content.py

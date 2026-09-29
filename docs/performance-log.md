@@ -371,3 +371,40 @@ harness's counts for the same preset stand: triangles 163 k–712 k against 900 
 within 500 except StreetApproach and NightOutside at 509 (1.8 % over §71.4's figure) with the frame
 at the vsync cap -- no content was reduced for them (R9: measured target met, no headroom work).
 Captures and per-scene console logs: scratchpad `web-02898/`.
+
+### 2026-09-29 — the Android preset on the emulator (`HOUSE-03037`)
+
+No physical device is available, so this is the best available emulator, recorded as such: AVD
+`House_Phone` (API 35, Android 15, x86_64, 2 GB RAM) under KVM with `-gpu host`, whose GLES is the
+emulator's translator over the AMD Radeon 780M (radeonsi, Mesa 25.0.7), 2400×1080 screen, run in
+the private GPU display. Release builds (optimised, signed with the debug key), the Android preset
+auto-detected (Low: shadows off, particles low, view 0.60×, lod +2), 1600×900 back buffer, vsync
+on. Each scene starts straight into the walk through the activity's `args` extra (`am start -n
+com.libcna.house/.HouseActivity --es args "--scene=walk --player=… --time=… --freeze-time
+--weather=…"`), warms up 20 s after `walking in`, then samples 30 s of the game SurfaceView's
+present timestamps from `dumpsys SurfaceFlinger --latency`. RSS is `dumpsys meminfo`'s TOTAL RSS.
+
+| Scene | x86_64 median / p95 ms | arm64 (translated) median / p95 ms | RSS MB (arm64) |
+|---|---:|---:|---:|
+| Kitchen (12:00) | 16.7 / 17.4 | 16.7 / 17.4 | 520 |
+| Library (10:30) | 16.7 / 17.5 | 16.7 / 17.5 | 533 |
+| MainStair (10:30) | 16.7 / 17.5 | 16.7 / 17.4 | 514 |
+| StreetApproach (10:30) | 16.7 / 17.3 | 33.3 / 34.2 | 551 |
+| RearGarden (10:30) | 16.7 / 17.3 | 17.0 / 34.0 | 522 |
+| UpperWindow (10:30) | 16.7 / 17.6 | 16.7 / 17.6 | 514 |
+| HeavyRain (18:00) | 16.7 / 17.4 | 16.8 / 34.0 | 513 |
+| NightOutside (22:00) | 16.7 / 17.8 | 33.3 / 34.0 | 548 |
+
+The x86_64 build runs natively and holds the display's 60 Hz everywhere. The arm64 build -- the one
+that ships -- runs through the emulator's arm64 translator, a CPU several times slower than native:
+interiors still hold 60 Hz, and the two street views, the scenes with the most draws, hold 30 FPS
+(two vsync intervals) against §71.5's 33 ms. RSS stays under 700 MB (x86_64 431–468 MB). The walk
+is reached 2.5–4 s after launch. The desktop harness's counts for the Android preset stand:
+triangles 27 k–595 k against 700 k, and draw calls 67–364 against 400 except StreetApproach and
+NightOutside at 509, the interior rooms seen through the front windows and the house's own rear
+façade. Nothing was reduced: the frame target is met on both builds, and the reductions measured
+-- not looking into rooms through windows smaller than 0.008 NDC (509 → 423) or treating the house
+mass as an occluder for the exterior pass (about −60) -- each miss 400 alone and change what is seen
+through the windows or add an occlusion system (R9). The street's draw count is the first thing
+to re-measure on a physical phone. Captures and per-scene logs: scratchpad `android-x86-release/`,
+`android-arm64-release/`.

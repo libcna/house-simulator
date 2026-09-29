@@ -26,7 +26,9 @@ android {
 
         externalNativeBuild {
             cmake {
-                abiFilters 'arm64-v8a'
+                // arm64-v8a is what ships; `-PhouseAbi=x86_64` builds for an x86_64 emulator, which
+                // then runs natively instead of through its arm64 translator.
+                abiFilters project.findProperty('houseAbi') ?: 'arm64-v8a'
                 targets 'main'
                 arguments '-DANDROID_PLATFORM=android-24',
                     "-DCNAHOUSE_CNA_ROOT=${cnaRoot.canonicalPath}",
@@ -35,6 +37,13 @@ android {
                     '-DCMAKE_C_COMPILER_LAUNCHER=ccache',
                     '-DCMAKE_CXX_COMPILER_LAUNCHER=ccache'
             }
+        }
+    }
+
+    buildTypes {
+        release {
+            // Installable as built: signed with the local debug key, not a store key.
+            signingConfig signingConfigs.debug
         }
     }
 
