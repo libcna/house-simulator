@@ -59,6 +59,7 @@
 #include "cnahouse/rendering/TransparentPass.hpp"
 #include "cnahouse/ui/LoadingScreen.hpp"
 #include "cnahouse/ui/TouchHud.hpp"
+#include "cnahouse/util/ContentFile.hpp"
 #include "cnahouse/util/Log.hpp"
 #include "cnahouse/weather/WeatherSampler.hpp"
 #include "cnahouse/world/ChunkReader.hpp"
@@ -546,10 +547,12 @@ namespace cnahouse::app
         content::ContentRegistry registry;
         try
         {
-            const std::string manifestText =
-                System::IO::File::ReadAllText(worldDirectory + "/assets.manifest.json");
+            const util::Result<std::string> manifestText =
+                util::ReadContentText(worldDirectory + "/assets.manifest.json");
             const util::Result<void> loaded =
-                registry.LoadFromJson(manifestText, worldDirectory + "/assets.manifest.json");
+                manifestText
+                    ? registry.LoadFromJson(manifestText.Value(), worldDirectory + "/assets.manifest.json")
+                    : util::Result<void>(manifestText.Error());
             if (!loaded)
             {
                 Log::Warn(LogCat::Audio,
@@ -681,9 +684,16 @@ namespace cnahouse::app
 
         try
         {
-            System::IO::FileStream stream(
-                worldDirectory + "/collision.bin", System::IO::FileMode::Open, System::IO::FileAccess::Read);
-            auto loaded = physics::CollisionLoader::Read(stream, worldDirectory + "/collision.bin");
+            // A relative content root is a title path (Android's APK assets); `HOUSE-03033`.
+            auto loaded = util::IsTitlePath(worldDirectory)
+                              ? physics::CollisionLoader::ReadFromTitle(worldDirectory + "/collision.bin")
+                              : [&]
+            {
+                System::IO::FileStream stream(worldDirectory + "/collision.bin",
+                                              System::IO::FileMode::Open,
+                                              System::IO::FileAccess::Read);
+                return physics::CollisionLoader::Read(stream, worldDirectory + "/collision.bin");
+            }();
             if (!loaded)
             {
                 Log::Error(LogCat::Content, "--scene=walk: {}", loaded.Error().Message());

@@ -261,6 +261,8 @@ run_gate "budget"     python3 tools/ci/budget_report.py --check
 # `HOUSE-02850`. The Web build itself fails over §71.4's download limits (see CMakeLists.txt's Web
 # preload); this keeps the limit arithmetic honest on machines that never build for the browser.
 run_gate "web-budget-selftest" python3 tools/ci/web_budget.py --selftest
+# `HOUSE-03033`. The same for the Android package: §71.5's 400 MB and the staged content it carries.
+run_gate "android-budget-selftest" python3 tools/ci/android_budget.py --selftest
 # `HOUSE-00217`. The stage table in docs/content-build.md is generated from the pipeline
 # graph, so a stage added without regenerating it is a documented order that is no longer
 # the order. This is the same idiom the budget report uses, for the same reason.

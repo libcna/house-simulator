@@ -9,6 +9,7 @@ add_library(cnahouse_core STATIC
     util/Ids.cpp
     util/Rng.cpp
     util/Json.cpp
+    util/ContentFile.cpp
 
     # app -- the frame, the services, the settings
     animation/Animation.cpp
@@ -183,6 +184,11 @@ target_link_libraries(cnahouse_core
         SharpRuntime::Text.Json
     PRIVATE
         cnahouse_warnings)
+
+if(ANDROID)
+    # util/Log.cpp writes to logcat there: Android discards stdout and stderr (`HOUSE-03033`).
+    target_link_libraries(cnahouse_core PRIVATE log)
+endif()
 
 target_compile_definitions(cnahouse_core PUBLIC
     CNAHOUSE_VERSION="${PROJECT_VERSION}"

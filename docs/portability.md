@@ -110,8 +110,9 @@ literal `SDL_main` export, SDLActivity loads it, and the process remains running
 The observed screen is still dark because House content and its Android content
 root have not been delivered or validated. This is build and launch evidence for
 `HOUSE-03031`/`HOUSE-03032`, **not** the device traversal, performance or Android
-DONE checklist. Content delivery is `HOUSE-03033`, after its performance-preset
-dependency; the independent settings and lifecycle tasks can proceed first.
+DONE checklist. Content delivery followed under `HOUSE-03033` (2026-09-29): the APK carries the
+Android-tier content as assets, read through `TitleContainer`, and walks the house on the
+`House_Phone` emulator; `android_budget.py` holds it to §71.5's 400 MB.
 
 ## CNA Android graphics gate — 2026-09-26
 

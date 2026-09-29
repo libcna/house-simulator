@@ -7,8 +7,8 @@ the 2-hour run HOUSE-02784 are accepted, the desktop release is tagged `v1.0.0` 
 the Web download fits (HOUSE-02850), the Web preset holds 60 FPS in Chrome (HOUSE-02898) and the
 Web DONE checklist passed in Chrome and Firefox (HOUSE-02900) with its smoke test and nightly CI
 job (HOUSE-02901) and its deployable package (HOUSE-02904) -- M14 is complete, as are M10, M11
-and M13. **11 open MUST / 78 OPT**, nominal **13.5 h**, pessimistic **28.9 h** (1.10 × 13.5 + 8 h
-Android + 6 h Web). House Simulator is **not DONE**.
+and M13. Android content delivery is accepted (HOUSE-03033). **10 open MUST / 78 OPT**, nominal
+**12.0 h**, pessimistic **21.2 h** (1.10 × 12.0 + 8 h Android). House Simulator is **not DONE**.
 
 **Presets (HOUSE-02405).** `--quality=android|web|high|ultra` (low/medium still accepted). The
 chunk library now cooks the authored `_LOD1`/`_LOD2` vegetation per preset level (flag bit 0, one
@@ -23,7 +23,8 @@ row (0.7×, Low) because Medium is also the Tier-S/4K desktop auto-detect row; a
 browser measurement asks for it. Numbers: `docs/performance-log.md`.
 
 **CNA.** The owner authorized fixing CNA defects found through House work in CNA itself, as
-separate CNA commits (2026-09-29). BL-18 is fixed in CNA `2c70eaf0f` on `next` (pushed).
+separate CNA commits (2026-09-29). BL-18 is fixed in CNA `2c70eaf0f` on `next` (pushed); BL-19,
+BL-20 and BL-21 in `5d275f556`, `9408eba8e`, `016c588bf` (not pushed).
 
 **Render suite.** The software-GL suite is 59 PASS / 1 opt-in SKIP after HOUSE-02405 refreshed
 the 27 Low-preset references whose vegetation became LOD2 (each pair inspected). It runs on a
@@ -31,8 +32,24 @@ private Xvfb (offscreen EGL with `LIBGL_ALWAYS_SOFTWARE=1` segfaults): `Xvfb :14
 then `DISPLAY=:141 SDL_VIDEODRIVER=x11 LIBGL_ALWAYS_SOFTWARE=1 build/cnahouse_render_tests`. Stop
 the Xvfb afterwards.
 
-**Next MUST.** The Android path from `HOUSE-03033` (content-path helper and Gradle staging written,
-APK build pending), then the final release M16.
+**Next MUST.** Android `HOUSE-03037`, `03038`, `03039`, `03041`, then the final release M16.
+
+**Android (HOUSE-03033 accepted).** `util/ContentFile` reads a relative content path through
+`TitleContainer` (on Android the APK's AssetManager), an absolute one as a file; Android's content
+root is the relative `content`; Gradle's `stageHouseContent` stages `build/content` at LOD level 2
+into the assets and `checkApkBudget` (`tools/ci/android_budget.py`) holds every assembled APK to
+§71.5's 400 MB and to the staged tree: 227.2 MB (content 178.5, native 25.6). Three CNA defects
+found on the way are fixed in CNA `next` (not pushed): BL-19 `.cnb` from APK assets (`5d275f556`),
+BL-20 SDL3 lifecycle events never delivered (`9408eba8e`), BL-21 Android IsActive stuck after a
+rotating launch (`016c588bf`). **Emulator recipe:** `kvm_amd` is loaded (owner, 2026-09-29); AVD
+`House_Phone` (API 35, 16 GB data) runs inside the private GPU display via a holder script:
+`tools/platform/run_gpu_tests_private.sh --exec <script>` whose script runs
+`emulator -avd House_Phone -gpu host -no-window -no-audio -no-snapshot-save -no-boot-anim` and
+waits. `adb install -r build-probe/android-gradle/app/outputs/apk/debug/app-debug.apk`; touch with
+`adb shell input swipe X Y X Y 600` (a plain `input tap` is shorter than a frame poll and missed;
+keys are ignored on the title); logs `adb logcat -s cna-house`. Start is at (1200, 395) on the
+2400×1080 screen. Measured: walk ~21.5 FPS under arm64 translation; Start freezes the menu ~35 s
+while loading (no loading frame drawn) -- a defect for HOUSE-03038/03039.
 Firefox runs inside `tools/platform/run_gpu_tests_private.sh --exec` (headless Firefox has no
 WebGL2); `--filming-tour` walks any build through the property from its command line. GPU Chrome: `--headless=new --enable-gpu --ignore-gpu-blocklist --use-angle=gl-egl`. The Web build (`source ~/emsdk/emsdk_env.sh;
 cmake --build --preset web` in build-consumer/) stages its preload with `stage_content.py

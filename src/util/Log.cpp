@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 #include "cnahouse/util/Log.hpp"
 
+#if defined(__ANDROID__)
+#include <android/log.h>
+#endif
+
 #include <algorithm>
 #include <array>
 #include <cstdio>
@@ -248,12 +252,26 @@ namespace cnahouse::util
         state.seenThisFrame.emplace(std::move(message), state.ring.size() - 1);
 
         const LogRecord& record = state.ring.back();
+#if defined(__ANDROID__)
+        // Android discards a process's stdout and stderr; logcat is where its log is read
+        // (`HOUSE-03033`).
+        const int priority = level >= LogLevel::Error  ? ANDROID_LOG_ERROR
+                             : level >= LogLevel::Warn ? ANDROID_LOG_WARN
+                                                       : ANDROID_LOG_INFO;
+        __android_log_print(priority,
+                            "cna-house",
+                            "[%c][%s] %s",
+                            LevelInitial(level),
+                            std::string(LogCatName(category)).c_str(),
+                            record.message.c_str());
+#else
         std::FILE* const console = level >= LogLevel::Warn ? stderr : stdout;
         std::fprintf(console,
                      "[%c][%s] %s\n",
                      LevelInitial(level),
                      std::string(LogCatName(category)).c_str(),
                      record.message.c_str());
+#endif
     }
 
     void Log::ResetForTesting()

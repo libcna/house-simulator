@@ -58,8 +58,15 @@ int main(int argc, char** argv)
     {
         titleDirectory += '/';
     }
+#if defined(__ANDROID__)
+    // Android's title is the APK: a relative root is what TitleContainer and ContentManager resolve
+    // among its assets, where no file path reaches (`HOUSE-03033`).
+    options->contentRoot = "content";
+    options->effectRoot = "content-fx";
+#else
     options->contentRoot = titleDirectory + "content";
     options->effectRoot = titleDirectory + "content-fx";
+#endif
 
     if (options->logCategories.has_value())
     {

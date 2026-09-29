@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 #include "cnahouse/world/WorldLoader.hpp"
 
+#include "cnahouse/util/ContentFile.hpp"
 #include "cnahouse/util/Log.hpp"
 #include "cnahouse/world/WorldValidator.hpp"
 
@@ -142,13 +143,18 @@ namespace cnahouse::world
                                            std::int32_t& version)
     {
         const std::string path = Join(directory, name);
-        if (!System::IO::File::Exists(path))
+        if (!util::ContentExists(path))
         {
             return Err(
                 ErrorCode::NotFound, "no such file; `cna-house.md` §15.1 requires it", std::string(name));
         }
 
-        Result<JsonDocument> document = JsonDocument::Load(path);
+        const Result<std::string> text = util::ReadContentText(path);
+        if (!text)
+        {
+            return text.Error().WithContext(name);
+        }
+        Result<JsonDocument> document = JsonDocument::Parse(text.Value(), path);
         if (!document)
         {
             return document.Error().WithContext(name);
@@ -276,15 +282,12 @@ namespace cnahouse::world
 
     Result<std::string> WorldLoader::HashFile(std::string_view path)
     {
-        std::vector<SharpRuntime::bytecs> bytes;
-        try
+        const Result<std::vector<std::uint8_t>> content = util::ReadContentBytes(path);
+        if (!content)
         {
-            bytes = System::IO::File::ReadAllBytes(std::string(path));
+            return content.Error();
         }
-        catch (const std::exception& e)
-        {
-            return Err(ErrorCode::IoFailure, e.what(), std::string(path));
-        }
+        const std::vector<SharpRuntime::bytecs> bytes(content->begin(), content->end());
         System::Security::Cryptography::SHA256 sha;
         return Spell(sha.ComputeHash(bytes));
     }
@@ -392,7 +395,7 @@ namespace cnahouse::world
             {
                 return sha.Error().WithContext("world.manifest.json");
             }
-            if (!System::IO::File::Exists(Join(directory, file.Value())))
+            if (!util::ContentExists(Join(directory, file.Value())))
             {
                 return Err(ErrorCode::NotFound,
                            "the manifest lists \"" + file.Value() + "\" and it is not here",

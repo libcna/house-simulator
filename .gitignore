@@ -13,6 +13,8 @@
 /build-tsan/
 /build-probe/
 /build-consumer/
+# Gradle's own project cache, beside android/'s settings.gradle.
+/android/.gradle/
 
 # ---------------------------------------------------------------------------
 # Generated content.

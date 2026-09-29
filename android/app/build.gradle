@@ -6,6 +6,10 @@ def houseRoot = rootProject.projectDir.parentFile
 def cnaRoot = new File(houseRoot.parentFile, 'cna')
 def sharpRuntimeRoot = new File(houseRoot.parentFile, 'sharp-runtime')
 def hostContentTool = new File(houseRoot, 'build/CNA_BUILD/cna-content')
+// HOUSE-03033: the APK carries the host content build's shipped tree at the Android preset's LOD
+// level. `-PhouseContent=<dir>` names another host content tree than build/content.
+def hostContent = new File(project.findProperty('houseContent') ?: new File(houseRoot, 'build/content').path)
+def androidStage = new File(houseRoot, 'build-probe/android-stage')
 
 android {
     namespace 'com.libcna.house'
@@ -38,6 +42,7 @@ android {
         main {
             // CNA already vendors SDLActivity and its Java bridge. Keep one copy.
             java.srcDir new File(cnaRoot, 'third_party/SDL/android-project/app/src/main/java')
+            assets.srcDir androidStage
         }
     }
 
@@ -48,4 +53,23 @@ android {
             buildStagingDirectory new File(houseRoot, 'build-probe/android-cxx')
         }
     }
+}
+
+// Stages what the APK ships before its assets are merged: tools/ci/stage_content.py with the
+// Android preset's LOD level (2); no content-fx, because the Android build has no Tier E.
+tasks.register('stageHouseContent', Exec) {
+    commandLine 'python3', new File(houseRoot, 'tools/ci/stage_content.py').path,
+        '--content', hostContent.path, '--out', androidStage.path, '--lod-level', '2'
+}
+tasks.matching { it.name.startsWith('merge') && it.name.endsWith('Assets') }.configureEach {
+    dependsOn 'stageHouseContent'
+}
+
+// Every assembled APK against cna-house.md §71.5's 400 MB and the staged tree it must carry.
+tasks.register('checkApkBudget', Exec) {
+    commandLine 'python3', new File(houseRoot, 'tools/ci/android_budget.py').path,
+        '--apk-dir', new File(project.buildDir, 'outputs/apk').path, '--stage', androidStage.path
+}
+tasks.matching { it.name ==~ /assemble(Debug|Release)/ }.configureEach {
+    finalizedBy 'checkApkBudget'
 }

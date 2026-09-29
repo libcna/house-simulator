@@ -6,6 +6,7 @@
 #include <limits>
 
 #include "cnahouse/physics/Move.hpp"
+#include "cnahouse/util/ContentFile.hpp"
 #include "cnahouse/util/Json.hpp"
 #include "cnahouse/util/Log.hpp"
 
@@ -27,7 +28,12 @@ namespace cnahouse::player
     {
         Stop();
         route_.clear();
-        const auto document = util::JsonDocument::Load(initialStatePath);
+        const auto text = util::ReadContentText(initialStatePath);
+        if (!text)
+        {
+            return text.Error();
+        }
+        const auto document = util::JsonDocument::Parse(text.Value(), std::string(initialStatePath));
         if (!document)
         {
             return document.Error();
