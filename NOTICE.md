@@ -83,9 +83,13 @@ Licensed under the Microsoft Public License (Ms-PL).
 
 ### Transitively, through CNA
 
-SDL3 (zlib licence) always; FFmpeg (LGPL-2.1-or-later, as configured by CNA) when
+SDL3 and SDL3_mixer (zlib licence) always; FFmpeg (LGPL-2.1-or-later, as configured by CNA) when
 `CNA_ENABLE_VIDEO` resolves to on; MojoShader (zlib licence) when compiled effects are enabled.
 These are selected by CNA's own CMake options, not by `cna-house`.
+
+The Linux package (`tools/ci/package_linux.py`) bundles the `libcna.so`, SDL3 and SDL3_mixer
+shared libraries the game was built with. FFmpeg and the graphics driver are the system's, loaded
+dynamically and not redistributed.
 
 ---
 

@@ -758,7 +758,9 @@ namespace cnahouse::app
         /// `DebugDraw` needs a device, and the overlay needs a `CollisionWorld` and a camera --
         /// which is exactly what `HOUSE-00620` recorded as the reason `F9` was not wired yet.
         debug::PhysicsOverlay physicsOverlay_;
+#if CNAHOUSE_DEBUG_TOOLS
         std::unique_ptr<debug::DebugDraw> debugDraw_;
+#endif
         /// §49.3's leftover time: the fixed step is 1/120 s and a frame is not.
         float stepAccumulator_ = 0.0F;
         bool lifecyclePaused_ = false;

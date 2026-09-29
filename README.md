@@ -189,6 +189,17 @@ literal and is not a mistake: `StorageDevice` uses it unless `SetAppNameEXT` is 
 call is `CNAEXT`, which this project forbids. The *container* name is what identifies `cna-house`,
 and it is plain XNA.
 
+## Packaging (Linux)
+
+```bash
+tools/ci/package_linux.py --build-dir build-probe   # any Release build directory
+```
+
+It refuses a build that is not Release or that has `CNAHOUSE_DEBUG_TOOLS` on, proves the debug
+tools compiled out, and writes `<build-dir>/package/cna-house-<version>-linux-x86_64/` and its
+`.tar.gz`: the game, the CNA and SDL libraries it was built with (found through `$ORIGIN/lib`),
+the content, the licences and a `cna-house.sh` launcher.
+
 ## Testing
 
 ```bash

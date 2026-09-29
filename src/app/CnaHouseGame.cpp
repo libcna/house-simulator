@@ -484,19 +484,24 @@ namespace cnahouse::app
     {
         // §16's world first: the collision is indexed by cell NAME, and which cell a body is in is
         // a question only the world data can answer (§16.4).
+        //
+        // Read from the content root `Main` puts beside the executable, never from the working
+        // directory: a package started from anywhere else found no world (`HOUSE-02789`), and a
+        // developer build started from the repository paired these files with build/'s chunks.
+        const std::string worldDirectory = options_.contentRoot + "/world";
         world::WorldData::Contents contents;
-        const auto levels = world::WorldLoader::LoadLevels("content/world", contents);
-        const auto materials = world::WorldLoader::LoadMaterials("content/world", contents);
-        const auto cells = world::WorldLoader::LoadCells("content/world", contents);
-        const auto portals = world::WorldLoader::LoadPortals("content/world", contents);
-        const auto openings = world::WorldLoader::LoadOpenings("content/world", contents);
-        const auto audioLayout = world::WorldLoader::LoadAudio("content/world", contents);
-        const auto interactables = world::WorldLoader::LoadInteractables("content/world", contents);
-        const auto initialState = world::WorldLoader::LoadInitialState("content/world", contents);
-        const auto weather = world::WorldLoader::LoadWeather("content/world", contents);
+        const auto levels = world::WorldLoader::LoadLevels(worldDirectory, contents);
+        const auto materials = world::WorldLoader::LoadMaterials(worldDirectory, contents);
+        const auto cells = world::WorldLoader::LoadCells(worldDirectory, contents);
+        const auto portals = world::WorldLoader::LoadPortals(worldDirectory, contents);
+        const auto openings = world::WorldLoader::LoadOpenings(worldDirectory, contents);
+        const auto audioLayout = world::WorldLoader::LoadAudio(worldDirectory, contents);
+        const auto interactables = world::WorldLoader::LoadInteractables(worldDirectory, contents);
+        const auto initialState = world::WorldLoader::LoadInitialState(worldDirectory, contents);
+        const auto weather = world::WorldLoader::LoadWeather(worldDirectory, contents);
         // §28's fixtures, for `LightingSystem` (`HOUSE-01251`). 243 rows; the loader is the same
         // one the tests use, so a lights file that would fail CI fails here too.
-        const auto lights = world::WorldLoader::LoadLights("content/world", contents);
+        const auto lights = world::WorldLoader::LoadLights(worldDirectory, contents);
         if (!levels || !materials || !cells || !portals || !openings || !audioLayout || !interactables ||
             !initialState || !lights || !weather)
         {
@@ -519,9 +524,9 @@ namespace cnahouse::app
         try
         {
             const std::string manifestText =
-                System::IO::File::ReadAllText("content/world/assets.manifest.json");
+                System::IO::File::ReadAllText(worldDirectory + "/assets.manifest.json");
             const util::Result<void> loaded =
-                registry.LoadFromJson(manifestText, "content/world/assets.manifest.json");
+                registry.LoadFromJson(manifestText, worldDirectory + "/assets.manifest.json");
             if (!loaded)
             {
                 Log::Warn(LogCat::Audio,
@@ -654,8 +659,8 @@ namespace cnahouse::app
         try
         {
             System::IO::FileStream stream(
-                "content/world/collision.bin", System::IO::FileMode::Open, System::IO::FileAccess::Read);
-            auto loaded = physics::CollisionLoader::Read(stream, "content/world/collision.bin");
+                worldDirectory + "/collision.bin", System::IO::FileMode::Open, System::IO::FileAccess::Read);
+            auto loaded = physics::CollisionLoader::Read(stream, worldDirectory + "/collision.bin");
             if (!loaded)
             {
                 Log::Error(LogCat::Content, "--scene=walk: {}", loaded.Error().Message());
@@ -918,14 +923,17 @@ namespace cnahouse::app
         debug::RegisterPlayerCommands(console_,
                                       debug::PlayerCommandContext{&player_, &tracker_, &*world_, &*index_});
 
+#if CNAHOUSE_DEBUG_TOOLS
         // §71's `F9` draws through this, and it needs a device -- which is why it is built here
-        // and not with the other members.
+        // and not with the other members. A release build never draws it, so it does not pay for
+        // its 65 536-vertex buffer either (`HOUSE-02789`).
         debugDraw_ = std::make_unique<debug::DebugDraw>(getGraphicsDeviceProperty());
+#endif
         view_.Camera().SetFieldOfView(settings_.fieldOfView);
         view_.Camera().SetViewport(settings_.backBufferWidth, settings_.backBufferHeight);
         view_.Bob().SetLevel(settings_.headBob);
         walking_ = true;
-        if (const auto loaded = filmingTour_.Load("content/world/initialstate.json"); !loaded)
+        if (const auto loaded = filmingTour_.Load(worldDirectory + "/initialstate.json"); !loaded)
         {
             Log::Error(LogCat::Content, "filming route: {}", loaded.Error().ToString());
         }
@@ -1733,7 +1741,9 @@ namespace cnahouse::app
             clock_.Advance(static_cast<double>(frame.realDeltaSeconds));
             counters_.BeginFrame();
             timing_.BeginFrame();
+#if CNAHOUSE_DEBUG_TOOLS
             overlay_.PushFrameTime(frame.deltaSeconds * 1000.0f);
+#endif
 
             // The ONE place the devices are read (`HOUSE-00140`). Every system downstream sees
             // `InputState`, which is expressed in game terms, so none of them can be written against a
@@ -2262,6 +2272,7 @@ namespace cnahouse::app
             chunkCuller_->Cull(visibility_->Visible());
             CullExterior();
         }
+#if CNAHOUSE_DEBUG_TOOLS
         if (visibilityGeometry_.Visible())
         {
             // Built only while it is up: §25.8's geometry is thousands of segments over a house
@@ -2269,6 +2280,7 @@ namespace cnahouse::app
             visibilityGeometry_.Build(
                 *world_, visibility_->Visible(), visibility_->Portals(), view_.Camera().Pose().eye);
         }
+#endif
     }
 
     debug::VisibilitySnapshot CnaHouseGame::VisibilitySnapshot() const
