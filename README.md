@@ -177,6 +177,7 @@ if you want a consistent video.
 
 | Option | Effect |
 |---|---|
+| `--quality=android\|web\|high\|ultra` | Quality preset; the default is auto-detected. `low`/`medium` are accepted for `android`/`web` |
 | `--tier=s` | Force Tier S (stock XNA effects only), whatever the build supports |
 | `--renderer-info` | Print the configured renderer, the `CNAHOUSE_TIER_E` build fact and the resolved render tier, then exit |
 | `--screenshot=<path>` | Write one PNG and exit |
@@ -204,13 +205,19 @@ Unit and integration tests need no display server; the render tests run under `X
 tools/ci/run_checks.sh
 ```
 
-That script runs, and fails on, exactly what CI runs:
+That script runs, and fails on, exactly what CI runs; every gate prints its name, and its comment
+in the script says why it exists:
 
-| Gate | What it rejects |
-|---|---|
-| `tools/ci/check_layout.py` | A missing required directory, or a file in the wrong place |
-| `tools/ci/check_xna_only.py` | Any forbidden CNA, CNAEXT or native-graphics symbol in runtime source; a `.fx` outside `assets-src/Effects/`; GLSL/SPIR-V anywhere; an `isRaining`-style boolean; `std::filesystem` outside `SaveStore`; `CNA_CNAEXT=ON` in a CMake cache |
-| `clang-format --dry-run -Werror` | Any deviation from [`.clang-format`](.clang-format) |
+* **Source rules:** the repository layout, the XNA-only lint (no CNA, CNAEXT or native-graphics
+  symbol in runtime source), the strict-XNA compile of every translation unit, the input boundary
+  and `clang-format`.
+* **Content:** the asset manifest and licences (no row, no build), the committed effect baseline,
+  each generated asset's reproducibility check, the world schema and layout rules, prop placement,
+  materials, vegetation, models, animation, fonts and the budget report.
+* **Tables:** the calendar, sun, moon, sky and star tables and their self-tests.
+
+`--fix` reformats before checking and `--staged` checks only staged files. The strict compile uses
+every core unless `HOUSE_XNA_STRICT_JOBS` limits it.
 
 ---
 

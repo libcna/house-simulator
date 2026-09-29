@@ -1,8 +1,9 @@
 # Handoff — 2026-09-29 (DONE audit; HOUSE-02405 measured presets; Round 180 bounded fixes)
 
-**State.** HOUSE-03683, HOUSE-03574, HOUSE-02714, HOUSE-03631, HOUSE-02713, HOUSE-02405 and the
-desktop DONE audit HOUSE-02781 are accepted; M10 and M11 are complete. **23 open MUST / 78 OPT**,
-nominal **29.75 h**, pessimistic **46.7 h** (1.10 × 29.75 + 8 h Android + 6 h Web). House Simulator is **not DONE**.
+**State.** HOUSE-03683, HOUSE-03574, HOUSE-02714, HOUSE-03631, HOUSE-02713, HOUSE-02405, the
+desktop DONE audit HOUSE-02781 and its gap fix HOUSE-02782 are accepted; M10 and M11 are complete.
+**22 open MUST / 78 OPT**, nominal **28.25 h**, pessimistic **45.1 h** (1.10 × 28.25 + 8 h Android
++ 6 h Web). House Simulator is **not DONE**.
 
 **Presets (HOUSE-02405).** `--quality=android|web|high|ultra` (low/medium still accepted). The
 chunk library now cooks the authored `_LOD1`/`_LOD2` vegetation per preset level (flag bit 0, one
@@ -25,9 +26,8 @@ private Xvfb (offscreen EGL with `LIBGL_ALWAYS_SOFTWARE=1` segfaults): `Xvfb :14
 then `DISPLAY=:141 SDL_VIDEODRIVER=x11 LIBGL_ALWAYS_SOFTWARE=1 build/cnahouse_render_tests`. Stop
 the Xvfb afterwards.
 
-**Next MUST.** `HOUSE-02782` (the audit's one gap, below), then ASAN/UBSAN `HOUSE-02783`, the
-2-hour run `HOUSE-02784`, licences `HOUSE-02788` and packaging; the Web/Android paths as their
-`dep:` lines allow.
+**Next MUST.** ASAN/UBSAN `HOUSE-02783`, the 2-hour run `HOUSE-02784`, licences `HOUSE-02788`
+and packaging; the Web/Android paths as their `dep:` lines allow.
 
 **Verified here.** Unit 1546/1546; perf 24/24 on the Radeon (amdgpu fdinfo proof); hardware-GPU
 integration 173 PASS / 3 opt-in SKIP / 0 FAIL (run it from the repository root, which ctest does:
@@ -66,7 +66,7 @@ review round or handoff asked for another pace; at 60× the 41-minute filming ci
 through about 1.7 days, so one tour shows the whole light schedule; Environment already offers
 other speeds and a frozen clock for anyone who wants them.
 
-**Gaps.** One, above, filed on `HOUSE-02782`. Nothing goes to the optional backlog.
+**Gaps.** One, above, filed on and fixed by `HOUSE-02782`. Nothing goes to the optional backlog.
 
 ---
 
