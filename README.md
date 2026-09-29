@@ -206,7 +206,10 @@ the content, the licences and a `cna-house.sh` launcher.
 ctest --test-dir build --output-on-failure
 ```
 
-Unit and integration tests need no display server; the render tests run under `Xvfb`.
+Unit and integration tests need no display server; the render tests run under `Xvfb`. After a Web
+build, `tools/ci/web_smoke.py --build-dir build-consumer` drives the page in headless Chrome
+(title, Start, 300 walk frames, a settings change) and fails on any error; `--gpu` uses the GPU
+instead of SwiftShader. The page passes `?arg=...` to the game's command line.
 
 ---
 

@@ -628,6 +628,55 @@ jobs:
             --test-dir build-${{ matrix.preset == 'linux-asan' && 'asan' || 'ubsan' }} \
             -L 'unit|integration'
 
+  # --- HOUSE-02901 (nightly) ---------------------------------------------------------------------
+  web-smoke:
+    name: Web build + headless-Chrome smoke
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { path: cna-house }
+      - uses: actions/checkout@v4
+        with: { repository: openeggbert/cnanext, path: cnanext }
+      - uses: actions/checkout@v4
+        with: { repository: openeggbert/sharp-runtime, path: sharp-runtimenext }
+      - uses: mymindstorm/setup-emsdk@v14
+        with: { version: 6.0.9 }
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build ccache g++-14 blender \
+            libgl1-mesa-dev libegl1-mesa-dev libasound2-dev libpulse-dev \
+            libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libfreetype-dev
+          /usr/bin/python3 -m pip install --break-system-packages --user numpy || true
+          python3 -m pip install --user jsonschema websocket-client
+      - name: The host content tool
+        working-directory: cna-house
+        run: |
+          cmake --preset linux-release
+          cmake --build --preset linux-release --target cna_content_tool -j"$(nproc)"
+      - name: The world content the walk loads
+        working-directory: cna-house
+        # content/ is generated, not committed: the shell and the world stages need Blender. The
+        # lightmapped shell is optional (`HOUSE-00487`), so this smoke draws the unbaked one.
+        env:
+          CNAHOUSE_BLENDER_PYTHONPATH: /home/runner/.local/lib/python3/dist-packages
+        run: |
+          python3 tools/blender/house_shell_gen.py
+          python3 tools/ci/build_content.py --only world
+      - name: Web build (stages the preload, fails over the download budget)
+        working-directory: cna-house
+        run: |
+          cmake --preset web -DCNAHOUSE_CNA_ROOT="$GITHUB_WORKSPACE/cnanext" \
+            -DCNAHOUSE_SHARP_RUNTIME_ROOT="$GITHUB_WORKSPACE/sharp-runtimenext"
+          cmake --build --preset web
+      - name: Smoke -- title, Start, 300 walk frames, a settings change
+        working-directory: cna-house
+        run: python3 tools/ci/web_smoke.py --build-dir build-consumer --log build-consumer/web-smoke.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: web-smoke-log, path: cna-house/build-consumer/web-smoke.log }
+
   # --- HOUSE-00138 (nightly) ---------------------------------------------------------------------
   render-tests:
     name: render tests under Xvfb (OPENGLES3)
