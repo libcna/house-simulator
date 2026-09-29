@@ -1,19 +1,27 @@
-# Handoff — 2026-09-29 (desktop release v1.0.0; DONE audit; measured presets)
+# Handoff — 2026-09-30 (release v1.1.0; House Simulator is DONE; maintenance mode)
 
-**State.** HOUSE-03683, HOUSE-03574, HOUSE-02714, HOUSE-03631, HOUSE-02713, HOUSE-02405, the
-desktop DONE audit HOUSE-02781, its gap fix HOUSE-02782, the licence check HOUSE-02788, the
-Linux package HOUSE-02789, its clean-profile runs HOUSE-02790, the ASAN/UBSAN pass HOUSE-02783 and
-the 2-hour run HOUSE-02784 are accepted, the desktop release is tagged `v1.0.0` (HOUSE-02797) and
-the Web download fits (HOUSE-02850), the Web preset holds 60 FPS in Chrome (HOUSE-02898) and the
-Web DONE checklist passed in Chrome and Firefox (HOUSE-02900) with its smoke test and nightly CI
-job (HOUSE-02901) and its deployable package (HOUSE-02904) -- M14 is complete, as are M10, M11
-and M13. Android content delivery (HOUSE-03033), the emulator measurement (HOUSE-03037) and the
-Android DONE checklist (HOUSE-03038), touch tuning (HOUSE-03039) and the Android package
-(HOUSE-03041) are accepted -- M15 is complete -- and the final measurement (HOUSE-03071) and XNA-only
-audit (HOUSE-03074) are recorded; the documentation pass (HOUSE-03075, `docs/testing.md`) and the
-final test and content pass (HOUSE-03076: 561 never-loaded assets out of the packages; Web 96.8 MB,
-APK 99.6 MB) and the 1.1.0 release notes (HOUSE-03077) are done. **1 open MUST / 78 OPT** (M16),
-nominal **0.25 h**. House Simulator is **not DONE** until the tag.
+**State.** Every MUST task of `plan.md` is done and the Definition of DONE holds on Linux, the
+Web and Android. The release is 1.1.0, tagged `v1.1.0` (local; not pushed, like `v1.0.0` and the
+commits since `a1a8b70`). **Feature development has stopped (rule R17).** From here the work is
+defect fixes, CNA compatibility fixes and narrowly justified changes; the optional backlog
+(`pri: OPT`) stays optional and is never scheduled on its own.
+
+| DONE | Holds by |
+|---|---|
+| D1 Architecture, D2 Traversal | every zone at C2+; the grand tour and the 90-view filming tour on Linux, Chrome, Firefox and Android |
+| D3 Furnishing, D4 Visual quality, D14 Bounded polish | G3/G4/G5, the M11 review HOUSE-02714 and its fix pass HOUSE-03631 |
+| D5 Environment, D6 Lighting, D7 Audio | HOUSE-01925/01939, HOUSE-03633/03636, HOUSE-01920/01922 |
+| D8 Application | menus, settings, credits, controls hint; Web and Android touch controls (HOUSE-03039) |
+| D9 Performance | HOUSE-03071: High inside every hard limit; Web 60 Hz in Chrome; Android 30-60 FPS on the emulator |
+| D10a/b/c Platforms | HOUSE-02790; HOUSE-02900/02901; HOUSE-03038/03041 (the `House_Phone` emulator, recorded as such) |
+| D11 Testing | HOUSE-03076: unit 1553, integration 173 + 3 opt-in skips, render 59 + 1, gates, strict XNA 358 units, Web and Android smoke; ASAN/UBSAN HOUSE-02783; 2-hour run HOUSE-02784 |
+| D12 Documentation | HOUSE-03075, HOUSE-03077; every shipped asset manifested and licensed (HOUSE-03076) |
+| D13 Defects | no known S1/S2; the known limitations in `CHANGELOG.md` 1.1.0 are S3/S4 |
+
+**Packages.** `tools/ci/package_linux.py --build-dir build-probe`, `tools/ci/package_web.py
+--build-dir build-consumer` and `tools/ci/package_android.py` (after `./gradlew assembleRelease`)
+write `cna-house-1.1.0-{linux-x86_64,web,android}` under the build trees' `package/`. Web download
+96.8 MB, APK 99.6 MB. The packages carry only what the game loads (HOUSE-03076).
 
 **Presets (HOUSE-02405).** `--quality=android|web|high|ultra` (low/medium still accepted). The
 chunk library now cooks the authored `_LOD1`/`_LOD2` vegetation per preset level (flag bit 0, one
@@ -29,7 +37,7 @@ browser measurement asks for it. Numbers: `docs/performance-log.md`.
 
 **CNA.** The owner authorized fixing CNA defects found through House work in CNA itself, as
 separate CNA commits (2026-09-29). BL-18 is fixed in CNA `2c70eaf0f` on `next` (pushed); BL-19,
-BL-20 and BL-21 in `5d275f556`, `9408eba8e`, `016c588bf` (not pushed).
+BL-20 and BL-21 in `5d275f556`, `9408eba8e` (+ `5a4181175`), `016c588bf` (not pushed).
 
 **Render suite.** The software-GL suite is 59 PASS / 1 opt-in SKIP after HOUSE-02405 refreshed
 the 27 Low-preset references whose vegetation became LOD2 (each pair inspected). It runs on a
@@ -37,9 +45,9 @@ private Xvfb (offscreen EGL with `LIBGL_ALWAYS_SOFTWARE=1` segfaults): `Xvfb :14
 then `DISPLAY=:141 SDL_VIDEODRIVER=x11 LIBGL_ALWAYS_SOFTWARE=1 build/cnahouse_render_tests`. Stop
 the Xvfb afterwards.
 
-**Next MUST.** `HOUSE-03078`: tag 1.1.0. `tools/ci/android_smoke.py`
-is the Android smoke; the Android build uses `-ffp-contract=off` (arm64 FMA otherwise diverges from
-desktop and stalls the filming tour).
+**Next.** Nothing is scheduled. `tools/ci/android_smoke.py` is the Android smoke; the Android
+build uses `-ffp-contract=off` (arm64 FMA otherwise diverges from desktop and stalls the filming
+tour).
 
 **Android (HOUSE-03033 accepted).** `util/ContentFile` reads a relative content path through
 `TitleContainer` (on Android the APK's AssetManager), an absolute one as a file; Android's content
