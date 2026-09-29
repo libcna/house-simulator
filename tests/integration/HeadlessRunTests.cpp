@@ -617,7 +617,7 @@ namespace
         // directly.
         Options options;
         options.headless = true;
-        options.scene = "walk";
+        options.scene.emplace("walk");
         Settings settings = Settings::Defaults();
         settings.verticalSync = false;
         settings.moonPhaseSpeedMultiplier = 6.0F;

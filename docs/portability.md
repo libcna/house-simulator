@@ -7,7 +7,7 @@ snapshots of the way there. `plan.md` remains the release authority.
 ## The Android release — HOUSE-03041 (2026-09-29)
 
 `./gradlew assembleRelease` in `android/` and then `tools/ci/package_android.py` write
-`build-probe/package/cna-house-1.0.0-android/`: the arm64-v8a release APK (181 MB, signed with the
+`build-probe/package/cna-house-1.0.0-android/`: the arm64-v8a release APK (100 MB since HOUSE-03076's content audit, signed with the
 local debug key), LICENSE, NOTICE.md, licenses/ and a README on installing it. A fresh
 `adb install` of that APK passes `tools/ci/android_smoke.py`. Device used: the `House_Phone`
 emulator (API 35, x86_64 with the arm64 translator, `-gpu host` over the Radeon 780M); no physical
@@ -24,7 +24,7 @@ Readiness (`cna-house.md` §80.2), as it stands:
 | `Platform` drives the HUD and defaults | Android: touch, no keyboard -- touch HUD, touch hints, the Android preset |
 | UI in virtual units with safe-area insets | the 2400×1080 phone letterboxes the 16:9 view; the `ui-*-20x9` render references |
 | Android tier defined and reachable on desktop | `--quality=android`; measured on the emulator (HOUSE-03037) |
-| Content fits the APK + OBB budget | `android_budget.py`: 181 MB of 400 MB, no OBB |
+| Content fits the APK + OBB budget | `android_budget.py`: 99.6 MB of 400 MB, no OBB |
 | Touch HUD testable on desktop | `--force-touch` |
 | Lifecycle through `Game`'s events | Home and return deactivate and reactivate (CNA BL-20/21) |
 
@@ -64,9 +64,9 @@ is the way to stop it.
 
 `tools/ci/package_web.py --build-dir build-consumer` writes the deployable directory
 `build-consumer/package/cna-house-1.0.0-web/`: `index.html` (and `cna-house.html`), the script,
-the wasm and the 375.8 MB preload, LICENSE, NOTICE.md, licenses/ and a README on serving it. Any
+the wasm and the preload (248 MB since HOUSE-03076's content audit), LICENSE, NOTICE.md, licenses/ and a README on serving it. Any
 static server works if it sends `.wasm` as `application/wasm`; served gzipped, the whole download
-is 178.1 MB (`tools/ci/web_budget.py`). `tools/ci/web_smoke.py` passes against the directory.
+is 96.8 MB (`tools/ci/web_budget.py`; 178.1 MB before the audit). `tools/ci/web_smoke.py` passes against the directory.
 
 Readiness (`cna-house.md` §80.1), as it stands:
 
@@ -76,13 +76,13 @@ Readiness (`cna-house.md` §80.1), as it stands:
 | GPU resources rebuilt after a context loss | not implemented: a lost WebGL context needs a reload (limitation) |
 | Audio starts only after a gesture | yes, on every platform (HOUSE-02895) |
 | Video behind `ITvSource` | out of scope: the showcase plays no video |
-| Packs ≤ 60 MB, download ≤ 180 MB compressed | largest pack 50.0 MB, 178.1 MB; the Web build fails otherwise (HOUSE-02850) |
+| Packs ≤ 60 MB, download ≤ 180 MB compressed | largest pack 41.8 MB, 96.8 MB in all; the Web build fails otherwise (HOUSE-02850) |
 | Web tier defined and reachable | the Web preset, auto-detected in the browser and `--quality=web` on the desktop (HOUSE-02405/02898) |
 | Sampled textures `SurfaceFormat::Color` only | `check_web_materials.py`, green |
 | Built and run in real browsers | Chrome 152 and Firefox 140 ESR: DONE checklist and the whole filming tour (HOUSE-02900) |
 
 Known limitations: a lost WebGL context means a reload; settings are not kept across a reload;
-the download is 178.1 of the 180 MB budget, so added content needs room made for it; Chrome paces
+the download is 96.8 of the 180 MB budget; Chrome paces
 at the display rate and Firefox at ~39 FPS on the test machine.
 
 ## Web DONE checklist in Chrome and Firefox — HOUSE-02900 (2026-09-29)

@@ -74,11 +74,13 @@ tasks.matching { it.name.startsWith('merge') && it.name.endsWith('Assets') }.con
     dependsOn 'stageHouseContent'
 }
 
-// Every assembled APK against cna-house.md §71.5's 400 MB and the staged tree it must carry.
-tasks.register('checkApkBudget', Exec) {
-    commandLine 'python3', new File(houseRoot, 'tools/ci/android_budget.py').path,
-        '--apk-dir', new File(project.buildDir, 'outputs/apk').path, '--stage', androidStage.path
-}
-tasks.matching { it.name ==~ /assemble(Debug|Release)/ }.configureEach {
-    finalizedBy 'checkApkBudget'
+// The APK just assembled against cna-house.md §71.5's 400 MB and the staged tree it must carry --
+// only that variant's: the other variant's APK may predate the current stage.
+['Debug', 'Release'].each { variant ->
+    def check = tasks.register("checkApkBudget${variant}", Exec) {
+        commandLine 'python3', new File(houseRoot, 'tools/ci/android_budget.py').path,
+            '--apk-dir', new File(project.buildDir, "outputs/apk/${variant.toLowerCase()}").path,
+            '--stage', androidStage.path
+    }
+    tasks.matching { it.name == "assemble${variant}" }.configureEach { finalizedBy check }
 }

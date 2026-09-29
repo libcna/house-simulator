@@ -79,7 +79,7 @@ namespace
         {
             states[index].cell = data.Cells()[index].id;
         }
-        states[0].artificial = 1.0F;
+        states.at(0).artificial = 1.0F;
         return states;
     }
 
@@ -135,7 +135,7 @@ TEST(BorrowedLightModelTests, AmbientAndBorrowedInputsCannotManufactureANewSourc
     }
     BorrowedLightModel model(data, portals);
     std::vector<RoomLightState> states(data.Cells().size());
-    states[0].borrowed = 1.0F;
+    states.at(0).borrowed = 1.0F;
     std::vector<float> borrowed(states.size(), 1.0F);
 
     model.Evaluate(states, borrowed);
@@ -152,8 +152,8 @@ TEST(BorrowedLightModelTests, DaylightTransferDoesNotTreatAnArtificialLampAsSky)
     }
     BorrowedLightModel model(data, portals);
     std::vector<RoomLightState> states(data.Cells().size());
-    states[0].daylight = 1.0F;
-    states[3].artificial = 1.0F;
+    states.at(0).daylight = 1.0F;
+    states.at(3).artificial = 1.0F;
     std::vector<float> borrowedDaylight(states.size());
 
     model.EvaluateDaylight(states, borrowedDaylight);
