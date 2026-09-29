@@ -66,7 +66,13 @@ namespace cnahouse::world
         };
 
         /// @brief Borrows @p device and @p library; both must outlive this object.
-        CellRuntime(Microsoft::Xna::Framework::Graphics::GraphicsDevice& device, const ChunkLibrary& library);
+        ///
+        /// @param lodLevel the quality preset's LOD level (`HOUSE-02405`). Only chunks drawn at it
+        ///        are uploaded: another preset's vegetation variants would be GPU memory no frame
+        ///        of this session reads.
+        CellRuntime(Microsoft::Xna::Framework::Graphics::GraphicsDevice& device,
+                    const ChunkLibrary& library,
+                    int lodLevel = 0);
         ~CellRuntime();
 
         CellRuntime(const CellRuntime&) = delete;
@@ -78,6 +84,11 @@ namespace cnahouse::world
         /// empty yard is a real answer, and failing on it would make every caller special-case the
         /// outdoors. A cell the world does not contain at all is `NotFound`.
         [[nodiscard]] util::Result<void> Load(std::string_view cell);
+
+        /// @brief Changes the LOD level and re-uploads every resident cell at it. A no-op when the
+        ///        level's chunks are already the resident ones; the first failure is returned after
+        ///        every other cell has been reloaded.
+        [[nodiscard]] util::Result<void> SetLodLevel(int lodLevel);
 
         /// @brief Releases @p cell's buffers. Unloading a cell that is not resident does nothing.
         void Unload(std::string_view cell);
@@ -143,6 +154,7 @@ namespace cnahouse::world
         /// index could have.
         std::vector<const ResidentChunk*> byChunk_;
         std::vector<std::uint32_t> residentIndices_;
+        std::uint8_t lodBit_ = 1u;
 
         [[nodiscard]] util::Result<ResidentChunk> Upload(const Chunk& chunk, std::uint32_t index);
 

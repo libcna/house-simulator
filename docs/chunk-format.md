@@ -68,7 +68,7 @@ and §17.4 excludes animated props from batching.
 |---|---|---|
 | `magic` | 4 bytes | ASCII `CCHK` |
 | `version` | `u32` | **1** |
-| `flags` | `u32` | 0. A reader must **reject** any unknown bit |
+| `flags` | `u32` | bit 0 (`0x1`): a LOD-mask table follows the last chunk (§4b). A reader must **reject** any other bit |
 | `worldHash` | string | `world.manifest.json`'s `worldHash`, or **empty** before `deploy_world.py` has written one. The only string in this format that may be empty: it means the staleness check cannot run, which is different from the file being corrupt |
 | `cellCount` | `u32` | |
 | `cells` | `cellCount` × string | sorted cell ids |
@@ -104,6 +104,23 @@ yaw/offset jitter are baked into the world-space vertices and sub-range box. An 
 selects an already-authored, otherwise-identical canonical material row before grouping. Existing
 chunks therefore remain byte-identical when those fields are absent, and runtime receives no new
 instance state.
+
+## 4b. Vegetation LOD masks
+
+`HOUSE-02405`. The quality presets' `lodBias` (High 0, Web 1, Android 2) selects which of an
+exterior plant's authored `_LOD1`/`_LOD2` nodes is drawn. The level is fixed per preset, not per
+distance: the chunk is the unit of drawing, so the selection has to be made when chunks are
+cooked. `build_chunks.py` cooks every plant at each level and files each variant's triangles in the
+cell its LOD0 triangles for that source material go to, so level 0 is byte-for-byte the library
+without masks.
+
+With flag bit 0 set, `chunkCount` × `u8` follow the last chunk, one per chunk in order. Bits 0–2
+name the levels in whose preset the chunk is drawn; a geometry that is identical at two levels is
+one chunk with both bits, and every non-vegetation chunk carries `0b111`. A mask of 0 or with a bit
+above 2 is invalid. Without the flag every chunk is drawn at every level, and the writer omits the
+table when every mask is `0b111`. The runtime uploads and culls only the active level's chunks
+(`CellRuntime`, `ChunkCuller` and the exterior pass), so a variant for another preset costs file
+bytes but no GPU memory, and changing the preset re-uploads the resident cells.
 
 ## 4a. The shell is chunked too
 

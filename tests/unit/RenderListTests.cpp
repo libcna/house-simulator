@@ -111,12 +111,17 @@ namespace
     }
 
     /// Every chunk in the house, so the list is asked the worst question §71.2 has an answer for.
+    /// The whole house at the High preset: every chunk but the lower presets' vegetation LOD
+    /// variants (`HOUSE-02405`), which that preset's residency never uploads.
     std::vector<std::uint32_t> AllChunks(const world::ChunkLibrary& library)
     {
-        std::vector<std::uint32_t> all(library.chunks.size());
+        std::vector<std::uint32_t> all;
         for (std::uint32_t i = 0; i < library.chunks.size(); ++i)
         {
-            all[i] = i;
+            if ((library.chunks[i].lodMask & world::LodBit(0)) != 0u)
+            {
+                all.push_back(i);
+            }
         }
         return all;
     }

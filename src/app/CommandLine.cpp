@@ -68,11 +68,13 @@ namespace cnahouse::app
 
         util::Result<QualityPreset> ParseQuality(std::string_view text)
         {
-            if (text == "low")
+            // `HOUSE-02405`: the platform names the Graphics section shows are the preset names;
+            // the internal row names stay accepted so existing scripts and settings keep working.
+            if (text == "android" || text == "low")
             {
                 return QualityPreset::Low;
             }
-            if (text == "medium")
+            if (text == "web" || text == "medium")
             {
                 return QualityPreset::Medium;
             }
@@ -84,9 +86,10 @@ namespace cnahouse::app
             {
                 return QualityPreset::Ultra;
             }
-            return Error(ErrorCode::InvalidData,
-                         std::format("expected low, medium, high or ultra, found '{}'", text),
-                         "--quality");
+            return Error(
+                ErrorCode::InvalidData,
+                std::format("expected android, web, high or ultra (or low/medium), found '{}'", text),
+                "--quality");
         }
 
         util::Result<RenderTier> ParseTier(std::string_view text)
@@ -141,7 +144,7 @@ namespace cnahouse::app
     {
         return "cna-house " CNAHOUSE_VERSION "\n"
                "\n"
-               "  --quality=low|medium|high|ultra\n"
+               "  --quality=android|web|high|ultra   (low/medium are the same two rows)\n"
                "                              Quality preset (default: auto-detected)\n"
                "  --tier=s|e                  Render tier. Tier E can be turned OFF, never ON: a binary\n"
                "                              built without it has no compiled effects to load.\n"

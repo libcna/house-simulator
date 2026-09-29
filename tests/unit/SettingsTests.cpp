@@ -304,6 +304,17 @@ namespace
         EXPECT_EQ(settings->quality, QualityPreset::High);
     }
 
+    TEST(SettingsTests, ThePlatformPresetNamesReadAsTheirRows)
+    {
+        // `HOUSE-02405`: a hand-edited file may use the names the Graphics section shows.
+        auto web = Settings::FromJson(R"({"quality": "web"})", "settings.json");
+        ASSERT_TRUE(web);
+        EXPECT_EQ(web->quality, QualityPreset::Medium);
+        auto android = Settings::FromJson(R"({"quality": "android"})", "settings.json");
+        ASSERT_TRUE(android);
+        EXPECT_EQ(android->quality, QualityPreset::Low);
+    }
+
     TEST(SettingsRoundTripTests, EveryPersistedValueSurvivesItsOwnJson)
     {
         Settings written = Settings::Defaults();

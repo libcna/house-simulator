@@ -99,9 +99,10 @@ namespace cnahouse::world
         return static_cast<std::uint32_t>(DeclarationFor(layout).getVertexStrideProperty());
     }
 
-    CellRuntime::CellRuntime(GraphicsDevice& device, const ChunkLibrary& library)
+    CellRuntime::CellRuntime(GraphicsDevice& device, const ChunkLibrary& library, int lodLevel)
         : device_(device)
         , library_(library)
+        , lodBit_(LodBit(lodLevel))
     {
     }
 
@@ -213,6 +214,10 @@ namespace cnahouse::world
         std::vector<ResidentChunk> uploaded;
         for (const std::uint32_t index : library_.ChunksOf(cell))
         {
+            if ((library_.chunks[index].lodMask & lodBit_) == 0u)
+            {
+                continue;
+            }
             auto chunk = Upload(library_.chunks[index], index);
             if (!chunk)
             {
@@ -225,6 +230,32 @@ namespace cnahouse::world
         resident_.emplace(std::string(cell), std::move(uploaded));
         RebuildChunkIndex();
         return {};
+    }
+
+    util::Result<void> CellRuntime::SetLodLevel(int lodLevel)
+    {
+        const std::uint8_t bit = LodBit(lodLevel);
+        if (bit == lodBit_)
+        {
+            return {};
+        }
+        lodBit_ = bit;
+        std::vector<std::string> cells;
+        for (const auto& [name, chunks] : resident_)
+        {
+            cells.push_back(name);
+        }
+        UnloadAll();
+        util::Result<void> result;
+        for (const std::string& cell : cells)
+        {
+            auto loaded = Load(cell);
+            if (!loaded && result)
+            {
+                result = std::move(loaded);
+            }
+        }
+        return result;
     }
 
     void CellRuntime::Unload(std::string_view cell)

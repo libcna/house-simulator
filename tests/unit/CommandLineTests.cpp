@@ -109,6 +109,9 @@ namespace
         // rather than on a name that merely had not been implemented yet.
         EXPECT_FALSE(Parse({"--quality=cinematic"}));
         EXPECT_TRUE(Parse({"--quality=ultra"})) << "ultra is a §68 row and must parse";
+        // `HOUSE-02405`: the platform names the Graphics section shows select the same rows.
+        EXPECT_EQ(Parse({"--quality=web"})->quality, QualityPreset::Medium);
+        EXPECT_EQ(Parse({"--quality=android"})->quality, QualityPreset::Low);
         EXPECT_FALSE(Parse({"--tier=x"}));
         EXPECT_FALSE(Parse({"--seed=abc"}));
         EXPECT_FALSE(Parse({"--time=notanumber"}));

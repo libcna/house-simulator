@@ -59,6 +59,11 @@ namespace cnahouse::visibility
             int chunksFromNested = 0;
         };
 
+        /// @brief The LOD level whose chunks this culler tests (`HOUSE-02405`). Another preset's
+        ///        vegetation variants are not this frame's geometry, so they are neither tested
+        ///        nor drawn, and the counters keep describing what the frame draws.
+        void SetLodLevel(int level) noexcept;
+
         void Cull(std::span<const VisibleCell> visible);
 
         /// @brief Indices into `ChunkLibrary::chunks`, in cell order then file order.
@@ -82,6 +87,7 @@ namespace cnahouse::visibility
         std::unordered_map<std::uint32_t, std::vector<std::uint32_t>> byCell_;
         std::vector<std::uint32_t> drawn_;
         Stats stats_;
+        std::uint8_t lodBit_ = 1u;
     };
 
 } // namespace cnahouse::visibility

@@ -9,10 +9,14 @@
 #include <algorithm>
 #include <cstdio>
 #include <filesystem>
+#include <span>
 #include <string>
 #include <vector>
 
 #include <gtest/gtest.h>
+
+#include "Microsoft/Xna/Framework/BoundingFrustum.hpp"
+#include "Microsoft/Xna/Framework/Matrix.hpp"
 
 #include "cnahouse/player/FirstPersonCamera.hpp"
 #include "cnahouse/visibility/ChunkCulling.hpp"
@@ -311,7 +315,8 @@ TEST(ChunkCullingTests, AChunkVisibleThroughTheSECONDDoorwayIsDrawn)
                 for (const std::uint32_t index : ChunkIndicesOf(*library, seen.cell))
                 {
                     const world::Chunk& chunk = library->chunks[index];
-                    if (seen.frusta[0].Intersects(chunk.bounds))
+                    // A lower preset's LOD variant is not the default level's geometry.
+                    if ((chunk.lodMask & world::LodBit(0)) == 0u || seen.frusta[0].Intersects(chunk.bounds))
                     {
                         continue;
                     }
@@ -394,4 +399,44 @@ TEST(ChunkCullingTests, NothingVisibleDrawsNothing)
     EXPECT_TRUE(culler.Chunks().empty());
     EXPECT_EQ(culler.Statistics().chunksTested, 0);
     EXPECT_EQ(culler.Statistics().cellsTested, 0);
+}
+
+TEST(ChunkCullingTests, OnlyTheActiveLodLevelsChunksAreTestedAndDrawn)
+{
+    // `HOUSE-02405`: a plain chunk, a LOD0-only variant and one for levels 1 and 2, all on screen.
+    // Another level's variant is not this frame's geometry, so it is not even counted as tested.
+    IdRegistry::ResetForTesting();
+    world::ChunkLibrary library;
+    library.cells = {"EXT_YARD"};
+    library.materials = {"MAT_LEAF"};
+    for (const std::uint8_t mask : {world::kEveryLod, std::uint8_t{0b001}, std::uint8_t{0b110}})
+    {
+        world::Chunk chunk;
+        chunk.lodMask = mask;
+        chunk.bounds =
+            Microsoft::Xna::Framework::BoundingBox(Vector3(-1.0F, -1.0F, -6.0F), Vector3(1.0F, 1.0F, -4.0F));
+        library.chunks.push_back(chunk);
+    }
+    const Microsoft::Xna::Framework::Matrix view = Microsoft::Xna::Framework::Matrix::CreateLookAt(
+        Vector3::Zero, Vector3(0.0F, 0.0F, -1.0F), Vector3::Up);
+    const Microsoft::Xna::Framework::Matrix projection =
+        Microsoft::Xna::Framework::Matrix::CreatePerspectiveFieldOfView(1.2F, 16.0F / 9.0F, 0.1F, 100.0F);
+    cnahouse::visibility::VisibleCell cell;
+    cell.cell = cnahouse::util::Intern("EXT_YARD");
+    cell.frusta[0] = ClipFrustum(Microsoft::Xna::Framework::BoundingFrustum(view * projection));
+    cell.frustumCount = 1;
+
+    ChunkCuller culler(library);
+    const auto drawn = [&](int level)
+    {
+        culler.SetLodLevel(level);
+        culler.Cull(std::span<const cnahouse::visibility::VisibleCell>(&cell, 1));
+        EXPECT_EQ(culler.Statistics().chunksTested, culler.Statistics().chunksDrawn);
+        return std::vector<std::uint32_t>(culler.Chunks().begin(), culler.Chunks().end());
+    };
+    EXPECT_EQ(drawn(0), (std::vector<std::uint32_t>{0u, 1u})) << "High draws LOD0";
+    EXPECT_EQ(drawn(1), (std::vector<std::uint32_t>{0u, 2u})) << "Web draws its variant";
+    EXPECT_EQ(drawn(2), (std::vector<std::uint32_t>{0u, 2u})) << "Android shares the finest one authored";
+    EXPECT_EQ(drawn(-1), drawn(0)) << "Ultra's negative bias clamps to LOD0";
+    EXPECT_EQ(drawn(5), drawn(2)) << "a bias past the authored levels clamps to the coarsest";
 }

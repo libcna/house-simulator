@@ -1202,6 +1202,18 @@ namespace cnahouse::app
         if (control == ui::SettingsControl::Quality)
         {
             quality_ = rendering::Restrict(rendering::SettingsFor(settings_.quality), platform_, tier_);
+            if (blockoutCells_ != nullptr)
+            {
+                // `HOUSE-02405`: the new preset's vegetation LOD level replaces the resident one.
+                if (auto relevelled = blockoutCells_->SetLodLevel(quality_.lodBias); !relevelled)
+                {
+                    Log::Error(LogCat::Content,
+                               "the {} preset's geometry could not be uploaded: {} ({})",
+                               QualityPresetName(settings_.quality),
+                               relevelled.Error().Message(),
+                               relevelled.Error().Context());
+                }
+            }
             Log::Info(LogCat::Rendering,
                       "settings quality {}: shadows {}, particles {}, view {:.2f}x, lod {:+d}, "
                       "anisotropy {}x, post-processing {}",
@@ -1468,7 +1480,8 @@ namespace cnahouse::app
             return;
         }
         blockoutChunks_ = std::make_unique<world::ChunkLibrary>(std::move(*library));
-        blockoutCells_ = std::make_unique<world::CellRuntime>(getGraphicsDeviceProperty(), *blockoutChunks_);
+        blockoutCells_ = std::make_unique<world::CellRuntime>(
+            getGraphicsDeviceProperty(), *blockoutChunks_, quality_.lodBias);
 
         std::size_t failed = 0;
         for (const std::string& cell : blockoutChunks_->cells)
@@ -2245,6 +2258,7 @@ namespace cnahouse::app
         visibility_->Update(frame);
         if (chunkCuller_.has_value())
         {
+            chunkCuller_->SetLodLevel(quality_.lodBias);
             chunkCuller_->Cull(visibility_->Visible());
             CullExterior();
         }
@@ -2343,7 +2357,8 @@ namespace cnahouse::app
         // point, because its GEOMETRY is still tested against the cones of the ones it did reach.
         exteriorChunks_.clear();
         exteriorCones_.clear();
-        if (!exteriorScene_.has_value() || exteriorScene_->Empty() || !world_.has_value())
+        if (!exteriorScene_.has_value() || exteriorScene_->Empty() || !world_.has_value() ||
+            blockoutChunks_ == nullptr)
         {
             return;
         }
@@ -2352,10 +2367,18 @@ namespace cnahouse::app
         {
             return;
         }
-        exteriorCuller_.Cull(exteriorScene_->bvh, exteriorCones_, view_.Camera().Pose().eye);
+        exteriorCuller_.Cull(
+            exteriorScene_->bvh, exteriorCones_, view_.Camera().Pose().eye, quality_.viewDistance);
+        // Another preset's vegetation LOD variant is in the hierarchy but not in this frame
+        // (`HOUSE-02405`); leaving it out here keeps the added count equal to what is drawn.
+        const std::uint8_t lodBit = world::LodBit(quality_.lodBias);
         for (const std::uint32_t instance : exteriorCuller_.Instances())
         {
-            exteriorChunks_.push_back(exteriorScene_->ChunkOf(instance));
+            const std::uint32_t chunk = exteriorScene_->ChunkOf(instance);
+            if ((blockoutChunks_->chunks[chunk].lodMask & lodBit) != 0u)
+            {
+                exteriorChunks_.push_back(chunk);
+            }
         }
         std::sort(exteriorChunks_.begin(), exteriorChunks_.end());
     }

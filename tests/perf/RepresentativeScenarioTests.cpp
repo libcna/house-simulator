@@ -1,16 +1,19 @@
 // SPDX-License-Identifier: MIT
 //
-// `HOUSE-02402`: the reduced plan's eight fixed performance scenarios. This harness reports
-// measurements; `HOUSE-02403` records the reference baseline and `HOUSE-02404` owns any optimisation
-// demanded by it. Keeping those decisions out of this file is what prevents a busy CI worker from
-// turning a useful measurement into a flaky release gate.
+// `HOUSE-02402`: the reduced plan's eight fixed performance scenarios, run under each shipped
+// preset since `HOUSE-02405`. This harness reports measurements; `HOUSE-02403` records the
+// reference baseline and `HOUSE-02404` owns any optimisation demanded by it. Keeping those decisions out of
+// this file is what prevents a busy CI worker from turning a useful measurement into a flaky release gate.
 #include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstdio>
+#include <map>
 #include <ostream>
 #include <string>
 #include <string_view>
+#include <tuple>
+#include <utility>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -20,6 +23,9 @@
 #include "cnahouse/app/Settings.hpp"
 #include "cnahouse/debug/Counters.hpp"
 #include "cnahouse/player/IInputSource.hpp"
+#include "cnahouse/visibility/RenderList.hpp"
+#include "cnahouse/world/ChunkData.hpp"
+#include "cnahouse/world/ChunkReader.hpp"
 
 namespace
 {
@@ -45,6 +51,36 @@ namespace
     void PrintTo(const Scenario& scenario, std::ostream* output)
     {
         *output << scenario.id;
+    }
+
+    /// `HOUSE-02405`: each shipped preset at the resolution its platform renders, with the budget
+    /// `cna-house.md` §71 gives it. Draw calls and triangles are deterministic for a fixed camera.
+    /// High's are the §71.6 hard limits and are asserted; the Web and Android counts are reported
+    /// with a verdict, because fitting them is the content work of `HOUSE-02898` and `HOUSE-03037`.
+    /// Frame costs are always reported, never asserted: timing on a shared machine is a
+    /// measurement to record, not a gate that fails on someone else's compiler.
+    struct Preset
+    {
+        const char* id;
+        QualityPreset quality;
+        int width;
+        int height;
+        double cpuBudgetMs;
+        double gpuBudgetMs;
+        double drawBudget;
+        double triangleBudget;
+        bool hardCountLimits;
+    };
+
+    constexpr std::array<Preset, 3> kPresets{{
+        {"High", QualityPreset::High, 1920, 1080, 9.5, 14.0, 1800.0, 3'400'000.0, true},
+        {"Web", QualityPreset::Medium, 1280, 720, 33.0, 33.0, 500.0, 900'000.0, false},
+        {"Android", QualityPreset::Low, 1280, 720, 33.0, 33.0, 400.0, 700'000.0, false},
+    }};
+
+    void PrintTo(const Preset& preset, std::ostream* output)
+    {
+        *output << preset.id;
     }
 
     constexpr std::array<Scenario, 8> kScenarios{{
@@ -99,9 +135,52 @@ namespace
         return total;
     }
 
-    class RepresentativeScenarioTests : public testing::TestWithParam<Scenario>
+    using ScenarioAtPreset = std::tuple<Scenario, Preset>;
+
+    class RepresentativeScenarioTests : public testing::TestWithParam<ScenarioAtPreset>
     {
     };
+
+    /// The last frame's static draws grouped by `cell:material`, largest first: where a preset's
+    /// triangles actually go, so a miss names its cause rather than only its size.
+    void PrintHeaviest(const cnahouse::visibility::RenderList& list,
+                       const cnahouse::world::ChunkLibrary& library)
+    {
+        std::map<std::string, std::pair<double, int>> groups;
+        std::map<std::string, int> cells;
+        for (const cnahouse::visibility::RenderItem& item : list.Items())
+        {
+            if (item.geometry >= library.chunks.size())
+            {
+                continue;
+            }
+            const cnahouse::world::Chunk& chunk = library.chunks[item.geometry];
+            ++cells[library.cells[chunk.cell]];
+            auto& group = groups[library.cells[chunk.cell] + ":" + library.materials[chunk.material]];
+            group.first += static_cast<double>(chunk.indexCount) / 3.0;
+            ++group.second;
+        }
+        std::vector<std::pair<std::string, std::pair<double, int>>> sorted(groups.begin(), groups.end());
+        std::sort(sorted.begin(),
+                  sorted.end(),
+                  [](const auto& a, const auto& b) { return a.second.first > b.second.first; });
+        for (std::size_t i = 0; i < std::min<std::size_t>(sorted.size(), 8u); ++i)
+        {
+            std::printf("[ heaviest ] %9.0f triangles in %2d draw(s)  %s\n",
+                        sorted[i].second.first,
+                        sorted[i].second.second,
+                        sorted[i].first.c_str());
+        }
+        std::vector<std::pair<std::string, int>> byCell(cells.begin(), cells.end());
+        std::sort(
+            byCell.begin(), byCell.end(), [](const auto& a, const auto& b) { return a.second > b.second; });
+        std::string busiest;
+        for (std::size_t i = 0; i < std::min<std::size_t>(byCell.size(), 10u); ++i)
+        {
+            busiest += " " + byCell[i].first + "=" + std::to_string(byCell[i].second);
+        }
+        std::printf("[ heaviest ] draws by cell:%s\n", busiest.c_str());
+    }
 
     class NeutralInput final : public cnahouse::player::IInputSource
     {
@@ -122,14 +201,15 @@ namespace
         cnahouse::player::InputState state_;
     };
 
-    std::string ScenarioName(const testing::TestParamInfo<Scenario>& parameter)
+    std::string ScenarioName(const testing::TestParamInfo<ScenarioAtPreset>& parameter)
     {
-        return parameter.param.id;
+        return std::string(std::get<0>(parameter.param).id) + "_" + std::get<1>(parameter.param).id;
     }
 
-    TEST_P(RepresentativeScenarioTests, ReportsHighTierFrameCost)
+    TEST_P(RepresentativeScenarioTests, MeetsItsPresetBudget)
     {
-        const Scenario& scenario = GetParam();
+        const Scenario& scenario = std::get<0>(GetParam());
+        const Preset& preset = std::get<1>(GetParam());
 
         Options options;
         options.scene = "walk";
@@ -139,16 +219,16 @@ namespace
         options.freezeTime = true;
         options.weather = scenario.weather;
         options.noAudio = true;
-        options.quality = QualityPreset::High;
+        options.quality = preset.quality;
         options.tier = RenderTier::S;
         options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
         options.effectRoot = CNAHOUSE_TEST_EFFECT_ROOT;
 
         Settings settings = Settings::Defaults();
-        settings.backBufferWidth = 1920;
-        settings.backBufferHeight = 1080;
+        settings.backBufferWidth = preset.width;
+        settings.backBufferHeight = preset.height;
         settings.verticalSync = false;
-        settings.quality = QualityPreset::High;
+        settings.quality = preset.quality;
 
         CnaHouseGame game(options, settings);
         // A fixed camera must not consume the owner's real mouse while this window is visible.
@@ -186,29 +266,52 @@ namespace
         ASSERT_GT(drawCalls, 0.0);
         ASSERT_GT(triangles, 0.0);
 
-        std::printf("[ scenario ] %s — %s\n"
-                    "[ scenario ] %s\n"
-                    "[ scenario ] 1920x1080 / Tier S / High / vsync off / %zu warm-up + %zu samples\n"
-                    "[ scenario ] draw calls %.0f average; triangles %.0f average\n"
-                    "[ scenario ] CPU %.3f ms (updates %.3f + render submit %.3f, submit p95 %.3f)\n"
-                    "[ scenario ] GPU completion %.3f ms median, %.3f ms p95\n",
-                    scenario.id,
-                    scenario.description,
-                    game.GetPlatform().Summary().c_str(),
-                    kWarmUp,
-                    kMeasured,
-                    drawCalls,
-                    triangles,
-                    cpuTotal,
-                    cpuUpdate,
-                    submitMedian,
-                    submitP95,
-                    gpuMedian,
-                    gpuP95);
+        std::printf(
+            "[ scenario ] %s — %s\n"
+            "[ scenario ] %s\n"
+            "[ scenario ] %dx%d / Tier S / %s preset / vsync off / %zu warm-up + %zu samples\n"
+            "[ scenario ] draw calls %.0f average (budget %.0f) %s; triangles %.0f average (budget %.0f) %s\n"
+            "[ scenario ] CPU %.3f ms (updates %.3f + render submit %.3f, submit p95 %.3f); "
+            "budget %.1f ms %s\n"
+            "[ scenario ] GPU completion %.3f ms median, %.3f ms p95; budget %.1f ms %s\n",
+            scenario.id,
+            scenario.description,
+            game.GetPlatform().Summary().c_str(),
+            preset.width,
+            preset.height,
+            preset.id,
+            kWarmUp,
+            kMeasured,
+            drawCalls,
+            preset.drawBudget,
+            drawCalls <= preset.drawBudget ? "within" : "OVER",
+            triangles,
+            preset.triangleBudget,
+            triangles <= preset.triangleBudget ? "within" : "OVER",
+            cpuTotal,
+            cpuUpdate,
+            submitMedian,
+            submitP95,
+            preset.cpuBudgetMs,
+            cpuTotal <= preset.cpuBudgetMs ? "within" : "OVER",
+            gpuMedian,
+            gpuP95,
+            preset.gpuBudgetMs,
+            gpuMedian <= preset.gpuBudgetMs ? "within" : "OVER");
+        const auto library = cnahouse::world::ChunkReader::ReadFromTitle("content/world/chunks.bin");
+        if (library)
+        {
+            PrintHeaviest(game.RenderListForTesting(), library.Value());
+        }
+        if (preset.hardCountLimits)
+        {
+            EXPECT_LE(drawCalls, preset.drawBudget) << preset.id << " draw-call budget";
+            EXPECT_LE(triangles, preset.triangleBudget) << preset.id << " triangle budget";
+        }
     }
 
     INSTANTIATE_TEST_SUITE_P(EightFixedScenarios,
                              RepresentativeScenarioTests,
-                             testing::ValuesIn(kScenarios),
+                             testing::Combine(testing::ValuesIn(kScenarios), testing::ValuesIn(kPresets)),
                              ScenarioName);
 } // namespace

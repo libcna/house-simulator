@@ -78,6 +78,12 @@ from layout_io import LayoutError  # noqa: E402
 
 MAGIC = b"CCHK"
 VERSION = 1
+#: `HOUSE-02405`: header flag bit 0 -- one LOD mask byte per chunk follows the last chunk.
+FLAG_LOD_MASKS = 0x1
+#: A chunk's LOD mask: bit N set means it is drawn at vegetation LOD level N (§71.3's preset LOD
+#: bias, 0 High, 1 Web, 2 Android). Everything that has no authored LOD is drawn at every level.
+EVERY_LOD = 0b111
+LOD_LEVELS = (0, 1, 2)
 
 #: §17.4's two limits.
 MAX_CHUNKS_PER_CELL = 6
@@ -983,14 +989,36 @@ SKINNED_CLASSES = {"skin", "fur"}
 EPS = 1e-6
 
 
-def _is_auxiliary_node(document: dict, node: dict) -> bool:
-    """Collision and authored LOD nodes are not part of the cell's LOD0 static batch."""
+def _node_lod(document: dict, node: dict) -> int | None:
+    """An authored node's LOD level: 0 for ordinary geometry, N for `_LODN`, None for `_COL`."""
     names = [str(node.get("name", ""))]
     mesh_index = node.get("mesh")
     if isinstance(mesh_index, int) and 0 <= mesh_index < len(document.get("meshes", [])):
         names.append(str(document["meshes"][mesh_index].get("name", "")))
-    return any(name.endswith("_COL") or re.search(r"_LOD[1-9][0-9]*$", name)
-               for name in names)
+    if any(name.endswith("_COL") for name in names):
+        return None
+    for name in names:
+        match = re.search(r"_LOD([1-9][0-9]*)$", name)
+        if match:
+            return int(match.group(1))
+    return 0
+
+
+def _is_auxiliary_node(document: dict, node: dict) -> bool:
+    """Collision and authored LOD nodes are not part of the cell's LOD0 static batch."""
+    return _node_lod(document, node) != 0
+
+
+def lod_masks(available: set[int]) -> dict[int, int]:
+    """Which LOD levels each authored variant is drawn at: the finest one at or below each level.
+
+    An asset with only `_LOD1` draws it at levels 1 and 2 rather than nothing at level 2, and one
+    with no LOD at all keeps `EVERY_LOD`, so its chunks are exactly what they were.
+    """
+    masks = {lod: 0 for lod in available}
+    for level in LOD_LEVELS:
+        masks[max(lod for lod in available if lod <= level)] |= 1 << level
+    return {lod: mask for lod, mask in masks.items() if mask}
 
 
 # ================================================================================ reading geometry
@@ -1062,8 +1090,11 @@ def read_geometry(path: Path) -> dict:
             "triangles": triangles, "hasUv1": has_uv1}
 
 
-def read_geometry_by_material(path: Path) -> dict[str, dict]:
+def read_geometry_by_material(path: Path, lod: int = 0) -> dict[str, dict]:
     """Read a prop as one welded mesh per source material, excluding `_COL` and LOD nodes.
+
+    @p lod above zero reads that authored `_LODN` variant instead, and returns nothing when the
+    asset has none (`HOUSE-02405`).
 
     Static chunks carry project material ids, not glTF material records.  A manifest
     `materialMap` supplies the explicit bridge; retaining the source split here preserves a
@@ -1077,7 +1108,7 @@ def read_geometry_by_material(path: Path) -> dict[str, dict]:
     groups: dict[str, list[dict]] = {}
 
     for index, node in enumerate(document.get("nodes", [])):
-        if "mesh" not in node or _is_auxiliary_node(document, node):
+        if "mesh" not in node or _node_lod(document, node) != lod:
             continue
         matrix = transforms[index]
         for primitive in document["meshes"][node["mesh"]].get("primitives", []):
@@ -1139,7 +1170,7 @@ def read_geometry_by_material(path: Path) -> dict[str, dict]:
         return merged
 
     result = {name: merge(parts) for name, parts in groups.items()}
-    if not result:
+    if not result and lod == 0:
         raise LayoutError(f"{path.name}: no renderable LOD0 geometry (only `_COL`/LOD nodes?)")
     return result
 
@@ -1383,13 +1414,14 @@ def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=(),
     geometry_cache: dict[tuple[str, str | None], dict] = {}
     groups: dict[tuple[str, tuple], list[dict]] = {}
     stats = {"props": 0, "dynamic": 0, "vegetationGroups": 0, "vegetationInstances": 0,
+             "vegetationLodVariants": 0,
              "split": 0, "primitiveSplit": 0, "wide": 0,
              "cellsOverChunkLimit": [], "materialsPerCell": {},
              "shellFiles": 0, "exteriorFiles": 0, "shellLightmapped": 0, "shellSurfaces": 0, "shellUnplaced": {}, "shellDynamicReceivers": 0,
              "shellEmpty": 0}
 
-    def source_meshes(identifier: str, asset_id: str, material_override: str | None):
-        """Resolve one authored asset to its LOD0 source-material meshes.
+    def source_meshes(identifier: str, asset_id: str, material_override: str | None, lod: int = 0):
+        """Resolve one authored asset to its LOD0 (or @p lod) source-material meshes.
 
         Props and vegetation use the same approved manifest bridge. Keeping that bridge here
         means exterior planting cannot bypass provenance by naming a loose file, and it cannot
@@ -1412,9 +1444,9 @@ def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=(),
             raise LayoutError(
                 f"{identifier!r} has no `material` override and asset {asset_id!r} has no "
                 "`materialMap` in assets.manifest.json")
-        cache_key = (asset_id, "source-materials")
+        cache_key = (asset_id, "source-materials", lod)
         if cache_key not in geometry_cache:
-            geometry_cache[cache_key] = read_geometry_by_material(path)
+            geometry_cache[cache_key] = read_geometry_by_material(path, lod)
         return asset, path, list(geometry_cache[cache_key].items())
 
     def canonical_material(identifier: str, asset: dict, source_material: str | None,
@@ -1510,38 +1542,59 @@ def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=(),
     # `HOUSE-00772`: exterior vegetation was authored in `layout.exterior.json` years before the
     # canonical renderer consumed it. Batch every deterministic placement through the same stock
     # XNA material/chunk path as static props: opaque bark uses BasicEffect, leaves and flowers use
-    # AlphaTestEffect, and `_LOD1`/`_LOD2` nodes remain auxiliary rather than being drawn on top of
-    # LOD0. A synthetic per-instance sub-range id preserves the existing BVH's partial culling.
+    # AlphaTestEffect, and `_LOD1`/`_LOD2` nodes are never drawn on top of LOD0. A synthetic
+    # per-instance sub-range id preserves the existing BVH's partial culling.
+    #
+    # `HOUSE-02405`: those authored LODs become chunks of their own, tagged with the LOD levels
+    # they are drawn at, because §71.3's lower presets are defined by their LOD bias and measured
+    # vegetation is what puts their scenes over §71.4/§71.5's triangle budgets. A variant's
+    # material is filed in the cell that material's LOD0 chose, so the three are one planting.
     levels = layout_io.by_id(layout_io.rows(layout, "levels"), "level")
     vegetation = (layout.get("exterior") or {}).get("vegetation") or []
     fallback_outdoors = house_exterior_cell(cells) if vegetation else None
     for planting in sorted(vegetation, key=lambda row: row["id"]):
         stats["vegetationGroups"] += 1
-        asset, path, meshes = source_meshes(
-            f"vegetation group {planting['id']}", planting["asset"], None)
+        variants = {}
+        for lod in LOD_LEVELS:
+            asset, path, meshes = source_meshes(
+                f"vegetation group {planting['id']}", planting["asset"], None, lod)
+            if meshes:
+                variants[lod] = meshes
+        masks = lod_masks(set(variants))
+        if len(masks) > 1:
+            stats["vegetationLodVariants"] += len(masks) - 1
         instances = planting.get("instances") or []
         group_scale = float(planting.get("scale", 1.0))
         stats["vegetationInstances"] += len(instances)
         for index, instance in enumerate(instances):
             instance_id = f"{planting['id']}:{index:03d}"
-            for source_material, mesh in meshes:
-                material_id, material = canonical_material(
-                    f"vegetation instance {instance_id}", asset, source_material, None)
-                layout_id = effect_layout(material)
-                if layout_id == LAYOUT_DUAL and not mesh["hasUv1"]:
-                    raise LayoutError(
-                        f"vegetation instance {instance_id!r} is drawn with DualTextureEffect "
-                        f"(material {material_id!r}) but {path.name} has no TEXCOORD_1")
-                placed = place(mesh, [float(c) for c in instance["position"]],
-                               float(instance.get("yawDeg", 0.0)),
-                               group_scale * float(instance.get("scale", 1.0)))
-                cell_id = place_outdoors(cells, bounds_of(placed["positions"]),
-                                         fallback_outdoors, levels)
-                cell = cells[cell_id]
-                key = (cell_id, group_key({"id": instance_id}, cell, material))
-                groups.setdefault(key, []).append({
-                    "prop": f"{instance_id}:{source_material}", "mesh": placed,
-                    "layout": layout_id, "material": material_id})
+            homes: dict[str | None, str] = {}
+            for lod, mask in sorted(masks.items()):
+                for source_material, mesh in variants[lod]:
+                    material_id, material = canonical_material(
+                        f"vegetation instance {instance_id}", asset, source_material, None)
+                    layout_id = effect_layout(material)
+                    if layout_id == LAYOUT_DUAL and not mesh["hasUv1"]:
+                        raise LayoutError(
+                            f"vegetation instance {instance_id!r} is drawn with DualTextureEffect "
+                            f"(material {material_id!r}) but {path.name} has no TEXCOORD_1")
+                    placed = place(mesh, [float(c) for c in instance["position"]],
+                                   float(instance.get("yawDeg", 0.0)),
+                                   group_scale * float(instance.get("scale", 1.0)))
+                    # Each source material is filed where its LOD0 stands, as before variants
+                    # existed; a coarser variant of it joins that cell.
+                    home = homes.get(source_material)
+                    if home is None:
+                        home = place_outdoors(cells, bounds_of(placed["positions"]),
+                                              fallback_outdoors, levels)
+                        homes[source_material] = home
+                    cell = cells[home]
+                    key = group_key({"id": instance_id}, cell, material)
+                    if mask != EVERY_LOD:
+                        key += (mask,)
+                    groups.setdefault((home, key), []).append({
+                        "prop": f"{instance_id}:{source_material}", "mesh": placed,
+                        "layout": layout_id, "material": material_id})
 
     for member, key in _shell_members(shell_dirs, cells, materials, stats):
         groups.setdefault(key, []).append(member)
@@ -1553,12 +1606,17 @@ def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=(),
     for (cell_id, key) in sorted(groups, key=lambda k: (k[0], k[1])):
         members = groups[(cell_id, key)]
         for chunk in _split(members, stats):
-            chunk.update({"cell": cell_id, "material": key[1], "key": key})
+            chunk.update({"cell": cell_id, "material": key[1], "key": key,
+                          "lodMask": key[5] if len(key) > 5 else EVERY_LOD})
             chunks.append(chunk)
 
+    # A cell's budget is what one preset draws there: the chunks at its busiest LOD level, not
+    # every variant at once. Without authored LODs this is exactly the plain chunk count.
     per_cell: dict[str, int] = {}
-    for chunk in chunks:
-        per_cell[chunk["cell"]] = per_cell.get(chunk["cell"], 0) + 1
+    for cell_id in {chunk["cell"] for chunk in chunks}:
+        per_cell[cell_id] = max(sum(1 for chunk in chunks
+                                    if chunk["cell"] == cell_id and chunk["lodMask"] & (1 << level))
+                                for level in LOD_LEVELS)
     # `HOUSE-00487`: over the TARGET is not automatically an error, but every one of them has to
     # be declared, none may exceed its own ceiling, and an exception nobody needs any more is a
     # failure too -- otherwise the list quietly becomes unlimited fragmentation.
@@ -1983,9 +2041,10 @@ def serialise(built: dict) -> bytes:
     cell_index = {name: i for i, name in enumerate(cells)}
     material_index = {name: i for i, name in enumerate(materials)}
 
+    masked = any(chunk.get("lodMask", EVERY_LOD) != EVERY_LOD for chunk in chunks)
     out = bytearray()
     out += MAGIC
-    out += struct.pack("<II", VERSION, 0)
+    out += struct.pack("<II", VERSION, FLAG_LOD_MASKS if masked else 0)
     out += bc._string(built["worldHash"])
     out += struct.pack("<I", len(cells))
     for name in cells:
@@ -2011,6 +2070,8 @@ def serialise(built: dict) -> bytes:
             out += bc._string(sub["prop"])
             out += struct.pack("<II", sub["indexStart"], sub["indexCount"])
             out += struct.pack("<6f", *sub["bounds"])
+    if masked:
+        out += bytes(chunk.get("lodMask", EVERY_LOD) for chunk in chunks)
     return bytes(out)
 
 
@@ -2038,8 +2099,8 @@ def read_back(data: bytes) -> dict:
     version, flags = unpack("<II")
     if version != VERSION:
         raise LayoutError(f"chunks.bin is version {version}; this reader knows {VERSION}")
-    if flags:
-        raise LayoutError(f"chunks.bin sets unknown flag bits {flags:#x}")
+    if flags & ~FLAG_LOD_MASKS:
+        raise LayoutError(f"chunks.bin sets unknown flag bits {flags & ~FLAG_LOD_MASKS:#x}")
     world_hash = text()
     (cell_count,) = unpack("<I")
     cells = [text() for _ in range(cell_count)]
@@ -2074,7 +2135,13 @@ def read_back(data: bytes) -> dict:
         chunks.append({"cell": cells[cell], "material": materials[material],
                        "layout": layout_id, "indexBits": 32 if wide else 16,
                        "bounds": bounds, "vertices": vertices, "indices": indices,
-                       "subRanges": sub_ranges})
+                       "subRanges": sub_ranges, "lodMask": EVERY_LOD})
+    if flags & FLAG_LOD_MASKS:
+        for chunk in chunks:
+            (mask,) = unpack("<B")
+            if not 1 <= mask <= EVERY_LOD:
+                raise LayoutError(f"chunk LOD mask {mask:#x} names no LOD level 0-2")
+            chunk["lodMask"] = mask
     if at != len(data):
         raise LayoutError(f"{len(data) - at} bytes left over after the last chunk")
     return {"worldHash": world_hash, "cells": cells, "materials": materials, "chunks": chunks}
@@ -2938,8 +3005,22 @@ def selftest() -> int:
         require(all(chunk["cell"] == "EXT_YARD" for chunk in planted["chunks"])
                 and all(len(chunk["subRanges"]) == 2 for chunk in planted["chunks"]),
                 "placements are filed by their bounds and each remains an outdoor BVH sub-range")
-        require(sum(len(chunk["indices"]) // 3 for chunk in planted["chunks"]) == 48,
-                "only LOD0 is batched for two placements; the fixture's LOD node is excluded")
+        level_triangles = [sum(len(chunk["indices"]) // 3 for chunk in planted["chunks"]
+                               if chunk["lodMask"] & (1 << level)) for level in LOD_LEVELS]
+        require(level_triangles[0] == 48,
+                f"LOD level 0 draws only LOD0 for two placements; the fixture's LOD node is "
+                f"never drawn on top of it ({level_triangles})")
+        require({chunk["lodMask"] for chunk in planted["chunks"]} == {0b001, 0b110}
+                and planted["stats"]["vegetationLodVariants"] == 1,
+                "HOUSE-02405: its `_LOD1` node becomes its own chunks, drawn at levels 1 and 2 "
+                "(an asset with no `_LOD2` keeps its finest variant at the coarsest level)")
+        require(lod_masks({0}) == {0: EVERY_LOD} and lod_masks({0, 1, 2}) == {0: 1, 1: 2, 2: 4},
+                "an asset without authored LODs keeps every level; a full set assigns one each")
+        masked = read_back(serialise(planted))
+        require([chunk["lodMask"] for chunk in masked["chunks"]]
+                == [chunk["lodMask"] for chunk in planted["chunks"]]
+                and struct.unpack_from("<I", serialise(planted), 8)[0] == FLAG_LOD_MASKS,
+                "the LOD masks round trip through the header flag and trailing table")
         exterior_file.unlink()
 
         shell_lm = workspace / "shell-lm"

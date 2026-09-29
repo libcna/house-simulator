@@ -238,6 +238,41 @@ TEST(ChunkReaderTests, AReservedHeaderFlagIsRefusedRatherThanMasked)
     EXPECT_EQ(library.Error().Code(), ErrorCode::VersionMismatch);
 }
 
+TEST(ChunkReaderTests, TheLodMaskTableFollowsTheLastChunk)
+{
+    // `HOUSE-02405`: header flag bit 0 announces one mask byte per chunk after the chunks.
+    Bytes bytes = Header();
+    bytes.Poke(8, static_cast<std::uint8_t>(ChunkReader::kFlagLodMasks));
+    Tables(bytes);
+    bytes.U32(2u);
+    OneChunk(bytes);
+    OneChunk(bytes, 1u, 1u);
+    bytes.U8(0b001u).U8(0b110u);
+    const auto library = ReadOf(bytes);
+    ASSERT_TRUE(library) << library.Error().Message();
+    ASSERT_EQ(library->chunks.size(), 2u);
+    EXPECT_EQ(library->chunks[0].lodMask, 0b001u);
+    EXPECT_EQ(library->chunks[1].lodMask, 0b110u);
+    EXPECT_EQ(ReadOf(WellFormed())->chunks[0].lodMask, cnahouse::world::kEveryLod)
+        << "a file without the table draws every chunk at every level";
+}
+
+TEST(ChunkReaderTests, ALodMaskNamingNoLevelIsRefused)
+{
+    for (const std::uint8_t mask : {std::uint8_t{0u}, std::uint8_t{0b1000u}})
+    {
+        Bytes bytes = Header();
+        bytes.Poke(8, static_cast<std::uint8_t>(ChunkReader::kFlagLodMasks));
+        Tables(bytes);
+        bytes.U32(1u);
+        OneChunk(bytes);
+        bytes.U8(mask);
+        const auto library = ReadOf(bytes);
+        ASSERT_FALSE(library) << "mask " << static_cast<int>(mask);
+        EXPECT_EQ(library.Error().Code(), ErrorCode::InvalidData);
+    }
+}
+
 TEST(ChunkReaderTests, AChunkNamingACellThatIsNotThereIsRefused)
 {
     Bytes bytes = Header();

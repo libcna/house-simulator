@@ -32,6 +32,8 @@ namespace cnahouse::world
         static constexpr std::uint32_t kMagic = 0x4B484343u; // 'C','C','H','K' little-endian
         /// @brief The only version this reader accepts.
         static constexpr std::uint32_t kVersion = 1u;
+        /// @brief Header flag: a table of one LOD mask per chunk follows the last chunk.
+        static constexpr std::uint32_t kFlagLodMasks = 0x1u;
         /// @brief A name longer than this is a corrupt length field, not a name.
         static constexpr std::uint32_t kMaxNameBytes = 1024u;
         /// @brief `u16` cell and material indices cannot address more.

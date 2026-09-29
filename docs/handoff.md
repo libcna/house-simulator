@@ -1,30 +1,38 @@
-# Handoff — 2026-09-29 (Round 180 bounded fixes; BL-18 fixed upstream)
+# Handoff — 2026-09-29 (HOUSE-02405 measured presets; Round 180 bounded fixes; BL-18 fixed upstream)
 
-**State.** HOUSE-03683, HOUSE-03574, HOUSE-02714, HOUSE-03631 and HOUSE-02713 are accepted;
-M11 is complete. **25 open MUST / 78 OPT**, nominal **33 h**, pessimistic **50.3 h**
-(1.10 × 33 + 8 h Android + 6 h Web). House Simulator is **not DONE**.
+**State.** HOUSE-03683, HOUSE-03574, HOUSE-02714, HOUSE-03631, HOUSE-02713 and HOUSE-02405 are
+accepted; M10 and M11 are complete. **24 open MUST / 78 OPT**, nominal **31 h**, pessimistic
+**48.1 h** (1.10 × 31 + 8 h Android + 6 h Web). House Simulator is **not DONE**.
 
-**Chosen by.** R1's S1 fix-now exception selected the shed enclosure; the remaining Round-179
-S2s and the lantern S2 found while verifying follow within HOUSE-03631 under R12's bounded
-budget (S1 ≈0.75 h, S2 ≈3.25 h). Evidence: `docs/visual-review/house-03631-fixes.md`.
+**Presets (HOUSE-02405).** `--quality=android|web|high|ultra` (low/medium still accepted). The
+chunk library now cooks the authored `_LOD1`/`_LOD2` vegetation per preset level (flag bit 0, one
+mask byte per chunk, `docs/chunk-format.md` §4b). `CellRuntime` uploads, and `ChunkCuller` and
+the exterior pass keep, only the preset's level (High 94.2 MB as before, Web 70.2, Android 60.8);
+a preset change re-uploads. High is byte-identical. Measured: the view distance alone changed no count in the
+eight scenes; with cooked LOD every Web/Android triangle count fits, and StreetApproach/
+NightOutside draw 509 (Web 500, Android 400) because of interior rooms seen through the front
+windows — noted on HOUSE-02898/03037. `tests/perf` runs 8 scenes × 3 presets; only High's counts
+are asserted. The Medium row (UI "Web") keeps view 0.85× and Medium particles against §71.3's Web
+row (0.7×, Low) because Medium is also the Tier-S/4K desktop auto-detect row; adjust only if the
+browser measurement asks for it. Numbers: `docs/performance-log.md`.
 
 **CNA.** The owner authorized fixing CNA defects found through House work in CNA itself, as
-separate CNA commits (2026-09-29). BL-18 is fixed in CNA `2c70eaf0f` on `next` (**not pushed**):
-aliases read `using Name CNAEXT = ...`, two using-declarations of inherited XNA members drop the
-marker, CNA's strict-surface check covers the headers. The House strict gate is 356 units clean.
+separate CNA commits (2026-09-29). BL-18 is fixed in CNA `2c70eaf0f` on `next` (pushed).
 
-**Render suite.** HOUSE-02713 refreshed all 93 stale references after inspecting each pair;
-the software-GL suite is 59 PASS / 1 opt-in SKIP. It runs on a private Xvfb (offscreen EGL with
-`LIBGL_ALWAYS_SOFTWARE=1` segfaults): `Xvfb :141 -nolisten tcp`, then `DISPLAY=:141
-SDL_VIDEODRIVER=x11 LIBGL_ALWAYS_SOFTWARE=1 build/cnahouse_render_tests`. Stop the Xvfb afterwards.
+**Render suite.** The software-GL suite is 59 PASS / 1 opt-in SKIP after HOUSE-02405 refreshed
+the 27 Low-preset references whose vegetation became LOD2 (each pair inspected). It runs on a
+private Xvfb (offscreen EGL with `LIBGL_ALWAYS_SOFTWARE=1` segfaults): `Xvfb :141 -nolisten tcp`,
+then `DISPLAY=:141 SDL_VIDEODRIVER=x11 LIBGL_ALWAYS_SOFTWARE=1 build/cnahouse_render_tests`. Stop
+the Xvfb afterwards.
 
-**Next MUST.** M13's DONE audit `HOUSE-02781`, then its dependent release tasks; `HOUSE-02405`
-(measured presets) and the Web/Android paths as their `dep:` lines allow.
+**Next MUST.** M13's DONE audit `HOUSE-02781`, then its dependent release tasks, and the
+Web/Android paths as their `dep:` lines allow.
 
-**Verified here.** Unit 1542/1542; hardware-GPU integration 172 PASS / 3 opt-in SKIP / 0 FAIL
-(amdgpu fdinfo proof); culled/unculled render check PASS; `tools/ci/run_checks.sh` green with
-`HOUSE_XNA_STRICT_JOBS=4`. Build rules unchanged: shared `/rv/cnaccache`, `build/` only, six
-compile cores, never the owner's display.
+**Verified here.** Unit 1546/1546; perf 24/24 on the Radeon (amdgpu fdinfo proof); hardware-GPU
+integration 173 PASS / 3 opt-in SKIP / 0 FAIL (run it from the repository root, which ctest does:
+`docs/zones.json` is read relative to it); `tools/ci/run_checks.sh` green with
+`HOUSE_XNA_STRICT_JOBS=4`. Build rules unchanged: shared `/rv/cnaccache`, `build/`/`build-probe/`
+only, six compile cores, never the owner's display.
 
 ---
 

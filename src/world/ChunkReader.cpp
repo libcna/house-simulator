@@ -380,10 +380,10 @@ namespace cnahouse::world
             }
 
             const std::uint32_t flags = reader.ReadUInt32();
-            if (flags != 0u)
+            if ((flags & ~kFlagLodMasks) != 0u)
             {
                 return Bad(ErrorCode::VersionMismatch,
-                           std::format("reserved header flags {:#010x} are set", flags),
+                           std::format("reserved header flags {:#010x} are set", flags & ~kFlagLodMasks),
                            name);
             }
 
@@ -430,6 +430,24 @@ namespace cnahouse::world
                     return chunk.Error();
                 }
                 library.chunks.push_back(std::move(*chunk));
+            }
+            if ((flags & kFlagLodMasks) != 0u)
+            {
+                // `HOUSE-02405`: one mask per chunk, after the last one. A mask naming no level
+                // would be a chunk no preset ever draws, which is a writer gone wrong.
+                for (std::uint32_t i = 0; i < chunkCount; ++i)
+                {
+                    const std::uint8_t mask = reader.ReadByte();
+                    if (mask == 0u || (mask & ~kEveryLod) != 0u)
+                    {
+                        return Bad(ErrorCode::InvalidData,
+                                   std::format("chunk {} has LOD mask {:#04x}, which names no level 0-2",
+                                               i,
+                                               static_cast<unsigned>(mask)),
+                                   name);
+                    }
+                    library.chunks[i].lodMask = mask;
+                }
             }
 
             return library;

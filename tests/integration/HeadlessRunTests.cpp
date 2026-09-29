@@ -93,6 +93,9 @@ namespace
         options.headless = true;
         options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
         options.scene = "blockout";
+        // The counts below are the High preset's: since `HOUSE-02405` the lower presets draw their
+        // own vegetation LOD, and the auto-detected row depends on the build.
+        options.quality = cnahouse::app::QualityPreset::High;
         Settings settings = Settings::Defaults();
         settings.backBufferWidth = 640;
         settings.backBufferHeight = 360;

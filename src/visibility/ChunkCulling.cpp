@@ -25,6 +25,11 @@ namespace cnahouse::visibility
         }
     }
 
+    void ChunkCuller::SetLodLevel(int level) noexcept
+    {
+        lodBit_ = world::LodBit(level);
+    }
+
     void ChunkCuller::Cull(std::span<const VisibleCell> visible)
     {
         drawn_.clear();
@@ -76,8 +81,12 @@ namespace cnahouse::visibility
 
         for (const std::uint32_t index : found->second)
         {
-            ++stats_.chunksTested;
             const world::Chunk& chunk = library_->chunks[index];
+            if ((chunk.lodMask & lodBit_) == 0u)
+            {
+                continue;
+            }
+            ++stats_.chunksTested;
 
             bool seen = false;
             for (std::size_t i = 0; i < cell.frustumCount && !seen; ++i)

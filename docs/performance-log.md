@@ -313,3 +313,38 @@ Web/Android performance remains required and is not claimed complete here.
 Logs: `/tmp/house-current-release-refresh.log`,
 `/tmp/house-02404-{current,repeat2,repeat3}-high.log`, the corresponding per-scene
 logs, and `/tmp/house-02404-hardware-{proof,street}.log`.
+
+### 2026-09-29 — the three quality presets against their own budgets (`HOUSE-02405`)
+
+Release `build-probe/`, OPENGLES3, Tier S, VSync off, real Radeon 780M (a StreetApproach Android
+process proved its own amdgpu client `1021675`, PCI `0000:c3:00.0`, from /proc fdinfo), SDL
+offscreen, EGL surfaceless, no monitor window. Fresh process per case, neutral input, 120 warm-up
+and 600 measured frames. Back buffers as logged: High 1920×1080, Web and Android 1280×720. Budgets
+from `cna-house.md` §71: High 9.5 ms CPU / 14 ms GPU / 1800 draws / 3.4 M triangles; Web 33 ms /
+500 / 900 k; Android 33 ms / 400 / 700 k.
+
+First measured with the view distance applied and no cooked LOD: every count equalled High's,
+so StreetApproach, RearGarden, HeavyRain and NightOutside exceeded both lower presets' triangle
+budgets (1.03–1.34 M). Cooked vegetation LOD levels (`docs/chunk-format.md` §4b) then give:
+
+| Scenario | High draws / tris | Web draws / tris | Android draws / tris | CPU ms H / W / A | GPU median ms H / W / A |
+|---|---|---|---|---|---|
+| Kitchen | 73 / 172,940 | 73 / 172,940 | 73 / 172,940 | 1.45 / 0.87 / 0.87 | 3.08 / 1.93 / 1.92 |
+| Library | 78 / 559,128 | 75 / 399,098 | 71 / 175,418 | 1.81 / 0.88 / 0.82 | 3.63 / 2.03 / 1.77 |
+| MainStair | 67 / 27,315 | 67 / 27,315 | 67 / 27,315 | 1.46 / 0.91 / 1.02 | 3.31 / 1.90 / 1.95 |
+| StreetApproach | 514 / 1,032,474 | **509** / 709,197 | **509** / 591,983 | 3.79 / 3.29 / 3.03 | 5.12 / 4.15 / 3.63 |
+| RearGarden | 376 / 1,198,541 | 367 / 676,301 | 364 / 399,707 | 2.96 / 2.34 / 2.13 | 5.02 / 3.45 / 3.24 |
+| UpperWindow | 85 / 259,255 | 84 / 163,295 | 84 / 103,863 | 1.40 / 0.87 / 0.97 | 3.31 / 1.87 / 1.92 |
+| HeavyRain | 319 / 1,341,378 | 306 / 562,788 | 303 / 282,786 | 2.54 / 2.27 / 1.84 | 5.09 / 3.56 / 2.99 |
+| NightOutside | 514 / 1,035,478 | **509** / 712,201 | **509** / 594,987 | 3.89 / 3.22 / 3.18 | 5.36 / 4.04 / 3.95 |
+
+Uploaded static geometry: High 1,392 chunks / 94.2 MB (unchanged), Web 1,376 / 70.2 MB, Android
+1,373 / 60.8 MB — residency holds only the preset's level. High meets every limit (asserted). Every Web and Android triangle count is within budget. Draw
+calls are within except StreetApproach and NightOutside, 509 against Web's 500 and Android's 400:
+the front windows show the interior rooms behind them (L0_LIVING 28, L2_LIBRARY 18, L0_FOYER 17
+chunks, …); the harness prints the heaviest cells. Fitting those is `HOUSE-02898`/`HOUSE-03037`'s
+content reduction. The desktop times only show the presets' cost on this GPU; Web and Android
+targets are measured in Chrome and on the device by those tasks.
+
+Logs: scratchpad `perf-02405b.log` (the table; an earlier run had identical counts),
+`perf-02405-proof.log`, `perf-02405-nolod.log`.

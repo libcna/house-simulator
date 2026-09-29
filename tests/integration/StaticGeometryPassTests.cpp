@@ -219,6 +219,42 @@ namespace
         EXPECT_EQ(states, 2u);
     }
 
+    TEST(StaticGeometryPassTests, OnlyThePresetsLodLevelIsResident)
+    {
+        // `HOUSE-02405`: A_ROOM holds a plain chunk and two vegetation variants (LOD0 only, and
+        // levels 1-2). A variant for another preset is GPU memory no frame of the session reads.
+        ChunkLibrary library = TinyHouse();
+        library.chunks[1].lodMask = 0b001u;
+        library.chunks.push_back(library.chunks[0]);
+        library.chunks.back().lodMask = 0b110u;
+        std::vector<std::vector<std::uint32_t>> resident;
+
+        cnahouse::testsupport::DeviceHost host(
+            [&](Gfx::GraphicsDevice& device)
+            {
+                CellRuntime cells(device, library, 1);
+                ASSERT_TRUE(cells.Load("A_ROOM"));
+                const auto snapshot = [&]
+                {
+                    resident.emplace_back(cells.ResidentChunkIndices().begin(),
+                                          cells.ResidentChunkIndices().end());
+                };
+                snapshot();
+                ASSERT_TRUE(cells.SetLodLevel(0));
+                snapshot();
+                ASSERT_TRUE(cells.SetLodLevel(-1)) << "Ultra's bias is LOD0 and changes nothing";
+                snapshot();
+                EXPECT_EQ(cells.Find(3u), nullptr) << "the released variant still has buffers";
+            });
+        host.Run();
+        ASSERT_TRUE(host.Ran());
+        ASSERT_EQ(host.Failure(), "");
+        ASSERT_EQ(resident.size(), 3u);
+        EXPECT_EQ(resident[0], (std::vector<std::uint32_t>{0u, 3u})) << "Web uploads its own variant";
+        EXPECT_EQ(resident[1], (std::vector<std::uint32_t>{0u, 1u})) << "High re-uploads LOD0";
+        EXPECT_EQ(resident[2], resident[1]);
+    }
+
     TEST(StaticGeometryPassTests, AnEmptyListIsNotWorkToDo)
     {
         const ChunkLibrary library = TinyHouse();

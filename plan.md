@@ -12,9 +12,9 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers and a reusable kit), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (2026-09-22 reduction, retained breadth and maintenance mode; its former hour ceiling is superseded below) |
 | Scope policy | The owner explicitly superseded the former 280-hour ceiling on 2026-09-27 and requested further targeted corrections and a filming tour. Keep MUST/OPT boundaries explicit; do not infer other features |
-| Active plan | **25 open MUST tasks** in 16 milestones. M11's review, bounded fix pass and golden refresh are complete; measured presets, platform and release work remain. Every active task's title and acceptance states the current work |
-| Estimate to DONE | Current open-task sum **33 agent-hours**; pessimistic **50.3 h** = 1.10 × 33 + the still-active Android/Web reserves (8 + 6 h); High performance reserve R-C is retired after repeatable acceptance. The old **44.84 / 52.75 / 76.03 h** table below is historical, not a current forecast or scheduling gate. Per-task `est:` remains for task sizing; platform/dependency waiting is not promised wall-clock completion |
-| Current gate | **G5, M7, M8, M9, M11 and M12 passed; M13's DONE audit is next. CNA fixed strict-API blocker BL-18 upstream (`2c70eaf0f`), which let `HOUSE-03683`/`03574`/`02714` be accepted. CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator.** Main/attic/basement stairs, garage-loft floor and whole-house lighting are corrected under `HOUSE-03635`/`03638`/`03639`/`03636`; doorway flashes and visibility/wall holes under `HOUSE-03637`/`03640`, including the owner's precise foyer/stair corner-gap screenshot. The existing car family is corrected under `HOUSE-03641`; full GPU filming circuit accepted under `HOUSE-03572`. Normal title/Start audio produces real backend PCM; owner listening accepts all six footstep categories and interior/exterior day/night ambience under `HOUSE-01920`/`01922`. Weather layers and the indoor-rain correction are accepted under `HOUSE-01925`; whole-zone four-state listening passes `HOUSE-01939`. Desktop High scenarios pass three complete current hardware-GPU rounds under `HOUSE-02404`; measured quality presets `HOUSE-02405` remain open |
+| Active plan | **24 open MUST tasks** in 16 milestones. M11's review, bounded fix pass and golden refresh are complete; measured presets, platform and release work remain. Every active task's title and acceptance states the current work |
+| Estimate to DONE | Current open-task sum **31 agent-hours**; pessimistic **48.1 h** = 1.10 × 31 + the still-active Android/Web reserves (8 + 6 h); High performance reserve R-C is retired after repeatable acceptance. The old **44.84 / 52.75 / 76.03 h** table below is historical, not a current forecast or scheduling gate. Per-task `est:` remains for task sizing; platform/dependency waiting is not promised wall-clock completion |
+| Current gate | **G5, M7, M8, M9, M11 and M12 passed; M13's DONE audit is next. CNA fixed strict-API blocker BL-18 upstream (`2c70eaf0f`), which let `HOUSE-03683`/`03574`/`02714` be accepted. CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator.** Main/attic/basement stairs, garage-loft floor and whole-house lighting are corrected under `HOUSE-03635`/`03638`/`03639`/`03636`; doorway flashes and visibility/wall holes under `HOUSE-03637`/`03640`, including the owner's precise foyer/stair corner-gap screenshot. The existing car family is corrected under `HOUSE-03641`; full GPU filming circuit accepted under `HOUSE-03572`. Normal title/Start audio produces real backend PCM; owner listening accepts all six footstep categories and interior/exterior day/night ambience under `HOUSE-01920`/`01922`. Weather layers and the indoor-rain correction are accepted under `HOUSE-01925`; whole-zone four-state listening passes `HOUSE-01939`. Desktop High scenarios pass three complete current hardware-GPU rounds under `HOUSE-02404`; the three presets are measured under `HOUSE-02405` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
 **Read in this order:** [Direction](#direction) → [Non-goals](#non-goals--not-required-for-done) →
@@ -399,7 +399,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M7](#m7--a-compact-environment) — A compact environment | B | 03501–03540 | 0 | `HOUSE-03520` | D5 | 0 |
 | [M8](#m8--atmospheric-audio-essentials) — Atmospheric audio essentials | B | 03541–03570 | 0 | **done** · `HOUSE-01939` | D7 | 0 |
 | [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 0 | **done** · `HOUSE-03574` | D8 | 0 |
-| [M10](#m10--performance-measurement-driven) — Performance, measurement-driven | B | 03601–03630 | 1 | `HOUSE-02405` | D9 | 2 |
+| [M10](#m10--performance-measurement-driven) — Performance, measurement-driven | B | 03601–03630 | 0 | **done** · `HOUSE-02405` | D9 | 0 |
 | [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 0 | **done** · `HOUSE-03631`, `HOUSE-02713` | D1, D2, D4, D6, D8, D9, D11, D13, D14 | 0 |
 | [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 0 | **done** · `HOUSE-03683` | D11 | 0 |
 | [M13](#m13--linux-desktop-release) — Linux desktop release | after M11 | 03701–03720 | 8 | `HOUSE-02797` | D9–D13 | 10.25 |
@@ -1342,12 +1342,13 @@ numbers and no code. No speculative optimisation infrastructure is built (rule R
       blocked: (2026-09-26, measurement environment) The eight fixed-camera scenarios execute, but reference timing is not reproducible while other sessions occupy the CPU/GPU: identical street draw/triangle counts ranged 5.732–16.929 ms CPU and 7.239–18.589 ms GPU median; night CPU ranged 7.056–11.823 ms. System load reached 33.85, with concurrent `wasm-opt` (~805% CPU), multi-process Chrome, multiple `cc1plus` compilers, Blender and `Graphics3DSampl` (~91%). No House or CNA defect is yet established. Retry fresh-process High runs only when competing build/graphics jobs end; choose a ≤4 h technique only for a repeatable House miss, otherwise close with measured passing evidence. `HOUSE-02405` and Android content delivery stay dependency-blocked meanwhile.
       done: (2026-09-28 current acceptance) Fresh Release build-probe/OPENGLES3/Tier-S/1920×1080 content/source, neutral input, no own competing compilation; three full fresh-process rounds of all eight High scenarios pass, with identical per-scene draw/triangle counts. Across 24 measurements CPU ≤7.449 ms against 9.5 ms, GPU completion median ≤8.493 ms against 14 ms, p95 ≤11.408 ms; draws ≤513 against 1800 and triangles ≤1,341,394 against 3.4 million. Additional street repeat verifies the actual amdgpu hardware client and passes at 4.703/6.030 ms CPU/completion. No code/content rendering optimisation, LOD, instancing or other technique is warranted; acceptance (3) closes the task and retires R-C's four-hour reserve. Old contended/moving-camera claims are not improvement evidence. Historical measurement blocker is superseded; HOUSE-02405 is unblocked. Complete unit/integration/static snapshot remains green. Per-scene medians/p95, configuration and logs: docs/performance-log.md.
 
-- [ ] HOUSE-02405 — The three quality presets, each measured against its own budget
+- [x] HOUSE-02405 — The three quality presets, each measured against its own budget
       dep: HOUSE-02404, HOUSE-00157 · sys: rendering · plat: ALL · pri: MUST · zone: all · adv: D9, D10b, D10c · est: 2
       accept: High (desktop), Web and Android presets, selectable with `--quality` and in the Graphics section; each measured on desktop against its documented budget in the harness
       verify: the harness under each preset
       trace: absorbs `HOUSE-02406`, `HOUSE-02407`, `HOUSE-02852` and `HOUSE-02957`
       current: (2026-09-28 source inspection) The UI already labels internal Low/Medium as Android/Web, but CLI/settings names still use low/medium. Only particle quality is consumed by the normal renderer; the existing ExteriorCuller view-distance argument is not supplied. Static cooking explicitly excludes auxiliary LOD meshes. Reuse the current quality table, culler and cooking mechanisms; first measure effective lower profiles before deciding whether additional cooked LOD depth is necessary. No implementation or preset-budget acceptance is claimed yet, and no optional shadow/post-processing work is activated.
+      done: (2026-09-29) `--quality=android|web|high|ultra` (low/medium kept) and settings accept the platform names; the Graphics section already showed them. The view distance reaches the exterior culler, and the chunk library carries cooked vegetation LOD levels 1/2 selected by each preset's `lodBias` (`docs/chunk-format.md` §4b; High is byte-identical); residency uploads only the preset's level (High 94.2 MB unchanged, Web 70.2, Android 60.8) and the culls keep only it, so F3 counts match the draws. The harness runs 8 scenes × 3 presets at their resolutions: High meets every limit; every Web/Android triangle count fits; StreetApproach/NightOutside draw 509 against Web 500 / Android 400, handed to HOUSE-02898/03037. Release Radeon numbers in docs/performance-log.md; unit 1546/1546, hardware-GPU integration 173/3 opt-in skip, render suite 59/1 skip after the inspected Low-preset reference refresh (27 images: only vegetation LOD differs).
 
 ---
 
@@ -1699,6 +1700,7 @@ limitation (reload the page), recorded by `HOUSE-02904`.
 - [ ] HOUSE-02898 — Measure the Web build against its target; reduce content until it fits
       dep: HOUSE-02892, HOUSE-02405 · sys: — · plat: WEB · pri: MUST · zone: all · adv: D9, D10b · est: 2
       accept: the Web preset's representative scenes (the street approach, one interior, the rear garden) in Chrome on the reference machine meet the documented Web target
+      note: (2026-09-29, HOUSE-02405) on desktop the Web preset's triangles fit everywhere, but StreetApproach and NightOutside draw 509 against 500 — interior rooms seen through the front windows; reduce there
 
 - [x] HOUSE-02899 — The browser loading screen with progress from the pack preload
       dep: HOUSE-02892, HOUSE-00156 · sys: ui · plat: WEB · pri: MUST · zone: all · adv: D10b · est: 1
@@ -1888,6 +1890,7 @@ emulator, not a compatibility lab. Cosmetic platform luxuries are cut.
             content root and packs from `HOUSE-03033`; a clear-color-only APK
             cannot establish the preset's target. This is dependency ordering,
             not a new performance requirement
+      note: (2026-09-29, HOUSE-02405) on desktop the Android preset's triangles fit everywhere, but StreetApproach and NightOutside draw 509 against 400 — interior rooms seen through the front windows; reduce there
 
 - [ ] HOUSE-03038 — The Android DONE checklist
       dep: HOUSE-03037, HOUSE-02797 · sys: — · plat: AND · pri: MUST · zone: all · adv: D10c · est: 1.5
@@ -2378,6 +2381,15 @@ under R5.
 ---
 
 ## Planning corrections
+
+### 2026-09-29 — The lower presets needed cooked vegetation LOD (`HOUSE-02405`)
+
+* Measured first, as the task required: with the view distance wired, Web and Android drew exactly
+  High's counts, and four outdoor scenes exceeded both triangle budgets (1.03–1.34 M against
+  900 k / 700 k). The authored `_LOD1`/`_LOD2` vegetation meshes already existed but were excluded
+  from cooking. Cooking them per preset level (one mask byte per chunk) is the smallest
+  measurement-driven technique under R9; High's chunks are byte-identical. No new asset, pass or
+  shader. The remaining draw-call excess is recorded on `HOUSE-02898`/`HOUSE-03037`.
 
 ### 2026-09-29 — Verifying the bounded pass exposes wall lanterns inside two rooms; BL-18 fixed upstream
 

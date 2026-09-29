@@ -15,11 +15,11 @@ namespace cnahouse::app
 
         QualityPreset QualityFromName(std::string_view name, QualityPreset fallback)
         {
-            if (name == "low")
+            if (name == "low" || name == "android")
             {
                 return QualityPreset::Low;
             }
-            if (name == "medium")
+            if (name == "medium" || name == "web")
             {
                 return QualityPreset::Medium;
             }

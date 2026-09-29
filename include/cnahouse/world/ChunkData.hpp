@@ -55,6 +55,16 @@ namespace cnahouse::world
         Microsoft::Xna::Framework::BoundingBox bounds;
     };
 
+    /// @brief A chunk drawn at every LOD level: bits 0-2 are §71.3's vegetation LOD levels.
+    inline constexpr std::uint8_t kEveryLod = 0b111u;
+
+    /// @brief The `lodMask` bit of LOD level @p level (0 High, 1 Web, 2 Android). Values outside
+    ///        0-2 are clamped, so Ultra's negative bias draws LOD0.
+    [[nodiscard]] constexpr std::uint8_t LodBit(int level) noexcept
+    {
+        return static_cast<std::uint8_t>(1u << (level < 0 ? 0 : (level > 2 ? 2 : level)));
+    }
+
     /// @brief One draw call's worth of pre-batched static geometry, in world space.
     ///
     /// The vertices arrive packed in the layout's own byte order and are kept that way: they are
@@ -73,6 +83,9 @@ namespace cnahouse::world
         std::uint32_t indexCount = 0u;
         std::vector<std::uint8_t> indices;
         std::vector<ChunkSubRange> subRanges;
+        /// @brief The LOD levels this chunk is drawn at (`HOUSE-02405`). An authored vegetation
+        ///        LOD variant sets only its own levels; everything else is `kEveryLod`.
+        std::uint8_t lodMask = kEveryLod;
     };
 
     /// @brief Everything `content/world/chunks.bin` holds.
