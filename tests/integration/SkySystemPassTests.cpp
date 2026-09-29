@@ -13,6 +13,7 @@
 
 #include <gtest/gtest.h>
 
+#include "System/IO/File.hpp"
 #include "System/IO/FileAccess.hpp"
 #include "System/IO/FileMode.hpp"
 #include "System/IO/FileStream.hpp"
@@ -99,9 +100,7 @@ namespace
             CNAHOUSE_TEST_SKY_DOME_FIXTURE, System::IO::FileMode::Open, System::IO::FileAccess::Read);
         auto mesh = cnahouse::rendering::SkyDomeReader::Read(stream, CNAHOUSE_TEST_SKY_DOME_FIXTURE);
         ASSERT_TRUE(mesh) << (mesh ? std::string() : mesh.Error().ToString());
-        std::ifstream skyJsonFile("content/world/layout.sky.json", std::ios::binary);
-        const std::string skyJson{std::istreambuf_iterator<char>(skyJsonFile),
-                                  std::istreambuf_iterator<char>()};
+        const std::string skyJson = System::IO::File::ReadAllText("content/world/layout.sky.json");
         auto colourModel = cnahouse::rendering::SkyColourModelReader::Read(skyJson, "layout.sky.json");
         ASSERT_TRUE(colourModel) << (colourModel ? std::string() : colourModel.Error().ToString());
 
@@ -178,9 +177,7 @@ namespace
                     CNAHOUSE_TEST_SKY_DOME_FIXTURE, System::IO::FileMode::Open, System::IO::FileAccess::Read);
                 auto mesh = cnahouse::rendering::SkyDomeReader::Read(stream, CNAHOUSE_TEST_SKY_DOME_FIXTURE);
                 ASSERT_TRUE(mesh) << (mesh ? std::string() : mesh.Error().ToString());
-                std::ifstream skyJsonFile("content/world/layout.sky.json", std::ios::binary);
-                const std::string skyJson{std::istreambuf_iterator<char>(skyJsonFile),
-                                          std::istreambuf_iterator<char>()};
+                const std::string skyJson = System::IO::File::ReadAllText("content/world/layout.sky.json");
                 auto model = cnahouse::rendering::SkyColourModelReader::Read(skyJson, "layout.sky.json");
                 ASSERT_TRUE(model) << (model ? std::string() : model.Error().ToString());
 

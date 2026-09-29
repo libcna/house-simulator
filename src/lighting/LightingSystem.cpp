@@ -593,6 +593,12 @@ namespace cnahouse::lighting
             {
                 const util::Id group = cellGroupIds_[packed.first + offset];
                 const auto found = groupIndex_.find(group.Value());
+                if (found == groupIndex_.end())
+                {
+                    // Packing kept only known groups, so this never runs; the check is what
+                    // stops `end()` being dereferenced if that ever changes (`HOUSE-02783`).
+                    continue;
+                }
                 const std::size_t groupIndex = found->second;
                 const float contribution = GroupOutputLevel(groupIndex) * groupLumens_[groupIndex];
                 lit += contribution;

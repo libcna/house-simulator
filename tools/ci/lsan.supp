@@ -1,0 +1,6 @@
+# LeakSanitizer suppressions for the sanitizer runs (HOUSE-02783). Only third-party code belongs here.
+#
+# Mesa's GLX allocates per-display visual and config data when SDL3's X11 GL loader chooses a visual
+# (X11_GL_GetVisual, once per window) and never frees it. It is reached only on the X11/GLX path the
+# software render suite uses; no House, CNA or sharp-runtime frame is in the stack.
+leak:libGLX_mesa.so

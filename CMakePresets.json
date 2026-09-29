@@ -43,24 +43,26 @@
     {
       "name": "linux-asan",
       "displayName": "Linux AddressSanitizer",
+      "description": "-Wno-maybe-uninitialized: under the sanitizers GCC 14 reports libstdc++'s own <regex> std::function state as maybe-uninitialized in sharp-runtime, which compiles with -Werror (HOUSE-02783).",
       "inherits": "base",
       "binaryDir": "${sourceDir}/build-asan",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "RelWithDebInfo",
         "CNAHOUSE_RENDERER": "OPENGLES3",
-        "CMAKE_CXX_FLAGS": "-fsanitize=address -fno-omit-frame-pointer",
+        "CMAKE_CXX_FLAGS": "-fsanitize=address -fno-omit-frame-pointer -Wno-maybe-uninitialized",
         "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address"
       }
     },
     {
       "name": "linux-ubsan",
       "displayName": "Linux UndefinedBehaviorSanitizer",
+      "description": "-Wno-maybe-uninitialized: under the sanitizers GCC 14 reports libstdc++'s own <regex> std::function state as maybe-uninitialized in sharp-runtime, which compiles with -Werror (HOUSE-02783).",
       "inherits": "base",
       "binaryDir": "${sourceDir}/build-ubsan",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "RelWithDebInfo",
         "CNAHOUSE_RENDERER": "OPENGLES3",
-        "CMAKE_CXX_FLAGS": "-fsanitize=undefined -fno-omit-frame-pointer",
+        "CMAKE_CXX_FLAGS": "-fsanitize=undefined -fno-omit-frame-pointer -Wno-maybe-uninitialized",
         "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=undefined"
       }
     },

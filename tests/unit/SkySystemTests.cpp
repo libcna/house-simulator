@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 
+#include "System/IO/File.hpp"
 #include "System/IO/MemoryStream.hpp"
 
 #include "cnahouse/environment/MoonModel.hpp"
@@ -40,8 +41,7 @@ namespace
 
     std::string SkyJson()
     {
-        std::ifstream input("content/world/layout.sky.json", std::ios::binary);
-        return std::string(std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>());
+        return System::IO::File::ReadAllText("content/world/layout.sky.json");
     }
 
     cnahouse::util::Result<SkyDomeMesh> ReadOf(const std::vector<std::uint8_t>& bytes)

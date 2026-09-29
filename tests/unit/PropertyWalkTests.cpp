@@ -27,6 +27,7 @@
 
 #include <gtest/gtest.h>
 
+#include "System/IO/File.hpp"
 #include "System/IO/FileAccess.hpp"
 #include "System/IO/FileMode.hpp"
 #include "System/IO/FileStream.hpp"
@@ -109,8 +110,7 @@ TEST(PropertyWalkTests, EveryPartOfTheLotIsReachableAndNoneOfItLeavesTheBox)
     {
         const std::string path = directory + "/layout.exterior.json";
         ASSERT_TRUE(std::filesystem::exists(path)) << path;
-        std::ifstream file(path);
-        const std::string text((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+        const std::string text = System::IO::File::ReadAllText(path);
         auto document = cnahouse::util::JsonDocument::Parse(text, "layout.exterior.json");
         ASSERT_TRUE(document) << document.Error().ToString();
         auto gates = document->Root().RequireArray("gates");

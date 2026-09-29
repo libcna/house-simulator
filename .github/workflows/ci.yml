@@ -615,6 +615,14 @@ jobs:
         working-directory: cna-house
         # ADR-0003 and HOUSE-00106 both note that sanitizer binaries in these projects reach
         # 400-900 MB; only one variant is built per job for that reason.
+        # HOUSE-02783: Mesa's drivers stay loaded, because memory a dlclose'd driver owned reads
+        # as leaked with no frame to attribute it to; lsan.supp names the one third-party leak
+        # left (Mesa GLX); and UBSan stops at its first report instead of printing and passing.
+        env:
+          LD_PRELOAD: libEGL_mesa.so.0 libGLX_mesa.so.0
+          ASAN_OPTIONS: verify_asan_link_order=0
+          LSAN_OPTIONS: suppressions=${{ github.workspace }}/cna-house/tools/ci/lsan.supp
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
         run: |
           tools/ci/run_tests.sh \
             --test-dir build-${{ matrix.preset == 'linux-asan' && 'asan' || 'ubsan' }} \
