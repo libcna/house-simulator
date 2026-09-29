@@ -12,8 +12,8 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers and a reusable kit), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (2026-09-22 reduction, retained breadth and maintenance mode; its former hour ceiling is superseded below) |
 | Scope policy | The owner explicitly superseded the former 280-hour ceiling on 2026-09-27 and requested further targeted corrections and a filming tour. Keep MUST/OPT boundaries explicit; do not infer other features |
-| Active plan | **5 open MUST tasks** in 16 milestones. M11's review, bounded fix pass and golden refresh are complete; measured presets, platform and release work remain. Every active task's title and acceptance states the current work |
-| Estimate to DONE | Current open-task sum **4.5 agent-hours**; pessimistic **5.0 h** = 1.10 × 4.5 (the Android reserve retires with M15); High performance reserve R-C is retired after repeatable acceptance, and the Web reserve with M14. The old **44.84 / 52.75 / 76.03 h** table below is historical, not a current forecast or scheduling gate. Per-task `est:` remains for task sizing; platform/dependency waiting is not promised wall-clock completion |
+| Active plan | **4 open MUST tasks** in 16 milestones. M11's review, bounded fix pass and golden refresh are complete; measured presets, platform and release work remain. Every active task's title and acceptance states the current work |
+| Estimate to DONE | Current open-task sum **4.0 agent-hours**; pessimistic **4.4 h** = 1.10 × 4.0 (the Android reserve retires with M15); High performance reserve R-C is retired after repeatable acceptance, and the Web reserve with M14. The old **44.84 / 52.75 / 76.03 h** table below is historical, not a current forecast or scheduling gate. Per-task `est:` remains for task sizing; platform/dependency waiting is not promised wall-clock completion |
 | Current gate | **G5, M7, M8, M9, M11 and M12 passed; M13, M14 and M15 are complete: the Linux desktop release is tagged `v1.0.0` and the Web and Android builds pass their DONE checklists; the final release M16 remains. CNA fixed strict-API blocker BL-18 upstream (`2c70eaf0f`), which let `HOUSE-03683`/`03574`/`02714` be accepted. CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator; the APK now carries the Android-tier content and walks the house on the `House_Phone` emulator (`HOUSE-03033`, with CNA fixes BL-19/20/21); the Android preset holds the frame target there (`HOUSE-03037`).** Main/attic/basement stairs, garage-loft floor and whole-house lighting are corrected under `HOUSE-03635`/`03638`/`03639`/`03636`; doorway flashes and visibility/wall holes under `HOUSE-03637`/`03640`, including the owner's precise foyer/stair corner-gap screenshot. The existing car family is corrected under `HOUSE-03641`; full GPU filming circuit accepted under `HOUSE-03572`. Normal title/Start audio produces real backend PCM; owner listening accepts all six footstep categories and interior/exterior day/night ambience under `HOUSE-01920`/`01922`. Weather layers and the indoor-rain correction are accepted under `HOUSE-01925`; whole-zone four-state listening passes `HOUSE-01939`. Desktop High scenarios pass three complete current hardware-GPU rounds under `HOUSE-02404`; the three presets are measured under `HOUSE-02405` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
@@ -1991,10 +1991,18 @@ maintenance mode.
             the street's draw count stays over the Web and Android figures with their frame targets
             met. `docs/performance-log.md`
 
-- [ ] HOUSE-03074 — Final XNA-only audit
+- [x] HOUSE-03074 — Final XNA-only audit
       dep: HOUSE-03071 · sys: ci · plat: CI · pri: MUST · zone: all · adv: D11 · est: 0.5
       accept: the XNA-only lint, the strict-XNA gate, the `nm -C` symbol check and `check_anim_assets.py` pass, and a manual review confirms that no runtime source calls a CNA-specific graphics or model API (no `SupportsCapability`, no `*EXT*` call, no `Model::Tag` read); `docs/xna-deviations.md` grants nothing and the lint has no allowlist
       trace: absorbs `HOUSE-02787`
+      done: (2026-09-30) On the final code: `check_xna_only.py` clean; the strict-XNA gate compiles all
+            358 units clean (109 destructor exemptions); `check_anim_assets.py` passes (159 models,
+            all single-skin). `nm -C`: the Release desktop executable carries no `CNA::Graphics::`
+            symbol; Android's `libmain.so`, which links CNA statically, carries only CNA's own
+            `VertexTypeRegistryEXT` behind XNA's `VertexBuffer` -- no House symbol. Manual review:
+            no runtime source calls `SupportsCapability` (it appears only in comments), an `*EXT*`
+            member, or reads `Model::Tag`. `docs/xna-deviations.md` grants nothing and the lint
+            reads no allowlist
 
 - [ ] HOUSE-03075 — Final documentation pass
       dep: HOUSE-03074 · sys: — · plat: ALL · pri: MUST · zone: all · adv: D12 · est: 1.75
