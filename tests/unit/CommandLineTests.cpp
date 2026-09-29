@@ -45,6 +45,7 @@ namespace
                               "--seed=12345",
                               "--time=6.5",
                               "--freeze-time",
+                              "--filming-tour",
                               "--weather=rain",
                               "--light-on=LG_EXT_DRIVEWAY_FLOOD",
                               "--light-on=LG_L0_GARAGE_MAIN",
@@ -62,6 +63,7 @@ namespace
         EXPECT_EQ(options->seed.value_or(0), 12345u);
         EXPECT_FLOAT_EQ(options->timeOfDay.value_or(0.0f), 6.5f);
         EXPECT_TRUE(options->freezeTime);
+        EXPECT_TRUE(options->filmingTour);
         EXPECT_EQ(options->weather.value_or(""), "rain");
         ASSERT_EQ(options->lightGroupsOn.size(), 2u);
         EXPECT_EQ(options->lightGroupsOn[0], "LG_EXT_DRIVEWAY_FLOOD");

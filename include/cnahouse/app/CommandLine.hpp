@@ -96,6 +96,9 @@ namespace cnahouse::app
         std::optional<float> timeOfDay;
         /// @brief Keep the simulation clock at its starting instant for deterministic review captures.
         bool freezeTime = false;
+        /// @brief Start the filming tour as the walk scene loads (`HOUSE-02900`): how a platform
+        ///        without the Linux `C` binding is walked through the property for verification.
+        bool filmingTour = false;
         std::optional<std::string> weather;
         /// @brief Repeatable deterministic review override for a real authored switch group.
         ///

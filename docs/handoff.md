@@ -4,9 +4,10 @@
 desktop DONE audit HOUSE-02781, its gap fix HOUSE-02782, the licence check HOUSE-02788, the
 Linux package HOUSE-02789, its clean-profile runs HOUSE-02790, the ASAN/UBSAN pass HOUSE-02783 and
 the 2-hour run HOUSE-02784 are accepted, the desktop release is tagged `v1.0.0` (HOUSE-02797) and
-the Web download fits (HOUSE-02850) and the Web preset holds 60 FPS in Chrome (HOUSE-02898); M10,
-M11 and M13 are complete. **14 open MUST / 78 OPT**, nominal **17.25 h**, pessimistic **33.0 h**
-(1.10 × 17.25 + 8 h Android + 6 h Web). House Simulator is **not DONE**.
+the Web download fits (HOUSE-02850), the Web preset holds 60 FPS in Chrome (HOUSE-02898) and the
+Web DONE checklist passed in Chrome and Firefox (HOUSE-02900); M10, M11 and M13 are complete.
+**13 open MUST / 78 OPT**, nominal **15.75 h**, pessimistic **31.3 h** (1.10 × 15.75 + 8 h Android
++ 6 h Web). House Simulator is **not DONE**.
 
 **Presets (HOUSE-02405).** `--quality=android|web|high|ultra` (low/medium still accepted). The
 chunk library now cooks the authored `_LOD1`/`_LOD2` vegetation per preset level (flag bit 0, one
@@ -29,9 +30,10 @@ private Xvfb (offscreen EGL with `LIBGL_ALWAYS_SOFTWARE=1` segfaults): `Xvfb :14
 then `DISPLAY=:141 SDL_VIDEODRIVER=x11 LIBGL_ALWAYS_SOFTWARE=1 build/cnahouse_render_tests`. Stop
 the Xvfb afterwards.
 
-**Next MUST.** The Web DONE walk `HOUSE-02900` (Chrome and Firefox), the Web CI smoke `HOUSE-02901`
-(the page's `?arg=` command line makes it interaction-free), then the Android path from
-`HOUSE-03033`. GPU Chrome: `--headless=new --enable-gpu --ignore-gpu-blocklist --use-angle=gl-egl`. The Web build (`source ~/emsdk/emsdk_env.sh;
+**Next MUST.** The Web CI smoke `HOUSE-02901` (`tools/ci/web_smoke.py` written and passing locally),
+then the Android path from `HOUSE-03033` (content-path helper and Gradle staging in progress).
+Firefox runs inside `tools/platform/run_gpu_tests_private.sh --exec` (headless Firefox has no
+WebGL2); `--filming-tour` walks any build through the property from its command line. GPU Chrome: `--headless=new --enable-gpu --ignore-gpu-blocklist --use-angle=gl-egl`. The Web build (`source ~/emsdk/emsdk_env.sh;
 cmake --build --preset web` in build-consumer/) stages its preload with `stage_content.py
 --lod-level 1` and fails over the download budget. Headless Chrome recipe: serve build-consumer/,
 `google-chrome --headless=new --remote-debugging-port=… --remote-allow-origins=…`, enable focus

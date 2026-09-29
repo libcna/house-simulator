@@ -994,6 +994,14 @@ namespace cnahouse::app
                   player_.Feet().Y,
                   player_.Feet().Z,
                   static_cast<double>(look_.yaw * 180.0F / 3.14159265F));
+
+        // `--filming-tour`: the same tour `C` starts on Linux, for walking another platform's build
+        // through the property from its command line (`HOUSE-02900`).
+        if (options_.filmingTour &&
+            !filmingTour_.Start(player_, util::IdRegistry::NameOf(tracker_.Current()), *collision_, broad_))
+        {
+            Log::Warn(LogCat::App, "--filming-tour: no filming route through the current cell");
+        }
     }
 
     void CnaHouseGame::UpdateWalk(float deltaSeconds)

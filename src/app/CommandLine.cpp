@@ -162,6 +162,7 @@ namespace cnahouse::app
                "                              repeat for additional groups\n"
                "  --light-off=<group>         Turn one authored group off for deterministic review;\n"
                "                              repeat for additional groups\n"
+               "  --filming-tour              Start the filming tour when the walk scene loads\n"
                "  --no-audio                  Start with audio disabled\n"
                "  --force-touch               Emulate one touch finger with the desktop mouse\n"
                "  --no-cull                   Draw everything resident instead of §25's visible\n"
@@ -222,6 +223,10 @@ namespace cnahouse::app
             else if (argument.name == "--freeze-time")
             {
                 options.freezeTime = true;
+            }
+            else if (argument.name == "--filming-tour")
+            {
+                options.filmingTour = true;
             }
             else if (argument.name == "--renderer-info")
             {

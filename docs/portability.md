@@ -3,6 +3,31 @@
 This is a running validation record, not a claim that the Linux, Web or Android DONE checklists
 have passed. `plan.md` remains the release authority.
 
+## Web DONE checklist in Chrome and Firefox — HOUSE-02900 (2026-09-29)
+
+The full Web build (1.0.0, WEBGL2, the HOUSE-02850 level-1 preload) served on localhost, in
+headless Chrome 152 on the Radeon 780M (ANGLE GL-EGL) and in Firefox 140 ESR on CNA's private
+Weston/Xwayland display with the same GPU (`tools/platform/run_gpu_tests_private.sh --exec`);
+nothing on the owner's desktop. Both auto-detect the Web preset.
+
+| Item | Chrome | Firefox |
+|---|---|---|
+| Loads to the title and, after the key press, to the menu | yes | yes |
+| Controls: title key, Start, W walk, mouse look, Esc pause, settings | yes (CDP) | yes (WebDriver BiDi) |
+| Representative traversal: `--filming-tour` walks the real controller street → yards → garden → kitchen → foyer → main stair → basement → every floor → attic | 90/90 views, 2,144 s | 90/90 views, 2,148 s |
+| Error or fatal log, uncaught exception | none | none |
+| Frame time, street / kitchen / rear garden (median, p95 ms) | 16.7, ≤ 16.8 | 25.4–25.7, ≤ 26.4 |
+| A settings change (quality row) applies | yes | yes |
+
+Differences: Chrome holds the display's 60 Hz; Firefox paces at ~39 FPS on the private
+compositor, inside the 30 FPS target either way. Headless Firefox has no WebGL2, so it needs a
+display (the private one); headless Chrome needs `--enable-gpu --ignore-gpu-blocklist
+--use-angle=gl-egl` to leave SwiftShader. Firefox reports the GPU as "Radeon R9 200 Series, or
+similar" (its fingerprinting mask) and shows CNA's stderr log lines as console errors, which are
+not errors. The Web build does not persist settings (persistence across a reload is optional);
+the change applies for the session. Any driver must hold a key across a frame (~0.8 s): XNA reads
+keyboard state once a frame.
+
 ## House Android lifecycle — 2026-09-26
 
 `HOUSE-03036` uses XNA `Game` events, not an Android/SDL runtime hook in House:
