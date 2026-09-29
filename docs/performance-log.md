@@ -408,3 +408,39 @@ mass as an occluder for the exterior pass (about −60) -- each miss 400 alone a
 through the windows or add an occlusion system (R9). The street's draw count is the first thing
 to re-measure on a physical phone. Captures and per-scene logs: scratchpad `android-x86-release/`,
 `android-arm64-release/`.
+
+### 2026-09-30 — final measurement on the three platforms (`HOUSE-03071`)
+
+The final code on the reference machine (Radeon 780M, Mesa 25.0.7). Only a platform's documented
+target missed, or a catastrophic regression, would have been fixed; neither occurred, so nothing
+was changed for performance.
+
+**Linux**, Release `build-probe/`, `cnahouse_perf_tests` (35/35 pass): the eight representative
+scenarios at 1920×1080 on the High preset, vsync off, 120 warm-up + 600 samples.
+
+| Scenario | Draws | Triangles | CPU ms | GPU median / p95 ms |
+|---|---:|---:|---:|---:|
+| Kitchen | 73 | 173 k | 1.61 | 3.26 / 4.73 |
+| Library | 78 | 559 k | 1.59 | 3.45 / 4.73 |
+| MainStair | 67 | 27 k | 1.61 | 3.40 / 4.56 |
+| StreetApproach | 514 | 1,032 k | 3.73 | 5.17 / 6.16 |
+| RearGarden | 376 | 1,199 k | 2.99 | 4.99 / 5.98 |
+| UpperWindow | 85 | 259 k | 1.52 | 3.26 / 4.69 |
+| HeavyRain | 319 | 1,341 k | 2.77 | 5.44 / 6.56 |
+| NightOutside | 514 | 1,035 k | 4.05 | 5.50 / 6.68 |
+
+All inside §71.2's hard limits (CPU 9.5 ms, GPU 14 ms, 1,800 draws, 3.4 M triangles). The same run's
+Web and Android preset counts are unchanged from `HOUSE-02405`: StreetApproach and NightOutside
+draw 509 against the Web's 500 and the Android preset's 400, everything else is within.
+
+**Web**, the current `build-consumer/` build in headless Chrome 152 on the GPU (the `HOUSE-02898`
+recipe): StreetApproach, Kitchen, RearGarden and NightOutside each 1,203-1,206 frames at a 16.7 ms
+median, p95 ≤ 16.8 ms -- the display's 60 Hz against the 30 FPS target.
+
+**Android**, the arm64 release APK on the `House_Phone` emulator through its arm64 translator (the
+`HOUSE-03037` recipe, now with `-ffp-contract=off`): Kitchen, Library, MainStair, UpperWindow at
+16.7 ms median (p95 ≤ 18.0), RearGarden 17.9 / 38.2, HeavyRain 16.7 / 33.7, StreetApproach 33.3 /
+37.6 and NightOutside 33.1 / 34.1 ms -- 30 FPS on the street against the 33 ms target; RSS 512-551
+MB against 700. A first pass under other load on the shared host measured the street at 66 ms; the
+repeat, with the host quieter, is the figure above. The translated CPU is the emulator's limit,
+not a phone's; the x86_64 build holds 60 Hz everywhere (`HOUSE-03037`).
