@@ -200,6 +200,35 @@ tools compiled out, and writes `<build-dir>/package/cna-house-<version>-linux-x8
 `.tar.gz`: the game, the CNA and SDL libraries it was built with (found through `$ORIGIN/lib`),
 the content, the licences and a `cna-house.sh` launcher.
 
+## Packaging (Web)
+
+```bash
+tools/ci/package_web.py --build-dir build-consumer
+```
+
+Writes `build-consumer/package/cna-house-<version>-web/`: the page, its script, wasm and preload,
+the licences and a README on serving it from any static server.
+
+## Android
+
+Needs the Android SDK with platform 35, build tools 36.1.0, NDK 29.0.14206865 and CMake 4.1.2, and
+a desktop build first: the APK's content is `build/content`, staged by Gradle at the Android
+preset's LOD level (`tools/ci/stage_content.py`), and the host content tool is
+`build/CNA_BUILD/cna-content`.
+
+```bash
+cd android && ANDROID_HOME=~/Android/Sdk ./gradlew assembleRelease && cd ..
+tools/ci/package_android.py                   # build-probe/package/cna-house-<version>-android/
+adb install build-probe/package/cna-house-<version>-android/cna-house-<version>-arm64.apk
+tools/ci/android_smoke.py                     # one device or emulator attached
+```
+
+The release APK is arm64-v8a, signed with the local debug key; Gradle's `checkApkBudget` holds
+every APK to the 400 MB budget and to the staged content. `-PhouseAbi=x86_64` builds for an x86_64
+emulator, which then runs natively. A command line is passed as the launching intent's `args`
+(`adb shell am start -n com.libcna.house/.HouseActivity --es args "--scene=walk --time=22"`), and
+the log is `adb logcat -s cna-house`.
+
 ## Testing
 
 ```bash

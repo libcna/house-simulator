@@ -3,6 +3,35 @@
 This is a running validation record, not a claim that the Linux, Web or Android DONE checklists
 have passed. `plan.md` remains the release authority.
 
+## The Android release — HOUSE-03041 (2026-09-29)
+
+`./gradlew assembleRelease` in `android/` and then `tools/ci/package_android.py` write
+`build-probe/package/cna-house-1.0.0-android/`: the arm64-v8a release APK (181 MB, signed with the
+local debug key), LICENSE, NOTICE.md, licenses/ and a README on installing it. A fresh
+`adb install` of that APK passes `tools/ci/android_smoke.py`. Device used: the `House_Phone`
+emulator (API 35, x86_64 with the arm64 translator, `-gpu host` over the Radeon 780M); no physical
+phone was available.
+
+Readiness (`cna-house.md` §80.2), as it stands:
+
+| Criterion | State |
+|---|---|
+| CNA cross-compiles for Android | every APK build compiles CNA and sharp-runtime for arm64-v8a (and x86_64) with NDK 29 |
+| `OPENGLES3` selectable and built for arm64-v8a | the APK's renderer (`OPENGLES3 · Tier S` in its log) |
+| A CNA graphics sample runs on a device or emulator | the 2026-09-26 gate below, and the game itself |
+| All input through `IInputSource` | `check_input_boundary.py`, green |
+| `Platform` drives the HUD and defaults | Android: touch, no keyboard -- touch HUD, touch hints, the Android preset |
+| UI in virtual units with safe-area insets | the 2400×1080 phone letterboxes the 16:9 view; the `ui-*-20x9` render references |
+| Android tier defined and reachable on desktop | `--quality=android`; measured on the emulator (HOUSE-03037) |
+| Content fits the APK + OBB budget | `android_budget.py`: 181 MB of 400 MB, no OBB |
+| Touch HUD testable on desktop | `--force-touch` |
+| Lifecycle through `Game`'s events | Home and return deactivate and reactivate (CNA BL-20/21) |
+
+Known limitations: measured on an emulator, not a phone; the street views draw 509 against the
+Android preset's 400 (the frame target holds, HOUSE-03037); SDL holds the game thread while the
+app is in the background, so the deactivation is delivered together with the reactivation on
+return; the package is signed with a development key.
+
 ## Android DONE checklist on the emulator — HOUSE-03038 (2026-09-29)
 
 No physical phone is available; this is the best available emulator, recorded as such: AVD
