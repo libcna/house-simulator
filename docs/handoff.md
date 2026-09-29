@@ -1,9 +1,10 @@
 # Handoff — 2026-09-29 (DONE audit; HOUSE-02405 measured presets; Round 180 bounded fixes)
 
 **State.** HOUSE-03683, HOUSE-03574, HOUSE-02714, HOUSE-03631, HOUSE-02713, HOUSE-02405, the
-desktop DONE audit HOUSE-02781, its gap fix HOUSE-02782, the licence check HOUSE-02788 and the
-Linux package HOUSE-02789 are accepted; M10 and M11 are complete. **20 open MUST / 78 OPT**,
-nominal **25.75 h**, pessimistic **42.3 h** (1.10 × 25.75 + 8 h Android + 6 h Web). House Simulator is **not DONE**.
+desktop DONE audit HOUSE-02781, its gap fix HOUSE-02782, the licence check HOUSE-02788, the
+Linux package HOUSE-02789 and its clean-profile runs HOUSE-02790 are accepted; M10 and M11 are
+complete. **19 open MUST / 78 OPT**, nominal **24.25 h**, pessimistic **40.7 h** (1.10 × 24.25 +
+8 h Android + 6 h Web). House Simulator is **not DONE**.
 
 **Presets (HOUSE-02405).** `--quality=android|web|high|ultra` (low/medium still accepted). The
 chunk library now cooks the authored `_LOD1`/`_LOD2` vegetation per preset level (flag bit 0, one
@@ -28,9 +29,11 @@ the Xvfb afterwards.
 
 **Next MUST.** ASAN/UBSAN `HOUSE-02783` (in progress: `build-asan/` configured, its `content`
 and `content-fx` are symlinks to `build/`'s so 416 MB is not rebuilt), the 2-hour run
-`HOUSE-02784`, the packaged clean-profile run `HOUSE-02790` (`tools/ci/package_linux.py
---build-dir build-probe` writes `build-probe/package/`); the Web/Android paths as their `dep:`
-lines allow.
+`HOUSE-02784`, then the desktop tag `HOUSE-02797`; the Web/Android paths as their `dep:` lines
+allow. `tools/ci/package_linux.py --build-dir build-probe` writes `build-probe/package/`; the
+clean-profile runs used `bwrap --ro-bind / / --dev-bind /dev /dev --tmpfs /rv --tmpfs /home
+--tmpfs /tmp --tmpfs /opt --ro-bind <package> /opt/cna-house ...` under `env -i` (add
+`--tmpfs /dev/snd --tmpfs /run/user/$UID` for no audio device).
 
 **Verified here.** Unit 1546/1546; perf 24/24 on the Radeon (amdgpu fdinfo proof); hardware-GPU
 integration 173 PASS / 3 opt-in SKIP / 0 FAIL (run it from the repository root, which ctest does:

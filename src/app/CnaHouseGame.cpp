@@ -29,6 +29,7 @@
 #include "Microsoft/Xna/Framework/Graphics/Effect.hpp"
 #include "Microsoft/Xna/Framework/Graphics/GraphicsAdapter.hpp"
 #include "Microsoft/Xna/Framework/Graphics/GraphicsDevice.hpp"
+#include "Microsoft/Xna/Framework/Graphics/GraphicsProfile.hpp"
 #include "Microsoft/Xna/Framework/Graphics/RenderTarget2D.hpp"
 #include "Microsoft/Xna/Framework/Graphics/SamplerState.hpp"
 #include "Microsoft/Xna/Framework/Graphics/SpriteBatch.hpp"
@@ -36,6 +37,7 @@
 #include "Microsoft/Xna/Framework/Graphics/SpriteSortMode.hpp"
 #include "Microsoft/Xna/Framework/Graphics/Texture2D.hpp"
 #include "Microsoft/Xna/Framework/Graphics/Viewport.hpp"
+#include "Microsoft/Xna/Framework/Point.hpp"
 #include "Microsoft/Xna/Framework/TitleContainer.hpp"
 #include "Microsoft/Xna/Framework/Vector2.hpp"
 
@@ -149,6 +151,27 @@ namespace cnahouse::app
                 }
             }
             return best == nullptr ? 0.0F : best->rise;
+        }
+
+        /// The capture target's size: the back buffer's, unless that exceeds the render-target
+        /// limit XNA 4.0 documents for the profile (Reach 2048, HiDef 4096). A 2560x1080 screenshot
+        /// is then drawn at 2048x864, the same aspect ratio, instead of the device refusing the
+        /// target (`HOUSE-02790`).
+        Microsoft::Xna::Framework::Point
+        CaptureSize(Microsoft::Xna::Framework::Graphics::GraphicsDevice& device, int width, int height)
+        {
+            const int limit = device.getGraphicsProfileProperty() ==
+                                      Microsoft::Xna::Framework::Graphics::GraphicsProfile::Reach
+                                  ? 2048
+                                  : 4096;
+            const int larger = std::max(width, height);
+            if (larger <= limit)
+            {
+                return {width, height};
+            }
+            const double scale = static_cast<double>(limit) / static_cast<double>(larger);
+            return {std::max(1, static_cast<int>(static_cast<double>(width) * scale)),
+                    std::max(1, static_cast<int>(static_cast<double>(height) * scale))};
         }
 
     } // namespace
@@ -2088,8 +2111,16 @@ namespace cnahouse::app
             {
                 if (capture_ == nullptr)
                 {
-                    capture_ = std::make_unique<Capture>(
+                    const Microsoft::Xna::Framework::Point size = CaptureSize(
                         getGraphicsDeviceProperty(), settings_.backBufferWidth, settings_.backBufferHeight);
+                    if (size.X != settings_.backBufferWidth)
+                    {
+                        Log::Info(LogCat::Debug,
+                                  "capture drawn at {}x{}: the graphics profile's render-target limit",
+                                  size.X,
+                                  size.Y);
+                    }
+                    capture_ = std::make_unique<Capture>(getGraphicsDeviceProperty(), size.X, size.Y);
                 }
                 getGraphicsDeviceProperty().SetRenderTarget(&capture_->target);
                 RenderFrame();
@@ -2113,8 +2144,16 @@ namespace cnahouse::app
             {
                 if (capture_ == nullptr)
                 {
-                    capture_ = std::make_unique<Capture>(
+                    const Microsoft::Xna::Framework::Point size = CaptureSize(
                         getGraphicsDeviceProperty(), settings_.backBufferWidth, settings_.backBufferHeight);
+                    if (size.X != settings_.backBufferWidth)
+                    {
+                        Log::Info(LogCat::Debug,
+                                  "capture drawn at {}x{}: the graphics profile's render-target limit",
+                                  size.X,
+                                  size.Y);
+                    }
+                    capture_ = std::make_unique<Capture>(getGraphicsDeviceProperty(), size.X, size.Y);
                 }
 
                 using Clock = std::chrono::steady_clock;
