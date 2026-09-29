@@ -1,8 +1,8 @@
 # Handoff — 2026-09-29 (Round 180 bounded fixes; BL-18 fixed upstream)
 
-**State.** HOUSE-03683, HOUSE-03574, HOUSE-02714 and HOUSE-03631 are accepted. **26 open MUST /
-78 OPT**, nominal **33.5 h**, pessimistic **50.85 h** (1.10 × 33.5 + 8 h Android + 6 h Web).
-House Simulator is **not DONE**.
+**State.** HOUSE-03683, HOUSE-03574, HOUSE-02714, HOUSE-03631 and HOUSE-02713 are accepted;
+M11 is complete. **25 open MUST / 78 OPT**, nominal **33 h**, pessimistic **50.3 h**
+(1.10 × 33 + 8 h Android + 6 h Web). House Simulator is **not DONE**.
 
 **Chosen by.** R1's S1 fix-now exception selected the shed enclosure; the remaining Round-179
 S2s and the lantern S2 found while verifying follow within HOUSE-03631 under R12's bounded
@@ -13,14 +13,13 @@ separate CNA commits (2026-09-29). BL-18 is fixed in CNA `2c70eaf0f` on `next` (
 aliases read `using Name CNAEXT = ...`, two using-declarations of inherited XNA members drop the
 marker, CNA's strict-surface check covers the headers. The House strict gate is 356 units clean.
 
-**Next MUST, by dependency order.** `HOUSE-02713`: refresh only the representative render
-references whose images changed on purpose, inspecting each. The software-GL render suite runs
-on a private Xvfb (offscreen EGL with `LIBGL_ALWAYS_SOFTWARE=1` segfaults), e.g.
-`Xvfb :141 -nolisten tcp` then `DISPLAY=:141 SDL_VIDEODRIVER=x11 LIBGL_ALWAYS_SOFTWARE=1`.
-It currently has 45 passes and 14 reference failures: references date from 2026-09-26, before
-several 2026-09-27/28 corrections as well as this round. Separate the intentional changes from
-anything unexplained before refreshing. Then `HOUSE-02405` (measured presets) and the
-Linux/Web/Android release paths as the table in the 2026-09-28 section below describes.
+**Render suite.** HOUSE-02713 refreshed all 93 stale references after inspecting each pair;
+the software-GL suite is 59 PASS / 1 opt-in SKIP. It runs on a private Xvfb (offscreen EGL with
+`LIBGL_ALWAYS_SOFTWARE=1` segfaults): `Xvfb :141 -nolisten tcp`, then `DISPLAY=:141
+SDL_VIDEODRIVER=x11 LIBGL_ALWAYS_SOFTWARE=1 build/cnahouse_render_tests`. Stop the Xvfb afterwards.
+
+**Next MUST.** M13's DONE audit `HOUSE-02781`, then its dependent release tasks; `HOUSE-02405`
+(measured presets) and the Web/Android paths as their `dep:` lines allow.
 
 **Verified here.** Unit 1542/1542; hardware-GPU integration 172 PASS / 3 opt-in SKIP / 0 FAIL
 (amdgpu fdinfo proof); culled/unculled render check PASS; `tools/ci/run_checks.sh` green with
