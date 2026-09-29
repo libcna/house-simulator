@@ -1,8 +1,8 @@
-# Handoff — 2026-09-29 (HOUSE-02405 measured presets; Round 180 bounded fixes; BL-18 fixed upstream)
+# Handoff — 2026-09-29 (DONE audit; HOUSE-02405 measured presets; Round 180 bounded fixes)
 
-**State.** HOUSE-03683, HOUSE-03574, HOUSE-02714, HOUSE-03631, HOUSE-02713 and HOUSE-02405 are
-accepted; M10 and M11 are complete. **24 open MUST / 78 OPT**, nominal **31 h**, pessimistic
-**48.1 h** (1.10 × 31 + 8 h Android + 6 h Web). House Simulator is **not DONE**.
+**State.** HOUSE-03683, HOUSE-03574, HOUSE-02714, HOUSE-03631, HOUSE-02713, HOUSE-02405 and the
+desktop DONE audit HOUSE-02781 are accepted; M10 and M11 are complete. **23 open MUST / 78 OPT**,
+nominal **29.75 h**, pessimistic **46.7 h** (1.10 × 29.75 + 8 h Android + 6 h Web). House Simulator is **not DONE**.
 
 **Presets (HOUSE-02405).** `--quality=android|web|high|ultra` (low/medium still accepted). The
 chunk library now cooks the authored `_LOD1`/`_LOD2` vegetation per preset level (flag bit 0, one
@@ -25,14 +25,48 @@ private Xvfb (offscreen EGL with `LIBGL_ALWAYS_SOFTWARE=1` segfaults): `Xvfb :14
 then `DISPLAY=:141 SDL_VIDEODRIVER=x11 LIBGL_ALWAYS_SOFTWARE=1 build/cnahouse_render_tests`. Stop
 the Xvfb afterwards.
 
-**Next MUST.** M13's DONE audit `HOUSE-02781`, then its dependent release tasks, and the
-Web/Android paths as their `dep:` lines allow.
+**Next MUST.** `HOUSE-02782` (the audit's one gap, below), then ASAN/UBSAN `HOUSE-02783`, the
+2-hour run `HOUSE-02784`, licences `HOUSE-02788` and packaging; the Web/Android paths as their
+`dep:` lines allow.
 
 **Verified here.** Unit 1546/1546; perf 24/24 on the Radeon (amdgpu fdinfo proof); hardware-GPU
 integration 173 PASS / 3 opt-in SKIP / 0 FAIL (run it from the repository root, which ctest does:
 `docs/zones.json` is read relative to it); `tools/ci/run_checks.sh` green with
 `HOUSE_XNA_STRICT_JOBS=4`. Build rules unchanged: shared `/rv/cnaccache`, `build/`/`build-probe/`
 only, six compile cores, never the owner's display.
+
+## DONE audit — desktop (HOUSE-02781, 2026-09-29)
+
+Every Definition-of-DONE row checked against its proving tasks and against a current run at
+House `72eee2f` / CNA `2c70eaf0f`. "Met" means the proving tasks are ticked **and** the current
+evidence still holds; platform rows name the open task that owns them.
+
+| # | Desktop verdict | Evidence now |
+|---|---|---|
+| D1 | met | G2 `03280`, G3 `03420` ticked; Round 180 closed every S1/S2; only S3 attic mottling and plain street stay logged |
+| D2 | met | `03226`/`03227`/`03240`/`03632`/`03631` ticked; hardware-GPU integration 173 PASS / 3 opt-in SKIP / 0 FAIL (grand tour 90 cells, filming circuit, random walk, inside-geometry) |
+| D3 | met | checkpoint `03380`, G3 `03420` |
+| D4 | met | G3, G4 `03452`, G5 `03480` |
+| D5 | met | `03520`, `02521`; environment, sun-season and HUD-season render references pass |
+| D6 | met | `03401`, `03402`, `03633`; Round 180 fixed the shed, foliage and lantern lighting |
+| D7 | met | `01920`, `01922`, `01939`, `02516` (owner listening) |
+| D8 | met on desktop | `02523`, `02528`, `03572`, `03721`, `03723`; Android touch is `03039` |
+| D9 | met on desktop | `02404` High acceptance, `02405` presets; Web `02898`, Android `03037`, final `03071` open |
+| D10a | open | `02789` package → `02790` clean-profile run |
+| D11 | partly | unit 1546/1546, integration 173 PASS / 3 opt-in SKIP / 0 FAIL, render 59 + 1 opt-in skip, XNA-only and strict (356 units) green, 20-minute run `02598`; ASAN/UBSAN `02783` and the 2-hour run `02784` open; Web smoke `02901`, Android checklist `03038` |
+| D12 | gap | licences `02788` and the final docs pass `03075` open; **gap:** README's option table omits `--quality`, and its Checks section describes 3 of the 112 gates `run_checks.sh` runs → `HOUSE-02782` |
+| D13 | met on desktop | no open S1/S2 after Round 180; final `03078` |
+| D14 | met | `02714`, `03631` |
+
+**TODO rule (absorbs `HOUSE-02786`).** `grep -rnE 'TODO|TBD|FIXME'` over `src/`, `include/`,
+`cmake/`, `CMakeLists.txt`, `android/`, `tools/` and `tests/` finds nothing.
+
+**Q-11 (absorbs `HOUSE-02793`).** The day stays **24 real minutes** (60×). No owner report,
+review round or handoff asked for another pace; at 60× the 41-minute filming circuit passes
+through about 1.7 days, so one tour shows the whole light schedule; Environment already offers
+other speeds and a frozen clock for anyone who wants them.
+
+**Gaps.** One, above, filed on `HOUSE-02782`. Nothing goes to the optional backlog.
 
 ---
 

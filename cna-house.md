@@ -7531,7 +7531,7 @@ placeholder for work not yet thought about.
 | Q-08 | Do we need `OcclusionQuery` for exterior occlusion? | Depends on a measurement | `HOUSE-02401` with a go/no-go gate |
 | Q-09 | Which of the two remaining rain-on-roof sourcing options sounds right? | An audition question, not a technical one | `HOUSE-00286` |
 | Q-10 | Should the pause menu pause the world by default? | Taste; both are implemented and it is a setting | `HOUSE-02794` — pick a default after playtesting |
-| Q-11 | Is 24 minutes the right day length after playtesting? | The analysis favours it; play may disagree | `HOUSE-02793` — re-evaluate at the feature-complete milestone; the setting exists either way |
+| Q-11 | Is 24 minutes the right day length after playtesting? | The analysis favours it; play may disagree | **Decided 2026-09-29 (`HOUSE-02781`): 24 minutes.** No report asked for another pace; the filming circuit spans about 1.7 days at it; Environment offers other speeds and a frozen clock |
 
 ---
 
