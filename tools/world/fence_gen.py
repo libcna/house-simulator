@@ -85,6 +85,11 @@ SHED_PART_ROLES = {
     "STRUCT_SHED_ROOF": "SHED_roof",
     "STRUCT_SHED_TRIM": "SHED_trim",
     "STRUCT_SHED_GLASS": "SHED_glass",
+    # HOUSE-03631: the enclosed side reuses the same families -- boarded walls and gables, and
+    # plain timber sheathing under the roof -- plus the slab edge the walls stand on.
+    "STRUCT_SHED_LINING": "SHED_siding",
+    "STRUCT_SHED_CEILING": "SHED_timber",
+    "STRUCT_SHED_BASE": "SHED_timber",
 }
 
 
@@ -464,6 +469,106 @@ def _panel(u0: float, u1: float, v0: float, v1: float,
     return out
 
 
+def _first_hit(origin: tuple, direction: tuple, faces: list) -> tuple[float, tuple] | None:
+    """The nearest face along a ray, as `(distance, normal)`, or None when the ray hits nothing.
+
+    Möller–Trumbore over each face's triangles. Edges are inclusive, so a ray cannot slip between
+    two faces that share an edge and report a hole the geometry does not have.
+    """
+    best = None
+    for corners, normal in faces:
+        for i, j, k in (((0, 1, 2),) if len(corners) == 3 else ((0, 1, 2), (0, 2, 3))):
+            a, b, c = corners[i], corners[j], corners[k]
+            e1 = tuple(b[n] - a[n] for n in range(3))
+            e2 = tuple(c[n] - a[n] for n in range(3))
+            p = (direction[1] * e2[2] - direction[2] * e2[1],
+                 direction[2] * e2[0] - direction[0] * e2[2],
+                 direction[0] * e2[1] - direction[1] * e2[0])
+            det = sum(e1[n] * p[n] for n in range(3))
+            if abs(det) < 1e-12:
+                continue
+            s = tuple(origin[n] - a[n] for n in range(3))
+            u = sum(s[n] * p[n] for n in range(3)) / det
+            if u < -1e-9 or u > 1.0 + 1e-9:
+                continue
+            q = (s[1] * e1[2] - s[2] * e1[1], s[2] * e1[0] - s[0] * e1[2],
+                 s[0] * e1[1] - s[1] * e1[0])
+            v = sum(direction[n] * q[n] for n in range(3)) / det
+            if v < -1e-9 or u + v > 1.0 + 1e-9:
+                continue
+            t = sum(e2[n] * q[n] for n in range(3)) / det
+            if t > 1e-7 and (best is None or t < best[0]):
+                best = (t, normal)
+    return best
+
+
+def _sphere(count: int) -> list[tuple[float, float, float]]:
+    """@p count directions spread evenly over the sphere (a Fibonacci lattice)."""
+    golden = math.pi * (3.0 - math.sqrt(5.0))
+    out = []
+    for index in range(count):
+        y = 1.0 - 2.0 * (index + 0.5) / count
+        radius = math.sqrt(max(0.0, 1.0 - y * y))
+        out.append((radius * math.cos(golden * index), y, radius * math.sin(golden * index)))
+    return out
+
+
+def shed_view_leaks(built: dict, directions: int = 96) -> dict[str, list]:
+    """Where a camera sees THROUGH the shed: the first surface along a ray faces away from it.
+
+    `HOUSE-03631`. Every face is single-sided and the renderer culls back faces, so a ray whose
+    first hit is a back face shows whatever lies behind it -- from inside the shed, the sky. The
+    interior rays may leave only through the door or window; the exterior rays, aimed at the shed
+    from around it, may enter through those openings but never see a back face either. Glass is
+    left out because a camera sees through it by design.
+    """
+    faces = [face for name, rows in built["parts"] if name != "STRUCT_SHED_GLASS"
+             for face in rows]
+    ix0, iz0, ix1, iz1 = built["room"]
+    floor, eaves = built["floor"], built["eaves"]
+    sphere = _sphere(directions)
+    leaks: dict[str, list] = {"inside": [], "outside": []}
+
+    for x in (ix0 + 0.5, (ix0 + ix1) / 2.0 - 0.07):
+        for z in (iz0 + 0.45, (iz0 + iz1) / 2.0 + 0.11, iz1 - 0.45):
+            for y in (floor + 1.6, eaves - 0.2):
+                origin = (x, y, z)
+                for direction in sphere:
+                    hit = _first_hit(origin, direction, faces)
+                    if hit is not None:
+                        if sum(hit[1][n] * direction[n] for n in range(3)) >= 0.0:
+                            leaks["inside"].append((origin, direction))
+                        continue
+                    through = False
+                    for axis, plane, u0, u1, v0, v1 in built["openingRects"]:
+                        k = 0 if axis == "x" else 2
+                        if abs(direction[k]) < 1e-9:
+                            continue
+                        t = (plane - origin[k]) / direction[k]
+                        point = tuple(origin[n] + t * direction[n] for n in range(3))
+                        u = point[2] if axis == "x" else point[0]
+                        through = through or (t > 0.0 and u0 <= u <= u1 and v0 <= point[1] <= v1)
+                    if not through:
+                        leaks["inside"].append((origin, direction))
+
+    bx0, by0, bz0, bx1, by1, bz1 = built["bounds"]
+    targets = [(bx0 + (bx1 - bx0) * fx, by0 + (by1 - by0) * fy, bz0 + (bz1 - bz0) * fz)
+               for fx in (0.13, 0.5, 0.87) for fy in (0.2, 0.55, 0.9) for fz in (0.17, 0.5, 0.83)]
+    centre = ((bx0 + bx1) / 2.0, (bz0 + bz1) / 2.0)
+    for angle in range(0, 360, 30):
+        for height in (0.6, 1.7, 4.5):
+            origin = (centre[0] + 4.5 * math.cos(math.radians(angle + 7)), height,
+                      centre[1] + 4.5 * math.sin(math.radians(angle + 7)))
+            for target in targets:
+                offset = tuple(target[n] - origin[n] for n in range(3))
+                length = math.sqrt(sum(value * value for value in offset))
+                direction = tuple(value / length for value in offset)
+                hit = _first_hit(origin, direction, faces)
+                if hit is not None and sum(hit[1][n] * direction[n] for n in range(3)) >= 0.0:
+                    leaks["outside"].append((origin, direction))
+    return leaks
+
+
 def shed(directory: Path) -> dict | None:
     """§11.1's garden shed: floor, four walls with their openings cut, and a gable roof.
 
@@ -516,16 +621,25 @@ def shed(directory: Path) -> dict | None:
         elif aperture and aperture.get("kind") == "window":
             shed_window = (portal, aperture)
 
+    # `HOUSE-03631`: two skins, lit by two cells. `parts` faces the weather and is filed with the
+    # sky-open garden; `lining` is what a body standing in `EXT_SHED` sees, and is filed with that
+    # enclosed cell. One file for both lit the sunny east elevation as the inside of a dark shed.
     parts: list[tuple[str, list]] = []
+    lining: list[tuple[str, list]] = []
     walls: list[dict] = []
-    # The four walls, each from the room's own face out to the footprint.
+    wall_lining: list[dict] = []
+    # The four walls, each from the room's own face out to the footprint. A panel's face in the
+    # room's own plane is lining; its outer face, reveals and top belong to the weather side.
     for axis, plane, outer, other in (("x", ix0, ox0, (iz0, iz1)), ("x", ix1, ox1, (iz0, iz1)),
                                       ("z", iz0, oz0, (ix0, ix1)), ("z", iz1, oz1, (ix0, ix1))):
         cut = holes.get((axis, round(plane, 4)), [])
+        k = 0 if axis == "x" else 2
         for u0, u1, v0, v1 in _panel(other[0], other[1], floor, head, cut):
             low = (min(plane, outer), v0, u0) if axis == "x" else (u0, v0, min(plane, outer))
             high = (max(plane, outer), v1, u1) if axis == "x" else (u1, v1, max(plane, outer))
-            walls += _box(low, high)
+            for corners, normal in _box(low, high):
+                inner = all(abs(point[k] - plane) < 1e-9 for point in corners)
+                (wall_lining if inner else walls).append((corners, normal))
     parts.append(("STRUCT_SHED_WALLS", walls))
 
     # Painted corner boards and eaves fascia give the small outbuilding the same disciplined
@@ -630,13 +744,17 @@ def shed(directory: Path) -> dict | None:
         closed = _box((middle - thickness / 2.0, hv0, lu0),
                       (middle + thickness / 2.0, hv0 + height, lu1))
         posed = _transform_faces(closed, pose_point, pose_normal)
-        parts.append(("STRUCT_SHED_DOOR", posed))
+        # Posed open into the shed, so the leaf is inside it and lit with it.
+        lining.append(("STRUCT_SHED_DOOR", posed))
         end = pose_point(middle, hv0, lu0 if hinge == lu1 else lu1)
         door_pose = {"id": opening["id"], "hinge": (middle, hv0, hinge),
                      "freeEdge": end, "openFraction": float(opening["openFraction"])}
 
     slab = _box((ox0, floor - 0.10, oz0), (ox1, floor, oz1))
-    parts.append(("STRUCT_SHED_FLOOR", slab))
+    parts.append(("STRUCT_SHED_BASE", [(corners, normal) for corners, normal in slab
+                                       if normal != (0.0, 1.0, 0.0)]))
+    lining.append(("STRUCT_SHED_FLOOR", [(corners, normal) for corners, normal in slab
+                                         if normal == (0.0, 1.0, 0.0)]))
 
     # A gable roof with its ridge along X, so the door is in a gable end -- which is what a shed
     # this shape is: 3.6 m square, eaves at 2.35 and the ridge half a metre over them.
@@ -659,15 +777,42 @@ def shed(directory: Path) -> dict | None:
         roof.append((corners, (-1.0 if gable == ox0 else 1.0, 0.0, 0.0)))
     parts.append(("STRUCT_SHED_ROOF", roof))
 
-    points = [point for _name, faces in parts for corners, _n in faces for point in corners]
+    # The same roof seen from below. Each underside runs parallel to its pitch from the top of
+    # the room's own wall face to one shared apex line, so the two meet without a gap and stay
+    # under the roof they line (the roof is thickest at the eaves, one wall-depth of rise). The
+    # inner gables close exactly that section at both ends. Outward-only faces are invisible from
+    # inside under back-face culling, which is how Round 179 saw the sky through the roof.
+    apex = eaves + min(middle - iz0, iz1 - middle) * rise / run
+    ceiling: list[dict] = []
+    for inner in (iz0, iz1):
+        inward = (0.0, -run / length, (rise / length) if inner < middle else (-rise / length))
+        corners = [(ix0, eaves, inner), (ix1, eaves, inner), (ix1, apex, middle), (ix0, apex, middle)]
+        if inner > middle:
+            corners = list(reversed(corners))
+        ceiling.append((corners, inward))
+    lining.append(("STRUCT_SHED_CEILING", ceiling))
+    for gable in (ix0, ix1):
+        corners = [(gable, eaves, iz1), (gable, eaves, iz0), (gable, apex, middle)]
+        if gable == ix1:
+            corners = list(reversed(corners))
+        wall_lining.append((corners, (1.0 if gable == ix0 else -1.0, 0.0, 0.0)))
+    lining.append(("STRUCT_SHED_LINING", wall_lining))
+
+    points = [point for _name, faces in parts + lining for corners, _n in faces for point in corners]
     return {
         "id": row["id"],
         "cell": cell["id"],
-        "parts": parts,
+        "skin": parts,
+        "lining": lining,
+        "parts": parts + lining,
         "openings": sum(len(value) for value in holes.values()),
         "interior": (ix1 - ix0) * (iz1 - iz0),
+        "room": (ix0, iz0, ix1, iz1),
+        "floor": floor,
         "eaves": eaves,
         "ridge": ridge,
+        "openingRects": [(axis, plane, u0, u1, v0, v1) for (axis, plane), rects in holes.items()
+                         for u0, u1, v0, v1 in rects],
         "doorPose": door_pose,
         "bounds": (min(p[0] for p in points), min(p[1] for p in points), min(p[2] for p in points),
                    max(p[0] for p in points), max(p[1] for p in points), max(p[2] for p in points)),
@@ -1009,6 +1154,22 @@ def _gate_document(gate: dict) -> tuple[dict, bytes]:
                      f"GATE_{gate['style']}", gate["style"])
 
 
+def _shed_documents(built: dict) -> list[tuple[str, dict, bytes]]:
+    """The shed as its two files: the weather skin, and the lining named for its cell.
+
+    `build_chunks.py` files an output named for a cell under that cell, and places any other by
+    where it stands among the sky-open outdoor cells -- so the skin is lit as the garden and the
+    lining as the enclosed shed, each by the cell a viewer of it is actually in.
+    """
+    out = []
+    for stem, rows in ((built["id"], built["skin"]), (built["cell"], built["lining"])):
+        document, blob = _document(
+            [(name, faces, {}, SHED_PART_ROLES[name]) for name, faces in rows],
+            "SHED_timber", "shed")
+        out.append((stem, document, blob))
+    return out
+
+
 def emit(directory: Path, output: Path) -> dict:
     output.mkdir(parents=True, exist_ok=True)
     written, triangles = [], 0
@@ -1019,11 +1180,9 @@ def emit(directory: Path, output: Path) -> dict:
         triangles += _triangles(fence["faces"])
     built = shed(directory)
     if built is not None:
-        document, blob = _document(
-            [(name, faces, {}, SHED_PART_ROLES[name]) for name, faces in built["parts"]],
-            "SHED_timber", "shed")
-        gltf_io.write_glb(output / f"{built['id']}.glb", document, blob)
-        written.append(built["id"])
+        for stem, document, blob in _shed_documents(built):
+            gltf_io.write_glb(output / f"{stem}.glb", document, blob)
+            written.append(stem)
         triangles += sum(_triangles(faces) for _name, faces in built["parts"])
     for structure in garden_structures(directory):
         style = _GARDEN_STYLE[structure["asset"]]  # `_GARDEN_BUILDERS`'s keys, checked below
@@ -1325,7 +1484,29 @@ def selftest() -> int:
                 f"§11.1's one door and one window are cut in it, because §16's portals are where "
                 f"the holes are ({built['openings']})")
 
+        # `HOUSE-03631`: the lining is filed under the cell it is the inside of, by name; the skin
+        # under the structure, which `build_chunks.py` places in the sky-open garden around it.
+        ix0, iz0, ix1, iz1 = built["room"]
+        centre = ((ix0 + ix1) / 2.0, 0.0, (iz0 + iz1) / 2.0)
+        inward_skin = [name for name, faces in built["skin"] for corners, normal in faces
+                       if any(all(abs(point[k] - plane) < 1e-9 for point in corners)
+                              and normal[k] * (centre[k] - plane) > 0.0
+                              for k, plane in ((0, ix0), (0, ix1), (2, iz0), (2, iz1)))]
+        stems = [stem for stem, _document_, _blob_ in _shed_documents(built)]
+        require(stems == [built["id"], built["cell"]] and not inward_skin
+                and sorted(name for name, _faces in built["parts"])
+                == sorted(set(name for name, _faces in built["parts"])),
+                f"the weather skin ({stems[0]}) and the room's lining ({stems[-1]}) are separate "
+                f"files, every part in exactly one, and no face of the room's own walls is left "
+                f"on the weather side ({sorted(set(inward_skin))})")
+
         shed_parts = {name: faces for name, faces in built["parts"]}
+        require(len(shed_parts.get("STRUCT_SHED_CEILING", [])) == 2
+                and all(normal[1] < 0.0 for _corners, normal in shed_parts["STRUCT_SHED_CEILING"])
+                and all(max(point[1] for point in corners) < built["ridge"]
+                        for corners, _normal in shed_parts["STRUCT_SHED_CEILING"]),
+                "the roof has an underside: two pitched faces looking down into the room, below "
+                "the ridge they line")
         require(len(shed_parts.get("STRUCT_SHED_TRIM", [])) >= 100
                 and len(shed_parts.get("STRUCT_SHED_GLASS", [])) == 1,
                 f"HOUSE-03267 finishes the shed with corner boards, eaves fascia, cased door and "
@@ -1347,7 +1528,7 @@ def selftest() -> int:
         plane = float(door["plane"]["value"])
         blocked = []
         for name, faces in built["parts"]:
-            if name != "STRUCT_SHED_WALLS":
+            if name not in ("STRUCT_SHED_WALLS", "STRUCT_SHED_LINING"):
                 continue
             for corners, _normal in faces:
                 xs = [point[0] for point in corners]
@@ -1376,6 +1557,18 @@ def selftest() -> int:
         require(not wrong_shed,
                 f"every face of it is wound the way its own normal says, gable ends included "
                 f"({sorted(set(wrong_shed))})")
+
+        # `HOUSE-03631`: Round 179 saw the sky through the roof from inside, by day and night.
+        # Winding alone cannot catch that -- an outward-only roof is wound perfectly -- so look
+        # along real sight lines instead and require every first surface to face the eye.
+        leaks = shed_view_leaks(built)
+        require(not leaks["inside"],
+                f"from inside, every sight line ends on a surface facing the eye or leaves "
+                f"through the door or window -- never through a back face to the sky "
+                f"({len(leaks['inside'])} leak(s), first {leaks['inside'][:1]})")
+        require(not leaks["outside"],
+                f"and from all round it, nothing shows its back face either "
+                f"({len(leaks['outside'])} leak(s), first {leaks['outside'][:1]})")
 
         # ------------------------------------------------------------ §11.1's garden structures
         garden = garden_structures(SOURCE)

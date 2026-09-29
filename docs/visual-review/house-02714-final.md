@@ -1,9 +1,10 @@
 # Final walkthrough evidence — HOUSE-02714
 
 The day/night walkthrough and classification have been performed on the actual
-GPU application. The task remains **open for final acceptance** because the
-mandatory strict-XNA gate fails in current upstream CNA (BL-18). This record
-does not claim that the defects found by the review have been fixed.
+GPU application. **Accepted 2026-09-29**, once CNA `2c70eaf0f` fixed the
+strict-XNA blocker BL-18 and the mandatory gate compiled clean. The defects found
+here are fixed under HOUSE-03631 ([Round 180](house-03631-fixes.md)); this
+record itself describes the review as performed.
 
 ## Method and current evidence
 

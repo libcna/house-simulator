@@ -840,7 +840,7 @@ A `+` after a total means at least one row in that pack could not be measured, s
 | `house-l0` | `TEXTURE_L0_STOR_LM_DAY` | texture | `Textures/Lightmaps/Daylight/L0_STOR_LM_DAY` | 13,485 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_STOR_LM_LG_L0_STOR_MAIN` | texture | `Textures/Lightmaps/Artificial/L0_STOR_LM_LG_L0_STOR_MAIN` | 12,124 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_SUNROOM_LM_DAY` | texture | `Textures/Lightmaps/Daylight/L0_SUNROOM_LM_DAY` | 14,150 | -- | 65,536 | · | · |
-| `house-l0` | `TEXTURE_L0_SUNROOM_LM_LG_EXT_TERRACE_MAIN` | texture | `Textures/Lightmaps/Artificial/L0_SUNROOM_LM_LG_EXT_TERRACE_MAIN` | 676 | -- | 65,536 | · | · |
+| `house-l0` | `TEXTURE_L0_SUNROOM_LM_LG_EXT_TERRACE_MAIN` | texture | `Textures/Lightmaps/Artificial/L0_SUNROOM_LM_LG_EXT_TERRACE_MAIN` | 1,471 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_SUNROOM_LM_LG_L0_SUNROOM_BAR` | texture | `Textures/Lightmaps/Artificial/L0_SUNROOM_LM_LG_L0_SUNROOM_BAR` | 12,912 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_SUNROOM_LM_LG_L0_SUNROOM_MAIN` | texture | `Textures/Lightmaps/Artificial/L0_SUNROOM_LM_LG_L0_SUNROOM_MAIN` | 13,856 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_WC1_LM_DAY` | texture | `Textures/Lightmaps/Daylight/L0_WC1_LM_DAY` | 15,450 | -- | 65,536 | · | · |

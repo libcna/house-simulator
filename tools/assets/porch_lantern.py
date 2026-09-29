@@ -261,21 +261,23 @@ def validate_reused_instances() -> None:
             not light["defaultOn"]:
         raise RuntimeError("front-balcony lantern optical linkage changed")
 
-    for index, x in enumerate((-2.5, 2.5), start=1):
+    # HOUSE-03631: on the outside face, clear of the slider and window W5, rather than on the
+    # wall's centre line inside the sunroom; the bake calibration follows the unburied source.
+    for index, x in enumerate((-3.5, 2.5), start=1):
         prop_id = f"PROP_EXT_TERRACE_LANTERN_{index}"
         light_id = f"LIGHT_EXT_TERRACE_MAIN_{index}"
         prop = props[prop_id]
         light = lights[light_id]
         if prop["asset"] != "MODEL_FIXTURE_PORCH_LANTERN" or \
                 prop["cell"] != "EXT_TERRACE" or \
-                prop["position"] != [x, 2.475, -32.11025] or prop["yawDeg"] != 180 or \
+                prop["position"] != [x, 2.475, -32.28725] or prop["yawDeg"] != 180 or \
                 prop["scale"] != 1 or not prop["static"] or prop["collision"] != "none":
             raise RuntimeError(f"canonical rear-terrace lantern placement changed: {prop_id}")
         if light["cell"] != "EXT_TERRACE" or light["group"] != "LG_EXT_TERRACE_MAIN" or \
-                light["type"] != "point" or light["position"] != [x, 2.75, -32.23] or \
+                light["type"] != "point" or light["position"] != [x, 2.75, -32.327] or \
                 light["direction"] != [0.0, -0.75, -0.661438] or \
                 light["colorK"] != 2700 or light["intensityLm"] != 1600.0 or \
-                light["range"] != 8.5 or light["bakeLumensPerRadiantWatt"] != 0.03 or \
+                light["range"] != 8.5 or light["bakeLumensPerRadiantWatt"] != 29.0 or \
                 light["bakeCells"] != ["L0_SUNROOM"] or \
                 light["spillCells"] != ["EXT_BACKYARD"] or \
                 light["fixtureProp"] != prop_id or \

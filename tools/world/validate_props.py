@@ -47,6 +47,8 @@ WINDOW_FRONT = 0.60
 # aperture slab itself; route width is checked separately below, so furniture beside a wide cased
 # opening is not mistaken for furniture *in* it.
 OPENING_FRONT = 0.02
+#: Half an interior partition: the shallowest a room's finished wall face lies inside its box.
+ROOM_FACE_INSET = 0.075
 ROUTE_WIDTH = 0.70
 ROUTE_RADIUS = ROUTE_WIDTH / 2.0
 GRID_STEP = 0.10
@@ -446,9 +448,96 @@ def _route_exists(cell: dict, obstacles, goals, *, require_all: bool = True) -> 
             else any(anchor in reached for anchor in anchors[1:]))
 
 
+def _room_volumes(cells: dict, levels: dict) -> list[tuple[str, tuple]]:
+    """Every non-exterior cell box as `(cell, (x0, x1, y0, y1, z0, z1))`, inset to its faces.
+
+    A room box runs to the centre line of its walls. The thinnest wall, an interior partition,
+    puts the finished face `ROOM_FACE_INSET` inside that line, so geometry reaching deeper than
+    that is in the room rather than hidden in the wall.
+    """
+    volumes = []
+    for cell_id, cell in sorted(cells.items()):
+        level = levels.get(str(cell.get("level")))
+        if cell.get("kind") == "exterior" or level is None:
+            continue
+        floor, ceiling = layout_io.cell_extent(cell, level)
+        volumes += [(cell_id, (x0 + ROOM_FACE_INSET, x1 - ROOM_FACE_INSET, floor, ceiling,
+                               z0 + ROOM_FACE_INSET, z1 - ROOM_FACE_INSET))
+                    for x0, x1, z0, z1 in _cell_boxes(cell)]
+    return volumes
+
+
+def _intrusions(points, volumes) -> dict[str, int]:
+    """How many of @p points lie strictly inside each room volume, by cell."""
+    low = [min(point[axis] for point in points) for axis in range(3)]
+    high = [max(point[axis] for point in points) for axis in range(3)]
+    found: dict[str, int] = {}
+    for cell_id, (x0, x1, y0, y1, z0, z1) in volumes:
+        if high[0] <= x0 or low[0] >= x1 or high[1] <= y0 or low[1] >= y1 \
+                or high[2] <= z0 or low[2] >= z1:
+            continue
+        count = sum(1 for x, y, z in points if x0 < x < x1 and y0 < y < y1 and z0 < z < z1)
+        if count:
+            found[cell_id] = found.get(cell_id, 0) + count
+    return found
+
+
+def _vegetation_intrusions(vegetation: list, volumes, manifest_path: Path) -> list[str]:
+    """Exterior plantings whose placed geometry reaches inside a room.
+
+    `HOUSE-03631`. A planting is authored as a point, so nothing looked at where its crown went,
+    and Round 179 saw a mature crown through L1_BED3's corner wall. The instances are placed with
+    `build_chunks.place`, the transform the chunks are baked with, over the same LOD0 meshes, so
+    this measures the leaves the player actually sees.
+    """
+    document = json.loads(manifest_path.read_text(encoding="utf-8"))
+    sources = {str(row.get("id")): row.get("sourceFile") for row in document.get("assets", [])}
+    meshes: dict[str, list] = {}
+    problems = []
+    for group_index, planting in enumerate(vegetation):
+        asset = str(planting.get("asset"))
+        if asset not in meshes:
+            source = sources.get(asset)
+            meshes[asset] = (list(build_chunks.read_geometry_by_material(REPO / source).values())
+                             if isinstance(source, str) else [])
+        group_scale = float(planting.get("scale", 1.0))
+        for index, instance in enumerate(planting.get("instances") or []):
+            points = [point for mesh in meshes[asset]
+                      for point in build_chunks.place(
+                          mesh, [float(value) for value in instance["position"]],
+                          float(instance.get("yawDeg", 0.0)),
+                          group_scale * float(instance.get("scale", 1.0)))["positions"]]
+            if not points:
+                continue
+            for cell_id, count in sorted(_intrusions(points, volumes).items()):
+                problems.append(f"layout.exterior.json:vegetation/{group_index}/instances/{index} "
+                                f"({planting.get('id')}): {count} vertices of {asset} lie inside "
+                                f"room {cell_id}")
+    return problems
+
+
+def _exterior_prop_intrusions(props: list[Placed], cells: dict, volumes) -> list[str]:
+    """Outdoor props -- wall lanterns above all -- whose geometry reaches into a room.
+
+    `HOUSE-03631`. The cell-containment rule tolerates wall-mounted props crossing their cell's
+    edge by `MOUNT_TOLERANCE`, which is right for a lamp's back plate in the wall and wrong for
+    one centred on the wall's line: four lanterns were, and showed through the master bedroom's
+    and sunroom's walls.
+    """
+    problems = []
+    for prop in props:
+        if (cells.get(prop.cell) or {}).get("kind") != "exterior":
+            continue
+        points = [_transform_point(point, prop.row) for point in prop.asset.positions]
+        for cell_id, count in sorted(_intrusions(points, volumes).items()):
+            problems.append(f"layout.props.json:props/{prop.index} ({prop.identifier}): {count} "
+                            f"vertices of {prop.asset.identifier} lie inside room {cell_id}")
+    return problems
+
+
 def validate(world_dir: Path, manifest_path: Path, zones_path: Path) -> list[str]:
     layout = layout_io.load_layout(
-        world_dir, ["levels", "cells", "portals", "openings", "props", "lights"])
+        world_dir, ["levels", "cells", "portals", "openings", "props", "lights", "exterior"])
     prop_rows = layout_io.rows(layout, "props")
     assets = _load_assets(manifest_path, {str(row.get("asset")) for row in prop_rows})
     cells = {str(row["id"]): row for row in layout_io.rows(layout, "cells")}
@@ -599,6 +688,10 @@ def validate(world_dir: Path, manifest_path: Path, zones_path: Path) -> list[str
             problems.append(f"layout.props.json:{cell_id}: rigid props leave no continuous "
                             f"{ROUTE_WIDTH:.2f} m route from the standing point to an accessible "
                             "portal approach")
+    volumes = _room_volumes(cells, levels)
+    problems += _exterior_prop_intrusions(props, cells, volumes)
+    problems += _vegetation_intrusions((layout.get("exterior") or {}).get("vegetation") or [],
+                                       volumes, manifest_path)
     return problems
 
 
@@ -671,6 +764,19 @@ def selftest() -> int:
             "the same disc may not cut across the L-shaped cell's missing inner corner")
     require(_route_exists(elbow, [], [(2.8, -20.7), (4.35, -21.6)]),
             "a clear 0.70 m route turns through an L-shaped cell")
+    volumes = _room_volumes(
+        {"BED": {"level": "L1", "kind": "room", "boxes": [{"x": [0.0, 4.0], "z": [0.0, 4.0]}]},
+         "YARD": {"level": "L1", "kind": "exterior",
+                  "boxes": [{"x": [-9.0, 9.0], "z": [-9.0, 9.0]}]}},
+        {"L1": {"ffl": 3.0, "ceiling": 5.5}})
+    crown = [(-1.0, 4.0, 1.0), (0.4, 4.2, 1.0), (0.5, 6.0, 1.0), (-0.5, 4.0, 1.0),
+             (0.05, 4.0, 1.0)]
+    require(len(volumes) == 1 and _intrusions(crown, volumes) == {"BED": 1},
+            "a crown vertex inside a room's finished faces and storey is an intrusion; one above "
+            "the ceiling, outside the wall or hidden within the wall's half is not, and open "
+            "exterior cells are not rooms")
+    require(not _intrusions([(point[0] - 1.0, point[1], point[2]) for point in crown], volumes),
+            "the same crown a metre further out clears the room")
     # Exact curved door/prop rejection is already exercised by validate_world.py --selftest and
     # intentionally has one implementation, not an approximate second opinion here.
     require(hasattr(__import__("validate_world"), "rule_14_static_leaf_poses"),

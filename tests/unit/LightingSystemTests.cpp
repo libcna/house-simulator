@@ -18,6 +18,7 @@
 #include <limits>
 #include <span>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -31,6 +32,7 @@
 #include "cnahouse/lighting/LightingSystem.hpp"
 #include "cnahouse/lighting/PlanckianLut.hpp"
 #include "cnahouse/lighting/ShadingGrid.hpp"
+#include "cnahouse/rendering/AlphaTestPass.hpp"
 #include "cnahouse/rendering/SkySystem.hpp"
 #include "cnahouse/visibility/VisibilitySystem.hpp"
 #include "cnahouse/world/WorldData.hpp"
@@ -2051,4 +2053,81 @@ TEST(LightingSystemTests, CameraExposureFollowsTheObservedCellsPublishedTarget)
     EXPECT_GT(lighting.CameraExposureScale(), exteriorState->exposureTarget);
     EXPECT_LT(lighting.CameraExposureScale(), livingState->exposureTarget)
         << "entering a dark room adapts over §25.7's 2.2 seconds rather than snapping";
+}
+
+TEST(LightScheduleTests, TheEnclosedShedIsLitByItsOwnLampThroughTheDay)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    // `HOUSE-03631`. The shed's lining is unbaked Basic geometry in an enclosed exterior cell: no
+    // LM_DAY receiver brings daylight in, so its one lamp is what a daytime visitor sees by.
+    HouseLighting house;
+    house.clock.calendarDaysPerSimDay = 1.0;
+    cnahouse::environment::CivilTime time;
+    time.year = 2031;
+    time.month = 1;
+    time.day = 15;
+    const Id lamp = Id::Of("LG_EXT_SHED_MAIN");
+    std::uint64_t frame = 400;
+    for (const auto& [hour, minute] : {std::pair{10, 30}, std::pair{22, 0}})
+    {
+        time.hour = hour;
+        time.minute = minute;
+        house.clock.SetStandard(time);
+        house.lighting.Update(Frame(frame++));
+        ASSERT_NE(house.lighting.FindGroup(lamp), nullptr);
+        EXPECT_TRUE(house.lighting.FindGroup(lamp)->on) << hour << ":" << minute;
+        EXPECT_GT(house.lighting.FindCell(Id::Of("EXT_SHED"))->artificial, 0.0F) << hour << ":" << minute;
+    }
+}
+
+TEST(LightingSystemTests, OutdoorFoliageFollowsTheSkyFromMorningToNight)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    // `HOUSE-03631`. Stock AlphaTestEffect has no lights, and a crown scaled by the camera
+    // exposure alone stayed at morning brightness at 22:00 against a dark garden and facade.
+    HouseLighting house;
+    house.clock.calendarDaysPerSimDay = 1.0;
+    ASSERT_TRUE(house.lighting.SetCloudCover(0.0F));
+    cnahouse::environment::CivilTime time;
+    time.year = 2031;
+    time.month = 1;
+    time.day = 15;
+    const Id yard = Id::Of("EXT_FRONTYARD_W");
+    const Microsoft::Xna::Framework::Vector3 crown(-13.2F, 4.5F, -8.4F);
+    const auto luminance = [](const Microsoft::Xna::Framework::Vector3& colour)
+    { return 0.2126F * colour.X + 0.7152F * colour.Y + 0.0722F * colour.Z; };
+    const auto foliage = [&](int hour, int minute, std::uint64_t frame)
+    {
+        time.hour = hour;
+        time.minute = minute;
+        house.clock.SetStandard(time);
+        house.lighting.Update(Frame(frame));
+        const CelestialKeyLight* key = house.lighting.CelestialKeyForCell(yard);
+        return luminance(cnahouse::rendering::OutdoorFoliageMultiplier(
+            house.lighting.SkyAmbientColor(),
+            key != nullptr ? key->diffuseColor : Microsoft::Xna::Framework::Vector3(),
+            house.lighting.StaticFixtureLightsForObject(yard, crown)));
+    };
+    const float morning = foliage(10, 30, 500);
+    const float night = foliage(22, 0, 501);
+    std::printf("  foliage light: 10:30 %.3f, 22:00 %.3f\n",
+                static_cast<double>(morning),
+                static_cast<double>(night));
+    EXPECT_GT(morning, 0.6F) << "a sunlit crown keeps the brightness the daytime reviews accepted";
+    EXPECT_LT(night, 0.2F * morning) << "a crown at night is lit like the garden around it";
+    EXPECT_GE(night, kAmbientFloor) << "and is never blacker than the ambient floor";
+
+    const ObjectLightAssignment none;
+    const auto dark = cnahouse::rendering::OutdoorFoliageMultiplier(
+        Microsoft::Xna::Framework::Vector3(), Microsoft::Xna::Framework::Vector3(), none);
+    EXPECT_FLOAT_EQ(dark.X, kAmbientFloor);
+    const auto blown = cnahouse::rendering::OutdoorFoliageMultiplier(
+        Microsoft::Xna::Framework::Vector3(3.0F, 3.0F, 3.0F), Microsoft::Xna::Framework::Vector3(), none);
+    EXPECT_FLOAT_EQ(blown.Y, 1.0F) << "clamped to one, as BasicEffect's own ambient term is";
 }

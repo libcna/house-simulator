@@ -1,4 +1,36 @@
-# Handoff for Claude Code Opus 5.5 High — 2026-09-28
+# Handoff — 2026-09-29 (Round 180 bounded fixes; BL-18 fixed upstream)
+
+**State.** HOUSE-03683, HOUSE-03574, HOUSE-02714 and HOUSE-03631 are accepted. **26 open MUST /
+78 OPT**, nominal **33.5 h**, pessimistic **50.85 h** (1.10 × 33.5 + 8 h Android + 6 h Web).
+House Simulator is **not DONE**.
+
+**Chosen by.** R1's S1 fix-now exception selected the shed enclosure; the remaining Round-179
+S2s and the lantern S2 found while verifying follow within HOUSE-03631 under R12's bounded
+budget (S1 ≈0.75 h, S2 ≈3.25 h). Evidence: `docs/visual-review/house-03631-fixes.md`.
+
+**CNA.** The owner authorized fixing CNA defects found through House work in CNA itself, as
+separate CNA commits (2026-09-29). BL-18 is fixed in CNA `2c70eaf0f` on `next` (**not pushed**):
+aliases read `using Name CNAEXT = ...`, two using-declarations of inherited XNA members drop the
+marker, CNA's strict-surface check covers the headers. The House strict gate is 356 units clean.
+
+**Next MUST, by dependency order.** `HOUSE-02713`: refresh only the representative render
+references whose images changed on purpose, inspecting each. The software-GL render suite runs
+on a private Xvfb (offscreen EGL with `LIBGL_ALWAYS_SOFTWARE=1` segfaults), e.g.
+`Xvfb :141 -nolisten tcp` then `DISPLAY=:141 SDL_VIDEODRIVER=x11 LIBGL_ALWAYS_SOFTWARE=1`.
+It currently has 45 passes and 14 reference failures: references date from 2026-09-26, before
+several 2026-09-27/28 corrections as well as this round. Separate the intentional changes from
+anything unexplained before refreshing. Then `HOUSE-02405` (measured presets) and the
+Linux/Web/Android release paths as the table in the 2026-09-28 section below describes.
+
+**Verified here.** Unit 1542/1542; hardware-GPU integration 172 PASS / 3 opt-in SKIP / 0 FAIL
+(amdgpu fdinfo proof); culled/unculled render check PASS; `tools/ci/run_checks.sh` green with
+`HOUSE_XNA_STRICT_JOBS=4`. Build rules unchanged: shared `/rv/cnaccache`, `build/` only, six
+compile cores, never the owner's display.
+
+---
+
+# Previous handoff — 2026-09-28 (superseded where the section above differs)
+
 
 ## Resume from this checkpoint
 

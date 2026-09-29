@@ -61,7 +61,7 @@
     {"group": "LG_EXT_FACADE_UPLIGHT", "class": "SC-DUSK"},
     {"group": "LG_EXT_GARAGE_LANTERN", "class": "SC-DUSK"},
     {"group": "LG_EXT_NEIGHBOUR_PORCH", "class": "SC-DUSK"},
-    {"group": "LG_EXT_SHED_MAIN", "class": "SC-DUSK"},
+    {"group": "LG_EXT_SHED_MAIN", "class": "SC-CIRC"},
     {"group": "LG_EXT_STREET", "class": "SC-DUSK"},
     {"group": "LG_EXT_TERRACE_MAIN", "class": "SC-DUSK"},
     {"group": "LG_EXT_WALK_PATH", "class": "SC-DUSK"},
@@ -1630,10 +1630,12 @@
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
-    // ---- LG_L1_BALCONY_REAR_MAIN x2 -- wall lanterns either side of the slider
+    // ---- LG_L1_BALCONY_REAR_MAIN x2 -- wall lanterns on the rear wall's outside face: one over
+    // ---- the slider (window W2 leaves no wall left of it) and one to its right. HOUSE-03631:
+    // ---- both previously stood on the wall's centre line, inside the master bedroom.
     {
       "id": "LIGHT_L1_BALCONY_REAR_MAIN_1", "cell": "L1_BALCONY_REAR", "group": "LG_L1_BALCONY_REAR_MAIN",
-      "type": "point", "position": [-4, 5.8, -27.1],
+      "type": "point", "position": [-2.25, 6.155, -27.327],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2400, "intensityLm": 300.0, "range": 7.69,
       "fixtureProp": "PROP_L1_BALCONY_REAR_MAIN_1_FIXTURE", "emissiveMaterialSlot": "LanternShade",
@@ -1641,7 +1643,7 @@
     },
     {
       "id": "LIGHT_L1_BALCONY_REAR_MAIN_2", "cell": "L1_BALCONY_REAR", "group": "LG_L1_BALCONY_REAR_MAIN",
-      "type": "point", "position": [0, 5.8, -27.1],
+      "type": "point", "position": [0, 6.075, -27.327],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2400, "intensityLm": 300.0, "range": 7.69,
       "fixtureProp": "PROP_L1_BALCONY_REAR_MAIN_2_FIXTURE", "emissiveMaterialSlot": "LanternShade",
@@ -2455,12 +2457,16 @@
     // ---- LG_EXT_TERRACE_MAIN x2 -- physical rear-wall lanterns over the terrace. Their broad
     // ---- wall-lantern pools light the deck locally, spill only into the immediately
     // ---- adjacent rear lawn and bake a bounded pool onto the sunroom's outside skin.
+    // ---- HOUSE-03631: both stand on the outside face, clear of the slider and window W5;
+    // ---- on the wall's centre line they were half inside the sunroom, and their 0.03 bake
+    // ---- calibration only compensated a source buried in the wall. 29 keeps the accepted
+    // ---- pool energy (receiver mean 0.133) from the corrected source position.
     {
       "id": "LIGHT_EXT_TERRACE_MAIN_1", "cell": "EXT_TERRACE", "group": "LG_EXT_TERRACE_MAIN",
-      "type": "point", "position": [-2.50, 2.75, -32.23],
+      "type": "point", "position": [-3.50, 2.75, -32.327],
       "direction": [0.0, -0.75, -0.661438],
       "colorK": 2700, "intensityLm": 1600.0, "range": 8.50,
-      "bakeLumensPerRadiantWatt": 0.03,
+      "bakeLumensPerRadiantWatt": 29.0,
       "bakeCells": ["L0_SUNROOM"],
       "spillCells": ["EXT_BACKYARD"],
       "fixtureProp": "PROP_EXT_TERRACE_LANTERN_1", "emissiveMaterialSlot": "LanternShade",
@@ -2469,10 +2475,10 @@
     },
     {
       "id": "LIGHT_EXT_TERRACE_MAIN_2", "cell": "EXT_TERRACE", "group": "LG_EXT_TERRACE_MAIN",
-      "type": "point", "position": [2.50, 2.75, -32.23],
+      "type": "point", "position": [2.50, 2.75, -32.327],
       "direction": [0.0, -0.75, -0.661438],
       "colorK": 2700, "intensityLm": 1600.0, "range": 8.50,
-      "bakeLumensPerRadiantWatt": 0.03,
+      "bakeLumensPerRadiantWatt": 29.0,
       "bakeCells": ["L0_SUNROOM"],
       "spillCells": ["EXT_BACKYARD"],
       "fixtureProp": "PROP_EXT_TERRACE_LANTERN_2", "emissiveMaterialSlot": "LanternShade",
@@ -2521,7 +2527,9 @@
 
     // ---- LG_EXT_SHED_MAIN x1 -- one physical utility batten under the shed's 2.35 m roof. Its
     // ---- short, explicit garden spill represents the light visible through the east window;
-    // ---- the source's 3.30 m range keeps it local to the potting edge.
+    // ---- the source's 3.30 m range keeps it local to the potting edge. It is the enclosed
+    // ---- shed's only light: its unbaked lining has no daylight receiver, so like the other
+    // ---- service and store rooms it keeps the all-day circulation class (HOUSE-03631).
     {
       "id": "LIGHT_EXT_SHED_MAIN_1", "cell": "EXT_SHED", "group": "LG_EXT_SHED_MAIN",
       "type": "point", "position": [-18.20, 2.25, -42.20],

@@ -41,6 +41,12 @@ namespace cnahouse::world
 namespace cnahouse::rendering
 {
 
+    /// @brief Ambient share of an active fixture's colour on unbaked (Basic) detail.
+    inline constexpr float kBasicFixtureAmbient = 0.20F;
+
+    /// @brief Direct share of an active fixture's colour in a Basic detail light slot.
+    inline constexpr float kBasicFixtureKey = 0.22F;
+
     /// @brief Outdoor opaque receivers share the sky's scene-referred Tier-S exposure domain.
     ///
     /// Interior receivers continue following the camera's adapted stock-effect multiplier. An

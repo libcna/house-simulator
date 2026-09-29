@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 #include "cnahouse/rendering/AlphaTestPass.hpp"
 
+#include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <utility>
 
@@ -22,6 +24,7 @@
 #include "cnahouse/rendering/MaterialBinder.hpp"
 #include "cnahouse/rendering/RenderStates.hpp"
 #include "cnahouse/rendering/StateTracker.hpp"
+#include "cnahouse/rendering/StaticGeometryPass.hpp"
 #include "cnahouse/util/Ids.hpp"
 #include "cnahouse/world/CellRuntime.hpp"
 #include "cnahouse/world/ChunkData.hpp"
@@ -30,6 +33,32 @@
 namespace cnahouse::rendering
 {
     namespace Gfx = Microsoft::Xna::Framework::Graphics;
+    using Microsoft::Xna::Framework::Vector3;
+
+    Vector3 OutdoorFoliageMultiplier(const Vector3& skyAmbient,
+                                     const Vector3& celestialKey,
+                                     const lighting::ObjectLightAssignment& fixtures) noexcept
+    {
+        Vector3 fixtureKey;
+        for (const auto& slot : fixtures.slots)
+        {
+            if (slot.has_value())
+            {
+                fixtureKey.X += slot->diffuseColor.X;
+                fixtureKey.Y += slot->diffuseColor.Y;
+                fixtureKey.Z += slot->diffuseColor.Z;
+            }
+        }
+        const auto channel = [&](float sky, float key, float fixture, float spill)
+        {
+            const float light = lighting::kAmbientFloor + sky + kFoliageKeyShare * key +
+                                kFoliageKeyShare * kBasicFixtureKey * fixture + kBasicFixtureAmbient * spill;
+            return std::isfinite(light) ? std::clamp(light, 0.0F, 1.0F) : 0.0F;
+        };
+        return Vector3(channel(skyAmbient.X, celestialKey.X, fixtureKey.X, fixtures.spillDiffuseColor.X),
+                       channel(skyAmbient.Y, celestialKey.Y, fixtureKey.Y, fixtures.spillDiffuseColor.Y),
+                       channel(skyAmbient.Z, celestialKey.Z, fixtureKey.Z, fixtures.spillDiffuseColor.Z));
+    }
 
     AlphaTestPass::AlphaTestPass(const world::ChunkLibrary& library,
                                  const world::CellRuntime& cells,
@@ -125,13 +154,19 @@ namespace cnahouse::rendering
             }
 
             bool hasResident = false;
+            Vector3 runMin;
+            Vector3 runMax;
             for (std::size_t i = first; i < last; ++i)
             {
-                if (items[i].geometry < library_.chunks.size() && cells_.Find(items[i].geometry) != nullptr)
+                if (items[i].geometry >= library_.chunks.size() || cells_.Find(items[i].geometry) == nullptr)
                 {
-                    hasResident = true;
-                    break;
+                    continue;
                 }
+                const Microsoft::Xna::Framework::BoundingBox& bounds =
+                    library_.chunks[items[i].geometry].bounds;
+                runMin = hasResident ? Vector3::Min(runMin, bounds.Min) : bounds.Min;
+                runMax = hasResident ? Vector3::Max(runMax, bounds.Max) : bounds.Max;
+                hasResident = true;
             }
             if (!hasResident)
             {
@@ -144,12 +179,24 @@ namespace cnahouse::rendering
             draw.view = &view;
             draw.projection = &projection;
             draw.diffuse = texture;
+            const world::Cell* cell = cellIndex < library_.cells.size()
+                                          ? world_.FindCell(util::Id::Of(library_.cells[cellIndex]))
+                                          : nullptr;
             if (cellIndex < library_.cells.size())
             {
                 draw.fog = ExteriorFogFor(util::Id::Of(library_.cells[cellIndex]), exteriorFog_);
             }
             const float exposure = lighting_ == nullptr ? 1.0F : lighting_->CameraEffectExposure();
-            draw.colourMultiplier = Microsoft::Xna::Framework::Vector3(exposure, exposure, exposure);
+            draw.colourMultiplier = Vector3(exposure, exposure, exposure);
+            if (lighting_ != nullptr && cell != nullptr && cell->kind == world::CellKind::Exterior &&
+                cell->visibilityHint == world::VisibilityHint::Open)
+            {
+                const lighting::CelestialKeyLight* key = lighting_->CelestialKeyForCell(cell->id);
+                draw.colourMultiplier = OutdoorFoliageMultiplier(
+                    lighting_->SkyAmbientColor(),
+                    key != nullptr ? key->diffuseColor : Vector3(),
+                    lighting_->StaticFixtureLightsForObject(cell->id, (runMin + runMax) * 0.5F));
+            }
             const util::Result<Gfx::Effect*> effectResult = binder_.Bind(material->id, draw);
             const util::Result<CullPolicy> cull = binder_.CullFor(material->id, 1.0F);
             if (!effectResult || !cull)

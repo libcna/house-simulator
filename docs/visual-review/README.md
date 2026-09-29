@@ -5737,3 +5737,15 @@ Methods, limitations, exact paths and per-zone dispositions are recorded in
 required corrections; its S1 enclosure issue is selected next by R1's fix-now
 exception, before unrelated performance or optional polish. No defect correction
 is falsely claimed complete by this review.
+
+## Round 180 — bounded fix pass over Round 179's findings
+
+HOUSE-03631 fixes every Round-179 S1/S2 at its root cause and one S2 found while verifying:
+the shed's missing roof underside (S1), its skin lit as the enclosed interior and its unlit
+daytime lining, the mature crown inside L1_BED3, night-bright AlphaTestEffect crowns, and four
+wall lanterns centred on their wall line inside L1_MASTER_BED and L0_SUNROOM. Matched Radeon
+GPU day/night before/after views were inspected for every item; generator, placement and
+lighting regressions protect them. Method, measurements and limits are in
+[the Round 180 record](house-03631-fixes.md). S3 attic mottling and the plain street stay in
+the logged backlog; no S4 work was scheduled. Next: the intentional golden refresh
+`HOUSE-02713`, selected by its dependency order within M11.

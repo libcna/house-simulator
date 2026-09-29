@@ -158,13 +158,19 @@ CHUNK_BUDGET_EXCEPTIONS = {
                         "HOUSE-00946 adds one asphalt-finish batch for narrow control joints and "
                         "one bluestone batch for the driveway's inset border/bands. HOUSE-03342 "
                         "adds one reused metal service-object role without a split"),
-    "EXT_SHED": (15,
-                  "HOUSE-03267's finished shed envelope uses six measured architectural roles. "
-                  "HOUSE-03342 adds five shared kit roles for its bounded secondary-tier "
-                  "workbench, storage and garden-tool composition; repeated tools and pots "
-                  "batch together, with no vertex or Reach-cap split. HOUSE-03406 adds the four "
-                  "existing utility-batten roles around its one physical source; no new material "
-                  "or vertex/Reach-cap split"),
+    "EXT_GARDEN": (10,
+                    "HOUSE-03631 files the shed's weather skin with the sky-open garden it stands "
+                    "in: its siding, painted trim, roof and clear glass join the garden's own "
+                    "six roles (the slab edge reuses the beds' garden timber), so the east "
+                    "elevation is lit as outdoors. No new material, vertex or Reach-cap split"),
+    "EXT_SHED": (12,
+                  "HOUSE-03631 keeps only the enclosed lining here: boarded walls and gables, "
+                  "the leaf posed inside, and timber floor and roof underside (three measured "
+                  "roles; the weather skin is EXT_GARDEN's). HOUSE-03342 adds five shared kit "
+                  "roles for its bounded secondary-tier workbench, storage and garden-tool "
+                  "composition; repeated tools and pots batch together, with no vertex or "
+                  "Reach-cap split. HOUSE-03406 adds the four existing utility-batten roles "
+                  "around its one physical source; no new material or vertex/Reach-cap split"),
     "EXT_WORLD": (30,
                    "the neighbourhood ring is not a room. HOUSE-00772's two rows of street trees "
                    "and the 2.1 m road-edge hedge add source-exact bark/cutout foliage with "
@@ -1721,10 +1727,17 @@ def place_outdoors(cells: dict, bounds, fallback: str, levels: dict | None = Non
     outdoors with a bounding-volume hierarchy over instances and their own boxes, because
     `EXT_WORLD` is one enormous cell and portal traversal cannot help inside it. A terrain tile
     that straddles two yards is not hidden by the one it is filed under.
+
+    It IS a lighting key, though, so only sky-open cells compete (`HOUSE-03631`). `EXT_SHED` is
+    an exterior cell that is enclosed -- `visibilityHint: opaque`, walls and a roof -- and the
+    runtime lights what is filed there as the inside of a dark shed. Placing by overlap put the
+    shed's whole weather skin there, and its sunny east elevation drew black at 10:30. An
+    enclosed cell's own surfaces are written in a file named for it, which is filed by name.
     """
     best, best_area = None, 0.0
     for identifier, cell in sorted(cells.items()):
-        if cell.get("kind") != "exterior" or identifier == fallback:
+        if (cell.get("kind") != "exterior" or identifier == fallback
+                or cell.get("visibilityHint") == "opaque"):
             continue
         if levels is not None:
             level = levels.get(cell.get("level"))
@@ -3151,6 +3164,24 @@ def selftest() -> int:
         require(place_outdoors(yard_cells, away, "EXT_YARD", yard_levels) == "EXT_YARD",
                 "and a road segment 100 m away, overlapping nothing of the property, lands in "
                 "the world, which is where it is")
+        # The shed's arrangement: an open plot that rings the walls, and the enclosed room inside
+        # them, which covers far more of the building's plan than the ring does.
+        sheltered = {
+            "EXT_YARD": yard_cells["EXT_YARD"],
+            "EXT_PLOT": {"id": "EXT_PLOT", "level": "L0", "kind": "exterior",
+                         "boxes": [{"x": [-6.0, -2.0], "z": [-6.0, -5.8]},
+                                   {"x": [-6.0, -2.0], "z": [-2.2, -2.0]},
+                                   {"x": [-6.0, -5.8], "z": [-5.8, -2.2]},
+                                   {"x": [-2.2, -2.0], "z": [-5.8, -2.2]}]},
+            "EXT_HUT": {"id": "EXT_HUT", "level": "L0", "kind": "exterior",
+                        "visibilityHint": "opaque",
+                        "boxes": [{"x": [-5.8, -2.2], "z": [-5.8, -2.2]}]},
+        }
+        hut = (-6.0, -0.1, -6.0, -2.0, 2.9, -2.0)
+        require(place_outdoors(sheltered, hut, "EXT_YARD", yard_levels) == "EXT_PLOT",
+                f"a hut's weather skin is filed with the open plot it stands in, never with the "
+                f"enclosed cell inside it, which the runtime lights as a dark interior "
+                f"(HOUSE-03631; {place_outdoors(sheltered, hut, 'EXT_YARD', yard_levels)})")
 
         outdoor_dir = workspace / "outdoors"
         outdoor_dir.mkdir()

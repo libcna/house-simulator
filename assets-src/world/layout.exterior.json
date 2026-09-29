@@ -518,9 +518,12 @@
     ] },
     // ---- VEG_MAPLE x2 -- legacy landscape-role id. The approved visual substitute is the
     // honestly identified mature Searsia lucida; no downloaded asset is deceptively renamed.
+    // HOUSE-03631: at Z -12.00 the second crown's measured x -16.67..-9.71 / z -15.97..-7.28
+    // put 232 vertices inside L1_BED3's finished corner walls. 2.2 m toward the road is the
+    // nearest position keeping the whole crown 0.6 m clear of every room box, eaves included.
     { "id": "VEG_MAPLE", "asset": "MODEL_VEGETATION_TREE_SEARSIA_LUCIDA_MATURE", "instances": [
       { "position": [-18.50, 0.00, -7.50], "yawDeg": 24.0, "scale": 0.82 },
-      { "position": [-13.50, 0.00, -12.00], "yawDeg": 197.0, "scale": 0.78 }
+      { "position": [-13.50, 0.00, -9.80], "yawDeg": 197.0, "scale": 0.78 }
     ] },
     // ---- VEG_BIRCH x1 -- legacy role id, using the approved mature wild-syringa substitute.
     { "id": "VEG_BIRCH", "asset": "MODEL_VEGETATION_TREE_TREE_SMALL_02_MATURE", "instances": [

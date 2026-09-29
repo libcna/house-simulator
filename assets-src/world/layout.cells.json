@@ -1086,7 +1086,7 @@
       "daylight": { "orientation": "S", "exposure": 0.82 },
       "lightGroups": ["LG_L0_SUNROOM_MAIN", "LG_L0_SUNROOM_BAR"],
       "lightmaps": {
-        "shellHash": "sha256:7a2c2baddbb138b3542318e6eacad3b22008f9f56c67aa785fb7ec186a919992",
+        "shellHash": "sha256:ffc00539e7d2fa5c1413181739233766cb81a9550b3d8912bf998b46fe63f15b",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_SUNROOM_LM_DAY",
           "scale": 1.0000001192092896,
@@ -1096,8 +1096,8 @@
           {
             "group": "LG_EXT_TERRACE_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_SUNROOM_LM_LG_EXT_TERRACE_MAIN",
-            "scale": 0.6217548251152039,
-            "receiverMean": 0.13254135185150603
+            "scale": 3.489997148513794,
+            "receiverMean": 0.1344914264447648
           },
           {
             "group": "LG_L0_SUNROOM_BAR",

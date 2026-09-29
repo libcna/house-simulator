@@ -152,11 +152,10 @@ namespace cnahouse::rendering
         // constructor-white key, clipping every pale seat. Keep the attenuated daylight terms,
         // while an *active* authored fixture supplies enough room bounce for close furniture and
         // trim to read: the foyer chair's fixed pixel rose from RGB(17,14,12) to RGB(53,37,23)
-        // without altering any artificial-lightmapped architectural receiver.
+        // without altering any artificial-lightmapped architectural receiver. The shared fixture
+        // ambient/key shares are declared in the header, where outdoor foliage reads them too.
         constexpr float kBasicSkyBounce = 0.18F;
-        constexpr float kBasicFixtureAmbient = 0.20F;
         constexpr float kBasicInteriorFixtureBounce = 0.38F;
-        constexpr float kBasicFixtureKey = 0.22F;
         // A cell-wide sample cannot reproduce the receiver's local UV2 gradient. It may lift the
         // established BasicEffect bounce, but must not turn a pale prop beside a shaded wall into
         // the brightest object in the room. Matched HOUSE-03402 captures bound that approximation

@@ -499,7 +499,8 @@
       "furnishedMeshes": 197,
       "furnishedProps": 3,
       "groups": [],
-      "shellHash": "sha256:7a2c2baddbb138b3542318e6eacad3b22008f9f56c67aa785fb7ec186a919992"
+      "lumensPerRadiantWatt": 200.0,
+      "shellHash": "sha256:ffc00539e7d2fa5c1413181739233766cb81a9550b3d8912bf998b46fe63f15b"
     },
     {
       "cell": "L0_WC1",
@@ -1131,8 +1132,7 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_STAIR_MAIN",
-    "L1_STAIR_MAIN"
+    "L0_SUNROOM"
   ],
   "reusedCells": 77,
   "rgba8Bytes": 5111808,

@@ -24,12 +24,29 @@ namespace cnahouse::world
 namespace cnahouse::lighting
 {
     class LightingSystem;
-}
+    struct ObjectLightAssignment;
+} // namespace cnahouse::lighting
 
 namespace cnahouse::rendering
 {
     class MaterialBinder;
     struct FogParams;
+
+    /// @brief Share of the sun/moon key a cutout crown receives on average: its leaves face every
+    ///        way, and about half of them face the light.
+    inline constexpr float kFoliageKeyShare = 0.5F;
+
+    /// @brief Stock-AlphaTestEffect colour for cutout foliage in a sky-open exterior cell.
+    ///
+    /// XNA's `AlphaTestEffect` has no lights, so `DiffuseColor` is all the light a leaf gets.
+    /// Scaling it by the camera exposure alone kept every crown at noon brightness all night
+    /// (`HOUSE-03631`). This is the light a BasicEffect receiver in the same cell gets -- the
+    /// ambient floor, the open sky, a crown's average share of the sun/moon key, and the active
+    /// fixtures' key and spill -- at the exterior's unit exposure, clamped to one per channel.
+    [[nodiscard]] Microsoft::Xna::Framework::Vector3
+    OutdoorFoliageMultiplier(const Microsoft::Xna::Framework::Vector3& skyAmbient,
+                             const Microsoft::Xna::Framework::Vector3& celestialKey,
+                             const lighting::ObjectLightAssignment& fixtures) noexcept;
 
     /// @brief §23.6's alpha-tested static pass, before transparency with full depth writes.
     ///
