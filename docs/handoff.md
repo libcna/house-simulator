@@ -1,9 +1,9 @@
 # Handoff — 2026-09-29 (DONE audit; HOUSE-02405 measured presets; Round 180 bounded fixes)
 
 **State.** HOUSE-03683, HOUSE-03574, HOUSE-02714, HOUSE-03631, HOUSE-02713, HOUSE-02405, the
-desktop DONE audit HOUSE-02781 and its gap fix HOUSE-02782 are accepted; M10 and M11 are complete.
-**22 open MUST / 78 OPT**, nominal **28.25 h**, pessimistic **45.1 h** (1.10 × 28.25 + 8 h Android
-+ 6 h Web). House Simulator is **not DONE**.
+desktop DONE audit HOUSE-02781, its gap fix HOUSE-02782 and the licence check HOUSE-02788 are
+accepted; M10 and M11 are complete. **21 open MUST / 78 OPT**, nominal **27.5 h**, pessimistic
+**44.3 h** (1.10 × 27.5 + 8 h Android + 6 h Web). House Simulator is **not DONE**.
 
 **Presets (HOUSE-02405).** `--quality=android|web|high|ultra` (low/medium still accepted). The
 chunk library now cooks the authored `_LOD1`/`_LOD2` vegetation per preset level (flag bit 0, one
@@ -26,8 +26,10 @@ private Xvfb (offscreen EGL with `LIBGL_ALWAYS_SOFTWARE=1` segfaults): `Xvfb :14
 then `DISPLAY=:141 SDL_VIDEODRIVER=x11 LIBGL_ALWAYS_SOFTWARE=1 build/cnahouse_render_tests`. Stop
 the Xvfb afterwards.
 
-**Next MUST.** ASAN/UBSAN `HOUSE-02783`, the 2-hour run `HOUSE-02784`, licences `HOUSE-02788`
-and packaging; the Web/Android paths as their `dep:` lines allow.
+**Next MUST.** ASAN/UBSAN `HOUSE-02783` (in progress: `build-asan/` configured, its `content`
+and `content-fx` are symlinks to `build/`'s so 416 MB is not rebuilt), the 2-hour run
+`HOUSE-02784`, then packaging `HOUSE-02789` (leave out the content build's lock/manifest files);
+the Web/Android paths as their `dep:` lines allow.
 
 **Verified here.** Unit 1546/1546; perf 24/24 on the Radeon (amdgpu fdinfo proof); hardware-GPU
 integration 173 PASS / 3 opt-in SKIP / 0 FAIL (run it from the repository root, which ctest does:
