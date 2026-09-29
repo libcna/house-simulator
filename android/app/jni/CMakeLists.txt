@@ -9,6 +9,12 @@ set(CMAKE_JOB_POOL_LINK link_pool)
 
 get_filename_component(HOUSE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../.." ABSOLUTE)
 
+# Clang fuses a*b+c into one FMA on arm64 (-ffp-contract=on), which rounds once where every other
+# House build (desktop gcc, x86_64, wasm) rounds twice. The movement and collision code then lands
+# a capsule a few ULPs elsewhere, enough for the filming tour's recorded route to stall on the
+# basement stair; with contraction off, arm64 simulates what the other builds simulate.
+add_compile_options(-ffp-contract=off)
+
 # The production House CMake target owns the source list and CNA configuration. Gradle
 # builds only this shared Android entry point and its real cnahouse_core dependencies;
 # host-only CNA tools and the desktop executable are excluded from this build graph.

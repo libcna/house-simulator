@@ -3,6 +3,33 @@
 This is a running validation record, not a claim that the Linux, Web or Android DONE checklists
 have passed. `plan.md` remains the release authority.
 
+## Android DONE checklist on the emulator — HOUSE-03038 (2026-09-29)
+
+No physical phone is available; this is the best available emulator, recorded as such: AVD
+`House_Phone` (API 35, x86_64 with the arm64 translator, 2 GB RAM, KVM) with `-gpu host` over the
+Radeon 780M, inside CNA's private GPU display. The shipped package -- the arm64-v8a release APK --
+was installed and driven through adb.
+
+| Item | Result |
+|---|---|
+| Install and run | `adb install` of the release APK; cold launch reaches the title, active |
+| Touch controls for the walk | the MOVE stick walks, a drag on the right looks, WALK switches to RUN and MENU pauses (and stops the tour); held taps drive every menu |
+| Representative traversal: `--filming-tour` street → yards → garden → kitchen → foyer → main stair → basement → every floor → attic | 90/90 views in 2,158 s on the arm64 release (the Web took 2,144 s), no error or warning |
+| Corruption | none in the tour's captures or the scene captures |
+| Performance | HOUSE-03037: 60 Hz inside and 30 FPS on the street through the translator; 60 Hz everywhere on the x86_64 build |
+| Lifecycle | Home and return log deactivated, activated; the walk resumes |
+| Smoke | `tools/ci/android_smoke.py`: passed -- title, Start, 984-1,125 walk frames in 20 s, the quality row round its presets, Home/return, no errors |
+
+**A defect this found, now fixed.** The first arm64 tour stalled on the basement stair while the
+x86_64 build, the desktop and both browsers completed it. Clang contracts `a*b+c` into one FMA on
+arm64, which rounds once where every other build rounds twice, so the movement and collision code
+put the capsule a few ULPs elsewhere and the recorded route stopped making progress.
+`android/app/jni/CMakeLists.txt` now builds with `-ffp-contract=off`; arm64 then climbs the stair
+exactly as desktop does.
+
+The touch HUD (MOVE, WALK, MENU) stays on screen during the filming tour: on a touch device MENU
+is the way to stop it.
+
 ## The Web release — HOUSE-02904 (2026-09-29)
 
 `tools/ci/package_web.py --build-dir build-consumer` writes the deployable directory

@@ -12,8 +12,8 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers and a reusable kit), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (2026-09-22 reduction, retained breadth and maintenance mode; its former hour ceiling is superseded below) |
 | Scope policy | The owner explicitly superseded the former 280-hour ceiling on 2026-09-27 and requested further targeted corrections and a filming tour. Keep MUST/OPT boundaries explicit; do not infer other features |
-| Active plan | **9 open MUST tasks** in 16 milestones. M11's review, bounded fix pass and golden refresh are complete; measured presets, platform and release work remain. Every active task's title and acceptance states the current work |
-| Estimate to DONE | Current open-task sum **9.5 agent-hours**; pessimistic **18.5 h** = 1.10 × 9.5 + the still-active Android reserve (8 h); High performance reserve R-C is retired after repeatable acceptance, and the Web reserve with M14. The old **44.84 / 52.75 / 76.03 h** table below is historical, not a current forecast or scheduling gate. Per-task `est:` remains for task sizing; platform/dependency waiting is not promised wall-clock completion |
+| Active plan | **8 open MUST tasks** in 16 milestones. M11's review, bounded fix pass and golden refresh are complete; measured presets, platform and release work remain. Every active task's title and acceptance states the current work |
+| Estimate to DONE | Current open-task sum **8.0 agent-hours**; pessimistic **16.8 h** = 1.10 × 8.0 + the still-active Android reserve (8 h); High performance reserve R-C is retired after repeatable acceptance, and the Web reserve with M14. The old **44.84 / 52.75 / 76.03 h** table below is historical, not a current forecast or scheduling gate. Per-task `est:` remains for task sizing; platform/dependency waiting is not promised wall-clock completion |
 | Current gate | **G5, M7, M8, M9, M11 and M12 passed; M13 is complete: the Linux desktop release is tagged `v1.0.0`; the Web and Android milestones follow. CNA fixed strict-API blocker BL-18 upstream (`2c70eaf0f`), which let `HOUSE-03683`/`03574`/`02714` be accepted. CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator; the APK now carries the Android-tier content and walks the house on the `House_Phone` emulator (`HOUSE-03033`, with CNA fixes BL-19/20/21); the Android preset holds the frame target there (`HOUSE-03037`).** Main/attic/basement stairs, garage-loft floor and whole-house lighting are corrected under `HOUSE-03635`/`03638`/`03639`/`03636`; doorway flashes and visibility/wall holes under `HOUSE-03637`/`03640`, including the owner's precise foyer/stair corner-gap screenshot. The existing car family is corrected under `HOUSE-03641`; full GPU filming circuit accepted under `HOUSE-03572`. Normal title/Start audio produces real backend PCM; owner listening accepts all six footstep categories and interior/exterior day/night ambience under `HOUSE-01920`/`01922`. Weather layers and the indoor-rain correction are accepted under `HOUSE-01925`; whole-zone four-state listening passes `HOUSE-01939`. Desktop High scenarios pass three complete current hardware-GPU rounds under `HOUSE-02404`; the three presets are measured under `HOUSE-02405` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
@@ -1933,10 +1933,20 @@ emulator, not a compatibility lab. Cosmetic platform luxuries are cut.
               build gained an installable release (debug-key signed), `-PhouseAbi=x86_64` for an
               x86_64 emulator, and the activity's `args` extra as its command line
 
-- [ ] HOUSE-03038 — The Android DONE checklist
+- [x] HOUSE-03038 — The Android DONE checklist
       dep: HOUSE-03037, HOUSE-02797 · sys: — · plat: AND · pri: MUST · zone: all · adv: D10c · est: 1.5
       accept: install and run; touch controls sufficient for the walk; the representative traversal of `HOUSE-02900`; no major corruption; acceptable performance. One device is enough; more are recorded when available
       trace: absorbs `HOUSE-03040`; was *Verify the whole feature set on a device*
+      verify: (2026-09-29) On the API-35 `House_Phone` emulator with `-gpu host`, recorded as the best
+              available device: the arm64 release APK installs and cold-launches active; the MOVE
+              stick, look drag, WALK/RUN and MENU work by touch; `--filming-tour` completes 90/90
+              views in 2,158 s with no error or warning and no corruption in its captures;
+              HOUSE-03037's frame times; Home and return deactivate and reactivate.
+              `tools/ci/android_smoke.py` (title, Start, 300+ walk frames, the quality row round
+              its presets, Home/return) passes. The first arm64 tour stalled on the basement
+              stair: clang's FMA contraction made arm64 round differently from every other build,
+              so the Android build now uses `-ffp-contract=off` and matches desktop exactly.
+              Record: `docs/portability.md`
 
 - [ ] HOUSE-03039 — Tune the touch controls on the device
       dep: HOUSE-03038, HOUSE-02992, HOUSE-02998 · sys: ui · plat: AND · pri: MUST · zone: all · adv: D8, D10c · est: 0.75

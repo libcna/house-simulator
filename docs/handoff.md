@@ -7,9 +7,9 @@ the 2-hour run HOUSE-02784 are accepted, the desktop release is tagged `v1.0.0` 
 the Web download fits (HOUSE-02850), the Web preset holds 60 FPS in Chrome (HOUSE-02898) and the
 Web DONE checklist passed in Chrome and Firefox (HOUSE-02900) with its smoke test and nightly CI
 job (HOUSE-02901) and its deployable package (HOUSE-02904) -- M14 is complete, as are M10, M11
-and M13. Android content delivery (HOUSE-03033) and the emulator measurement (HOUSE-03037) are
-accepted. **9 open MUST / 78 OPT**, nominal **9.5 h**, pessimistic **18.5 h** (1.10 × 9.5 + 8 h
-Android). House Simulator is **not DONE**.
+and M13. Android content delivery (HOUSE-03033), the emulator measurement (HOUSE-03037) and the
+Android DONE checklist (HOUSE-03038) are accepted. **8 open MUST / 78 OPT**, nominal **8.0 h**,
+pessimistic **16.8 h** (1.10 × 8.0 + 8 h Android). House Simulator is **not DONE**.
 
 **Presets (HOUSE-02405).** `--quality=android|web|high|ultra` (low/medium still accepted). The
 chunk library now cooks the authored `_LOD1`/`_LOD2` vegetation per preset level (flag bit 0, one
@@ -33,7 +33,9 @@ private Xvfb (offscreen EGL with `LIBGL_ALWAYS_SOFTWARE=1` segfaults): `Xvfb :14
 then `DISPLAY=:141 SDL_VIDEODRIVER=x11 LIBGL_ALWAYS_SOFTWARE=1 build/cnahouse_render_tests`. Stop
 the Xvfb afterwards.
 
-**Next MUST.** Android `HOUSE-03038`, `03039`, `03041`, then the final release M16.
+**Next MUST.** Android `HOUSE-03039`, `03041`, then the final release M16. `tools/ci/android_smoke.py`
+is the Android smoke; the Android build uses `-ffp-contract=off` (arm64 FMA otherwise diverges from
+desktop and stalls the filming tour).
 
 **Android (HOUSE-03033 accepted).** `util/ContentFile` reads a relative content path through
 `TitleContainer` (on Android the APK's AssetManager), an absolute one as a file; Android's content
