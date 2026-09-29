@@ -333,4 +333,20 @@ namespace
         EXPECT_FALSE(desktop.hasTouch);
         EXPECT_TRUE(desktop.hasKeyboard);
     }
+
+    TEST(TouchSourceTests, ThePhonesBackButtonIsACancelOnItsPressOnly)
+    {
+        TouchSource source;
+        source.Apply(Frame({}), 0.016F);
+        source.ApplyBack(true);
+        EXPECT_TRUE(source.Current().cancelPressed);
+        source.Apply(Frame({}), 0.016F);
+        source.ApplyBack(true);
+        EXPECT_FALSE(source.Current().cancelPressed) << "held, not pressed again";
+        source.Apply(Frame({}), 0.016F);
+        source.ApplyBack(false);
+        source.Apply(Frame({}), 0.016F);
+        source.ApplyBack(true);
+        EXPECT_TRUE(source.Current().cancelPressed);
+    }
 } // namespace

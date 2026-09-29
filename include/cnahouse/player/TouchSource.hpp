@@ -41,6 +41,10 @@ namespace cnahouse::player
         void Apply(const Microsoft::Xna::Framework::Input::Touch::TouchCollection& touches,
                    float deltaSeconds);
 
+        /// @brief The phone's Back button, which CNA reports as `Keys::Escape`: a press is a cancel,
+        /// as Esc is on a keyboard. Called by Update after Apply; public so a test can drive it.
+        void ApplyBack(bool down) noexcept;
+
         /// @brief Discard fingers held before focus/background loss without changing the control layout.
         void Reset() noexcept;
 
@@ -95,6 +99,7 @@ namespace cnahouse::player
         bool emulateMouse_ = false;
         bool mouseWasDown_ = false;
         bool buttonsEnabled_ = false;
+        bool backWasDown_ = false;
     };
 
 } // namespace cnahouse::player

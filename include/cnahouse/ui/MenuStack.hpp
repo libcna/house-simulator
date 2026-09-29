@@ -311,6 +311,8 @@ namespace cnahouse::ui
         bool fullscreen = true;
         bool verticalSync = true;
         bool tierE = false;
+        /// Look sensitivity is the touch drag's, not the mouse's: the only pointer is a finger.
+        bool touchLook = false;
         std::vector<app::DisplaySize> displaySizes{{1600, 900}};
 
         [[nodiscard]] static SettingsFeatures Resolve(const app::Platform& platform,
@@ -364,6 +366,7 @@ namespace cnahouse::ui
         [[nodiscard]] bool ActivateSelected();
         [[nodiscard]] bool SelectPointer(float x, float y);
         [[nodiscard]] std::string ValueText(SettingsControl control) const;
+        [[nodiscard]] float& LookSensitivity() const noexcept;
 
         app::Settings* settings_;
         Changed onChanged_;

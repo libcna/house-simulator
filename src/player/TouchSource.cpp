@@ -7,6 +7,8 @@
 #include <vector>
 
 #include "Microsoft/Xna/Framework/Input/ButtonState.hpp"
+#include "Microsoft/Xna/Framework/Input/Keyboard.hpp"
+#include "Microsoft/Xna/Framework/Input/Keys.hpp"
 #include "Microsoft/Xna/Framework/Input/Mouse.hpp"
 #include "Microsoft/Xna/Framework/Input/Touch/TouchLocationState.hpp"
 #include "Microsoft/Xna/Framework/Input/Touch/TouchPanel.hpp"
@@ -95,9 +97,20 @@ namespace cnahouse::player
                      : std::vector<TouchLocation>{});
             mouseWasDown_ = down;
             Apply(touches, deltaSeconds);
-            return;
         }
-        Apply(Microsoft::Xna::Framework::Input::Touch::TouchPanel::GetState(), deltaSeconds);
+        else
+        {
+            Apply(Microsoft::Xna::Framework::Input::Touch::TouchPanel::GetState(), deltaSeconds);
+        }
+        ApplyBack(Microsoft::Xna::Framework::Input::Keyboard::GetState().IsKeyDown(
+            Microsoft::Xna::Framework::Input::Keys::Escape));
+    }
+
+    void TouchSource::ApplyBack(bool down) noexcept
+    {
+        // Without this a touch device could open Settings and never leave it (`HOUSE-03039`).
+        state_.cancelPressed = state_.cancelPressed || (down && !backWasDown_);
+        backWasDown_ = down;
     }
 
     std::optional<Microsoft::Xna::Framework::Vector2> TouchSource::StickOrigin() const noexcept

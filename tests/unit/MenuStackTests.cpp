@@ -638,6 +638,34 @@ namespace
         EXPECT_EQ(applied, 4);
     }
 
+    TEST(SettingsScreenTests, LookSensitivityEditsTheTouchValueWhereTouchIsThePointer)
+    {
+        for (const bool touchOnly : {false, true})
+        {
+            Settings settings = Settings::Defaults();
+            cnahouse::app::Platform platform;
+            platform.target =
+                touchOnly ? cnahouse::app::BuildTarget::Android : cnahouse::app::BuildTarget::Desktop;
+            platform.hasTouch = touchOnly;
+            platform.hasKeyboard = !touchOnly;
+            const cnahouse::rendering::RenderTier tier(cnahouse::app::RenderTier::S);
+            SettingsScreen screen(settings, {}, SettingsFeatures::Resolve(platform, tier, settings));
+            InputState down;
+            down.uiDownPressed = true;
+            for (int guard = 0; guard < 32 && screen.Selected() != SettingsControl::LookSensitivity; ++guard)
+            {
+                screen.Update(down, 0.016F);
+            }
+            ASSERT_EQ(screen.Selected(), SettingsControl::LookSensitivity);
+
+            InputState right;
+            right.uiRightPressed = true;
+            screen.Update(right, 0.016F);
+            EXPECT_FLOAT_EQ(touchOnly ? settings.touchLookSensitivity : settings.mouseSensitivity, 1.1F);
+            EXPECT_FLOAT_EQ(touchOnly ? settings.mouseSensitivity : settings.touchLookSensitivity, 1.0F);
+        }
+    }
+
     TEST(SettingsScreenTests, MouseAndTouchUseTheSameBoundedHitTargets)
     {
         for (const PointerKind kind : {PointerKind::Mouse, PointerKind::Touch})
@@ -711,6 +739,18 @@ namespace
         InputState cancel;
         cancel.cancelPressed = true;
         EXPECT_EQ(screen.Update(cancel, 0.016F), ScreenAction::Pop);
+    }
+
+    TEST(SettingsScreenTests, ATapOnTheHintLineGoesBack)
+    {
+        Settings settings = Settings::Defaults();
+        SettingsScreen screen(settings);
+        InputState tap;
+        tap.pointerKind = PointerKind::Touch;
+        tap.pointerPressed = true;
+        tap.pointerX = 0.50F;
+        tap.pointerY = 0.889F;
+        EXPECT_EQ(screen.Update(tap, 0.016F), ScreenAction::Pop);
     }
 
     TEST(SettingsRoundTripTests, EveryVisibleValueMutatesBeforeItsLiveApplyCallback)

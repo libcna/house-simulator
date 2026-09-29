@@ -164,6 +164,10 @@ namespace cnahouse::ui
                                                                                      0.736F,
                                                                                      0.774F};
         constexpr float kSettingsHitHalfHeight = 0.017F;
+        // The hint line at the foot of the page is also its back button, for a pointer that has no
+        // Esc key -- a finger on a phone or in a browser (`HOUSE-03039`).
+        constexpr float kSettingsBackY = 0.889F;
+        constexpr float kSettingsBackHalfHeight = 0.03F;
         constexpr float kSettingsSliderStart = 0.55F;
         constexpr float kSettingsSliderEnd = 0.80F;
         constexpr std::array kVisibleQualityPresets = {
@@ -510,6 +514,7 @@ namespace cnahouse::ui
         features.displaySize = platform.target != app::BuildTarget::Android;
         features.fullscreen = platform.target != app::BuildTarget::Android;
         features.verticalSync = platform.target == app::BuildTarget::Desktop;
+        features.touchLook = platform.hasTouch && !platform.hasKeyboard;
         features.displaySizes.clear();
 
         if (features.canvasSize)
@@ -593,7 +598,9 @@ namespace cnahouse::ui
     ScreenAction SettingsScreen::Update(const player::InputState& input, float deltaSeconds)
     {
         (void)deltaSeconds;
-        if (input.cancelPressed)
+        if (input.cancelPressed ||
+            (input.pointerPressed && std::abs(input.pointerY - kSettingsBackY) <= kSettingsBackHalfHeight &&
+             input.pointerX >= 0.30F && input.pointerX <= 0.70F))
         {
             return ScreenAction::Pop;
         }
@@ -686,8 +693,8 @@ namespace cnahouse::ui
                 return AssignChanged(settings_->weatherVolume,
                                      StepSetting(settings_->weatherVolume, 0.05F, direction, 0.0F, 1.0F));
             case SettingsControl::LookSensitivity:
-                return AssignChanged(settings_->mouseSensitivity,
-                                     StepSetting(settings_->mouseSensitivity, 0.1F, direction, 0.2F, 4.0F));
+                return AssignChanged(LookSensitivity(),
+                                     StepSetting(LookSensitivity(), 0.1F, direction, 0.2F, 4.0F));
             case SettingsControl::InvertY:
                 return AssignChanged(settings_->invertY, direction > 0);
             case SettingsControl::TimeOfDay:
@@ -782,7 +789,7 @@ namespace cnahouse::ui
                 }
                 if (selected_ == SettingsControl::LookSensitivity)
                 {
-                    return AssignChanged(settings_->mouseSensitivity, 0.2F + fraction * 3.8F);
+                    return AssignChanged(LookSensitivity(), 0.2F + fraction * 3.8F);
                 }
 
                 float* volume = &settings_->masterVolume;
@@ -803,6 +810,13 @@ namespace cnahouse::ui
             return ActivateSelected();
         }
         return false;
+    }
+
+    float& SettingsScreen::LookSensitivity() const noexcept
+    {
+        // One visible row for the one pointer the player has (`HOUSE-03039`): on a touch-only
+        // device the mouse's value would change nothing the finger does.
+        return features_.touchLook ? settings_->touchLookSensitivity : settings_->mouseSensitivity;
     }
 
     std::string SettingsScreen::ValueText(SettingsControl control) const
@@ -836,7 +850,7 @@ namespace cnahouse::ui
             case SettingsControl::Weather:
                 return std::format("{:.0f}%", static_cast<double>(settings_->weatherVolume) * 100.0);
             case SettingsControl::LookSensitivity:
-                return std::format("{:.1f}x", static_cast<double>(settings_->mouseSensitivity));
+                return std::format("{:.1f}x", static_cast<double>(LookSensitivity()));
             case SettingsControl::InvertY:
                 return settings_->invertY ? "On" : "Off";
             case SettingsControl::TimeOfDay:
@@ -892,7 +906,8 @@ namespace cnahouse::ui
         }
 
         text.DrawShadowed(batch,
-                          "Arrows/WASD change  Enter select  Esc back",
+                          features_.touchLook ? "Tap a row to change it  Tap here to go back"
+                                              : "Arrows/WASD change  Enter select  Esc back",
                           Vector2(0.0F, 790.0F),
                           Anchor::TopCentre,
                           Color(200, 200, 200, 255));
