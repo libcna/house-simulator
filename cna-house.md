@@ -1,9 +1,11 @@
 # CNA House — Architecture and Design Document
 
 **Project:** `cna-house`
-**Repository:** `/rv/data/development/github.com/openeggbert/cna-house`
+**Repository:** `/rv/data/development/github.com/libcna/house-simulator`
 **Document status:** design baseline for the planning pass completed 2026-09-06.
-**Implementation status:** IN PROGRESS since 2026-09-06. **Scope reduced 2026-09-21** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md)), **again the same day** ([ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md)), **and finally on 2026-09-22** ([ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md)). See `plan.md` for
+**Implementation status:** COMPLETE -- the Linux, Web and Android builds meet `plan.md`'s Definition
+of DONE (2026-09-30); the project is in maintenance mode, and `CHANGELOG.md` describes what shipped.
+Begun 2026-09-06. **Scope reduced 2026-09-21** ([ADR-0014](docs/decisions/ADR-0014-showcase-scope.md)), **again the same day** ([ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md)), **and finally on 2026-09-22** ([ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md)). See `plan.md` for
 the ledger.
 
 > Implementation was approved by the project owner on 2026-09-06. This document remains the
@@ -732,20 +734,20 @@ Draw(gt):
 
 ### 8.1 Build
 
-`cna-house` consumes `../cnanext` and `../sharp-runtimenext` as sibling source checkouts by
+`cna-house` consumes `../cna` and `../sharp-runtime` as sibling source checkouts by
 `add_subdirectory`, exactly as `cna-samples` does
 (`cna-samples/CMakeLists.txt:50`, `:30`). No vendoring, no submodules, no fetch.
 
 ```cmake
 set(CNA_GRAPHICS_RENDERER            "OPENGLES3" CACHE STRING "" FORCE)   # WEBGL2 on Emscripten
-set(CNA_SHARP_RUNTIME_ROOT           "${CMAKE_CURRENT_SOURCE_DIR}/../sharp-runtimenext" CACHE PATH "" FORCE)
+set(CNA_SHARP_RUNTIME_ROOT           "${CMAKE_CURRENT_SOURCE_DIR}/../sharp-runtime" CACHE PATH "" FORCE)
 set(CNA_EASYGL_COMPILED_EFFECTS      ON  CACHE BOOL "" FORCE)   # Tier E
 set(CNA_ENABLE_VIDEO                 AUTO CACHE STRING "" FORCE) # television
 set(CNA_CNAEXT                       OFF CACHE BOOL "" FORCE)   # the engine layer must not exist
 set(CNA_BUILD_TESTS                  OFF CACHE BOOL "" FORCE)
 set(CNA_BUILD_EXAMPLES               OFF CACHE BOOL "" FORCE)
 set(SHARP_RUNTIME_COMPONENTS "Core.Base;Console;IO;IO.IsolatedStorage;Collections.Core;Collections.ObjectModel;Runtime;Threading;Text;Text.Json;Globalization;Diagnostics;Storage;Security.Cryptography" CACHE STRING "" FORCE)
-add_subdirectory(../cnanext CNA_BUILD)
+add_subdirectory(../cna CNA_BUILD)
 ```
 
 `CNA_CNAEXT OFF` is not cosmetic: with it off every file in `modules/graphics-ext/` is compiled

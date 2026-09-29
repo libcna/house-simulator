@@ -1,6 +1,6 @@
 # cna-house -- root build.
 #
-# `cna-house` consumes `../cnanext` and `../sharp-runtimenext` as SIBLING SOURCE CHECKOUTS by
+# `cna-house` consumes `../cna` and `../sharp-runtime` as SIBLING SOURCE CHECKOUTS by
 # `add_subdirectory` (`cna-house.md` §8.1). No vendoring, no submodules, no fetch: the sibling is
 # built as part of this build, from the source the developer has, so a CNA change is visible here
 # immediately and a CNA version is never silently pinned.
@@ -25,9 +25,9 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 # ------------------------------------------------------------------------------------------------
 # The sibling checkouts
 # ------------------------------------------------------------------------------------------------
-set(CNAHOUSE_CNA_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../cnanext"
+set(CNAHOUSE_CNA_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../cna"
     CACHE PATH "The CNA checkout this build consumes")
-set(CNAHOUSE_SHARP_RUNTIME_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../sharp-runtimenext"
+set(CNAHOUSE_SHARP_RUNTIME_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../sharp-runtime"
     CACHE PATH "The sharp-runtime checkout this build consumes")
 
 foreach(_sibling "${CNAHOUSE_CNA_ROOT}" "${CNAHOUSE_SHARP_RUNTIME_ROOT}")

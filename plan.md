@@ -1,6 +1,6 @@
 # CNA House — Showcase Completion Plan
 
-`STATUS: APPROVED — IMPLEMENTATION IN PROGRESS · FINAL SCOPE 2026-09-22 (HOUSE-03206, ADR-0016) · earlier reductions 2026-09-21 (HOUSE-03201, ADR-0014; HOUSE-03205, ADR-0015)`
+`STATUS: MAINTENANCE MODE ON THE 1.1.0 RELEASE (HOUSE-03078, rule R17) · FINAL SCOPE 2026-09-22 (HOUSE-03206, ADR-0016) · earlier reductions 2026-09-21 (HOUSE-03201, ADR-0014; HOUSE-03205, ADR-0015)`
 
 This file is the **execution ledger for the remaining work, and the only current source of truth
 for what that work is.** A checkbox moves to `[x]` only when the task's acceptance criteria are
@@ -9,11 +9,12 @@ renumbered.
 
 | | |
 |---|---|
+| Mode | **Maintenance.** With the 1.1.0 release every MUST task is done and feature development stops (rule R17): what remains is defect fixes, CNA compatibility fixes and narrowly justified changes. The optional backlog stays optional |
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers and a reusable kit), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (2026-09-22 reduction, retained breadth and maintenance mode; its former hour ceiling is superseded below) |
 | Scope policy | The owner explicitly superseded the former 280-hour ceiling on 2026-09-27 and requested further targeted corrections and a filming tour. Keep MUST/OPT boundaries explicit; do not infer other features |
-| Active plan | **4 open MUST tasks** in 16 milestones. M11's review, bounded fix pass and golden refresh are complete; measured presets, platform and release work remain. Every active task's title and acceptance states the current work |
-| Estimate to DONE | Current open-task sum **4.0 agent-hours**; pessimistic **4.4 h** = 1.10 × 4.0 (the Android reserve retires with M15); High performance reserve R-C is retired after repeatable acceptance, and the Web reserve with M14. The old **44.84 / 52.75 / 76.03 h** table below is historical, not a current forecast or scheduling gate. Per-task `est:` remains for task sizing; platform/dependency waiting is not promised wall-clock completion |
+| Active plan | **3 open MUST tasks** in 16 milestones. M11's review, bounded fix pass and golden refresh are complete; measured presets, platform and release work remain. Every active task's title and acceptance states the current work |
+| Estimate to DONE | Current open-task sum **2.25 agent-hours**; pessimistic **2.5 h** = 1.10 × 2.25 (the Android reserve retires with M15); High performance reserve R-C is retired after repeatable acceptance, and the Web reserve with M14. The old **44.84 / 52.75 / 76.03 h** table below is historical, not a current forecast or scheduling gate. Per-task `est:` remains for task sizing; platform/dependency waiting is not promised wall-clock completion |
 | Current gate | **G5, M7, M8, M9, M11 and M12 passed; M13, M14 and M15 are complete: the Linux desktop release is tagged `v1.0.0` and the Web and Android builds pass their DONE checklists; the final release M16 remains. CNA fixed strict-API blocker BL-18 upstream (`2c70eaf0f`), which let `HOUSE-03683`/`03574`/`02714` be accepted. CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator; the APK now carries the Android-tier content and walks the house on the `House_Phone` emulator (`HOUSE-03033`, with CNA fixes BL-19/20/21); the Android preset holds the frame target there (`HOUSE-03037`).** Main/attic/basement stairs, garage-loft floor and whole-house lighting are corrected under `HOUSE-03635`/`03638`/`03639`/`03636`; doorway flashes and visibility/wall holes under `HOUSE-03637`/`03640`, including the owner's precise foyer/stair corner-gap screenshot. The existing car family is corrected under `HOUSE-03641`; full GPU filming circuit accepted under `HOUSE-03572`. Normal title/Start audio produces real backend PCM; owner listening accepts all six footstep categories and interior/exterior day/night ambience under `HOUSE-01920`/`01922`. Weather layers and the indoor-rain correction are accepted under `HOUSE-01925`; whole-zone four-state listening passes `HOUSE-01939`. Desktop High scenarios pass three complete current hardware-GPU rounds under `HOUSE-02404`; the three presets are measured under `HOUSE-02405` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
 
@@ -2004,10 +2005,16 @@ maintenance mode.
             member, or reads `Model::Tag`. `docs/xna-deviations.md` grants nothing and the lint
             reads no allowlist
 
-- [ ] HOUSE-03075 — Final documentation pass
+- [x] HOUSE-03075 — Final documentation pass
       dep: HOUSE-03074 · sys: — · plat: ALL · pri: MUST · zone: all · adv: D12 · est: 1.75
       accept: `cna-house.md`, `README.md` and `docs/*` describe the shipped software; `docs/testing.md` states what each suite covers, how to run it, how to add a case and how to accept a render-test change; `plan.md` states that the project is in maintenance mode
       trace: absorbs `HOUSE-02795` and `HOUSE-02600` (`docs/testing.md`)
+      done: (2026-09-30) `docs/testing.md` states what each suite covers, where and how it runs, how to
+            add a case and how to accept a render change. README describes the shipped software
+            (status, the Web and Android builds and packages, the sibling checkouts as they are named
+            -- `../cna`, `../sharp-runtime`, now also CMake's default), `cna-house.md`'s header and
+            §8.1 say the same, `docs/portability.md` states that the three DONE checklists passed,
+            and this plan's header states maintenance mode
 
 - [ ] HOUSE-03076 — Final test and content pass
       dep: HOUSE-03075 · sys: ci · plat: CI · pri: MUST · zone: all · adv: D11, D12 · est: 1.25

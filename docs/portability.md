@@ -1,7 +1,8 @@
 # Platform portability evidence
 
-This is a running validation record, not a claim that the Linux, Web or Android DONE checklists
-have passed. `plan.md` remains the release authority.
+The validation record of the three platforms, newest first. The Linux, Web and Android DONE
+checklists have passed (`HOUSE-02790`, `HOUSE-02900`, `HOUSE-03038`); the older dated sections are
+snapshots of the way there. `plan.md` remains the release authority.
 
 ## The Android release — HOUSE-03041 (2026-09-29)
 
