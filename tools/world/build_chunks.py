@@ -2075,6 +2075,19 @@ def serialise(built: dict) -> bytes:
     return bytes(out)
 
 
+def select_level(data: bytes, level: int) -> bytes:
+    """One preset's library: the chunks drawn at LOD `level`, each then drawn at every level.
+
+    `HOUSE-02850`. A platform that ships one preset -- the Web's level 1, Android's level 2 --
+    downloads only its own vegetation variants, and a player who picks another preset there still
+    draws that same geometry rather than nothing.
+    """
+    library = read_back(data)
+    kept = [{**chunk, "lodMask": EVERY_LOD} for chunk in library["chunks"]
+            if chunk.get("lodMask", EVERY_LOD) & (1 << level)]
+    return serialise({**library, "chunks": kept})
+
+
 def read_back(data: bytes) -> dict:
     view = memoryview(data)
     at = 0
@@ -3021,6 +3034,16 @@ def selftest() -> int:
                 == [chunk["lodMask"] for chunk in planted["chunks"]]
                 and struct.unpack_from("<I", serialise(planted), 8)[0] == FLAG_LOD_MASKS,
                 "the LOD masks round trip through the header flag and trailing table")
+        web = read_back(select_level(serialise(planted), 1))
+        require(sorted(chunk["lodMask"] for chunk in web["chunks"])
+                == [EVERY_LOD] * sum(1 for chunk in planted["chunks"] if chunk["lodMask"] & 0b010)
+                and struct.unpack_from("<I", select_level(serialise(planted), 1), 8)[0] == 0,
+                "HOUSE-02850: one level's library keeps only that level's chunks, drawn at every "
+                "level, with no mask table")
+        require(select_level(serialise(planted), 0) == serialise(
+                    {**planted, "chunks": [{**chunk, "lodMask": EVERY_LOD} for chunk in planted["chunks"]
+                                           if chunk["lodMask"] & 0b001]}),
+                "level 0's library is the unmasked library of its chunks")
         exterior_file.unlink()
 
         shell_lm = workspace / "shell-lm"

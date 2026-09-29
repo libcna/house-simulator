@@ -250,8 +250,8 @@ if(EMSCRIPTEN)
         -sEXIT_RUNTIME=1
         "SHELL:--shell-file ${CMAKE_CURRENT_SOURCE_DIR}/cmake/web_shell.html"
         "SHELL:--pre-js ${CMAKE_CURRENT_SOURCE_DIR}/cmake/web_pointer_lock_pre.js"
-        "SHELL:--preload-file ${CMAKE_BINARY_DIR}/content@/content"
-        "SHELL:--preload-file ${CMAKE_BINARY_DIR}/content-fx@/content-fx")
+        "SHELL:--preload-file ${CMAKE_BINARY_DIR}/web-stage/content@/content"
+        "SHELL:--preload-file ${CMAKE_BINARY_DIR}/web-stage/content-fx@/content-fx")
     set_property(TARGET cna-house APPEND PROPERTY LINK_DEPENDS
         "${CMAKE_CURRENT_SOURCE_DIR}/cmake/web_shell.html"
         "${CMAKE_CURRENT_SOURCE_DIR}/cmake/web_pointer_lock_pre.js")
@@ -450,6 +450,38 @@ add_custom_target(content-verify
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     COMMENT "content-verify: rebuilding every content root twice and comparing"
     VERBATIM)
+
+# --- the Web preload ----------------------------------------------------------------------------
+#
+# HOUSE-02850: the preload is the shipped content only -- no `notPackaged` inputs, no `dev` fixtures
+# and the Web preset's LOD level of the chunk library -- and the build fails when it breaks §71.4's
+# download limits (60 MB a pack, 180 MB in all, compressed). Defined last so that every content
+# target it waits for already exists.
+if(EMSCRIPTEN)
+    find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    add_custom_target(cnahouse_web_stage
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/ci/stage_content.py"
+                --content "${CMAKE_BINARY_DIR}/content" --effects "${CMAKE_BINARY_DIR}/content-fx"
+                --out "${CMAKE_BINARY_DIR}/web-stage" --lod-level 1
+        COMMENT "Staging the Web preload"
+        VERBATIM)
+    # After the link, because the page, script and wasm are part of the download too.
+    add_custom_command(TARGET cna-house POST_BUILD
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/ci/web_budget.py"
+                --content "${CMAKE_BINARY_DIR}/web-stage/content"
+                --effects "${CMAKE_BINARY_DIR}/web-stage/content-fx"
+                --program "$<TARGET_FILE:cna-house>"
+                          "${CMAKE_BINARY_DIR}/cna-house.js" "${CMAKE_BINARY_DIR}/cna-house.wasm"
+                --data "${CMAKE_BINARY_DIR}/cna-house.data"
+        COMMENT "Checking the Web download against its budget"
+        VERBATIM)
+    foreach(_producer cnahouse_content cnahouse_world_content cnahouse_effects)
+        if(TARGET ${_producer})
+            add_dependencies(cnahouse_web_stage ${_producer})
+        endif()
+    endforeach()
+    add_dependencies(cna-house cnahouse_web_stage)
+endif()
 
 # ------------------------------------------------------------------------------------------------
 # Tests (`HOUSE-00125`)

@@ -258,6 +258,9 @@ run_gate "vegetation-previews" python3 tools/blender/vegetation_preview.py --che
 # build tree and gives the same answer everywhere. Its compiled column is empty by design; pass
 # --content/--effects by hand for the numbers the pack budgets are written against.
 run_gate "budget"     python3 tools/ci/budget_report.py --check
+# `HOUSE-02850`. The Web build itself fails over §71.4's download limits (see CMakeLists.txt's Web
+# preload); this keeps the limit arithmetic honest on machines that never build for the browser.
+run_gate "web-budget-selftest" python3 tools/ci/web_budget.py --selftest
 # `HOUSE-00217`. The stage table in docs/content-build.md is generated from the pipeline
 # graph, so a stage added without regenerating it is a documented order that is no longer
 # the order. This is the same idiom the budget report uses, for the same reason.

@@ -120,7 +120,10 @@ one chunk with both bits, and every non-vegetation chunk carries `0b111`. A mask
 above 2 is invalid. Without the flag every chunk is drawn at every level, and the writer omits the
 table when every mask is `0b111`. The runtime uploads and culls only the active level's chunks
 (`CellRuntime`, `ChunkCuller` and the exterior pass), so a variant for another preset costs file
-bytes but no GPU memory, and changing the preset re-uploads the resident cells.
+bytes but no GPU memory, and changing the preset re-uploads the resident cells. A platform that
+ships one preset carries only its level: `tools/ci/stage_content.py --lod-level N` writes the
+library `build_chunks.select_level` makes, those chunks with every mask set (`HOUSE-02850`; the
+Web preload uses level 1).
 
 ## 4a. The shell is chunked too
 

@@ -12,7 +12,7 @@ overlay or debug-draw code. The staged tree is
         cna-house            the game, RUNPATH $ORIGIN/lib
         cna-house.sh         the launch script
         lib/                 CNA and SDL, the libraries the build made rather than the system has
-        content/ content-fx/ the built content, without the content build's bookkeeping
+        content/ content-fx/ the shipped content (`stage_content.py`)
         LICENSE NOTICE.md licenses/ README.txt
 
 It is written to `<build-dir>/package/`, beside the build it came from. Content is hard-linked
@@ -32,9 +32,9 @@ import tarfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO / "tools" / "ci"))
 
-# The content build's own bookkeeping, which the game never opens.
-SKIPPED_NAMES = {".cna-content.lock", ".cna-content-manifest.json", ".gitkeep"}
+import stage_content  # noqa: E402
 
 # Linked into a release binary, any of these means a debug tool did not compile out.
 DEBUG_SYMBOL = re.compile(
@@ -131,25 +131,6 @@ def set_runpath(path: Path, runpath: str) -> None:
         script.unlink()
 
 
-def link_tree(source: Path, target: Path) -> int:
-    count = 0
-    for root, directories, files in os.walk(source):
-        directories.sort()
-        relative = Path(root).relative_to(source)
-        (target / relative).mkdir(parents=True, exist_ok=True)
-        for name in sorted(files):
-            if name in SKIPPED_NAMES:
-                continue
-            origin = Path(root) / name
-            destination = target / relative / name
-            try:
-                os.link(origin, destination)
-            except OSError:
-                shutil.copy2(origin, destination)
-            count += 1
-    return count
-
-
 def check_closure(stage: Path) -> None:
     binary = stage / "cna-house"
     for library in built_libraries(binary):
@@ -184,9 +165,9 @@ def main() -> int:
         shutil.copy2(library.resolve(), copied)
         set_runpath(copied, "$ORIGIN")
 
-    files = link_tree(build / "content", stage / "content")
-    if (build / "content-fx").is_dir():
-        files += link_tree(build / "content-fx", stage / "content-fx")
+    # Every LOD level: a desktop player can pick any preset. What the manifest does not ship and
+    # the content build's bookkeeping stay out (`HOUSE-02850`).
+    files = stage_content.stage(build / "content", build / "content-fx", stage, None)
 
     for document in ("LICENSE", "NOTICE.md"):
         shutil.copy2(REPO / document, stage / document)
