@@ -36,8 +36,9 @@ row (0.7×, Low) because Medium is also the Tier-S/4K desktop auto-detect row; a
 browser measurement asks for it. Numbers: `docs/performance-log.md`.
 
 **CNA.** The owner authorized fixing CNA defects found through House work in CNA itself, as
-separate CNA commits (2026-09-29). BL-18 is fixed in CNA `2c70eaf0f` on `next` (pushed); BL-19,
-BL-20 and BL-21 in `5d275f556`, `9408eba8e` (+ `5a4181175`), `016c588bf` (not pushed).
+separate CNA commits (2026-09-29). BL-18 to BL-21 are fixed in CNA `next` (`2c70eaf0f`, `5d275f556`,
+`9408eba8e` + `5a4181175`, `016c588bf`; pushed 2026-09-30), BL-13, BL-16 and BL-17 in `f6c4df279`,
+`577fb0674` and `6824a036f` (2026-09-30, not pushed).
 
 **Render suite.** The software-GL suite is 59 PASS / 1 opt-in SKIP after HOUSE-02405 refreshed
 the 27 Low-preset references whose vegetation became LOD2 (each pair inspected). It runs on a
@@ -54,7 +55,7 @@ tour).
 root is the relative `content`; Gradle's `stageHouseContent` stages `build/content` at LOD level 2
 into the assets and `checkApkBudget` (`tools/ci/android_budget.py`) holds every assembled APK to
 §71.5's 400 MB and to the staged tree: 227.2 MB (content 178.5, native 25.6). Three CNA defects
-found on the way are fixed in CNA `next` (not pushed): BL-19 `.cnb` from APK assets (`5d275f556`),
+found on the way are fixed in CNA `next` (pushed 2026-09-30): BL-19 `.cnb` from APK assets (`5d275f556`),
 BL-20 SDL3 lifecycle events never delivered (`9408eba8e`), BL-21 Android IsActive stuck after a
 rotating launch (`016c588bf`). **Emulator recipe:** `kvm_amd` is loaded (owner, 2026-09-29); AVD
 `House_Phone` (API 35, 16 GB data) runs inside the private GPU display via a holder script:
