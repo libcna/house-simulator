@@ -38,7 +38,7 @@ browser measurement asks for it. Numbers: `docs/performance-log.md`.
 **CNA.** The owner authorized fixing CNA defects found through House work in CNA itself, as
 separate CNA commits (2026-09-29). BL-18 to BL-21 are fixed in CNA `next` (`2c70eaf0f`, `5d275f556`,
 `9408eba8e` + `5a4181175`, `016c588bf`; pushed 2026-09-30), BL-13, BL-16 and BL-17 in `f6c4df279`,
-`577fb0674` and `6824a036f` (2026-09-30, not pushed).
+`577fb0674` and `6824a036f` (pushed 2026-09-30).
 
 **Render suite.** The software-GL suite is 59 PASS / 1 opt-in SKIP after HOUSE-02405 refreshed
 the 27 Low-preset references whose vegetation became LOD2 (each pair inspected). It runs on a
