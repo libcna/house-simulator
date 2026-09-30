@@ -1,3 +1,23 @@
+# Maintenance handoff — 2026-09-30 (HOUSE-03724)
+
+R15/R17 selected the owner-reported Web mouse-look defect because sustained turning stopped at
+the canvas edge (D8/D10b, S2); it is the first maintenance correction after release and changes
+no zone scoreboard entry. The pointer-lock launcher now passes relative browser motion to the
+project-owned input source, which keeps XNA `MouseState` for buttons and menu coordinates and
+preserves Linux recentring. Capture changes clear pending Web motion. The Web build and local
+package were refreshed. Chrome and Firefox each turned through 360 degrees and onward; see
+`docs/portability.md` for the browser evidence. Linux's 1,553 unit tests passed, as did the final
+28 input/capture tests and strict XNA (358 units). `run_checks.sh` failed only its root-layout
+gate because this session's environment supplies an empty `.aws` directory; all other gates pass.
+No CNA or sharp-runtime source was changed, and `CNA_CNAEXT=OFF` remains forced.
+
+On request, the 1.1.0 arm64 APK was installed and launched on a 24040RN64Y phone and a
+Samsung SM-T505 tablet. Each reported a running `com.libcna.house` process after launch. The
+tablet was disconnected before a post-launch log check; this is an install/start check, not a
+physical-device traversal or performance acceptance.
+
+---
+
 # Handoff — 2026-09-30 (release v1.1.0; House Simulator is DONE; maintenance mode)
 
 **State.** Every MUST task of `plan.md` is done and the Definition of DONE holds on Linux, the

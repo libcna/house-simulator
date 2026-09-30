@@ -354,3 +354,24 @@ loading the 391 MiB preload; pack sizing remains `HOUSE-02850`.
 The desktop Chrome/Firefox evidence above did not validate touch-only Web control;
 the separate mobile-emulation check is recorded under `HOUSE-03723` above. It does
 not substitute for the remaining Web performance, pack-sizing or Android device gates.
+
+### Sustained Web mouse look — HOUSE-03724 (2026-09-30)
+
+After release, the owner found that mouse look stopped after a short turn. The original Web
+source subtracted successive XNA `MouseState` canvas positions. Pointer lock confines those
+positions to the canvas even though the browser continues to report `movementX` and `movementY`,
+so the calculated delta eventually became zero. The launcher now sends locked browser motion to
+the project's input source once per XNA update. The ordinary XNA mouse sample still supplies
+buttons and menu coordinates; the Linux recentring path is unchanged. Capture changes clear the
+pending Web motion and the smoothing history.
+
+The rebuilt page was served to Chrome with `--scene=walk`. A canvas click acquired pointer lock,
+and the exported project motion function was present. Five successive 714-pixel rightward inputs
+turned the camera through about 450 degrees without an error. Relative to the initial screenshot,
+the first, second and third quarter turns differed by 17.67, 13.20 and 16.12 mean RGB levels;
+after the fourth (2,856 pixels, approximately 360 degrees) the difference fell to 0.18; the
+fifth differed by 17.73. This also proves motion continues after returning to the starting view.
+Firefox 140 ESR was then run in a private Xvfb display with real XTest mouse movement: five more
+714-pixel rightward steps left the system pointer fixed at (576, 324) while the scene turned.
+The fourth screenshot returned to the original facing; the fifth faced a different doorway.
+The inspected screenshots are `/tmp/house-03724-firefox-{start,q1,q2,q3,q4,q5}.png`.

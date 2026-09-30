@@ -146,6 +146,7 @@ namespace cnahouse::player
                           const Microsoft::Xna::Framework::Input::MouseState& mouse,
                           const Microsoft::Xna::Framework::Input::Touch::TouchCollection* touches,
                           float deltaSeconds);
+        void ApplyLookDelta(float dx, float dy) noexcept;
 
         InputConfig config_;
         InputState state_;
@@ -154,8 +155,10 @@ namespace cnahouse::player
         /// giving it a slot would put it in a table whose entries are all bound keys.
         bool anyDownPreviously_ = false;
         bool primaryDownPreviously_ = false;
+#if !defined(__EMSCRIPTEN__)
         int previousMouseX_ = 0;
         int previousMouseY_ = 0;
+#endif
         bool hasPreviousMouse_ = false;
         /// The previous frame's look, for §44's two-frame average. Zeroed whenever the history is
         /// dropped -- a capture change or a frame with no motion -- for the same reason the

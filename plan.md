@@ -1682,6 +1682,13 @@ limitation (reload the page), recorded by `HOUSE-02904`.
       trace: remaining conditional touch criterion split from `HOUSE-03721` under R7/R15, not optional scope
       note: (2026-09-26) Chrome mobile/touch emulation at 400×800 received real CNA `TouchPanel` frames: the first tap selected Web touch input, dismissed the gesture gate and displayed the touch-spaced main menu; a Start tap entered walking with MOVE/MENU/WALK HUD, and the Menu button opened Pause. CNA advances a new Pressed touch to Moved before the game read; `TouchSource` now recognises the XNA previous-Pressed location as a one-frame edge. Device polling stays inside that source (`check_input_boundary`: 282 files clean), and untouched Web stays keyboard/mouse until actual touch. Native/Web builds, 12 focused tests and the full 1489/1489 unit label pass; one unrelated SkySystem timing test failed at four-way parallelism, passed alone and in the final two-way full run. Strict XNA passed 344 translation units with four workers; the full static gate reports only the pre-existing user-owned `.claude` root-layout entry. Browser captures are in `docs/portability.md`
 
+- [x] HOUSE-03724 — Fix Web mouse look stopping at the canvas edge
+      dep: HOUSE-03721 · sys: player · plat: WEB · pri: MUST · zone: all · adv: D8, D10b, D13 · est: 1.5
+      accept: (1) a locked mouse can turn through 360 degrees and continue in the same direction; (2) losing capture discards pending motion and menus retain their pointer; (3) the desktop XNA mouse path remains intact
+      verify: Web build and browser turn test, native unit suite, XNA gates; record browser evidence in `docs/portability.md`
+      note: (2026-09-30, owner-reported S2 maintenance defect) Browser pointer lock keeps the DOM cursor at one canvas coordinate. The Web input source read successive absolute XNA `MouseState` positions, so its delta became zero at the edge despite continuing physical motion. R15/R17 select this narrow D8/D10b correction; the zone scoreboard is unchanged
+      done: (2026-09-30) The pointer-lock launcher sends unbounded browser movement into the project-owned input source; its XNA mouse sample still owns buttons and menu coordinates, and capture changes clear pending motion. Chrome showed five successive 714-pixel right turns: the fourth returned to the initial view and the fifth kept turning, with no console error. Firefox 140 ESR under private Xvfb repeated the five turns with real XTest motion and a stationary locked system pointer; inspected captures show the same return and continued turn. `docs/portability.md` has the measurements. The Web target and its 96.8 MB download budget pass; the local Web package was rebuilt. Linux's unit target passes all 1,553 tests and the final 28 focused input/capture tests. XNA-only is clean and strict-XNA passes 358 units. `run_checks.sh` has only the unrelated root-layout failure for the empty, environment-provided `.aws` directory; no tracked layout change was made
+
 ### Verification (after M13)
 
 - [x] HOUSE-02850 — Fit the Web packs: every pack ≤ 60 MB and the Web-tier total ≤ 180 MB compressed, reducing content only where over
@@ -2491,6 +2498,14 @@ under R5.
 ---
 
 ## Planning corrections
+
+### 2026-09-30 — Web mouse look stopped at the canvas edge (`HOUSE-03724`)
+
+* The owner reported that Web mouse look turns briefly and then stops. The pointer-lock bridge
+  obtained capture, but `KeyboardMouseSource` treated XNA's bounded canvas position as an
+  unbounded motion source. That makes D8/D10b's Web controls fail on a sustained turn (S2).
+  Under R15/R17, `HOUSE-03724` fixes the existing control path in M14's next free id. It adds no
+  feature or zone work; the C3/C4/C5 scoreboard does not change.
 
 ### 2026-09-29 — The lower presets needed cooked vegetation LOD (`HOUSE-02405`)
 

@@ -13,6 +13,24 @@
 
 namespace cnahouse::player
 {
+#if defined(__EMSCRIPTEN__)
+    namespace
+    {
+        float webMouseX = 0.0F;
+        float webMouseY = 0.0F;
+    } // namespace
+
+    // The page's pointer-lock bridge supplies movement that has no bounded canvas position.
+    extern "C" void cnahouse_web_mouse_motion(float dx, float dy)
+    {
+        if (std::isfinite(dx) && std::isfinite(dy))
+        {
+            webMouseX += dx;
+            webMouseY += dy;
+        }
+    }
+#endif
+
     namespace
     {
         using Microsoft::Xna::Framework::Input::Keys;
@@ -50,10 +68,16 @@ namespace cnahouse::player
         // distance it travelled -- the "camera snaps when you close the menu" bug.
         hasPreviousMouse_ = false;
         lookAvailable_ = false;
-        // The two-frame average's history goes with it -- and does so in `Apply`'s seeding branch
-        // rather than here, because dropping `hasPreviousMouse_` is what sends the next frame
-        // down that branch. Zeroing it in both places is one place too many: a bug in the one
-        // that matters would be hidden by the one that does not.
+#if defined(__EMSCRIPTEN__)
+        webMouseX = 0.0F;
+        webMouseY = 0.0F;
+#endif
+        // The native two-frame average's history is dropped by Apply's seeding branch. On Web the
+        // next browser delta is applied directly, so the history is cleared here instead.
+#if defined(__EMSCRIPTEN__)
+        previousLookX_ = 0.0F;
+        previousLookY_ = 0.0F;
+#endif
     }
 
     void KeyboardMouseSource::Update(float deltaSeconds)
@@ -63,11 +87,13 @@ namespace cnahouse::player
               Microsoft::Xna::Framework::Input::Touch::TouchPanel::GetState(),
               deltaSeconds);
 
-        // A browser owns the locked pointer. Warping it to a nominal centre there is ignored or
-        // reported as ordinary motion, so the next frame would consume a bogus large delta.
-        // The normal sample-to-sample path below already handles Web pointer motion and seeds
-        // itself again after each capture transition. Preserve desktop's measured recenter path.
-#if !defined(__EMSCRIPTEN__)
+#if defined(__EMSCRIPTEN__)
+        const float dx = webMouseX;
+        const float dy = webMouseY;
+        webMouseX = 0.0F;
+        webMouseY = 0.0F;
+        ApplyLookDelta(captured_ ? dx : 0.0F, captured_ ? dy : 0.0F);
+#else
         if (captured_)
         {
             // Recentre AFTER sampling, so the sample just taken is the player's motion and the write
@@ -211,6 +237,11 @@ namespace cnahouse::player
         anyDownPreviously_ = anyDown;
 
         // --- look ------------------------------------------------------------------------------------
+#if defined(__EMSCRIPTEN__)
+        // Pointer-locked MouseState still carries bounded canvas coordinates. The launcher feeds
+        // the unbounded motion separately, after this XNA sample has supplied buttons and menu hits.
+        return;
+#else
         const int x = mouse.getXProperty();
         const int y = mouse.getYProperty();
 
@@ -234,21 +265,24 @@ namespace cnahouse::player
         previousMouseX_ = x;
         previousMouseY_ = y;
 
-        if (dx == 0 && dy == 0)
+        ApplyLookDelta(static_cast<float>(dx), static_cast<float>(dy));
+#endif
+    }
+
+    void KeyboardMouseSource::ApplyLookDelta(float dx, float dy) noexcept
+    {
+        if (dx == 0.0F && dy == 0.0F)
         {
-            // No motion event arrived. Not the same as "the player held still": on an unfocused window
-            // the snapshot simply does not advance, and the two are indistinguishable from here -- so
-            // neither contributes look, which is the safe reading of both.
             lookAvailable_ = false;
-            previousLookX_ = 0.0f;
-            previousLookY_ = 0.0f;
+            previousLookX_ = 0.0F;
+            previousLookY_ = 0.0F;
             return;
         }
 
         lookAvailable_ = true;
         const float scale = InputConfig::kRadiansPerPixel * config_.sensitivity;
-        const float lookX = static_cast<float>(dx) * scale;
-        const float lookY = static_cast<float>(dy) * scale * (config_.invertY ? -1.0f : 1.0f);
+        const float lookX = dx * scale;
+        const float lookY = dy * scale * (config_.invertY ? -1.0f : 1.0f);
 
         if (config_.smoothing)
         {

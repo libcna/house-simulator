@@ -248,6 +248,7 @@ if(EMSCRIPTEN)
         -sINITIAL_MEMORY=134217728
         -sFORCE_FILESYSTEM=1
         -sEXIT_RUNTIME=1
+        "SHELL:-sEXPORTED_FUNCTIONS=_main,_cnahouse_web_mouse_motion"
         "SHELL:--shell-file ${CMAKE_CURRENT_SOURCE_DIR}/cmake/web_shell.html"
         "SHELL:--pre-js ${CMAKE_CURRENT_SOURCE_DIR}/cmake/web_pointer_lock_pre.js"
         "SHELL:--preload-file ${CMAKE_BINARY_DIR}/web-stage/content@/content"

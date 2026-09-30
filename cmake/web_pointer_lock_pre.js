@@ -12,6 +12,15 @@ Module['preRun'].push(function () {
     if (request && request.catch) request.catch((error) => console.warn('Pointer lock denied:', error));
   });
 
+  // MouseState contains canvas coordinates even while the browser locks the pointer. Those
+  // coordinates stop at the canvas edge, so use the browser's unbounded motion for camera look.
+  // The game consumes this through its own input source once per XNA frame.
+  canvas.addEventListener('mousemove', function (event) {
+    if (document.pointerLockElement !== canvas) return;
+    const addMotion = Module['_cnahouse_web_mouse_motion'];
+    if (addMotion) addMotion(event.movementX, event.movementY);
+  });
+
   let pauseOnFocus = false;
   const releaseIfVisible = function () {
     if (canvas.style.cursor !== 'none') pauseOnFocus = false;
