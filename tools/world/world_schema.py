@@ -338,6 +338,7 @@ def build() -> dict[str, dict]:
                  "range": {"type": "number", "minimum": 0},
                  # Optional per-fixture radiometric calibration for the offline lightmap bake.
                  "bakeLumensPerRadiantWatt": {"type": "number", "exclusiveMinimum": 0},
+                 "bakeEmitterRadius": {"type": "number", "minimum": 0.005, "maximum": 0.5},
                  "bakeCells": {"type": "array", "items": ID, "uniqueItems": True},
                  "spillCells": {"type": "array", "items": ID, "uniqueItems": True},
                  "coneInnerDeg": {"type": "number", "minimum": 0, "maximum": 180},

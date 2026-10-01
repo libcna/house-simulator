@@ -354,11 +354,12 @@ def create_light_objects(lights: list[dict],
                 f"{source_efficacy!r}")
         data.energy = float(light.get("intensityLm", 0.0)) / source_efficacy
         data.color = (1.0, 1.0, 1.0)
-        # Recessed rows sit 20 mm below the ceiling.  A 50 mm emitter intersects that receiver and
-        # produces one white firefly; max-normalising against it crushes the whole useful atlas to
-        # black.  Five millimetres stays inside the authored clearance while retaining a finite,
-        # deterministic source.
-        data.shadow_soft_size = 0.005
+        # Recessed rows sit 20 mm below the ceiling.  Five millimetres is the safe default;
+        # an explicit larger radius models a broad diffuser in a room with hard rafter shadows.
+        radius = float(light.get("bakeEmitterRadius", 0.005))
+        if not math.isfinite(radius) or not 0.005 <= radius <= 0.5:
+            raise SystemExit(f"lightmap_bake: {name} has invalid bakeEmitterRadius {radius!r}")
+        data.shadow_soft_size = radius
         data.use_custom_distance = True
         data.cutoff_distance = float(light.get("range", 10.0))
         if kind == "spot":
@@ -1005,6 +1006,14 @@ def selftest() -> int:
                 "a per-fixture calibration crosses legacy receiver-cell calibrations without "
                 "changing the global bake default")
         bpy.data.objects.remove(overridden_object, do_unlink=True)
+        broad = {**authored[0], "id": "BROAD_SPOT", "bakeEmitterRadius": 0.25}
+        create_light_objects([broad])
+        broad_object = bpy.data.objects.get("BROAD_SPOT")
+        require(broad_object is not None and
+                abs(broad_object.data.shadow_soft_size - 0.25) < 1e-6 and
+                shell_hash([broad]) != shell_hash(authored),
+                "an authored diffuser radius softens only its bake and changes its source hash")
+        bpy.data.objects.remove(broad_object, do_unlink=True)
         recessed = {**authored[0], "id": "RECESSED_POINT", "type": "point",
                     "cell": "ROOM_A", "position": [0.0, 2.0, 0.0]}
         create_light_objects([recessed], ceiling_y=2.02, receiver_cell="ROOM_A")

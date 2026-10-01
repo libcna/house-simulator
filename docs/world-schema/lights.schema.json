@@ -91,6 +91,11 @@
             "type": "array",
             "uniqueItems": true
           },
+          "bakeEmitterRadius": {
+            "maximum": 0.5,
+            "minimum": 0.005,
+            "type": "number"
+          },
           "bakeLumensPerRadiantWatt": {
             "exclusiveMinimum": 0,
             "type": "number"

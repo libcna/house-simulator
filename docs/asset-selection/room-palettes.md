@@ -80,10 +80,10 @@ and roof-space wear is confined to the rooms whose schedule calls for it.
 | `L2_WC6` — WC 6 | `MAT_TILE_CERAMIC_LIGHT` | `MAT_PAINT_SAGE` | `MAT_PAINT_CEILING_MOISTURE` | `MAT_DOOR_PAINTED` |
 | `L3_STAIR_HEAD` — Attic Stair Head | `MAT_WOOD_OAK_FLOOR` | `MAT_PAINT_AGED_PLASTER` | `MAT_PAINT_CEILING_ATTIC` | `MAT_HATCH_PLY` |
 | `L3_ROOM` — Attic Room | `MAT_WOOD_OAK_FLOOR` | `MAT_PAINT_WARM_WHITE` | `MAT_PAINT_CEILING_ATTIC` | `MAT_DOOR_HARDWOOD` |
-| `L3_STORE_W` — West Attic Store | `MAT_WOOD_OAK_FLOOR` | `MAT_PAINT_AGED_PLASTER` | `MAT_PAINT_CEILING_ATTIC` | `MAT_HATCH_PLY` |
-| `L3_STORE_E` — East Attic Services | `MAT_WOOD_OAK_FLOOR` | `MAT_PAINT_AGED_PLASTER` | `MAT_PAINT_CEILING_ATTIC` | `MAT_HATCH_PLY` |
-| `L3_STORE_N` — North Attic Store | `MAT_WOOD_OAK_FLOOR` | `MAT_PAINT_AGED_PLASTER` | `MAT_PAINT_CEILING_ATTIC` | `MAT_HATCH_PLY` |
-| `L3_STORE_S` — South Attic Store | `MAT_WOOD_OAK_FLOOR` | `MAT_PAINT_AGED_PLASTER` | `MAT_PAINT_CEILING_ATTIC` | `MAT_HATCH_PLY` |
+| `L3_STORE_W` — West Attic Store | `MAT_WOOD_OAK_FLOOR` | `MAT_PAINT_WARM_WHITE` | `MAT_PAINT_CEILING_CREAM` | `MAT_HATCH_PLY` |
+| `L3_STORE_E` — East Attic Services | `MAT_WOOD_OAK_FLOOR` | `MAT_PAINT_WARM_WHITE` | `MAT_PAINT_CEILING_CREAM` | `MAT_HATCH_PLY` |
+| `L3_STORE_N` — North Attic Store | `MAT_WOOD_OAK_FLOOR` | `MAT_PAINT_WARM_WHITE` | `MAT_PAINT_CEILING_CREAM` | `MAT_HATCH_PLY` |
+| `L3_STORE_S` — South Attic Store | `MAT_WOOD_OAK_FLOOR` | `MAT_PAINT_WARM_WHITE` | `MAT_PAINT_CEILING_CREAM` | `MAT_HATCH_PLY` |
 
 All wall and ceiling choices use the lightmapped `DualTexture` path. Trim uses only
 non-lightmapped `Basic` joinery finishes, so `HOUSE-00907` can replace the generated

@@ -13,7 +13,7 @@ renumbered.
 | Goal | A finished, multiplatform **architectural and graphics walkthrough showcase for CNA**. See [Direction](#direction) |
 | Scope decisions | [ADR-0014](docs/decisions/ADR-0014-showcase-scope.md) (a showcase, not a life simulator), [ADR-0015](docs/decisions/ADR-0015-quality-tiers-and-compact-scope.md) (quality tiers and a reusable kit), [ADR-0016](docs/decisions/ADR-0016-final-scope-reduction.md) (2026-09-22 reduction, retained breadth and maintenance mode; its former hour ceiling is superseded below) |
 | Scope policy | The owner explicitly superseded the former 280-hour ceiling on 2026-09-27 and requested further targeted corrections and a filming tour. Keep MUST/OPT boundaries explicit; do not infer other features |
-| Active plan | **No open MUST task.** All 16 milestones are complete; the optional backlog stays optional (rule R17) |
+| Active plan | **No open MUST task.** The owner-requested `HOUSE-03647` maintenance fix is complete (2026-10-01); the optional backlog stays optional (R15/R17) |
 | Estimate to DONE | Nothing open: House Simulator is DONE (2026-09-30). The old **44.84 / 52.75 / 76.03 h** table below is historical |
 | Current gate | **DONE: every milestone is complete and the multiplatform release is tagged `v1.1.0` (HOUSE-03078); the project is in maintenance mode. CNA fixed strict-API blocker BL-18 upstream (`2c70eaf0f`), which let `HOUSE-03683`/`03574`/`02714` be accepted. CNA's Android graphics gate and House's arm64 APK/settings/lifecycle path passed on the `Medium_Phone` emulator; the APK now carries the Android-tier content and walks the house on the `House_Phone` emulator (`HOUSE-03033`, with CNA fixes BL-19/20/21); the Android preset holds the frame target there (`HOUSE-03037`).** Main/attic/basement stairs, garage-loft floor and whole-house lighting are corrected under `HOUSE-03635`/`03638`/`03639`/`03636`; doorway flashes and visibility/wall holes under `HOUSE-03637`/`03640`, including the owner's precise foyer/stair corner-gap screenshot. The existing car family is corrected under `HOUSE-03641`; full GPU filming circuit accepted under `HOUSE-03572`. Normal title/Start audio produces real backend PCM; owner listening accepts all six footstep categories and interior/exterior day/night ambience under `HOUSE-01920`/`01922`. Weather layers and the indoor-rain correction are accepted under `HOUSE-01925`; whole-zone four-state listening passes `HOUSE-01939`. Desktop High scenarios pass three complete current hardware-GPU rounds under `HOUSE-02404`; the three presets are measured under `HOUSE-02405` |
 | History | [`docs/history/plan-legacy-2026-09-21.md`](docs/history/plan-legacy-2026-09-21.md): the original 53-phase ledger (674 tasks completed before 2026-09-21). [`docs/history/scope-reductions-2026-09-21.md`](docs/history/scope-reductions-2026-09-21.md): what the first two reductions cancelled and why. Neither is a requirement |
@@ -290,7 +290,7 @@ proved all 90 intended-accessible cells and the tight-space traversal. G1 clears
 | `Z-GAR` | **C3** | 1 / 1 | — | Round 159; the complete vehicle/workshop/storage composition is balanced in both fixed views by day and scheduled night (`HOUSE-03442`) | No zone-specific S2 |
 | `Z-L1` | **C3** | 1 / 1 | — | Round 158; the complete master-bedroom recipe, including its wall treatment, is balanced by day and scheduled night (`HOUSE-03444`) | No zone-specific S2 |
 | `Z-L2` | **C3** | — | 1 / 1 | Round 162; the complete library composition is readable by day, scheduled night and overcast, with no S1/S2 (`HOUSE-03454`) | No zone-specific S2 |
-| `Z-L3` | **C3** | 1 / 1 | — | Round 157; the lived-in attic-room composition reads under dormer daylight and scheduled evening lights (`HOUSE-03446`) | No zone-specific S2 |
+| `Z-L3` | **C3** | 1 / 1 | — | Round 157; the lived-in attic-room composition reads under dormer daylight and scheduled evening lights (`HOUSE-03446`); attic-store wall mottling corrected by `HOUSE-03647` | No zone-specific S2/S3 |
 | `Z-STAIR` | **C3** | 3 / 3 | — | Round 154; the three main-stair cells retain their complete main-tier composition and are balanced in every fixed foot/head view by day and scheduled night (`HOUSE-03447`) | No zone-specific S2; main-stair-foot darkness closed |
 | `Z-EXF` | **C3** (C5 hero content in place) | — | 4 / 4 | Round 164; day/night/overcast review closes the finished front approach and elevation with no S1/S2 (`HOUSE-03450`) | No zone-specific S2 |
 | `Z-EXR` | **C3** | 2 / 2 | — | Round 155; terrace/backyard compositions and fence planting are presentation-ready under clear day and the bounded scheduled-night hierarchy (`HOUSE-03448`) | No zone-specific S2 |
@@ -401,7 +401,7 @@ and earlier ones in [`docs/history/scope-reductions-2026-09-21.md`](docs/history
 | [M8](#m8--atmospheric-audio-essentials) — Atmospheric audio essentials | B | 03541–03570 | 0 | **done** · `HOUSE-01939` | D7 | 0 |
 | [M9](#m9--application-shell) — Application shell | B | 03571–03600 | 0 | **done** · `HOUSE-03574` | D8 | 0 |
 | [M10](#m10--performance-measurement-driven) — Performance, measurement-driven | B | 03601–03630 | 0 | **done** · `HOUSE-02405` | D9 | 0 |
-| [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 0 | **done** · `HOUSE-03631`, `HOUSE-02713` | D1, D2, D4, D6, D8, D9, D11, D13, D14 | 0 |
+| [M11](#m11--final-defect-pass-bounded--after-g5-only) — Final defect pass | after G5 | 03631–03680 | 0 | **done** · `HOUSE-03647` maintenance correction | D1, D2, D4, D6, D8, D9, D11, D13, D14 | 0 |
 | [M12](#m12--representative-tests) — Representative tests | B | 03681–03700 | 0 | **done** · `HOUSE-03683` | D11 | 0 |
 | [M13](#m13--linux-desktop-release) — Linux desktop release | after M11 | 03701–03720 | 0 | **done** · `HOUSE-02797` | D9–D13 | 0 |
 | [M14](#m14--web) — Web | bring-up: B · verification: after M13 | 03721–03750 | 0 | **done** · `HOUSE-02904` | D10b | 0 |
@@ -1490,6 +1490,12 @@ There is no zone rotation, no "polish everything" pass and no screenshot → twe
       verify: the render suite
       done: (2026-09-29) The software-GL render suite (private Xvfb) had 14 failing cases over 93 references last committed 2026-09-15..26: every later change (M4/M5 dressing and lighting, HOUSE-03573 walk/run settings row, 03635/03638 stairs, 03636 schedules and bakes, 03641 cars, 03643 pole, 03646 terrace, 03631 shed/foliage/lanterns) had changed them without a refresh. All 93 reference/actual pairs were inspected side by side; every difference is one of those intended changes, none a new defect. The only incidental observation is the debug overlay's timing text overlapping its title at 640x360 (S4, logged, not scheduled). Only failing references were replaced; a passing content-smoke frame 0.11% off stays untouched. Render suite now 59 PASS / 1 opt-in SKIP / 0 FAIL, including the culled/unculled check. The scope covers every existing reference suite, not only the three named sets; see Planning corrections 2026-09-29.
 
+- [x] HOUSE-03647 — Remove mottled surfaces from the four attic stores
+      dep: HOUSE-03631 · sys: world-content, lighting · plat: ALL · pri: MUST · zone: Z-L3 · adv: D6, D13, D14 · est: 2
+      accept: the four storage rooms keep their architecture and furnishings, but the large wall and roof slopes no longer show the reported dark blotches in actual clear-day and scheduled-night views; regenerated shell, daylight and artificial lightmaps have valid source hashes; nearby attic views remain readable
+      verify: focused shell/lightmap provenance and content validation, inspected before/after GPU views in the west and north stores by day and night, representative render test and unit suite
+      done: (2026-10-01) Existing smooth plaster/cream ceiling finishes replace the mottled paint only in the four stores. Their generated shells and both atlas modes were rebaked at 1,024 samples; north/south utility lights use a 0.25 m offline emitter radius while their runtime placement and schedule stay fixed. Clear-day and scheduled-night OPENGLES3 views for all four stores were inspected, including west/north before/after and the adjacent attic room. The refreshed shell manifest, bake/source hashes, palette and schema checks pass; 1,553/1,553 unit tests, 59/59 software render tests plus one opt-in skip, and all 358 strict-XNA units pass. The full static script's only remaining failure is the inherited, read-only root `.aws` layout entry. Evidence: docs/visual-review/house-03647-attic-stores.md.
+
 ---
 
 ## M12 — Representative tests
@@ -2498,6 +2504,14 @@ under R5.
 ---
 
 ## Planning corrections
+
+### 2026-10-01 — Owner requested the logged attic-store S3 fix (`HOUSE-03647`)
+
+* The owner explicitly requested correction of the mottled attic storage wall retained in the
+  1.1.0 release notes after `HOUSE-03631`'s bounded pass. R15/R17 therefore add one narrow M11
+  maintenance task beyond that former pass's R12 time limit. The correction stays local to the
+  four storage rooms and their existing bake pipeline; it does not change the DONE scope, open a
+  polish rotation or schedule an OPT feature.
 
 ### 2026-09-30 — Web mouse look stopped at the canvas edge (`HOUSE-03724`)
 

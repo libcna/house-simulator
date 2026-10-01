@@ -2357,12 +2357,13 @@
           "lights": [
             "LIGHT_L3_STORE_E_MAIN_1"
           ],
-          "mean": 0.08546875876412152,
-          "peak": 0.643483579158783,
-          "receiverMean": 0.235268839602746,
-          "scale": 0.5462766289710999
+          "mean": 0.08929685601635595,
+          "peak": 0.6134273409843445,
+          "receiverMean": 0.2457238289372623,
+          "scale": 0.5433521270751953
         }
       ],
+      "lumensPerRadiantWatt": 200.0,
       "shellHash": "sha256:642e6b4b5df0bf68f8d56e4ffcbf202703f592e3438037ac4d8bd8423aa15494"
     },
     {
@@ -2378,14 +2379,14 @@
           "lights": [
             "LIGHT_L3_STORE_N_MAIN_1"
           ],
-          "mean": 0.059814680426480686,
-          "peak": 2.8569021224975586,
-          "receiverMean": 0.15418560794642222,
-          "scale": 2.0907857418060303
+          "mean": 0.05737671951833757,
+          "peak": 1.3404418230056763,
+          "receiverMean": 0.14790122287420432,
+          "scale": 1.0068082809448242
         }
       ],
       "lumensPerRadiantWatt": 200.0,
-      "shellHash": "sha256:fedeea87d280136090f1e59c3b6523e0ea83c6973fbbf48d8bfa0eb743955de1"
+      "shellHash": "sha256:5cb71d25524f483963a1b70c99c8b1ef17279bce7b4acbb62b964a1e64129c28"
     },
     {
       "cell": "L3_STORE_S",
@@ -2400,13 +2401,14 @@
           "lights": [
             "LIGHT_L3_STORE_S_MAIN_1"
           ],
-          "mean": 0.077103289075843,
-          "peak": 2.0692543983459473,
-          "receiverMean": 0.16418771617086195,
-          "scale": 1.7416144609451294
+          "mean": 0.06993670555483855,
+          "peak": 1.0449237823486328,
+          "receiverMean": 0.14865632814619217,
+          "scale": 0.8450114130973816
         }
       ],
-      "shellHash": "sha256:17eedf4503cb6a8697b9c1604d9e7dc7e9f8dfd7f9e640afe63972728ea5db74"
+      "lumensPerRadiantWatt": 200.0,
+      "shellHash": "sha256:8c9db5d252054ee1ee8dfe5b5487b90567bf2ef9c684109eea3906a0bc87c9af"
     },
     {
       "cell": "L3_STORE_W",
@@ -2421,22 +2423,24 @@
           "lights": [
             "LIGHT_L3_STORE_W_MAIN_1"
           ],
-          "mean": 0.036002072981136495,
-          "peak": 0.27453696727752686,
-          "receiverMean": 0.08904860563450186,
-          "scale": 0.2535014748573303
+          "mean": 0.03701086633948523,
+          "peak": 0.2672440707683563,
+          "receiverMean": 0.09154378386401585,
+          "scale": 0.2473568618297577
         }
       ],
+      "lumensPerRadiantWatt": 200.0,
       "shellHash": "sha256:349a982c95b67755d55e1bcaaae04e8e6bce61d202b36fba4c86a3246494ddef"
     }
   ],
   "promotedSubsetCells": [
-    "L0_SUNROOM"
+    "L3_STORE_N",
+    "L3_STORE_S"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 9043968,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 1680909,
+  "sourceBytes": 1675795,
   "tool": "bake_house_lightmaps.py"
 }

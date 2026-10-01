@@ -2517,7 +2517,10 @@ file and only an offline check can catch it.
    > the 78 baked cells lost 2 494 faces of yard wall that were never part of any room.
 3. `tools/blender/lightmap_bake.py` bakes, per cell, one lightmap per light group plus one
    "daylight" lightmap lit only by a uniform sky dome through that cell's window openings.
-   Bakes are diffuse-only, indirect included, Cycles, 256 samples, denoised.
+   Bakes are diffuse-only, indirect included, Cycles, 256 samples by default, denoised.
+   The four attic stores use 1 024 samples after the release review exposed noisy low-light
+   receivers. The north and south store utility fixtures use an authored 0.25 m bake emitter
+   radius to soften roof-structure shadows; runtime light placement and strength are unchanged.
 4. The atlases are exported as PNG (`_LM_<group>.png`) and compiled to `Texture2D` content.
 5. `layout.cells.json` gains the generated lightmap names; a hash of the shell geometry is stored
    so a stale bake is detected and the build fails loudly rather than shipping wrong light.

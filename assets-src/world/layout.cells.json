@@ -2623,8 +2623,8 @@
       // 1.2 → 4.6 m, so most of it is crouch-only -- §13.6's headroom-aware capsule, the one
       // place in the house where crouching exists.
       "yOverride": [9.30, 13.90],
-      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_AGED_PLASTER",
-      "ceilingMaterial": "MAT_PAINT_CEILING_ATTIC", "trimMaterial": "MAT_HATCH_PLY",
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_WARM_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_CREAM", "trimMaterial": "MAT_HATCH_PLY",
       "footstepSurface": "hardwood",
       "acoustic": { "roomTone": "AMB_ATTIC", "absorption": 0.66, "reverbHint": "attic_soft" },
       "thermal": { "heated": false, "ductBranch": null },
@@ -2635,14 +2635,14 @@
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L3_STORE_W_LM_DAY",
           "scale": 1.0000001192092896,
-          "receiverMean": 0.2604959223707794
+          "receiverMean": 0.2592626220666611
         },
         "artificial": [
           {
             "group": "LG_L3_STORE_W_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L3_STORE_W_LM_LG_L3_STORE_W_MAIN",
-            "scale": 0.2535014748573303,
-            "receiverMean": 0.08904860563450186
+            "scale": 0.2473568618297577,
+            "receiverMean": 0.09154378386401585
           }
         ]
       },
@@ -2653,8 +2653,8 @@
       "boxes": [{ "x": [4.90, 8.70], "z": [-27.10, -20.20] }],
       // Header tank, HVAC branch ducts, an aerial mast, cable runs. 1.2 → 4.2 m.
       "yOverride": [9.30, 13.50],
-      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_AGED_PLASTER",
-      "ceilingMaterial": "MAT_PAINT_CEILING_ATTIC", "trimMaterial": "MAT_HATCH_PLY",
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_WARM_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_CREAM", "trimMaterial": "MAT_HATCH_PLY",
       "footstepSurface": "hardwood",
       "acoustic": { "roomTone": "AMB_ATTIC", "absorption": 0.58, "reverbHint": "attic_soft" },
       "thermal": { "heated": false, "ductBranch": null },
@@ -2665,14 +2665,14 @@
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L3_STORE_E_LM_DAY",
           "scale": 1.0000001192092896,
-          "receiverMean": 0.2975792330580109
+          "receiverMean": 0.299586193276076
         },
         "artificial": [
           {
             "group": "LG_L3_STORE_E_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L3_STORE_E_LM_LG_L3_STORE_E_MAIN",
-            "scale": 0.5462766289710999,
-            "receiverMean": 0.235268839602746
+            "scale": 0.5433521270751953,
+            "receiverMean": 0.2457238289372623
           }
         ]
       },
@@ -2684,26 +2684,26 @@
       // Christmas decorations, a cot, framed pictures. 1.2 → 3.2 m, two dormers.
       // §16.3 makes this the far end of the house's longest path: EXT_ROAD to here is 11 hops.
       "yOverride": [9.30, 12.50],
-      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_AGED_PLASTER",
-      "ceilingMaterial": "MAT_PAINT_CEILING_ATTIC", "trimMaterial": "MAT_HATCH_PLY",
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_WARM_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_CREAM", "trimMaterial": "MAT_HATCH_PLY",
       "footstepSurface": "hardwood",
       "acoustic": { "roomTone": "AMB_ATTIC", "absorption": 0.60, "reverbHint": "attic_soft" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "S", "exposure": 0.22 },
       "lightGroups": ["LG_L3_STORE_N_MAIN"],
       "lightmaps": {
-        "shellHash": "sha256:fedeea87d280136090f1e59c3b6523e0ea83c6973fbbf48d8bfa0eb743955de1",
+        "shellHash": "sha256:5cb71d25524f483963a1b70c99c8b1ef17279bce7b4acbb62b964a1e64129c28",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L3_STORE_N_LM_DAY",
           "scale": 1.0000001192092896,
-          "receiverMean": 0.2581289864510743
+          "receiverMean": 0.26185720646898947
         },
         "artificial": [
           {
             "group": "LG_L3_STORE_N_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L3_STORE_N_LM_LG_L3_STORE_N_MAIN",
-            "scale": 2.0907857418060303,
-            "receiverMean": 0.15418560794642222
+            "scale": 1.0068082809448242,
+            "receiverMean": 0.14790122287420432
           }
         ]
       },
@@ -2716,25 +2716,25 @@
       "boxes": [{ "x": [-3.60, 3.60], "z": [-17.00, -14.30] }],
       // The roof-space void behind the front knee wall: 1.2 → 3.0 m and no window at all.
       "yOverride": [9.30, 12.30],
-      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_AGED_PLASTER",
-      "ceilingMaterial": "MAT_PAINT_CEILING_ATTIC", "trimMaterial": "MAT_HATCH_PLY",
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_WARM_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_CREAM", "trimMaterial": "MAT_HATCH_PLY",
       "footstepSurface": "hardwood",
       "acoustic": { "roomTone": "AMB_ATTIC", "absorption": 0.62, "reverbHint": "attic_soft" },
       "thermal": { "heated": false, "ductBranch": null },
       "lightGroups": ["LG_L3_STORE_S_MAIN"],
       "lightmaps": {
-        "shellHash": "sha256:17eedf4503cb6a8697b9c1604d9e7dc7e9f8dfd7f9e640afe63972728ea5db74",
+        "shellHash": "sha256:8c9db5d252054ee1ee8dfe5b5487b90567bf2ef9c684109eea3906a0bc87c9af",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L3_STORE_S_LM_DAY",
           "scale": 1.0000001192092896,
-          "receiverMean": 0.21855551430517473
+          "receiverMean": 0.22085039140486612
         },
         "artificial": [
           {
             "group": "LG_L3_STORE_S_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L3_STORE_S_LM_LG_L3_STORE_S_MAIN",
-            "scale": 1.7416144609451294,
-            "receiverMean": 0.16418771617086195
+            "scale": 0.8450114130973816,
+            "receiverMean": 0.14865632814619217
           }
         ]
       },

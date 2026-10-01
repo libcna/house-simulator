@@ -2247,7 +2247,7 @@
       "type": "point", "position": [-0.55, 11.40, -25.55],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 7.00,
-      "bakeLumensPerRadiantWatt": 5.0,
+      "bakeLumensPerRadiantWatt": 5.0, "bakeEmitterRadius": 0.25,
       "fixtureProp": "PROP_L3_STORE_N_UTILITY_LIGHT", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -2258,7 +2258,7 @@
       "type": "point", "position": [0.00, 11.28, -15.65],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 5.36,
-      "bakeLumensPerRadiantWatt": 10.0,
+      "bakeLumensPerRadiantWatt": 10.0, "bakeEmitterRadius": 0.25,
       "fixtureProp": "PROP_L3_STORE_S_UTILITY_LIGHT", "emissiveMaterialSlot": "cream",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },

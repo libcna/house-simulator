@@ -166,13 +166,13 @@ PALETTES = {
     "L2_BATH5": p("tile_dark", "soft_grey", "moisture"),
     "L2_WC6": p("tile_light", "sage", "moisture"),
 
-    # L3 -- one maintained room surrounded by visibly older, utilitarian roof-space.
+    # L3 -- a maintained room and smooth storage walls within utilitarian roof-space.
     "L3_STAIR_HEAD": p("oak", "aged", "attic", "ply"),
     "L3_ROOM": p("oak", "warm_white", "attic", "hardwood"),
-    "L3_STORE_W": p("oak", "aged", "attic", "ply"),
-    "L3_STORE_E": p("oak", "aged", "attic", "ply"),
-    "L3_STORE_N": p("oak", "aged", "attic", "ply"),
-    "L3_STORE_S": p("oak", "aged", "attic", "ply"),
+    "L3_STORE_W": p("oak", "warm_white", "cream", "ply"),
+    "L3_STORE_E": p("oak", "warm_white", "cream", "ply"),
+    "L3_STORE_N": p("oak", "warm_white", "cream", "ply"),
+    "L3_STORE_S": p("oak", "warm_white", "cream", "ply"),
 }
 
 ID_LINE = re.compile(r'^\s*"id":\s*"([A-Z0-9_]+)"')
