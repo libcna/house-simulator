@@ -1,3 +1,35 @@
+# Maintenance handoff — 2026-10-01 (attic stores and street planting)
+
+The owner explicitly requested the two S3 defects left in the 1.1.0 release notes. R15/R17
+therefore selected the narrow maintenance tasks `HOUSE-03647` (Z-L3) and `HOUSE-03648` (Z-STR),
+despite M11's old bounded review having ended; R12 did not silently schedule an optional polish
+pass. The zone scoreboard still keeps the plain road foreground as a separate S3 item.
+
+The four attic stores now use the existing smooth plaster/ceiling materials and have freshly
+baked shell receivers and daylight/artificial atlases. The north and south utility bulbs use a
+0.25 m radius only in the offline bake, reducing harsh rafter shadows. The street keeps all 34
+tree centres and 121 far-hedge sections; four central trees use the existing licensed young
+jacaranda, and the hedge crowns vary in height. The existing collision and render paths are used.
+Matched views and the rejected narrower probes are recorded in
+`docs/visual-review/house-03647-attic-stores.md` and
+`docs/visual-review/house-03648-street-planting.md`.
+
+Current Linux validation: world content builds, all 15 world rules pass, all 1,553 unit tests
+pass, the 90-cell controller grand tour passes (566 route stops, 19 collision detours), and the
+offscreen OPENGLES3 render suite passes 59/59 with one intentional diagnostic skip. The 31
+changed visual references reflect the inspected surfaces, planting and current 1.1.0 HUD text.
+All three fixed StreetApproach preset cases pass their assertions. Counts are 514 draws / 1.04 M
+triangles at High, 510 / 708 k at Web and 510 / 591 k at Android. The Web/Android draw guidance was
+already exceeded at 509; the added young-tree split adds one draw there. CPU/GPU milliseconds from
+software Mesa are not the reference hardware timing result and are not claimed as a speed gain.
+The full `run_checks.sh` found four generated documents plus the room-palette expectation stale;
+each was regenerated and its focused check now passes. The other gates passed, including 358
+strict-XNA translation units. Its only remaining failure is the session-provided, read-only
+root `.aws` directory in the layout gate, the same inherited exception recorded in the previous
+handoff. No CNA or sharp-runtime source was changed, and `CNA_CNAEXT=OFF` remains forced.
+
+---
+
 # Maintenance handoff — 2026-09-30 (HOUSE-03724)
 
 R15/R17 selected the owner-reported Web mouse-look defect because sustained turning stopped at

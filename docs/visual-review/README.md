@@ -1,5 +1,12 @@
 # Visual review ledger
 
+## 2026-10-01 maintenance — released S3 items
+
+The owner's two remaining 1.1.0 visual reports were addressed in
+[`HOUSE-03647`](house-03647-attic-stores.md) (mottled attic storage walls) and
+[`HOUSE-03648`](house-03648-street-planting.md) (repeated street planting). Both records include
+inspected OPENGLES3 captures. The broad road foreground is still a separate S3 observation.
+
 > **Note (2026-09-21):** `captures/` is git-ignored and pruned. Older iteration captures (all `house-00*`, superseded `rN`, probes, candidates) were deleted; links marked *(removed)* point to captures that no longer exist. This ledger text is the record; regenerate captures with the tools if needed.
 
 > **2026-09-21: protocol change (`HOUSE-03201`, [ADR-0014](../decisions/ADR-0014-showcase-scope.md)).**

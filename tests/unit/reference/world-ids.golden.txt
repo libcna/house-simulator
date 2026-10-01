@@ -3468,6 +3468,7 @@ exterior/vegetation	VEG_HEDGE_NEAR_W
 exterior/vegetation	VEG_MAPLE
 exterior/vegetation	VEG_SHRUB
 exterior/vegetation	VEG_STREET_TREE
+exterior/vegetation	VEG_STREET_TREE_YOUNG
 assets	VIDEO_SMOKE_CLIP
 interactables/interactables	WC_B1_WC7
 interactables/interactables	WC_L0_WC1

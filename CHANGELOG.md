@@ -2,6 +2,16 @@
 
 Versions follow [`docs/versioning.md`](docs/versioning.md).
 
+## Unreleased maintenance — 2026-10-01
+
+* The four attic stores use a smoother existing wall and ceiling finish and freshly baked daylight
+  and artificial lighting. The north and south utility lights have a wider offline bake source,
+  removing the large dark patches without changing the running lights.
+* Street planting has varied hedge heights and four younger jacaranda trees among the 34 existing
+  tree positions. The pedestrian route and road-end barriers remain clear.
+* The affected software-render references were refreshed for these visual changes and the current
+  1.1.0 diagnostic HUD text. The broad road foreground remains a separate S3 item.
+
 ## 1.1.0 — 2026-09-30 — the multiplatform release
 
 The same house on the Linux desktop, in a browser and on Android. With this release every MUST task

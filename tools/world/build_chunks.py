@@ -127,13 +127,15 @@ CHUNK_BUDGET_EXCEPTIONS = {
                  "HOUSE-00847 adds the shared estate family's measured body, tyre, glazing, "
                  "steel and lamp roles through the ordinary static-prop path; the two road-cell "
                  "placements retain bounded sub-ranges"),
-    "EXT_FRONTYARD_E": (15,
+    "EXT_FRONTYARD_E": (16,
                          "HOUSE-00772's planted east lawn: its existing ground/building finishes "
                          "plus measured source-exact bark, branch, leaf, flower and grass atlases. "
                          "HOUSE-00937 adds the authored foundation-mulch terrain role. This "
                          "exterior cell is a landscape region rather than a room. HOUSE-01289 "
                          "adds one shared bronze body and one switched lens role for its two "
-                         "facade uplights"),
+                         "facade uplights. HOUSE-03648 uses the approved young jacaranda mesh "
+                         "among the street saplings; shared materials keep the role count fixed, "
+                         "but its measured extra vertices take one Reach-cap split"),
     "EXT_FRONTYARD_W": (8,
                          "the planted west lawn keeps ground, facade, bark and cutout foliage "
                          "separate. HOUSE-01289 adds one shared bronze body and one switched lens "
