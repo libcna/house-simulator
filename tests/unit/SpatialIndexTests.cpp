@@ -8,6 +8,7 @@
 // brute force does not have -- the incremental test with its hysteresis, and the neighbour walk.
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <cstdint>
 #include <random>
 #include <string>

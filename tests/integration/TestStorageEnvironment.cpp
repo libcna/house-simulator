@@ -17,7 +17,7 @@ namespace
     public:
         void SetUp() override
         {
-#if defined(__linux__) && !defined(__ANDROID__)
+#if (defined(__linux__) && !defined(__ANDROID__)) || defined(__APPLE__)
             previous_ = System::Environment::GetEnvironmentVariable("XDG_DATA_HOME");
             root_ = std::filesystem::temp_directory_path() /
                     ("cnahouse-integration-" + std::to_string(std::random_device{}()));
@@ -29,7 +29,7 @@ namespace
 
         void TearDown() override
         {
-#if defined(__linux__) && !defined(__ANDROID__)
+#if (defined(__linux__) && !defined(__ANDROID__)) || defined(__APPLE__)
             System::Environment::SetEnvironmentVariable("XDG_DATA_HOME", previous_);
             if (ownsRoot_)
             {

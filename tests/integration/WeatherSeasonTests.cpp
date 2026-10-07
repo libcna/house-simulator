@@ -33,7 +33,7 @@ namespace
     [[nodiscard]] float DirectSunlight(const SimClock& clock, float cloudCover)
     {
         const auto sun = cnahouse::environment::SunPositionFor(clock);
-        const auto shading = cnahouse::environment::SunShadingFor(sun, cloudCover);
+        const auto shading = cnahouse::environment::SunShadingFor(sun, static_cast<double>(cloudCover));
         return sun.altitudeDeg > cnahouse::environment::kRefractedHorizonDeg ? shading.directIntensity : 0.0F;
     }
 

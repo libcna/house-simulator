@@ -52,7 +52,7 @@ TEST(MoonDiscTests, TheQuadIsEightHundredNinetyUnitsTowardTheMoonAtItsAngularSiz
     const float dz = frame.centre.Z - camera.eye.Z;
     EXPECT_NEAR(std::sqrt(dx * dx + dy * dy + dz * dz), 890.0F, 1e-3F);
 
-    constexpr float kExpectedRadius = 890.0F * std::tan(0.52F * 0.5F * std::numbers::pi_v<float> / 180.0F);
+    const float kExpectedRadius = 890.0F * std::tan(0.52F * 0.5F * std::numbers::pi_v<float> / 180.0F);
     EXPECT_NEAR(frame.radius, kExpectedRadius, 1e-5F);
     EXPECT_FLOAT_EQ(frame.horizonScale, 1.0F);
 }

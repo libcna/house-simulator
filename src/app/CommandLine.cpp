@@ -7,6 +7,8 @@
 #include <format>
 #include <string_view>
 
+#include "cnahouse/util/FromChars.hpp"
+
 namespace cnahouse::app
 {
     namespace
@@ -42,7 +44,7 @@ namespace cnahouse::app
         {
             float value = 0.0f;
             const auto* const end = text.data() + text.size();
-            const auto [ptr, ec] = std::from_chars(text.data(), end, value);
+            const auto [ptr, ec] = util::FromChars(text.data(), end, value);
             if (ec != std::errc{} || ptr != end)
             {
                 return Error(ErrorCode::InvalidData,

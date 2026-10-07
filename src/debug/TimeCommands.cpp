@@ -6,6 +6,7 @@
 #include <format>
 
 #include "cnahouse/environment/DayLength.hpp"
+#include "cnahouse/util/FromChars.hpp"
 
 namespace cnahouse::debug
 {
@@ -19,7 +20,7 @@ namespace cnahouse::debug
             // trailing rubbish rather than parsing a prefix. "12abc" is a typo, not 12.
             const char* first = text.data();
             const char* last = text.data() + text.size();
-            const auto result = std::from_chars(first, last, out);
+            const auto result = util::FromChars(first, last, out);
             return result.ec == std::errc{} && result.ptr == last && std::isfinite(out);
         }
 

@@ -10,6 +10,7 @@ add_library(cnahouse_core STATIC
     util/Rng.cpp
     util/Json.cpp
     util/ContentFile.cpp
+    util/FromChars.cpp
 
     # app -- the frame, the services, the settings
     animation/Animation.cpp

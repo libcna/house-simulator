@@ -371,7 +371,6 @@ TEST(GroundProbeTests, TheWholeRealHouseIsStoodOn)
 
     BroadPhase broad;
     std::size_t stood = 0;
-    std::size_t onStairs = 0;
     for (const auto& cell : world->cells)
     {
         if (cell.shapes.empty() || cell.nx == 0u || cell.nz == 0u)
@@ -410,7 +409,6 @@ TEST(GroundProbeTests, TheWholeRealHouseIsStoodOn)
         ASSERT_TRUE(ground.onGround || ground.steep)
             << cell.id << ": a body settled onto this cell's floor was over nothing";
         ++stood;
-        onStairs += ground.kind == CollisionKind::Stair ? 1u : 0u;
         EXPECT_EQ(ground.cellId, cell.id);
         EXPECT_LT(ground.surface, world->surfaces.size()) << cell.id;
         EXPECT_LE(ground.distance, 0.05F + 1e-4F) << cell.id;

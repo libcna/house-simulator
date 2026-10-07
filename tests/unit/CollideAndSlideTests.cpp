@@ -440,7 +440,6 @@ TEST(CollideAndSlideTests, EveryStepInTheRealHouseEndsSomewhereABodyCanBe)
     std::size_t stepped = 0;
     std::size_t touched = 0;
     std::size_t blocked = 0;
-    std::size_t landedInside = 0;
     for (const auto& cell : world->cells)
     {
         if (cell.shapes.empty() || cell.nx == 0u || cell.nz == 0u)
@@ -507,7 +506,6 @@ TEST(CollideAndSlideTests, EveryStepInTheRealHouseEndsSomewhereABodyCanBe)
             // If it did end up touching something, §49.3's step 5 has to be able to fix it inside
             // its four pushes. A body the slide leaves 0.08 m inside a wall is a body that would
             // stay there.
-            ++landedInside;
             const Depenetration out = Depenetrate(*world, cell, broad, ended);
             EXPECT_TRUE(out.resolved)
                 << cell.id << ": a slid step left the body " << overlap.depth << " m inside shape "

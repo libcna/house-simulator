@@ -101,10 +101,10 @@ TEST(SkyExposureTests, TheDirectTermIsZeroOutsideTheConeAndReachesItWithoutAStep
     // No step anywhere: the largest jump over a quarter-degree sweep bounds what a frame can do.
     double worst = 0.0;
     double worstAt = 0.0;
-    double previous = SkyExposureFor(window, 45.0, window - 180.0, 0.0).direct;
+    double previous = static_cast<double>(SkyExposureFor(window, 45.0, window - 180.0, 0.0).direct);
     for (double offset = -180.0; offset <= 180.0; offset += 0.25)
     {
-        const double current = SkyExposureFor(window, 45.0, window + offset, 0.0).direct;
+        const double current = static_cast<double>(SkyExposureFor(window, 45.0, window + offset, 0.0).direct);
         if (std::abs(current - previous) > worst)
         {
             worst = std::abs(current - previous);
@@ -403,7 +403,8 @@ TEST(DaylightModelTests, AnOpenSashAdmitsMoreThanAShutOneAndTheAuthoredStartIsRe
         {
             siblings += other.cell == candidate.cell ? 1 : 0;
         }
-        if (siblings == 1 && model.DaylightFor(candidate.cell, 12.0, candidate.azimuthDeg, 0.0) > 0.0F)
+        if (siblings == 1 &&
+            model.DaylightFor(candidate.cell, 12.0, static_cast<double>(candidate.azimuthDeg), 0.0) > 0.0F)
         {
             window = candidate.window;
             cell = candidate.cell;
@@ -432,7 +433,7 @@ TEST(DaylightModelTests, AnOpenSashAdmitsMoreThanAShutOneAndTheAuthoredStartIsRe
     EXPECT_GT(half, shut);
     EXPECT_LT(half, open);
 
-    EXPECT_FALSE(model.SetOpenFraction(window, std::nan(""))) << "a NaN must be refused, not clamped";
+    EXPECT_FALSE(model.SetOpenFraction(window, std::nanf(""))) << "a NaN must be refused, not clamped";
     EXPECT_FALSE(model.SetOpenFraction(Id::Of("WIN_NO_SUCH_WINDOW"), 1.0F));
     ASSERT_TRUE(model.SetOpenFraction(window, 4.0F));
     EXPECT_FLOAT_EQ(model.OpenFraction(window), 1.0F) << "out of range is clamped";
@@ -524,7 +525,7 @@ TEST(DaylightModelTests, TheRealSunDrivesItOverADayAndTheCurveHasOneMaximum)
     for (int minute = 0; minute < 1440; minute += 10)
     {
         const auto sun = SunPositionAt(dayStart + minute / 1440.0, observer);
-        curve.push_back(model.DaylightFor(room, sun.altitudeDeg, sun.azimuthDeg, 0.0));
+        curve.push_back(static_cast<double>(model.DaylightFor(room, sun.altitudeDeg, sun.azimuthDeg, 0.0)));
     }
     int rises = 0;
     int falls = 0;

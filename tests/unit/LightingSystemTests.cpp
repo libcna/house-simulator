@@ -16,6 +16,7 @@
 #include <cstdio>
 #include <filesystem>
 #include <limits>
+#include <numbers>
 #include <span>
 #include <string>
 #include <utility>
@@ -136,7 +137,7 @@ TEST(LightingSystemTests, ThreeBulbFamiliesHaveTheAuthoredSwitchOnShapes)
     EXPECT_FLOAT_EQ(BulbTransitionLevel(BulbClass::Fluorescent, 8.0F), 1.0F);
 
     EXPECT_FLOAT_EQ(BulbTransitionLevel(BulbClass::Filament, -1.0F), 0.0F);
-    EXPECT_FLOAT_EQ(BulbTransitionLevel(BulbClass::Filament, std::nan("")), 0.0F);
+    EXPECT_FLOAT_EQ(BulbTransitionLevel(BulbClass::Filament, std::nanf("")), 0.0F);
 }
 
 TEST(LightingSystemTests, AuthoredGroupsDriveOneSharedTransitionThroughEveryLightingConsumer)
@@ -1305,7 +1306,7 @@ TEST(LightingSystemTests, ADimmerScalesTheGroupAndIsRefusedWhenItIsNotANumber)
 
     // ...and a NaN is refused outright rather than clamped, because clamping a NaN keeps the NaN.
     EXPECT_TRUE(lighting.SetGroupDimmer(group, 0.75F));
-    EXPECT_FALSE(lighting.SetGroupDimmer(group, std::nan("")));
+    EXPECT_FALSE(lighting.SetGroupDimmer(group, std::nanf("")));
     EXPECT_FLOAT_EQ(lighting.FindGroup(group)->Level(), 0.75F) << "the refused value was applied";
 
     // A switch that is OFF is off whatever the dimmer says.
@@ -1664,7 +1665,10 @@ TEST(LightingSystemTests, TheFramePublishesTheSunAndTheDaylightModelInWorldCellO
 
     const cnahouse::lighting::DaylightModel oracle(house.world, house.shading);
     std::vector<float> expected(house.world.Cells().size());
-    oracle.Evaluate(expectedSun.altitudeDeg, expectedSun.azimuthDeg, lighting.CloudCover(), expected);
+    oracle.Evaluate(expectedSun.altitudeDeg,
+                    expectedSun.azimuthDeg,
+                    static_cast<double>(lighting.CloudCover()),
+                    expected);
     int lit = 0;
     for (std::size_t index = 0; index < lighting.Cells().size(); ++index)
     {
@@ -1784,8 +1788,8 @@ TEST(LightingSystemTests, TheSunIsDirectionalLightZeroOutdoorsAndAboveTheIndoorT
     EXPECT_EQ(house.lighting.SunKeyForCell(Id::Of("NO_SUCH_CELL")), nullptr);
 
     const auto direction = cnahouse::environment::SunDirection(house.lighting.Sun());
-    const auto shading =
-        cnahouse::environment::SunShadingFor(house.lighting.Sun(), house.lighting.CloudCover());
+    const auto shading = cnahouse::environment::SunShadingFor(
+        house.lighting.Sun(), static_cast<double>(house.lighting.CloudCover()));
     EXPECT_NEAR(outdoorKey->direction.X, direction.X, 1e-6F);
     EXPECT_NEAR(outdoorKey->direction.Y, direction.Y, 1e-6F);
     EXPECT_NEAR(outdoorKey->direction.Z, direction.Z, 1e-6F);
