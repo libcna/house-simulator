@@ -50,8 +50,9 @@ import argparse
 import fnmatch
 import hashlib
 import json
-import subprocess
+import os
 import shutil
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -114,9 +115,17 @@ def find_cna_content() -> Path | None:
     The same three places `content_verify.py` looks, and for the same reason: it is built by CNA,
     not by this repository, so its path depends on how the sibling was configured.
     """
-    for candidate in (REPO / "build" / "CNA_BUILD" / "cna-content",
-                      REPO / "build-consumer" / "CNA_BUILD" / "cna-content",
-                      REPO.parent / "cnanext" / "build" / "cna-content"):
+    # AM4-199: an explicit `CNA_CONTENT`, then the three configured-build locations, then PATH --
+    # a build tree outside the repository (an out-of-source build root) is otherwise never found.
+    explicit = os.environ.get("CNA_CONTENT")
+    candidates = [Path(explicit)] if explicit else []
+    candidates += [REPO / "build" / "CNA_BUILD" / "cna-content",
+                   REPO / "build-consumer" / "CNA_BUILD" / "cna-content",
+                   REPO.parent / "cnanext" / "build" / "cna-content"]
+    on_path = shutil.which("cna-content")
+    if on_path:
+        candidates.append(Path(on_path))
+    for candidate in candidates:
         if candidate.is_file() and candidate.stat().st_mode & 0o111:
             return candidate
     return None

@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import os
 import shutil
 import subprocess
 import sys
@@ -48,11 +49,17 @@ KNOWN_CROSS_MACHINE_HAZARDS: dict[str, str] = {}
 
 
 def find_cna_content() -> Path | None:
-    for candidate in (
-        REPO / "build" / "CNA_BUILD" / "cna-content",
-        REPO / "build-consumer" / "CNA_BUILD" / "cna-content",
-        REPO.parent / "cnanext" / "build" / "cna-content",
-    ):
+    # AM4-199: an explicit `CNA_CONTENT`, then the three configured-build locations, then PATH --
+    # a build tree outside the repository (an out-of-source build root) is otherwise never found.
+    explicit = os.environ.get("CNA_CONTENT")
+    candidates = [Path(explicit)] if explicit else []
+    candidates += [REPO / "build" / "CNA_BUILD" / "cna-content",
+                   REPO / "build-consumer" / "CNA_BUILD" / "cna-content",
+                   REPO.parent / "cnanext" / "build" / "cna-content"]
+    on_path = shutil.which("cna-content")
+    if on_path:
+        candidates.append(Path(on_path))
+    for candidate in candidates:
         if candidate.is_file() and candidate.stat().st_mode & 0o111:
             return candidate
     return None
