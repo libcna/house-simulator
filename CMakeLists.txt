@@ -128,6 +128,17 @@ target_compile_options(cnahouse_warnings INTERFACE
 option(CNAHOUSE_WERROR "Promote warnings to errors in cna-house's own targets" ON)
 
 # ------------------------------------------------------------------------------------------------
+# Floating-point contraction (`AM4-202`)
+# ------------------------------------------------------------------------------------------------
+# No fused multiply-add the source did not write. GCC on x86-64 cannot contract (the baseline ISA
+# has no FMA), but Apple clang contracts by default and GCC on arm64 contracts aggressively, so the
+# same walk computed different last bits there -- measured on an Apple-silicon Mac, where a
+# near-zero orientation sign in the capsule sweep flipped and the grand and filming tours stuck on
+# the main stair. Physics and placement are deterministic only if every platform rounds the same
+# way. Carried by the same interface library, so it reaches exactly this project's own targets.
+target_compile_options(cnahouse_warnings INTERFACE -ffp-contract=off)
+
+# ------------------------------------------------------------------------------------------------
 # The library and the executable (`HOUSE-00123`)
 # ------------------------------------------------------------------------------------------------
 # Everything except `main` lives in `cnahouse_core`, so the test targets link the same code the

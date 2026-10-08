@@ -592,7 +592,14 @@ namespace cnahouse::physics
                     // line. The edge tests cover it.
                     continue;
                 }
-                if (Dot(Subtract(prism.centroid, prism.corners[f][0]), normal) > 0.0f)
+                // Outward means "away from the centroid" only for a prism with a volume. A flat one
+                // (`!prism.solid`: a sphere's zero half-height, or a triangle that contains Y) has
+                // its centroid IN the plane of every face, so that dot product is zero up to
+                // rounding and its sign is noise -- Apple clang's default FMA contraction flipped
+                // it (`AM4-202`), and a sphere swept into a stair ramp met an edge's normal instead
+                // of the face's. There the two triangle copies' opposite windings ({0,1,2} and
+                // {3,5,4}) already face both ways, which is what a sheet needs.
+                if (prism.solid && Dot(Subtract(prism.centroid, prism.corners[f][0]), normal) > 0.0f)
                 {
                     normal = Xna::Vector3(-normal.X, -normal.Y, -normal.Z);
                 }
