@@ -22,6 +22,7 @@
 #include "Microsoft/Xna/Framework/Graphics/IndexElementSize.hpp"
 #include "Microsoft/Xna/Framework/Graphics/PrimitiveType.hpp"
 #include "Microsoft/Xna/Framework/Graphics/Texture2D.hpp"
+#include "Microsoft/Xna/Framework/Graphics/TextureCollection.hpp"
 #include "Microsoft/Xna/Framework/Graphics/VertexBuffer.hpp"
 #include "Microsoft/Xna/Framework/Graphics/VertexDeclaration.hpp"
 #include "Microsoft/Xna/Framework/Graphics/VertexElement.hpp"
@@ -279,6 +280,16 @@ namespace cnahouse::rendering
         }
         else if (uploadedGeneration_ != mask_.GenerationCount())
         {
+            // XNA refuses SetData on a texture the device still has bound (`AM4-203`), and the
+            // previous frame's DualTextureEffect pass left the mask on a sampler slot.
+            Gfx::TextureCollection& textures = context.device.getTexturesProperty();
+            for (int slot = 0; slot < 2; ++slot)
+            {
+                if (textures[slot] == &resources_->mask)
+                {
+                    textures(slot, nullptr);
+                }
+            }
             resources_->mask.SetData(mask_.Pixels().data(), static_cast<int>(mask_.Pixels().size()));
             uploadedGeneration_ = mask_.GenerationCount();
             ++maskUploadCount_;
