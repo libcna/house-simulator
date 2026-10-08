@@ -85,7 +85,7 @@ class Stage:
     def __init__(self, name: str, group: str, command: list[str], inputs: list[str],
                  outputs: list[str], needs: list[str] | None = None,
                  description: str = "", tool: Path | None = None,
-                 requires_tool: bool | None = None) -> None:
+                 requires_tool: bool | None = None, tool_name: str | None = None) -> None:
         self.name = name
         self.group = group
         self.command = command
@@ -105,8 +105,10 @@ class Stage:
         self.tool = tool
         self.requires_tool = requires_tool if requires_tool is not None else tool is not None
         #: What to call the missing tool in the skip reason. The command's own name, because a
-        #: reader of the report wants to know what to install and not which stage wanted it.
-        self.tool_name = command[0] if command else name
+        #: reader of the report wants to know what to install and not which stage wanted it --
+        #: unless the command is an interpreter running a driver for the real tool (AM4-204:
+        #: `shading` runs `python3`, and "python3 is not available" sent the reader the wrong way).
+        self.tool_name = tool_name or (command[0] if command else name)
 
 
 def find_cna_content() -> Path | None:
@@ -304,7 +306,10 @@ def default_stages() -> list[Stage]:
                       "build/shell/*.glb", "build/neighbourhood/*.glb"],
               outputs=["content/world/shading.bin"],
               needs=["neighbourhood", "world-rules"],
-              tool=shutil.which("blender"), requires_tool=True,
+              # AM4-204: the same lookup `tools/blender/blender_env.py` makes, so an install that
+              # is not on PATH as `blender` (macOS's app bundle) is found through CNAHOUSE_BLENDER.
+              tool=os.environ.get("CNAHOUSE_BLENDER") or shutil.which("blender"),
+              requires_tool=True, tool_name="Blender (blender on PATH, or CNAHOUSE_BLENDER)",
               description="§22's per-window sun-shading grid, 12 x 24 nodes a window"),
         Stage("snowshell", "world", ["python3", "tools/world/build_snowshell.py"],
               inputs=["assets-src/world/*.json", "assets-src/Models/**/*.glb"],
@@ -597,7 +602,12 @@ def documentation(stages: list[Stage]) -> str:
                      f"{needs} | {reads} | {writes} |")
     lines += ["", "The command each stage runs:", "", "```"]
     for stage in order:
-        lines.append(f"{stage.name:<14} {' '.join(stage.command)}")
+        # AM4-204: the tool by name, never the path it resolved to on the machine that wrote the
+        # document -- or `--check-docs` passes only on that one machine.
+        command = list(stage.command)
+        if stage.tool is not None and command and command[0] == str(stage.tool):
+            command[0] = Path(command[0]).name
+        lines.append(f"{stage.name:<14} {' '.join(command)}")
     lines += ["```", "", DOC_END]
     return "\n".join(lines)
 
