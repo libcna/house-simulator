@@ -17,6 +17,11 @@
 
 namespace
 {
+    // Where WhatAShortStdStringCosts' strings publish their storage. Without that escape Apple
+    // clang at -O3 elides the long string's new/delete pair (C++14 [expr.new]/10 allows it) and
+    // measures 0.25 ns, which is no allocation at all (AM4-302).
+    const char* volatile gEscapedStringData = nullptr;
+
     using Clock = std::chrono::steady_clock;
 
     /// Median of `kRuns` timings of @p work, in nanoseconds per iteration.
@@ -150,6 +155,7 @@ namespace
                 for (std::size_t i = 0; i < n; ++i)
                 {
                     std::string name = "L0_KITCHEN";
+                    gEscapedStringData = name.data();
                     sink = sink + name.size();
                 }
             },
@@ -161,6 +167,7 @@ namespace
                 for (std::size_t i = 0; i < n; ++i)
                 {
                     std::string name = "Models/Interior/Kitchen/kitchen_worktop_oak_long_variant";
+                    gEscapedStringData = name.data();
                     sink = sink + name.size();
                 }
             },
