@@ -161,6 +161,8 @@ def selftest() -> int:
         return header + struct.pack("<II", len(payload), gltf_validate.CHUNK_JSON) + payload
 
     failures = 0
+    # build/ is where a developer tree keeps scratch; a fresh checkout (CI) has none.
+    (REPO / "build").mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="origin-selftest-", dir=str(REPO / "build")) as work:
         cases = [
             ("a chair resting on the origin", [-0.25, 0.0, -0.25], [0.25, 0.45, 0.25], "chair", 0),

@@ -445,6 +445,8 @@ def update_runtime_bridge() -> None:
 
 def prepare_all(cache: Path, sources: tuple[Source, ...] = SOURCES) -> None:
     OUTPUT.mkdir(parents=True, exist_ok=True)
+    # build/ is where a developer tree keeps scratch; a fresh checkout (CI) has none.
+    (REPO / "build").mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="p2-vegetation-", dir=REPO / "build") as work_text:
         work = Path(work_text)
         for source in sources:

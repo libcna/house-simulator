@@ -446,6 +446,8 @@ def selftest() -> int:
         return header + struct.pack("<II", len(payload), gltf_validate.CHUNK_JSON) + payload
 
     failures = 0
+    # build/ is where a developer tree keeps scratch; a fresh checkout (CI) has none.
+    (REPO / "build").mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="scale-selftest-", dir=str(REPO / "build")) as work:
         good = Path(work) / "door_ok.glb"
         good.write_bytes(make(0.85, 2.04, 0.05))

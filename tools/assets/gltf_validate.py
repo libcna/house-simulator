@@ -147,6 +147,8 @@ def run_gltf_validator(path: Path) -> tuple[bool, list[str]]:
 
 def run_importer(path: Path, tool: Path) -> list[str]:
     """A real `cna-content` import, with its warnings treated as errors."""
+    # build/ is where a developer tree keeps scratch; a fresh checkout (CI) has none.
+    (REPO / "build").mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="gltf-validate-", dir=str(REPO / "build")) as work:
         result = subprocess.run(
             [str(tool), "build", str(path), "-o", str(Path(work) / "out.cnb")],
@@ -207,6 +209,8 @@ def selftest(tool: Path | None) -> int:
     cases.append(("two skins", glb, "skins"))
 
     failures = 0
+    # build/ is where a developer tree keeps scratch; a fresh checkout (CI) has none.
+    (REPO / "build").mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="gltf-selftest-", dir=str(REPO / "build")) as work:
         for name, payload, expect in cases:
             path = Path(work) / f"{name.replace(' ', '_')}.glb"
