@@ -367,6 +367,16 @@ def main() -> int:
         print(f"deploy_world: no world files in {args.source} yet -- nothing to deploy.")
         return 0
 
+    # The deployed copy is generated and not committed, so a fresh checkout has none; that is
+    # nothing to compare, not a stale copy, and is said the way the other content gates say it
+    # (`verify_shell`, `check_anim_assets`). Treating it as stale failed every CI lint run, where
+    # nothing is ever deployed (CNA plans/plan_apple_m4.md AM4-243). A partial copy is still
+    # compared, file by file.
+    if args.check and not any(args.target.glob("*.json")):
+        print(f"deploy_world: nothing deployed at {args.target} -- run tools/world/deploy_world.py "
+              f"to deploy. NOTHING WAS CHECKED.")
+        return 0
+
     written, problems = deploy(args.source, args.target, dry_run=args.check)
     for problem in problems:
         print(f"deploy_world: {problem}", file=sys.stderr)
