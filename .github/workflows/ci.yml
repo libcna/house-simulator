@@ -746,11 +746,13 @@ jobs:
       - name: The world content the walk loads
         working-directory: cna-house
         # content/ is generated, not committed: the shell and the world stages need Blender. The
-        # lightmapped shell is optional (`HOUSE-00487`), so this smoke draws the unbaked one.
+        # shell's lightmap UVs (build/shell-lm) are generated too: `chunks` needs them for interior
+        # receivers since HOUSE-00923 (CNA plans/plan_apple_m4.md AM4-314).
         env:
           CNAHOUSE_BLENDER_PYTHONPATH: /home/runner/.local/lib/python3/dist-packages
         run: |
           python3 tools/blender/house_shell_gen.py
+          python3 tools/blender/shell_unwrap.py
           python3 tools/ci/build_content.py --only world
       - name: Web build (stages the preload, fails over the download budget)
         working-directory: cna-house

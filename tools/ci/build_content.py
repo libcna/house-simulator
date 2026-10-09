@@ -279,9 +279,11 @@ def default_stages() -> list[Stage]:
               # `HOUSE-00473` and which no stage declared until `HOUSE-00492` regenerated the
               # shell and looked. It is masked today only because `chunks` fails on every run
               # (`HOUSE-00487`) and therefore reruns anyway; the day that is fixed, a shell
-              # regeneration would go unchunked. `build/shell-lm` is deliberately NOT here: it is
-              # the PREFERRED tree when it exists and the build works without it, so requiring it
-              # would skip the stage on a checkout that has never baked a lightmap.
+              # regeneration would go unchunked. `build/shell-lm` is deliberately NOT an input: it
+              # is the PREFERRED tree when it exists, and declaring it would skip the stage on a
+              # checkout that has not unwrapped the shell. Since HOUSE-00923 the stage does need
+              # it for interior receivers, which is why CI runs `tools/blender/shell_unwrap.py`
+              # before this build (AM4-314).
               inputs=["assets-src/world/*.json", "assets-src/Models/**/*.glb",
                       "build/terrain/*.glb", "build/fence/*.glb", "build/shell/*.glb"],
               outputs=["content/world/chunks.bin"],
