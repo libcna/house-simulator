@@ -86,6 +86,17 @@
       }
     },
     {
+      "name": "metal",
+      "displayName": "macOS METAL",
+      "description": "CNA's native macOS renderer. Tier E runs through CNA_METAL_COMPILED_EFFECTS (MojoShader SPIR-V to SPIRV-Cross MSL).",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build-consumer",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CNAHOUSE_RENDERER": "METAL"
+      }
+    },
+    {
       "name": "web",
       "displayName": "Web / WEBGL2",
       "description": "Single-threaded Emscripten build. Requires the EMSDK environment and the native build's host cna-content tool.",
@@ -110,6 +121,7 @@
     { "name": "linux-ubsan", "configurePreset": "linux-ubsan" },
     { "name": "headless", "configurePreset": "headless" },
     { "name": "gl33", "configurePreset": "gl33" },
+    { "name": "metal", "configurePreset": "metal" },
     {
       "name": "web",
       "configurePreset": "web",

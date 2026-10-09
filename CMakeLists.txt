@@ -48,8 +48,8 @@ endforeach()
 # separate binary is produced per renderer (`cna-house.md` §7.3). There is deliberately no
 # `--renderer` command-line option (`HOUSE-00132`).
 set(CNAHOUSE_RENDERER "OPENGLES3" CACHE STRING
-    "The CNA renderer this build targets: OPENGLES3 (shipping), HEADLESS (CI), OPENGL33 (dev)")
-set_property(CACHE CNAHOUSE_RENDERER PROPERTY STRINGS OPENGLES3 HEADLESS OPENGL33 WEBGL2)
+    "The CNA renderer this build targets: OPENGLES3 (shipping), HEADLESS (CI), OPENGL33 (dev), METAL (macOS)")
+set_property(CACHE CNAHOUSE_RENDERER PROPERTY STRINGS OPENGLES3 HEADLESS OPENGL33 WEBGL2 METAL)
 
 set(CNA_GRAPHICS_RENDERER "${CNAHOUSE_RENDERER}" CACHE STRING "" FORCE)
 set(CNA_PLATFORM          "SDL3"                 CACHE STRING "" FORCE)
@@ -63,6 +63,7 @@ set(CNA_CNAEXT   OFF CACHE BOOL "" FORCE)
 set(CNA_DEVICES  OFF CACHE BOOL "" FORCE)
 
 set(CNA_EASYGL_COMPILED_EFFECTS ON   CACHE BOOL   "" FORCE)   # Tier E; see cmake/TierSelection.cmake
+set(CNA_METAL_COMPILED_EFFECTS  ON   CACHE BOOL   "" FORCE)   # Tier E on METAL; ignored by other renderers
 set(CNA_ENABLE_VIDEO            "AUTO" CACHE STRING "" FORCE) # the television, phase 21
 set(CNA_ENABLE_NET              OFF  CACHE BOOL   "" FORCE)   # ADR-0011: no networking
 set(CNA_BUILD_TESTS             OFF  CACHE BOOL   "" FORCE)

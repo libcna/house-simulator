@@ -126,8 +126,8 @@ The presets set `CNA_GRAPHICS_RENDERER=OPENGLES3` (EasyGL), `CNA_CNAEXT=OFF`,
 is not a knob.
 
 Other presets exist for the cases that need a different renderer, each with its own build directory
-from the closed list — `headless` (CI integration tests), `gl33` (diagnostic only), `linux-asan`
-and `linux-ubsan`. The renderer cannot be changed after configure and there is deliberately no
+from the closed list — `headless` (CI integration tests), `gl33` (diagnostic only), `metal`
+(macOS, CNA's native Metal renderer, Tier E included), `linux-asan` and `linux-ubsan`. The renderer cannot be changed after configure and there is deliberately no
 `--renderer` option; one binary is built per renderer.
 
 The Web preset reuses `build-consumer/` and needs the Emscripten SDK environment plus the native

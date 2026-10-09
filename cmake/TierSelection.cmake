@@ -58,6 +58,13 @@ if(CNAHOUSE_RENDERER STREQUAL "OPENGLES3" OR CNAHOUSE_RENDERER STREQUAL "OPENGL3
     else()
         set(_tier_e_reason "CNA_EASYGL_COMPILED_EFFECTS is OFF")
     endif()
+elseif(CNAHOUSE_RENDERER STREQUAL "METAL")
+    # CNA's Metal renderer runs compiled effects through MojoShader's SPIR-V and SPIRV-Cross MSL.
+    if(CNA_METAL_COMPILED_EFFECTS)
+        set(_tier_e_supported ON)
+    else()
+        set(_tier_e_reason "CNA_METAL_COMPILED_EFFECTS is OFF")
+    endif()
 elseif(CNAHOUSE_RENDERER STREQUAL "HEADLESS")
     set(_tier_e_reason "the HEADLESS renderer rasterises nothing, so no effect can be exercised")
 else()
