@@ -155,6 +155,12 @@ namespace
 
     TEST(TransparentPassTests, ItDrawsOnlyLiveLinkedFixtureGlowsWithAdditiveReadOnlyDepth)
     {
+        if (std::string_view(CNAHOUSE_RENDERER_NAME) == "HEADLESS")
+        {
+            // AM4-318: this test reads a rendered frame back, and HEADLESS rasterises nothing and
+            // refuses render-target readback. It runs in full on every drawing renderer.
+            GTEST_SKIP() << "needs render-target readback, which HEADLESS does not have";
+        }
         world::WorldData::Contents contents;
         world::Light light;
         light.id = cnahouse::util::Id::Of("LIGHT_TEST_LANTERN");

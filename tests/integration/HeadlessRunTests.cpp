@@ -393,6 +393,12 @@ namespace
 
     TEST(HeadlessRunTests, MouseRowsFollowTheLiveCanvasAndFontAfterDisplayChanges)
     {
+        if (std::string_view(CNAHOUSE_RENDERER_NAME) == "HEADLESS")
+        {
+            // AM4-318: this test reads a rendered frame back, and HEADLESS rasterises nothing and
+            // refuses render-target readback. It runs in full on every drawing renderer.
+            GTEST_SKIP() << "needs render-target readback, which HEADLESS does not have";
+        }
         class ClickDrawnRows final : public cnahouse::player::IInputSource
         {
         public:
@@ -1343,6 +1349,12 @@ namespace
 
     TEST(HeadlessRunTests, CommandLineScreenshotKeepsItsAuthoredWalkPose)
     {
+        if (std::string_view(CNAHOUSE_RENDERER_NAME) == "HEADLESS")
+        {
+            // AM4-318: this test reads a rendered frame back, and HEADLESS rasterises nothing and
+            // refuses render-target readback. It runs in full on every drawing renderer.
+            GTEST_SKIP() << "needs render-target readback, which HEADLESS does not have";
+        }
         const std::filesystem::path output =
             std::filesystem::path(CNAHOUSE_TEST_OUTPUT_DIR) / "fixed-walk-pose.png";
         std::filesystem::remove(output);

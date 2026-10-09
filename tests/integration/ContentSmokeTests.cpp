@@ -71,9 +71,15 @@ namespace
         EXPECT_TRUE(report.font.loaded) << report.font.contentName << ": " << report.font.error;
         EXPECT_TRUE(report.sound.loaded) << report.sound.contentName << ": " << report.sound.error;
         EXPECT_TRUE(report.video.loaded) << report.video.contentName << ": " << report.video.error;
+#if CNAHOUSE_TIER_E
         EXPECT_TRUE(report.effect.loaded) << report.effect.contentName << ": " << report.effect.error
                                           << "\n(this build has Tier E, so the compiled effect must load)\n"
                                           << report.ToString();
+#else
+        // A build without Tier E (HEADLESS, which rasterises nothing: cmake/TierSelection.cmake) has
+        // no compiled effect to load, and ADR-0003 makes that a complete session (AM4-318).
+        EXPECT_FALSE(report.effect.loaded) << report.ToString();
+#endif
         EXPECT_TRUE(report.AllRequiredLoaded()) << report.ToString();
     }
 
@@ -134,6 +140,10 @@ namespace
 
     TEST(ContentSmokeTests, TheCompiledEffectReachesTheDraw)
     {
+#if !CNAHOUSE_TIER_E
+        GTEST_SKIP() << "this build compiles Tier E out (cmake/TierSelection.cmake); there is no "
+                        "compiled effect to reach the draw (AM4-318)";
+#endif
         const auto report = RunSmoke(SmokeOptions(), 30);
         ASSERT_TRUE(report.effect.loaded) << report.effect.error;
         // Which effect drew, not merely that something did. `Model::Draw` would produce a picture

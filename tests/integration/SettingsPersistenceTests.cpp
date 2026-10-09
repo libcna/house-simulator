@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+#include <string_view>
 #include <gtest/gtest.h>
 
 #include <array>
@@ -43,6 +44,12 @@ namespace
 
     TEST(SettingsPersistenceTests, NormalSettingsEditSurvivesASecondApplicationProcess)
     {
+        if (std::string_view(CNAHOUSE_RENDERER_NAME) == "HEADLESS")
+        {
+            // AM4-318: this test reads a rendered frame back, and HEADLESS rasterises nothing and
+            // refuses render-target readback. It runs in full on every drawing renderer.
+            GTEST_SKIP() << "needs render-target readback, which HEADLESS does not have";
+        }
 #if defined(__linux__) && !defined(__ANDROID__)
         using namespace cnahouse;
         auto store = persistence::DesktopSaveStore::Open();
