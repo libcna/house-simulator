@@ -7,7 +7,9 @@
 # `cna-house` builds against `../cna` and `../sharp-runtime` as SIBLING checkouts
 # (`cna-house.md` §8.1), so every build job checks all three out into that shape, on the branches
 # `tools/ci/sibling_refs.sh` chooses (CNA plans/plan_apple_m4.md AM4-232). There is no vendoring in
-# this repository; CNA's own submodules (its SDL3) come with it. A runner that skipped a sibling
+# this repository; CNA's own top-level submodules (its SDL3, Draco) come with it -- not their
+# nested codec submodules, which CNA disables and a third-party 503 once failed us on (CNA
+# plans/plan_apple_m4.md AM4-310). A runner that skipped a sibling
 # would fail at configure with the message the root `CMakeLists.txt` prints, which is the intended
 # behaviour.
 name: ci
@@ -474,7 +476,7 @@ jobs:
         id: siblings
         run: cna-house/tools/ci/sibling_refs.sh "${{ github.head_ref }} ${{ github.ref_name }}" cna sharp-runtime easy-gl meta-gl >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
-        with: { repository: libcna/cna, ref: "${{ steps.siblings.outputs.cna }}", path: cna, submodules: recursive }
+        with: { repository: libcna/cna, ref: "${{ steps.siblings.outputs.cna }}", path: cna, submodules: true }
       - uses: actions/checkout@v4
         with: { repository: libcna/sharp-runtime, ref: "${{ steps.siblings.outputs.sharp_runtime }}", path: sharp-runtime }
       # CNA's GL renderers build easy-gl from a sibling checkout, and easy-gl its own sibling meta-gl.
@@ -541,7 +543,7 @@ jobs:
         id: siblings
         run: cna-house/tools/ci/sibling_refs.sh "${{ github.head_ref }} ${{ github.ref_name }}" cna sharp-runtime easy-gl meta-gl >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
-        with: { repository: libcna/cna, ref: "${{ steps.siblings.outputs.cna }}", path: cna, submodules: recursive }
+        with: { repository: libcna/cna, ref: "${{ steps.siblings.outputs.cna }}", path: cna, submodules: true }
       - uses: actions/checkout@v4
         with: { repository: libcna/sharp-runtime, ref: "${{ steps.siblings.outputs.sharp_runtime }}", path: sharp-runtime }
       # CNA's GL renderers build easy-gl from a sibling checkout, and easy-gl its own sibling meta-gl.
@@ -607,7 +609,7 @@ jobs:
         id: siblings
         run: cna-house/tools/ci/sibling_refs.sh "${{ github.head_ref }} ${{ github.ref_name }}" cna sharp-runtime easy-gl meta-gl >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
-        with: { repository: libcna/cna, ref: "${{ steps.siblings.outputs.cna }}", path: cna, submodules: recursive }
+        with: { repository: libcna/cna, ref: "${{ steps.siblings.outputs.cna }}", path: cna, submodules: true }
       - uses: actions/checkout@v4
         with: { repository: libcna/sharp-runtime, ref: "${{ steps.siblings.outputs.sharp_runtime }}", path: sharp-runtime }
       # CNA's GL renderers build easy-gl from a sibling checkout, and easy-gl its own sibling meta-gl.
@@ -670,7 +672,7 @@ jobs:
         id: siblings
         run: cna-house/tools/ci/sibling_refs.sh "${{ github.head_ref }} ${{ github.ref_name }}" cna sharp-runtime easy-gl meta-gl >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
-        with: { repository: libcna/cna, ref: "${{ steps.siblings.outputs.cna }}", path: cna, submodules: recursive }
+        with: { repository: libcna/cna, ref: "${{ steps.siblings.outputs.cna }}", path: cna, submodules: true }
       - uses: actions/checkout@v4
         with: { repository: libcna/sharp-runtime, ref: "${{ steps.siblings.outputs.sharp_runtime }}", path: sharp-runtime }
       # CNA's GL renderers build easy-gl from a sibling checkout, and easy-gl its own sibling meta-gl.
@@ -718,7 +720,7 @@ jobs:
         id: siblings
         run: cna-house/tools/ci/sibling_refs.sh "${{ github.head_ref }} ${{ github.ref_name }}" cna sharp-runtime easy-gl meta-gl >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
-        with: { repository: libcna/cna, ref: "${{ steps.siblings.outputs.cna }}", path: cna, submodules: recursive }
+        with: { repository: libcna/cna, ref: "${{ steps.siblings.outputs.cna }}", path: cna, submodules: true }
       - uses: actions/checkout@v4
         with: { repository: libcna/sharp-runtime, ref: "${{ steps.siblings.outputs.sharp_runtime }}", path: sharp-runtime }
       # CNA's GL renderers build easy-gl from a sibling checkout, and easy-gl its own sibling meta-gl.
@@ -775,7 +777,7 @@ jobs:
         id: siblings
         run: cna-house/tools/ci/sibling_refs.sh "${{ github.head_ref }} ${{ github.ref_name }}" cna sharp-runtime easy-gl meta-gl >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
-        with: { repository: libcna/cna, ref: "${{ steps.siblings.outputs.cna }}", path: cna, submodules: recursive }
+        with: { repository: libcna/cna, ref: "${{ steps.siblings.outputs.cna }}", path: cna, submodules: true }
       - uses: actions/checkout@v4
         with: { repository: libcna/sharp-runtime, ref: "${{ steps.siblings.outputs.sharp_runtime }}", path: sharp-runtime }
       # CNA's GL renderers build easy-gl from a sibling checkout, and easy-gl its own sibling meta-gl.
