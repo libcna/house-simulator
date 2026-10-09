@@ -123,7 +123,7 @@ def find_cna_content() -> Path | None:
     candidates = [Path(explicit)] if explicit else []
     candidates += [REPO / "build" / "CNA_BUILD" / "cna-content",
                    REPO / "build-consumer" / "CNA_BUILD" / "cna-content",
-                   REPO.parent / "cnanext" / "build" / "cna-content"]
+                   REPO.parent / "cna" / "build" / "cna-content"]
     on_path = shutil.which("cna-content")
     if on_path:
         candidates.append(Path(on_path))

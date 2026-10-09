@@ -48,7 +48,7 @@ def find_cna_content() -> Path | None:
     for candidate in (
         REPO / "build" / "CNA_BUILD" / "cna-content",
         REPO / "build-consumer" / "CNA_BUILD" / "cna-content",
-        REPO.parent / "cnanext" / "build" / "cna-content",
+        REPO.parent / "cna" / "build" / "cna-content",
     ):
         if candidate.is_file():
             return candidate
