@@ -43,21 +43,6 @@ done
 
 die() { echo "build_effects.sh: $*" >&2; exit 1; }
 
-# `cna-content` is REUSED, never rebuilt: it is a host tool that already exists in the CNA checkout,
-# and openeggbert build rule 2 is explicit that an existing build directory is used rather than a
-# new one created. Search the places it actually lands, in order of specificity.
-if [[ -z "$content" ]]; then
-    for candidate in \
-        "${repo_root}/build/CNA_BUILD/cna-content" \
-        "${repo_root}/build-consumer/CNA_BUILD/cna-content" \
-        "${repo_root}/../cnanext/build/cna-content"
-    do
-        if [[ -x "$candidate" ]]; then content="$candidate"; break; fi
-    done
-fi
-[[ -n "$content" ]] || die "no cna-content found; pass --cna-content <path>"
-[[ -x "$content" ]] || die "cna-content at '$content' is not executable"
-
 shopt -s nullglob
 sources=("${effects_src}"/*.fx)
 shopt -u nullglob
@@ -141,6 +126,23 @@ if [[ $check_only -eq 1 ]]; then
     fi
     exit $status
 fi
+
+# `cna-content` is REUSED, never rebuilt: it is a host tool that already exists in the CNA checkout,
+# and openeggbert build rule 2 is explicit that an existing build directory is used rather than a
+# new one created. Search the places it actually lands, in order of specificity. Only a build
+# needs it: `--check` above compares recorded hashes, and asking for the tool first made the check
+# CI runs fail on every runner that has none (CNA plans/plan_apple_m4.md AM4-236).
+if [[ -z "$content" ]]; then
+    for candidate in \
+        "${repo_root}/build/CNA_BUILD/cna-content" \
+        "${repo_root}/build-consumer/CNA_BUILD/cna-content" \
+        "${repo_root}/../cna/build/cna-content"
+    do
+        if [[ -x "$candidate" ]]; then content="$candidate"; break; fi
+    done
+fi
+[[ -n "$content" ]] || die "no cna-content found; pass --cna-content <path>"
+[[ -x "$content" ]] || die "cna-content at '$content' is not executable"
 
 [[ -n "$fxc" ]] || die "no fxc; set CNAHOUSE_FXC or pass --fxc <path to fxc.exe>"
 [[ -f "$fxc" ]] || die "fxc at '$fxc' does not exist"
