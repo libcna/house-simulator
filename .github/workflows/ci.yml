@@ -31,6 +31,13 @@ env:
   CCACHE_DIR: ${{ github.workspace }}/.ccache
   CCACHE_BASEDIR: ${{ github.workspace }}
   CCACHE_MAXSIZE: 2G
+  # GCC 14, the compiler `cna-house` is written against (Debian 13) and the one every compiling job
+  # below installs. Installing it never selected it: CMake took the runner's `c++`, GCC 13 on
+  # ubuntu-24.04, whose libstdc++ reports -Wnull-dereference inside std::vector::insert in a Release
+  # build -- an error here, where the house builds at -Werror (CNA plans/plan_apple_m4.md AM4-267).
+  # The lint container compiles nothing, and the Web build's toolchain names its own compiler.
+  CC: gcc-14
+  CXX: g++-14
   # What CNA's vendored SDL3 builds against on Linux (the list CNA's own Linux CI installs).
   CNA_SDL_BUILD_DEPS: >-
     pkg-config libx11-dev libxext-dev libxrandr-dev libxi-dev libxcursor-dev libxfixes-dev
