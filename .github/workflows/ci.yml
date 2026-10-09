@@ -4,18 +4,26 @@
 # than by convenience: lint runs in seconds and gates every push, the sanitizer and render jobs are
 # nightly because they are slow and because a red nightly is a message rather than a blocked merge.
 #
-# `cna-house` builds against `../cnanext` and `../sharp-runtimenext` as SIBLING checkouts
-# (`cna-house.md` §8.1), so every build job checks all three out into that shape. There is no
-# vendoring and no submodule to init; a runner that skipped a sibling would fail at configure with
-# the message the root `CMakeLists.txt` prints, which is the intended behaviour.
+# `cna-house` builds against `../cna` and `../sharp-runtime` as SIBLING checkouts
+# (`cna-house.md` §8.1), so every build job checks all three out into that shape, on the branches
+# `tools/ci/sibling_refs.sh` chooses (CNA plans/plan_apple_m4.md AM4-232). There is no vendoring in
+# this repository; CNA's own submodules (its SDL3) come with it. A runner that skipped a sibling
+# would fail at configure with the message the root `CMakeLists.txt` prints, which is the intended
+# behaviour.
 name: ci
 
 on:
   push:
   pull_request:
+  # The sanitizer and web jobs already admit a manual run; the trigger that allows one was missing.
+  workflow_dispatch:
   schedule:
     # Nightly, after most working days have ended in Europe.
     - cron: "0 2 * * *"
+
+# Read-only: no job writes to the repository, its releases or its packages.
+permissions:
+  contents: read
 
 env:
   # One ccache, always, and `CCACHE_BASEDIR` is what unifies hashes across build trees. The
@@ -23,6 +31,11 @@ env:
   CCACHE_DIR: ${{ github.workspace }}/.ccache
   CCACHE_BASEDIR: ${{ github.workspace }}
   CCACHE_MAXSIZE: 2G
+  # What CNA's vendored SDL3 builds against on Linux (the list CNA's own Linux CI installs).
+  CNA_SDL_BUILD_DEPS: >-
+    pkg-config libx11-dev libxext-dev libxrandr-dev libxi-dev libxcursor-dev libxfixes-dev
+    libxss-dev libxtst-dev libwayland-dev wayland-protocols libxkbcommon-dev libudev-dev
+    libdbus-1-dev
 
 jobs:
   # --- HOUSE-00133 -------------------------------------------------------------------------------
@@ -434,10 +447,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { path: cna-house }
+      - name: Choose the CNA and sharp-runtime branches
+        id: siblings
+        run: cna-house/tools/ci/sibling_refs.sh "${{ github.head_ref }} ${{ github.ref_name }}" cna sharp-runtime >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
-        with: { repository: openeggbert/cnanext, path: cnanext }
+        with: { repository: libcna/cna, ref: "${{ steps.siblings.outputs.cna }}", path: cna, submodules: recursive }
       - uses: actions/checkout@v4
-        with: { repository: openeggbert/sharp-runtime, path: sharp-runtimenext }
+        with: { repository: libcna/sharp-runtime, ref: "${{ steps.siblings.outputs.sharp_runtime }}", path: sharp-runtime }
       - uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
@@ -446,7 +462,7 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build ccache g++-14 \
+          sudo apt-get install -y ninja-build ccache g++-14 ${{ env.CNA_SDL_BUILD_DEPS }} \
             libgl1-mesa-dev libegl1-mesa-dev libasound2-dev libpulse-dev \
             libavcodec-dev libavformat-dev libavutil-dev libswresample-dev \
             libfreetype-dev
@@ -488,10 +504,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { path: cna-house }
+      - name: Choose the CNA and sharp-runtime branches
+        id: siblings
+        run: cna-house/tools/ci/sibling_refs.sh "${{ github.head_ref }} ${{ github.ref_name }}" cna sharp-runtime >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
-        with: { repository: openeggbert/cnanext, path: cnanext }
+        with: { repository: libcna/cna, ref: "${{ steps.siblings.outputs.cna }}", path: cna, submodules: recursive }
       - uses: actions/checkout@v4
-        with: { repository: openeggbert/sharp-runtime, path: sharp-runtimenext }
+        with: { repository: libcna/sharp-runtime, ref: "${{ steps.siblings.outputs.sharp_runtime }}", path: sharp-runtime }
       - uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
@@ -500,7 +519,7 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build ccache g++-14 libfreetype-dev \
+          sudo apt-get install -y ninja-build ccache g++-14 ${{ env.CNA_SDL_BUILD_DEPS }} libfreetype-dev \
             libasound2-dev libpulse-dev
       - name: Configure and build
         working-directory: cna-house
@@ -541,10 +560,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { path: cna-house }
+      - name: Choose the CNA and sharp-runtime branches
+        id: siblings
+        run: cna-house/tools/ci/sibling_refs.sh "${{ github.head_ref }} ${{ github.ref_name }}" cna sharp-runtime >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
-        with: { repository: openeggbert/cnanext, path: cnanext }
+        with: { repository: libcna/cna, ref: "${{ steps.siblings.outputs.cna }}", path: cna, submodules: recursive }
       - uses: actions/checkout@v4
-        with: { repository: openeggbert/sharp-runtime, path: sharp-runtimenext }
+        with: { repository: libcna/sharp-runtime, ref: "${{ steps.siblings.outputs.sharp_runtime }}", path: sharp-runtime }
       - uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
@@ -553,7 +575,7 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build ccache g++-14 binutils \
+          sudo apt-get install -y ninja-build ccache g++-14 ${{ env.CNA_SDL_BUILD_DEPS }} binutils \
             libgl1-mesa-dev libegl1-mesa-dev libasound2-dev libpulse-dev \
             libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libfreetype-dev
       - name: Build
@@ -596,14 +618,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { path: cna-house }
+      - name: Choose the CNA and sharp-runtime branches
+        id: siblings
+        run: cna-house/tools/ci/sibling_refs.sh "${{ github.head_ref }} ${{ github.ref_name }}" cna sharp-runtime >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
-        with: { repository: openeggbert/cnanext, path: cnanext }
+        with: { repository: libcna/cna, ref: "${{ steps.siblings.outputs.cna }}", path: cna, submodules: recursive }
       - uses: actions/checkout@v4
-        with: { repository: openeggbert/sharp-runtime, path: sharp-runtimenext }
+        with: { repository: libcna/sharp-runtime, ref: "${{ steps.siblings.outputs.sharp_runtime }}", path: sharp-runtime }
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build ccache g++-14 xvfb \
+          sudo apt-get install -y ninja-build ccache g++-14 ${{ env.CNA_SDL_BUILD_DEPS }} xvfb \
             libgl1-mesa-dev libegl1-mesa-dev libasound2-dev libpulse-dev \
             libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libfreetype-dev
       - name: Configure and build
@@ -636,16 +661,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { path: cna-house }
+      - name: Choose the CNA and sharp-runtime branches
+        id: siblings
+        run: cna-house/tools/ci/sibling_refs.sh "${{ github.head_ref }} ${{ github.ref_name }}" cna sharp-runtime >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
-        with: { repository: openeggbert/cnanext, path: cnanext }
+        with: { repository: libcna/cna, ref: "${{ steps.siblings.outputs.cna }}", path: cna, submodules: recursive }
       - uses: actions/checkout@v4
-        with: { repository: openeggbert/sharp-runtime, path: sharp-runtimenext }
+        with: { repository: libcna/sharp-runtime, ref: "${{ steps.siblings.outputs.sharp_runtime }}", path: sharp-runtime }
       - uses: mymindstorm/setup-emsdk@v14
         with: { version: 6.0.9 }
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build ccache g++-14 blender \
+          sudo apt-get install -y ninja-build ccache g++-14 ${{ env.CNA_SDL_BUILD_DEPS }} blender \
             libgl1-mesa-dev libegl1-mesa-dev libasound2-dev libpulse-dev \
             libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libfreetype-dev
           /usr/bin/python3 -m pip install --break-system-packages --user numpy || true
@@ -667,8 +695,8 @@ jobs:
       - name: Web build (stages the preload, fails over the download budget)
         working-directory: cna-house
         run: |
-          cmake --preset web -DCNAHOUSE_CNA_ROOT="$GITHUB_WORKSPACE/cnanext" \
-            -DCNAHOUSE_SHARP_RUNTIME_ROOT="$GITHUB_WORKSPACE/sharp-runtimenext"
+          cmake --preset web -DCNAHOUSE_CNA_ROOT="$GITHUB_WORKSPACE/cna" \
+            -DCNAHOUSE_SHARP_RUNTIME_ROOT="$GITHUB_WORKSPACE/sharp-runtime"
           cmake --build --preset web
       - name: Smoke -- title, Start, 300 walk frames, a settings change
         working-directory: cna-house
@@ -685,14 +713,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { path: cna-house }
+      - name: Choose the CNA and sharp-runtime branches
+        id: siblings
+        run: cna-house/tools/ci/sibling_refs.sh "${{ github.head_ref }} ${{ github.ref_name }}" cna sharp-runtime >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
-        with: { repository: openeggbert/cnanext, path: cnanext }
+        with: { repository: libcna/cna, ref: "${{ steps.siblings.outputs.cna }}", path: cna, submodules: recursive }
       - uses: actions/checkout@v4
-        with: { repository: openeggbert/sharp-runtime, path: sharp-runtimenext }
+        with: { repository: libcna/sharp-runtime, ref: "${{ steps.siblings.outputs.sharp_runtime }}", path: sharp-runtime }
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build ccache g++-14 xvfb mesa-utils \
+          sudo apt-get install -y ninja-build ccache g++-14 ${{ env.CNA_SDL_BUILD_DEPS }} xvfb mesa-utils \
             libgl1-mesa-dev libegl1-mesa-dev libasound2-dev libpulse-dev \
             libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libfreetype-dev
       - name: Configure and build
