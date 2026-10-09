@@ -118,14 +118,19 @@ include(TierSelection)
 # Applied to `cna-house`'s OWN targets only, through an interface library. Promoting warnings to
 # errors across `add_subdirectory`d siblings would make this project's policy break someone else's
 # build, which is not ours to do.
+#
+# The option is declared before it is read. `${CNAHOUSE_WERROR}` below is expanded when the line
+# runs, not when the generator expression is evaluated, so with the declaration after it a fresh
+# configure read an unset variable and built without `-Werror`, and only a second configure -- with
+# `ON` already in the cache -- built with it (CNA plans/plan_apple_m4.md AM4-266).
+option(CNAHOUSE_WERROR "Promote warnings to errors in cna-house's own targets" ON)
+
 add_library(cnahouse_warnings INTERFACE)
 target_compile_options(cnahouse_warnings INTERFACE
     -Wall -Wextra -Wpedantic
     -Wshadow -Wnon-virtual-dtor -Wold-style-cast -Wcast-align -Woverloaded-virtual
     -Wconversion -Wsign-conversion -Wdouble-promotion -Wnull-dereference
     $<$<BOOL:${CNAHOUSE_WERROR}>:-Werror>)
-
-option(CNAHOUSE_WERROR "Promote warnings to errors in cna-house's own targets" ON)
 
 # ------------------------------------------------------------------------------------------------
 # Floating-point contraction (`AM4-202`)
