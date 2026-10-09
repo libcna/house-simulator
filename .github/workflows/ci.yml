@@ -559,8 +559,11 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
+          # FFmpeg: the television's video (phase 21) is part of what the content smoke tests load;
+          # without these CNA compiles video out (AM4-317).
           sudo apt-get install -y ninja-build ccache g++-14 ${{ env.CNA_SDL_BUILD_DEPS }} libfreetype-dev \
-            libasound2-dev libpulse-dev blender python3-numpy
+            libasound2-dev libpulse-dev blender python3-numpy \
+            libavcodec-dev libavformat-dev libavutil-dev libswresample-dev
       - name: Configure and build
         working-directory: cna-house
         run: |
@@ -576,6 +579,11 @@ jobs:
         # `DISPLAY` and `WAYLAND_DISPLAY` are unset deliberately. HOUSE-00105 measured 600 frames
         # under exactly these conditions, and a run that silently found an X server would prove
         # nothing about CI.
+        # The runner has no sound card: SDL's ALSA backend refuses, the game runs silent, and every
+        # test that asserts a voice or a mixer level fails. SDL's dummy driver mixes into nothing but
+        # runs the same engine the tests measure (CNA plans/plan_apple_m4.md AM4-317).
+        env:
+          SDL_AUDIODRIVER: dummy
         run: env -u DISPLAY -u WAYLAND_DISPLAY tools/ci/run_tests.sh --preset integration
 
       - name: Twenty-minute stability run
