@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-#include <string_view>
 #include <gtest/gtest.h>
 
 #include <array>
@@ -7,6 +6,7 @@
 #include <filesystem>
 #include <fstream>
 #include <sstream>
+#include <string_view>
 
 #include "cnahouse/app/CnaHouseGame.hpp"
 #include "cnahouse/persistence/DesktopSaveStore.hpp"

@@ -399,6 +399,7 @@ namespace
             // refuses render-target readback. It runs in full on every drawing renderer.
             GTEST_SKIP() << "needs render-target readback, which HEADLESS does not have";
         }
+
         class ClickDrawnRows final : public cnahouse::player::IInputSource
         {
         public:
