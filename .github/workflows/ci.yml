@@ -454,13 +454,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { path: cna-house }
-      - name: Choose the CNA and sharp-runtime branches
+      - name: Choose the sibling branches
         id: siblings
-        run: cna-house/tools/ci/sibling_refs.sh "${{ github.head_ref }} ${{ github.ref_name }}" cna sharp-runtime >> "$GITHUB_OUTPUT"
+        run: cna-house/tools/ci/sibling_refs.sh "${{ github.head_ref }} ${{ github.ref_name }}" cna sharp-runtime easy-gl meta-gl >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
         with: { repository: libcna/cna, ref: "${{ steps.siblings.outputs.cna }}", path: cna, submodules: recursive }
       - uses: actions/checkout@v4
         with: { repository: libcna/sharp-runtime, ref: "${{ steps.siblings.outputs.sharp_runtime }}", path: sharp-runtime }
+      # CNA's GL renderers build easy-gl from a sibling checkout, and easy-gl its own sibling meta-gl.
+      - uses: actions/checkout@v4
+        with: { repository: libcna/easy-gl, ref: "${{ steps.siblings.outputs.easy_gl }}", path: easy-gl }
+      - uses: actions/checkout@v4
+        with: { repository: libcna/meta-gl, ref: "${{ steps.siblings.outputs.meta_gl }}", path: meta-gl }
       - uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
@@ -511,13 +516,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { path: cna-house }
-      - name: Choose the CNA and sharp-runtime branches
+      - name: Choose the sibling branches
         id: siblings
-        run: cna-house/tools/ci/sibling_refs.sh "${{ github.head_ref }} ${{ github.ref_name }}" cna sharp-runtime >> "$GITHUB_OUTPUT"
+        run: cna-house/tools/ci/sibling_refs.sh "${{ github.head_ref }} ${{ github.ref_name }}" cna sharp-runtime easy-gl meta-gl >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
         with: { repository: libcna/cna, ref: "${{ steps.siblings.outputs.cna }}", path: cna, submodules: recursive }
       - uses: actions/checkout@v4
         with: { repository: libcna/sharp-runtime, ref: "${{ steps.siblings.outputs.sharp_runtime }}", path: sharp-runtime }
+      # CNA's GL renderers build easy-gl from a sibling checkout, and easy-gl its own sibling meta-gl.
+      - uses: actions/checkout@v4
+        with: { repository: libcna/easy-gl, ref: "${{ steps.siblings.outputs.easy_gl }}", path: easy-gl }
+      - uses: actions/checkout@v4
+        with: { repository: libcna/meta-gl, ref: "${{ steps.siblings.outputs.meta_gl }}", path: meta-gl }
       - uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
@@ -567,13 +577,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { path: cna-house }
-      - name: Choose the CNA and sharp-runtime branches
+      - name: Choose the sibling branches
         id: siblings
-        run: cna-house/tools/ci/sibling_refs.sh "${{ github.head_ref }} ${{ github.ref_name }}" cna sharp-runtime >> "$GITHUB_OUTPUT"
+        run: cna-house/tools/ci/sibling_refs.sh "${{ github.head_ref }} ${{ github.ref_name }}" cna sharp-runtime easy-gl meta-gl >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
         with: { repository: libcna/cna, ref: "${{ steps.siblings.outputs.cna }}", path: cna, submodules: recursive }
       - uses: actions/checkout@v4
         with: { repository: libcna/sharp-runtime, ref: "${{ steps.siblings.outputs.sharp_runtime }}", path: sharp-runtime }
+      # CNA's GL renderers build easy-gl from a sibling checkout, and easy-gl its own sibling meta-gl.
+      - uses: actions/checkout@v4
+        with: { repository: libcna/easy-gl, ref: "${{ steps.siblings.outputs.easy_gl }}", path: easy-gl }
+      - uses: actions/checkout@v4
+        with: { repository: libcna/meta-gl, ref: "${{ steps.siblings.outputs.meta_gl }}", path: meta-gl }
       - uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
@@ -625,13 +640,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { path: cna-house }
-      - name: Choose the CNA and sharp-runtime branches
+      - name: Choose the sibling branches
         id: siblings
-        run: cna-house/tools/ci/sibling_refs.sh "${{ github.head_ref }} ${{ github.ref_name }}" cna sharp-runtime >> "$GITHUB_OUTPUT"
+        run: cna-house/tools/ci/sibling_refs.sh "${{ github.head_ref }} ${{ github.ref_name }}" cna sharp-runtime easy-gl meta-gl >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
         with: { repository: libcna/cna, ref: "${{ steps.siblings.outputs.cna }}", path: cna, submodules: recursive }
       - uses: actions/checkout@v4
         with: { repository: libcna/sharp-runtime, ref: "${{ steps.siblings.outputs.sharp_runtime }}", path: sharp-runtime }
+      # CNA's GL renderers build easy-gl from a sibling checkout, and easy-gl its own sibling meta-gl.
+      - uses: actions/checkout@v4
+        with: { repository: libcna/easy-gl, ref: "${{ steps.siblings.outputs.easy_gl }}", path: easy-gl }
+      - uses: actions/checkout@v4
+        with: { repository: libcna/meta-gl, ref: "${{ steps.siblings.outputs.meta_gl }}", path: meta-gl }
       - name: Install build dependencies
         run: |
           sudo apt-get update
@@ -668,13 +688,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { path: cna-house }
-      - name: Choose the CNA and sharp-runtime branches
+      - name: Choose the sibling branches
         id: siblings
-        run: cna-house/tools/ci/sibling_refs.sh "${{ github.head_ref }} ${{ github.ref_name }}" cna sharp-runtime >> "$GITHUB_OUTPUT"
+        run: cna-house/tools/ci/sibling_refs.sh "${{ github.head_ref }} ${{ github.ref_name }}" cna sharp-runtime easy-gl meta-gl >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
         with: { repository: libcna/cna, ref: "${{ steps.siblings.outputs.cna }}", path: cna, submodules: recursive }
       - uses: actions/checkout@v4
         with: { repository: libcna/sharp-runtime, ref: "${{ steps.siblings.outputs.sharp_runtime }}", path: sharp-runtime }
+      # CNA's GL renderers build easy-gl from a sibling checkout, and easy-gl its own sibling meta-gl.
+      - uses: actions/checkout@v4
+        with: { repository: libcna/easy-gl, ref: "${{ steps.siblings.outputs.easy_gl }}", path: easy-gl }
+      - uses: actions/checkout@v4
+        with: { repository: libcna/meta-gl, ref: "${{ steps.siblings.outputs.meta_gl }}", path: meta-gl }
       - uses: mymindstorm/setup-emsdk@v14
         with: { version: 6.0.9 }
       - name: Install build dependencies
@@ -720,13 +745,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { path: cna-house }
-      - name: Choose the CNA and sharp-runtime branches
+      - name: Choose the sibling branches
         id: siblings
-        run: cna-house/tools/ci/sibling_refs.sh "${{ github.head_ref }} ${{ github.ref_name }}" cna sharp-runtime >> "$GITHUB_OUTPUT"
+        run: cna-house/tools/ci/sibling_refs.sh "${{ github.head_ref }} ${{ github.ref_name }}" cna sharp-runtime easy-gl meta-gl >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
         with: { repository: libcna/cna, ref: "${{ steps.siblings.outputs.cna }}", path: cna, submodules: recursive }
       - uses: actions/checkout@v4
         with: { repository: libcna/sharp-runtime, ref: "${{ steps.siblings.outputs.sharp_runtime }}", path: sharp-runtime }
+      # CNA's GL renderers build easy-gl from a sibling checkout, and easy-gl its own sibling meta-gl.
+      - uses: actions/checkout@v4
+        with: { repository: libcna/easy-gl, ref: "${{ steps.siblings.outputs.easy_gl }}", path: easy-gl }
+      - uses: actions/checkout@v4
+        with: { repository: libcna/meta-gl, ref: "${{ steps.siblings.outputs.meta_gl }}", path: meta-gl }
       - name: Install build dependencies
         run: |
           sudo apt-get update
