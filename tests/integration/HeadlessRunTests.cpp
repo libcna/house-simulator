@@ -684,6 +684,11 @@ namespace
 
     TEST(HeadlessRunTests, PressingF8ShowsTheClockTheFrameActuallyRanOn)
     {
+#if !CNAHOUSE_DEBUG_TOOLS
+        // AM4-301: F8 is a debug-tools key, compiled out with CNAHOUSE_DEBUG_TOOLS off (a Release
+        // build's default, cmake/TierSelection.cmake); there is no key to press.
+        GTEST_SKIP() << "F8 is a debug-tools key and this build compiles them out";
+#endif
         // `HOUSE-01537`. §71's `F8`, end to end: the key reaches the overlay, and behind it the
         // clock this session has actually been advancing -- not a fresh one the panel made for
         // itself. `EnvironmentOverlayTests` proves what the lines SAY; what is proved here is that
@@ -752,6 +757,11 @@ namespace
 
     TEST(HeadlessRunTests, PressingF3ShowsTheWalkTheFrameActuallyDid)
     {
+#if !CNAHOUSE_DEBUG_TOOLS
+        // AM4-301: F3 is a debug-tools key, compiled out with CNAHOUSE_DEBUG_TOOLS off (a Release
+        // build's default, cmake/TierSelection.cmake); there is no key to press.
+        GTEST_SKIP() << "F3 is a debug-tools key and this build compiles them out";
+#endif
         // `HOUSE-00681`. §25.8's `F3`, end to end: the key reaches the overlay, and behind it a
         // real §25.2 walk ran over §12's house with the camera the frame was drawn from. The
         // numbers are what phase 9 spent itself proving, and this is the first place a person can
@@ -835,6 +845,11 @@ namespace
 
     TEST(HeadlessRunTests, PressingF4DrawsTheDecisionAndNotJustTheHouse)
     {
+#if !CNAHOUSE_DEBUG_TOOLS
+        // AM4-301: F4 is a debug-tools key, compiled out with CNAHOUSE_DEBUG_TOOLS off (a Release
+        // build's default, cmake/TierSelection.cmake); there is no key to press.
+        GTEST_SKIP() << "F4 is a debug-tools key and this build compiles them out";
+#endif
         // `HOUSE-00682`. §25.8's `F4`, end to end: the key reaches the overlay, the overlay is
         // built from the same walk `F3` reports, and what it holds is the DECISION -- the rooms
         // reached, their openings with their latch state, and a pyramid per cone.
@@ -877,6 +892,11 @@ namespace
 
     TEST(HeadlessRunTests, PressingF5FreezesTheWalkAndDetachesTheCamera)
     {
+#if !CNAHOUSE_DEBUG_TOOLS
+        // AM4-301: F5 is a debug-tools key, compiled out with CNAHOUSE_DEBUG_TOOLS off (a Release
+        // build's default, cmake/TierSelection.cmake); there is no key to press.
+        GTEST_SKIP() << "F5 is a debug-tools key and this build compiles them out";
+#endif
         // `HOUSE-00683`. §25.8: *"`F5` freezes the visibility computation so the camera can fly
         // out and inspect what was culled -- the single most useful debugging tool for a portal
         // system."* Both halves are checked: the walk stops being recomputed, and the camera stops
@@ -988,6 +1008,11 @@ namespace
 
     TEST(HeadlessRunTests, FreezingDoesNotMoveTheViewItWasPressedToKeep)
     {
+#if !CNAHOUSE_DEBUG_TOOLS
+        // AM4-301: F5 is a debug-tools key, compiled out with CNAHOUSE_DEBUG_TOOLS off (a Release
+        // build's default, cmake/TierSelection.cmake); there is no key to press.
+        GTEST_SKIP() << "F5 is a debug-tools key and this build compiles them out";
+#endif
         // The detach ADOPTS the eye: a camera that started somewhere else would throw away the
         // view the reader pressed `F5` to keep, which is the one thing the freeze is for.
         cnahouse::util::Log::ResetForTesting();
@@ -1203,6 +1228,11 @@ namespace
 
     TEST(HeadlessRunTests, PressingF9BuildsTheWireframeForTheCellTheBodyIsIn)
     {
+#if !CNAHOUSE_DEBUG_TOOLS
+        // AM4-301: F9 is a debug-tools key, compiled out with CNAHOUSE_DEBUG_TOOLS off (a Release
+        // build's default, cmake/TierSelection.cmake); there is no key to press.
+        GTEST_SKIP() << "F9 is a debug-tools key and this build compiles them out";
+#endif
         // `HOUSE-00620` recorded §71's `F9` as unwired because *"`DebugDraw::Begin` needs a view
         // and a projection and the loop has neither a camera nor a loaded `CollisionWorld` until
         // phase 8"*. `--scene=walk` has both, so this is the phase-8 review closing it: the key
