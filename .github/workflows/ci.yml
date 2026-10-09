@@ -509,6 +509,11 @@ jobs:
         # `check_xna_only.py` cannot see those -- `KeyboardState{}` names no forbidden identifier.
         run: python3 tools/ci/check_xna_strict.py --all
 
+      - name: The content the tests read
+        working-directory: cna-house
+        run: |
+          python3 -m pip install --break-system-packages --user numpy pillow jsonschema
+          tools/ci/ci_content.sh ${{ matrix.preset }} build
       - name: Unit tests
         working-directory: cna-house
         # Unit tests need no GPU and no display by construction: anything that does belongs in
@@ -549,6 +554,11 @@ jobs:
         run: |
           cmake --preset headless
           cmake --build --preset headless -j"$(nproc)"
+      - name: The content the tests read
+        working-directory: cna-house
+        run: |
+          python3 -m pip install --break-system-packages --user numpy pillow jsonschema
+          tools/ci/ci_content.sh headless build-consumer
       - name: Integration tests with no display server
         working-directory: cna-house
         # `DISPLAY` and `WAYLAND_DISPLAY` are unset deliberately. HOUSE-00105 measured 600 frames
