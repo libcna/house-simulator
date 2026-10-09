@@ -75,6 +75,16 @@ check_format()
         echo "clang-format not found -- install it; CI will run this gate regardless." >&2
         return 1
     fi
+    # clang-format 18 formats this tree differently from 19 and newer, which agree on it; CI pins
+    # 19.1.7 (CNA plans/plan_apple_m4.md AM4-233). An older one would report, or with --fix make,
+    # changes nobody else's formatter wants.
+    local major
+    major=$(clang-format --version | sed -E 's/.*version ([0-9]+).*/\1/')
+    if [[ ! "$major" =~ ^[0-9]+$ ]] || (( major < 19 )); then
+        echo "clang-format $(clang-format --version) is older than 19; install 19 or newer" \
+             "(pip install clang-format==19.1.7 is what CI uses)." >&2
+        return 1
+    fi
 
     local files
     mapfile -t files < <(cxx_files)

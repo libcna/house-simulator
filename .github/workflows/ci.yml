@@ -45,8 +45,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { path: cna-house }
-      - name: Install clang-format
-        run: sudo apt-get update && sudo apt-get install -y clang-format
+      - name: Install clang-format 19.1.7
+        # Pinned rather than Ubuntu's: 24.04 ships clang-format 18, which formats 26 lines of this
+        # tree differently from the 19 and newer it is written with (CNA plans/plan_apple_m4.md
+        # AM4-233), and an apt package would move the gate with every runner image.
+        run: |
+          python3 -m venv "$RUNNER_TEMP/clang-format"
+          "$RUNNER_TEMP/clang-format/bin/pip" install --quiet "clang-format==19.1.7"
+          echo "$RUNNER_TEMP/clang-format/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/clang-format/bin/clang-format" --version
       - name: Run the gates
         working-directory: cna-house
         run: tools/ci/run_checks.sh
