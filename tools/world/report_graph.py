@@ -305,8 +305,11 @@ def selftest() -> int:
 
         require(report["cells"] == {"total": 9, "interior": 8, "exterior": 1},
                 f"9 cells, 8 interior and 1 exterior terrace ({report['cells']})")
-        require(report["portals"]["total"] == 8,
-                f"8 portals ({report['portals']['total']})")
+        # Eight doors and openings and one window, `WIN_FOYER_1`, which rule 10's sill check
+        # needed in the fixture (`HOUSE-00360`). The window is a portal but not a way through, so
+        # the edge counts below are the eight doors' and openings' alone.
+        require(report["portals"]["total"] == 9,
+                f"9 portals ({report['portals']['total']})")
 
         # 1. The two graphs differ, and they differ by the doors. This is the claim §16.3 makes
         #    about the real house and the only one worth proving on a fixture.
@@ -350,8 +353,8 @@ def selftest() -> int:
                     "| `L0_FOYER` → `L0_HALL` | `P_FOYER__HALL` | ○ | |\n"
                     "### 16.3 Graph shape\n"
                     "| Cells | 9 |\n"
-                    "| Portals total | 8 |\n"
-                    "| — windows | 0 |\n"
+                    "| Portals total | 9 |\n"
+                    "| — windows | 1 |\n"
                     f"| Mean interior cell degree | {report['degree']['mean']} |\n"
                     f"| Max interior cell degree | `{report['degree']['maxCell']}` = "
                     f"{report['degree']['max']} |\n"
@@ -363,9 +366,9 @@ def selftest() -> int:
         require(disagreements(report, agreeing) == [],
                 f"§16 agreeing with the layout is silent ({disagreements(report, agreeing)})")
 
-        drifted = agreeing.replace("| Portals total | 8 |", "| Portals total | 12 |")
+        drifted = agreeing.replace("| Portals total | 9 |", "| Portals total | 12 |")
         problems = disagreements(report, drifted)
-        require(any("does not mention '8'" in problem for problem in problems),
+        require(any("does not mention '9'" in problem for problem in problems),
                 f"a metric that drifted is named, with the measured value ({problems})")
 
         invented = agreeing.replace("`P_FOYER__HALL`", "`P_FOYER__NOWHERE`")

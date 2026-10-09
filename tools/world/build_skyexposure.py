@@ -833,24 +833,20 @@ def selftest() -> int:
                     room = portal.get(side)
                     if room in cells_by_id and cells_by_id[room].get("kind") != "exterior":
                         windowed.setdefault(room, []).append(str(opening.get("type")))
-            # `HOUSE-00491`: `W_GABLE` is a louvre in a gable end, and this roof is a hip -- both
-            # of them are 0.73 m inside solid roof and neither can see anything. Named here, with
-            # the task that owns the decision, so the claim below stays a real claim.
-            gabled = {name for name, types in windowed.items() if set(types) == {"W_GABLE"}}
-            require(gabled == {"L3_STORE_W", "L3_STORE_E"},
-                    f"the only rooms whose every window is a gable louvre are the two "
-                    f"`HOUSE-00491` is about ({sorted(gabled)})")
-            silent = sorted(name for name in windowed if name not in gabled and sky[name] <= 0.0)
+            # `W_GABLE` was a louvre in a gable end, and this roof is a hip: the two in the attic
+            # stores sat 0.73 m inside solid roof and heard nothing. `HOUSE-00491` removed them
+            # (owner decision, 2026-09-10), so no window is exempt from the claim below, and a
+            # louvre that came back would have to be argued for again rather than slip past it.
+            gabled = sorted(name for name, types in windowed.items() if "W_GABLE" in types)
+            require(not gabled,
+                    f"no room has a gable louvre, which `HOUSE-00491` removed ({gabled})")
+            silent = sorted(name for name in windowed if sky[name] <= 0.0)
             require(not silent,
-                    f"every room with a window in a WALL hears the sky through it ({silent})")
+                    f"every room with a window hears the sky through it ({silent})")
             require(sky["L3_ROOM"] > 0.0 and sky["L3_STORE_N"] > 0.0,
                     f"...including the three rooms lit by dormers, which measured 0.000 until "
                     f"`HOUSE-00490` cut the roof out of the way of their windows "
                     f"({sky['L3_ROOM']:.3f}, {sky['L3_STORE_N']:.3f})")
-            require(all(sky[name] == 0.0 for name in gabled),
-                    f"and the two gable louvres still hear nothing, which is what "
-                    f"`HOUSE-00491` records "
-                    f"({[round(sky[name], 3) for name in sorted(gabled)]})")
 
             # §64.6: "the sunroom with its slider open gets almost the outdoor level". The slider
             # is not open in this file and cannot be: the baked figure is the GEOMETRIC opening
